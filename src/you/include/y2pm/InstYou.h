@@ -251,6 +251,8 @@ class InstYou {
     
           virtual bool progress( int percent ) = 0;
           virtual bool patchProgress( int percent, const std::string &str ) = 0;
+
+          virtual bool executeYcpScript( const std::string &script ) = 0;
     };
 
     static void setCallbacks( Callbacks * );
@@ -269,6 +271,8 @@ class InstYou {
                              bool noExternal = false );
     PMError retrieveScript( const std::string &script, bool reload,
                             bool checkSig );
+
+    PMError executeScript( const std::string &, bool dryrun );
 
     /**
      * check, if patch has new packages.

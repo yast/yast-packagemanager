@@ -451,17 +451,9 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
   }
 
-  Pathname scriptPath;
-  if ( !patch->preScript().empty() ) {
-    scriptPath = _paths->localScriptPath( patch->preScript() );
-    if ( dryrun ) {
-      cout << "PRESCRIPT: " << scriptPath << endl;
-    } else {
-      error = Y2PM::instTarget().executeScript( scriptPath );
-      if ( error ) return PMError( YouError::E_prescript_failed,
-                                   scriptPath.asString() );
-    }
-  }
+  error = executeScript( patch->preScript(), dryrun );
+  D__ << "Prescript: " << error << endl;
+  if ( error ) return PMError( YouError::E_prescript_failed, error.details() );
 
   error = patchProgress( 1 );
   if ( error ) return error;
@@ -509,22 +501,47 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
   }
 
-  if ( !patch->postScript().empty() ) {
-    scriptPath = _paths->localScriptPath( patch->postScript() );
-    if ( dryrun ) {
-      cout << "POSTSCRIPT: " << scriptPath << endl;
-    } else {
-      error = Y2PM::instTarget().executeScript( scriptPath );
-      if ( error ) {
-        return PMError( YouError::E_postscript_failed, scriptPath.asString() );
-      }
-    }
-  }
+  error = executeScript( patch->postScript(), dryrun );
+  D__ << "Postscript: " << error << endl;
+  if ( error ) return PMError( YouError::E_postscript_failed, error.details() );
 
   error = patchProgress( 100 );
   if ( error ) return error;
   
   return error;
+}
+
+PMError InstYou::executeScript( const string &script, bool dryrun )
+{
+  if ( script.empty() ) return PMError();
+
+  Pathname scriptPath = _paths->localScriptPath( script );
+  if ( dryrun ) {
+    cout << "SCRIPT: " << scriptPath << endl;
+  } else {
+    string extension;
+    int pos = script.find( '.' );
+    if ( pos >= 0 ) {
+      extension = script.substr( pos + 1, script.length() - pos );
+    }
+
+    D__ << "Script extension: " << extension << endl;
+
+    PMError error;
+    if ( extension == "ycp" ) {
+      if ( !_callbacks ) return PMError( YouError::E_callback_missing );
+
+      if ( !_callbacks->executeYcpScript( scriptPath.asString() ) ) {
+        return PMError( YouError::E_script_failed, scriptPath.asString() );
+      }
+    } else {
+      PMError error = Y2PM::instTarget().executeScript( scriptPath );
+      if ( error ) return PMError( YouError::E_script_failed,
+                                   scriptPath.asString() );
+    }
+  }
+
+  return PMError();
 }
 
 class CurlCallbacks : public MediaCurl::Callbacks
