@@ -100,73 +100,116 @@ ostream & operator<<( ostream & str, const PMPackageManager & obj )
 void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 					    std::list<PMPackagePtr> & instlist_r )
 {
-  dellist_r.clear();
-  instlist_r.clear();
-
-  DBG << "getPackagesToInsDel..." << endl;
-
-  PkgSet iset; // for install order
-
-  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
-    const PMSelectablePtr & sel( *it );
-
-    if ( !sel ) {
-      INT << "NULL SELECTABLE" << endl;
-      continue;
-    }
-
-    if ( sel->to_install() ) {
-
-      if ( sel->candidateObj() ) {
-	iset.add( sel->candidateObj() );
-	instlist_r.push_back( sel->candidateObj() );
-      } else
-	INT << "NULL candidate to install" << endl;
-
-    } else if ( sel->to_delete() ) {
-
-      if ( sel->installedObj() ) {
-	dellist_r.push_back( sel->installedObj() );
-      } else
-	INT << "NULL installed to delete" << endl;
-
-    }
-  }
-  DBG << "num packages: delete " << dellist_r.size() << ", install " << instlist_r.size() << endl;
-
-  ///////////////////////////////////////////////////////////////////
-  // sort installed list.
-  ///////////////////////////////////////////////////////////////////
-
-  std::list<PMPackagePtr> instbackup_r;
-  instbackup_r.swap( instlist_r );
-  if ( instlist_r.size() ) {
-    INT << "DONT swap lists" << endl;
+    dellist_r.clear();
     instlist_r.clear();
-  }
 
-  InstallOrder order( iset );
-  order.startrdfs();
+    DBG << "getPackagesToInsDel..." << endl;
 
-  for( InstallOrder::SolvableList pkgs = order.computeNextSet();
-       ! pkgs.empty(); pkgs = order.computeNextSet() ) {
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
+    {
+	const PMSelectablePtr & sel( *it );
 
-    for( InstallOrder::SolvableList::const_iterator cit = pkgs.begin();
-	 cit != pkgs.end(); ++cit ) {
-      PMPackagePtr cpkg = PMPackagePtr::cast_away_const( *cit );
-      if ( !cpkg ) {
-	INT << "SORT returned NULL Package" << endl;
-	continue;
-      }
-#warning MUST check for CD and media
-      instlist_r.push_back( cpkg );
-      order.setInstalled( *cit );
+	if ( !sel )
+	{
+	    INT << "NULL SELECTABLE" << endl;
+	    continue;
+	}
+
+	if (sel->to_install())
+	{
+	    if ( sel->candidateObj() )
+	    {
+		// unordered list for backup
+		instlist_r.push_back( sel->candidateObj() );
+	    }
+	    else
+	    {
+		INT << "NULL candidate to install" << endl;
+	    }
+	}
+	else if (sel->to_delete())
+	{
+	    if ( sel->installedObj() )
+	    {
+		dellist_r.push_back( sel->installedObj() );
+	    }
+	    else
+	    {
+		INT << "NULL installed to delete" << endl;
+	    }
+	    break;
+	}
     }
-  }
 
-  if ( instbackup_r .size() != instlist_r.size() ) {
-    INT << "Lost packages in InstallOrder sort." << endl;
-  }
+    DBG << "num packages: delete " << dellist_r.size() << ", install " << instlist_r.size() << endl;
+
+    ///////////////////////////////////////////////////////////////////
+    // sort installed list.
+    ///////////////////////////////////////////////////////////////////
+
+    // backup list
+    std::list<PMPackagePtr> instbackup_r;
+    instbackup_r.swap( instlist_r );
+
+    if ( instlist_r.size() )
+    {
+	// oops, swap() is supposed to empty it's argument
+	INT << "DONT swap lists" << endl;
+	instlist_r.clear();
+    }
+
+#warning check source priority and media count
+    
+
+    // loop over medias
+    for (int cdnum = 1; cdnum < 10; ++cdnum)
+    {
+	PkgSet iset; // for install order
+
+	// loop over packages, adding matchin medianr to set
+	for (std::list<PMPackagePtr>::const_iterator pkgIt = instbackup_r.begin();
+	     pkgIt != instbackup_r.end(); ++pkgIt)
+	{
+	    if ((*pkgIt)->medianr() == cdnum)
+	    {
+		iset.add (*pkgIt);
+	    }
+	}
+
+	// matching medianr found -> solve
+	if (!iset.empty())
+	{
+	    InstallOrder order( iset );
+
+	    // start recursive depth-first-search
+	    order.startrdfs();
+
+	   for (InstallOrder::SolvableList pkgs = order.computeNextSet();
+		!pkgs.empty(); pkgs = order.computeNextSet() )
+	   {
+
+		for (InstallOrder::SolvableList::const_iterator cit = pkgs.begin();
+		     cit != pkgs.end(); ++cit )
+		{
+		    PMPackagePtr cpkg = PMPackagePtr::cast_away_const( *cit );
+
+		    if ( !cpkg )
+		    {
+			INT << "SORT returned NULL Package" << endl;
+			continue;
+		    }
+
+		    instlist_r.push_back( cpkg );
+		    order.setInstalled( *cit );
+		}
+	    }
+	} // ! iset.empty
+    } // cdnum loop
+
+    if ( instbackup_r .size() != instlist_r.size() )
+    {
+	INT << "Lost packages in InstallOrder sort." << endl;
+    }
 
 }
 
