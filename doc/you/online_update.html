@@ -491,7 +491,7 @@ security | recommended | patchlevel | document | optional   Types of patches to 
 </pre>
 
 
-<h1>Patch CD Update</h1>
+<h2>Patch CD Update</h2>
 
 <p>There is also the possibilty to provide the patches on a CD ROM. 
 Insert the CD ROM with the patches and start the "Patch CD update" 
@@ -508,7 +508,7 @@ the directory structure on the CD ROM is:
 <tt>{ARCHITECTURE}/update/{SuSE-Version}/patches/*</tt>.</p>
 
 <a name="multiple-cd"/>
-<h2>Support for Patch CD Updates from multiple CDs</h2>
+<h3>Support for Patch CD Updates from multiple CDs</h3>
 <p>Since 9.1 YOU supports patch CD updates from more than one CD. This requires
 some additional files to identify the CDs and to specify the distribution of
 patches on the CDs.</p>
@@ -538,6 +538,20 @@ have to be on the same CD. All patch CDs have to contain the patch files for all
 patches on all CDs. The "directory.3" file is only needed on the first patch CD.
 Leaving it out from the other CDs prevents that the patch CD update is started
 from another than the first CD which doesn't work.</p>
+
+
+<h2>Logging</h2>
+
+<p>YOU writes a summary log to <tt>/var/lib/YaST2/you/youlog</tt> since SL
+9.1/SLES 9, detailed logs are written to the standard YaST log file
+(<tt>/var/log/YaST2/y2log</tt>).<p>
+
+<p>If the environment variable <tt>Y2DEBUG</tt> is set, debug information is
+included in the YaST log. For YOU versions between 8.1/SLES8 and 9.0 setting the
+environment variable <tt>Y2SLOG_DEBUG</tt> adds additional debug information
+from the packagemanager backend. In particular for the 8.1/SLES8 version it's
+recommended to set the <tt>Y2SLOG_DEBUG</tt> variable to get meaningful log
+information.</p>
 
 <hr>
 <address><a href="mailto:cschum@suse.de">Cornelius Schumacher</a></address>
