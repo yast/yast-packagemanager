@@ -19,7 +19,6 @@
 
 /-*/
 
-#include <string>
 #include <iostream>
 
 #include <y2pm/MediaAccess.h>
@@ -170,7 +169,7 @@ MediaAccess::handler (void) const
 
 // get destination for file retrieval
 const Pathname &
-MediaAccess::getAttachPath (void) const
+MediaAccess::getAttachPoint (void) const
 {
     return _destination;
 }
