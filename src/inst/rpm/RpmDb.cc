@@ -24,6 +24,7 @@
 
 #include <cstdlib>
 
+#include <iostream>
 #include <string>
 #include <list>
 #include <vector>
@@ -128,7 +129,7 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 
 	    RpmArgVec opts(1);
 	    opts[0] = "--initdb";
-	    
+
 	    run_rpm(opts);
 
 	    string rpmerrormsg, str;
@@ -215,7 +216,7 @@ RpmDb::DbStatus RpmDb::rebuildDatabase()
     DBG << endl;
 
     opts[0] = "--rebuilddb";
-    
+
     run_rpm(opts);
 
     string rpmerrormsg, str;
@@ -1325,7 +1326,7 @@ string RpmDb::checkPackageResult2string(unsigned code)
     string eol = "\n";
     if(code == 0)
 	return string(_("Ok"))+eol;
-    
+
     //translator: these are different kinds of how an rpm package can be broken
     msg = _("Package is not OK for the following reasons:");
     msg += eol;
@@ -1375,3 +1376,34 @@ string RpmDb::checkPackageResult2string(unsigned code)
 
     return msg;
 }
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : std::ostream &
+**
+*/
+std::ostream & operator<<( std::ostream & str, const RpmDb::DbStatus & obj )
+{
+#define ENUM_OUT(V) case RpmDb::V: return str << #V; break
+  switch ( obj ) {
+    ENUM_OUT( RPMDB_OK );
+    ENUM_OUT( RPMDB_NOT_FOUND );
+    ENUM_OUT( RPMDB_OLD_VERSION );
+    ENUM_OUT( RPMDB_NEW_CREATED );
+    ENUM_OUT( RPMDB_ERROR_CREATED );
+    ENUM_OUT( RPMDB_ERROR_CHECK_OLD_VERSION );
+    ENUM_OUT( RPMDB_ERROR_MKDIR );
+    ENUM_OUT( RPMDB_ERROR_INITDB );
+    ENUM_OUT( RPMDB_ERROR_COPY_TMPDB );
+    ENUM_OUT( RPMDB_ERROR_REBUILDDB );
+    ENUM_OUT( RPMDB_ERROR_NOT_INITIALIZED );
+    ENUM_OUT( RPMDB_ERROR_SUBPROCESS_FAILED );
+  // default: let compiler warn 'not handled in switch'
+  case RpmDb::RPMDB_NUM_ERRORS: break;
+  }
+  return str << "RPMDB_ERROR_UNKNOWN";
+#undef ENUM_OUT
+}
+
