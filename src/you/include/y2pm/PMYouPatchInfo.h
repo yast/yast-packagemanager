@@ -31,71 +31,8 @@
 #include <y2pm/PMError.h>
 
 #include <y2pm/PMYouPatchPtr.h>
-
-class YOUPatchTagSet : public CommonPkdParser::TagSet
-{
-    public:
-	enum Tags {
-	    KIND,
-	    SHORTDESCRIPTION,
-	    LONGDESCRIPTION,
-            PREINFORMATION,
-            POSTINFORMATION,
-	    SIZE,
-	    BUILDTIME,
-	    MINYAST1VERSION,
-	    MINYAST2VERSION,
-	    UPDATEONLYINSTALLED,
-	    PACKAGES,
-	    NUM_TAGS
-	};
-    private:
-	std::string _locale;
-    public:
-	YOUPatchTagSet(const std::string& locale) : TagSet(), _locale(locale) 
-	{
-	    CommonPkdParser::Tag *t;
-	    t = createTag("Kind",KIND);
-	    t = createTag("Shortdescription.",SHORTDESCRIPTION);
-	    t->setType(CommonPkdParser::Tag::ACCEPTLOCALEONLY);
-	    t->setDefaultLocale("english");
-	    t->setPreferredLocale(locale);
-	    _localetags.push_back(t);
-	    t = createTag("Longdescription.",LONGDESCRIPTION);
-	    t->setType(CommonPkdParser::Tag::ACCEPTLOCALEONLY);
-	    t->setDefaultLocale("english");
-	    t->setPreferredLocale(locale);
-	    t->setEndTag("noitpircsedgnol",CommonPkdParser::Tag::ENDTAG_COMPLETELYREVERSED);
-	    t = createTag("Preinformation.",PREINFORMATION);
-	    t->setType(CommonPkdParser::Tag::ACCEPTLOCALEONLY);
-	    t->setDefaultLocale("english");
-	    t->setPreferredLocale(locale);
-	    t->setEndTag("noitamrofnier",CommonPkdParser::Tag::ENDTAG_COMPLETELYREVERSED);
-	    t = createTag("Postinformation.",POSTINFORMATION);
-	    t->setType(CommonPkdParser::Tag::ACCEPTLOCALEONLY);
-	    t->setDefaultLocale("english");
-	    t->setPreferredLocale(locale);
-	    t->setEndTag("noitamrofnitsop",CommonPkdParser::Tag::ENDTAG_COMPLETELYREVERSED);
-	    _localetags.push_back(t);
-	    t = createTag("Size",SIZE);
-	    t = createTag("Buildtime",BUILDTIME);
-	    t = createTag("MinYaST1Version",MINYAST1VERSION);
-	    t = createTag("MinYaST2Version",MINYAST1VERSION);
-	    t = createTag("UpdateOnlyInstalled",UPDATEONLYINSTALLED);
-	    t = createTag("Packages",PACKAGES);
-	    t->setEndTag("Segakcap");
-	}
-        
-        CommonPkdParser::Tag *createTag( const std::string &tagname, int num )
-        {
-            CommonPkdParser::Tag *t = new CommonPkdParser::Tag( tagname,
-                CommonPkdParser::Tag::ACCEPTONCE );
-            this->addTag( t );
-            addTagByIndex( num, t );
-            
-            return t;
-        }
-};
+#include <y2pm/PMYouPackageDataProviderPtr.h>
+#include <y2pm/PMYouPatchTags.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -115,9 +52,13 @@ class PMYouPatchPaths {
     void setPatchUrl( const Url & );
     Url patchUrl();
 
+    std::string arch() const { return _arch; }
+
   private:
     Pathname _patchPath;
     Url _patchUrl;
+    
+    std::string _arch;
 };
 
 
@@ -171,12 +112,30 @@ class PMYouPatchInfo {
     PMError readFile( const Pathname &path, const std::string &fileName,
                       std::list<PMYouPatchPtr> &patches );
 
+    /**
+     * Parse package info.
+     *
+     * @param packages String containing the package information.
+     * @param patch    Patch the packages belong to.
+     **/
+    PMError parsePackages( const std::string &packages,
+                           const PMYouPatchPtr &patch );
+
   protected:
     std::string tagValue( YOUPatchTagSet::Tags tag );
+    std::string tagValue( YOUPackageTagSet::Tags tag );
+
+    PMError createPackage( const PMYouPatchPtr &patch );
 
   private:
-    CommonPkdParser::TagSet *_tagset;
+    CommonPkdParser::TagSet *_patchtagset;
+    CommonPkdParser::TagSet *_packagetagset;
+    
     std::list<std::string> *_patchFiles;
+
+    PMYouPackageDataProviderPtr _packageProvider;
+
+    PMYouPatchPaths *_paths;
 };
 
 ///////////////////////////////////////////////////////////////////

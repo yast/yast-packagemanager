@@ -28,6 +28,7 @@
 #include <y2pm/PMYouPatchPtr.h>
 
 #include <y2pm/PMObject.h>
+#include <y2pm/PMPackagePtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -153,12 +154,24 @@ class PMYouPatch : virtual public Rep, public PMObject {
      */
     bool updateOnlyInstalled() const { return _updateOnlyInstalled; }
 
+    /**
+     * Add a package to this patch.
+     *
+     */
+    void addPackage( const PMPackagePtr &pkg );
+    /**
+     * Return list of all packages belonging to this patch.
+     */
+    std::list<PMPackagePtr> packages() const { return _packages; }
+
   private:
     std::string _shortDescription, _longDescription;
     std::string _preInformation, _postInformation;
     std::string _minYastVersion;
     Kind _kind;
     bool _updateOnlyInstalled;
+
+    std::list<PMPackagePtr> _packages;
 
   protected:
 
