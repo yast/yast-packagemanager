@@ -36,7 +36,6 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 
-#warning FIX _CACHE_ROOT_DIR ( "/var/adm/YaST/InstSrcManager" )
 Pathname InstSrcManager::_cache_root_dir( "/var/adm/YaST/InstSrcManager" );
 
 const Pathname InstSrcManager::_cache_tmp_dir( "tmp" );
@@ -51,17 +50,17 @@ const Pathname InstSrcManager::_cache_tmp_dir( "tmp" );
 //
 //	DESCRIPTION :
 //
-InstSrcManager::InstSrcManager()
+InstSrcManager::InstSrcManager( const bool autoEnable_r )
 {
   int res = PathInfo::assert_dir( cache_tmp_dir(), 0700 );
   if ( res ) {
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
   }
   if ( Y2PM::runningFromSystem() ) {
-    initSrcPool();
-  } else
+    initSrcPool( autoEnable_r );
+  } else {
     MIL << "Not running from system: no init from SrcPool" << endl;
-
+  }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -74,6 +73,84 @@ InstSrcManager::InstSrcManager()
 //
 InstSrcManager::~InstSrcManager()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::initSrcPool
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::initSrcPool( const bool autoEnable_r )
+{
+  MIL << "Read " << (autoEnable_r?"and auto enable ":"") << "SrcPool from " << cache_root_dir() << endl;
+
+  PMError err;
+  unsigned count = 0;
+
+  list<string> retlist;
+  int res = PathInfo::readdir( retlist, cache_root_dir(), false );
+  if ( res ) {
+    ERR << "Error reading InstSrc cache at " << cache_root_dir() << " (errno " << res << ")" << endl;
+  } else {
+    for ( list<string>::iterator it = retlist.begin(); it != retlist.end(); ++it ) {
+      DBG << "Check '" << *it << "'" << endl;
+      if ( it->find( "IS_CACHE_" ) == 0 ) {
+	if ( ! scanSrcCache( cache_root_dir() + *it, autoEnable_r ) ) {
+	  // no error
+	  ++count;
+	}
+      }
+    }
+  }
+
+  if ( !count ) {
+    WAR << "Got no InstSrc'es from cahce!" << endl;
+  } else {
+    MIL << "Read " << count << " InstSrc'es from cache." << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::scanSrcCache
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r, const bool autoEnable_r )
+{
+  MIL << "Read InstSrc from cache " << srccache_r << endl;
+
+  InstSrcPtr nsrc;
+  PMError err = InstSrc::vconstruct( nsrc, srccache_r );
+  if ( err ) {
+    WAR << "Invalid InstSrc cache at " << srccache_r << " (" << err << ")" << endl;
+    return Error::E_isrc_cache_invalid;
+  }
+
+  ISrcId nid = poolAdd( nsrc );
+  if ( ! nid ) {
+    WAR << "Duplicate InstSrc cache at " << srccache_r << endl;
+    return Error::E_isrc_cache_duplicate;
+  } else {
+    if ( autoEnable_r && nid->descr()->default_activate() ) {
+      err = enableSource( nid );
+      if ( !err ) {
+	MIL << "Auto enabled: " << nid << endl;
+      } else {
+	ERR << "Failed auto enable: " << nid << endl;
+      }
+    } else {
+      MIL << "Stays disabled: " << nid << endl;
+    }
+  }
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -186,69 +263,6 @@ InstSrcManager::ISrcId InstSrcManager::poolAdd( InstSrcPtr nsrc_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::initSrcPool
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//
-PMError InstSrcManager::initSrcPool()
-{
-  MIL << "Init SrcPool from " << cache_root_dir() << endl;
-
-  PMError err;
-#warning need SrcPool init (scandir for IS_CACHE_*?)
-
-  list<string> retlist;
-  int res = PathInfo::readdir( retlist, cache_root_dir(), false );
-  if ( res ) {
-    ERR << "Error reading InstSrc cache at " << cache_root_dir() << " (errno " << res << ")" << endl;
-  } else {
-    for ( list<string>::iterator it = retlist.begin(); it != retlist.end(); ++it ) {
-      DBG << "Check '" << *it << "'" << endl;
-      if ( it->find( "IS_CACHE_" ) == 0 ) {
-	scanSrcCache( cache_root_dir() + *it );
-      }
-    }
-  }
-
-  return err;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcManager::scanSrcCache
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//
-PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r )
-{
-  MIL << "Read InstSrc from cache " << srccache_r << endl;
-
-  InstSrcPtr nsrc;
-  PMError err = InstSrc::vconstruct( nsrc, srccache_r );
-  if ( err ) {
-    WAR << "Invalid InstSrc cache at " << srccache_r << " (" << err << ")" << endl;
-    return Error::E_isrc_cache_invalid;
-  }
-
-  ISrcId nid = poolAdd( nsrc );
-  if ( ! nid ) {
-    WAR << "Duplicate InstSrc cache at " << srccache_r << endl;
-    return Error::E_isrc_cache_duplicate;
-  } else {
-#warning scanSrcCache autoenables
-    err = enableSource( nid );
-  }
-
-
-  return err;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : InstSrcManager::scanMedia
 //	METHOD TYPE : PMError
 //
@@ -307,8 +321,6 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
       ISrcId nid = poolAdd( nsrc );
       if ( nid ) {
 	idlist_r.push_back( nid );
-      } else {
-         scan_err = Error::E_isrc_cache_duplicate;
       }
     }
   }

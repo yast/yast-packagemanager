@@ -95,7 +95,7 @@ class Y2PM {
      **/
     static std::list<LangCode> & getRequestedLocales () { return _requested_locales; }
     static void setRequestedLocales (std::list<LangCode> & requested_locales) { _requested_locales = requested_locales; }
- 
+
     /**
      * Access to the (target) base architecture
      **/
@@ -141,6 +141,17 @@ class Y2PM {
      * and also !!START THE packageManager!!
      **/
     static InstTarget & instTarget(bool do_start = false, Pathname root = Pathname("/"));
+
+    /**
+     * Special call to create the instSrcManager (if it does not
+     * already exist), but prevent autoenabling of any InstSrc'es
+     * found in the cache.
+     *
+     * Returns true, if the call succeeded. Otherwise the instSrcManager
+     * has already been constructed, and may or may not contain enabled
+     * InstSrc'es.
+     **/
+    static bool noAutoInstSrcManager();
 
     /**
      * Access to the installation source manager

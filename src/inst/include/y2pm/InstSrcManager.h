@@ -49,7 +49,7 @@ class InstSrcManager {
   private:
 
     friend class Y2PM;
-    InstSrcManager();
+    InstSrcManager( const bool autoEnable_r = true );
     ~InstSrcManager();
 
   private:
@@ -113,9 +113,19 @@ class InstSrcManager {
 
   private:
 
-    typedef std::set<InstSrcPtr>  ISrcPool;
+    typedef std::set<InstSrcPtr> ISrcPool;
 
     ISrcPool _knownSources;
+
+    /**
+     * Preload all cached InstSrces.
+     **/
+    PMError initSrcPool( const bool autoEnable_r );
+
+    /**
+     * Create InstSrc from cache and add it to ISrcPool.
+     **/
+    PMError scanSrcCache( const Pathname & srccache_r, const bool autoEnable_r );
 
     /**
      * Find InstSrcPtr in _knownSources by ISrcId.
@@ -134,16 +144,6 @@ class InstSrcManager {
      * Return ISrcId for the added nsrc_r, or NULL if duplicate.
      **/
     ISrcId poolAdd( InstSrcPtr nsrc_r );
-
-    /**
-     * Preload all cached InstSrces.
-     **/
-    PMError initSrcPool();
-
-    /**
-     * Create InstSrc from cache and add it to ISrcPool.
-     **/
-    PMError scanSrcCache( const Pathname & srccache_r );
 
     /**
      * helper for cacheCopyTo fake
@@ -167,13 +167,17 @@ class InstSrcManager {
      * Disable InstSrc. Provided Objects are withdrawn from Manager classes.
      **/
     PMError disableSource( const ISrcId & isrc_r );
-
 #if 0
+    /**
+     * Delete InstSrc. Erase it together with all cached info.
+     **/
     PMError deleteSource( const ISrcId & isrc_r );
 
+    /**
+     * Set whether this source should be automaticaly enabled on startup
+     **/
     PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
 #endif
-
   public:
 
     /**

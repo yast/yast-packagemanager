@@ -232,6 +232,24 @@ InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : Y2PM::noAutoInstSrcManager
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool Y2PM::noAutoInstSrcManager()
+{
+  if ( !_instSrcManager ) {
+    MIL << "Launch InstSrcManager (no auto enable)..." << endl;
+    _instSrcManager = new InstSrcManager ( /*autoEnable*/false );
+    MIL << "Created InstSrcManager (no auto enable) @" << _instSrcManager << endl;
+  }
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : Y2PM::instSrcManager
 //	METHOD TYPE : InstSrcManager &
 //
