@@ -39,10 +39,10 @@ IMPL_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMDataPro
 //	METHOD NAME : PMULSelectionDataProvider::PMULSelectionDataProvider
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION : open packages stream and keep pointer to tag parser
+//	DESCRIPTION : store selection Pathname
 //		      for later value retrieval on-demand
 //
-PMULSelectionDataProvider::PMULSelectionDataProvider(const std::string &selectionname)
+PMULSelectionDataProvider::PMULSelectionDataProvider(const Pathname &selectionname)
 {
     _selection_retrieval = new TagCacheRetrieval (selectionname);
 }
