@@ -258,6 +258,14 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	{
 	    ndescr->set_content_datadir (value);
 	}
+	else if (tag == "YOUTYPE")
+	{
+	    ndescr->set_content_youtype (value);
+	}
+	else if (tag == "YOUPATH")
+	{
+	    ndescr->set_content_youpath (value);
+	}
 	else if (tag == "REQUIRES")
 	{
 	    ndescr->set_content_requires (PkgRelation (PkgName (value), NONE, PkgEdition ()));
