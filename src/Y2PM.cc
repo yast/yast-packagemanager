@@ -646,7 +646,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		(*_callbacks._provide_start_func)(fullname, (*it)->archivesize(), true, _callbacks._provide_start_data);
 	    }
 
-	    PMError err = (*it)->providePkgToInstall(path);	// fetch package from source for later installation
+	    err = (*it)->providePkgToInstall(path);	// fetch package from source for later installation
 
 	    if ((err || is_remote)
 		&& (_callbacks._provide_done_func != 0))
@@ -812,7 +812,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		    }
 
 		    Pathname path;
-		    PMError err = (*it)->provideSrcPkgToInstall(path);
+		    err = (*it)->provideSrcPkgToInstall(path);
 
 		    if ((err || is_remote)
 			&& (_callbacks._provide_done_func != 0))

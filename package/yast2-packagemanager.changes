@@ -1,8 +1,15 @@
 -------------------------------------------------------------------
+Mon Mar 10 20:47:30 CET 2003 - ma@suse.de
+
+- Fixed: rpm install error wrongly interpreted as error providing
+  next package. (#24924)
+- 2.7.29
+
+-------------------------------------------------------------------
 Mon Mar 10 18:22:30 CET 2003 - ma@suse.de
 
 - Let solver always tag auto states triggered by packages in goodlist.
-  (e.g. auto delete for obsoleted packages. (#25005)
+  (e.g. auto delete for obsoleted packages.) (#25005)
 - 2.7.28
 
 -------------------------------------------------------------------
