@@ -27,6 +27,9 @@
 
 using namespace std;
 
+#undef Y2LOG
+#define Y2LOG "InstallOrder"
+
 InstallOrder::InstallOrder(const PkgSet& toinstall, const PkgSet& installed) :
 	_toinstall(toinstall),
 	_installed(installed),
@@ -64,7 +67,7 @@ void InstallOrder::setInstalled( constPMSolvablePtr ptr )
     SolvableList& adj = _rgraph[ptr];
 
     D__ << ptr->name() << endl;
-    
+
     // order will be < 0
     _nodes[ptr].order--;
     _installed.add(PMSolvablePtr::cast_away_const(ptr));
@@ -99,7 +102,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 
     NodeInfo& info = _nodes[node];
 //    SolvableList& reverseedges = _rgraph[node];
-    
+
     info.visited = true;
     info.begintime = _rdfstime;
     _rdfstime++;
@@ -166,7 +169,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 	    {
 		if(*it != node)
 		{
-		    WAR  << "backward edge " << node->name() << " -> " << (*it)->name() << endl;
+		    W__  << "backward edge " << node->name() << " -> " << (*it)->name() << endl;
 		}
 	    }
 	    else
@@ -189,7 +192,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
     _topsorted.push_back(node);
     _nodes[node].endtime = _rdfstime;
     _rdfstime++;
-    
+
     M__ << node->name() << " done" << endl;
 }
 
@@ -200,11 +203,11 @@ void InstallOrder::startrdfs()
     _graph.erase(_graph.begin(),_graph.end());
 
     _rdfstime = 1;
-    
+
     _topsorted.erase(_topsorted.begin(),_topsorted.end());
 
     _numrun++;
-    MIL << "run " << _numrun << endl;
+    M__ << "run " << _numrun << endl;
 
     // it->first is PkgName
     // it->second is PMSolvablePtr
