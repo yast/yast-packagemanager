@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Feb 17 10:39:27 CET 2003 - ma@suse.de
+
+- Package internal: Cleaned up testsuite and moved all developer
+  stuff to devel subdir. Tag targets as EXTRA_PROGRAMS, as we don't
+  want them to disturb build, in case they do not compile on every
+  architecture.
+- 2.7.13
+
+-------------------------------------------------------------------
 Fri Feb 14 19:04:37 CET 2003 - ma@suse.de
 
 - Bind textdomain "rpm-groups" to get translations (#19603)
