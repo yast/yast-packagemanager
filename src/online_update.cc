@@ -218,13 +218,13 @@ int main( int argc, char **argv )
       url = Url( urlStr );
       if ( !url.isValid() ) {
         cerr << "Error: URL '" << urlStr << "' is not valid." << endl;
-        exit( 1 );
+        exit( -1 );
       }
     } else {
       error = you.paths()->requestServers();
       if ( error ) {
         cerr << "Error while requesting servers: " << error << endl;
-        exit( 1 );
+        exit( -1 );
       }
       url = you.paths()->currentServer();
     }
@@ -236,7 +236,7 @@ int main( int argc, char **argv )
   error = you.retrievePatchInfo( url, reload, checkSig );
   if ( error ) {
     cerr << "Error retrieving patches: " << error << endl;
-    exit( 1 );
+    exit( -1 );
   }
 
   you.selectPatches( kinds );
@@ -262,7 +262,7 @@ int main( int argc, char **argv )
   error = you.retrievePatches( reload, checkSig, autoInstall );
   if ( error ) {
     cerr << "Error retrieving packages: " << error << endl;
-    exit( 1 );
+    exit( -1 );
   }
 
   if ( autoGet && !autoInstall ) {
@@ -273,7 +273,7 @@ int main( int argc, char **argv )
   error = you.installPatches( dryrun );
   if ( error ) {
     cerr << "Error installing packages: " << error << endl;
-    exit( 1 );
+    exit( -1 );
   }
 
   MIL << "END" << endl;
