@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan 27 16:48:02 CET 2004 - cschum@suse.de
+
+- Fixed testsuite.
+
+-------------------------------------------------------------------
 Mon Jan 26 21:25:10 CET 2004 - ma@suse.de
 
 - Revised rpm database rebuild and adjusted callbacks.
