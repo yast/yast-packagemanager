@@ -316,17 +316,6 @@ class InstSrc: virtual public Rep {
 	    _mediachangedata = data;
 	}
 
-	/** set callback function for media error
-	 *
-	 * @param func callback function
-	 * @param data arbitrary data to pass when function is called
-	 * */
-	void setMediaErrorCallback(std::string (*func)(PMError,void*), void* data)
-	{
-	    _mediaerrorfunc = func;
-	    _mediaerrordata = data;
-	}
-
 	/**
 	 * provide media by number
 	 *

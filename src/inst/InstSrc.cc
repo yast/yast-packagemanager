@@ -716,37 +716,42 @@ InstSrc::provideMedia (int medianr) const
 		    }
 		}
 		MIL << "vendor '" << vendor << "' id '" << id << "'" << endl;
-#if 1
-			InstSrcPtr isptr = InstSrcPtr::cast_away_const (this);
-			isptr->_medianr = medianr;			// everything ok
-			reply = "";
-			break;
-#else
 		if (_mediachangefunc != 0)
 		{
-		    string error = string(vendor) + " != " + _descr->media_vendor();
+		    string error = string(vendor) + " != " + (const std::string &)(_descr->media_vendor());
 		    if (id[0] != 0)
 		    {
 			error = error + "\n" + id + " != " + _descr->media_id();
 		    }
+
+		    //---------------------------------------------------------
+		    // wrong media ID number callback
+
 		    string changereply = (*_mediachangefunc) (error, url.asString(), product, _medianr, medianr, _mediachangedata);
-		    if (changereply == "S")
+
+		    if (changereply == "S")			// skip
 		    {
 			_media->release();
 			MIL << "skip media" << endl;
-		        return InstSrcError::E_skip_media;
+			return InstSrcError::E_skip_media;
 		    }
-		    else if (changereply == "E")
+		    else if (changereply == "E")		// eject
 		    {
 			_media->release(true);
 		    }
-		    else if (changereply == "C")
+		    else if (changereply == "I")		// ignore
+		    {
+			MIL << "ignore bad media id" << endl;
+			reply = "";
+			break;
+		    }
+		    else if (changereply == "C")		// cancel installation
 		    {
 			_media->release();
 			MIL << "cancel media" << endl;
-		        return InstSrcError::E_skip_media;
+			return InstSrcError::E_skip_media;
 		    }
-		    else if (!changereply.empty())
+		    else if (!changereply.empty())		// new url
 		    {
 			url = Url(changereply);
 			if (url.isValid())
@@ -757,20 +762,19 @@ InstSrc::provideMedia (int medianr) const
 		    }
 		}
 
-#endif
 	    } // media file ok
 	}
 	else
 	{
 	    MIL << "provideFile failed: " << err.errstr() << endl;
 	}
-#warning TBD eject CD on PPC/MAC
-	_media->release();
 
 	std::string path = url.getPath();
 	if (!triedReOpen
 	    && isdigit(path[path.size()-1]))
 	{
+	    _media->release();
+
 	    triedReOpen = true;				// don't come here again
 	    MIL << "Closing path '" << path << "'" << endl;
 	    _media->close();				// close medium
@@ -788,22 +792,48 @@ InstSrc::provideMedia (int medianr) const
 	if (_mediachangefunc == 0)
 	{
 	    ERR << "Can't find medium, can't ask user" << endl;
-	    InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
-	    ptr->_medianr = 0;
+	    medianr = 0;
 	    break;
 	}
 
+	// wrong media number callback
+
+	//---------------------------------------------------------
 	string changereply = (*_mediachangefunc) (err.errstr(), url.asString(), product, _medianr, medianr, _mediachangedata);
-#warning TBD check reply
-	reply = changereply;
-	if (reply != "")
+
+	if (changereply == "S")			// skip
 	{
-	    break;
+	    _media->release();
+	    MIL << "skip media" << endl;
+	    return InstSrcError::E_skip_media;
+	}
+	else if (changereply == "E")		// eject
+	{
+	    reply = "";
+	    _media->release(true);
+	}
+	else if (changereply == "I")		// ignore, same as ok/retry (user must skip)
+	{
+	    MIL << "ignore bad media id" << endl;
+	    reply = "";
+	}
+	else if (changereply == "C")		// cancel installation
+	{
+	    _media->release();
+	    MIL << "cancel media" << endl;
+	    return InstSrcError::E_skip_media;
+	}
+	else if (!changereply.empty())		// new url
+	{
+	    url = Url(changereply);
 	}
     }
 
     if (reply != "")
 	return InstSrcError::E_no_media;
+
+    InstSrcPtr isptr = InstSrcPtr::cast_away_const (this);
+    isptr->_medianr = medianr;			// everything ok
 
     return InstSrcError::E_ok;
 }
