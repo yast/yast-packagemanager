@@ -131,7 +131,13 @@ class InstSrcManager {
     /**
      * Rewrite rank values of all known sources. Used by initSrcPool.
      **/
-    PMError writeNewRanks( const bool autoEnable_r = false );
+    PMError writeNewRanks();
+
+    /**
+     * Return _knownSources iterator to ISrcId.
+     * Return _knownSources.end() if not in _knownSources.
+     **/
+    ISrcPool::iterator poolHandle( const ISrcId & isrc_r );
 
     /**
      * Find InstSrcPtr in _knownSources by ISrcId.
