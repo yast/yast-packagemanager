@@ -118,6 +118,11 @@ class PMYouPatchInfo : virtual public Rep {
 
     PMYouPackageDataProviderPtr packageDataProvider() const;
 
+    PMError readDirectoryFile( const Pathname &,
+                               std::list<std::string> &patchFiles );
+
+    PMError processMediaDir( const Url & );
+
   protected:
     std::string tagValueLocale ( YOUPatchTagSet::Tags tagIndex,
                                  std::istream &input );
@@ -130,8 +135,6 @@ class PMYouPatchInfo : virtual public Rep {
     std::string tagValue( YOUPackageTagSet::Tags tag );
 
     PMError createPackage( const PMYouPatchPtr &patch );
-
-    PMError processMediaDir( const Url & );
 
   private:
     YOUPatchTagSet _patchTagSet;

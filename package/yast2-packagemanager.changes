@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 13 15:00:18 CET 2003 - cschum@suse.de
+
+- Added -q option to online_update command line to for quick check of
+  updates without downloading all patch information.
+
+-------------------------------------------------------------------
 Wed Feb 12 14:59:13 CET 2003 - ma@suse.de
 
 - Selection/SelectionManager overworked. Now able to delete/install/replace

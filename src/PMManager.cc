@@ -52,10 +52,6 @@ PMManager::PMManager()
 //
 PMManager::~PMManager()
 {
-#warning Why is the destructor not called?
-
-  writeSettings();
-
   clearAll();
 }
 
@@ -578,15 +574,19 @@ PMManager::updateAllInstalled (bool only_newer)
 
 void PMManager::readSettings()
 {
-  PathInfo pi( settingsFile() );
+  Pathname file = settingsFile();
+  
+  if ( file.empty() ) return;
+
+  PathInfo pi( file );
   if ( !pi.isExist() ) {
-    DBG << "Settings file '" << settingsFile() << "' doesn't exist." << endl;
+    DBG << "Settings file '" << file << "' doesn't exist." << endl;
     return;
   }
 
-  ifstream in( settingsFile().asString().c_str() );
+  ifstream in( file.asString().c_str() );
   if ( in.fail() ) {
-    ERR << "Can't read settings from '" << settingsFile() << "'" << endl;
+    ERR << "Can't read settings from '" << file << "'" << endl;
   }
 
   bool parseTaboo = false;
@@ -612,9 +612,14 @@ void PMManager::writeSettings()
 {
   D__ << "writeSettings()" << endl;
 
-  ofstream out( settingsFile().asString().c_str() );
+  Pathname file = settingsFile();
+  if ( file.empty() ) return;
+
+  D__ << "file: " << file << endl;
+
+  ofstream out( file.asString().c_str() );
   if ( out.fail() ) {
-    ERR << "Can't write settings to '" << settingsFile() << "'" << endl;
+    ERR << "Can't write settings to '" << file << "'" << endl;
     return;
   }
 
