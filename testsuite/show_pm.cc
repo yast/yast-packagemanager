@@ -14,6 +14,8 @@
 #include <y2pm/PMObjectPtr.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSelectable.h>
+#include <y2pm/PMSelectablePtr.h>
 #include <iostream>
 #include <algorithm>
 
@@ -52,6 +54,34 @@ pkglist2string (const std::list<PMPackagePtr>& plist, const char *sep)
 	    ret += "(nil)";
 	else
 	    ret += ((const std::string &)((*pos)->name()) + "-" + (*pos)->version() + "-" + (*pos)->release() + "." + (const std::string &)((*pos)->arch()));
+   }
+   return ret;
+}
+
+
+std::string
+slclist2string (const std::list<PMSelectablePtr>& slist, const char *sep)
+{
+   std::string ret;
+   if (slist.empty())
+	return ret;
+   for (std::list<PMSelectablePtr>::const_iterator pos = slist.begin();
+	pos != slist.end(); ++pos)
+   {
+	if (!ret.empty())
+	    ret += sep;
+	if (!(*pos))
+	    ret += "(nil)";
+	else
+	{
+	    PMPackagePtr package = (*pos)->candidateObj();
+	    if (package)
+	    {
+		ret += ((const std::string &)(package->name()) + "-" + package->version() + "-" + package->release() + "." + (const std::string &)(package->arch()));
+	    }
+	    else
+		ret += (*pos)->name();
+	}
    }
    return ret;
 }
@@ -144,6 +174,7 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     cout << "Location: '" << p->location() << "'" << endl;
     cout << "MediaNr: " << p->medianr () << endl;
     cout << "Keywords: " << strlist2string(p->keywords()) << endl;
+    cout << "DU: " << strlist2string(p->du()) << endl;
     cout << "========" << endl;
     return;
 }
@@ -167,14 +198,14 @@ show_pmselection (PMSelectionPtr s)
     cout << "Archivesize: " << s->archivesize() << endl;
     while (locales[pos] != 0)
     {
-	cout << "Summary[" << locales[pos] << "]: " << s->summary(locales[pos]) << endl;
-	cout << "InsPacks[" << locales[pos] << "]: " << strlist2string(s->inspacks(locales[pos])) << endl;
+	cout << "Summary[" << locales[pos] << "]: " << s->summary(LangCode(locales[pos])) << endl;
+	cout << "InsPacks[" << locales[pos] << "]: " << strlist2string(s->inspacks(LangCode(locales[pos]))) << endl;
 	cout << "InsPacksPtrs[" << locales[pos] << "]: (";
-	cout << pkglist2string(s->inspacks_ptrs(locales[pos]), ", ") << ")" << endl;
+	cout << slclist2string(s->inspacks_ptrs(LangCode(locales[pos])), ", ") << ")" << endl;
 	cout << "DelPacks[" << locales[pos] << "]: (";
-	cout << strlist2string(s->delpacks(locales[pos])) << ")" << endl;
+	cout << strlist2string(s->delpacks(LangCode(locales[pos]))) << ")" << endl;
 	cout << "DelPacksPtrs[" << locales[pos] << "]: (";
-	cout << pkglist2string(s->delpacks_ptrs(locales[pos]), ", ") << ")" << endl;
+	cout << slclist2string(s->delpacks_ptrs(LangCode(locales[pos])), ", ") << ")" << endl;
 	pos++;
     }
     cout << "========" << endl;
