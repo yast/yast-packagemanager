@@ -40,11 +40,8 @@
 #include <y2pm/PMError.h>
 
 #include <y2pm/InstTargetPtr.h>		// pointer to self
-#include <y2pm/MediaAccessPtr.h>		// physical media access class
-//#include <y2pm/InstDescr.h>		// target description
-//#include <y2pm/InstData.h>		// target content
+#include <y2pm/MediaAccessPtr.h>	// physical media access class
 
-//#include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
@@ -232,7 +229,7 @@ class InstTarget: virtual public Rep {
 	 * @param flags which flags to use, default flags are used if 0
 	 */
 	PMError installPackage (const std::string& filename, unsigned flags = 0);
-	
+
 	/**
 	 * install packages to the target
 	 *
@@ -251,7 +248,7 @@ class InstTarget: virtual public Rep {
 	 *
 	 * */
 	PMError removePackage(const std::string& label, unsigned flags = 0);
-	
+
 	/**
 	 * remove package
 	 *

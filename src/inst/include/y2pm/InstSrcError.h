@@ -62,7 +62,9 @@ class InstSrcError {
       E_no_instsrc_on_media,
       E_no_instsrcdata_on_media,
       E_src_already_enabled,
-      E_src_no_description
+      E_src_no_description,
+      // InstSrcMgr
+      E_bad_id
     };
 };
 

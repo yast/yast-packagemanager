@@ -86,6 +86,20 @@ class InstSrcManager {
      **/
     Pathname genSrcCacheName() const;
 
+  private:
+
+    struct ProductEntry {
+      Pathname    _dir;
+      std::string _name;
+      bool operator<( const ProductEntry & rhs ) const {
+	return( _dir.asString() < rhs._dir.asString() );
+      }
+    };
+
+    typedef std::set<ProductEntry> ProductSet;
+
+    PMError scanProductsFile( const Pathname & file_r, ProductSet & pset_r ) const;
+
   public:
 
     /**
@@ -106,6 +120,8 @@ class InstSrcManager {
     ISrcPool _knownSources;
 
     ISrcList _enabledSources;
+
+    InstSrcPtr lookupId( const ISrcId & isrc_r ) const;
 
   public:
 

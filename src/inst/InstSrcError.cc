@@ -74,6 +74,8 @@ std::string InstSrcError::errtext( const unsigned e )
     ENUM_OUT( E_no_instsrcdata_on_media );
     ENUM_OUT( E_src_already_enabled );
     ENUM_OUT( E_src_no_description );
+    //
+    ENUM_OUT( E_bad_id );
 
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////
