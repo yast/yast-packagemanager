@@ -130,6 +130,13 @@ void InstYou::selectPatches( int kinds )
 
 PMError InstYou::attachSource()
 {
+  int err = PathInfo::assert_dir( _paths->localDir() );
+  if ( err ) {
+    E__ << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
+        << endl;
+    return PMError( InstSrcError::E_error );
+  }
+
   PMError error = _media.open( _paths->patchUrl(), _paths->localDir() );
   if ( error ) {
     E__ << "Error opening URL '" << _paths->patchUrl() << "'" << endl;
