@@ -217,8 +217,8 @@ static std::string urlStringNoCred (const Url &url)
   baseUrl.setUsername(std::string());
   return baseUrl.asString();
 }
-  
-  
+
+
 PMError InstYou::readUserPassword()
 {
   SysConfig cfg( _settings->passwordFile() );
@@ -1102,7 +1102,17 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
     if ( _settings->dryRun() ) {
       cout << "INSTALL: " << fileName << endl;
     } else {
+#if 0 // for keepOriginal
+      if ( (*itPkg)->keepOriginal() ) {
+	unsigned flags = Y2PM::instTarget().getPkgInstFlags();
+	flags |= RpmDb::RPMINST_NOUPGRADE;
+	error = Y2PM::instTarget().installPackage( fileName.asString(), flags );
+      } else {
+	error = Y2PM::instTarget().installPackage( fileName.asString() );
+      }
+#else
       error = Y2PM::instTarget().installPackage( fileName.asString() );
+#endif
       if ( error ) {
         E__ << "Installation of RPM " << fileName << " of patch "
             << patch->name() << "failed" << endl;

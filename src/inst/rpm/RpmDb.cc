@@ -1586,7 +1586,10 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 
     // run rpm
     RpmArgVec opts;
-    opts.push_back("-U");
+    if (flags & RPMINST_NOUPGRADE)
+      opts.push_back("-i");
+    else
+      opts.push_back("-U");
     opts.push_back("--percent");
 
     if (flags & RPMINST_NODIGEST)

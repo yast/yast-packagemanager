@@ -240,6 +240,18 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
+  InstSrcManager::ISrcId nid( newSrc("/Local/packages/test/RPMS") );
+  ISM.enableSource( nid );
+  SEC << PMGR["test"] << endl;
+  PMGR["test"]->user_set_install();
+  SEC << PMGR["test"] << endl;
+
+  std::list<std::string> errors;
+  std::list<std::string> remaining;
+  std::list<std::string> srcremaining;
+  Y2PM::commitPackages( 0, errors, remaining, srcremaining );
+  ISM.deleteSource( nid );
+
 #if 0
   dumpLangWhatIf( SEC, true );
   doSolve( PMGR );

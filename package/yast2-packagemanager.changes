@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Feb 13 19:38:14 CET 2005 - ma@suse.de
+
+- Introduced RPMINST_NOUPGRADE flag which allows to behave
+  like 'rpm -i', in contrary to the default 'rpm -U'.
+
+-------------------------------------------------------------------
 Thu Feb 10 18:02:54 CET 2005 - ma@suse.de
 
 - Do rebuild the rpm database on update.
