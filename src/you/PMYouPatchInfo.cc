@@ -125,9 +125,12 @@ PMError PMYouPatchPaths::requestServers( const string &url, const string &file )
 
   string line;  
   ifstream in( ( media.getAttachPoint() + f ).asString().c_str() );
-  while( !in.eof() ) {
-    in >> line;
-    cerr << "LINE: '" << line << "'" << endl;
+  while( getline( in, line ) ) {
+    if ( *line.begin() != '#' ) {
+      Url url( line );
+      if ( url.isValid() ) _servers.push_back( url );
+      D__ << "Mirror url: " << url.asString() << endl;
+    }
   }
   
   return PMError();
