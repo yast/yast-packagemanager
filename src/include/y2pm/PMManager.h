@@ -59,6 +59,8 @@ class PMManager {
 
     virtual PMSelectablePtr newSelectable( const PkgName & name_r ) const;
 
+  private:
+
     PMSelectablePtr poolLookup( const PkgName & name_r ) const;
 
   public:

@@ -4,6 +4,7 @@
 
 SUBDIRS = include inst pkg media
 
+# first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
 		pkg/include	\
