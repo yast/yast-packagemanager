@@ -32,7 +32,8 @@ noinst_PROGRAMS = \
         test_you	\
         cschum_test	\
 	media_test	\
-	test_updateinf
+	test_updateinf  \
+        test_libcurl
 
 test_updateinf_SOURCES = test_updateinf.cc
 test_updateinf_LDADD = $(top_builddir)/src/liby2pm.la
@@ -89,4 +90,8 @@ cschum_test_LDFLAGS = -static
 media_test_SOURCES = media_test.cc
 media_test_LDADD = $(top_builddir)/src/liby2pm.la
 media_test_LDFLAGS = -static
+
+test_libcurl_SOURCES = test_libcurl.cc
+test_libcurl_LDADD = -lcurl $(top_builddir)/src/liby2pm.la
+test_libcurl_LDFLAGS = -static
 

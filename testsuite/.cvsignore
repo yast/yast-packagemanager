@@ -22,3 +22,4 @@ cschum_test
 order
 test_updateinf
 media_test
+test_libcurl

@@ -20,12 +20,13 @@ int main(int argc, char* argv[])
 	PMError result;
 	//result = m->open("ftp:hewitt:/suse-STABLE");
 	Url url(argv[1]);
-	result = m->open(url);
+	result = m->open(url,argv[2]);
 	DBG << result << endl;
-	result = m->attach(argv[2]);
+	result = m->attach();
 	DBG << result << endl;
 	//result = m->provideFile("/apt/SuSE/STABLE-i386/examples/sources.list.FTP");
-	result = m->provideDir(argv[3]);
+	//result = m->provideDir(argv[3]);
+	result = m->provideFile(argv[3]);
 	DBG << result << endl;
 	m->release(true);
 }
