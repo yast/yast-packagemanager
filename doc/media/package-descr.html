@@ -214,5 +214,51 @@ Useful e.g. for optimized versions of the same package (i.e. i686 and i486 versi
 It's just to save space.<br></td></tr>
 <tr><td valign=top>+Key<br>-Key</td><td valign=top><i>keywords</i></td><td>coming from package database</td></tr>
 </TABLE>
+<p></p>
+<H2>Example</H2>
+<pre>
+=Pkg: 3ddiag 0.494 16 i586
++Req:
+/bin/cp
+/bin/ln
+/bin/ls
+/bin/mkdir
+/bin/mv
+/bin/rm
+/bin/cat
+aaa_base
+/bin/sh
+/bin/sh
+ld-linux.so.2
+libc.so.6
+libc.so.6(GLIBC_2.0)
+libhd.so.5
+rpmlib(PayloadIsBzip2) <= 3.0.5-1
+-Req:
++Prq:
+/bin/cp
+/bin/ln
+/bin/ls
+/bin/mkdir
+/bin/mv
+/bin/rm
+/bin/cat
+aaa_base
+/bin/sh
+rpmlib(PayloadIsBzip2) <= 3.0.5-1
+-Prq:
++Prv:
+mesa:/etc/mesa.conf
+-Prv:
+=Loc: 1 3ddiag-0.494-16.i586.rpm
+=Siz: 27958 64932
+=Tim: 1028715372
+=Src: 3ddiag 0.494 16 src
+=Grp: System/Base
+=Lic: GPL
++Aut:
+Stefan Dirsch <sndirsch@suse.de>
+-Aut:
+</pre>
 </BODY>
 </HTML>
