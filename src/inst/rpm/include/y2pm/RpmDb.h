@@ -56,6 +56,8 @@ class RpmDb: virtual public Rep
 	//
 	std::list<PMPackagePtr> _packages;
 
+	Pathname _backuppath;
+
     public:
 
         /**
@@ -261,6 +263,18 @@ class RpmDb: virtual public Rep
 	 * */
 	bool setInstallationLogfile (const Pathname& filename);
 
+	/**
+	 * set backup dir for rpm config files
+	 *
+	 * @param const Pathname
+	 * */
+	void setBackupPath (const Pathname& path) { _backuppath = path; }
+
+	/**
+	 * get backup dir for rpm config files
+	 *
+	 * */
+	Pathname getBackupPath (void) { return _backuppath; }
 
 	/**
 	 * convert PMPackagePtr to package name for RPM
