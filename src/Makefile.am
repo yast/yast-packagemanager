@@ -55,3 +55,9 @@ online_update_LDFLAGS = -static
 installation_sources_SOURCES = installation_sources.cc
 installation_sources_LDADD = liby2pm.la
 installation_sources_LDFLAGS = -static
+
+admdir = /var/adm/fillup-templates
+
+adm_DATA = sysconfig.onlineupdate
+
+EXTRA_DIST = $(adm_DATA)
