@@ -10,6 +10,19 @@ using namespace std;
 PkgDep::alternatives_mode PkgDep::default_alternatives_mode =ASK_IF_NO_DEFAULT;
 unsigned PkgDep::default_max_remove = 10;
 
+PkgDep::PkgDep ( PkgSet& instd,
+	 const PkgSet& avail,
+	 AlternativesCallback alternatives_callback,
+	 alternatives_mode m
+	)
+    : alt_mode(m),
+	installed(instd),
+	available(avail),
+	_alternatives_callback(alternatives_callback),
+	_install_installed(true)
+{
+    _unresolvable_callback = default_unresolvable_callback;
+}
 
 bool PkgDep::also_provided_by_installed( const PkgRelation& req )
 {
@@ -40,8 +53,11 @@ unsigned PkgDep::count_providers_for( const PkgSet* set, const PkgRelation& req)
 	return providers;
 }
 
-PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg,
-											   const PkgRelation& provides )
+/** some to-be-installed package provides "provides", however pkg has a
+ * conflict on this relation. Lookup the package name in the available set and
+ * see if choosing that one as candidate would resolve the conflict
+ * */
+PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg, const PkgRelation& provides )
 {
 	PkgName name = pkg->name();
 
@@ -61,8 +77,7 @@ PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg,
 	return upgrade;
 }
 
-PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
-											   const PkgRelation& confl )
+PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg, const PkgRelation& confl )
 {
 	PkgName name = pkg->name();
 
@@ -85,9 +100,13 @@ PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
 	return upgrade;
 }
 
+/** pkg requires something that is no longer there when oldpkg is replaced by
+ * newpkg. Try to find a replacement for pkg in the hope that the requirement
+ * is satisfied then.
+ * */
 PMSolvablePtr PkgDep::try_upgrade_requirerer(
-	PMSolvablePtr pkg, PMSolvablePtr oldpkg, PMSolvablePtr newpkg
-) {
+	PMSolvablePtr pkg, PMSolvablePtr oldpkg, PMSolvablePtr newpkg)
+{
 	PkgName name = pkg->name();
 
 	D__ << "Trying to upgrade requirerer " << name << "-" << pkg->edition()
@@ -103,15 +122,20 @@ PMSolvablePtr PkgDep::try_upgrade_requirerer(
 	// target are now satisfied
 	bool requirements_ok = true;
 	ci_for( PMSolvable::,PkgRelList_, req, upgrade->,requires_ ) {
-		if ((req->name() == oldpkg->name() || req->name() == newpkg->name()) &&
-			!req_ok_after_upgrade( *req, oldpkg, newpkg )) {
+		// ln -- doesn't make sense, could be indirect requirement
+		//if ((req->name() == oldpkg->name() || req->name() == newpkg->name()) &&
+		
+		if(!req_ok_after_upgrade( *req, oldpkg, newpkg )) {
 			requirements_ok = false;
 			break;
 		}
 	}
+	if( !requirements_ok) D__ << "upgrade still broken" << endl;
 	return requirements_ok ? upgrade : (PMSolvablePtr)0;
 }
 
+/** try to find a different version of pkg in the available set
+ * */
 PMSolvablePtr PkgDep::available_upgrade( PMSolvablePtr pkg )
 {
 	PMSolvablePtr upgrade;

@@ -377,6 +377,9 @@ size_t hashfun( const PMSolvablePtr & pkg ){
         return size_t((const void*)pkg);
 }
 
+/** search the available set for packages that provide "req" which is needed by
+ * "referer"
+ * */
 PkgDep::search_result
 PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 							 ErrorResult *res )
@@ -391,8 +394,20 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 		if (req.matches( prov->relation() )) {
 			D__ << "Available " << prov->pkg()->name() << " provides "
 				 << prov->relation() << " which is needed by "
-				 << referer->name() << " (Requires: " << req << ")\n";
-			providers.push_back( *prov );
+				 << referer->name() << " (Requires: " << req << ")" << endl;
+			// search_for_provider is called when no
+			// candidate or installed provides the
+			// relation, so when there is 
+			PMSolvablePtr instd = vinstalled[prov->pkg()->name()];
+			if(instd && instd->doesProvide(prov->relation()))
+			{
+				W__ << "Installed " << instd->nameEd()
+					<< " provides it too, obsolete? -- skipping" << endl;
+			}
+			else
+			{
+				providers.push_back( *prov );
+			}
 		}
 	}
 
@@ -444,7 +459,8 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 		D__ << "Exactly one provider for " << req
 			 << " found, adding " << provider->name()
 			 << " as candidate\n";
-		candidates->add( provider, true );
+		// ln -- force used to be true, I don't think it makes sense
+		candidates->add( provider );
 		to_check.push_back( provider );
 		// add referer only if no installed pkg can provide this
 		if (!also_provided_by_installed( req ))
@@ -471,9 +487,8 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 	}
 }
 
-bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg,
-									PMSolvablePtr newpkg,
-									ErrorResult &res )
+/** resolve broken requirements when replacing oldpkg by newpkg */
+bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg, PMSolvablePtr newpkg, ErrorResult &res )
 {
 	bool error = false;
 
@@ -528,9 +543,11 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg,
 	return !error;
 }
 
-bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
-								   PMSolvablePtr oldpkg,
-								   PMSolvablePtr newpkg )
+/** check if the requirement rel is satisfied when replacing oldpkg by newpkg.
+ * This is the case when newpkg, a candidate or an otherwise installed package
+ * provides it
+ * */
+bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel, PMSolvablePtr oldpkg, PMSolvablePtr newpkg )
 {
 	// check if newpkg satisfies the requirement
 	ci_for( PMSolvable::,Provides_, prov, newpkg->,all_provides_) {
@@ -541,7 +558,7 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
 		}
 	}
 
-	// check if another candidate satifies it
+	// check if a candidate satisfies it
 	RevRel_for( candidates->provided()[rel.name()], prov1 ) {
 		if (prov1->relation().matches( rel )) {
 			D__ << "    satisfied by candidate " << prov1->pkg()->name()

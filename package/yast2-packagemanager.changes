@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Feb  6 17:10:24 CET 2003 - lnussel@suse.de
+
+- do not consider installed inconsistent packages that are already marked for
+  installation
+- search_for_provider no longer marks available packages for installation when
+  an installed version also provides the relation (should fix confusing result
+  for obsoletions)
+
+-------------------------------------------------------------------
 Thu Feb  6 14:02:21 CET 2003 - ma@suse.de
 
 - New UI_Status 'S_Keep' (similar to S_Taboo, but an installed object

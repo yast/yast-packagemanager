@@ -336,9 +336,17 @@ bool PkgDep::solvesystemnoauto(
 	    {
 		if(installed.includes(bit->value->name()))
 		{
-		    D__ << (bit->value->name()) << " ";
-		    installed.remove( bit->value );
-		    candidates.add( bit->value );
+		    D__ << (bit->value->name());
+		    if(!candidates.includes( bit->value->name()))
+		    {
+			installed.remove( bit->value );
+			candidates.add( bit->value );
+			D__ << " ";
+		    }
+		    else
+		    {
+			D__ << "(NOT!) ";
+		    }
 		}
 		else
 		    INT << bit->value->name() << " not in installed" << endl;
