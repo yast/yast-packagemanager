@@ -160,7 +160,10 @@ class InstSrcDescr : virtual public Rep {
 
 
     /**
-     * internal use - fill data from tag set into object
+     * Internal use - fill data from tag set into object
+     * @param ndescr The object to fill
+     * @param tagset The tag set
+     * @return bool true: data are complete, false: object only partly filled
      **/
     static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset );
 
