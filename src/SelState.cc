@@ -288,7 +288,7 @@ bool SelState::appl_set_install( const bool doit )
 //
 bool SelState::auto_unset( const bool doit )
 {
-  if ( !by_auto() )
+  if ( to_modify() && !by_auto() )
     return false;
   if ( doit ) {
     clr( M_TO );
@@ -308,7 +308,7 @@ bool SelState::auto_set_delete( const bool doit )
 {
   if ( to_delete() )
     return true;
-  if ( !by_auto() || !has_installed() || is_taboo() )
+  if ( ( to_modify() && !by_auto() ) || !has_installed() || is_taboo() )
     return false;
   if ( doit ) {
     clr( M_TO );
@@ -329,7 +329,7 @@ bool SelState::auto_set_install( const bool doit )
 {
   if ( to_install() )
     return true;
-  if ( !by_auto() || !has_candidate() || is_taboo() )
+  if ( ( to_modify() && !by_auto() ) || !has_candidate() || is_taboo() )
     return false;
   if ( doit ) {
     clr( M_TO );
