@@ -15,4 +15,6 @@ test_patchinfo
 test_content
 test_packages
 test_selections
+test_you
 gs_test
+order
