@@ -287,7 +287,10 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
 
     WgetStatus status = wget.getFile( Url(url), localSuseServers() );
 
-    if ( status != WGET_OK ) return PMError( YouError::E_get_suseservers_failed );
+    if ( status != WGET_OK ) {
+      return PMError( YouError::E_get_suseservers_failed,
+                      wget.error_string( status ) );
+    }
   }
 
   string line;
