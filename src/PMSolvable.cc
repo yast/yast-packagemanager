@@ -28,6 +28,8 @@
 
 using namespace std;
 
+#warning Think about using PkgRelation set instead of list.
+
 ///////////////////////////////////////////////////////////////////
 // static public
 //	METHOD NAME : InstSrcDataUL::Tag2PkgRelList

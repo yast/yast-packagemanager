@@ -28,7 +28,10 @@
 #include <y2util/FSize.h>
 #include <y2util/Date.h>
 #include <y2util/Vendor.h>
+
 #include <y2pm/RpmDbPtr.h>
+#include <y2pm/RpmLibHeaderPtr.h>
+
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
 #include <y2pm/PMPackage.h>
@@ -49,10 +52,17 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	// !!! RpmDb uses a per Package DataProvider, so it's always the
 	//     same PMPackage that calls the inteface. So it makes sense to
 	//     store data here.
+	Date              _attr_INSTALLTIME; // referenced from rpmdb during setup
 	std::string       _attr_SUMMARY;
 	FSize             _attr_SIZE;
 	YStringTreeItem * _attr_GROUP;
 	Vendor            _attr_VENDOR;
+
+
+	/**
+	 * Called from RpmDb to setup cached values.
+	 **/
+	void loadStaticData( constRpmLibHeaderPtr h );
 
 	/**
 	 * single package cache for _cachedPkg
@@ -60,17 +70,18 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	 * will be re-filled if attribute request
 	 * for a package != _cachedPkg is issued
 	 */
-	static PMPackagePtr _cachedPkg;
-	static rpmCache     _theCache;
+	static PMPackagePtr         _cachedPkg;
+	static constRpmLibHeaderPtr _cachedData;
 
-	void fillCache (PMPackagePtr package) const;
+	constRpmLibHeaderPtr fillCache( PMPackagePtr package ) const;
 
-    public:
+  public:
 
 	/**
 	 * constructor, destructor
 	 */
-	PMRpmPackageDataProvider (RpmDbPtr rpmdb);
+	PMRpmPackageDataProvider( RpmDbPtr rpmdb );
+
 	virtual ~PMRpmPackageDataProvider();
 
   public:
@@ -101,8 +112,10 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
     virtual std::list<std::string> postin      ( const PMPackage & pkg_r ) const;
     virtual std::list<std::string> preun       ( const PMPackage & pkg_r ) const;
     virtual std::list<std::string> postun      ( const PMPackage & pkg_r ) const;
-    virtual std::string            sourcerpm   ( const PMPackage & pkg_r ) const;
     virtual std::list<std::string> filenames   ( const PMPackage & pkg_r ) const;
+
+    // suse packages values
+    virtual std::list<std::string> du          ( const PMPackage & pkg_r ) const;
 };
 
 #endif // PMRpmPackageDataProvider_h

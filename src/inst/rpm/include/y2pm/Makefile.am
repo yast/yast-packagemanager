@@ -7,6 +7,9 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
+	RpmLibDb.h \
+	RpmLibHeader.h \
+	RpmLibHeaderPtr.h \
 	RpmDb.h \
 	RpmDbPtr.h \
 	RpmCache.h \
