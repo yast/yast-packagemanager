@@ -134,10 +134,12 @@ MinYaST2Version:&lt;minimal YaST2 version which is needed for installation&gt;
 
 UpdateOnlyInstalled: &lt;true/false; Only packages ( described in this patch ) will be updated which are installed. &gt;
 
+<!--
 Installtrigger:
 &lt;Script which will be execute in order to decide if the patch have to be installed.&gt;
 &lt;return 0 --> patch will be installed. &gt;
 Reggirtllatsni:
+-->
 
 Prescript: &lt;name of script executed before installing the patch&gt;
 Postscript: &lt;name of script executed after installing the patch&gt;
@@ -177,16 +179,25 @@ Segakcap:
 
 <p>There are some criterions for preselecting patches which will be installed
 by YOU:
-<p> - The scripted defined in the patchdescription ( flag "Installtrigger" ) 
-   returns true.
- - One or more packages of patch are installed and have older versions.
- - One or more packages have a flag ( "Category" ) which is a installed package.
-<p>
+<ul>
+  <li>If there is a patch of kind "YaST2" the newest patch of this kind is selected. All other
+  patches are deselected by default.</li>
+<!--  <li>The scripted defined in the patchdescription ( flag "Installtrigger" ) 
+  returns true.</li>-->
+  <li>If one or more packages of the patch are installed and have older versions, the patch will
+  be selected.</li>
+  <li>If one or more packages of the patch are older as the installed package, the patch will not
+  be selected, even if other packages of the patch are newer than the installed one.</li>
+<!--  <li>One or more packages have a flag ( "Category" ) which is a installed package.</li>-->
+</ul>
+
+<!--
 <p>If the flag "UpdateOnlyInstalled" is not defined or is false, ALL packages of the
 patch will be installed.
 If this flag is "true", only packages will be updated which are already installed
 and have a older version OR the package has a flag ( "Category" ) which is a installed package.
-<p>
+</p>
+-->
 
 <h3>Executing scripts within a patch</h3>
 <p>There is the possibility to run scripts while installing packages. The script from the
