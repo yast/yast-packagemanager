@@ -205,10 +205,10 @@ int main( int argc, char * argv[] )
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  Y2PM::setNotRunningFromSystem();
+  //Y2PM::setNotRunningFromSystem();
   Y2PM::instSrcManager();
-  InstSrcManager::ISrcId nid = newSrc( "ftp://schnell/CD-ARCHIVE/9.1/SuSE-9.1-FTP-i386-RC2/CD1" );
-  ISM.enableSource( nid );
+  //InstSrcManager::ISrcId nid = newSrc( "ftp://schnell/CD-ARCHIVE/9.1/SuSE-9.1-FTP-i386-RC2/CD1" );
+  //ISM.enableSource( nid );
   //ISM.disableAllSources();
 
   SEC << "STOP" << endl;

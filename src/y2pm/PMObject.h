@@ -57,6 +57,31 @@ class PMObject : public PMSolvable {
      **/
     virtual bool prefererCandidate() const { return false; }
 
+  private:
+
+    /**
+     * Mark if the license was accepted by the user
+     * In order not to ask again and again...
+     * Defaults to 'false', i.e. no licence to confirm.
+     **/
+      bool _license_to_confirm;
+
+  public:
+
+    /**
+     * check if the license of the package was confirmed
+     * @return true if was accepted (no more confirmation needed), false if not
+     **/
+    bool hasLicenseToConfirm () const { return _license_to_confirm; }
+    /**
+     * mark the license of the package as confirmed
+     **/
+    void markLicenseConfirmed () { _license_to_confirm = false; }
+    /**
+     * mark the license of the package as unconfirmed
+     **/
+    void markLicenseUnconfirmed () { _license_to_confirm = true; }
+
   public:
 
     /**
