@@ -163,11 +163,16 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     Url url(_url);
     url.setPath(path.asString());
 
-    // TODO: recreate fs structure
-    Pathname dest = attachPoint()+filename;
-    if(PathInfo::assert_dir(dest.dirname()))
+    Pathname dest = attachPoint() + filename;
+
+    string destNew = dest.asString() + ".new.yast.37456";
+    
+    D__ << "dest: " << dest << endl;
+    D__ << "destNew: " << destNew << endl;
+    
+    if( PathInfo::assert_dir( dest.dirname() ) )
     {
-	DBG << "assert_dir " << dest.asString() << " failed" << endl;
+	DBG << "assert_dir " << dest.dirname() << " failed" << endl;
 	return Error::E_system;
     }
 
@@ -179,9 +184,9 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
       return PMError( Error::E_curl_setopt_failed, _curlError );
     }
 
-    FILE *file = fopen( dest.asString().c_str(), "w" );
+    FILE *file = fopen( destNew.c_str(), "w" );
     if ( !file ) {
-      E__ << "fopen failed" << endl;
+      ERR << "fopen failed" << endl;
       return Error::E_error;
     }
 
@@ -196,7 +201,8 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     fclose( file );
 
     if ( ret != 0 ) {
-      E__ << "curl perform failed" << endl;
+      PathInfo::unlink( destNew );
+
       ERR << "curl error: " << ret << ": " << _curlError << endl;
       PMError err;
       switch ( ret ) {
@@ -211,7 +217,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
             CURLcode infoRet = curl_easy_getinfo( _curl, CURLINFO_HTTP_CODE,
                                                   &httpReturnCode );
             if ( infoRet == CURLE_OK ) {
-              ERR << "HTTP return code: " << httpReturnCode << endl;
+              DBG << "HTTP return code: " << httpReturnCode << endl;
               if ( httpReturnCode == 401 ) return Error::E_login_failed;
             }
           }
@@ -241,7 +247,12 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
       err.setDetails( _curlError );
       return err;
     }
-    
+
+    if ( PathInfo::rename( destNew, dest ) != 0 ) {
+      ERR << "Rename failed" << endl;
+      return Error::E_system;
+    }
+
     return Error::E_ok;
 }
 
