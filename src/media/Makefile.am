@@ -34,6 +34,8 @@ liby2pmMedia_la_SOURCES = \
 
 liby2pmMedia_la_LIBADD = -ly2util
 
+
+EXTRA_DIST = Make.defines
 #
 # MOVE IT TO TESTSUITE
 # needs liby2pm to link
