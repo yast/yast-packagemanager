@@ -20,20 +20,20 @@ such a description format.<br>
 <H1>Requirements</H1>
 <OL>
 <LI>Multiple products per media<BR>
-A media might contain several products, i.e. a combined patch media.
+A media may contain several products, i.e. a combined patch media.
 </LI>
 <LI>Multiple architectures per product<BR>
-A media might contain products for multiple architectures.
+A media may contain products for multiple architectures.
 </LI>
 <LI>Bi-Arch support<BR>
-An architecture might be bi-arch, where mixing of 'compatible'
+An architecture may be bi-arch, where mixing of 'compatible'
 architectures is allowed.
 </LI>
 <LI>Multiple languages per product<BR>
-A media might contain products for multiple languages.
+A media may contain products for multiple languages.
 </LI>
 <LI>Multiple media<BR>
-a) The content might be splitted onto multiple media.<br>
+a) The content may be splitted onto multiple media.<br>
 b) It must be able to merge splitted media into a single directory.<br>
 </LI>
 <LI>A media must be easily recognizable by the system<BR>
@@ -74,7 +74,7 @@ At toplevel of a media, a directory<br>
  should exists.<br>
 <hr>
 If it does not exist, the presence of the correct media can not
-be verified. This might be convenient for an on-line media which
+be verified. This may be convenient for an on-line media which
 just provides a set of packages.<br>
 In this case, no verfication takes place.
 <hr>
@@ -90,6 +90,8 @@ directly access the correct media directory.<br>
 <h3>Files inside <tt>media.<i>N</i>/</tt></h3>
 Inside the <tt>media.<i>N</i>/</tt> directory the files
 <tt>media</tt> and <tt>products</tt> must exist.<br>
+Optionally, a file named <tt>patches</tt> may exist to
+denote a media with patches (e.g. for YaST online update).<br>
 <br>
 The <tt>media</tt> file contains the media identifier needed
 to determine correctness when using removable media.<BR>
@@ -101,8 +103,14 @@ each product.<br>
 In case of splitted media, it must be present of the first media
 of the set.<BR>
 <br>
+The <tt>patches</tt> file contains a single directory specification for
+the root of the patches directory tree.<br>
+In case of splitted media, it must be present of the first media
+of the set.<BR>
+<br>
 
 
+<!------------------------------------------------------------------!>
 <H2>The <tt>/media.<i>N</i>/media</tt> file</H2>
 This should contain a key to quickly identify correctness of the inserted
 media. It is not shown to the user but should contain human-readable
@@ -151,11 +159,12 @@ linux#
 </pre>
 <p></p>
 
+<!------------------------------------------------------------------!>
 <H2>The <tt>products</tt> file</H2>
 This file contains the directory name for each product contained on
 the media.<br>
 <hr>
-If this file is not present, a single product on the meida's root directory
+If this file is not present, a single product on the media's root directory
 is assumed.
 <hr>
 <br>
@@ -202,6 +211,7 @@ In the above example, "SuSE Linux Personal" uses the toplevel directory, whereas
 other products have their own sub-directories.
 <p></p>
 
+<!------------------------------------------------------------------!>
 <H2>The <tt>content</tt> file</H2>
 This file resides inside the product directory as specified by the <tt>products</tt>
 file on the media. It contains all product-specfic data to describe
@@ -325,6 +335,42 @@ linux#
 </pre>
 <br>
 
+<!------------------------------------------------------------------!>
+<H2>The <tt>patches</tt> file</H2>
+This file contains a single directory name for the root of the
+patches directory contained on the media.<br>
+If this file is not present, the media's root directory
+is assumed.<br>
+<br>
+The line starts with the directory name (relative to the media's
+root dir !), followed by whitespace (space or tab) followed by an
+optional comment with the description/patchlevel of the Patch CD.<br>
+A leading slash in the directory name is only needed to specify
+the root directory of the media.<br>
+<br>
+<BR>
+Proposal:<BR>
+<TABLE border>
+<tr><td>File:</td><td><tt>patches</tt></td></tr>
+<tr><td>Location</td><td><tt>/media.1/</tt> directory</td></tr>
+<tr><td valign="top">Content</td><td>one line of ASCII as follows<BR>
+  <i><tt>&lt;directory&gt;</tt></i>
+    <i>&lt;whitespace&gt;</i>
+    <i><tt>&lt;optional comment&gt;</tt></i>
+</td></tr>
+</TABLE>
+<br>
+
+<H3>Example</H3>
+<pre>
+linux# cat /mnt/media.1/patches
+/ Patch-CD SuSE-SLES 7 (i386) Patchlevel 4
+linux# cat /mnt2/media.1/patches
+patches Patch-CD SuSE-SLOX 4 (i386) Patchlevel 1
+</pre>
+<br>
+
+<!------------------------------------------------------------------!>
 <H2>The package description directory</H2>
 
 Each such directory contains a file listing the selections (<tt>selections</tt>)
