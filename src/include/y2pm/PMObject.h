@@ -65,6 +65,7 @@ class PMObject : virtual public Rep, public PMSolvable {
     virtual bool                   providesSources() const = 0;
 
     virtual std::string            instSrcLablel()   const = 0;
+    std::string instSrcLabel() { return instSrcLablel(); }
     virtual Vendor                 instSrcVendor()   const = 0;
 
   public:
