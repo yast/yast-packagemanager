@@ -448,7 +448,7 @@ ULSelectionParser::fromMediaDir (std::list<PMSelectionPtr>& selections,
     for (selmaptype::iterator it = _selmap.begin(); it != _selmap.end(); it++)
     {
 	selections.push_back (it->second.first);
-	_selmap.erase (it);
     }
+    _selmap.clear ();
     return PMError::E_ok;
 }

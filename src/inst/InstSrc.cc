@@ -687,16 +687,6 @@ InstSrc::provideMedia (int medianr) const
 		}
 	    }
 
-	    if (err != MediaError::E_ok)
-	    {
-		MIL << "media error:" << err.errstr() << endl;
-		if (_mediaerrorfunc != 0)
-		{
-		    reply = (*_mediaerrorfunc) (err, _mediaerrordata);
-		}
-		if (reply != "")
-		    break;
-	    }
 	}
 
 	Pathname mediafile ("/media."+number2string(medianr)+"/media");
@@ -746,6 +736,7 @@ InstSrc::provideMedia (int medianr) const
 	string product = _descr->content_label();
 	string changereply = (*_mediachangefunc) (product, err.errstr(), _medianr, medianr, _mediachangedata);
 #warning TBD check reply
+	reply = changereply;
 	if (reply != "")
 	{
 	    break;
