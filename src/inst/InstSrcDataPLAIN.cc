@@ -250,7 +250,7 @@ PMError InstSrcDataPLAIN::providePkgToInstall( const Pathname & pkgfile_r, Pathn
   path_r = media->localPath( pkgfile );
 
   if ( _instSrc->isRemote() && ! RpmHeader::readPackage( path_r, /*checkDigest*/true ) ) {
-    err = Error::E_corupted_file;
+    err = Error::E_corrupted_file;
     err.setDetails( pkgfile.asString() );
     PathInfo::unlink( path_r );
     ERR << "Bad digest '" << path_r << "': " << err << endl;

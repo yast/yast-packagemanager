@@ -81,7 +81,7 @@ static PMError parseDelta(PMPackagePtr pkg, PMYouPackageDataProviderPtr provider
 
   vector<string> deltaData;
   stringutil::split( line, deltaData );
-  if ( deltaData.size() != 6 )
+  if ( deltaData.size() < 6 )
   {
     string text = "Error parsing 'Deltas' attribute.";
     text += " ";
@@ -208,6 +208,12 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch, std::istream&
 
   bool forceInstall = tagValue( YOUPackageTagSet::FORCEINSTALL ) == "true";
   _packageDataProvider->setForceInstall( pkg, forceInstall );
+
+  value = tagValue( YOUPackageTagSet::PATCHRPMMD5 );
+  _packageDataProvider->setPatchRpmMD5sum( pkg, value );
+
+  value = tagValue( YOUPackageTagSet::MD5SUM );
+  _packageDataProvider->setMD5sum( pkg, value );
 
   // remember position since retrieveData will seek in the stream.
   std::istream::pos_type posbeforedelta = strm.tellg();
@@ -433,17 +439,22 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     value = tagValue( YOUPatchTagSet::UPDATEONLYNEW, patchstream );
     p->setUpdateOnlyNew( value == "true" );
 
-    value = tagMultiValue( YOUPatchTagSet::PACKAGES, patchstream );
-    PMError error = parsePackages( value, p );
-    if ( error ) {
-      return error;
+    PMError error;
+
+    value = stringutil::trim(tagMultiValue( YOUPatchTagSet::PACKAGES, patchstream ));
+    if(!value.empty())
+    {
+	error = parsePackages( value, p );
+	if ( error ) {
+	  return error;
+	}
     }
 
     value = tagMultiValue( YOUPatchTagSet::FILES, patchstream );
     error = parseFiles( value, p );
     if ( error ) return error;
 
-    return PMError();
+    return error;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -462,7 +473,9 @@ PMError PMYouPatchInfo::readDir( vector<PMYouPatchPtr> &patches,
       if ( error ) return error;
     }
 
-    if ( _totalPatchFileCount == 0 ) return PMError();
+    if ( _totalPatchFileCount <= 0 ) return PMError();
+
+    patches.reserve(_totalPatchFileCount);
 
     MediaAccess media;
 

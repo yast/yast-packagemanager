@@ -1,10 +1,16 @@
 -------------------------------------------------------------------
-Thu Jul  1 15:48:53 CEST 2004 - lnussel@suse.de
+Tue Jul 13 18:08:17 CEST 2004 - lnussel@suse.de
 
 - use boolean YOU_USE_DELTAS sysconfig variable
 - sort deltas by installation source before requesting the base packages
 - pass rpm error messages to upper layer if rpm fails to install a package
 - add flag to mark an installation source as suitable for delta base packages
+- don't treat a patch file without packages as error
+- check MD5 sum of packages after retrieval if possible
+- new YOU package tags: PatchRpmMD5 and MD5sum
+- describe new YOU tags in docu
+- report progress when assembling deltas
+- 2.10.3
 
 -------------------------------------------------------------------
 Thu Jun 24 17:23:41 CEST 2004 - lnussel@suse.de

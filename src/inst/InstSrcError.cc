@@ -92,7 +92,7 @@ std::string InstSrcError::errtext( const unsigned e )
     ENUM_OUT( E_data_bad_selection );
       // DataProvider
     ENUM_OUT( E_no_source );
-    ENUM_OUT( E_corupted_file );
+    ENUM_OUT( E_corrupted_file );
 
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////
