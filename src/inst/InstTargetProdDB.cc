@@ -295,47 +295,60 @@ PMError InstTargetProdDB::install( const constInstSrcDescrPtr & isd_r )
   }
 
   if ( isInstalled( isd_r ) ) {
-    ERR << "Already installed: " << isd_r << endl;
-    return Error::E_ProdDB_install_failed;
+    MIL << "Already installed: " << isd_r << endl;
+  } else {
+
+    // write isd_r, reread it, if Ok add to lists
+    string nfilename( db_file_name( _nextIdx ) );
+    PathInfo nfile( db_file( nfilename ) );
+    if ( nfile.isExist() ) {
+      INT << "New dbfile name '" << nfilename << "' already exists!" << endl;
+      return Error::E_ProdDB_install_failed;
+    }
+
+    ofstream ostr( nfile.path().asString().c_str() );
+    err = isd_r->writeStream( ostr );
+    if ( err ) {
+      ERR << "Error writing " << isd_r << endl;
+      PathInfo::unlink( nfile.path() );
+      return Error::E_ProdDB_install_failed;
+    }
+    ostr.close();
+
+    unsigned idx = 0;
+    InstSrcDescrPtr ndescr;
+    err = read_db_file( nfilename, idx, ndescr );
+    if ( err || !ndescr ) {
+      ERR << "Error rereading from " << nfilename << endl;
+      PathInfo::unlink( nfile.path() );
+      return Error::E_ProdDB_install_failed;
+    }
+
+    map<unsigned,constInstSrcDescrPtr>::value_type nv( idx, ndescr );
+    if ( ! _prodmap.insert( nv ).second ) {
+      INT << "Duplicate entry " << idx << " in " << *this << endl;
+      PathInfo::unlink( nfile.path() );
+      return Error::E_ProdDB_install_failed;
+    }
+    DBG << *this << ":i[" << _nextIdx << "] " << ndescr << endl;
+    _prodlist.push_front( ndescr ); // reversed by id
+    ++_nextIdx;
+
+    MIL << *this << " installed " << isd_r << endl;
   }
 
-  // write isd_r, reread it, if Ok add to lists
-  string nfilename( db_file_name( _nextIdx ) );
-  PathInfo nfile( db_file( nfilename ) );
-  if ( nfile.isExist() ) {
-    INT << "New dbfile name '" << nfilename << "' already exists!" << endl;
-    return Error::E_ProdDB_install_failed;
+  // look for other versions of this product
+  list<constInstSrcDescrPtr> dellist;
+  for ( list<constInstSrcDescrPtr>::const_iterator it = _prodlist.begin(); it != _prodlist.end(); ++it ) {
+    if (    (*it)->content_product().name   == isd_r->content_product().name
+	 && (*it)->content_product().edition != isd_r->content_product().edition ) {
+      dellist.push_back( *it );
+    }
+  }
+  for ( list<constInstSrcDescrPtr>::const_iterator it = dellist.begin(); it != dellist.end(); ++it ) {
+    remove( *it );
   }
 
-  ofstream ostr( nfile.path().asString().c_str() );
-  err = isd_r->writeStream( ostr );
-  if ( err ) {
-    ERR << "Error writing " << isd_r << endl;
-    PathInfo::unlink( nfile.path() );
-    return Error::E_ProdDB_install_failed;
-  }
-  ostr.close();
-
-  unsigned idx = 0;
-  InstSrcDescrPtr ndescr;
-  err = read_db_file( nfilename, idx, ndescr );
-  if ( err || !ndescr ) {
-    ERR << "Error rereading from " << nfilename << endl;
-    PathInfo::unlink( nfile.path() );
-    return Error::E_ProdDB_install_failed;
-  }
-
-  map<unsigned,constInstSrcDescrPtr>::value_type nv( idx, ndescr );
-  if ( ! _prodmap.insert( nv ).second ) {
-    INT << "Duplicate entry " << idx << " in " << *this << endl;
-    PathInfo::unlink( nfile.path() );
-    return Error::E_ProdDB_install_failed;
-  }
-  DBG << *this << ":i[" << _nextIdx << "] " << ndescr << endl;
-  _prodlist.push_front( ndescr ); // reversed by id
-  ++_nextIdx;
-
-  MIL << *this << " installed " << isd_r << endl;
   return Error::E_ok;
 }
 
