@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 22 14:07:54 CET 2005 - ma@suse.de
+
+- Added smb/cifs workgroup/domainname handling. (#53423)
+- 2.11.21
+
+-------------------------------------------------------------------
 Mon Feb 21 14:19:55 CET 2005 - mir@suse.de
 
 - Timezone bug revisited (#42021, see 2.11.17)

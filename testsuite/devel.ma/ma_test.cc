@@ -249,10 +249,7 @@ int main( int argc, char * argv[] )
   }
 
 
-
-  PMLanguageManager::PkgSelectables pkgs( LMGR.getLangPackagesFor( LangCode("tx") ) );
-  INT << pkgs << endl;
-  //dumpLangWhatIf( SEC, true );
+  cedSrc("smb://user:pass@host/share/path;workgroup=domain");
 
 #if 0
   dumpLangWhatIf( SEC, true );

@@ -171,6 +171,12 @@ PMError MediaSMB::attachTo(bool next)
       options.erase( toEnv );
     }
 
+    // look for a workgroup
+    string workgroup = _url.option("workgroup");
+    if ( workgroup.size() ) {
+      options["workgroup"] = workgroup;
+    }
+
     // pass 'username' and 'password' via environment
     Mount::Environment environment;
     if ( username.size() )
