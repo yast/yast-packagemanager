@@ -207,15 +207,20 @@ class PMSelectable : virtual public Rep {
 
   public:
 
+    // Keep this order, it's used for sorting package lists!
+    // Dangerous / noteworthy states are sorted first.
+    //
+    // sh@suse.de
+    
     enum UI_Status {
-      S_Del,                 // delete  installedObj
-      S_Install,             // install candidateObj ( have no installedObj ) ( clears taboo )
-      S_Update,              // install candidateObj ( have installedObj )
-      S_NoInst,              // no modification      ( have no installedObj )
-      S_KeepInstalled,       // no modification      ( have installedObj )
-      S_Auto,                // like S_Install, but not requested by user, does not clear taboo
-      S_AutoDel,             // like S_Del, but not requested by user, does not clear taboo
       S_Taboo,               // hide candidateObj so it can't be installed. ( have no installedObj )
+      S_Del,                 // delete  installedObj
+      S_Update,              // install candidateObj ( have installedObj )
+      S_Install,             // install candidateObj ( have no installedObj ) ( clears taboo )
+      S_AutoDel,             // like S_Del, but not requested by user, does not clear taboo
+      S_Auto,                // like S_Install, but not requested by user, does not clear taboo
+      S_KeepInstalled,       // no modification      ( have installedObj )
+      S_NoInst,              // no modification      ( have no installedObj )
     };
 
     friend std::ostream & operator<<( std::ostream & str, UI_Status obj );
