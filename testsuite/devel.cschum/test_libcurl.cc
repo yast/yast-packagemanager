@@ -1,12 +1,9 @@
 #include <getopt.h>
 
+#include <iostream>
 #include <iomanip>
 #include <list>
 #include <string>
-
-#include <y2util/Y2SLog.h>
-
-#include <y2util/Url.h>
 
 #include <curl/curl.h>
 
@@ -14,45 +11,58 @@ using namespace std;
 
 int main( int argc, char **argv )
 {
-  MIL << "START" << endl;
-
-  if ( argc != 2 ) {
-    cerr << "Usage: test_libcurl <url>" << endl;
-  }
-
-  cout << "URL: '" << argv[1] << "'" << endl;
+  const char *url1 = "ftp://dist/full/full-i386/media.1/media";
+  const char *url2 = "ftp://dist/full/full-i386/content";
 
   bool error = false;
 
   CURLcode ret = curl_global_init( CURL_GLOBAL_ALL );
   if ( ret != 0 ) {
-    ERR << "global init failed" << endl;
+    cerr << "global init failed" << endl;
     exit( 1 );
   }  
   
   CURL *curl = curl_easy_init();
   if ( !curl ) {
-    ERR << "easy init failed" << endl;
+    cerr << "easy init failed" << endl;
     error = true;
   } else {
-    ret = curl_easy_setopt( curl, CURLOPT_URL, argv[ 1 ] );
+    char curlError[ CURL_ERROR_SIZE ];
+    ret = curl_easy_setopt( curl, CURLOPT_ERRORBUFFER, curlError );
     if ( ret != 0 ) {
-      ERR << "easy setopt failed." << endl;
+      cerr << "Error setting error buffer" << endl;
       error = true;
-    }
+    } else {
+      cout << "---- URL1: " << url1 << endl;
+      ret = curl_easy_setopt( curl, CURLOPT_URL, url1 );
+      if ( ret != 0 ) {
+        cerr << "easy setopt failed." << endl;
+        error = true;
+      } else {
+        ret = curl_easy_perform( curl );
+        if ( ret != 0 ) {
+          cerr << "easy perform failed: " << curlError << endl;
+          error = true;
+        }
+      }
 
-    ret = curl_easy_perform( curl );
-    if ( ret != 0 ) {
-      ERR << "easy perform failed." << endl;
-      error = true;
+      cout << "---- URL2: " << url2 << endl;
+      ret = curl_easy_setopt( curl, CURLOPT_URL, url2 );
+      if ( ret != 0 ) {
+        cerr << "easy setopt failed." << endl;
+        error = true;
+      } else {
+        ret = curl_easy_perform( curl );
+        if ( ret != 0 ) {
+          cerr << "easy perform failed: " << curlError << endl;
+          error = true;
+        }
+      }
     }
-
     curl_easy_cleanup( curl );
   }
   
   curl_global_cleanup();
-
-  MIL << "END" << endl;
 
   if ( error ) exit( 1 );
   
