@@ -281,6 +281,11 @@ class InstSrcManager {
     typedef std::set<InstSrc::UniqueID>        SrcDelSet;
 
     /**
+     *
+     **/
+    SrcStateVector editGet() const;
+
+    /**
      * Rearange known InstSrces rank and default state according to keep_r
      * (highest priority first). InstSrces to delete are given by del_r.
      *
@@ -288,7 +293,7 @@ class InstSrcManager {
      * keep_r or del_r. The bool part of a SrcState tells whether the InstSrc
      * should be enabled by default.
      **/
-    PMError adjustSources( const SrcStateVector & keep_r, const SrcDelSet del_r );
+    PMError editSet( const SrcStateVector & keep_r, const SrcDelSet del_r );
 
   public:
 
