@@ -26,7 +26,6 @@
 #include <y2util/SysConfig.h>
 
 #include <y2pm/MediaCurl.h>
-#include <y2pm/Wget.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
