@@ -201,7 +201,7 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
 	    DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
 	    ++ustats.chk_to_downgrade;
 	  } else {
-	    DBG << " ==> (candidate older)" << << candidate endl;
+	    DBG << " ==> (candidate older)" << candidate << endl;
 	    ++ustats.chk_to_keep_old;
 	  }
 	}
