@@ -63,20 +63,6 @@ PMRpmPackageDataProvider::description () const
     return value;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::insnotify () const
-{
-    // N/A
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMRpmPackageDataProvider::delnotify () const
-{
-    // N/A
-    return std::list<std::string>();
-}
-
 const FSize
 PMRpmPackageDataProvider::size () const
 {
@@ -212,20 +198,6 @@ PMRpmPackageDataProvider::sourcerpm () const
     return value;
 }
 
-const FSize
-PMRpmPackageDataProvider::archivesize () const
-{
-    // N/A
-    return FSize (0);
-}
-
-const std::list<std::string>
-PMRpmPackageDataProvider::authors () const
-{
-    // N/A
-    return std::list<std::string> ();
-}
-
 const std::list<std::string>
 PMRpmPackageDataProvider::filenames () const
 {
@@ -233,36 +205,6 @@ PMRpmPackageDataProvider::filenames () const
     _rpmdb->queryPackage (_package, "[%{FILENAMES}\n]", value);
     return value;
 }
-
-// suse packages values
-const std::list<std::string>
-PMRpmPackageDataProvider::recommends () const
-{
-    // N/A
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMRpmPackageDataProvider::suggests () const
-{
-    // N/A
-    return std::list<std::string>();
-}
-
-const std::string
-PMRpmPackageDataProvider::location () const
-{
-    // N/A
-    return std::string();
-}
-
-const std::list<std::string>
-PMRpmPackageDataProvider::keywords () const
-{
-    // N/A
-    return std::list<std::string>();
-}
-
 
 PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
 							       PMObject::PMObjectAttribute attr )

@@ -49,26 +49,25 @@ class PMSelectionDataProvider : virtual public Rep, public PMDataProvider  {
   public:
 
 	/**
-	 * access functions for PMObject attributes
+	 * access functions for PMObject/PMSelection attributes
 	 */
 
-	virtual const std::string summary(const std::string& lang = "") const;
-	virtual const std::list<std::string> description(const std::string& lang = "") const;
-	virtual const std::list<std::string> insnotify(const std::string& lang = "") const;
-	virtual const std::list<std::string> delnotify(const std::string& lang = "") const;
-	virtual const FSize size() const;
+	virtual const std::string summary(const std::string& lang) const = 0;
+	virtual const std::list<std::string> description(const std::string& lang) const = 0;
+	virtual const std::list<std::string> insnotify(const std::string& lang) const = 0;
+	virtual const std::list<std::string> delnotify(const std::string& lang) const = 0;
 
 	/**
 	 * access functions for PMSelection attributes
 	 */
 
-	virtual const std::string category () const;
-	virtual const bool visible () const;
-	virtual const std::list<std::string> suggests() const;
-	virtual const std::list<std::string> inspacks(const std::string& lang = "") const;
-	virtual const std::list<std::string> delpacks(const std::string& lang = "") const;
-	virtual const FSize archivesize() const;
-	virtual const std::string order() const;
+	virtual const std::string category () const = 0;
+	virtual const bool visible () const = 0;
+	virtual const std::list<std::string> suggests() const = 0;
+	virtual const std::list<std::string> inspacks(const std::string& lang = "") const = 0;
+	virtual const std::list<std::string> delpacks(const std::string& lang = "") const = 0;
+	virtual const FSize archivesize() const = 0;
+	virtual const std::string order() const = 0;
 
     /**
      * Selection attribute retrieval.

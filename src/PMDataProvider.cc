@@ -54,3 +54,34 @@ PMDataProvider::PMDataProvider()
 PMDataProvider::~PMDataProvider()
 {
 }
+
+
+const std::string
+PMDataProvider::summary () const
+{
+    return "";
+}
+
+const std::list<std::string>
+PMDataProvider::description () const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMDataProvider::insnotify () const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMDataProvider::delnotify () const
+{
+    return std::list<std::string>();
+}
+
+const FSize
+PMDataProvider::size () const
+{
+    return FSize(0);
+}

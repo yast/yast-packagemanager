@@ -83,14 +83,19 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	void setSelection ( PMSelectionPtr selection) { _selection = selection; }
 
 	/**
-	 * access functions for PMObject attributes
+	 * access functions for PMObject/PMSelection attributes
 	 */
 
-	const std::string summary(const std::string& lang = "") const;
-	const std::list<std::string> description(const std::string& lang = "") const;
-	const std::list<std::string> insnotify(const std::string& lang = "") const;
-	const std::list<std::string> delnotify(const std::string& lang = "") const;
+	const std::string summary() const { return summary(""); }
+	const std::list<std::string> description() const { return description(""); }
+	const std::list<std::string> insnotify() const { return insnotify(); }
+	const std::list<std::string> delnotify() const { return delnotify(); }
 	const FSize size() const;
+
+	const std::string summary(const std::string& lang) const;
+	const std::list<std::string> description(const std::string& lang) const;
+	const std::list<std::string> insnotify(const std::string& lang) const;
+	const std::list<std::string> delnotify(const std::string& lang) const;
 
 	/**
 	 * access functions for PMSelection attributes

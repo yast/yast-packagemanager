@@ -44,6 +44,16 @@ class PMDataProvider : virtual public Rep {
 
   public:
 
+	/**
+	 * access functions for PMObject attributes
+	 */
+
+	virtual const std::string summary () const = 0;
+	virtual const std::list<std::string> description () const = 0;
+	virtual const std::list<std::string> insnotify () const = 0;
+	virtual const std::list<std::string> delnotify () const = 0;
+	virtual const FSize size () const = 0;
+
     /**
      * Object attribute retrieval.
      * @see PMObject

@@ -113,30 +113,6 @@ PMULPackageDataProvider::buildtime () const
 }
 
 const std::string
-PMULPackageDataProvider::buildhost () const
-{
-    return "";
-}
-
-const Date
-PMULPackageDataProvider::installtime () const
-{
-    return Date();
-}
-
-const std::string
-PMULPackageDataProvider::distribution () const
-{
-    return "";
-}
-
-const std::string
-PMULPackageDataProvider::vendor () const
-{
-    return "";
-}
-
-const std::string
 PMULPackageDataProvider::license () const
 {
     FALLBACK(_attr_LICENSE,license);
@@ -146,60 +122,12 @@ PMULPackageDataProvider::license () const
 }
 
 const std::string
-PMULPackageDataProvider::packager () const
-{
-    return "";
-}
-
-const std::string
 PMULPackageDataProvider::group () const
 {
     FALLBACK(_attr_GROUP,group);
     std::string value;
     _package_retrieval->retrieveData (_attr_GROUP, value);
     return value;
-}
-
-const std::list<std::string>
-PMULPackageDataProvider::changelog () const
-{
-    return std::list<std::string>();
-}
-
-const std::string
-PMULPackageDataProvider::url () const
-{
-    return "";
-}
-
-const std::string
-PMULPackageDataProvider::os () const
-{
-    return "";
-}
-
-const std::list<std::string>
-PMULPackageDataProvider::prein () const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMULPackageDataProvider::postin () const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMULPackageDataProvider::preun () const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMULPackageDataProvider::postun () const
-{
-    return std::list<std::string>();
 }
 
 const std::string
@@ -224,12 +152,6 @@ PMULPackageDataProvider::authors () const
     std::list<std::string> value;
     _package_retrieval->retrieveData (_attr_AUTHORS, value);
     return value;
-}
-
-const std::list<std::string>
-PMULPackageDataProvider::filenames () const
-{
-    return std::list<std::string>();
 }
 
 // suse packages values

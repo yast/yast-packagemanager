@@ -51,43 +51,33 @@ class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
   public:
 
 	/**
-	 * access functions for PMObject attributes
-	 */
-
-	virtual const std::string summary () const;
-	virtual const std::list<std::string> description () const;
-	virtual const std::list<std::string> insnotify () const;
-	virtual const std::list<std::string> delnotify () const;
-	virtual const FSize size () const;
-
-	/**
 	 * access functions for PMPackage attributes
 	 */
 
-	virtual const Date buildtime () const;
-	virtual const std::string buildhost () const;
-	virtual const Date installtime () const;
-	virtual const std::string distribution () const;
-	virtual const std::string vendor () const;
-	virtual const std::string license () const;
-	virtual const std::string packager () const;
-	virtual const std::string group () const;
-	virtual const std::list<std::string> changelog () const;
-	virtual const std::string url () const;
-	virtual const std::string os () const;
-	virtual const std::list<std::string> prein () const;
-	virtual const std::list<std::string> postin () const;
-	virtual const std::list<std::string> preun () const;
-	virtual const std::list<std::string> postun () const;
-	virtual const std::string sourcerpm () const;
-	virtual const FSize archivesize () const;
-	virtual const std::list<std::string> authors () const;
-	virtual const std::list<std::string> filenames () const;
+	virtual const Date buildtime () const = 0;
+	virtual const std::string buildhost () const = 0;
+	virtual const Date installtime () const = 0;
+	virtual const std::string distribution () const = 0;
+	virtual const std::string vendor () const = 0;
+	virtual const std::string license () const = 0;
+	virtual const std::string packager () const = 0;
+	virtual const std::string group () const = 0;
+	virtual const std::list<std::string> changelog () const = 0;
+	virtual const std::string url () const = 0;
+	virtual const std::string os () const = 0;
+	virtual const std::list<std::string> prein () const = 0;
+	virtual const std::list<std::string> postin () const = 0;
+	virtual const std::list<std::string> preun () const = 0;
+	virtual const std::list<std::string> postun () const = 0;
+	virtual const std::string sourcerpm () const = 0;
+	virtual const FSize archivesize () const = 0;
+	virtual const std::list<std::string> authors () const = 0;
+	virtual const std::list<std::string> filenames () const = 0;
 	// suse packages values
-	virtual const std::list<std::string> recommends () const;
-	virtual const std::list<std::string> suggests () const;
-	virtual const std::string location () const;
-	virtual const std::list<std::string> keywords () const;
+	virtual const std::list<std::string> recommends () const = 0;
+	virtual const std::list<std::string> suggests () const = 0;
+	virtual const std::string location () const = 0;
+	virtual const std::list<std::string> keywords () const = 0;
 
     /**
      * Package attribute retrieval.
