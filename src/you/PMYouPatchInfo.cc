@@ -26,6 +26,7 @@
 
 #include <y2pm/InstSrcError.h>
 #include <y2pm/PMYouPatch.h>
+#include <y2pm/MediaAccess.h>
 
 #include <y2pm/PMYouPatchInfo.h>
 
@@ -33,15 +34,72 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMYouPatchInfo
+//	CLASS NAME : PMYouPatchPaths
 //
 ///////////////////////////////////////////////////////////////////
 
+PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
+                                  const string &arch )
+{
+  _patchPath = arch + "/update/";
+  if ( product != "SuSE-Linux" ) {
+    _patchPath += product + "/";
+    _patchUrl = Url( "http://support.suse.de/" );
+  } else {
+    _patchUrl = Url( "ftp://ftp.suse.com/pub/suse/" );
+  }
+  _patchPath += version + "/patches/";
+}
+
+void PMYouPatchPaths::setPatchPath( const Pathname &path )
+{
+  _patchPath = path;
+}
+
+Pathname PMYouPatchPaths::patchPath()
+{
+  return _patchPath;
+}
+
+void PMYouPatchPaths::setPatchUrl( const Url &url )
+{
+  _patchUrl = url;
+}
+
+Url PMYouPatchPaths::patchUrl()
+{
+  return _patchUrl;
+}
+
+void PMYouPatchPaths::setAttachPoint( const Pathname &path )
+{
+  _attachPoint = path;
+}
+
+Pathname PMYouPatchPaths::attachPoint()
+{
+  return _attachPoint;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMYouPatchInfo
+//
+///////////////////////////////////////////////////////////////////
 
 PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 {
     _tagset = new YOUPatchTagSet( lang );
     _tagset->setEncoding(CommonPkdParser::Tag::UTF8);
+    
+    _patchFiles = new list<string>;
+}
+
+PMYouPatchInfo::~PMYouPatchInfo()
+{
+    delete _patchFiles;
+    delete _tagset;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -52,21 +110,22 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 //
 //	DESCRIPTION :
 //
-PMError PMYouPatchInfo::readFile( const string &path, const string &fileName,
+PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
                                   list<PMYouPatchPtr> &patches )
 {
-    std::cerr << "starting parser" << std::endl;
+    D__ << "path: " << path << " fileName: " << fileName << endl;
 
     TagParser parser;
-    std::string tagstr;
+    string tagstr;
 
-    std::ifstream commonpkdstream( ( path + fileName ).c_str() );
+    _tagset->clear();
+
+    std::ifstream commonpkdstream( ( path + fileName ).asString().c_str() );
     if(!commonpkdstream)
     {
-	std::cerr << "file not found" << std::endl;
+	E__ << "file not found" << endl;
 	return PMError( InstSrcError::E_bad_url );
     }
-
 
     bool repeatassign = false;
     bool parse = true;
@@ -88,7 +147,7 @@ PMError PMYouPatchInfo::readFile( const string &path, const string &fileName,
 		case CommonPkdParser::Tag::REJECTED_FULL:
 		    if( tagstr != "Filename" )
 		    {
-			std::cerr << "syntax error" << std::endl;
+			E__ << "syntax error" << std::endl;
 			parse = false;
 		    }
 //		    std::cerr << "tagset already has " << tagstr << std::endl;
@@ -100,14 +159,19 @@ PMError PMYouPatchInfo::readFile( const string &path, const string &fileName,
 		    parse = false;
 		    break;
 	    }
-	} while(repeatassign);
+	} while( repeatassign );
     }
 
-    if ( !parse )
+    if ( !parse ) {
+        E__ << "Parse Error" << endl;
         return PMError( InstSrcError::E_error );
+    }
 
     unsigned int pos = fileName.find( '-' );
-    if ( pos < 0 ) return PMError( InstSrcError::E_error );
+    if ( pos < 0 ) {
+      E__ << "No '-' in '" << fileName << "'" << endl;
+      return PMError( InstSrcError::E_error );
+    }
     
     string name = fileName.substr( 0, pos );
     string version = fileName.substr( pos + 1, fileName.length() - pos );
@@ -135,15 +199,100 @@ PMError PMYouPatchInfo::readFile( const string &path, const string &fileName,
     else { p->setUpdateOnlyInstalled( false ); }
 
     patches.push_back( p );
-  
+
     return PMError();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMYouPatchInfo::readDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
+                                 const Pathname &attachPath,
+                                 list<PMYouPatchPtr> &patches )
+{
+    MediaAccessPtr media( new MediaAccess );
+
+    PMError error = media->open( baseUrl );
+    if ( error != PMError::E_ok ) return error;
+
+    error = media->attachTo( attachPath );
+    if ( error != PMError::E_ok && error != MediaError::E_attachpoint_fixed ) {
+      return error;
+    }
+
+    const list<string> *patchFiles = media->dirInfo ( patchPath );
+
+    if ( !patchFiles ) {
+      W__ << "dirInfo failed." << endl;
+      error = media->provideFile( patchPath + "directory" );
+      if ( error != PMError::E_ok ) {
+        E__ << "no directory file found." << endl;
+        return error;
+      }
+      Pathname dirFile = media->getAttachPoint() + patchPath + "directory";
+
+      patchFiles = _patchFiles;
+      _patchFiles->clear();
+      
+      string buffer;
+      ifstream in( dirFile.asString().c_str() );
+      while( getline( in, buffer ) ) {
+        _patchFiles->push_back( buffer );
+      }
+    }
+
+    list<string>::const_iterator it;
+    for( it = patchFiles->begin(); it != patchFiles->end(); ++it ) {
+        if ( *it == "." || *it == ".." || *it == "directory" ) continue;
+        error = media->provideFile( patchPath + *it );
+        if ( error != PMError::E_ok ) {
+            E__ << error << patchPath + *it << endl;
+            cerr << "ERR: " << *it << endl;
+        } else {
+            Pathname path = media->getAttachPoint() + patchPath;
+            D__ << "read patch: file: " << *it << endl;
+            error = readFile( path, *it, patches );
+            if ( error != PMError::E_ok ) {
+                return error;
+            }
+        }
+    }
+
+    return PMError();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMYouPatchInfo::getPatches
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError PMYouPatchInfo::getPatches( PMYouPatchPaths *paths,
+                                    list<PMYouPatchPtr> &patches )
+{
+    Pathname attachPoint;
+
+    Url url = paths->patchUrl();
+    if ( url.getProtocol() == "dir" ) {
+        attachPoint = "/";
+    } else {
+        attachPoint = paths->attachPoint();
+    }
+    return readDir( paths->patchUrl(), paths->patchPath(), attachPoint,
+                    patches );
 }
 
 string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex )
 {
     CommonPkdParser::Tag *tag = _tagset->getTagByIndex( tagIndex );
     if ( !tag ) {
-        cerr << "tag not found" << endl;
         return "";
     }
     
