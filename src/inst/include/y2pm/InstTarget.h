@@ -192,6 +192,19 @@ class InstTarget: virtual public Rep, public InstData {
 	// package install / remove
 
 	/**
+	 * set backup dir for rpm config files
+	 *
+	 * @param const Pathname
+	 * */
+	void setBackupPath (const Pathname& path);
+
+	/**
+	 * get backup dir for rpm config files
+	 *
+	 * */
+	Pathname getBackupPath (void);
+
+	/**
 	 * set parameters to use on installation/update
 	 *
 	 * @param flags which parameters to use by default, eg.  * RPMINST_NODOCS|RPMINST_NOSCRIPTS
