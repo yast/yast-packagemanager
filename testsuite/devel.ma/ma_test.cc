@@ -211,6 +211,8 @@ int main( int argc, char * argv[] )
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
     Y2PM::instTargetInit("/");
+    _t.start( "Launch PMLanguageManager" );
+    Y2PM::languageManager();
     _t.start( "Launch PMPackageManager" );
     Y2PM::packageManager();
     _t.start( "Launch PMSelectionManager" );
@@ -218,37 +220,15 @@ int main( int argc, char * argv[] )
     _t.start( "Launch InstSrcManager" );
     Y2PM::instSrcManager();
     _t.stop();
-    INT << "Total Packages "   << PMGR.size() << endl;
+    INT << "Total Packages   " << PMGR.size() << endl;
     INT << "Total Selections " << SMGR.size() << endl;
+    INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  PMError  err;
-  Pathname localp;
-  int      medianr = -1;
-  InstSrcManager::ISrcId sid( ISM.getSources(true).front() );
+  dumpLangWhatIf( SEC, true );
 
-  err = sid->provideFile( medianr, "/autorun.inf", localp );
-  SEC << medianr << ": " << localp << " - " << err << endl;
-
-  medianr = 1;
-  err = sid->provideFile( medianr, "/autorun.inf", localp );
-  SEC << medianr << ": " << localp << " - " << err << endl;
-
-  medianr = 2;
-  err = sid->provideFile( medianr, "/autorun.inf", localp );
-  SEC << medianr << ": " << localp << " - " << err << endl;
-
-  medianr = 3;
-  err = sid->provideFile( medianr, "/autorun.inf", localp );
-  SEC << medianr << ": " << localp << " - " << err << endl;
-
-  medianr = 4;
-  err = sid->provideFile( medianr, "/autorun.inf", localp );
-  SEC << medianr << ": " << localp << " - " << err << endl;
-
-  medianr = 8;
-  err = sid->provideFile( medianr, "/autorun.inf", localp );
-  SEC << medianr << ": " << localp << " - " << err << endl;
+  LMGR["cs"]->user_set_onSystem();
+  LMGR["cs"]->user_set_offSystem();
 
   SEC << "STOP" << endl;
   return 0;

@@ -22,9 +22,9 @@ if ! fuser $LPIPE >/dev/null; then
 fi
 
 make -C ../../src || exit 1
-if [ $PRG == wfm_test.bin ]; then
-	make -C /Local/ma/yast2/current/source/core/wfm/src || exit 1
-fi
+#if [ $PRG == wfm_test.bin ]; then
+#	make -C /Local/ma/yast2/current/source/core/wfm/src || exit 1
+#fi
 make $PRG || exit 1
 
 export Y2SLOG_FILE=-

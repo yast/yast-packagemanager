@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb  4 12:26:11 CET 2005 - ma@suse.de
+
+- Let selections and packages follow state changes in LanguageManager.
+- 2.11.13
+
+-------------------------------------------------------------------
 Thu Jan 27 13:55:04 CET 2005 - mir@suse.de
 - Added option --skipPre (49887)
 - 2.11.12

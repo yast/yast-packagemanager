@@ -27,7 +27,7 @@
 #include <y2pm/PMObject.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMVendorAttr.h>
-
+#include <y2pm/PMManager.h>
 
 using namespace std;
 
@@ -160,10 +160,11 @@ bool PMSelectable::clistASV( const PMObjectPtr & lhs, const PMObjectPtr & rhs )
 //
 //	DESCRIPTION :
 //
-PMSelectable::PMSelectable()
-    : _manager( 0 )
-{
-}
+//PMSelectable::PMSelectable()
+//    : _manager( 0 )
+//    , _observedState( _state, _name, _manager, 0 )
+//{
+//}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -173,9 +174,10 @@ PMSelectable::PMSelectable()
 //
 //	DESCRIPTION :
 //
-PMSelectable::PMSelectable( const PkgName& name_r )
+PMSelectable::PMSelectable( const PkgName& name_r, SelectableNotify notify_Fnc_r )
     : _manager( 0 )
     , _name( name_r )
+    , _observedState( _state, this, _manager, notify_Fnc_r )
 {
 }
 
@@ -551,53 +553,53 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
   case S_Protected:
     if ( !_state.has_installed() )
       return false;
-    return _state.user_set_taboo( doit );
+    return _observedState( &SelState::user_set_taboo, doit );
     break;
 
   case S_Taboo:
     if ( _state.has_installed() )
       return false;
-    return _state.user_set_taboo( doit );
+    return _observedState( &SelState::user_set_taboo, doit );
     break;
 
   case S_Del:
-    return _state.user_set_delete( doit );
+    return _observedState( &SelState::user_set_delete, doit );
     break;
 
   case S_Install:
     if ( !_state.has_candidate_only() )
       return false;
-    return _state.user_set_install( doit );
+    return _observedState( &SelState::user_set_install, doit );
     break;
 
   case S_Update:
     if ( !_state.has_both_objects() )
       return false;
-    return _state.user_set_install( doit );
+    return _observedState( &SelState::user_set_install, doit );
     break;
 
   case S_AutoDel:
-    return _state.auto_set_delete( doit );
+    return _observedState( &SelState::auto_set_delete, doit );
     break;
 
   case S_AutoInstall:
     if ( !_state.has_candidate_only() )
       return false;
-    return _state.auto_set_install( doit );
+    return _observedState( &SelState::auto_set_install, doit );
     break;
 
   case S_AutoUpdate:
     if ( !_state.has_both_objects() )
       return false;
-    return _state.auto_set_install( doit );
+    return _observedState( &SelState::auto_set_install, doit );
     break;
 
   case S_KeepInstalled:
     if ( ! _state.has_installed() )
       return false;
     if ( doit ) {
-      _state.user_clr_taboo( doit ); // not done by user_unset
-      _state.user_unset( doit );
+      _observedState( &SelState::user_clr_taboo, doit ); // not done by user_unset
+      _observedState( &SelState::user_unset, doit );
     }
     return true;
     break;
@@ -606,8 +608,8 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
     if ( _state.has_installed() )
       return false;
     if ( doit ) {
-      _state.user_clr_taboo( doit ); // not done by user_unset
-      _state.user_unset( doit );
+      _observedState( &SelState::user_clr_taboo, doit ); // not done by user_unset
+      _observedState( &SelState::user_unset, doit );
     }
     return true;
     break;

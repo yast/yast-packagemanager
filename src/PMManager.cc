@@ -40,7 +40,6 @@ using namespace std;
 PMManager::PMManager()
     : installed(NULL), available(NULL), toinstall(NULL), nowinstalled(NULL)
 {
-
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -54,6 +53,17 @@ PMManager::PMManager()
 PMManager::~PMManager()
 {
   clearAll();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::selectableNotify
+//	METHOD TYPE : void
+//
+void PMManager::selectableNotify( constPMSelectablePtr item_r, SelState old_r, SelState new_r )
+{
+  _D__("SelectableNotify") << item_r->name() << old_r << " -> " << new_r << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -111,7 +121,7 @@ void PMManager::clearAll()
 //
 PMSelectablePtr PMManager::newSelectable( const PkgName & name_r ) const
 {
-  PMSelectablePtr ret( new PMSelectable( name_r ) );
+  PMSelectablePtr ret( new PMSelectable( name_r, &PMManager::selectableNotify ) );
   return ret;
 }
 

@@ -72,6 +72,11 @@ class PMLanguageManager : public PMManager {
      **/
     virtual void postPSI();
 
+    /**
+     * Receives trigger from Selectable on state change
+     **/
+    virtual void selectableNotify( constPMSelectablePtr item_r, SelState old_r, SelState new_r );
+
   public:
 
     virtual void rescan();

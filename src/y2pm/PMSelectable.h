@@ -41,7 +41,7 @@ class PMSelectable : public CountedRep {
 
   public:
 
-    typedef std::list<PMObjectPtr>  PMObjectList;
+    typedef std::list<PMObjectPtr> PMObjectList;
 
     class SavedState {
       public:
@@ -77,8 +77,8 @@ class PMSelectable : public CountedRep {
     friend class PMManager;
     friend class SavedState;
 
-    PMManager * _manager;
-    SelState    _state;
+    PMManager *      _manager;
+    SelState         _state;
 
     void _mgr_attach( PMManager * mgr_r );
     void _mgr_detach();
@@ -116,11 +116,50 @@ class PMSelectable : public CountedRep {
     void chooseCandidateObj();
     void clearCandidateObj();
 
-  protected:
+  private:
 
-    PMSelectable();
+    typedef void (PMManager::*SelectableNotify)( constPMSelectablePtr item_r, SelState old_r, SelState new_r );
 
-    PMSelectable( const PkgName & name_r );
+    // If the Selectables state is manipulated through this,
+    // a notify is triggered on state change.
+    struct ObservedSelState {
+      const PMSelectable * _item;
+      SelState &           _cstate;
+      PMManager *&         _mgr;
+      SelectableNotify     _notifyFnc;
+
+      ObservedSelState( SelState & cstate_r, const PMSelectable * item_r,
+			PMManager *& mgr_r, SelectableNotify notifyFnc_r )
+	: _item( item_r )
+	, _cstate( cstate_r )
+	, _mgr( mgr_r )
+	, _notifyFnc( notifyFnc_r )
+	  {}
+
+      // signature of SelState:: state manipulating methods
+      typedef bool (SelState::*Manip)( const bool doit );
+
+      bool operator()( Manip manip, const bool doit ) {
+	if ( _mgr && _notifyFnc ) {
+	  SelState old( _cstate );
+	  bool ret = (_cstate.*manip)( doit );
+	  if ( old != _cstate ) {
+	    (_mgr->*_notifyFnc)( _item, old, _cstate );
+	  }
+	  return ret;
+	}
+	// no Manager to notify
+	return (_cstate.*manip)( doit );
+      }
+    };
+
+    ObservedSelState _observedState; // !decl. AFTER _manager _name and _state
+
+  public:
+
+    //PMSelectable();
+
+    PMSelectable( const PkgName & name_r, SelectableNotify notify_Fnc_r = 0 );
 
     virtual ~PMSelectable();
 
@@ -302,17 +341,19 @@ class PMSelectable : public CountedRep {
       TO_INSTALL = 1
     };
 
-    Fate fate() const {
-      if ( to_modify() ) {
-	return( to_delete() ? TO_DELETE : TO_INSTALL );
+    static Fate fate( SelState state_r ) {
+      if ( state_r.to_modify() ) {
+	return( state_r.to_delete() ? TO_DELETE : TO_INSTALL );
       }
       return UNMODIFIED;
     }
 
+    Fate fate() const { return fate( _state ); }
+
     /**
      * Set to neither install nor delete (keeps taboo)
      **/
-    void setNothingSelected() { _state.user_unset( true ); }
+    void setNothingSelected() { _observedState( &SelState::user_unset, true ); }
 
     /**
      * Downgrade condition. Returns true, iff both objects are present, and
@@ -403,29 +444,29 @@ class PMSelectable : public CountedRep {
      * User request to clear state (neither delete nor install).
      * (keeps taboo)
      **/
-    bool user_unset() { return _state.user_unset( true ); }
+    bool user_unset() { return _observedState( &SelState::user_unset, true ); }
 
     /**
      * User request to delete the installed object. Fails if no
      * installed object is present (clears taboo).
      **/
-    bool user_set_delete() { return _state.user_set_delete( true ); }
+    bool user_set_delete() { return _observedState( &SelState::user_set_delete, true ); }
 
     /**
      * User request to install the candidate object. Fails if no
      * candidate object is present (clears taboo).
      **/
-    bool user_set_install() { return _state.user_set_install( true ); }
+    bool user_set_install() { return _observedState( &SelState::user_set_install, true ); }
 
     /**
      * No modification allowed by user.
      **/
-    bool user_set_taboo() { return _state.user_set_taboo( true ); }
+    bool user_set_taboo() { return _observedState( &SelState::user_set_taboo, true ); }
 
     /**
      * Clear taboo flag.
      **/
-    bool user_clr_taboo() { return _state.user_clr_taboo( true ); }
+    bool user_clr_taboo() { return _observedState( &SelState::user_clr_taboo, true ); }
 
   public:
 
@@ -433,20 +474,20 @@ class PMSelectable : public CountedRep {
      * Application request to clear state (neither delete nor install).
      * Fails if user requested modification.
      **/
-    bool appl_unset() { return _state.appl_unset( true ); }
+    bool appl_unset() { return _observedState( &SelState::appl_unset, true ); }
 
     /**
      * Application request to delete the installed object. Fails if no
      * installed object is present, or user requested install or taboo.
      **/
-    bool appl_set_delete() { return _state.appl_set_delete( true ); }
+    bool appl_set_delete() { return _observedState( &SelState::appl_set_delete, true ); }
 
     /**
      * Application request to install the candidate object. Fails if no
      * candidate object is present, or user requested delete or taboo.
      * <b>Does not check for downgrade_condition. Do not use it without need.</b>
      **/
-    bool appl_force_install() { return _state.appl_set_install( true ); }
+    bool appl_force_install() { return _observedState( &SelState::appl_set_install, true ); }
 
     /**
      * Application request to install the candidate object. Fails if no
@@ -461,20 +502,20 @@ class PMSelectable : public CountedRep {
      * Auto request to clear state (neither delete nor install).
      * Fails if user/appl requested modification.
      **/
-    bool auto_unset() { return _state.auto_unset( true ); }
+    bool auto_unset() { return _observedState( &SelState::auto_unset, true ); }
 
     /**
      * Auto request to delete the installed object. Fails if no
      * installed object is present, or user/appl requested install or taboo.
      **/
-    bool auto_set_delete() { return _state.auto_set_delete( true ); }
+    bool auto_set_delete() { return _observedState( &SelState::auto_set_delete, true ); }
 
     /**
      * Auto request to install the candidate object. Fails if no
      * candidate object is present, or user/appl requested delete or taboo.
      * <b>Does not check for downgrade_condition. Do not use it without need.</b>
      **/
-    bool auto_force_install() { return _state.auto_set_install( true ); }
+    bool auto_force_install() { return _observedState( &SelState::auto_set_install, true ); }
 
     /**
      * Auto request to install the candidate object. Fails if no
