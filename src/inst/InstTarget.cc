@@ -183,6 +183,8 @@ InstTarget::getPatches (void) const
         if ( error ) {
             E__ << "Error reading patch info for installed patches." << endl;
         }
+
+        _patchesInitialized = true;
     }
 
     return _patches;
