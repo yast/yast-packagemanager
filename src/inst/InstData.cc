@@ -162,22 +162,22 @@ InstData::findPackages (const std::list<PMPackagePtr> *packagelist, const string
     for (PkgLI pkg = packagelist->begin(); pkg != packagelist->end(); ++pkg)
     {
 	if (!name.empty()
-	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_NAME).firstLine()) != name)
+	    && ((*pkg)->name() != name))
 	{
 	    continue;
 	}
 	if (!version.empty()
-	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_VERSION).firstLine()) != version)
+	    && ((*pkg)->edition().version() != version))
 	{
 	    continue;
 	}
 	if (!release.empty()
-	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_RELEASE).firstLine()) != release)
+	    && ((*pkg)->edition().release() != release))
 	{
 	    continue;
 	}
 	if (!arch.empty()
-	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_ARCH).firstLine()) != arch)
+	    && ((*pkg)->arch() != arch))
 	{
 	    continue;
 	}
