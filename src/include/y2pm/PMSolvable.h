@@ -27,6 +27,7 @@
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRelation.h>
+#include <y2pm/PkgAttributeValue.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -44,6 +45,11 @@ class PMSolvable : virtual public Rep {
     typedef PkgRelList_type::iterator       PkgRelList_iterator;
     typedef PkgRelList_type::const_iterator PkgRelList_const_iterator;
 
+  public:
+
+    /**
+     * Attributes provided by PMSolvable
+     **/
     enum PMSolvableAttribute
     {
 	PMSLV_ATTR_BEGIN = 0,
@@ -55,10 +61,19 @@ class PMSolvable : virtual public Rep {
 	ATTR_PROVIDES,
 	ATTR_OBSOLETES,
 	ATTR_CONFLICTS,
-
+	// last entry:
 	PMSLV_NUM_ATTRIBUTES
     };
 
+    /**
+     * Get attribute name as string.
+     **/
+    std::string getAttributeName( PMSolvableAttribute attr ) const;
+
+    /**
+     * Get attribute value
+     **/
+    PkgAttributeValue getAttributeValue( PMSolvableAttribute attr ) const;
 
   public:
 

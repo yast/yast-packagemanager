@@ -47,7 +47,39 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
 {
 }
 
-string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMRpmPackageDataProvider::getAttributeValue
+//	METHOD TYPE : PkgAttributeValue
+//
+//	DESCRIPTION :
+//
+PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
+							       PMObject::PMObjectAttribute attr_r )
+{
+#warning getAttributeValue() must convert to new interface
+  PMPackagePtr p( PMPackagePtr::cast_away_const( obj_r ) );
+  return OLD_getAttributeValue( p, attr_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMRpmPackageDataProvider::getAttributeValue
+//	METHOD TYPE : PkgAttributeValue
+//
+//	DESCRIPTION :
+//
+PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
+							       PMPackage::PMPackageAttribute attr_r )
+{
+#warning getAttributeValue() must convert to new interface
+  PMPackagePtr p( PMPackagePtr::cast_away_const( pkg_r ) );
+  return OLD_getAttributeValue( p, attr_r );
+}
+
+string PMRpmPackageDataProvider::OLD_getAttributeValue(PMPackagePtr pkg,
     PMObject::PMObjectAttribute attr)
 {
 //    D__ << pkg->name() << pkg->edition().as_string() << endl;
@@ -100,7 +132,7 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
     return ret;
 }
 
-string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
+string PMRpmPackageDataProvider::OLD_getAttributeValue(PMPackagePtr pkg,
     PMPackage::PMPackageAttribute attr)
 {
 //    D__ << pkg->name() << pkg->edition().as_string() << endl;

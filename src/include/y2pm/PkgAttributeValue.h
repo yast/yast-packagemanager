@@ -68,6 +68,11 @@ class PkgAttributeValue : public std::list<std::string> {
      * (and probabely only) string stored..
      **/
     std::string firstLine( const std::string & default_r = "" ) const;
+
+    /**
+     * Write out a debug line
+     **/
+    friend std::ostream & operator<<( std::ostream & str, const PkgAttributeValue & obj );
 };
 
 ///////////////////////////////////////////////////////////////////

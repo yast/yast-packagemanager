@@ -23,6 +23,7 @@
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PMSelectable.h>
+#include <y2pm/PMDataProvider.h>
 
 using namespace std;
 
@@ -60,75 +61,52 @@ PMObject::~PMObject()
 {
 }
 
-string PMObject::getAttributeName(PMSolvableAttribute attr)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMObject::getAttributeName
+//	METHOD TYPE : string
+//
+//	DESCRIPTION :
+//
+string PMObject::getAttributeName( PMObjectAttribute attr ) const
 {
-    const char* str = NULL;
-    switch(attr)
-    {
-	case ATTR_NAME:
-	    str = "NAME";
-	    break;
-	case ATTR_VERSION:
-	    str = "VERSION";
-	    break;
-	case ATTR_RELEASE:
-	    str = "RELEASE";
-	    break;
-	case ATTR_REQUIRES:
-	    str = "REQUIRES";
-	    break;
-	case ATTR_PREREQUIRES:
-	    str = "PREREQUIRES";
-	    break;
-	case ATTR_PROVIDES:
-	    str = "PROVIDES";
-	    break;
-	case ATTR_OBSOLETES:
-	    str = "OBSOLETES";
-	    break;
-	case ATTR_CONFLICTS:
-	    str = "CONFLICTS";
-	    break;
-	case PMSLV_NUM_ATTRIBUTES:
-	    // invalid
-	    return "invalid query";
-    }
+  switch ( attr ) {
 
-    if(!str)
-    {
-	ERR << "invalid enum value" << endl;
-	str = "invalid query";
-    }
+#define ENUM_OUT(V) case ATTR_##V: return #V; break
+    ENUM_OUT( SUMMARY );
+    ENUM_OUT( DESCRIPTION );
+    ENUM_OUT( SIZE );
+#undef ENUM_OUT
 
-    return str;
+  ///////////////////////////////////////////////////////////////////
+  // no default: let compiler warn '... not handled in switch'
+  ///////////////////////////////////////////////////////////////////
+  case PMOBJ_NUM_ATTRIBUTES:
+    // illegal attr value
+    break;
+  }
+  // HERE: illegal attr value or forgott do adjust switch.
+  ERR << "Illegal PMObjectAttribute(" << attr << ')' << endl;
+  return "";
 }
 
-string PMObject::getAttributeName(PMObjectAttribute attr)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMObject::getAttributeValue
+//	METHOD TYPE : PkgAttributeValue
+//
+//	DESCRIPTION :
+//
+PkgAttributeValue PMObject::getAttributeValue( PMObjectAttribute attr ) const
 {
-    const char* str = NULL;
-    switch(attr)
-    {
-	case ATTR_DESCRIPTION:
-	    str = "DESCRIPTION";
-	    break;
-	case ATTR_SUMMARY:
-	    str = "SUMMARY";
-	    break;
-	case ATTR_SIZE:
-	    str = "SIZE";
-	    break;
-	case PMOBJ_NUM_ATTRIBUTES:
-	    // invalid
-	    return "invalid query";
-    }
-
-    if(!str)
-    {
-	ERR << "invalid enum value" << endl;
-	str = "invalid query";
-    }
-
-    return str;
+  PMDataProviderPtr dataprovider( dataProvider() );
+  if ( !dataprovider ) {
+    ERR << "No dataprovider for " << *this << endl;
+    return PkgAttributeValue();
+  }
+  return dataprovider->getAttributeValue( this, attr );
 }
 
 ///////////////////////////////////////////////////////////////////

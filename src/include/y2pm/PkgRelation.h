@@ -32,7 +32,15 @@ class PkgRelation {
 	}
 	bool operator!=( const PkgRelation& r2 ) { return !operator==(r2); }
 
-	friend std::ostream& operator<<( std::ostream&, const PkgRelation& );
+	/**
+	 * Convert this into a human readable string.
+	 **/
+	std::string asString() const;
+
+	/**
+	 * Write out asString()
+	 **/
+	friend std::ostream& operator<<(std::ostream&, const PkgRelation&);
 };
 
 #endif  /* _PkgRelation_h */

@@ -23,8 +23,8 @@
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPPackagePtr
-//	CLASS NAME : constPMPPackagePtr
+//	CLASS NAME : PMPackagePtr
+//	CLASS NAME : constPMPackagePtr
 /**
  *
  **/

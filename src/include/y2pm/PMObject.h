@@ -26,6 +26,7 @@
 #include <y2pm/PMSolvable.h>
 
 #include <y2pm/PMSelectablePtr.h>
+#include <y2pm/PMDataProviderPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -43,16 +44,46 @@ class PMObject : virtual public Rep, public PMSolvable {
 
     PMSelectablePtr _selectable;
 
+  protected:
+
+    /**
+     * Access to the concrete Objects DataProvider for attribute retrieval.
+     **/
+    virtual PMDataProviderPtr dataProvider() const = 0;
+
   public:
 
+    /**
+     * Attributes provided by PMObject
+     **/
     enum PMObjectAttribute {
 	PMOBJ_ATTR_BEGIN = PMSLV_NUM_ATTRIBUTES,
 	ATTR_SUMMARY = PMOBJ_ATTR_BEGIN,
 	ATTR_DESCRIPTION,
 	ATTR_SIZE, // installed size
-
+	// last entry:
 	PMOBJ_NUM_ATTRIBUTES
     };
+
+    /**
+     * Get attribute name as string.
+     **/
+    std::string getAttributeName(PMObjectAttribute attr) const;
+
+    /**
+     * Access to base class getAttributeName
+     **/
+    PMSolvable::getAttributeName;
+
+    /**
+     * Get attribute value
+     **/
+    PkgAttributeValue getAttributeValue(PMObjectAttribute attr) const;
+
+    /**
+     * Access to base class getAttributeValue
+     **/
+    PMSolvable::getAttributeValue;
 
   public:
 
@@ -60,30 +91,6 @@ class PMObject : virtual public Rep, public PMSolvable {
 	      const PkgEdition & edition_r );
 
     virtual ~PMObject();
-
-  public:
-
-    ///////////////////////////////////////////////////////////////////
-    // Object attribute retrieval
-    ///////////////////////////////////////////////////////////////////
-
-    /** get attributes like Summary, Description, Group etc.
-     *
-     * @param attr Attribute number
-     * @return Attribute value
-     * */
-    virtual std::string getAttributeValue(PMObjectAttribute attr) = 0;
-    
-    virtual std::string getAttributeValue(PMSolvableAttribute attr) = 0;
-
-    /** get the name of an attribute
-     *
-     * @param attr Attribute number
-     * @return Attribute name
-     * */
-    virtual std::string getAttributeName(PMObjectAttribute attr);
-    
-    virtual std::string getAttributeName(PMSolvableAttribute attr);
 
   public:
 
