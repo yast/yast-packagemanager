@@ -10,10 +10,12 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcPtr.h
+  File:       InstSrcPtr.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Declaration of pointer classes constInstSrcPtr and InstSrcPtr.
 
 /-*/
 #ifndef InstSrcPtr_h
@@ -22,13 +24,9 @@
 #include <y2util/RepDef.h>
 
 ///////////////////////////////////////////////////////////////////
-//
 //	CLASS NAME : InstSrcPtr
 //	CLASS NAME : constInstSrcPtr
-/**
- *
- **/
-DEFINE_BASIC_HANDLES(InstSrc);
+///////////////////////////////////////////////////////////////////
+DEFINE_BASE_POINTER(InstSrc);
 
 #endif // InstSrcPtr_h
-

@@ -15,6 +15,8 @@
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
+  Purpose: Declaration of pointer classes constInstSrcDataPtr and InstSrcDataPtr.
+
 /-*/
 #ifndef InstSrcDataPtr_h
 #define InstSrcDataPtr_h
@@ -22,13 +24,10 @@
 #include <y2util/RepDef.h>
 
 ///////////////////////////////////////////////////////////////////
-//
 //	CLASS NAME : InstSrcDataPtr
 //	CLASS NAME : constInstSrcDataPtr
-/**
- *
- **/
-DEFINE_BASIC_HANDLES(InstSrcData);
+///////////////////////////////////////////////////////////////////
+DEFINE_BASE_POINTER(InstSrcData);
 
 #endif // InstSrcDataPtr_h
 

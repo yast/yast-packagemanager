@@ -53,9 +53,9 @@ class InstSrcError {
       E_cache_dir_create,
       E_bad_cache_dir,
       E_bad_cache_descr,
-      //
+      // InstSrc creation
       E_bad_url,
-      E_no_media
+      E_no_instsrc_on_media
     };
 };
 

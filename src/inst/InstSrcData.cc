@@ -10,91 +10,90 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcManager.cc
+  File:       InstSrcData.cc
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose:
 
 /-*/
 
 #include <iostream>
 
-#include <y2util/Y2SLog.h>
-#include <y2pm/InstSrcManager.h>
+#include <y2pm/InstSrcData.h>
+
 #include <y2pm/InstSrc.h>
-#include <y2pm/PMPackageManager.h>
+#include <y2pm/InstSrcDescr.h>
+#include <y2pm/MediaAccess.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
+//	CLASS NAME : InstSrcDataPtr
+//	CLASS NAME : constInstSrcDataPtr
+///////////////////////////////////////////////////////////////////
+IMPL_BASE_POINTER(InstSrcData);
+
+///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::InstSrcManager
+//	METHOD NAME : InstSrcData::InstSrcData
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-InstSrcManager::InstSrcManager()
+InstSrcData::InstSrcData()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::~InstSrcManager
+//	METHOD NAME : InstSrcData::~InstSrcData
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-InstSrcManager::~InstSrcManager()
+InstSrcData::~InstSrcData()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::scanMedia
+//	METHOD NAME : InstSrcData::dumpOn
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+ostream & InstSrcData::dumpOn( ostream & str ) const
+{
+  Rep::dumpOn( str );
+  return str;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::tryGetDescr
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::scanMedia( constInstSrcPtr & isrc_r,
-				   const Url &       mediaurl_r,
-				   const ISrcType    type_r )
+PMError InstSrcData::tryGetDescr( InstSrcDescrPtr & ndescr_r,
+				  InstSrcPtr source_r, const Pathname & produduct_dir_r )
 {
-  MIL << "scanMedia (" << type_r << ") " << media_r << endl;
-  DBG << "scanMedia " << isrc_r << endl;
+  ndescr_r = 0;
+  PMError err;
 
-  isrc_r = 0;
+  InstSrcDescrPtr ndescr( new InstSrcDescr );
 
-  if ( !media_r )
-    return E_NO_MEDIA;
+  ndescr_r = ndescr;
+  return err;
 
-  return E_Error;
+#warning TBD tryGetDescr from media
+
+  return Error::E_error;
 }
-
-PMError InstSrcManager::enableSource( InstSrcPtr & isrc_r )
-{
-  D__ << endl;
-  if(isrc_r->Activate())
-  {
-    PMPackageManager::PM().addPackages( isrc_r->getPackages() );
-    return E_OK;
-  }
-  return E_Error;
-}
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : operator<<
-**	FUNCTION TYPE : ostream &
-**
-**	DESCRIPTION :
-*/
-ostream & operator<<( ostream & str, const InstSrcManager & obj )
-{
-  return str;
-}
-
 
