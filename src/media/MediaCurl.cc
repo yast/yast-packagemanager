@@ -207,11 +207,10 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     if(_url.host().empty())
 	return Error::E_no_host_specified;
 
-    Pathname path = _url.path();
-    path += filename;
+    string path = _url.path() + filename.asString();
 
-    Url url(_url);
-    url.setPath(path.asString());
+    Url url( _url );
+    url.setPath( path );
 
     Pathname dest = attachPoint() + filename;
 
