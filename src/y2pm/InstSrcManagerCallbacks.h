@@ -50,7 +50,9 @@ namespace InstSrcManagerCallbacks {
 				     const std::string & url,
 				     const std::string & product,
 				     int current,
+				     const std::string & currentLabel,
 				     int expected,
+				     const std::string & expectedLabel,
                                      bool doublesided ) = 0;
   };
 
@@ -62,10 +64,14 @@ namespace InstSrcManagerCallbacks {
 				     const std::string & url,
 				     const std::string & product,
 				     int current,
+				     const std::string & currentLabel,
 				     int expected,
+				     const std::string & expectedLabel,
                                      bool doublesided ) {
       return MediaChangeCallback::changeMedia( error, url, product,
-					       current, expected, doublesided );
+					       current, currentLabel,
+					       expected, expectedLabel,
+					       doublesided );
     }
   };
 

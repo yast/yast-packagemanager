@@ -20,12 +20,15 @@ liby2pminstsrc_la_SOURCES = \
 	InstSrcError.cc			\
 	InstSrcDescr.cc 		\
 	InstSrcData.cc			\
+	\
 	InstSrcDataUL.cc		\
 	ULSelectionParser.cc		\
 	ULPackagesParser.cc		\
 	ULParsePackagesLang.cc		\
 	PMULPackageDataProvider.cc	\
 	PMULSelectionDataProvider.cc	\
+	F_Media.cc F_Medianames.cc	\
+	\
 	InstSrcDataPLAIN.cc		\
 	PMPLAINPackageDataProvider.cc	\
 	\
