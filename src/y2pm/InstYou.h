@@ -33,7 +33,7 @@
 
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMYouPatchInfo.h>
-#include <y2pm/PMYouPatchPaths.h>
+#include <y2pm/PMYouSettings.h>
 #include <y2pm/PMYouServers.h>
 
 ///////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ class InstYou {
      * Custom constructor
      *
      **/
-    InstYou( const PMYouPatchInfoPtr &, const PMYouPatchPathsPtr & );
+    InstYou( const PMYouPatchInfoPtr &, const PMYouSettingsPtr & );
 
     /**
      * Destructor
@@ -178,7 +178,7 @@ class InstYou {
     /**
      * Get object holding path information.
      */
-    PMYouPatchPathsPtr paths() const { return _paths; }
+    PMYouSettingsPtr paths() const { return _settings; }
 
     /**
      * Get object holding patch information.
@@ -277,13 +277,14 @@ class InstYou {
     PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
     PMError retrievePatch( const PMYouPatchPtr &, bool reload,
                            bool checkSig = true, bool noExternal = false );
-    PMError retrievePackage( const PMPackagePtr &pkg, bool reload = true,
-                             bool noExternal = false );
-    PMError retrieveScript( const std::string &script, bool reload,
-                            bool checkSig );
+    PMError retrievePackage( const PMPackagePtr &pkg, const PMYouProductPtr &,
+                             bool reload = true, bool noExternal = false );
+    PMError retrieveScript( const std::string &script, const PMYouProductPtr &,
+                            bool reload, bool checkSig );
     PMError InstYou::retrieveFile( const PMYouFile &file, bool reload );
 
-    PMError executeScript( const std::string &, bool dryrun );
+    PMError executeScript( const std::string &, const PMYouProductPtr &,
+                           bool dryrun );
 
     /**
      * check, if patch has new packages.
@@ -303,7 +304,7 @@ class InstYou {
 
   private:
     PMYouPatchInfoPtr _info;
-    PMYouPatchPathsPtr _paths;
+    PMYouSettingsPtr _settings;
     
     std::list<PMYouPatchPtr> _patches;
 

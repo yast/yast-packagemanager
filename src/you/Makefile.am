@@ -14,10 +14,11 @@ liby2pmyou_la_SOURCES = \
 	PMYouPatchManager.cc \
         PMYouPatchInfo.cc \
         PMYouPackageDataProvider.cc \
-        PMYouPatchPaths.cc \
+        PMYouSettings.cc \
         PMYouServers.cc \
         PMYouPatchTags.cc \
         InstYou.cc \
-        YouError.cc
+        YouError.cc \
+        PMYouProduct.cc
 
 EXTRA_DIST = youservers

@@ -15,6 +15,7 @@
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/InstYou.h>
 #include <y2pm/PMYouPackageDataProvider.h>
+#include <y2pm/PMYouProduct.h>
 #include <Y2PM.h>
 
 using namespace std;
@@ -95,12 +96,12 @@ void doTest()
 */
 int main( int argc, char **argv )
 {
-  PMYouPatchPathsPtr patchPaths = new PMYouPatchPaths();
-  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( patchPaths );
+  PMYouSettingsPtr settings = new PMYouSettings();
+  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( settings );
 
   provider = new PMYouPackageDataProvider( patchInfo );
 
-  you = new InstYou( patchInfo, patchPaths );
+  you = new InstYou( patchInfo, settings );
 
   list<PkgArch> archs;
   archs.push_back( PkgArch( "i686" ) );
@@ -109,7 +110,7 @@ int main( int argc, char **argv )
   archs.push_back( PkgArch( "i386" ) );
   archs.push_back( PkgArch( "i286" ) );
   archs.push_back( PkgArch( "noarch" ) );
-  patchPaths->setArchs( archs );
+  settings->primaryProduct()->setArchs( archs );
   
   patch = new PMYouPatch( PkgName( "mypatch" ), PkgEdition( "1" ),
                           PkgArch( "i386" ) );

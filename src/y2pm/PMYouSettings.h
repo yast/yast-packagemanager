@@ -10,16 +10,14 @@
 |                                                    (C) SuSE Linux AG |
 \----------------------------------------------------------------------/
 
-  File:       PMYouPatchPaths.h
-
   Author:     Cornelius Schumacher <cschum@suse.de>
   Maintainer: Cornelius Schumacher <cschum@suse.de>
 
   Purpose: Class providing path information for YOU patches.
 
 /-*/
-#ifndef PMYouPatchPaths_h
-#define PMYouPatchPaths_h
+#ifndef PMYOUSETTINGS_H
+#define PMYOUSETTINGS_H
 
 #include <list>
 #include <string>
@@ -33,52 +31,36 @@
 #include <y2pm/PkgArch.h>
 
 #include <y2pm/PMYouServers.h>
+#include <y2pm/PMYouProductPtr.h>
 
-#include <y2pm/PMYouPatchPathsPtr.h>
+#include <y2pm/PMYouSettingsPtr.h>
 
 class SysConfig;
 
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : PMYouPatchPaths
 /**
- * Paths for patches.
- **/
-class PMYouPatchPaths : virtual public Rep {
-  REP_BODY(PMYouPatchPaths);
+  This class provides general settings for YOU.
+*/
+class PMYouSettings : virtual public Rep
+{
+  REP_BODY(PMYouSettings);
 
   public:
     /**
       Constructor.
     */
-    PMYouPatchPaths();
+    PMYouSettings();
     /**
       Constructor. Initialise object with values based on the given product,
       version and baseArch.
     */
-    PMYouPatchPaths( const std::string &product, const std::string &version,
-                     const std::string &baseArch );
+    PMYouSettings( const std::string &product, const std::string &version,
+                   const std::string &baseArch );
 
     /**
       Destructor
     */
-    ~PMYouPatchPaths();
+    ~PMYouSettings();
 
-    /**
-      Init object.
-      
-      @param product  Product name
-      @param version  Product version
-      @param baseArch Base architecture of product
-      @param youUrl   URL used to get YOU server list
-      @param path     Path on server to directory containing patches, rpms and
-                      scripts directories
-      @param business True, if product is a business product, needing
-                      authentification on the server
-    */
-    void init( const std::string &product, const std::string &version,
-               const std::string &baseArch, const std::string &youUrl,
-               const std::string &path, bool business );
     /**
       Init object with given product, version and baseArch values.
     */
@@ -102,16 +84,6 @@ class PMYouPatchPaths : virtual public Rep {
       Get patch prefix.
     */
     Pathname pathPrefix();
-
-    /**
-      Set path on server to directory containing the "patches", "rpms" and
-      "scripts" directories. This path depends on the product.
-    */
-    void setPatchPath( const Pathname & );
-    /**
-      Return path to patches on server.
-    */
-    Pathname patchPath();
 
     /**
       Set patch server where patches are read from.
@@ -138,40 +110,6 @@ class PMYouPatchPaths : virtual public Rep {
       Return path to patch meta information file (aka media.1/patches).
     */
     Pathname mediaPatchesFile();
-
-    /**
-      Return path to RPM for base architecture.
-      
-      @param pkg      Pointer to package
-      @param patchRpm If true, return path to patch RPM, if false, return path
-                      to full RPM.
-    */
-    Pathname rpmPath( const PMPackagePtr &pkg, bool patchRpm = false );
-    /**
-      Return path to RPM.
-      
-      @param pkg      Pointer to package
-      @param arch     Architecture of RPM.
-      @param patchRpm If true, return path to patch RPM, if false, return path
-                      to full RPM.
-    */
-    Pathname rpmPath( const PMPackagePtr &pkg, const std::string & arch,
-                      bool patchRpm = false );
-
-    /**
-      Return path of script.
-      
-      @param scriptName Name of script
-    */
-    Pathname scriptPath( const std::string &scriptName );
-
-    /**
-      Return path of script at download location.
-      
-      @param scriptName Name of script
-    */
-    
-    Pathname localScriptPath( const std::string &scriptName );
 
     /**
       Return local base directory for you related files.
@@ -221,46 +159,6 @@ class PMYouPatchPaths : virtual public Rep {
     std::string directoryFileName();
 
     /**
-      Return name of product.
-    */
-    std::string product();
-    
-    /**
-      Return name of distribution.
-    */
-    std::string distProduct();
-    
-    /**
-      Return version of product.
-    */
-    std::string version();
-    
-    /**
-      Return base architecture.
-    */
-    PkgArch baseArch();
-
-    /**
-      Set list of compatible architectures.
-    */
-    void setArchs( const std::list<PkgArch> & );
-    /**
-      Return list of compatible architectures.
-    */
-    std::list<PkgArch> archs();
-
-    /**
-      Return architecture.
-    */
-    PkgArch arch();
-
-    /**
-      Return whether the product is a business product or not. Business products
-      require authentification on the server.
-    */
-    bool businessProduct();
-
-    /**
       Return path to file used for storing cookies.
     */
     Pathname cookiesFile();
@@ -279,14 +177,6 @@ class PMYouPatchPaths : virtual public Rep {
       Return configuration object for file at configFile().
     */
     SysConfig *config();
-
-    /**
-      Return base URL where list of YOU servers is read from.
-
-      Return default URL, if the information can't be read from the product
-      information.
-    */
-    std::string youUrl();
 
     /**
       Set language code used for displaying messages to the user. If the
@@ -315,35 +205,29 @@ class PMYouPatchPaths : virtual public Rep {
      */
     static std::string translateLangCode( const LangCode &lang );
 
+    /**
+      Return products relevant for YOU updates.
+    */
+    std::list<PMYouProductPtr> products() const;
+
+    /**
+      Return product which characterizes the installed system best.
+    */
+    PMYouProductPtr primaryProduct() const;
+
   protected:
-    void init( const std::string &path );
+    void init();
 
   private:
     Pathname _pathPrefix;
 
-    Pathname _patchPath;
-    Pathname _rpmPath;
-    Pathname _scriptPath;
-
     PMYouServer _patchServer;
     
-    std::string _product;
-    std::string _version;
-    PkgArch _baseArch;
-
-    std::string _distProduct;
-
-    std::list<PkgArch> _archs;
-    PkgArch _arch;
-    
-    std::string _youUrl;
-    bool _businessProduct;
-
     SysConfig *_config;
 
     LangCode _lang;
+
+    std::list<PMYouProductPtr> _products;
 };
 
-///////////////////////////////////////////////////////////////////
-
-#endif // PMYouPatchPaths_h
+#endif

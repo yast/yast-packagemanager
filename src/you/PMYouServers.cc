@@ -34,7 +34,8 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectable.h>
-#include <y2pm/PMYouPatchPaths.h>
+#include <y2pm/PMYouSettings.h>
+#include <y2pm/PMYouProduct.h>
 
 #include <y2pm/PMYouServers.h>
 
@@ -102,7 +103,7 @@ std::string PMYouServer::toString() const
 
 IMPL_BASE_POINTER(PMYouServers);
 
-PMYouServers::PMYouServers( const PMYouPatchPathsPtr &patchPaths )
+PMYouServers::PMYouServers( const PMYouSettingsPtr &patchPaths )
 {
   _patchPaths = patchPaths;
 }
@@ -142,23 +143,25 @@ PMError PMYouServers::requestServers( bool check )
   SysConfig cfg( "onlineupdate" );
   
   if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
-    string url = _patchPaths->youUrl();
-    url += "?product=" + _patchPaths->product();
-    url += "&version=" + _patchPaths->version();
-    url += "&basearch=" + string( _patchPaths->baseArch() );
-    url += "&arch=" + string( _patchPaths->arch() );
+    PMYouProductPtr product = _patchPaths->primaryProduct();
+
+    string url = product->youUrl();
+    url += "?product=" + product->product();
+    url += "&version=" + product->version();
+    url += "&basearch=" + string( product->baseArch() );
+    url += "&arch=" + string( product->arch() );
     
     url += "&lang=" + string( _patchPaths->langCode() );
     
     url += "&business=";
-    if ( _patchPaths->businessProduct() ) url += "1";
+    if ( product->businessProduct() ) url += "1";
     else url += "0";
     
     url += "&check=";
     if ( check ) url += "1";
     else url += "0";
     
-    url += "&distproduct=" + _patchPaths->distProduct();
+    url += "&distproduct=" + product->distProduct();
 
     addPackageVersion( "yast2-online-update", url );
     addPackageVersion( "yast2-packagemanager", url );
@@ -190,6 +193,7 @@ PMError PMYouServers::requestServers( bool check )
       PathInfo::unlink( localSuseServers() );
     }
   } else {
+    // Backwards compatibility with SL8.1/SLES8
     error = readServers( localSuseServers() );
     if ( error ) return error;
   }
@@ -269,7 +273,7 @@ PMYouServer PMYouServers::defaultServer()
 {
   if ( _servers.size() == 0 ) {
     PMYouServer server;
-    if ( _patchPaths->businessProduct() ) {
+    if ( _patchPaths->primaryProduct()->businessProduct() ) {
       server.setUrl( "http://sdb.suse.de/download/" );
     } else {
       server.setUrl( "ftp://ftp.suse.com/pub/suse/" );

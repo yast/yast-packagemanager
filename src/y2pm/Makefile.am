@@ -91,10 +91,12 @@ pkginclude_HEADERS = Y2PMCallbacks.h \
 	PMYouPatchInfoPtr.h		\
 	PMYouPatchTags.h		\
 	PMYouPatchManager.h		\
-	PMYouPatchPaths.h		\
-	PMYouPatchPathsPtr.h		\
+	PMYouSettings.h		        \
+	PMYouSettingsPtr.h		\
 	PMYouServers.h			\
 	PMYouServersPtr.h		\
+	PMYouProduct.h			\
+	PMYouProductPtr.h		\
 	YouError.h
 
 #<INSTALL-HEADER-TARGET>

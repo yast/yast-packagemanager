@@ -38,6 +38,7 @@
 #include <y2pm/InstTargetError.h>
 #include <y2pm/PMYouServers.h>
 #include <y2pm/MediaCurl.h>
+#include <y2pm/PMYouProduct.h>
 
 #include <y2pm/InstYou.h>
 
@@ -53,17 +54,17 @@ InstYou::Callbacks *InstYou::_callbacks = 0;
 
 InstYou::InstYou()
 {
-  _paths = new PMYouPatchPaths();
-  _info = new PMYouPatchInfo( _paths );
+  _settings = new PMYouSettings();
+  _info = new PMYouPatchInfo( _settings );
 
   init();
 }
 
 InstYou::InstYou( const PMYouPatchInfoPtr &info,
-                  const PMYouPatchPathsPtr &paths )
+                  const PMYouSettingsPtr &paths )
 {
   _info = info;
-  _paths = paths;
+  _settings = paths;
 
   init();
 }
@@ -84,12 +85,12 @@ void InstYou::init()
 
 PMError InstYou::initProduct()
 {
-  return _paths->initProduct();
+  return _settings->initProduct();
 }
 
 PMError InstYou::servers( list<PMYouServer> &servers )
 {
-  PMYouServers youServers( _paths );
+  PMYouServers youServers( _settings );
 
   PMError error = youServers.requestServers();
 
@@ -105,11 +106,11 @@ PMError InstYou::servers( list<PMYouServer> &servers )
 
 PMError InstYou::readUserPassword()
 {
-  SysConfig cfg( _paths->passwordFile() );
-  _username = cfg.readEntry( "USERNAME_" + _paths->patchUrl().asString() );
-  _password = cfg.readEntry( "PASSWORD_" + _paths->patchUrl().asString() );
+  SysConfig cfg( _settings->passwordFile() );
+  _username = cfg.readEntry( "USERNAME_" + _settings->patchUrl().asString() );
+  _password = cfg.readEntry( "PASSWORD_" + _settings->patchUrl().asString() );
 
-  _paths->setUsernamePassword( _username, _password );
+  _settings->setUsernamePassword( _username, _password );
 
   return PMError();
 }
@@ -127,12 +128,12 @@ PMError InstYou::setUserPassword( const string &username,
     p = _password;
   }
 
-  SysConfig cfg( _paths->passwordFile() );
-  cfg.writeEntry( "USERNAME_" + _paths->patchUrl().asString(), u );
-  cfg.writeEntry( "PASSWORD_" + _paths->patchUrl().asString(), p );
+  SysConfig cfg( _settings->passwordFile() );
+  cfg.writeEntry( "USERNAME_" + _settings->patchUrl().asString(), u );
+  cfg.writeEntry( "PASSWORD_" + _settings->patchUrl().asString(), p );
   cfg.save();
 
-  PathInfo::chmod( _paths->passwordFile(), 0600 );
+  PathInfo::chmod( _settings->passwordFile(), 0600 );
 
   return PMError();
 }
@@ -140,7 +141,7 @@ PMError InstYou::setUserPassword( const string &username,
 PMError InstYou::retrievePatchDirectory()
 {
   if ( !_username.empty() && !_password.empty() ) {
-    _paths->setUsernamePassword( _username, _password );
+    _settings->setUsernamePassword( _username, _password );
   }
 
   PMError error = _info->getDirectory( true );
@@ -155,7 +156,7 @@ PMError InstYou::retrievePatchInfo( bool reload, bool checkSig )
   _patches.clear();
 
   if ( !_username.empty() && !_password.empty() ) {
-    _paths->setUsernamePassword( _username, _password );
+    _settings->setUsernamePassword( _username, _password );
   }
 
   PMError error = _info->getPatches( _patches, reload, checkSig );
@@ -163,7 +164,6 @@ PMError InstYou::retrievePatchInfo( bool reload, bool checkSig )
     ERR << "Error downloading patchinfos: " << error << endl;
     return error;
   }
-
 
   Y2PM::youPatchManager().poolAddCandidates( _patches );
 
@@ -322,16 +322,16 @@ void InstYou::updatePackageStates()
 
 PMError InstYou::attachSource()
 {
-  int err = PathInfo::assert_dir( _paths->attachPoint() );
+  int err = PathInfo::assert_dir( _settings->attachPoint() );
   if ( err ) {
-    ERR << "Can't create " << _paths->attachPoint() << " (errno: " << err << ")"
+    ERR << "Can't create " << _settings->attachPoint() << " (errno: " << err << ")"
         << endl;
     return PMError( InstSrcError::E_error );
   }
 
-  PMError error = _media.open( _paths->patchUrl(), _paths->attachPoint() );
+  PMError error = _media.open( _settings->patchUrl(), _settings->attachPoint() );
   if ( error ) {
-    ERR << "Error opening URL '" << _paths->patchUrl() << "'" << endl;
+    ERR << "Error opening URL '" << _settings->patchUrl() << "'" << endl;
     return error;
   }
   error = _media.attach();
@@ -471,7 +471,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
   }
 
-  error = executeScript( patch->preScript(), dryrun );
+  error = executeScript( patch->preScript(), patch->product(), dryrun );
   D__ << "Prescript: " << error << endl;
   if ( error ) {
     if ( error == YouError::E_user_abort ) return error;
@@ -524,7 +524,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
   }
 
-  error = executeScript( patch->postScript(), dryrun );
+  error = executeScript( patch->postScript(), patch->product(), dryrun );
   D__ << "Postscript: " << error << endl;
   if ( error ) {
     if ( error == YouError::E_user_abort ) return error;
@@ -537,11 +537,12 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   return error;
 }
 
-PMError InstYou::executeScript( const string &script, bool dryrun )
+PMError InstYou::executeScript( const string &script,
+                                const PMYouProductPtr &product, bool dryrun )
 {
   if ( script.empty() ) return PMError();
 
-  Pathname scriptPath = _paths->localScriptPath( script );
+  Pathname scriptPath = product->localScriptPath( script );
   if ( dryrun ) {
     cout << "SCRIPT: " << scriptPath << endl;
   } else {
@@ -642,7 +643,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
       }
     }
 
-    error = retrievePackage( *itPkg, reload, noExternal );
+    error = retrievePackage( *itPkg, patch->product(), reload, noExternal );
     if ( error ) {
       MediaCurl::setCallbacks( 0 );
       if ( error == MediaError::E_user_abort ) {
@@ -693,7 +694,8 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
 
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
-    PMError error = retrieveScript( patch->preScript(), reload, checkSig );
+    PMError error = retrieveScript( patch->preScript(), patch->product(),
+                                    reload, checkSig );
     if ( error ) {
       ERR << "Error retrieving preScript." << endl;
       return error;
@@ -704,7 +706,8 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
   if ( error ) return error;
 
   if ( !patch->postScript().empty() ) {
-    PMError error = retrieveScript( patch->postScript(), reload, checkSig );
+    PMError error = retrieveScript( patch->postScript(), patch->product(),
+                                    reload, checkSig );
     if ( error ) {
       ERR << "Error retrieving postScript." << endl;
       return error;
@@ -717,30 +720,31 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
   return PMError();
 }
 
-PMError InstYou::retrieveScript( const string &script, bool reload,
+PMError InstYou::retrieveScript( const string &script,
+                                 const PMYouProductPtr &product, bool reload,
                                  bool checkSig )
 {
   DBG << "Retrieve script '" << script << "'" << endl;
 
-  Pathname scriptPath = _paths->scriptPath( script );
+  Pathname scriptPath = product->scriptPath( script );
 
   PMError error = _media.provideFile( scriptPath, !reload );
 
   if ( error ) {
     ERR << "Error downloading script from '"
-        << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
+        << _settings->patchUrl() << "/" << scriptPath << "'" << endl;
     return error;
   }
 
-  int e = PathInfo::assert_dir( _paths->localScriptPath( "" ) );
+  int e = PathInfo::assert_dir( product->localScriptPath( "" ) );
   if ( e ) {
-    ERR << "Can't create " << _paths->localScriptPath( "" ) << " (errno: "
+    ERR << "Can't create " << product->localScriptPath( "" ) << " (errno: "
         << e << ")" << endl;
     return PMError( InstSrcError::E_error );
   }
 
   string sourceScript = _media.localPath( scriptPath ).asString();
-  string destScript = _paths->localScriptPath( script ).asString();
+  string destScript = product->localScriptPath( script ).asString();
 
   GPGCheck gpg;
   bool ok = gpg.check_file( sourceScript, destScript );
@@ -762,7 +766,8 @@ PMError InstYou::retrieveScript( const string &script, bool reload,
   return PMError();
 }
 
-PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
+PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
+                                  const PMYouProductPtr &product, bool reload,
                                   bool noExternal )
 {
   DBG << "InstYou::retrievePackage: '" << pkg->name() << "'" << endl;
@@ -776,9 +781,9 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
       return InstSrcError::E_bad_url;
     }
 
-    int e = PathInfo::assert_dir( _paths->externalRpmDir() );
+    int e = PathInfo::assert_dir( _settings->externalRpmDir() );
     if ( e ) {
-      ERR << "Can't create " << _paths->externalRpmDir() << " (errno: "
+      ERR << "Can't create " << _settings->externalRpmDir() << " (errno: "
           << e << ")" << endl;
       return PMError( InstSrcError::E_error );
     }
@@ -788,7 +793,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
 
     MediaAccess media;
 
-    PMError err = media.open( url, _paths->externalRpmDir() );
+    PMError err = media.open( url, _settings->externalRpmDir() );
     if ( err ) return err;
 
     if ( !noExternal ) {
@@ -804,7 +809,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
     return PMError();
   }
 
-  list<PkgArch> archs = _paths->archs();
+  list<PkgArch> archs = product->archs();
 
   if ( pkg->hasInstalledObj() ) {
     archs.push_front( pkg->getInstalledObj()->arch() );
@@ -819,8 +824,8 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
     D__ << "ARCH: " << *it << endl;
 
     // If the package has a version installed, try to get patch RPM first.
-    rpmPath = _paths->rpmPath( pkg, *it, patchRpm );
-    D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
+    rpmPath = product->rpmPath( pkg, *it, patchRpm );
+    D__ << "Trying downloading '" << _settings->patchUrl() << "/" << rpmPath
         << "'" << endl;
     error = _media.provideFile( rpmPath, !reload );
     if ( error ) {
@@ -830,8 +835,8 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
 
       // If patch RPM was requested first, try to get full RPM now.
       if ( patchRpm ) {
-        rpmPath = _paths->rpmPath( pkg, *it, false );
-        D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
+        rpmPath = product->rpmPath( pkg, *it, false );
+        D__ << "Trying downloading '" << _settings->patchUrl() << "/" << rpmPath
             << "'" << endl;
         error = _media.provideFile( rpmPath, !reload );
         if ( error ) {
@@ -871,9 +876,9 @@ PMError InstYou::retrieveFile( const PMYouFile &file, bool reload )
     return InstSrcError::E_bad_url;
   }
 
-  int e = PathInfo::assert_dir( _paths->filesDir() );
+  int e = PathInfo::assert_dir( _settings->filesDir() );
   if ( e ) {
-    ERR << "Can't create " << _paths->filesDir() << " (errno: "
+    ERR << "Can't create " << _settings->filesDir() << " (errno: "
         << e << ")" << endl;
     return PMError( InstSrcError::E_error );
   }
@@ -883,7 +888,7 @@ PMError InstYou::retrieveFile( const PMYouFile &file, bool reload )
 
   MediaAccess media;
 
-  PMError err = media.open( url, _paths->filesDir() );
+  PMError err = media.open( url, _settings->filesDir() );
   if ( err ) return err;
 
   err = media.attach();
@@ -919,22 +924,22 @@ PMError InstYou::removePackages()
       }
     }
     if ( !patch->preScript().empty() ) {
-      Pathname scriptPath = _paths->scriptPath( patch->preScript() );
+      Pathname scriptPath = patch->product()->scriptPath( patch->preScript() );
       PMError error = _media.releaseFile( scriptPath );
       if ( error ) {
         ERR << "Can't release " << scriptPath.asString() << endl;
         return error;
       }
-      PathInfo::unlink( _paths->localScriptPath( patch->preScript() ) );
+      PathInfo::unlink( patch->product()->localScriptPath( patch->preScript() ) );
     }
     if ( !patch->postScript().empty() ) {
-      Pathname scriptPath = _paths->scriptPath( patch->postScript() );
+      Pathname scriptPath = patch->product()->scriptPath( patch->postScript() );
       PMError error = _media.releaseFile( scriptPath );
       if ( error ) {
         ERR << "Can't release " << scriptPath.asString() << endl;
         return error;
       }
-      PathInfo::unlink( _paths->localScriptPath( patch->postScript() ) );
+      PathInfo::unlink( patch->product()->localScriptPath( patch->postScript() ) );
     }
   }
 
@@ -1075,7 +1080,7 @@ PMError InstYou::patchProgress( int i, const string &pkg )
 
 int InstYou::lastUpdate()
 {
-  string date = _paths->config()->readEntry( "LastUpdate" );
+  string date = _settings->config()->readEntry( "LastUpdate" );
 
   D__ << "LastUpdate: '" << date << "'" << endl;
 
@@ -1095,8 +1100,8 @@ PMError InstYou::writeLastUpdate()
 {
   MIL << "writeLastUpdate" << endl;
 
-  _paths->config()->writeEntry( "LastUpdate", Date::toSECONDS( Date::now() ) );
-  _paths->config()->save();
+  _settings->config()->writeEntry( "LastUpdate", Date::toSECONDS( Date::now() ) );
+  _settings->config()->save();
 
 #warning Settings should probably written elsewhere
   // Settings can't be written in destructor, because writeSettings relies on
@@ -1108,7 +1113,7 @@ PMError InstYou::writeLastUpdate()
 
 int InstYou::quickCheckUpdates()
 {
-  PMYouServer server = _paths->patchServer();
+  PMYouServer server = _settings->patchServer();
 
   Url url = server.url();
 
@@ -1116,11 +1121,13 @@ int InstYou::quickCheckUpdates()
 
   _info->processMediaDir();
 
+  // FIXME: Iterate through all directories
+
   Pathname path = url.path();
-  path += _paths->patchPath() + _paths->directoryFileName();
+  path += _settings->primaryProduct()->patchPath() + _settings->directoryFileName();
   url.setPath( path.asString() );
 
-  Pathname dest = _paths->localWriteDir() + "quickcheck";
+  Pathname dest = _settings->localWriteDir() + "quickcheck";
 
   PMError error = MediaAccess::getFile( url, dest );
   if ( error ) {
@@ -1131,8 +1138,9 @@ int InstYou::quickCheckUpdates()
   list<string> newPatchFiles;
   _info->readDirectoryFile( dest, newPatchFiles );
 
-  Pathname dirFile = _paths->rootAttachPoint() + _paths->patchPath() +
-                     _paths->directoryFileName();
+  Pathname dirFile = _settings->rootAttachPoint() +
+                     _settings->primaryProduct()->patchPath() +
+                     _settings->directoryFileName();
 
   DBG << "Old directory file: " << dirFile << endl;
 
@@ -1187,7 +1195,7 @@ void InstYou::filterArchitectures( PMYouPatchPtr &patch )
 
     D__ << "    Package isn't installed." << endl;
 
-    std::list<PkgArch> archs = _paths->archs();
+    std::list<PkgArch> archs = _settings->primaryProduct()->archs();
 
     // Check if package instance has an allowed arch. If not, discard it.
     std::list<PkgArch>::const_iterator archIt;

@@ -46,8 +46,9 @@ extern "C" {
 
 #include <y2pm/InstTargetProdDB.h>
 #include <y2pm/InstTargetSelDB.h>
-#include <y2pm/PMYouPatchPaths.h>
+#include <y2pm/PMYouSettings.h>
 #include <y2pm/PMYouPatchInfo.h>
+#include <y2pm/PMYouProduct.h>
 
 #include <Y2PM.h>
 
@@ -215,12 +216,12 @@ const std::list<PMYouPatchPtr>&
 InstTarget::getPatches (void) const
 {
     if ( !_patchesInitialized ) {
-        PMYouPatchPathsPtr paths( new PMYouPatchPaths );
+        PMYouSettingsPtr paths( new PMYouSettings );
         PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo( paths ) );
 
         string u = "dir://" + ( rootdir() + paths->installDir() ).asString();
         paths->setPatchServer( PMYouServer( u ) );
-        paths->setPatchPath( "" );
+        paths->primaryProduct()->setPatchPath( "" );
         PMError error = patchInfo->readDir( _patches, false, false, false );
         if ( error ) {
             E__ << "Error reading patch info for installed patches." << endl;
@@ -328,7 +329,7 @@ bool InstTarget::setInstallationLogfile( const string & logfile )
 
 PMError InstTarget::installPatch( const Pathname &filename )
 {
-    PMYouPatchPaths paths;
+    PMYouSettings paths;
 
     Pathname dest = rootdir() + paths.installDir();
 
