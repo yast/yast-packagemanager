@@ -1,6 +1,6 @@
 /*
 
-   PMQueryNode.h
+   QueryNode.h
 
    data type definitions for query handling
 
@@ -8,8 +8,8 @@
    Maintainer: kkaempf@suse.de
 */
 
-#ifndef PMQUERYNODE_H
-#define PMQUERYNODE_H
+#ifndef QueryNODE_H
+#define QueryNODE_H
 /*
    define maximum id values for query keywords
    see tools/keyword.h
@@ -79,4 +79,4 @@ struct qnode {
     struct qvalue right;
 };
 
-#endif // PMQUERYNODE_H
+#endif // QueryNODE_H

@@ -26,6 +26,7 @@
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaError.h>
 #include <y2pm/InstTargetError.h>
+#include <y2pm/QueryError.h>
 
 using namespace std;
 

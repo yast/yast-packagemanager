@@ -10,44 +10,44 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMQuery.h
+   File:       Query.h
 
    Author:     Klaus Kaempf <kkaempf@suse.de>
    Maintainer: Klaus Kaempf <kkaempf@suse.de>
 
 /-*/
-#ifndef PMQuery_h
-#define PMQuery_h
+#ifndef Query_h
+#define Query_h
 
 #include <iosfwd>
 #include <string>
 
 #include <y2util/RepDef.h>
-#include <y2pm/PMQueryPtr.h>
-#include <y2pm/PMQueryParser.h>
-#include <y2pm/PMQueryNode.h>
-#include <y2pm/PMQueryError.h>
+#include <y2pm/QueryPtr.h>
+#include <y2pm/QueryParser.h>
+#include <y2pm/QueryNode.h>
+#include <y2pm/QueryError.h>
 
 #include <y2pm/PMSelectablePtr.h>
 
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMQuery
+//	CLASS NAME : Query
 /**
  * @short Interface class for queries
  **/
-class PMQuery : virtual public Rep {
-    REP_BODY(PMQuery);
+class Query : virtual public Rep {
+    REP_BODY(Query);
 
     private:
 	struct qnode *_query;
 
     public:
-	PMQuery();
-	~PMQuery();
+	Query();
+	~Query();
 };
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMQuery_h
+#endif // Query_h

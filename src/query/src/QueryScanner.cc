@@ -1,5 +1,5 @@
 /*
-   PMQueryScanner.cc
+   QueryScanner.cc
 
    match keywords by traversing table
 

@@ -15,15 +15,15 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		media/include		\
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-lib_LTLIBRARIES = liby2query.la
+lib_LTLIBRARIES = liby2pmquery.la
 
-liby2query_la_SOURCES = PMQueryScanner.cc PMQueryParser.cc PMQueryError.cc PMQuery.cc
+liby2pmquery_la_SOURCES = QueryScanner.cc QueryParser.cc QueryError.cc Query.cc
+liby2pmquery_la_LDFLAGS = -version-info 2:0
 
 $(srcdir)/lookuptable.h: $(top_srcdir)/src/query/tools/keywords.h
 	$(top_srcdir)/src/query/tools/maketable -o $@
 
-$(srcdir)/PMQueryScanner.cc:  $(srcdir)/lookuptable.h
-liby2query_la_LDFLAGS = -version-info 2:0
+$(srcdir)/QueryScanner.cc:  $(srcdir)/lookuptable.h
 
 clean-local:
 	rm -f lookuptable.h

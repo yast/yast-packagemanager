@@ -8,9 +8,10 @@ SUBDIRS = include inst pkg sel you media libPkgDep query
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include			\
+		query/include		\
 		pkg/include		\
-		sel/include	\
-		you/include	\
+		sel/include		\
+		you/include		\
 		inst/include		\
 		inst/rpm/include	\
 		media/include		\
@@ -37,6 +38,7 @@ liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			you/liby2pmyou.la	\
 			inst/liby2pminstsrc.la	\
 			media/liby2pmMedia.la	\
+			query/src/liby2pmquery.la\
 			libPkgDep/libPkgDep.la	\
 			-ly2util
 

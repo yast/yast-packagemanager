@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMQueryError.cc
+  File:       QueryError.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <y2pm/PMQueryError.h>
+#include <y2pm/QueryError.h>
 
 using namespace std;
 
@@ -31,18 +31,18 @@ using namespace std;
 #endif
 ///////////////////////////////////////////////////////////////////
 
-const std::string PMQueryError::errclass( "Query" );
+const std::string QueryError::errclass( "Query" );
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMQueryError::errtext
+//	METHOD NAME : QueryError::errtext
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION : Return textual description or numerical value
 //      as string.
 //
-std::string PMQueryError::errtext( const unsigned e )
+std::string QueryError::errtext( const unsigned e )
 {
     switch ( (Error)e ) {
 

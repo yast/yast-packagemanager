@@ -10,23 +10,43 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMQueryPtr.h
+   File:       QueryParser.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
-
-  Purpose: Declaration of pointer classes constPMQueryPtr and PMQueryPtr.
+   Author:     Klaus Kaempf <kkaempf@suse.de>
+   Maintainer: Klaus Kaempf <kkaempf@suse.de>
 
 /-*/
-#ifndef PMQueryPtr_h
-#define PMQueryPtr_h
+#ifndef QueryParser_h
+#define QueryParser_h
 
-#include <y2util/RepDef.h>
+#include <iosfwd>
+#include <string>
+
+#include <y2pm/QueryError.h>
+#include <y2pm/QueryNode.h>
+#include <y2pm/QueryScanner.h>
 
 ///////////////////////////////////////////////////////////////////
-//	CLASS NAME : PMQueryPtr
-//	CLASS NAME : constPMQueryPtr
-///////////////////////////////////////////////////////////////////
-DEFINE_BASE_POINTER(PMQuery);
+//
+//	CLASS NAME : QueryParser
+/**
+ * @short parser query from string to struct qnode
+ **/
+class QueryParser {
 
-#endif // PMQueryPtr_h
+    private:
+	void free_node (struct qnode *node);
+	int op_binding (enum operation op);
+	enum operation parse_op (const char **query);
+	PMError check_node (struct qnode *node);
+	int parse_value (struct qvalue *value, const char **query, PMError *error);
+	struct qnode *parse_expr (const char **query, PMError *error);
+    public:
+	QueryParser () {}
+	~QueryParser () {}
+	PMError parseQuery (const std::string& query, int& errpos, struct qnode **node);
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // Query_h
