@@ -46,7 +46,8 @@ it to systems with this architecture.</LI>
 A short label describing the selection (in multiple languages!)</LI>
 <LI><b>Category</b><br>
 A selection can be a <i>base</i> or an <i>add-on</i> selection.<br>
-Base selections should not have any requirements, just suggestions. Base selections are
+Base selections should not have any requirements, just recommendations
+or suggestions. Base selections are
 mutually exclusive to other base selections.<br>
 Add-on selections stack onto base selections and can be grouped by
 the category name.</LI>
@@ -62,8 +63,15 @@ provides is useful on updates if a selection was renamed.</LI>
 Selections obsoleted by this selection. Useful for update.</LI>
 <LI><b>Conflicts</b><br>
 Selections conflicting with this selection.</LI>
+<LI><b>Recommends</b><br>
+Selections recommended by this selection. (Weak dependency)<br>
+Recommended selections are automatically pre-selected but the user
+can choose to de-deselect them.</LI>
 <LI><b>Suggests</b><br>
-Selections suggested by this selection. (Weak dependency)</LI>
+Selections suggested by this selection. (Weak dependency)<br>
+Suggested selections are offered to the user but are <b>not</b>
+automatically pre-selected.
+</LI>
 <LI><b>Size</b><br>
 Sum of all package sizes, Sum of installed packages</LI>
 <LI><b>Package to install (generally)</b><br>
