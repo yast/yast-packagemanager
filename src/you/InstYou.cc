@@ -30,6 +30,7 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/YouError.h>
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/Wget.h>
 
 #include <y2pm/InstYou.h>
 
@@ -82,14 +83,46 @@ PMError InstYou::servers( list<Url> &servers )
   }
   
   servers = _paths->servers();
-  
+
   return PMError();
 }
 
 PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
                                      const string &password )
 {
-  return PMError();
+  Url u( url );
+
+  D__ << u << endl;
+  
+  u.setUsername( regcode );
+  u.setPassword( password );
+
+  string path = u.getPath();
+  D__ << path << endl;
+  if ( path.empty() ) path = "/";
+  else if ( *(path.rbegin()) != '/' ) path += "/";
+  D__ << path << endl;
+  u.setPath( path );
+
+  Pathname dummyFile = _paths->localDir() + "dummy";
+
+  D__ << dummyFile << endl;
+  D__ << u << endl;
+
+  Wget wget;
+  WgetStatus status = wget.getFile( u, dummyFile );
+
+  if ( status == WGET_OK ) {
+    _regcode = regcode;
+    _password = password;
+    PathInfo::unlink( dummyFile );
+    return PMError();
+  } else {
+    if ( status == WGET_ERROR_LOGIN ) return YouError::E_auth_failed;
+    else W__ << wget.error_string( status ) << endl;
+  }
+
+  return YouError::E_error;
 }
 
 
@@ -97,7 +130,12 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool checkSig )
 {
   _patches.clear();
 
-  _paths->setPatchUrl( url );
+  Url u( url );
+  if ( !_regcode.empty() && !_password.empty() ) {
+    u.setUsername( _regcode );
+    u.setPassword( _password );
+  }
+  _paths->setPatchUrl( u );
 
   PMError error = _info->getPatches( _paths, _patches, checkSig );
   if ( error ) {

@@ -219,12 +219,12 @@ class MediaAccess : virtual public Rep {
        * same media. If the first one goes out of scope, the file is
        * cleaned. It's just a convenience for 'access and forgett'.
        *
-       * <b>Caution:</b> We should either store the refernce MediaAccess'
+       * <b>Caution:</b> We should either store the reference MediaAccess'
        * MediaHandler here (for this MediaHandler must become a
        * ref counting pointer class), or we need more info from MediaHandler
        * (whether he's downloading to the local fs. If not, no releasefile
        * is necessary).
-       * Cutrrently we can not releaseFile after the media was closed
+       * Currently we can not releaseFile after the media was closed
        * (it's passed to the handler, which is deleted on close).
        **/
       class FileProvider {
