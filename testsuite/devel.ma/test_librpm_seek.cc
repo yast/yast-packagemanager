@@ -23,13 +23,62 @@ struct X_FD_s {
 
 using namespace std;
 
+string dio( FDIO_t & dio ) {
+#define DIO(XX) if ( dio == XX ) return #XX
+  DIO(fdio);
+  DIO(fpio);
+  DIO(ufdio);
+  DIO(gzdio);
+  DIO(bzdio);
+  DIO(fadio);
+  return "???io";
+}
+
+void dlog ( struct X_FD_s * xfd )
+{
+  INT << "nfps " << xfd->nfps << endl;
+  for ( int i = 0; i <= xfd->nfps; ++i ) {
+    INT << "  [" << i << "] " << dio( xfd->fps[i].io ) << "\t" << xfd->fps[i].fdno << "\t" << xfd->fps[i].fp << endl;
+  }
+}
+
+//int Fileno(FD_t fd)
+//int Fcntl(FD_t fd, int op, void *lip)
+
 /******************************************************************
 **
 **
 **	FUNCTION NAME : Ftell
 **	FUNCTION TYPE : static long
 */
-long Ftell( FD_t fd ) {
+extern "C" {
+long XXFtell( FD_t fd ) {
+    long int rc = -1;
+
+    struct X_FD_s * xfd = (struct X_FD_s*)fd;
+
+    if ( !xfd || xfd->magic != XFDMAGIC) {
+      //INT << "magic(" << XFDMAGIC << ") failed: " << xfd->magic << endl;
+      return -2;
+    }
+    if ( xfd->fps[xfd->nfps].io == fpio ) { // (fdGetIo(fd) == fpio) { // fd->fps[fd->nfps].io;
+	FILE * fp;
+
+	fp = (FILE *)xfd->fps[xfd->nfps].fp; // fdGetFILE(fd); // (FILE *)fd->fps[fd->nfps].fp
+	rc = ::ftell(fp);
+	return rc;
+    }
+
+    return -2;
+}
+}
+/******************************************************************
+**
+**
+**	FUNCTION NAME : Ftell
+**	FUNCTION TYPE : static long
+*/
+long Ftell( FD_t & fd ) {
     long int rc = -1;
 
     struct X_FD_s * xfd = (struct X_FD_s*)fd;
@@ -38,12 +87,21 @@ long Ftell( FD_t fd ) {
       INT << "magic(" << XFDMAGIC << ") failed: " << xfd->magic << endl;
       return -2;
     }
-
+    dlog( xfd );
     if ( xfd->fps[xfd->nfps].io == fpio ) { // (fdGetIo(fd) == fpio) { // fd->fps[fd->nfps].io;
 	FILE * fp;
 
 	fp = (FILE *)xfd->fps[xfd->nfps].fp; // fdGetFILE(fd); // (FILE *)fd->fps[fd->nfps].fp
-	rc = ftell(fp);
+	INT << "fp = " << (void*)fp << endl;
+
+	int fno = ::Fileno( fd );
+	if ( fno != -1 ) {
+	  SEC << "FILENO " << fno << "  tell: " << ::lseek(fno,0,SEEK_CUR) << endl;
+	} else {
+	  SEC << " NO FILENO" << endl;
+	}
+	rc = ::ftell( fp );
+	INT << "rc = " << rc << endl;
 	return rc;
     }
 
