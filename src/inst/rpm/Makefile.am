@@ -5,6 +5,8 @@
 SUBDIRS = include
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall -imacros Make.defines
+AM_LDFLAGS = -L$(libdir)
+
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\

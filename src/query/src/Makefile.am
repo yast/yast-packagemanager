@@ -4,6 +4,7 @@
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
 # -DPARSER_DEBUG
+AM_LDFLAGS = -L$(libdir)
 
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
