@@ -1103,7 +1103,7 @@ PMError InstSrcManager::intern_cacheCopyTo()
     ///////////////////////////////////////////////////////////////////
     // write cache to ...
     ///////////////////////////////////////////////////////////////////
-
+#warning check for write errors
     if ( (*it)->descr() ) {
       (*it)->descr()->writeCache( ndesc );
     }

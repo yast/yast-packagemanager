@@ -196,15 +196,19 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  PM::ISrcIdList isrc( ISM.getSources( true ) );
-  SEC << isrc << endl;
+  MIL << PMGR.updateDu() << endl;
+  unsigned srccnt = 0;
+  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
+    if ( (*it)->set_source_install( true ) ) {
+      ++srccnt;
+    }
+    if ( (*it)->providesSources() && ! (*it)->source_install() ) {
+      WAR << "set_source_install error" << endl;
+    }
+  }
+  SEC << "srccnt " << srccnt << endl;
+  MIL << PMGR.updateDu() << endl;
 
-  const list<constInstSrcDescrPtr> & iprods( TMGR.getProducts() );
-  INT << iprods << endl;
-
-  MIL << TMGR.installProduct( isrc.front()->descr() ) << endl;
-
-  INT << TMGR.getProducts() << endl;
 
 #if 0
   MIL << "=========================" << endl;

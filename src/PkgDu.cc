@@ -327,8 +327,33 @@ void PkgDuMaster::setMountPoints( const set<MountPoint> & mountpoints_r )
   }
 
   _pkg_diff = 0;
+  string src_dir( "/usr/src/packages" );
+  _src_on = "";
+
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it ) {
     _pkg_diff += it->_pkgusage;
+    // whether src_dir has prefix it->_mountpoint
+    if ( src_dir.compare( 0, it->_mountpoint.size(), it->_mountpoint ) == 0 ) {
+      _src_on = it->_mountpoint;
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgDuMaster::addSrcPkgs
+//	METHOD TYPE : void
+//
+void PkgDuMaster::addSrcPkgs( const FSize & srcSize_r )
+{
+  if ( srcSize_r ) {
+    set<MountPoint>::const_iterator it = _mountpoints.find( _src_on );
+    if ( it != _mountpoints.end() ) {
+      it->_pkgusage += srcSize_r;
+    } else {
+      WAR << "Can't find partition of /usr/src/packages" << endl;
+    }
   }
 }
 

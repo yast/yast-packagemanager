@@ -370,9 +370,14 @@ const PkgDuMaster & PMPackageManager::updateDu()
   getDu(); // tries to initialize an empty mountpoint set from InstTarget.
 
   if ( _du_master.resetStats() ) {
+    FSize srcSizes;
     // There's at least one mountpoint
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
       const constPMSelectablePtr & sel( *it );
+
+      if ( sel->source_install() ) {
+	srcSizes += PMPackagePtr( sel->candidateObj() )->sourcesize();
+      }
 
       if ( ! sel->to_modify() )
 	continue; // package unchanged
@@ -387,8 +392,8 @@ const PkgDuMaster & PMPackageManager::updateDu()
 
 	PMPackagePtr( sel->installedObj() )->du_sub( _du_master );
       }
-
     }
+    _du_master.addSrcPkgs( srcSizes );
   } else {
     WAR << "Unable to get mountpoint info" << endl;
   }

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Apr  5 21:13:53 CEST 2004 - ma@suse.de
+
+- Include source packages to install in disk usage
+  calculation. (#38257)
+- 2.9.34
+
+-------------------------------------------------------------------
 Sun Apr  4 23:30:34 CEST 2004 - ma@suse.de
 
 - Product db: Obsolete already existing entries
