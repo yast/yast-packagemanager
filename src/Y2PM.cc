@@ -103,7 +103,7 @@ InstSrcManager & Y2PM::instSrcManager()
   if ( !_instSrcManager ) {
     MIL << "Launch InstSrcManager..." << endl;
     _instSrcManager = new InstSrcManager;
-    MIL << "Created InstSrcManager" << endl;
+    MIL << "Created InstSrcManager @" << _instSrcManager << endl;
   }
   return *_instSrcManager;
 }
@@ -122,7 +122,7 @@ PMPackageManager & Y2PM::packageManager(bool with_target)
   {
     MIL << "Launch PackageManager..." << endl;
     _packageManager = new PMPackageManager;
-    MIL << "Created PackageManager" << endl;
+    MIL << "Created PackageManager @" << _packageManager << endl;
 
     if (with_target)
     {
@@ -154,7 +154,7 @@ PMSelectionManager & Y2PM::selectionManager()
   if ( !_selectionManager ) {
     MIL << "Launch SelectionManager..." << endl;
     _selectionManager = new PMSelectionManager;
-    MIL << "Created SelectionManager" << endl;
+    MIL << "Created SelectionManager @" << _selectionManager << endl;
   }
   return *_selectionManager;
 }
@@ -172,7 +172,7 @@ PMYouPatchManager & Y2PM::youPatchManager()
   if ( !_youPatchManager ) {
     MIL << "Launch YouPatchManager..." << endl;
     _youPatchManager = new PMYouPatchManager;
-    MIL << "Created YouPatchManager" << endl;
+    MIL << "Created YouPatchManager @" << _youPatchManager << endl;
   }
   return *_youPatchManager;
 }
