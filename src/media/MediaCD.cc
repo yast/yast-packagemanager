@@ -109,11 +109,11 @@ bool MediaCD::openTray( const string & device_r )
     return false;
   }
   int res = ::ioctl( fd, CDROMEJECT );
+  ::close( fd );
   if ( res ) {
     WAR << "Eject " << device_r << " failed (" << ::strerror( errno ) << ")" << endl;
     return false;
   }
-  ::close( fd );
   MIL << "Eject " << device_r << endl;
   return true;
 }
@@ -132,11 +132,11 @@ bool MediaCD::closeTray( const string & device_r )
     return false;
   }
   int res = ::ioctl( fd, CDROMCLOSETRAY );
+  ::close( fd );
   if ( res ) {
     WAR << "Close tray " << device_r << " failed (" << ::strerror( errno ) << ")" << endl;
     return false;
   }
-  ::close( fd );
   DBG << "Close tray " << device_r << endl;
   return true;
 }
