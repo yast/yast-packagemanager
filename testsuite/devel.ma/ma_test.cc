@@ -215,7 +215,7 @@ int main( int argc, char * argv[] )
   //ISM.enableSource( nid );
   //ISM.disableAllSources();
   string u( "ftp://10.20.0.20/netboot/find/SuSE-9.2-Prof-i386-Beta2-CD1/media.1" );
-  u += ";proxy=10.20.1.24;proxyport=8080;proxyproto=http";
+  u += ";proxy=10.20.1.24;proxyport=8080;proxyuser=wrzl:prmpf";
 
   Url url( u );
   PMError err;
@@ -232,27 +232,6 @@ int main( int argc, char * argv[] )
     ERR << "Failed to provide: " << err << endl;
     return err;
   }
-
-
-#if 0
-  Pathname cachefile_r( "/tmp/foo/IS_PLAINcache" );
-
-  RpmHeaderCache _cache( cachefile_r );
-  if ( !_cache.open() ) {
-    ERR << "Failed to open cache " << cachefile_r << endl;
-  } else {
-    MIL << "Scan cachefile " << cachefile_r << endl;
-
-    unsigned hpos;
-    Pathname pkgfile;
-    int      isSource;
-    for ( constRpmHeaderPtr iter = _cache.getFirst( pkgfile, isSource, hpos );
-	  iter; iter = _cache.getNext( pkgfile, isSource, hpos ) ) {
-      D__ << " At " << hpos << (isSource?" src ":" bin ") << endl;
-      D__ << "    " << iter->tag_name() << endl;
-    }
-  }
-#endif
 
   SEC << "STOP" << endl;
   return 0;

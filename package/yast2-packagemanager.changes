@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Oct  1 14:28:03 CEST 2004 - ma@suse.de
+
+- mount cifs/smbfs: pass username and password via environment,
+  not via commandline (#38261  )
+- Let proxy settings passed via url options supersede settings
+  in /etc/sysconfig/proxy. (#45477)
+- InstTargetProdDB::remove: Make shure the entry to delete does
+  not go out of scope before the function returns. (#46551)
+- 2.10.17
+
+-------------------------------------------------------------------
 Thu Sep 30 14:59:58 CEST 2004 - lnussel@suse.de
 
 - disable the "you may disconnect from the internet now" message
