@@ -390,6 +390,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       W__ << "no directory file found." << endl;
       if ( error == MediaError::E_login_failed ||
            error == MediaError::E_proxyauth_failed ) {
+          _media.release();
           return error;
       }
 
@@ -398,6 +399,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
         if ( error == MediaError::E_not_supported_by_media ) {
 	  E__ << "dirInfo not supported on " << _media << ": " << error << endl;
         }
+        _media.release();
         return error;
       }
     } else {
@@ -428,6 +430,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                 if ( !gpg.check_file( filePath ) ) {
                     E__ << "Signature check for '" << filePath << "' failed."
                         << endl;
+                    _media.release();
                     return PMError( YouError::E_bad_sig_file );
                 }
                 D__ << "Signature ok." << endl;
@@ -436,6 +439,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
             D__ << "read patch: file: " << *it << endl;
             error = readFile( path, *it, patches );
             if ( error != PMError::E_ok ) {
+                _media.release();
                 return error;
             }
         }
