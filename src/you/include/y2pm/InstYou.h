@@ -87,21 +87,19 @@ class InstYou {
                              const std::string &password, bool persistent );
 
     /**
-      Read list of all available patches.
-
-      @param url  URL of patch server
+      Read list of all available patches. The server where the patches are
+      retrieved from has to be set in the paths() object.
     */
-    PMError retrievePatchDirectory( PMYouServer server );
+    PMError retrievePatchDirectory();
 
     /**
-     * Read patch information files.
-     *
-     * @param server    Patch server.
-     * @param reload    If true reload all patches from server.
-     * @param checkSig  If true check signatures of patch info files.
-     */
-    PMError retrievePatchInfo( PMYouServer server, bool reload = true,
-                               bool checkSig = true );
+      Read patch information files. The server where the patches are
+      retrieved from has to be set in the paths() object.
+     
+      @param reload    If true reload all patches from server.
+      @param checkSig  If true check signatures of patch info files.
+    */
+    PMError retrievePatchInfo( bool reload = true, bool checkSig = true );
     
     /**
      * Attach source of patches.
@@ -231,7 +229,7 @@ class InstYou {
       Doesn't check for type of updates and doesn't download any update
       information.
     */
-    int quickCheckUpdates( const PMYouServer &server );
+    int quickCheckUpdates();
 
     /*
       Return currently set username used for authentificaton to the server.

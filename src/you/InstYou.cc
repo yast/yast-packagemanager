@@ -141,35 +141,36 @@ PMError InstYou::setUserPassword( const string &username,
   return PMError();
 }
 
-PMError InstYou::retrievePatchDirectory( PMYouServer server )
+PMError InstYou::retrievePatchDirectory()
 {
-  Url u = server.url();
   if ( !_username.empty() && !_password.empty() ) {
+    PMYouServer server = _paths->patchServer();
+    Url u = server.url();
     u.setUsername( _username );
     u.setPassword( _password );
+    server.setUrl( u );
+    _paths->setPatchServer( server );
   }
-  server.setUrl( u );
-  _paths->setPatchServer( server );
 
   PMError error = _info->getDirectory( true );
 
   return error;
 }
 
-PMError InstYou::retrievePatchInfo( PMYouServer server, bool reload,
-                                    bool checkSig )
+PMError InstYou::retrievePatchInfo( bool reload, bool checkSig )
 {
   D__ << "retrievePatchInfo()" << endl;
 
   _patches.clear();
 
-  Url u = server.url();
   if ( !_username.empty() && !_password.empty() ) {
+    PMYouServer server = _paths->patchServer();
+    Url u = server.url();
     u.setUsername( _username );
     u.setPassword( _password );
-  }  
-  server.setUrl( u );
-  _paths->setPatchServer( server );
+    server.setUrl( u );
+    _paths->setPatchServer( server );
+  }
 
   PMError error = _info->getPatches( _patches, reload, checkSig );
   if ( error ) {
@@ -1097,15 +1098,13 @@ PMError InstYou::writeLastUpdate()
   return PMError();
 }
 
-int InstYou::quickCheckUpdates( const PMYouServer &server )
+int InstYou::quickCheckUpdates()
 {
+  PMYouServer server = _paths->patchServer();
+
   Url url = server.url();
 
   D__ << "InstYou::quickCheckUpdates(): " << url << endl;
-
-  PMYouServer s = _paths->patchServer();
-  s.setUrl( url );
-  _paths->setPatchServer( s );
 
   _info->processMediaDir();
   

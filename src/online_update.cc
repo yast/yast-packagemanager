@@ -265,7 +265,7 @@ int main( int argc, char **argv )
   }
 
   if ( quickCheckUpdates ) {
-    int updates = you.quickCheckUpdates( server );
+    int updates = you.quickCheckUpdates();
     if ( updates < 0 ) {
       cerr << "Unable to check for updates." << endl;
       return -1;
@@ -281,11 +281,11 @@ int main( int argc, char **argv )
     }
   }
 
-  error = you.retrievePatchDirectory( server );
+  error = you.retrievePatchDirectory();
   if ( error ) {
     if ( error == MediaError::E_login_failed ) {
       you.readUserPassword();
-      error = you.retrievePatchDirectory( server );
+      error = you.retrievePatchDirectory();
       if ( error ) {
         cerr << error << endl;
         exit( -1 );
@@ -296,7 +296,7 @@ int main( int argc, char **argv )
     }
   }
 
-  error = you.retrievePatchInfo( server, reload, checkSig );
+  error = you.retrievePatchInfo( reload, checkSig );
   if ( error ) {
     cerr << "Error retrieving patches: " << error << endl;
     exit( -1 );
