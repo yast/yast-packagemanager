@@ -275,6 +275,14 @@ PMError InstSrc::disableSource()
   PMError err;
 
   writeCache();
+
+  if (_media)
+  {
+    if (_media->isAttached())
+	_media->release();
+    _media->close();
+  }
+
   _data->_instSrc_withdraw(); // withdraw Objects from Manager classes.
   _data->_instSrc_detach();   // clear backreferences to InstSrc.
   _data = 0;
