@@ -157,8 +157,8 @@ do_query (const std::string query)
     else
     {
 	int j;
-//	printf ("*** %s:\n", error.errstr().c_str());
-	printf ("*** Fail\n");
+	printf ("*** %s:\n", error.errstr().c_str());
+//	printf ("*** Fail\n");
 	printf ("%s\n", query.c_str());
 	for (j = 0; j < errpos; j++)
 	{
