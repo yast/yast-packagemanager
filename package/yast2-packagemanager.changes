@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Mar  5 18:50:57 CET 2003 - kkaempf@suse.de
+
+- enhance provide and install callbacks to pass error code, error
+  message and package name. Change return code from void to string,
+  implement ok/retry(this package)/skip(this media)/cancel(installation)
+  for errors during package providal (download) and package installation.
+  (#23780)
+- 2.7.24
+
+-------------------------------------------------------------------
 Wed Mar  5 11:46:06 CET 2003 - ma@suse.de
 
 - Prevent selection manager from changing state of packages not included

@@ -215,23 +215,28 @@ class Y2PM {
 	    CallBacks();
 
 	    /**
-	     * called right before package 'name' is provided
+	     * called right before package 'name' is provided, if source is remote
 	     * */
 	    void (*_provide_start_func)(const std::string& server,
 					const FSize& size, bool remote, void* data);
 	    void* _provide_start_data;
 
 	    /**
-	     * called multiple times during package providal, 'progress' is the
-	     * already provided percentage
+	     * called multiple times during package providal if source is remote
+	     * 'progress' is the already provided percentage
 	     * */
 	    void (*_provide_progress_func)(int progress, void* data);
 	    void* _provide_progress_data;
 
 	    /**
-	     * called after package 'name' was provided
+	     * called after package 'name' was provided if source is remote or err != 0
+	     * might return
+	     *   ""	ok
+	     *   "I"	ignore error
+	     *   "C"	cancel installation completely
+	     *   "S"	skip rest of current media
 	     * */
-	    void (*_provide_done_func)(PMError err, const std::string& errdata, void* data);
+	    std::string (*_provide_done_func)(PMError err, const std::string& errdata, const std::string& name, void* data);
 	    void* _provide_done_data;
 
 	    /**
@@ -251,9 +256,14 @@ class Y2PM {
 	    void* _package_progress_data;
 
 	    /**
-	     * called after package 'name' got installed or deleted
+	     * called after package got installed or deleted
+	     * might return
+	     *   ""	ok
+	     *   "I"	ignore error
+	     *   "C"	cancel installation completely
+	     *   "S"	skip rest of current media
 	     * */
-	    void (*_package_done_func)(PMError err, const std::string& errdata, void* data);
+	    std::string (*_package_done_func)(PMError err, const std::string& errdata, void* data);
 	    void* _package_done_data;
 
 	    /**
@@ -288,7 +298,7 @@ class Y2PM {
 	/**
 	 * called right after package 'name' was provided
 	 * */
-	static void setProvideDoneCallback(void (*func)(PMError error, const std::string& reason, void*), void* data);
+	static void setProvideDoneCallback(std::string (*func)(PMError error, const std::string& reason, const std::string& name, void*), void* data);
 
 	/**
 	 * called right before package 'name' is installed or deleted
@@ -304,7 +314,7 @@ class Y2PM {
 	/**
 	 * called after package 'name' got installed or deleted
 	 * */
-	static void setPackageDoneCallback(void (*func)(PMError err, const std::string& reason, void*), void* data);
+	static void setPackageDoneCallback(std::string (*func)(PMError err, const std::string& reason, void*), void* data);
 
 	/**
 	 * called multiple times during rpm rebuilddb, 'progress' is the
