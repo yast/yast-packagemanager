@@ -187,12 +187,12 @@ Y2PM::CallBacks::CallBacks()
     _source_change_data = NULL;
 #warning Switch to new callback interface
     // Translate new InstTarget Callbacks:
-    InstTarget::cb_rpmConvertDb().setFunc( cbfConvertDb );
-    InstTarget::cb_rpmRrebuildDb().setFunc( cbfRebuildDb );
-    InstTarget::cb_rpmInstallPkg().setFunc( cbfInstallPkg );
+    InstTarget::cb_rpmConvertDb().set( cbfConvertDb );
+    InstTarget::cb_rpmRrebuildDb().set( cbfRebuildDb );
+    InstTarget::cb_rpmInstallPkg().set( cbfInstallPkg );
 };
 
-void Y2PM::cbfConvertDb( const ProgressCounter & pc, void * ) {
+void Y2PM::cbfConvertDb( const ProgressCounter & pc, const void * ) {
   // WFM does not yet support it, so drop a debug line every 100 packages processed.
   if ( pc.state() == ProgressCounter::st_value && pc.val() % 100 )
     return;
@@ -200,12 +200,12 @@ void Y2PM::cbfConvertDb( const ProgressCounter & pc, void * ) {
       << pc.val() << " " << pc.precent() << "%" << endl;
 
 }
-void Y2PM::cbfRebuildDb( const ProgressCounter & pc, void * ) {
+void Y2PM::cbfRebuildDb( const ProgressCounter & pc, const void * ) {
   if ( _callbacks._rebuilddb_progress_func ) {
     _callbacks._rebuilddb_progress_func( (int)pc.precent(), _callbacks._rebuilddb_progress_data );
   }
 }
-void Y2PM::cbfInstallPkg( const ProgressCounter & pc, void * ) {
+void Y2PM::cbfInstallPkg( const ProgressCounter & pc, const void * ) {
   static int lastP = 0;
   switch ( pc.state() ) {
   case ProgressCounter::st_start:

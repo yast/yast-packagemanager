@@ -19,13 +19,16 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 
 noinst_LTLIBRARIES = liby2pminstrpmsrc.la
 
-liby2pminstrpmsrc_la_SOURCES = 	\
-	binHeader.cc binHeaderCache.cc \
-	RpmHeader.cc RpmHeaderCache.cc \
-	RpmDb.cc \
-	librpmDb.cc librpmDb.cv3.cc \
+liby2pminstrpmsrc_la_SOURCES = 	librpm.h	\
+	librpmDb.cc librpmDb.cv3.cc		\
+	binHeader.cc binHeaderCache.cc		\
+	RpmHeader.cc RpmHeaderCache.cc		\
+	RpmDb.cc 				\
 	PMRpmPackageDataProvider.cc
 
 liby2pminstrpmsrc_la_LIBADD = -ly2util -lrpm -lpopt
+
+# also define FAKELIBRPM in librpm.h
+#liby2pminstrpmsrc_la_LIBADD = -ly2util
 
 EXTRA_DIST = Make.defines

@@ -50,9 +50,9 @@ class Y2PM {
   private:
 
     // Translate InstTarget Callbacks to (still old) Y2PM interface
-    static void cbfConvertDb( const ProgressCounter & pc, void * );
-    static void cbfRebuildDb( const ProgressCounter & pc, void * );
-    static void cbfInstallPkg( const ProgressCounter & pc, void * );
+    static void cbfConvertDb( const ProgressCounter & pc, const void * );
+    static void cbfRebuildDb( const ProgressCounter & pc, const void * );
+    static void cbfInstallPkg( const ProgressCounter & pc, const void * );
 
   private:
 

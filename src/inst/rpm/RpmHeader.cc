@@ -18,12 +18,7 @@
   Purpose:
 
 /-*/
-
-extern "C" {
-#include <rpm/rpmlib.h>
-#include <rpm/rpmts.h>
-#include <netinet/in.h>
-}
+#include "librpm.h"
 
 #include <iostream>
 #include <map>
@@ -106,10 +101,10 @@ constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r )
     return (RpmHeader*)0;
   }
 
-  rpmts ts = rpmtsCreate();
+  rpmts ts = ::rpmtsCreate();
   Header nh = 0;
   int res = ::rpmReadPackageFile( ts, fd, path_r.asString().c_str(), &nh );
-  ts = rpmtsFree(ts);
+  ts = ::rpmtsFree(ts);
   if ( ! nh ) {
     WAR << "Error reading header from " << path_r << " error(" << res << ")" << endl;
     ::Fclose( fd );
