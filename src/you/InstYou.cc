@@ -878,6 +878,11 @@ PMError InstYou::retrieveFile( const PMYouFile &file, bool reload )
   return PMError();
 }
 
+PMError InstYou::disconnect()
+{
+  return _media.disconnect();
+}
+
 PMError InstYou::removePackages()
 {
   PMYouPatchPtr patch;

@@ -166,6 +166,11 @@ PMError MediaHandler::attach(bool next)
   return err;
 }
 
+PMError MediaHandler::disconnect()
+{
+  return PMError();
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //

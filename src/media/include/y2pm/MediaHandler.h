@@ -211,6 +211,18 @@ class MediaHandler {
 	  return _localRoot + pathname.absolutename();
 	}
 
+        /**
+          Disconnect media.
+          
+          This is useful for media which e.g. holds open a connection to a
+          server like FTP. After calling disconnect() the media object still is
+          valid and files are present.
+          
+          After calling disconnect() it's not possible to call provideFile() or
+          provideDir() anymore.
+        */
+        virtual PMError disconnect();
+
 	/**
 	 * Use concrete handler to release the media.
 	 * @param eject if true, physically eject the media * (i.e. CD-ROM)

@@ -55,6 +55,8 @@ class MediaCurl : public MediaHandler {
 
     static void setCallbacks( Callbacks *c ) { _callbacks = c; }
 
+    PMError disconnect();
+
   protected:
     static int progressCallback( void *clientp, double dltotal, double dlnow,
                                  double ultotal, double ulnow );
@@ -74,6 +76,8 @@ class MediaCurl : public MediaHandler {
     static Pathname _cookieFile;
 
     static Callbacks *_callbacks;
+    
+    bool _connected;
 };
 
 ///////////////////////////////////////////////////////////////////
