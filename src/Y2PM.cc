@@ -843,6 +843,10 @@ static PMError installSpmFromMedia( constInstSrcPtr current_src_ptr_r, unsigned 
 **	returns uninstalled packages (because media not available) in 'remaining_r'
 **	returns uninstalled source packages in 'srcremaining_r'
 */
+#warning Must distinguish between action error and callback request
+#define COMMIT_ERROR  -99999
+#define COMMIT_ABORT -100000
+
 static int internal_commitPackages( unsigned mediaNr_r,
 				    std::list<std::string> & errors_r,
 				    std::list<std::string> & remaining_r,
@@ -889,7 +893,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
 
   switch ( error ) {
   case InstSrcError::E_cancel_media: // cancel all
-    return 0;
+    return COMMIT_ABORT;
     break;
   default:
     error = PMError::E_ok;
@@ -1143,7 +1147,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
     srcremaining_r.push_back ((*it)->name());
   }
 
-  return (error ? -count : count);
+  return (error ? (COMMIT_ABORT - count) : count);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1174,8 +1178,8 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
 			  InstSrcManager::ISrcIdList installrank_r )
 {
   if ( ! ( _instTarget && instTarget().initialized() ) ) {
-    ERR << "Can't commit packages without instTarget being initialized!" << endl;
-    return 0;
+    ERR << "Can't commit packages: " << InstTargetError::E_not_initialized << endl;
+    return -99999;
   }
 
   if ( mediaNr_r == 9999 ) {
@@ -1196,7 +1200,11 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
     instTargetUpdate(); // reread modified databases
   }
 
-  MIL << "Commiting packages returns " << ret << endl;
+  if ( ret < 0 ) {
+    WAR << "commitPackages aborted after " << (-ret + COMMIT_ABORT) << " package(s) installed" << endl;
+  } else {
+    MIL << "commitPackages installed " << ret << " package(s)" << endl;
+  }
   return ret;
 }
 
@@ -1209,7 +1217,10 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
 //	DESCRIPTION : install a single, locally availabe rpm file, uses callbacks !
 PMError Y2PM::installFile( const Pathname & path_r )
 {
-#warning Check for initialized target?
+  if ( ! ( _instTarget && instTarget().initialized() ) ) {
+    ERR << "Can't install package '" << path_r << "': " << InstTargetError::E_not_initialized << endl;
+    return InstTargetError::E_not_initialized;
+  }
   return instTarget().installPackage( path_r, RpmDb::RPMINST_NONE );
 }
 
@@ -1222,6 +1233,9 @@ PMError Y2PM::installFile( const Pathname & path_r )
 //	DESCRIPTION : remove a single package by name, uses callbacks !
 PMError Y2PM::removePackage( const std::string & pkgname_r )
 {
-#warning Check for initialized target?
+  if ( ! ( _instTarget && instTarget().initialized() ) ) {
+    ERR << "Can't remove package '" << pkgname_r << "': " << InstTargetError::E_not_initialized <<endl;
+    return InstTargetError::E_not_initialized;
+  }
   return instTarget().removePackage( pkgname_r );
 }
