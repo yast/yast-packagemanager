@@ -109,7 +109,8 @@ class PkgSplit {
 
     /**
      * Order to be used by associative std::container (set/map). Lexicographic by
-     * ipkg, then file.
+     * ipkg, then file. <B>Do not change this ordering! We rely on it.</B>
+     *
      * A matter of taste, as 'operator<' would do the same job. But I don't like it
      * in classes where it's meaning isn't obvious.
      **/
@@ -120,7 +121,8 @@ class PkgSplit {
 
 /**
  * Order to be used by associative std::container (set/map). Lexicographic by
- * ipkg, then file.
+ * ipkg, then file. <B>Do not change this ordering! We rely on it.</B>
+ *
  * A matter of taste, as 'operator<' would do the same job. But I don't like it
  * in classes where it's meaning isn't obvious.
  **/

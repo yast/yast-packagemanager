@@ -37,15 +37,15 @@ using namespace std;
 //
 PkgSplit::PkgSplit( const string & splitprovides_r, const bool quiet_r )
 {
-  if ( splitprovides_r.find_first_of( " \t\n" ) ) {
+  if ( splitprovides_r.find_first_of( " \t\n" ) != string::npos ) {
     if ( !quiet_r )
-      ERR << "Bad splitprovides '" << splitprovides_r << "'" << endl;
+      ERR << "Bad splitprovides (contains whitespace)'" << splitprovides_r << "'" << endl;
     return;
   }
   string::size_type sep = splitprovides_r.find( ":/" );
   if ( sep == string::npos || sep == 0 || sep == splitprovides_r.size()-2 ) {
     if ( !quiet_r )
-      ERR << "Bad splitprovides '" << splitprovides_r << "'" << endl;
+      ERR << "Bad splitprovides (empty avlue)'" << splitprovides_r << "'" << endl;
     return;
   }
   _ipkg = PkgName( splitprovides_r.substr( 0, sep ) );
