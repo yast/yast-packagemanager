@@ -156,6 +156,8 @@ PMError InstYou::retrievePatchDirectory( const Url &url )
 PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
                                     bool checkSig )
 {
+  D__ << "retrievePatchInfo()" << endl;
+
   _patches.clear();
 
   Url u( url );
@@ -181,13 +183,14 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
   // Set correct size depending on if the patch RPM is used or the full one and
   // set the packagesInstalled flag
   for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
-    D__ << "Patch: " << (*itPatch)->summary() << endl;
+    D__ << "Patch: " << (*itPatch)->name() << endl;
     bool packagesInstalled = false;
     FSize patchSize;
+
     list<PMPackagePtr> packages = (*itPatch)->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      D__ << "  Package: " << (*itPkg)->summary() << endl;
+      D__ << "  Package: " << (*itPkg)->name() << endl;
       if ( hasPatchRpm( *itPkg ) ) {        
         _info->packageDataProvider()->setArchiveSize( *itPkg, (*itPkg)->patchRpmSize() );
         D__ << "    Using patch RPM" << endl;
@@ -198,6 +201,15 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
 
       if ( (*itPkg)->hasInstalledObj() ) packagesInstalled = true;
     }
+
+    list<PMYouFile> files = (*itPatch)->files();
+    list<PMYouFile>::const_iterator itFile;
+    for ( itFile = files.begin(); itFile != files.end(); ++itFile ) {
+      D__ << "  File " << itFile->name() << ": Size: " << itFile->size()
+          << endl;
+      patchSize += itFile->size();
+    }
+
     (*itPatch)->setPatchSize( patchSize );
     D__ << "  PatchSize: " << patchSize << endl;
 
@@ -300,6 +312,14 @@ void InstYou::updatePackageStates()
         }
       } else {
         INT << "Package has no Selectable." << endl;
+      }
+    }
+    
+    if ( toInstall ) {
+      list<PMYouFile> files = (*it)->files();
+      list<PMYouFile>::const_iterator itFile;
+      for( itFile = files.begin(); itFile != files.end(); ++itFile ) {
+        _totalDownloadSize += itFile->size();
       }
     }
   }

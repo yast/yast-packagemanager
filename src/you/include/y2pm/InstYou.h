@@ -31,7 +31,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/MediaAccess.h>
 
-#include <y2pm/PMYouPatchPtr.h>
+#include <y2pm/PMYouPatch.h>
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/PMYouPatchPaths.h>
 
