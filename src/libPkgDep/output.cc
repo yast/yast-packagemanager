@@ -72,6 +72,19 @@ ostream& operator<<( ostream& os, const PkgDep::ErrorResult& res )
 		}
 		os << endl;
 	}
+	if (!res.remove_referers.empty())
+	{
+		os << "Remove-Referers: ";
+		ci_for( PkgDep::SolvableList::,, it, res.remove_referers.,)
+		{
+		    if(it != res.remove_referers.begin())
+		    {
+			os << ", ";
+		    }
+		    os << (*it)->name();
+		}
+		os << endl;
+	}
 	if (res.state_change_not_possible)
 		os << "State-Change-Not-Possible: yes" << endl;
 

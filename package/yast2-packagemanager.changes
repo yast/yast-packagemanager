@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 10 15:51:14 CET 2004 - lnussel@suse.de
+
+- generate separate remove_referers list (#24306)
+- 2.9.24
+
+-------------------------------------------------------------------
 Wed Mar 10 11:12:15 CET 2004 - ma@suse.de
 
 - Removed patch for uncached plain sources. It breaks installation

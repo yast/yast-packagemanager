@@ -44,7 +44,7 @@ unsigned PkgDep::count_providers_for( const PkgSet* set, const PkgRelation& req)
 
 	RevRel_for( PkgSet::getRevRelforPkg(set->provided(),req.name()), prov ) {
 		if (prov->relation().matches( req )) {
-			D__ << req.name() << " satisfied by " << prov->pkg()->name()
+			D__ << req.name() << " satisfied by " << prov->pkg()->name() << " " << (const void*)(prov->pkg())
 				 << " with Provides: " << prov->relation() << std::endl;
 			++providers;
 		}

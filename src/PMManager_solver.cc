@@ -259,7 +259,7 @@ bad, PkgDep::ErrorResultList& obsolete)
 
 		if(!fakei.includes(p->name())) continue;
 		D__ << "remove " <<  p->name() << endl;
-		PkgDep::remove_package(&fakei, p, it->remove_to_solve_conflict);
+		PkgDep::remove_package(&fakei, p, it->remove_referers);
 	    }
 	}
     }
