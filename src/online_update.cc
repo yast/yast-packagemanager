@@ -97,7 +97,7 @@ class Callbacks : public InstYou::Callbacks
 	virtual bool executeYcpScript( const std::string &script )
 	{
 	    cout << stringutil::form(_("patch wants to execute ycp script %s but that"
-		" is not supportes with this tool"), script.c_str()) << endl;
+		" is not supported with this tool"), script.c_str()) << endl;
 	    return false;
 	}
 };
@@ -159,11 +159,12 @@ void usage()
        << _("-D, --debug              Debug output.") << endl
        << endl
        << _("-S, --select-patches <list of patches>") << endl
-       << _("                         Select given patches for download/installation. Patches are\n"
-            "                         specified as comma-separated list of patch names. Only patches\n"
-            "                         which would also be selected by the default selection algorithm\n"
-            "                         can be selected (this behavior is overriden by the --force"
-            "                         option).") << endl
+       << _(
+"                         Select given patches for download and installation. Patches are\n"
+"                         specified as comma-separated list of patch names. Only patches\n"
+"                         that would also be selected by the default selection algorithm\n"
+"                         can be selected (this behavior is overriden by the --force option)."
+	) << endl
        << _("-f, --force              Force installation of a selected patch.") << endl
        << endl
        << "security | recommended | patchlevel | document | optional   "
