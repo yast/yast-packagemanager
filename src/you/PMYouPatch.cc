@@ -161,7 +161,7 @@ list<string> PMYouPatch::description() const
 
 list<string> PMYouPatch::insnotify() const
 {
-  if ( packagesInstalled() || !updateOnlyInstalled() ) {
+  if ( installable() ) {
     return PMObject::insnotify();
   }
 
@@ -171,6 +171,13 @@ list<string> PMYouPatch::insnotify() const
   text.push_back( "doesn't contain any updates to installed packages." );
 
   return text;
+}
+
+bool PMYouPatch::installable() const
+{
+  return _packagesInstalled || !_updateOnlyInstalled ||
+         !_preScript.empty() || !_postScript.empty() ||
+         !_files.empty();
 }
 
 void PMYouPatch::setFiles( const std::list<PMYouFile> &files )
