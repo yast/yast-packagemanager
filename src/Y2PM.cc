@@ -97,6 +97,8 @@ Y2PM::CallBacks::CallBacks()
     _package_progress_data = NULL;
     _package_done_func = NULL;
     _package_done_data = NULL;
+    _rebuilddb_progress_func = NULL;
+    _rebuilddb_progress_data = NULL;
 };
 
 
@@ -163,6 +165,18 @@ Y2PM::setPackageDoneCallback(void (*func)(PMError, const std::string&, void*), v
     _callbacks._package_done_data = data;
 }
 
+
+/**
+ * called multiple times during rpm rebuilddb, 'progress' is the
+ * rebuild progress
+ * */
+void
+Y2PM::setRebuildDBProgressCallback(void (*func)(int percent, void*), void* data)
+{
+    _callbacks._rebuilddb_progress_func = func;
+    _callbacks._rebuilddb_progress_data = data;
+    instTarget().setRebuildDBProgressCallback(func, data);
+}
 
 ///////////////////////////////////////////////////////////////////
 

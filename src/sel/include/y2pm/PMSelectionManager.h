@@ -54,7 +54,9 @@ class PMSelectionManager : public PMManager {
      * see activate()
      */
     std::list<PMSelectablePtr> _currently_actives;
-
+    LangCode _currently_preferred_locale;
+    std::list<LangCode> _currently_requested_locales;
+ 
   private:
 
     /**
