@@ -34,6 +34,80 @@
 
 using namespace std;
 
+
+class Callbacks : public InstYou::Callbacks
+{
+    private:
+	int total_percent;
+	string _str;
+
+    public:
+	Callbacks() : InstYou::Callbacks()
+	{
+	}
+	virtual ~Callbacks()
+	{
+	}
+
+	virtual bool progress( int percent )
+	{
+	    return true;
+	}
+	virtual bool patchProgress( int percent, const std::string &str )
+	{
+	    return true;
+	}
+
+	virtual PMError showError( const std::string &type,
+		const std::string &text,
+		const std::string &details )
+	{
+	    cout << stringutil::form(_("Error (type: %s): %s"), type.c_str(), text.c_str()) << endl;
+	    if(!details.empty())
+		cout << stringutil::form(_("Details: %s"), details.c_str()) << endl;
+	    return PMError();
+	}
+	virtual PMError showMessage( const std::string &type,
+		const std::list<PMYouPatchPtr> & )
+	{
+	    cout << "Message: ???" << endl;
+	    return PMError();
+	}
+	virtual void log( const std::string &text )
+	{
+	    cout << text;
+	    if(text[text.length()-1] != '\n')
+		cout << endl;
+	    else
+		cout << flush;
+	}
+
+	virtual bool executeYcpScript( const std::string &script )
+	{
+	    cout << stringutil::form(_("patch wants to execute ycp script %s but that"
+		" is not supportes with this tool"), script.c_str()) << endl;
+	    return false;
+	}
+};
+
+// ensure callbacks are reset on destruction
+class setYouCallbacks
+{
+    private:
+	InstYou& _you;
+	Callbacks callbacks;
+
+    public:
+	setYouCallbacks(InstYou& you) : _you(you)
+	{
+	    _you.setCallbacks(&callbacks);
+	}
+	~setYouCallbacks()
+	{
+	    _you.setCallbacks(NULL);
+	}
+};
+
 void usage()
 {
   cout << _("Usage: online-update [options] [types]")
@@ -309,6 +383,8 @@ int main( int argc, char **argv )
   PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( settings );
 
   InstYou you( patchInfo, settings );
+
+  setYouCallbacks callbacks(you);
 
   if ( !productStr && !versionStr && !archStr ) {
     you.initProduct();
