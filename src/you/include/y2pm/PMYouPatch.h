@@ -25,6 +25,7 @@
 #include <string>
 
 #include <y2util/Pathname.h>
+#include <y2util/FSize.h>
 
 #include <y2pm/PMYouPatchPtr.h>
 
@@ -163,6 +164,16 @@ class PMYouPatch : virtual public Rep, public PMObject {
     Pathname localFile() const { return _localFile; }
 
     /**
+      Set size of patch.
+    */
+    void setPatchSize( const FSize &size ) { _patchSize = size; }
+
+    /**
+      Return size of patch.
+    */
+    FSize patchSize() const { return _patchSize; }
+
+    /**
      * Return full name in the format "name-version-release".
      *
      */
@@ -182,7 +193,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
     }
     virtual std::list<std::string> insnotify()       const { return PMObject::insnotify(); }
     virtual std::list<std::string> delnotify()       const { return PMObject::delnotify(); }
-    virtual FSize                  size()            const { return PMObject::size(); }
+    virtual FSize                  size()            const { return patchSize(); }
     virtual bool                   providesSources() const { return PMObject::providesSources(); }
 
     virtual std::string            instSrcLablel()   const { return PMObject::instSrcLablel(); }
@@ -196,6 +207,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
     Kind _kind;
     bool _updateOnlyInstalled;
     std::string _preScript, _postScript;
+    FSize _patchSize;
 
     std::list<PMPackagePtr> _packages;
 

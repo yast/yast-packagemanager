@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <stdlib.h>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/GPGCheck.h>
@@ -339,6 +340,9 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     value = tagValue( YOUPatchTagSet::UPDATEONLYINSTALLED );
     if ( value == "true" ) { p->setUpdateOnlyInstalled( true ); }
     else { p->setUpdateOnlyInstalled( false ); }
+
+    value = tagValue( YOUPatchTagSet::SIZE );
+    p->setPatchSize( atoll( value.c_str() ) * 1024 );
 
     value = tagValue( YOUPatchTagSet::PACKAGES );
     PMError error = parsePackages( value, p );
