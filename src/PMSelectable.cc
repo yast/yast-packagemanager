@@ -469,30 +469,33 @@ bool PMSelectable::clearTaboo( const bool doit )
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMSelectable::set_status
+//	METHOD NAME : PMSelectable::intern_set_status
 //	METHOD TYPE : bool
 //
 //	DESCRIPTION :
 //
-bool PMSelectable::set_status( const UI_Status state_r, const bool doit )
+bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
 {
   switch ( state_r ) {
 
-  case F_Taboo:
-    if ( doit ) {
-      // enter TABOO
-      clearCandidateObj();
+  case S_Taboo:
+    if ( _state.user_set_taboo( doit ) ) {
+      if ( doit )
+	clearCandidateObj();
+      return true;
     }
-    return _state.user_set_taboo( doit );
+    return false;
     break;
 
   case S_Del:
+    // TABOO state has no installed and no candidate set!
+    // No need for extra test
     return _state.user_set_delete( doit );
     break;
 
   case S_Update:
-    if ( ! clearTaboo( doit ) )
-      return false; // got no candidateObj
+    // TABOO state has no installed and no candidate set!
+    // No need for extra test
     if ( !_state.has_both_objects() )
       return false;
     return _state.user_set_install( doit );
@@ -507,7 +510,7 @@ bool PMSelectable::set_status( const UI_Status state_r, const bool doit )
     break;
 
   case S_Auto:
-    // TABOO state has no candidate set!
+    // TABOO state has no installed and no candidate set!
     // No need for extra test
     if ( !_state.has_candidate_only() )
       return false;
@@ -515,12 +518,18 @@ bool PMSelectable::set_status( const UI_Status state_r, const bool doit )
     break;
 
   case S_KeepInstalled:
+    // TABOO state has no installed and no candidate set!
+    // No need for extra test
     if ( ! _state.has_installed() )
       return false;
     return _state.user_unset( doit );
     break;
 
   case S_NoInst:
+    // TABOO state has no installed and no candidate set!
+    // MUST TEST
+    if ( _state.is_taboo() )
+      return false;
     if ( _state.has_installed() )
       return false;
     return _state.user_unset( doit );
@@ -542,7 +551,9 @@ bool PMSelectable::set_status( const UI_Status state_r, const bool doit )
 PMSelectable::UI_Status PMSelectable::status() const
 {
   if ( !_state.to_modify() ) {
-    return( _state.has_installed() ? S_KeepInstalled : S_NoInst );
+    if ( _state.has_installed() )
+      return S_KeepInstalled;
+    return( _state.is_taboo() ? S_Taboo : S_NoInst );
   }
 
   if ( _state.to_install() ) {
@@ -553,35 +564,5 @@ PMSelectable::UI_Status PMSelectable::status() const
 
   // _state.to_delete
   return S_Del;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMSelectable::has_status
-//	METHOD TYPE : bool
-//
-//	DESCRIPTION :
-//
-bool PMSelectable::has_status( const UI_Status state_r ) const
-{
-  switch ( state_r ) {
-
-  case S_Del:
-  case S_Install:
-  case S_Update:
-  case S_NoInst:
-  case S_KeepInstalled:
-  case S_Auto:
-    return( status() == state_r );
-    break;
-
-  case F_Taboo:
-    return _state.is_taboo();
-    break;
-
-  }
-  // illegal state_r
-  return false;
 }
 

@@ -48,7 +48,8 @@ class SelState {
 
     static const bits B_BY_USER  = 0x10; // modification requested by user
 
-    static const bits B_F_TABOO  = 0x20; // forbidden to install candidate object
+    static const bits B_F_TABOO  = 0x20; // In absence of installed object
+                                         // forbid to install candidate object
 
     //static const bits B_UNUSED  = 0x40;
     //static const bits B_UNUSED  = 0x80;
@@ -72,12 +73,12 @@ class SelState {
   public:
 
     /**
-     * Set whether an installed object is present
+     * Set whether an installed object is present (clears taboo)
      **/
     void set_has_installed( bool b = true );
 
     /**
-     * Set whether a candidate object is present
+     * Set whether a candidate object is present (clears taboo)
      **/
     void set_has_candidate( bool b = true );
 
@@ -144,47 +145,47 @@ class SelState {
     /**
      * User request to clear state (neither delete nor install).
      **/
-    bool user_unset( const bool doit = true );
+    bool user_unset( const bool doit );
 
     /**
      * User request to delete the installed object. Fails if no
      * installed object is present.
      **/
-    bool user_set_delete( const bool doit = true );
+    bool user_set_delete( const bool doit );
 
     /**
      * User request to install the candidate object. Fails if no
      * candidate object is present, or taboo.
      **/
-    bool user_set_install( const bool doit = true );
+    bool user_set_install( const bool doit );
 
     /**
      * Forbid to install candidate object.
      **/
-    bool user_set_taboo( const bool doit = true );
+    bool user_set_taboo( const bool doit );
 
     /**
      * Clear taboo flag.
      **/
-    bool user_clr_taboo( const bool doit = true );
+    bool user_clr_taboo( const bool doit );
 
     /**
      * Auto request to clear state (neither delete nor install).
      * Fails if user requested modification.
      **/
-    bool auto_unset( const bool doit = true );
+    bool auto_unset( const bool doit );
 
     /**
      * Auto request to delete the installed object. Fails if no
      * installed object is present, or user requested install.
      **/
-    bool auto_set_delete( const bool doit = true );
+    bool auto_set_delete( const bool doit );
 
     /**
      * Auto request to install the candidate object. Fails if no
      * candidate object is present, or user requested delete, or taboo.
      **/
-    bool auto_set_install( const bool doit = true );
+    bool auto_set_install( const bool doit );
 
   public:
 
