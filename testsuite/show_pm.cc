@@ -115,6 +115,7 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     show_pmobject ((PMObjectPtr)p, only_cached);
 
     cout << "Buildtime: " << p->buildtime() << endl;
+    cout << "Group: " << p->group() << endl;
 
     if (only_cached)
     {
@@ -127,7 +128,6 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     cout << "Vendor: " << p->vendor() << endl;
     cout << "License: " << p->license() << endl;
     cout << "Packager: " << p->packager() << endl;
-    cout << "Group: " << p->group() << endl;
     cout << "Changelog: " << strlist2string(p->changelog(), "\n") << endl;
     cout << "Url: " << p->url() << endl;
     cout << "OS: " << p->os() << endl;
@@ -160,6 +160,7 @@ show_pmselection (PMSelectionPtr s)
     cout << "IsBase: " << s->isBase () << endl;
     cout << "Visible: " << s->visible () << endl;
     cout << "Order: " << s->order() << endl;
+    cout << "Recommends: " << strlist2string(s->recommends()) << endl;
     cout << "Suggests: " << strlist2string(s->suggests()) << endl;
     cout << "SuggestsPtrs: " << sellist2string(s->suggests_ptrs(), ", ") << endl;
     cout << "InsPacks: " << strlist2string(s->inspacks("")) << endl;
