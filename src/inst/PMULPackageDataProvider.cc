@@ -123,9 +123,12 @@ PMULPackageDataProvider::size ( const PMPackage & pkg_r ) const
 bool
 PMULPackageDataProvider::providesSources( const PMPackage & pkg_r ) const
 {
-  if (_attr_SOURCELOC.empty() && (_fallback_provider != 0))
-    return _fallback_provider->providesSources(pkg_r);
-  return _attr_SOURCELOC.empty();
+  if ( _attr_SOURCELOC.empty() ) {
+    if ( _fallback_provider != 0 )
+      return _fallback_provider->providesSources(pkg_r);
+    return false;
+  }
+  return true;
 }
 
 std::string
