@@ -23,6 +23,7 @@
 
 #include <y2pm/InstallOrder.h>
 #include <y2pm/PkgDep_int.h>
+#include <y2pm/PMPackage.h>
 
 using namespace std;
 
@@ -234,6 +235,9 @@ const InstallOrder::SolvableList& InstallOrder::getTopSorted() const
     return _topsorted;
 }
 
+static char* colors[] = { "red", "green", "blue", "yellow" };
+static const short numcol = 4;
+
 const void InstallOrder::printAdj(std::ostream& os, bool reversed) const
 {
     const Graph& g = (reversed?_rgraph:_graph);
@@ -246,7 +250,19 @@ const void InstallOrder::printAdj(std::ostream& os, bool reversed) const
 	PkgName name = gcit->first->name();
 	os << "\"" << name << "\""
 		<< "[label=\"" << name << "\\n"
-		<< order << "\"] " << endl;
+		<< order << "\"";
+	{
+	    constPMPackagePtr p = PMSolvablePtr::cast_away_const(gcit->first);
+	    if(p != NULL)
+	    {
+		int nr = p->medianr()-1;
+		if(nr >= 0 && nr<numcol)
+		{
+		    os << " color=\"" << colors[nr] << "\"";
+		}
+	    }
+	}
+	os << "] " << endl;
 	for (SolvableList::const_iterator scit = gcit->second.begin();
 	    scit != gcit->second.end(); ++scit)
 	{
