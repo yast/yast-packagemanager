@@ -4,6 +4,7 @@ Fri Mar 14 17:51:16 CET 2003 - kkaempf@suse.de
 - fix passing of path information from package provider to target.
 - fix error message, show path of missing file instead of package
   name.
+- 2.7.32
 
 -------------------------------------------------------------------
 Fri Mar 14 16:46:41 CET 2003 - kkaempf@suse.de
