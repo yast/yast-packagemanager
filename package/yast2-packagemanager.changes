@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Sep 15 23:22:12 CEST 2003 - ma@suse.de
+
+- On installation and update look for ascii armored public keys
+  located in the media rootdir, and import them into the rpmdatabase,
+  if they are not already present. (#30350)
+- Install packages using --nodigest --nosignature (#28776)
+- 2.8.19
+
+-------------------------------------------------------------------
 Mon Sep 15 19:28:29 CEST 2003 - msvec@suse.cz
 
 - 2.8.18

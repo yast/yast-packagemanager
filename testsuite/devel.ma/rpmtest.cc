@@ -173,9 +173,17 @@ void Pdb( ) {
   }
 }
 
-void xx() {
-  SEC << "instTargetUpdate: " << Y2PM::instTargetUpdate() << endl;
-  SEC << "pkg 'test': " << PMGR["test"] << endl;
+void xx( RpmDb & db ) {
+  set<string> known_pubkeys;
+  set<PkgEdition> pubkeys( db.pubkeys() );
+  for( set<PkgEdition>::const_iterator it = pubkeys.begin(); it != pubkeys.end(); ++it ) {
+    known_pubkeys.insert( (*it).asString() );
+  }
+  DBG << "--pubkeys----" << endl;
+  for ( set<string>::const_iterator it = known_pubkeys.begin(); it != known_pubkeys.end(); ++it ) {
+    DBG << *it << endl;
+  }
+  DBG << "-------------" << endl;
 }
 
 /******************************************************************
@@ -201,19 +209,9 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  ret = mmain( argc, argv );
-#if 0
-  xx();
-  xx();
-
+  //ret = mmain( argc, argv );
+  Y2PM::instTargetUpdate();
   SEC << Y2PM::installFile( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm" ) << endl;
-  xx();
-  xx();
-
-  SEC << Y2PM::removePackage( "test" ) << endl;
-  xx();
-  xx();
-#endif
 
   SEC << "STOP -> " << ret << endl;
   return ret;
@@ -242,7 +240,45 @@ int mmain( int argc, const char * argv[] )
 
   // /usr/lib/rpm/gnupg/pubring.gpg build@suse.de
 
-  INT << db.importPubkey( "/usr/lib/rpm/gnupg/pubring.gpg", "build@suse.de" ) << endl;
+  MediaAccessPtr m( new MediaAccess() );
+  WAR << m->open( Url( "/tmp" ) ) << endl;
+  WAR << m->attach() << endl;
+
+  constMediaAccessPtr mm( m );
+  string prefix( "gpg-pubkey-" );
+  string ext( ".asc" );
+
+  list<string> files;
+  PMError err = mm->dirInfo( files, "/", /*dots*/false );
+  if ( err ) {
+    ERR << "Unable to read media root: " << err << endl;
+    return 0;
+  }
+  for ( list<string>::const_iterator it = files.begin(); it != files.end(); ++it ) {
+    string file = *it;
+    DBG << "    " << file << endl;
+    if ( file.find( prefix ) != 0 )
+      continue;
+    file.erase( 0, prefix.size() );
+    if ( file.size() <= ext.size() || file.rfind( ext ) != (file.size() - ext.size()) )
+      continue;
+    file.erase( file.size() - ext.size() );
+    MIL << file << endl;
+
+    MediaAccess::FileProvider pubkey( mm, *it );
+    if ( pubkey.error() ) {
+      ERR << "Media can't provide '" << *it << "' " << pubkey.error() << endl;
+       continue;
+    }
+    err = db.importPubkey( pubkey() );
+
+  }
+
+
+
+  //xx( db );
+  //INT << db.importPubkey( "/usr/lib/rpm/gnupg/pubring.gpg", "build@suse.de" ) << endl;
+  //xx( db );
 
   return 0;
 }
