@@ -53,7 +53,7 @@ const Pathname InstSrcManager::_cache_tmp_dir( "tmp" );
 //
 InstSrcManager::InstSrcManager( const bool autoEnable_r )
 {
-  int res = PathInfo::assert_dir( cache_tmp_dir(), 0700 );
+  int res = PathInfo::assert_dir( cache_tmp_dir() );
   if ( res ) {
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
   }
@@ -774,6 +774,28 @@ void InstSrcManager::disableAllSources()
   }
 }
 
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : dirPermAdjust
+**	FUNCTION TYPE : inline void
+**
+**	DESCRIPTION :
+*/
+inline void dirPermAdjust( const Pathname & dir_r )
+{
+  PathInfo dirpath( dir_r );
+  if ( dirpath.isDir() ) {
+    PathInfo::chmod( dirpath.path(), 0755 );
+    list<string> content;
+    PathInfo::readdir( content, dirpath.path(), /*dots*/false );
+    for ( list<string>::const_iterator it = content.begin(); it != content.end(); ++it ) {
+      dirPermAdjust( dir_r + *it );
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -800,6 +822,8 @@ PMError InstSrcManager::cacheCopyTo( const Pathname & newRoot_r )
   Pathname old_cache_root_dir = _cache_root_dir;
   _cache_root_dir = newRoot_r + _cache_root_dir;
 
+  dirPermAdjust( _cache_root_dir.dirname() ); // get rid of old 0700 mode
+
   PMError err = intern_cacheCopyTo();
 
   _cache_root_dir = old_cache_root_dir;
@@ -823,7 +847,7 @@ PMError InstSrcManager::cacheCopyTo( const Pathname & newRoot_r )
 //
 PMError InstSrcManager::intern_cacheCopyTo()
 {
-  int res = PathInfo::assert_dir( cache_tmp_dir(), 0700 );
+  int res = PathInfo::assert_dir( cache_tmp_dir() );
   if ( res ) {
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
     return Error::E_error;
@@ -878,7 +902,7 @@ PMError InstSrcManager::intern_cacheCopyTo()
       return Error::E_cache_dir_exists;
     }
 
-    int res = PathInfo::mkdir( cpath.path(), 0700 );
+    int res = PathInfo::mkdir( cpath.path() );
     if ( res ) {
       ERR << "Unable to create cache dir " << cpath << " (errno " << res << ")" << endl;
       return Error::E_cache_dir_create;
@@ -891,19 +915,19 @@ PMError InstSrcManager::intern_cacheCopyTo()
     Pathname ndata( srccache + InstSrc::_c_data_dir );
     Pathname nmedi( srccache + InstSrc::_c_media_dir );
 
-    res = PathInfo::assert_dir( ndesc, 0700 );
+    res = PathInfo::assert_dir( ndesc );
     if ( res ) {
       ERR << "Unable to create descr_dir " << ndesc << " (errno " << res << ")" << endl;
       return Error::E_cache_dir_create;
     }
 
-    res = PathInfo::assert_dir( ndata, 0700 );
+    res = PathInfo::assert_dir( ndata );
     if ( res ) {
       ERR << "Unable to create data_dir " << ndata << " (errno " << res << ")" << endl;
       return Error::E_cache_dir_create;
     }
 
-    res = PathInfo::assert_dir( nmedi, 0700 );
+    res = PathInfo::assert_dir( nmedi );
     if ( res ) {
       ERR << "Unable to create media_dir " << nmedi << " (errno " << res << ")" << endl;
       return Error::E_cache_dir_create;
