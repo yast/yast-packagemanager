@@ -141,7 +141,7 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     {
       if (content.eof())
 	break;
-      MIL << "getine() failed" << endl;
+      MIL << "getline() failed" << endl;
       err = Error::E_no_instsrc_on_media;
       break;
     }
@@ -564,16 +564,12 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache, TagCacheRetrieval *
 void
 InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset)
 {
-MIL << "InstSrcData_UL::LangTag2Package()" << endl;
-
     // PACKAGE
     string single ((tagset->getTagByIndex(InstSrcData_ULLangTags::PACKAGE))->Data());
 
     std::vector<std::string> splitted;
     stringutil::split (single, splitted, " ", false);
 
-MIL << "-----------------------------" << endl;
-MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
     const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
 
     if (!candidates
@@ -582,7 +578,6 @@ MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitte
 	ERR << "Ambiguous package " << single << endl;
 	return;
     }
-MIL << "Found it" << endl;
 
     PMPackagePtr package = candidates->front();
     PMULPackageDataProviderPtr dataprovider = package->dataProvider();
@@ -600,13 +595,9 @@ MIL << "Found it" << endl;
 #define SET_SINGLE(tagname) \
     SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULLangTags::tagname))->Data())
 
-MIL << "SUMMARY" << endl;
     SET_SINGLE (SUMMARY);
-MIL << "DESCRIPTION" << endl;
     SET_MULTI (DESCRIPTION);
-MIL << "INSNOTIFY" << endl;
     SET_MULTI (INSNOTIFY);
-MIL << "DELNOTIFY" << endl;
     SET_MULTI (DELNOTIFY);
 
     return;
