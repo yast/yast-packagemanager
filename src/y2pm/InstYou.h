@@ -199,6 +199,11 @@ class InstYou {
     int lastUpdate();
 
     /**
+      Return how many patches have been installed.
+    */
+    int installedPatches() { return _installedPatches; }
+
+    /**
       Return total size of data to be downloaded based on current selection of
       patches.
     */
@@ -363,6 +368,8 @@ class InstYou {
     std::string _password;
 
     FSize _totalDownloadSize;
+
+    int _installedPatches;
 };
 
 ///////////////////////////////////////////////////////////////////

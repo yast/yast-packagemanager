@@ -84,6 +84,7 @@ void InstYou::init()
   _selectedPatchesIt = _patches.begin();
   _progressTotal = 0;
   _progressCurrent = 0;
+  _installedPatches = 0;
 }
 
 PMError InstYou::initProduct()
@@ -559,7 +560,7 @@ bool InstYou::installPatches()
 
   bool skipAll = false;
 
-  int installedPatches = 0;
+  _installedPatches = 0;
 
   PMError error;
 
@@ -575,7 +576,7 @@ bool InstYou::installPatches()
       if ( !patch->skipped() ) {
         error = installPatch( patch );
         if ( !error ) {
-          installedPatches++;
+          _installedPatches++;
           log( _("Ok\n") );
         } else {
           ERR << "Install error " << patch->name() << ": " << error << endl;
@@ -633,13 +634,13 @@ bool InstYou::installPatches()
   log( _("Installation finished.\n") );
   log( "\n" );
 
-  if ( installedPatches == 0 ) {
+  if ( _installedPatches == 0 ) {
     log( _("No patches have been installed.") );
-  } else if ( installedPatches == 1 ) {
+  } else if ( _installedPatches == 1 ) {
     log( _("1 patch has been installed") );
   } else {
     log( stringutil::form( _("%d patches have been installed."),
-                           installedPatches ) );
+                           _installedPatches ) );
   }
 
   if ( error ) {
@@ -648,7 +649,7 @@ bool InstYou::installPatches()
     writeLastUpdate();
   }
 
-  return installedPatches > 0;
+  return _installedPatches > 0;
 }
 
 PMError InstYou::installPatch( const PMYouPatchPtr &patch )
