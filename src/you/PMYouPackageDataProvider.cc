@@ -56,6 +56,30 @@ PMYouPackageDataProvider::~PMYouPackageDataProvider()
 {
 }
 
+const std::string
+PMYouPackageDataProvider::summary() const
+{
+    return "";
+}
+
+const std::list<std::string>
+PMYouPackageDataProvider::description() const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMYouPackageDataProvider::insnotify() const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMYouPackageDataProvider::delnotify() const
+{
+    return std::list<std::string>();
+}
+
 PkgAttributeValue PMYouPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
 							       PMObject::PMObjectAttribute attr )
 {
