@@ -146,8 +146,14 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
     SET_CACHE (LOCATION);
 
     stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
-    SET_VALUE (ARCHIVESIZE, FSize (atoll(splitted[0].c_str())));
-    SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
+    if (splitted.size() > 0)
+    {
+	SET_VALUE (ARCHIVESIZE, FSize (atoll(splitted[0].c_str())));
+	if (splitted.size() > 1)
+	{
+	    SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
+	}
+    }
     SET_VALUE (BUILDTIME, Date (GET_TAG(BUILDTIME)->Data()));
     SET_CACHE (SOURCERPM);
     SET_CACHE (GROUP);
@@ -290,7 +296,6 @@ InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, Common
 	selection->setConflicts (pkgrellist);
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(OBSOLETES))->MultiData()))
 	selection->setObsoletes (pkgrellist);
-    SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
 
     SET_CACHE (SUMMARY);
     SET_VALUE (CATEGORY, GET_TAG(CATEGORY)->Data());
@@ -301,6 +306,10 @@ InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, Common
     if (splitted.size() > 0)
     {
 	SET_VALUE (ARCHIVESIZE, FSize (atoll(splitted[0].c_str())));
+	if (splitted.size() > 1)
+	{
+	    SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
+	}
     }
 
     SET_CACHE (INSPACKS);
