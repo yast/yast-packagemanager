@@ -70,6 +70,7 @@ PkgArch InstTarget::baseArch()
 	char *argv[3] = { "uname", "-m", 0 };
 	ExternalProgram process (argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
 	string output = process.receiveLine ();
+	process.close ();
 	if (output.length() == 0)
 	{
 	    ERR << "No output from 'uname -m'" << endl;
