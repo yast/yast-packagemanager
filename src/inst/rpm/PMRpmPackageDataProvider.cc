@@ -68,9 +68,7 @@ PMRpmPackageDataProvider::stopRetrieval() const
 const std::string
 PMRpmPackageDataProvider::summary () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{SUMMARY}", value);
-    return value;
+    return _attr_SUMMARY;
 }
 
 const std::list<std::string>
@@ -84,9 +82,7 @@ PMRpmPackageDataProvider::description () const
 const FSize
 PMRpmPackageDataProvider::size () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{SIZE}", value);
-    return FSize (atoll(value.c_str()));
+    return _attr_SIZE;
 }
 
 const Date

@@ -36,8 +36,9 @@ int main(int argc, char* argv[])
     if (argc<2)
     {
 	cerr << "specify option" << endl;
-	cerr << "[--root <root-dir>]" << endl;
-	cerr << "[--flags <num>]" << endl;
+	cerr << "[--root <root-dir>]	//<root>/var/lib/rpm" << endl;
+	cerr << "[--flags <num>]	// rpm flags to use, see source" << endl;
+	cerr << "[--short]		// short output, only cached values" << endl;
 	cerr << "<command>: " << endl;
 	cerr << "query, install, remove, check, checkversion, rebuilddb" << endl;
 	return 1;
@@ -49,6 +50,7 @@ int main(int argc, char* argv[])
     unsigned argpos = 0;
     string root = "/";
     unsigned flags = 0;
+    bool short_output = false;
 
     for(int i = 1; i < argc; i++)
     {
@@ -86,6 +88,15 @@ int main(int argc, char* argv[])
 	    command = "";
     }
 
+    if (command == "--short")
+    {
+	short_output = true;
+
+	if(argnum>argpos)
+	    command = args[argpos++];
+	else
+	    command = "";
+    }
     RpmDbPtr rpmdb = new RpmDb();
     PMError stat = rpmdb->initDatabase(root, true);
     if( stat != RpmDb::Error::E_ok )
@@ -109,7 +120,7 @@ int main(int argc, char* argv[])
 	    }
 	    else
 	    {
-		show_pmpackage (*p);
+		show_pmpackage (*p, short_output);
 	    }
 	}
     }

@@ -43,6 +43,9 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	// package this provider belongs to
 	PMPackagePtr _package;
 
+	std::string _attr_SUMMARY;
+	FSize _attr_SIZE;
+
     public:
 
 	/**

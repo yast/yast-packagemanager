@@ -639,6 +639,7 @@ RpmDb::getPackages (void)
 	RPM_CONFLICTS,
 	RPM_BUILDTIME,		// passed to PkgEdition()
 	RPM_SUMMARY,
+	RPM_SIZE,
 	NUM_RPMTAGS
     };
 
@@ -658,7 +659,7 @@ RpmDb::getPackages (void)
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
     rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
     rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},];";
-    rpmquery += "%{BUILDTIME};%{SUMMARY}";
+    rpmquery += "%{BUILDTIME};%{SUMMARY};%{SIZE}";
     rpmquery += "\\n";
 
     RpmArgVec opts(4);
@@ -752,6 +753,9 @@ RpmDb::getPackages (void)
 	    p->setProvides (provides);
 	    p->setObsoletes (obsoletes);
 	    p->setConflicts (conflicts);
+
+	    dataprovider->_attr_SUMMARY = pkgattribs[RPM_SUMMARY];
+	    dataprovider->_attr_SIZE = FSize (atoll(pkgattribs[RPM_SIZE].c_str()));
 
 	    _packages.push_back (p);
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
