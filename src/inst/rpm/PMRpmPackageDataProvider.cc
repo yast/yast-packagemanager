@@ -135,7 +135,7 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	    break;
 	case PMPackage::ATTR_CHANGELOG:
 	    queryformat =
-    "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\n\n%{CHANGELOGTEXT}\n\n]";
+    "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\\n\\n%{CHANGELOGTEXT}\\n\\n]";
 	    break;
 	case PMPackage::ATTR_URL:
 	    queryformat = "%{URL}";
@@ -168,7 +168,7 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	    // not available as rpm tag
 	    return "";
 	case PMPackage::ATTR_FILENAMES:
-	    queryformat = "[%{FILENAMES}\n]";
+	    queryformat = "[%{FILENAMES}\\n]";
 	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid
