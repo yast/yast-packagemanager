@@ -35,6 +35,7 @@ A media may contain products for multiple languages.
 <LI>Multiple media<BR>
 a) The content may be splitted onto multiple media.<br>
 b) It must be able to merge splitted media into a single directory.<br>
+c) Media can be double-sided (e.g. DVD-ROM).<br>
 </LI>
 <LI>A media must be easily recognizable by the system<BR>
 This is needed when re-inserting a cd-rom media for further package
@@ -125,11 +126,12 @@ Proposal: Encode Vendor and Timestamp information in a file<BR>
   <i><tt>&lt;vendor&gt;</tt></i><br>
   <i><tt>&lt;YYYYMMDDHHMMSS&gt;</tt></i><br>
   <i>[<tt>&lt;media count&gt;</tt>]</i><br>
+  <i>[<tt>&lt;media flags&gt;</tt>]</i><br>
 </td></tr>
 </TABLE>
 <br>
 The identification data is stored inside the file on purpose. It could
-also be encoded in the file name (current SuSE media does it). But this
+also be encoded in the file name (older SuSE media did it). But this
 requires a directory scan for file access and should be avoided.<BR>
 <br>
 By storing the vendor name in the file, the timestamp can be kept vendor
@@ -139,11 +141,25 @@ for media identification.)<BR>
 <br>
 The media count is needed if the installation data is
 split up on multiple (identical) medias. The <tt>media</tt> file on
-the first media should contain the total count of medias. It is an
-optional information on the other media.<BR>
+the first media should contain the total count of medias.<br>
+The media count is a numerical value (all characters are digits).<br>
+It is an optional information on the other media.<BR>
+<br>
+A forth line may contain flags further describing the media.<br>
+In order to distinguish the flags from the count line, the flags values
+start with a letter.<br>
 <br>
 All media of a media-set must have identical vendor and data information
 in the <tt>media</tt> file.<br>
+<p></p>
+Currently defined flags
+<TABLE border>
+<tr><th>flag</th><th>meaning</th></tr>
+<tr><td><tt>doublesided</tt></td><td>media is double sided,
+	YaST will ask for 'front side' for odd-numbered media
+	and 'back side' for even-numbered media.<br>
+	The default is single-sided media.</td></tr>
+</table>
 <p></p>
 <H3>Example</H3>
 <pre>
