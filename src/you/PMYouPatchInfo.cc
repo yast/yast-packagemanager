@@ -403,7 +403,9 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       string buffer;
       ifstream in( dirFile.asString().c_str() );
       while( getline( in, buffer ) ) {
-        patchFiles.push_back( buffer );
+        if ( !buffer.empty() && (*buffer.begin() != '#') ) {
+          patchFiles.push_back( buffer );
+        }
       }
     }
 
