@@ -24,9 +24,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
-#include <y2pm/PMPackageDataProviderPtr.h>
-#include <y2pm/PMDataProvider.h>
 
 #include <y2pm/PMPackage.h>
 
