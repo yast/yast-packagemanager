@@ -236,6 +236,8 @@ PMError MediaHandler::releasePath( const Pathname & pathname ) const
   if ( info.isDir() ) {
     if ( info.path() != _localRoot ) {
       PathInfo::recursive_rmdir( info.path() );
+    } else {
+      PathInfo::clean_dir( info.path() );
     }
   }
 
