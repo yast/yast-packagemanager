@@ -233,17 +233,17 @@ int main( int argc, char **argv )
 
   // Get URL of you source.
 
-  Url url;
+  PMYouServer server;
 
   if ( autoInstall ) {
-    url = Url( "dir://" + you.paths()->attachPoint().asString() );
+    server.url = "dir://" + you.paths()->attachPoint().asString();
   } else {
     if ( urlStr ) {
-      url = Url( urlStr );
-      if ( !url.isValid() ) {
+      if ( !Url( urlStr ).isValid() ) {
         cerr << "Error: URL '" << urlStr << "' is not valid." << endl;
         exit( -1 );
       }
+      server.url = urlStr;
     } else {
       PMYouServers youServers( you.paths() );
       error = youServers.requestServers( checkUpdates || quickCheckUpdates );
@@ -251,19 +251,19 @@ int main( int argc, char **argv )
         cerr << "Error while requesting servers: " << error << endl;
         exit( -1 );
       }
-      url = youServers.currentServer();
+      server = youServers.currentServer();
     }
   }
 
-  patchPaths->setPatchUrl( url );
+  patchPaths->setPatchUrl( server.url );
 
   if ( verbose ) {
-    cout << "URL: " << url.asString() << endl;
+    cout << "URL: " << server.url << endl;
     cout << "Path: " << you.paths()->patchPath() << endl;
   }
 
   if ( quickCheckUpdates ) {
-    int updates = you.quickCheckUpdates( url );
+    int updates = you.quickCheckUpdates( server );
     if ( updates < 0 ) {
       cerr << "Unable to check for updates." << endl;
       return -1;
@@ -279,11 +279,11 @@ int main( int argc, char **argv )
     }
   }
 
-  error = you.retrievePatchDirectory( url );
+  error = you.retrievePatchDirectory( server );
   if ( error ) {
     if ( error == MediaError::E_login_failed ) {
       you.readUserPassword();
-      error = you.retrievePatchDirectory( url );
+      error = you.retrievePatchDirectory( server );
       if ( error ) {
         cerr << error << endl;
         exit( -1 );
@@ -294,7 +294,7 @@ int main( int argc, char **argv )
     }
   }
 
-  error = you.retrievePatchInfo( url, reload, checkSig );
+  error = you.retrievePatchInfo( server, reload, checkSig );
   if ( error ) {
     cerr << "Error retrieving patches: " << error << endl;
     exit( -1 );

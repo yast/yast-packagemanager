@@ -15,7 +15,7 @@
   Author:     Cornelius Schumacher <cschum@suse.de>
   Maintainer: Cornelius Schumacher <cschum@suse.de>
 
-  Purpose: Provide path information for YOU patches.
+  Purpose: Provide YOU server information.
 
 /-*/
 
@@ -76,7 +76,7 @@ PMError PMYouServers::requestServers( bool check )
 {
   string lastServer = _patchPaths->config()->readEntry( "LastServer" );
   if ( !lastServer.empty() ) {
-    addServer( Url( lastServer ) );
+    addServer( parseServerLine( lastServer ) );
   }
 
   PMError error = readServers( localYouServers() );
@@ -158,20 +158,25 @@ PMError PMYouServers::readServers( const Pathname &file )
   }
   while( getline( in, line ) ) {
     if ( !line.empty() && *line.begin() != '#' ) {
-      Url url( line );
-      if ( url.isValid() ) addServer( url );
+      PMYouServer server = parseServerLine( line );
+      Url url( server.url );
+      if ( url.isValid() ) addServer( server );
     }
   }
 
   return PMError();
 }
 
-void PMYouServers::addServer( const Url &url )
+void PMYouServers::addServer( const PMYouServer &server )
 {
-  D__ << "Mirror url: " << url << endl;
+  D__ << "Add server: " << server.name << " (" << server.url << ")" << endl;
 
-  list<Url>::const_iterator it = find( _servers.begin(), _servers.end(), url );
-  if ( it == _servers.end() ) _servers.push_back( url );
+  list<PMYouServer>::const_iterator it;
+  for( it = _servers.begin(); it != _servers.end(); ++it ) {
+    if ( it->url == server.url && it->name == server.name &&
+         it->directory == server.directory ) break;
+  }
+  if ( it == _servers.end() ) _servers.push_back( server );
 }
 
 void PMYouServers::addPackageVersion( const string &pkgName,
@@ -190,10 +195,10 @@ void PMYouServers::addPackageVersion( const string &pkgName,
   }
 }
 
-list<Url> PMYouServers::servers()
+list<PMYouServer> PMYouServers::servers()
 {
   if ( _servers.size() == 0 ) {
-    list<Url> servers;
+    list<PMYouServer> servers;
     servers.push_back( defaultServer() );
     return servers;
   } else {
@@ -201,20 +206,22 @@ list<Url> PMYouServers::servers()
   }
 }
 
-Url PMYouServers::defaultServer()
+PMYouServer PMYouServers::defaultServer()
 {
   if ( _servers.size() == 0 ) {
+    PMYouServer server;
     if ( _patchPaths->businessProduct() ) {
-      return Url( "http://sdb.suse.de/download/" );
+      server.url = "http://sdb.suse.de/download/";
     } else {
-      return Url( "ftp://ftp.suse.com/pub/suse/" );
+      server.url = "ftp://ftp.suse.com/pub/suse/";
     }
+    return server;
   } else {
     return *_servers.begin();
   }
 }
 
-Url PMYouServers::currentServer()
+PMYouServer PMYouServers::currentServer()
 {
   return *(servers().begin());
 }
@@ -239,4 +246,11 @@ string PMYouServers::encodeUrl( const string &url )
   D__ << result << endl;
 
   return result;
+}
+
+PMYouServer PMYouServers::parseServerLine( const string &line )
+{
+  PMYouServer server;
+  server.url = line;
+  return server;
 }

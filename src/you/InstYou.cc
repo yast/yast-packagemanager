@@ -86,7 +86,7 @@ PMError InstYou::initProduct()
   return _paths->initProduct();
 }
 
-PMError InstYou::servers( list<Url> &servers )
+PMError InstYou::servers( list<PMYouServer> &servers )
 {
   PMYouServers youServers( _paths );
 
@@ -139,9 +139,9 @@ PMError InstYou::setUserPassword( const string &username,
   return PMError();
 }
 
-PMError InstYou::retrievePatchDirectory( const Url &url )
+PMError InstYou::retrievePatchDirectory( const PMYouServer &server )
 {
-  Url u( url );
+  Url u( server.url );
   if ( !_username.empty() && !_password.empty() ) {
     u.setUsername( _username );
     u.setPassword( _password );
@@ -153,14 +153,14 @@ PMError InstYou::retrievePatchDirectory( const Url &url )
   return error;
 }
 
-PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
+PMError InstYou::retrievePatchInfo( const PMYouServer &server, bool reload,
                                     bool checkSig )
 {
   D__ << "retrievePatchInfo()" << endl;
 
   _patches.clear();
 
-  Url u( url );
+  Url u( server.url );
   if ( !_username.empty() && !_password.empty() ) {
     u.setUsername( _username );
     u.setPassword( _password );
@@ -1093,9 +1093,9 @@ PMError InstYou::writeLastUpdate()
   return PMError();
 }
 
-int InstYou::quickCheckUpdates( const Url &u )
+int InstYou::quickCheckUpdates( const PMYouServer &server )
 {
-  Url url = u;
+  Url url = Url( server.url );
 
   D__ << "InstYou::quickCheckUpdates(): " << url << endl;
 
