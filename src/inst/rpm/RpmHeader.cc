@@ -269,7 +269,7 @@ PMSolvable::PkgRelList_type RpmHeader::PkgRelList_val( tag tag_r, FileDeps::File
     PkgName n( names[i] );
 
     if ( n == self ) {
-      //_I__("DEPCHECK") << self << " has dependency on it self" << endl;
+#warning Filtering self provides. Check code and solver
       continue;
     }
 
