@@ -86,6 +86,7 @@ void du(vector<string>& argv);
 void showselection(vector<string>& argv);
 void installselection(vector<string>& argv);
 void order(vector<string>& argv);
+void update(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -124,6 +125,7 @@ static struct Funcs func[] = {
     { "installselection",	installselection,	1,	"mark selection for installation" },
     
     { "order",		order,		1,	"compute installation order" },
+    { "update",		update,		1,	"compute update" },
 
     { NULL,		NULL,		0,	NULL }
 };
@@ -671,6 +673,14 @@ void order(vector<string>& argv)
     cout << endl;
 
 }
+
+void update(vector<string>& argv)
+{
+    PMUpdateStats stats;
+    Y2PM::packageManager().doUpdate(stats);
+    cout << stats << endl;
+}
+
 #if 0
 void installold(vector<string>& argv)
 {
