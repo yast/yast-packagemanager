@@ -76,6 +76,9 @@ PMPackage::~PMPackage()
 //
 std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
 {
+    if (attr < PMPackage::PKG_ATTR_BEGIN)
+	return getAttributeName((PMObject::PMObjectAttribute)attr);
+
   switch ( attr ) {
 
 #define ENUM_OUT(V) case ATTR_##V: return #V; break
@@ -99,6 +102,10 @@ std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
     ENUM_OUT( ARCHIVESIZE );
     ENUM_OUT( AUTHOR );
     ENUM_OUT( FILENAMES );
+    ENUM_OUT( RECOMMENDS );
+    ENUM_OUT( SUGGESTS );
+    ENUM_OUT( LOCATION );
+    ENUM_OUT( KEYWORDS );
 #undef ENUM_OUT
 
   ///////////////////////////////////////////////////////////////////

@@ -60,6 +60,8 @@ class PMObject : virtual public Rep, public PMSolvable {
 	PMOBJ_ATTR_BEGIN = PMSLV_NUM_ATTRIBUTES,
 	ATTR_SUMMARY = PMOBJ_ATTR_BEGIN,
 	ATTR_DESCRIPTION,
+	ATTR_INSNOTIFY,			// notification on install
+	ATTR_DELNOTIFY,			// notification on delete
 	ATTR_SIZE, // installed size
 	// last entry:
 	PMOBJ_NUM_ATTRIBUTES

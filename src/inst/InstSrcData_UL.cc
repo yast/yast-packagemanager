@@ -251,6 +251,8 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   ndescr->set_content_archmap (archmap);
   ndescr->set_content_labelmap (labelmap);
 
+  ndescr->set_product_dir (product_dir_r);
+
   ///////////////////////////////////////////////////////////////////
   // done
   ///////////////////////////////////////////////////////////////////
@@ -278,14 +280,16 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     ndata_r = 0;
     PMError err;
 
-    std::list<PMPackagePtr> *pacs = new (std::list<PMPackagePtr>);
+    std::list<PMPackagePtr> *packagelist = new (std::list<PMPackagePtr>);
     InstSrcDataPtr ndata( new InstSrcData (media_r) );
-
-    ///////////////////////////////////////////////////////////////////
-    // parse packages file and fill into ndata
-    ///////////////////////////////////////////////////////////////////
-
     std::string tagstr;
+
+    ///////////////////////////////////////////////////////////////////
+    // parse package data
+    ///////////////////////////////////////////////////////////////////
+
+    // --------------------------------
+    // setup packages access
 
     Pathname packagesname = descr_dir_r + "/packages";
     MIL << "provideFile (" << packagesname << ")" << endl;
@@ -297,24 +301,43 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     packagesname = media_r->getAttachPoint() + packagesname;
     MIL << "fopen(" << packagesname << ")" << endl;
+    TagCacheRetrieval *pkgcache = new TagCacheRetrieval (packagesname);
 
-    TagCacheRetrieval *retrieval = new TagCacheRetrieval (packagesname);
+    // --------------------------------
+    // setup packages.<lang> access
+    // check for packages.<lang> file
 
-    std::ifstream& packages = retrieval->getStream();
+    char *lang = getenv ("LANG");
+    if (lang == 0) lang = "en";
+    if (strlen (lang) > 2) lang = strndup (lang, 2);
 
-    if( !packages)
+    Pathname langname = packagesname.asString() + "." + lang;
+    TagCacheRetrieval *langcache = 0;
+    err = media_r->provideFile (langname);
+    if (err != Error::E_ok)
+    {
+	return err;
+    }
+    MIL << "fopen(" << langname << ")" << endl;
+    langcache = new TagCacheRetrieval (langname);
+
+    // --------------------------------
+    // read package data
+
+    std::ifstream& package_stream = pkgcache->getStream();
+    if( !package_stream)
     {
 	return Error::E_open_file;
     }
 
     CommonPkdParser::TagSet* tagset;
-    tagset = new InstSrcData_ULTags ();
-
+    tagset = new InstSrcData_ULPkgTags ();
     bool parse = true;
+    TagParser & parser = pkgcache->getParser();
 
-    TagParser & parser = retrieval->getParser();
+    MIL << "start packages parsing" << endl;
 
-    while( parse && parser.lookupTag (packages))
+    while( parse && parser.lookupTag (package_stream))
     {
 	bool repeatassign = false;
 
@@ -322,7 +345,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
 	do
 	{
-	    switch( tagset->assign (tagstr.c_str(), parser, packages))
+	    switch( tagset->assign (tagstr.c_str(), parser, package_stream))
 	    {
 		case CommonPkdParser::Tag::ACCEPTED:
 		    repeatassign = false;
@@ -332,7 +355,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    pacs->push_back (Tag2Package( retrieval, tagset ));
+		    packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset ));
 		    count++;
 		    tagset->clear();
 		    repeatassign = true;
@@ -348,17 +371,88 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     if (parse)
     {
-	pacs->push_back (Tag2Package( retrieval, tagset ));
+	// insert final package
+
+	packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset ));
 	count++;
 
-	ndata->setPackages (pacs);
+	// =============================================================
+	// pass packages list to InstSrcData
+
+	ndata->setPackages (packagelist);
     }
     tagset->clear();
+
+    MIL << "done packages parsing" << endl;
 
     if( !parse )
 	std::cerr << "*** parsing was aborted ***" << std::endl;
     else
 	std::cerr << "*** parsed " << count << " packages ***" << std::endl;
+
+
+    ///////////////////////////////////////////////////////////////////
+    // parse language data
+    ///////////////////////////////////////////////////////////////////
+
+    std::ifstream& language_stream = langcache->getStream();
+    if( !language_stream)
+    {
+	return Error::E_open_file;
+    }
+
+    tagset = new InstSrcData_ULLangTags ();
+    parser = langcache->getParser();
+
+    MIL << "start packages.<lang> parsing" << endl;
+    count = 0;
+
+    while( parse && parser.lookupTag (language_stream))
+    {
+	bool repeatassign = false;
+
+	tagstr = parser.startTag();
+
+	do
+	{
+	    switch( tagset->assign (tagstr.c_str(), parser, language_stream))
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    repeatassign = false;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    LangTag2Package (langcache, packagelist, tagset);
+		    count++;
+		    tagset->clear();
+		    repeatassign = true;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	} while( repeatassign );
+    }
+
+    if (parse)
+    {
+	LangTag2Package (langcache, packagelist, tagset);
+	count++;
+    }
+    tagset->clear();
+
+    MIL << "done packages.<lang> parsing" << endl;
+
+    if( !parse )
+	std::cerr << "*** parsing was aborted ***" << std::endl;
+    else
+	std::cerr << "*** parsed " << count << " language entries ***" << std::endl;
+
 
     ///////////////////////////////////////////////////////////////////
     // done
@@ -376,11 +470,22 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     return err;
 }
 
+
+/**
+ * pass packages data from tagset
+ * to pgkcache
+ * Single line values are passed by value
+ * Multi line values are passed by file position (on-demand read)
+ *
+ * langcache is only used for PMULPackageDataProvider() constructor
+ *
+ */
+
 PMPackagePtr
-InstSrcData_UL::Tag2Package( TagCacheRetrieval *retrieval, CommonPkdParser::TagSet * tagset )
+InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache, TagCacheRetrieval *langcache, CommonPkdParser::TagSet * tagset )
 {
     // PACKAGE
-    string single ((tagset->getTagByIndex(InstSrcData_ULTags::PACKAGE))->Data());
+    string single ((tagset->getTagByIndex(InstSrcData_ULPkgTags::PACKAGE))->Data());
 
     std::vector<std::string> splitted;
 
@@ -393,95 +498,117 @@ InstSrcData_UL::Tag2Package( TagCacheRetrieval *retrieval, CommonPkdParser::TagS
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
     PkgArch arch (splitted[3]);
 
-    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (retrieval));
-    PMPackagePtr pac( new PMPackage (name, edition, arch, dataprovider));
-    CommonPkdParser::Tag *tagptr;
+    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, langcache));
+    PMPackagePtr package( new PMPackage (name, edition, arch, dataprovider));
+
+    CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
+
 #define SET_VALUE(tagname,value) \
-    dataprovider->setAttributeValue (pac, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
+    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
 #define SET_POS(tagname,begin,end) \
-    dataprovider->setAttributeValue (pac, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
+    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcData_ULTags::tagname)
+    tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname)
 #define SET_MULTI(tagname) \
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 #define SET_SINGLE(tagname) \
-    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->Data())
+    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname))->Data())
 
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_NAME
     SET_VALUE (NAME, splitted[0]);
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_VERSION
     SET_VALUE (VERSION, splitted[1]);
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_RELEASE
     SET_VALUE (RELEASE, splitted[2]);
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_ARCH
     SET_VALUE (ARCH, splitted[3]);
 
-    // REQUIRES, list of requires tags
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_REQUIRES
     SET_MULTI (REQUIRES);
-
-    // PREREQUIRES, list of pre-requires tags
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_PREREQUIRES
     SET_MULTI (PREREQUIRES);
-
-    // PROVIDES, list of provides tags
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_PROVIDES
     SET_MULTI (PROVIDES);
-
-    // CONFLICTS, list of conflicts tags
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_CONFLICTS
     SET_MULTI (CONFLICTS);
-
-    // OBSOLETES, list of obsoletes tags
-    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_OBSOLETES
     SET_MULTI (OBSOLETES);
 
-    // RECOMMENDS, list of recommends tags
-    // FIXME Where to put RECOMMENDS ?
-    //SET_MULTI (RECOMMENDS);
+    SET_MULTI (RECOMMENDS);
+    SET_MULTI (SUGGESTS);
+    SET_SINGLE (LOCATION);
 
-    // SUGGESTS, list of suggests tags
-    // FIXME Where to put SUGGESTS ?
-    //SET_MULTI (SUGGESTS);
-
-    // LOCATION, file location
-    // FIXME Where to put LOCATION ?
-    //SET_SINGLE (LOCATION);
-
-    // SIZE, packed and unpacked size
-    // -> PMPackage::PMObjectAttribute::ATTR_SIZE (installed)
-    // -> PMPackage::PMPackageAttribute::ATTR_ARCHIVESIZE (package)
-    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULTags::SIZE))->Data(), splitted, " ", false);
-    dataprovider->setAttributeValue (pac, PMPackage::ATTR_ARCHIVESIZE, splitted[0]);
-    dataprovider->setAttributeValue (pac, (PMPackage::PMPackageAttribute)PMPackage::ATTR_SIZE, splitted[1]);
-
-    // BUILDTIME, buildtime
-    // -> PMPackage::PMPackageAttribute::ATTR_BUILDTIME
+    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SIZE))->Data(), splitted, " ", false);
+    SET_VALUE (ARCHIVESIZE, splitted[0]);
+    SET_VALUE (SIZE, splitted[1]);
     SET_SINGLE (BUILDTIME);
-
-    // SOURCE, source package
-    // PMPackage::PMPackageAttribute::ATTR_SOURCERPM
     SET_SINGLE (SOURCERPM);
-
-    // GROUP, rpm group
-    // -> PMPackage::PMPackageAttribute::ATTR_GROUP
     SET_SINGLE (GROUP);
-
-    // LICENSE, license
-    // -> PMPackage::PMPackageAttribute::ATTR_LICENSE
     SET_SINGLE (LICENSE);
-
-    // AUTHORS, list of authors
-    // -> PMPackage::PMPackageAttribute::ATTR_AUTHOR
     SET_MULTI (AUTHOR);
+    SET_MULTI (KEYWORDS);
+
+#undef SET_VALUE
+#undef SET_POS
+#undef GET_TAG
+#undef SET_SINGLE
+#undef SET_MULTI
 
     // SHAREWITH, package to share data with
     // FIXME
-    //string sharewith ((tagset->getTagByIndex(InstSrcData_ULTags::SHAREWITH))->Data());
+    //string sharewith ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SHAREWITH))->Data());
 
-    // KEYWORDS, list of keywords
-    // FIXME Where to put KEYWORDS
-    //SET_MULTI (KEYWORDS);
-
-    return pac;
+    return package;
 }
+
+
+/**
+ * pass packages.lang data from tagset
+ * to langcache
+ * Single line values are passed by value
+ * Multi line values are passed by file position (on-demand read)
+ *
+ */
+
+void
+InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset)
+{
+MIL << "InstSrcData_UL::LangTag2Package()" << endl;
+
+    // PACKAGE
+    string single ((tagset->getTagByIndex(InstSrcData_ULLangTags::PACKAGE))->Data());
+
+    std::vector<std::string> splitted;
+    stringutil::split (single, splitted, " ", false);
+
+MIL << "-----------------------------" << endl;
+MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+    const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
+
+    if (!candidates
+	|| candidates->size() != 1)
+    {
+	ERR << "Ambiguous package " << single << endl;
+	return;
+    }
+MIL << "Found it" << endl;
+
+    PMPackagePtr package = candidates->front();
+    PMULPackageDataProviderPtr dataprovider = package->dataProvider();
+
+    CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
+
+#define SET_VALUE(tagname,value) \
+    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
+#define SET_POS(tagname,begin,end) \
+    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
+#define GET_TAG(tagname) \
+    tagset->getTagByIndex(InstSrcData_ULLangTags::tagname)
+#define SET_MULTI(tagname) \
+    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
+#define SET_SINGLE(tagname) \
+    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULLangTags::tagname))->Data())
+
+MIL << "SUMMARY" << endl;
+    SET_SINGLE (SUMMARY);
+MIL << "DESCRIPTION" << endl;
+    SET_MULTI (DESCRIPTION);
+MIL << "INSNOTIFY" << endl;
+    SET_MULTI (INSNOTIFY);
+MIL << "DELNOTIFY" << endl;
+    SET_MULTI (DELNOTIFY);
+
+    return;
+}
+

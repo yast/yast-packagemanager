@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
+
 #include <y2pm/InstData.h>
 
 #include <y2pm/DataOldSuSE.h>
@@ -142,6 +144,47 @@ InstData::getPackages() const
     return _packages;
 }
 
+/**
+ * find list of packages
+ * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
+ */
+const std::list<PMPackagePtr> *
+InstData::findPackages (const std::list<PMPackagePtr> *packagelist, const string& name, const string& version, const string& release, const string& arch)
+{
+    std::list<PMPackagePtr> *hits = new (std::list<PMPackagePtr>);
+    if (packagelist == 0)
+    {
+	ERR << "InstData::findPackages (NULL, ...)" << endl;
+	return hits;
+    }
+
+    typedef std::list<PMPackagePtr>::const_iterator PkgLI;
+    for (PkgLI pkg = packagelist->begin(); pkg != packagelist->end(); ++pkg)
+    {
+	if (!name.empty()
+	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_NAME).firstLine()) != name)
+	{
+	    continue;
+	}
+	if (!version.empty()
+	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_VERSION).firstLine()) != version)
+	{
+	    continue;
+	}
+	if (!release.empty()
+	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_RELEASE).firstLine()) != release)
+	{
+	    continue;
+	}
+	if (!arch.empty()
+	    && ((*pkg)->getAttributeValue ((PMPackage::PMPackageAttribute)PMPackage::ATTR_ARCH).firstLine()) != arch)
+	{
+	    continue;
+	}
+	hits->push_back (*pkg);
+    }
+    return hits;
+}
 
 /**
  * generate PMSolvable objects for each patch on the source
