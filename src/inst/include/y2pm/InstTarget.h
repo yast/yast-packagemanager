@@ -293,27 +293,53 @@ class InstTarget: virtual public Rep, public InstData {
 	 * */
 	void setRebuildDBProgressCallback(void (*func)(int,void*), void* data);
 
-	/**
-	 * query system for provided tag (rpm -q --whatprovides)
-	 */
-	bool isProvided (const std::string& tag) { return _rpmdb->isProvided (tag); }
+    public:
+      ///////////////////////////////////////////////////////////////////
+      //
+      // Direct RPM database retrieval forwarded to RpmDb
+      //
+      ///////////////////////////////////////////////////////////////////
 
-	/**
-	 * query system for installed package (rpm -q)
-	 */
-	bool isInstalled (const std::string& name) { return _rpmdb->isInstalled (name); }
+      /**
+       * Return true if at least one package owns a certain file.
+       **/
+      bool hasFile( const std::string & file_r ) const { return _rpmdb->hasFile( file_r ); }
 
-	/**
-	 * query system for package the given file belongs to
-	 * (rpm -qf)
-	 * report 'name-version-release' if full_name, else 'name' only
-	 */
-	std::string belongsTo (const Pathname& name, bool full_name = true) { return _rpmdb->belongsTo (name, full_name); }
+      /**
+       * Return true if at least one package provides a certain tag.
+       **/
+      bool hasProvides( const std::string & tag_r ) const { return _rpmdb->hasProvides( tag_r ); }
 
-	/**
-	 * Hack to let InstTarget lookup required and conflicting file relations.
+      /**
+       * Return true if at least one package requires a certain tag.
+       **/
+      bool hasRequiredBy( const std::string & tag_r ) const { return _rpmdb->hasRequiredBy( tag_r ); }
+
+      /**
+       * Return true if at least one package conflicts with a certain tag.
 	 **/
-	void traceFileRel( const PkgRelation & rel_r ) { _rpmdb->traceFileRel( rel_r ); }
+      bool hasConflicts( const std::string & tag_r ) const { return _rpmdb->hasConflicts( tag_r ); }
+
+      /**
+       * Return true if package is installed.
+       **/
+      bool hasPackage( const PkgName & name_r ) const { return _rpmdb->hasPackage( name_r ); }
+
+      /**
+       * Hack to let InstTarget lookup required and conflicting file relations.
+       **/
+      void traceFileRel( const PkgRelation & rel_r ) { _rpmdb->traceFileRel( rel_r ); }
+
+      ///////////////////////////////////////////////////////////////////
+
+      /**
+       * Deprecated old style
+       **/
+      bool isProvided (const std::string& tag) { return hasProvides(tag); }
+      /**
+       * Deprecated old style
+       **/
+      bool isInstalled (const std::string& name) { return hasPackage(PkgName(name)); }
 
       ///////////////////////////////////////////////////////////////////
       // Patch related interface

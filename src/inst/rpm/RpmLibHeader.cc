@@ -19,6 +19,8 @@
 
 /-*/
 
+#include "RpmLib.h"
+
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
@@ -77,19 +79,19 @@ class RpmLibHeader::stringList {
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : RpmLibHeader::int32List
+//	CLASS NAME : RpmLibHeader::intList
 /**
  *
  **/
-class RpmLibHeader::int32List {
-  int32List            ( const int32List & );
-  int32List & operator=( const int32List & );
+class RpmLibHeader::intList {
+  intList            ( const intList & );
+  intList & operator=( const intList & );
   private:
     unsigned cnt;
     void *   val;
     int_32   type;
   public:
-    int32List()
+    intList()
       : cnt( 0 ), val( 0 ), type( RPM_NULL_TYPE )
     {}
     unsigned set( void * val_r, int_32 cnt_r, int_32 type_r ) {
@@ -99,7 +101,7 @@ class RpmLibHeader::int32List {
       return cnt;
     }
     unsigned size() const { return cnt; }
-    int_32 operator[]( const unsigned idx_r ) const {
+    int operator[]( const unsigned idx_r ) const {
       if ( idx_r < cnt ) {
 	switch ( type ) {
 	case RPM_CHAR_TYPE:
@@ -116,6 +118,12 @@ class RpmLibHeader::int32List {
     }
 };
 
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : RpmLibHeader::Changelog
+//
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
@@ -182,17 +190,30 @@ RpmLibHeader::~RpmLibHeader()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::int_32_list
+//	METHOD NAME : RpmLibHeader::has_tag
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool RpmLibHeader::has_tag( tag tag_r ) const
+{
+  return ::headerIsEntry( _h, tag_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibHeader::int_list
 //	METHOD TYPE : unsigned
 //
 //	DESCRIPTION :
 //
-unsigned RpmLibHeader::int_32_list( int_32 tag_r, int32List & lst_r ) const
+unsigned RpmLibHeader::int_list( tag tag_r, intList & lst_r ) const
 {
   int_32 type = 0;
   int_32 cnt  = 0;
   void * val  = 0;
-  headerGetEntry( _h, tag_r, &type, &val, &cnt );
+  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
 
   if ( val ) {
     switch ( type ) {
@@ -222,12 +243,12 @@ unsigned RpmLibHeader::int_32_list( int_32 tag_r, int32List & lst_r ) const
 //
 //	DESCRIPTION :
 //
-unsigned RpmLibHeader::string_list( int_32 tag_r, stringList & lst_r ) const
+unsigned RpmLibHeader::string_list( tag tag_r, stringList & lst_r ) const
 {
   int_32 type = 0;
   int_32 cnt  = 0;
   void * val  = 0;
-  headerGetEntry( _h, tag_r, &type, &val, &cnt );
+  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
 
   if ( val ) {
     switch ( type ) {
@@ -246,17 +267,17 @@ unsigned RpmLibHeader::string_list( int_32 tag_r, stringList & lst_r ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::int_32_val
-//	METHOD TYPE : int_32
+//	METHOD NAME : RpmLibHeader::int_val
+//	METHOD TYPE : int
 //
 //	DESCRIPTION :
 //
-int_32 RpmLibHeader::int_32_val( int_32 tag_r ) const
+int RpmLibHeader::int_val( tag tag_r ) const
 {
   int_32 type = 0;
   int_32 cnt  = 0;
   void * val  = 0;
-  headerGetEntry( _h, tag_r, &type, &val, &cnt );
+  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
 
   if ( val ) {
     switch ( type ) {
@@ -289,12 +310,12 @@ int_32 RpmLibHeader::int_32_val( int_32 tag_r ) const
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::string_val( int_32 tag_r ) const
+std::string RpmLibHeader::string_val( tag tag_r ) const
 {
   int_32 type = 0;
   int_32 cnt  = 0;
   void * val  = 0;
-  headerGetEntry( _h, tag_r, &type, &val, &cnt );
+  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
 
   if ( val ) {
     switch ( type ) {
@@ -321,7 +342,7 @@ std::string RpmLibHeader::string_val( int_32 tag_r ) const
 //
 //	DESCRIPTION :
 //
-std::list<std::string> RpmLibHeader::stringList_val( int_32 tag_r ) const
+std::list<std::string> RpmLibHeader::stringList_val( tag tag_r ) const
 {
   std::list<std::string> ret;
   stringList             lines;
@@ -340,7 +361,7 @@ std::list<std::string> RpmLibHeader::stringList_val( int_32 tag_r ) const
 //
 //	DESCRIPTION :
 //
-PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( int_32 tag_r, FileDeps::FileNames * freq_r ) const
+PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( tag tag_r, FileDeps::FileNames * freq_r ) const
 {
   PMSolvable::PkgRelList_type ret;
 
@@ -375,8 +396,8 @@ PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( int_32 tag_r, FileDeps
   if ( !count )
     return ret;
 
-  int32List  flags;
-  int_32_list( kindFlags, flags );
+  intList  flags;
+  int_list( kindFlags, flags );
 
   stringList versions;
   string_list( kindVersion, versions );
@@ -476,10 +497,10 @@ PkgName RpmLibHeader::tag_name() const
 //
 PkgEdition RpmLibHeader::tag_edition() const
 {
-  return PkgEdition( int_32_val( RPMTAG_EPOCH ),
+  return PkgEdition( int_val   ( RPMTAG_EPOCH ),
 		     string_val( RPMTAG_VERSION ),
 		     string_val( RPMTAG_RELEASE ),
-		     int_32_val( RPMTAG_BUILDTIME ) );
+		     int_val   ( RPMTAG_BUILDTIME ) );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -505,7 +526,7 @@ PkgArch RpmLibHeader::tag_arch() const
 //
 Date RpmLibHeader::tag_installtime() const
 {
-  return int_32_val( RPMTAG_INSTALLTIME );
+  return int_val( RPMTAG_INSTALLTIME );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -518,7 +539,7 @@ Date RpmLibHeader::tag_installtime() const
 //
 Date RpmLibHeader::tag_buildtime() const
 {
-  return int_32_val( RPMTAG_BUILDTIME );
+  return int_val( RPMTAG_BUILDTIME );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -583,7 +604,7 @@ PMSolvable::PkgRelList_type RpmLibHeader::tag_obsoletes( FileDeps::FileNames * f
 //
 FSize RpmLibHeader::tag_size() const
 {
-  return int_32_val( RPMTAG_SIZE );
+  return int_val( RPMTAG_SIZE );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -596,7 +617,7 @@ FSize RpmLibHeader::tag_size() const
 //
 FSize RpmLibHeader::tag_archivesize() const
 {
-  return int_32_val( RPMTAG_ARCHIVESIZE );
+  return int_val( RPMTAG_ARCHIVESIZE );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -806,8 +827,8 @@ RpmLibHeader::Changelog RpmLibHeader::tag_changelog() const
 {
   Changelog ret;
 
-  int32List times;
-  if ( int_32_list( RPMTAG_CHANGELOGTIME, times ) ) {
+  intList times;
+  if ( int_list( RPMTAG_CHANGELOGTIME, times ) ) {
     stringList names;
     string_list( RPMTAG_CHANGELOGNAME, names );
     stringList texts;
@@ -836,8 +857,8 @@ std::list<std::string> RpmLibHeader::tag_filenames() const
   if ( string_list( RPMTAG_BASENAMES, basenames ) ) {
     stringList dirnames;
     string_list( RPMTAG_DIRNAMES, dirnames );
-    int32List  dirindexes;
-    int_32_list( RPMTAG_DIRINDEXES, dirindexes );
+    intList  dirindexes;
+    int_list( RPMTAG_DIRINDEXES, dirindexes );
     for ( unsigned i = 0; i < basenames.size(); ++ i ) {
       ret.push_back( dirnames[dirindexes[i]] + basenames[i] );
     }

@@ -318,7 +318,7 @@ int main()
   for ( PMPackageManager::PMSelectableVec::const_iterator i = PMGR.begin(); i != PMGR.end(); ++i ) {
     PMPackagePtr p( (*i)->installedObj() );
     if ( p ) {
-      dataDump( DBG, p );
+      //dataDump( DBG, p );
       if ( !--cnt )
 	break;
     } else {
@@ -326,6 +326,36 @@ int main()
     }
   }
 
+  RpmLibDb rpmdb( "/var/lib/rpm" );
+  if ( rpmdb.dbOpen() ) {
+    SEC << "DB OPEN" << endl;
+  }
+
+  INT << "rpmdb.findByFile" << endl;
+  RpmLibDb::const_header_set result( rpmdb.findByFile( "/bin/bash" ) );
+  for ( int i = 0; i < result.size(); ++i ) {
+    MIL << result[i] << endl;
+  }
+
+  INT << "rpmdb.findByProvides" << endl;
+  result = rpmdb.findByProvides( "libreadline.so.4" );
+  for ( int i = 0; i < result.size(); ++i ) {
+    MIL << result[i] << endl;
+  }
+
+  INT << "rpmdb.findByRequiredBy" << endl;
+  result = rpmdb.findByRequiredBy( "/bin/bash" );
+  for ( int i = 0; i < result.size(); ++i ) {
+    MIL << result[i] << endl;
+  }
+
+  INT << "rpmdb.findByConflicts" << endl;
+  result = rpmdb.findByConflicts( "postfix" );
+  for ( int i = 0; i < result.size(); ++i ) {
+    MIL << result[i] << endl;
+  }
+
+  rpmdb.dbClose();
 
   SEC << "STOP" << endl;
   return 0;

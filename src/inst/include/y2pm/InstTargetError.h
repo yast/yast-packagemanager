@@ -61,8 +61,9 @@ class InstTargetError {
       E_RpmDB_subprocess_failed,
       E_RpmDB_old_db,
       //
-      E_RpmLib_read_config,
-      E_RpmLib_dbopen,
+      E_RpmLib_read_config_failed,
+      E_RpmLib_dbopen_failed,
+      E_RpmLib_db_not_open,
       //
       E_SelDB_already_open,
       E_SelDB_open_failed,

@@ -21,10 +21,6 @@
 #ifndef RpmLibHeader_h
 #define RpmLibHeader_h
 
-extern "C" {
-#include <rpm/rpmlib.h>
-}
-
 #include <iosfwd>
 #include <list>
 
@@ -52,31 +48,34 @@ class RpmLibHeader : virtual public Rep {
 
   private:
 
+    typedef int tag;
+    typedef struct headerToken * Header;
+
+  private:
+
     Header _h;
 
   private:
 
-    int_32 tag_type( int_32 tag_r ) const;
-
-    bool has_tag( int_32 tag_r ) const { return( tag_type( tag_r ) != RPM_NULL_TYPE ); }
+    bool has_tag( tag tag_r ) const;
 
   private:
 
-    class int32List;
-    unsigned int_32_list( int_32 tag_r, int32List & lst_r ) const;
+    class intList;
+    unsigned int_list( tag tag_r, intList & lst_r ) const;
 
     class stringList;
-    unsigned string_list( int_32 tag_r, stringList & lst_r ) const;
+    unsigned string_list( tag tag_r, stringList & lst_r ) const;
 
   private:
 
-    int_32 int_32_val( int_32 tag_r ) const;
+    int int_val( tag tag_r ) const;
 
-    std::string string_val( int_32 tag_r ) const;
+    std::string string_val( tag tag_r ) const;
 
-    std::list<std::string> stringList_val( int_32 tag_r ) const;
+    std::list<std::string> stringList_val( tag tag_r ) const;
 
-    PMSolvable::PkgRelList_type PkgRelList_val( int_32 tag_r, FileDeps::FileNames * freq_r = 0 ) const;
+    PMSolvable::PkgRelList_type PkgRelList_val( tag tag_r, FileDeps::FileNames * freq_r = 0 ) const;
 
   public:
 

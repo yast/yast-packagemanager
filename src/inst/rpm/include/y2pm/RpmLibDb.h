@@ -21,10 +21,6 @@
 #ifndef RpmLibDb_h
 #define RpmLibDb_h
 
-extern "C" {
-#include <rpm/rpmlib.h>
-}
-
 #include <iosfwd>
 #include <vector>
 #include <list>
@@ -76,6 +72,8 @@ class RpmLibDb {
 
   private:
 
+    typedef struct rpmdb_s * rpmdb;
+
     /**
      * Static flag whether globalInit() was called
      **/
@@ -98,14 +96,21 @@ class RpmLibDb {
      **/
     rpmdb _db;
 
+    /**
+     * Remember dbOpen error.
+     **/
+    PMError _dbOpenError;
+
   public:
 
     /**
      * Constructor. Path to RPM database is passed as argument.
      * globalInit() is called if necessary. RPM database is
-     * <b>not</b> opened.
+     * opened, if no_open_r is false (default).
+     *
+     * Call @ref dbOpenError to test whether the database is accessible.
      **/
-    RpmLibDb( const Pathname & dbPath_r );
+    RpmLibDb( const Pathname & dbPath_r, const bool no_open_r = false );
 
     /**
      * Closes RPM database if open.
@@ -125,16 +130,18 @@ class RpmLibDb {
     PMError dbClose();
 
     /**
-     * True if RPM database is open.
+     * Returns <code>E_ok</code> if RPM database is open. Otherwise
+     * the error returned by the last call to @ref dbOpen, or
+     * <code>E_RpmLib_db_not_open</code> after call to @ref dbClose.
      **/
-    bool isOpen() const { return _db; }
+    PMError dbOpenError() const { return _dbOpenError; }
 
     /**
      * Returns path to RPM database.
      **/
     const Pathname & dbPath() const { return _dbPath; }
 
-  public:
+  private:
 
     /**
      * DEVELOPER STUFF. DONT'T USE IT.
@@ -143,19 +150,20 @@ class RpmLibDb {
       private:
 	RpmLibDb & _RpmLibDb;
 	bool       _mustclose;
-	PMError    _openerr;
       public:
 	openIf( RpmLibDb & rpmlibdb_r )
 	  : _RpmLibDb( rpmlibdb_r )
+	  , _mustclose( false )
 	{
-	  _mustclose = ! _RpmLibDb.isOpen();
-	  _openerr = _mustclose ? _RpmLibDb.dbOpen() : Error::E_ok;
+	  if ( _RpmLibDb.dbOpenError() ) {
+	    // db is not open
+	    _mustclose = ! _RpmLibDb.dbOpen();
+	  }
 	}
 	~openIf() {
 	  if ( _mustclose )
 	    _RpmLibDb.dbClose();
 	}
-	PMError openerr() const { return _openerr; }
     };
 
   public:
@@ -196,32 +204,22 @@ class RpmLibDb {
 
       private:
 
+	class index_set;
+
 	rpmdb                 _dbptr;
 	std::vector<unsigned> _idxSet;
 
 	/**
 	 * Constructor used by RpmLibDb.
 	 **/
-	const_header_set( rpmdb dbptr_r, dbiIndexSet & idxSet_r )
-	  : _dbptr( dbptr_r )
-	{
-	  if ( _dbptr && idxSet_r.count ) {
-	    _idxSet.resize( idxSet_r.count );
-	    for ( int i = 0; i < idxSet_r.count; ++i ) {
-	      _idxSet[i] = idxSet_r.recs[i].recOffset;
-	    }
-	  }
-	  ::dbiFreeIndexRecord( idxSet_r );
-	}
+	const_header_set( rpmdb dbptr_r, const index_set & idxSet_r );
 
       public:
 
 	/**
 	 * Default constructor.
 	 **/
-	const_header_set()
-	  : _dbptr( 0 )
-	{}
+	const_header_set() : _dbptr( 0 ) {}
 
 	/**
 	 * Number of packages available.
@@ -239,7 +237,22 @@ class RpmLibDb {
     /**
      * Return all packages that own a certain file.
      **/
-    const_header_set findByFile( const std::string & which_r ) const;
+    const_header_set findByFile( const std::string & file_r ) const;
+
+    /**
+     * Return all packages that provide a certain tag.
+     **/
+    const_header_set findByProvides( const std::string & tag_r ) const;
+
+    /**
+     * Return all packages that require a certain tag.
+     **/
+    const_header_set findByRequiredBy( const std::string & tag_r ) const;
+
+    /**
+     * Return all packages that conflict with a certain tag.
+     **/
+    const_header_set findByConflicts( const std::string & tag_r ) const;
 
     /**
      * Find package by name. Returns NULL, if package is not installed.
@@ -263,6 +276,40 @@ class RpmLibDb {
      * Abbr. for <code>findPackage( which_r->name(), which_r->edition() );</code>
      **/
     constRpmLibHeaderPtr findPackage( const constPMPackagePtr & which_r ) const;
+
+  private:
+
+    /**
+     * Return all instances of package named name_r. Intended to be private!
+     **/
+    const_header_set findAllPackages( const PkgName & name_r ) const;
+
+  public:
+
+    /**
+     * Return true if at least one package owns a certain file.
+     **/
+    bool hasFile( const std::string & file_r ) const { return findByFile( file_r ).size(); }
+
+    /**
+     * Return true if at least one package provides a certain tag.
+     **/
+    bool hasProvides( const std::string & tag_r ) const { return findByProvides( tag_r ).size(); }
+
+    /**
+     * Return true if at least one package requires a certain tag.
+     **/
+    bool hasRequiredBy( const std::string & tag_r ) const { return findByRequiredBy( tag_r ).size(); }
+
+    /**
+     * Return true if at least one package conflicts with a certain tag.
+     **/
+    bool hasConflicts( const std::string & tag_r ) const { return findByConflicts( tag_r ).size(); }
+
+    /**
+     * Return true if package is installed.
+     **/
+    bool hasPackage( const PkgName & name_r ) const { return findAllPackages( name_r ).size(); }
 
   public:
 
@@ -304,34 +351,27 @@ class RpmLibDb {
 	rpmdb    _dbptr;
 	unsigned _recnum;
 
+	/**
+	 * Get record data
+	 **/
 	void setrec( int recnum_r );
 
 	/**
 	 * Constructor used by RpmLibDb.
 	 **/
-	const_iterator( rpmdb dbptr_r )
-	  : _hptr( 0 ), _dbptr( dbptr_r ), _recnum( 0 )
-	{
-	  if ( _dbptr )
-	    setrec( ::rpmdbFirstRecNum( _dbptr ) );
-	}
+	const_iterator( rpmdb dbptr_r );
 
       public:
 
 	/**
 	 * Default constructor.
 	 **/
-	const_iterator()
-	  : _hptr( 0 ), _dbptr( 0 ), _recnum( 0 )
-	{}
+	const_iterator() : _hptr( 0 ), _dbptr( 0 ), _recnum( 0 ) {}
 
 	/**
 	 * Advance to next package. Needs access to rpmdb.
 	 **/
-	void operator++() {
-	  if ( _dbptr )
-	    setrec( ::rpmdbNextRecNum( _dbptr, _recnum ) );
-	}
+	void operator++();
 
 	/**
 	 * Test for equal iterator position.
