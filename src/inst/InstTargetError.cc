@@ -53,25 +53,24 @@ std::string InstTargetError::errtext( const unsigned e )
   // case E_some_err:	return N_("some text");
   ///////////////////////////////////////////////////////////////////
   case E_system:				return N_("Unkown error in subsystem");
-  case E_RpmDB_not_found:			return N_("RPM Database not found");
-  case E_RpmDB_create_failed:			return N_("Creating RPM Database failed");
-  case E_RpmDB_check_old_version_failed:	return N_("Checking for old version of rpm failed");
-  case E_RpmDB_mkdir_failed:			return N_("mkdir failed");
-  case E_RpmDB_initdb_failed:			return N_("Initializing the RPM Database failed");
-  case E_RpmDB_copy_tmpdb_failed:		return N_("Copying temporary Database failed");
-  case E_RpmDB_rebuilddb_failed:		return N_("Rebuilding RPM Database failed");
-  case E_RpmDB_not_initialized:			return N_("RPM Database not initialized");
-  case E_RpmDB_subprocess_failed:		return N_("Some subprocess failed");
-  case E_RpmDB_old_db:				return N_("Can not operate on old Database");
-  case E_RpmLib_read_config_failed:   	        return N_("rpmReadConfigFiles failed");
-  case E_RpmLib_dbopen_failed:			return N_("rpmdbOpen failed");
-  case E_RpmLib_db_not_open:			return N_("rpmdb not open");
+  case E_invalid_argument:			return N_("Invalid argument");
   ///////////////////////////////////////////////////////////////////
   // In a hurry? Write:
   // ENUM_OUT( E_some_err );
   // untill you found a beautifull text describing it.
   ///////////////////////////////////////////////////////////////////
 #define ENUM_OUT(V) case V: return #V
+
+  ENUM_OUT( E_RpmDB_global_init_failed );
+  ENUM_OUT( E_RpmDB_already_open );
+  ENUM_OUT( E_RpmDB_init_failed );
+  ENUM_OUT( E_RpmDB_open_failed );
+  ENUM_OUT( E_RpmDB_convert_failed );
+  ENUM_OUT( E_RpmDB_rebuild_failed );
+  ENUM_OUT( E_RpmDB_access_blocked );
+  ENUM_OUT( E_RpmDB_not_open );
+
+  ENUM_OUT( E_RpmDB_subprocess_failed );
 
   ENUM_OUT( E_SelDB_already_open );
   ENUM_OUT( E_SelDB_open_failed );

@@ -28,10 +28,10 @@
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <list>
-#include <vector>
 #include <map>
+#include <string>
+#include <vector>
 
 #include <y2util/Date.h>
 #include <y2util/FSize.h>
@@ -44,15 +44,10 @@
 #include <y2util/diff.h>
 
 #include <y2pm/RpmDb.h>
-#include <y2pm/RpmLibDb.h>
-#include <y2pm/Timecount.h>
-
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PMPackage.h>
+#include <y2pm/librpmDb.h>
 #include <y2pm/PMRpmPackageDataProvider.h>
-#include <y2pm/PMRpmPackageDataProviderPtr.h>
 #include <y2pm/PMPackageManager.h>
+#include <y2pm/Timecount.h>
 
 #include <Y2PM.h>
 
@@ -62,11 +57,65 @@
 
 using namespace std;
 
-IMPL_BASE_POINTER(RpmDb);
+/******************************************************************
+**
+**
+**	FUNCTION NAME : stringPath
+**	FUNCTION TYPE : inline string
+*/
+inline string stringPath( const Pathname & root_r, const Pathname & sub_r )
+{
+  return librpmDb::stringPath( root_r, sub_r );
+}
 
-#define FAILIFNOTINITIALIZED \
-	if(_old_present) return Error::E_RpmDB_old_db; \
-	if(!_initialized) return Error::E_RpmDB_not_initialized;
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream &
+*/
+ostream & operator<<( ostream & str, const RpmDb::DbStateInfoBits & obj )
+{
+  if ( obj == RpmDb::DbSI_NO_INIT ) {
+    str << "NO_INIT";
+  } else {
+#define ENUM_OUT(B,C) str << ( obj & RpmDb::B ? C : '-' )
+    str << "V4(";
+    ENUM_OUT( DbSI_HAVE_V4,	'X' );
+    ENUM_OUT( DbSI_MADE_V4,	'c' );
+    ENUM_OUT( DbSI_MODIFIED_V4,	'm' );
+    str << ")V3(";
+    ENUM_OUT( DbSI_HAVE_V3,	'X' );
+    ENUM_OUT( DbSI_HAVE_V3TOV4,	'B' );
+    ENUM_OUT( DbSI_MADE_V3TOV4,	'c' );
+    str << ")";
+#undef ENUM_OUT
+  }
+  return str;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : testCB
+**	FUNCTION TYPE : static void
+*/
+static void testCB( const ProgressCounter & pc, void * )
+{
+  int mod = pc.max()/3;
+  if ( !mod )
+     mod = 1;
+  if ( pc.state() == ProgressCounter::st_value && pc.val() % mod )
+    return;
+  DBG << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
+      << pc.val() << " " << pc.precent() << "%" << endl;
+}
+
+///////////////////////////////////////////////////////////////////
+//	CLASS NAME : RpmDbPtr
+//	CLASS NAME : RpmDbconstPtr
+///////////////////////////////////////////////////////////////////
+IMPL_BASE_POINTER(RpmDb);
 
 #define WARNINGMAILPATH "/var/adm/notify/warnings"
 
@@ -134,222 +183,524 @@ class RpmDb::Logfile {
     }
 };
 
+///////////////////////////////////////////////////////////////////
+
 Pathname RpmDb::Logfile::_fname;
 ofstream RpmDb::Logfile::_log;
 unsigned RpmDb::Logfile::_refcnt = 0;
 
 ///////////////////////////////////////////////////////////////////
 
-/****************************************************************/
-/* struct RpmDb::Packages					*/
-/****************************************************************/
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : RpmDb::Packages
+/**
+ * Helper class for RpmDb::getPackages() to build the
+ * list<PMPackagePtr> returned. We have to assert, that there
+ * is a unique entry for every PkgName.
+ *
+ * In the first step we build the _index map which helps to catch
+ * multiple occurances of a PkgName in the rpmdb. That's not desired,
+ * but possible. Usg. the last package instance installed is strored
+ * in the _index map.
+ *
+ * At the end buildList() is called to build the list<PMPackagePtr>
+ * from the _index map. _valid is set true to assign that the list
+ * is in sync with the rpmdb content. Operations changing the rpmdb
+ * content (install/remove package) should set _valid to false. The
+ * next call to RpmDb::getPackages() will then reread the the rpmdb.
+ *
+ * Note that outside RpmDb::getPackages() _list and _index are always
+ * in sync. So you may use lookup(PkgName) to retrieve a specific
+ * PMPackagePtr.
+ **/
+class RpmDb::Packages {
+  public:
+    list<PMPackagePtr>        _list;
+    map<PkgName,PMPackagePtr> _index;
+    bool                      _valid;
+    Packages() : _valid( false ) {}
+    void clear() {
+      _list.clear();
+      _index.clear();
+      _valid = false;
+    }
+    PMPackagePtr lookup( const PkgName & name_r ) const {
+      map<PkgName,PMPackagePtr>::const_iterator got = _index.find( name_r );
+      if ( got != _index.end() )
+	return got->second;
+      return PMPackagePtr();
+    }
+    void buildList() {
+      _list.clear();
+      for ( map<PkgName,PMPackagePtr>::iterator iter = _index.begin();
+	    iter != _index.end(); ++iter ) {
+	if ( iter->second )
+	  _list.push_back( iter->second );
+      }
+      _valid = true;
+    }
+};
 
-void RpmDb::Packages::buildList()
-{
-  _list.clear();
-  for ( map<PkgName,PMPackagePtr>::iterator iter = _index.begin();
-	iter != _index.end(); ++iter ) {
-    if ( iter->second )
-      _list.push_back( iter->second );
-  }
-  _valid = true;
-}
+///////////////////////////////////////////////////////////////////
 
-PMPackagePtr RpmDb::Packages::lookup( const PkgName & name_r ) const
-{
-  std::map<PkgName,PMPackagePtr>::const_iterator got = _index.find( name_r );
-  if ( got != _index.end() )
-    return got->second;
-  return PMPackagePtr();
-}
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : RpmDb
+//
+///////////////////////////////////////////////////////////////////
 
-/****************************************************************/
-/* public member-functions					*/
-/****************************************************************/
+ProgressCounter::Callback RpmDb::_cb_convertDb( testCB );
+ProgressCounter::Callback RpmDb::_cb_rebuildDb( testCB );
+ProgressCounter::Callback RpmDb::_cb_installPkg( testCB );
 
-/*-------------------------------------------------------------*/
-/* creates a RpmDb					       */
-/*-------------------------------------------------------------*/
-RpmDb::RpmDb() :
-    _progressfunc(NULL),
-    _progressdata(NULL),
-    _rootdir(""),
-    _varlibrpm("/var/lib/rpm"),
-    _varlib("/var/lib"),
+#define FAILIFNOTINITIALIZED if( ! initialized() ) { WAR << "No database access: " << Error::E_RpmDB_not_open << endl; return Error::E_RpmDB_not_open; }
+
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::RpmDb
+//	METHOD TYPE : Constructor
+//
+RpmDb::RpmDb()
+    : _dbStateInfo( DbSI_NO_INIT )
 #warning LET old dbname block everything until db init, pkg install/delete are checked.
-    _rpmdbname("packages.rpm"),
-    _backuppath ("/var/adm/backup"),
-    _packagebackups(false),
-    _creatednew(false),
-    _old_present(false),
-    _initialized(false),
-    _warndirexists(false)
+    , _backuppath ("/var/adm/backup")
+    , _packagebackups(false)
+    , _warndirexists(false)
+    , _packages( * new Packages ) // delete in destructor
 {
    process = 0;
    exit_code = -1;
-   temporary = false;
-   dbPath = "";
-   //XXX dunno, copied from old yast2 installer
+
+   // Some rpm versions are patched not to abort installation if
+   // symlink creation failed.
    setenv( "RPM_IgnoreFailedSymlinks", "1", 1 );
 }
 
-/*--------------------------------------------------------------*/
-/* Cleans up						       	*/
-/*--------------------------------------------------------------*/
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::~RpmDb
+//	METHOD TYPE : Destructor
+//
 RpmDb::~RpmDb()
 {
    M__ << "~RpmDb()" << endl;
+   closeDatabase();
 
-   if ( process )
-      delete process;
-
-   process = NULL;
-// only needed with createTmpDatabase
-#if 0
-   if ( temporary )
-   {
-      // Removing all files of the temporary DB
-
-      string command = "rm -R ";
-
-//XXX system
-      command += dbPath.asString();
-      ::system ( command.c_str() );
-   }
-#endif
-
+   delete process;
+   delete &_packages;
    M__  << "~RpmDb() end" << endl;
 }
 
-
-/*--------------------------------------------------------------*/
-/* Initialize the rpm database					*/
-/* If Flag "createNew" is set, than it will be created, if not	*/
-/* exist --> returns DbNewCreated if successfully created 	*/
-/*--------------------------------------------------------------*/
-PMError
-RpmDb::initDatabase( string name_of_root, bool createNew )
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::dumpOn
+//	METHOD TYPE : std::ostream &
+//
+std::ostream & RpmDb::dumpOn( std::ostream & str ) const
 {
-    Pathname     dbFilename;
-    struct stat  dummyStat;
-    PMError	 dbStatus = Error::E_ok;
+  str << "RpmDb[";
 
-    DBG << "calling initDatabase" << endl;
+  if ( _dbStateInfo == DbSI_NO_INIT ) {
+    str << "NO_INIT";
+  } else {
+#define ENUM_OUT(B,C) str << ( _dbStateInfo & B ? C : '-' )
+    str << "V4(";
+    ENUM_OUT( DbSI_HAVE_V4,	'X' );
+    ENUM_OUT( DbSI_MADE_V4,	'c' );
+    ENUM_OUT( DbSI_MODIFIED_V4,	'm' );
+    str << ")V3(";
+    ENUM_OUT( DbSI_HAVE_V3,	'X' );
+    ENUM_OUT( DbSI_HAVE_V3TOV4,	'B' );
+    ENUM_OUT( DbSI_MADE_V3TOV4,	'c' );
+    str << "): " << stringPath( _root, _dbPath );
+#undef ENUM_OUT
+  }
+  return str << "]";
+}
 
-    _rootdir = name_of_root;
-    dbFilename += _rootdir + _varlibrpm + _rpmdbname;
-    if (  stat( dbFilename.asString().c_str(), &dummyStat ) != -1 )
-    {
-	// DB found
-	dbPath = _varlibrpm;
-	_initialized = true;
-	DBG << "Setting dbPath to " << dbPath.asString() << endl;
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::initDatabase
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::initDatabase( Pathname root_r, Pathname dbPath_r )
+{
+  ///////////////////////////////////////////////////////////////////
+  // Check arguments
+  ///////////////////////////////////////////////////////////////////
+  if ( root_r.empty() )
+    root_r = "/";
+
+  if ( dbPath_r.empty() )
+    dbPath_r = "/var/lib/rpm";
+
+  if ( ! (root_r.absolute() && dbPath_r.absolute()) ) {
+    ERR << "Illegal root or dbPath: " << stringPath( root_r, dbPath_r ) << endl;
+    return Error::E_invalid_argument;
+  }
+
+  MIL << "Calling initDatabase: " << stringPath( root_r, dbPath_r ) << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // Check whether already initialized
+  ///////////////////////////////////////////////////////////////////
+  if ( initialized() ) {
+    if ( root_r == _root && dbPath_r == _dbPath ) {
+      return Error::E_ok;
+    } else {
+      ERR << "Can't switch to " << stringPath( root_r, dbPath_r )
+	<< " while accessing " << stringPath( _root, _dbPath ) << endl;
+      return Error::E_RpmDB_already_open;
     }
-    else if ( createNew )
-    {
-	DBG << "creating new database" << endl;
-	// New rpm-DB will be created
-	if(!PathInfo::assert_dir(dbFilename.dirname()))
-	{
-	    dbPath = _varlibrpm;
+  }
 
-	    RpmArgVec opts(1);
-	    opts[0] = "--initdb";
+  ///////////////////////////////////////////////////////////////////
+  // init database
+  ///////////////////////////////////////////////////////////////////
+  librpmDb::unblockAccess();
+  DbStateInfoBits info = DbSI_NO_INIT;
+  PMError err = internal_initDatabase( root_r, dbPath_r, info );
 
-	    run_rpm (opts);
+  if ( err ) {
+    librpmDb::blockAccess();
+    ERR << "Cleanup on error: state " << info << endl;
 
-	    string rpmerrormsg, str;
-	    while (systemReadLine (str))
-	    {
-		rpmerrormsg+=str;
-	    }
-	    if ( systemStatus() != 0 )
-	    {
-		// error
-		dbStatus = Error::E_RpmDB_create_failed;
-		ERR << "Error creating rpm database, rpm error was: " << rpmerrormsg << endl;
-	    }
-	    else
-	    {
-		_creatednew = true;
-		_initialized = true;
-		dbStatus = Error::E_ok;
-	    }
+    if ( dbsi_has( info, DbSI_MADE_V4 ) ) {
+      // remove the newly created rpm4 database and
+      // any backup created on conversion.
+      removeV4( root_r + dbPath_r, dbsi_has( info, DbSI_MADE_V3TOV4 ) );
+    }
+
+  } else {
+    MIL << "Cleanup: state " << info << endl;
+    if ( dbsi_has( info, DbSI_HAVE_V3 ) ) {
+      if ( root_r == "/" || dbsi_has( info, DbSI_MODIFIED_V4 ) ) {
+	// Move obsolete rpm3 database beside.
+	removeV3( root_r + dbPath_r );
+	dbsi_clr( info, DbSI_HAVE_V3 );
+      } else {
+	// Performing an update: Keep the original rpm3 database
+	// and wait if the rpm4 database gets modified by installing
+	// or removing packages. Cleanup in closeDatabase.
+	MIL << "Update mode: Cleanup delayed until closeDatabase." << endl;
+      }
+    }
+#warning CHECK: notify root about conversion backup.
+
+    _root   = root_r;
+    _dbPath = dbPath_r;
+    _dbStateInfo = info;
+
+    MIL << "InitDatabase: " << *this << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::internal_initDatabase
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::internal_initDatabase( const Pathname & root_r, const Pathname & dbPath_r,
+				      DbStateInfoBits & info_r )
+{
+  info_r = DbSI_NO_INIT;
+
+  ///////////////////////////////////////////////////////////////////
+  // Get info about the desired database dir
+  ///////////////////////////////////////////////////////////////////
+  librpmDb::DbDirInfo dbInfo( root_r, dbPath_r );
+
+  if ( dbInfo.illegalArgs() ) {
+    return Error::E_invalid_argument; // should not happen (checked in initDatabase)
+  }
+  if ( ! dbInfo.usableArgs() ) {
+    ERR << "Bad database directory: " << dbInfo.dbDir() << endl;
+    return Error::E_invalid_argument;
+  }
+
+  if ( dbInfo.hasDbV4() ) {
+    dbsi_set( info_r, DbSI_HAVE_V4 );
+    MIL << "Found rpm4 database in " << dbInfo.dbDir() << endl;
+  } else {
+    MIL << "Creating new rpm4 database in " << dbInfo.dbDir() << endl;
+  }
+
+  if ( dbInfo.hasDbV3() ) {
+    dbsi_set( info_r, DbSI_HAVE_V3 );
+  }
+  if ( dbInfo.hasDbV3ToV4() ) {
+    dbsi_set( info_r, DbSI_HAVE_V3TOV4 );
+  }
+
+  DBG << "Initial state: " << info_r << ": " << stringPath( root_r, dbPath_r );
+  librpmDb::dumpState( DBG ) << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // Access database, create if needed
+  ///////////////////////////////////////////////////////////////////
+
+  // creates dbdir and empty rpm4 database if not present
+  PMError err = librpmDb::dbAccess( root_r, dbPath_r );
+
+  if ( ! dbInfo.hasDbV4() ) {
+    dbInfo.restat();
+    if ( dbInfo.hasDbV4() ) {
+      dbsi_set( info_r, DbSI_HAVE_V4 | DbSI_MADE_V4 );
+    }
+  }
+
+  if ( err ) {
+    ERR << "Can't access rpm4 database " << dbInfo.dbV4() << " " << err << endl;
+    return err;
+  }
+
+  DBG << "Acess state: " << info_r << ": " << stringPath( root_r, dbPath_r );
+  librpmDb::dumpState( DBG ) << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // Check whether to convert something. Create backup but do
+  // not remove anything here
+  ///////////////////////////////////////////////////////////////////
+  constlibrpmDbPtr dbptr;
+  librpmDb::dbAccess( dbptr );
+  bool dbEmpty = dbptr->empty();
+  if ( dbEmpty ) {
+    MIL << "Empty rpm4 database "  << dbInfo.dbV4() << endl;
+  }
+
+  if ( dbInfo.hasDbV3() ) {
+    MIL << "Found rpm3 database " << dbInfo.dbV3() << endl;
+
+    if ( dbEmpty ) {
+      MIL << "Convert rpm3 database to rpm4" << endl;
+      extern PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r,
+				    unsigned & V3toV4Written_r, unsigned & V3toV4Errors_r,
+				    ProgressCounter pcnt_r );
+      Timecount _t( "convert V3 to V4" );
+      unsigned V3toV4Written = 0;
+      unsigned V3toV4Errors  = 0;
+      err = convertV3toV4( dbInfo.dbV3().path(), dbptr,
+			   V3toV4Written, V3toV4Errors, _cb_convertDb );
+      _t.stop();
+
+      if ( err ) {
+	ERR << "Convert rpm3 database to rpm4: " << err << endl;
+	return Error::E_RpmDB_convert_failed;
+      } else if ( V3toV4Errors ) {
+	ERR << "Convert rpm3 database to rpm4: " << V3toV4Errors << " package(s) failed"  << endl;
+	return Error::E_RpmDB_convert_failed;
+      }
+
+      // create a backup copy
+      int res = PathInfo::copy( dbInfo.dbV3().path(), dbInfo.dbV3ToV4().path() );
+      if ( res ) {
+	WAR << "Backup converted rpm3 database failed: error(" << res << ")" << endl;
+      } else {
+	dbInfo.restat();
+	if ( dbInfo.hasDbV3ToV4() ) {
+	  MIL << "Backup converted rpm3 database: " << dbInfo.dbV3ToV4() << endl;
+	  dbsi_set( info_r, DbSI_HAVE_V3TOV4 | DbSI_MADE_V3TOV4 );
 	}
-	else
-	    dbStatus = Error::E_RpmDB_mkdir_failed;
-    }
-    else
-    {
-	ERR << "dbFilename not found " << dbFilename.asString() << endl;
+      }
 
-	// DB not found
-	dbStatus = Error::E_RpmDB_not_found;
-    }
+    } else {
 
-    // check for installed rpm package
-    if ( !_creatednew && dbStatus == Error::E_ok )
-    {
-       // Check, if it is an old rpm-Db
-       RpmArgVec opts(2);
-       opts[0] = "-q";
-       opts[1] = "rpm";
-       string output;
+      WAR << "Non empty rpm3 and rpm4 database found: using rpm4" << endl;
+#warning EXCEPTION: nonempty rpm4 and rpm3 database found.
+      // set DbSI_MODIFIED_V4 as it's not a temporary which can be removed.
+      dbsi_set( info_r, DbSI_MODIFIED_V4 );
 
-       run_rpm (opts);
-       string rpmmsg, str;
-       while (systemReadLine (str))
-       {
-	   rpmmsg+=str;
-       }
-
-       int status = systemStatus();
-
-       if ( rpmmsg.empty() )
-       {
-	  // error
-	  dbStatus = Error::E_RpmDB_check_old_version_failed;
-	  ERR << "rpm silently failed while checking old rpm version" << endl;
-       }
-       else
-       {
-	  if ( rpmmsg.find ( "old format database is present" ) !=
-	       string::npos )
-	  {
-	     _old_present = true;
-	     WAR <<  "RPM-Db on the system is old"  << endl;
-	  }
-	  else
-	  {
-	     if ( status != 0 )
-	     {
-		// error
-		dbStatus = Error::E_RpmDB_check_old_version_failed;
-		ERR << "checking for old rpm version failed, rpm output was: "
-		    << rpmmsg << endl;
-	     }
-	  }
-       }
     }
 
-    return dbStatus;
+    DBG << "Convert state: " << info_r << ": " << stringPath( root_r, dbPath_r );
+    librpmDb::dumpState( DBG ) << endl;
+  }
+
+  if ( dbInfo.hasDbV3ToV4() ) {
+    MIL << "Rpm3 database backup: " << dbInfo.dbV3ToV4() << endl;
+  }
+
+  return err;
 }
 
-void RpmDb::checkrebuilddbstatus(Pathname tmpdbpath, off_t oldsize)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::removeV4
+//	METHOD TYPE : void
+//
+void RpmDb::removeV4( const Pathname & dbdir_r, bool v3backup_r )
 {
-    if(tmpdbpath.empty()) return;
+  const char * v3backup = "packages.rpm3";
+  const char * master = "Packages";
+  const char * index[] = {
+    "Basenames",
+    "Conflictname",
+    "Depends",
+    "Dirnames",
+    "Filemd5s",
+    "Group",
+    "Installtid",
+    "Name",
+    "Providename",
+    "Provideversion",
+    "Pubkeys",
+    "Requirename",
+    "Requireversion",
+    "Sha1header",
+    "Sigmd5",
+    "Triggername",
+    // last entry!
+    NULL
+  };
 
-    PathInfo pi(tmpdbpath);
+  PathInfo pi( dbdir_r );
+  if ( ! pi.isDir() ) {
+    ERR << "Can't remove rpm4 database in non directory: " << dbdir_r << endl;
+    return;
+  }
 
-    off_t size = pi.size();
-
-    if(size && oldsize)
-    {
-	int p = static_cast<int>(static_cast<double>(size)/oldsize*100);
-	ReportRebuildDBProgress(p);
+  for ( const char ** f = index; *f; ++f ) {
+    pi( dbdir_r + *f );
+    if ( pi.isFile() ) {
+      PathInfo::unlink( pi.path() );
     }
+  }
+
+  pi( dbdir_r + master );
+  if ( pi.isFile() ) {
+    MIL << "Removing rpm4 database " << pi << endl;
+    PathInfo::unlink( pi.path() );
+  }
+
+  if ( v3backup_r ) {
+    pi( dbdir_r + v3backup );
+    if ( pi.isFile() ) {
+      MIL << "Removing converted rpm3 database backup " << pi << endl;
+      PathInfo::unlink( pi.path() );
+    }
+  }
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::removeV3
+//	METHOD TYPE : void
+//
+void RpmDb::removeV3( const Pathname & dbdir_r )
+{
+  const char * master = "packages.rpm";
+  const char * index[] = {
+    "conflictsindex.rpm",
+    "fileindex.rpm",
+    "groupindex.rpm",
+    "nameindex.rpm",
+    "providesindex.rpm",
+    "requiredby.rpm",
+    "triggerindex.rpm",
+    // last entry!
+    NULL
+  };
+
+  PathInfo pi( dbdir_r );
+  if ( ! pi.isDir() ) {
+    ERR << "Can't remove rpm3 database in non directory: " << dbdir_r << endl;
+    return;
+  }
+
+  for ( const char ** f = index; *f; ++f ) {
+    pi( dbdir_r + *f );
+    if ( pi.isFile() ) {
+      PathInfo::unlink( pi.path() );
+    }
+  }
+
+#warning CHECK: compare vs existiing v3 backup. notify root
+  pi( dbdir_r + master );
+  if ( pi.isFile() ) {
+    Pathname m( pi.path() );
+    Pathname b( m.extend( ".deleted" ) );
+    pi( b );
+    if ( pi.isFile() ) {
+      // rempve existing backup
+      PathInfo::unlink( b );
+    }
+    PathInfo::rename( m, b );
+    pi( b );
+    MIL << "(Re)moved rpm3 database to " << pi << endl;
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::closeDatabase
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::closeDatabase()
+{
+  if ( ! initialized() ) {
+    return Error::E_ok;
+  }
+
+  MIL << "Calling closeDatabase: " << *this << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // Block further database access
+  ///////////////////////////////////////////////////////////////////
+#warning MUST: clear packages if provided to Packagemanager (here or InstTArget) or via TBD hook
+  _packages.clear();
+  librpmDb::blockAccess();
+
+  ///////////////////////////////////////////////////////////////////
+  // Check fate if old version database still present
+  ///////////////////////////////////////////////////////////////////
+  if ( dbsi_has( _dbStateInfo, DbSI_HAVE_V3 ) ) {
+    MIL << "Update mode: Delayed cleanup: state " << _dbStateInfo << endl;
+    if ( dbsi_has( _dbStateInfo, DbSI_MODIFIED_V4 ) ) {
+      // Move outdated rpm3 database beside.
+      removeV3( _root + _dbPath );
+    } else {
+      // Remove unmodified rpm4 database
+      removeV4( _root + _dbPath, dbsi_has( _dbStateInfo, DbSI_MADE_V3TOV4 ) );
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Uninit
+  ///////////////////////////////////////////////////////////////////
+  _root = _dbPath = Pathname();
+  _dbStateInfo = DbSI_NO_INIT;
+
+  MIL << "closeDatabase: " << *this << endl;
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::rebuildDatabase
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::rebuildDatabase()
+{
+#warning NO REBUILDDB
+  INT << "NOOP: rebuildDatabase -> TBD" << endl;
+  return Error::E_RpmDB_rebuild_failed;
+}
+
+#if 0
 // rebuild rpm database
 // beware: you must report 100% before return
 PMError
@@ -358,7 +709,7 @@ RpmDb::rebuildDatabase()
     RpmArgVec opts(1);
     PMError status = Error::E_ok;
     Pathname tmpdbpath;
-    Pathname rpmdb = _rootdir + _varlibrpm + _rpmdbname;
+    Pathname rpmdb = _root + _varlibrpm + _rpmdbname;
     Pathname rebuilddbdir = "/var/lib/rpmrebuilddb.";
 
     FAILIFNOTINITIALIZED
@@ -373,7 +724,7 @@ RpmDb::rebuildDatabase()
 
     run_rpm (opts);
     if(process)
-	tmpdbpath = _rootdir + Pathname::extend(rebuilddbdir,stringutil::form("%d",process->getpid())) + _rpmdbname;
+	tmpdbpath = _root + Pathname::extend(rebuilddbdir,stringutil::form("%d",process->getpid())) + _rpmdbname;
 
     string rpmerrormsg, str;
 
@@ -417,226 +768,26 @@ RpmDb::rebuildDatabase()
 	ERR << "Error rebuilding rpm database, rpm error was: " << rpmerrormsg << endl;
     }
 
-    ReportRebuildDBProgress(100);
+    _rebuilddbProgressCB( 100 );
 
     return status;
 }
 
-/*--------------------------------------------------------------*/
-/* Creating a temporary rpm-database.				*/
-/* If copyOldRpm == true than the rpm-database from		*/
-/* /var/lib/rpm will be copied.					*/
-/*--------------------------------------------------------------*/
-PMError
-RpmDb::createTmpDatabase ( bool copyOldRpm )
+void RpmDb::checkrebuilddbstatus(Pathname tmpdbpath, off_t oldsize)
 {
-    FAILIFNOTINITIALIZED
+    if(tmpdbpath.empty()) return;
 
-    return Error::E_ok;
-#if 0
-   // searching a non-existing rpm-path
-   int counter = 0;
-   struct stat  dummyStat;
-   Pathname rpmPath;
-   Pathname saveDbPath = dbPath;
-   DbStatus err = RPMDB_OK;
-   char number[10];
+    PathInfo pi(tmpdbpath);
 
-   number[0] = 0;
+    off_t size = pi.size();
 
-   rpmPath = _rootdir + _varlib + "rpm.new";
-   for ( counter = 0;
-	counter < 1000 && stat( rpmPath.asString().c_str(), &dummyStat ) != -1;
-	counter++)
-   {
-      // search free rpm-path
-      snprintf ( number, 10, "%d", counter);
-      rpmPath = _rootdir + _varlib + "rpm.new.";
-      rpmPath.extend(number);
-   }
-
-   if (!PathInfo::assert_dir( rpmPath, S_IRWXU ))
-   {
-      err = RPMDB_ERROR_MKDIR;
-      ERR << "ERROR command: assert_dir " << rpmPath.asString() << endl;
-
-   }
-
-   // setting global dbpath
-   dbPath = _varlib;
-   if ( counter == 0 )
-   {
-      dbPath = dbPath + "rpm.new";
-   }
-   else
-   {
-      dbPath = dbPath + "rpm.new.";
-      dbPath.extend(number);
-   }
-
-   if ( !err )
-   {
-      RpmArgVec opts(1);
-      opts[0] = "--initdb";
-      run_rpm (opts);
-      if ( systemStatus() != 0 )
-      {
-	 // error
-	 err = RPMDB_ERROR_INITDB;
-	 ERR << "ERROR command: rpm --initdb  --dbpath " <<
-		  dbPath.asString() << endl;
-      }
-   }
-
-   if ( !err && copyOldRpm )
-   {
-      // copy old RPM-DB into temporary RPM-DB
-
-      string command = "cp -a ";
-      command = command + Pathname::cat(_rootdir, _varlibrpm).asString() + "/* " +
-	 rpmPath.asString();
-
-//XXX system
-      if ( system ( command.c_str() ) == 0 )
-      {
-	 err = RPMDB_OK;
-      }
-      else
-      {
-	 err = RPMDB_ERROR_COPY_TMPDB;
-	 ERR << "ERROR command: " << command.c_str() << endl;
-      }
-
-      if ( !err )
-      {
-	 RpmArgVec opts(1);
-	 opts[0] = "--rebuilddb";
-	 run_rpm (opts);
-	 if ( systemStatus() != 0 )
-	 {
-	    // error
-	    err = RPMDB_ERROR_REBUILDDB;
-	    ERR << "ERROR command: rpm --rebuilddb  --dbpath " <<
-		     dbPath.asString() << endl;
-	 }
-      }
-   }
-
-   if ( !err )
-   {
-      temporary = true;
-   }
-   else
-   {
-      // setting global dbpath
-      dbPath = saveDbPath;
-   }
-
-   return ( err );
-#endif
+    if(size && oldsize)
+    {
+	int p = static_cast<int>(static_cast<double>(size)/oldsize*100);
+	_rebuilddbProgressCB( p );
+    }
 }
-
-/*--------------------------------------------------------------*/
-/* Installing the rpm-database to /var/lib/rpm, if the		*/
-/* current has been created by "createTmpDatabase".		*/
-/*--------------------------------------------------------------*/
-PMError
-RpmDb::installTmpDatabase( void )
-{
-    FAILIFNOTINITIALIZED
-
-    return Error::E_ok;
-#if 0
-   DbStatus err = RPMDB_OK;
-   Pathname oldPath;
-   struct stat  dummyStat;
-   int counter = 1;
-
-   DBG << "calling installTmpDatabase" << endl;
-
-   if ( !temporary  )
-   {
-      DBG << "RPM-database does not have to be updated." << endl;
-      return ( RPMDB_OK );
-   }
-
-   if ( dbPath.empty() )
-   {
-      ERR << "RPM-DB is not initialized." << endl;
-      return ( RPMDB_ERROR_NOT_INITIALIZED );
-   }
-
-   if ( !err )
-   {
-      // creating path for saved rpm-DB
-      oldPath = _rootdir + _varlib + "rpm.old";
-      while ( counter < 1000 && stat( oldPath.asString().c_str(), &dummyStat ) != -1 )
-      {
-	 // search free rpm-path
-	 char number[10];
-	 snprintf ( number, 10, "%d", counter++);
-	 oldPath = _rootdir + _varlib + "rpm.old.";
-	 oldPath.extend(number);
-      }
-
-      if (!PathInfo::assert_dir ( oldPath, S_IRWXU ))
-      {
-	 ERR << "ERROR command: assert_dir %s" << oldPath.asString() << endl;
-	 err = RPMDB_ERROR_MKDIR;
-      }
-   }
-
-   if ( !err )
-   {
-      // saving old rpm
-      string command = "cp -a ";
-      command = command + Pathname::cat(_rootdir, _varlibrpm).asString() + "/* " + oldPath.asString();
-
-// XXX system */
-      if ( system ( command.c_str() ) == 0)
-      {
-	 err = RPMDB_OK;
-      }
-      else
-      {
-	 ERR << "ERROR command: " << command.c_str() << endl;
-	 err = RPMDB_ERROR_COPY_TMPDB;
-      }
-   }
-
-
-   if ( !err )
-   {
-      string command = "cp -a ";
-      command = command + Pathname::cat(_rootdir, dbPath).asString() + "/* " + // */
-	 Pathname::cat(_rootdir, _varlibrpm).asString();
-
-      if ( system ( command.c_str() ) == 0)
-      {
-	 err = RPMDB_OK;
-      }
-      else
-      {
-	 ERR << "ERROR command: " << command.c_str() << endl;
-	 err = RPMDB_ERROR_COPY_TMPDB;
-      }
-   }
-
-   if ( !err )
-   {
-      // remove temporary RPM-DB
-      string command = "rm -R ";
-
-      command += Pathname::cat(_rootdir, dbPath).asString();
-      system ( command.c_str() );
-
-      temporary = false;
-      dbPath = _varlibrpm;
-   }
-
-   return ( err );
 #endif
-}
 
 
 // helper function
@@ -647,9 +798,6 @@ RpmDb::pkg2rpm (constPMPackagePtr package)
 {
     return ((const string &)package->name()) + "-" + package->edition().asString();
 }
-
-
-
 
 // split in into pieces seperated by sep, return vector out
 // produce up to max tokens. if max is zero the number of tokens is unlimited
@@ -692,7 +840,7 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 //
 const std::list<PMPackagePtr> & RpmDb::getPackages()
 {
-  if ( _packages._valid || _old_present || !_initialized ) {
+  if ( _packages._valid || ! initialized() ) {
     return _packages._list;
   }
 
@@ -701,26 +849,17 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   _packages.clear();
 
   ///////////////////////////////////////////////////////////////////
-  // Access to rpmdb
-  ///////////////////////////////////////////////////////////////////
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return _packages._list;
-  }
-
-  ///////////////////////////////////////////////////////////////////
   // Collect package data. A map is used to check whethere there are
   // multiple entries for the same PkgName. If so we consider the last
   // one installed to be the one we're interesed in.
   ///////////////////////////////////////////////////////////////////
-#warning HACK!
-  librpmDb::db_const_iterator iter( librpmDb::access() );
-  for ( ; *iter; ++iter ) {
+  librpmDb::db_const_iterator iter;
+  if ( iter.dbError() ) {
+    ERR << "No database access: " << iter.dbError() << endl;
+    return _packages._list;
+  }
 
-    if ( !*iter ) {
-#warning How to handle bad record number in RpmLibDb?
-      break;
-    }
+  for ( ; *iter; ++iter ) {
 
     PkgName name        = iter->tag_name();
     Date    installtime = iter->tag_installtime();
@@ -766,7 +905,6 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   ///////////////////////////////////////////////////////////////////
   // Build final packages list
   ///////////////////////////////////////////////////////////////////
-  rpmdb.dbClose();
   _packages.buildList();
   DBG << "Found installed packages: " << _packages._list.size() << endl;
   return _packages._list;
@@ -794,13 +932,12 @@ void RpmDb::traceFileRel( const PkgRelation & rel_r )
   //
   // packages already initialized. Must check and insert here
   //
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
+  librpmDb::db_const_iterator iter;
+  if ( iter.dbError() ) {
+    ERR << "No database access: " << iter.dbError() << endl;
     return;
   }
 
-#warning HACK!
-  librpmDb::db_const_iterator iter( librpmDb::access() );
   for ( iter.findByFile( rel_r.name() ); *iter; ++iter ) {
     PMPackagePtr pptr = _packages.lookup( iter->tag_name() );
     if ( !pptr ) {
@@ -821,13 +958,8 @@ void RpmDb::traceFileRel( const PkgRelation & rel_r )
 //
 bool RpmDb::hasFile( const std::string & file_r ) const
 {
-  if ( _old_present || !_initialized )
-    return false;
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return false;
-  }
-  return rpmdb.hasFile( file_r );
+  librpmDb::db_const_iterator it;
+  return it.findByFile( file_r );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -840,13 +972,8 @@ bool RpmDb::hasFile( const std::string & file_r ) const
 //
 bool RpmDb::hasProvides( const std::string & tag_r ) const
 {
-  if ( _old_present || !_initialized )
-    return false;
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return false;
-  }
-  return rpmdb.hasProvides( tag_r );
+  librpmDb::db_const_iterator it;
+  return it.findByProvides( tag_r );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -859,13 +986,8 @@ bool RpmDb::hasProvides( const std::string & tag_r ) const
 //
 bool RpmDb::hasRequiredBy( const std::string & tag_r ) const
 {
-  if ( _old_present || !_initialized )
-    return false;
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return false;
-  }
-  return rpmdb.hasRequiredBy( tag_r );
+  librpmDb::db_const_iterator it;
+  return it.findByRequiredBy( tag_r );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -878,13 +1000,8 @@ bool RpmDb::hasRequiredBy( const std::string & tag_r ) const
 //
 bool RpmDb::hasConflicts( const std::string & tag_r ) const
 {
-  if ( _old_present || !_initialized )
-    return false;
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return false;
-  }
-  return rpmdb.hasConflicts( tag_r );
+  librpmDb::db_const_iterator it;
+  return it.findByConflicts( tag_r );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -897,13 +1014,8 @@ bool RpmDb::hasConflicts( const std::string & tag_r ) const
 //
 bool RpmDb::hasPackage( const PkgName & name_r ) const
 {
-  if ( _old_present || !_initialized )
-    return false;
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return false;
-  }
-  return rpmdb.hasPackage( name_r );
+  librpmDb::db_const_iterator it;
+  return it.findPackage( name_r );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -917,14 +1029,10 @@ bool RpmDb::hasPackage( const PkgName & name_r ) const
 PMError RpmDb::getData( const PkgName & name_r,
 			constRpmLibHeaderPtr & result_r ) const
 {
-  result_r = 0;
-  FAILIFNOTINITIALIZED;
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return rpmdb.dbOpenError();
-  }
-  result_r = rpmdb.findPackage( name_r );
-  return Error::E_ok;
+  librpmDb::db_const_iterator it;
+  it.findPackage( name_r );
+  result_r = *it;
+  return it.dbError();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -938,14 +1046,10 @@ PMError RpmDb::getData( const PkgName & name_r,
 PMError RpmDb::getData( const PkgName & name_r, const PkgEdition & ed_r,
 			constRpmLibHeaderPtr & result_r ) const
 {
-  result_r = 0;
-  FAILIFNOTINITIALIZED;
-  RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpenError() ) {
-    return rpmdb.dbOpenError();
-  }
-  result_r = rpmdb.findPackage( name_r, ed_r );
-  return Error::E_ok;
+  librpmDb::db_const_iterator it;
+  it.findPackage( name_r, ed_r  );
+  result_r = *it;
+  return it.dbError();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -958,7 +1062,7 @@ PMError RpmDb::getData( const PkgName & name_r, const PkgEdition & ed_r,
 //
 PMError RpmDb::getData( const Pathname & path, constRpmLibHeaderPtr & result_r )
 {
-  result_r = RpmLibDb::getData( path );
+  result_r = RpmLibHeader::readPackage( path );
   return( result_r ? Error::E_ok : Error::E_error );
 }
 
@@ -1104,12 +1208,6 @@ RpmDb::queryRPM (const std::string& package, const char *qparam, const char *for
 {
     RpmArgVec opts(4);
 
-    if (_old_present)
-    {
-	ERR << "Old rpmdb !" << endl;
-	return false;
-    }
-
     int argc = 0;
     opts[argc++] = qparam;
     if (format != 0)
@@ -1140,8 +1238,7 @@ RpmDb::queryRPM (const std::string& package, const char *qparam, const char *for
 {
     RpmArgVec opts(4);
 
-    if(_old_present) return false;
-    if(!_initialized) return false;
+    if(! initialized() ) return false;
 
     int argc = 0;
     opts[argc++] = qparam;
@@ -1204,8 +1301,7 @@ RpmDb::queryChangedFiles(FileList & fileList, const string& packageName)
 
     fileList.clear();
 
-    if(_old_present) return false;
-    if(!_initialized) return false;
+    if( ! initialized() ) return false;
 
     int argc = 0;
     RpmArgVec opts(5);
@@ -1269,55 +1365,53 @@ RpmDb::run_rpm(const RpmArgVec& options,
 		       ExternalProgram::Stderr_Disposition disp)
 {
 
-    exit_code = -1;
+  if ( process ) {
+    delete process;
+    process = NULL;
+  }
+  exit_code = -1;
 
-    RpmArgVec args(5);
-    unsigned argc = 0;
+  if ( ! initialized() ) {
+    ERR << "Attempt to run rpm: " << Error::E_RpmDB_not_open << endl;
+    return;
+  }
 
-    args[argc++] = "rpm";
-    if (!_rootdir.asString().empty()
-	&& (_rootdir.asString() != "/"))
+  RpmArgVec args(5);
+  unsigned argc = 0;
+
+  // always set root and dbpath
+  args[argc++] = "rpm";
+  args[argc++] = "--root";
+  args[argc++] = _root.asString().c_str();
+  args[argc++] = "--dbpath";
+  args[argc++] = _dbPath.asString().c_str();
+  args[argc++] = NULL;
+
+  const char* argv[argc+options.size()+2];
+  argc = 0;
+
+  for (RpmArgVec::iterator it=args.begin();it<args.end();++it)
     {
-	args[argc++] = "--root";
-	args[argc++] = _rootdir.asString().c_str();
+      if (*it == 0)
+	break;
+      argv[argc++]=*it;
     }
-    if (!dbPath.asString().empty())
+  for(RpmArgVec::const_iterator it2=options.begin();it2<options.end();++it2)
     {
-	args[argc++] = "--dbpath";
-	args[argc++] = dbPath.asString().c_str();
-    }
-    if (argc < 4)
-	args[argc++] = 0;
-
-    const char* argv[argc+options.size()+2];
-    argc = 0;
-
-//    D__ << "rpm command: ";
-
-    for (RpmArgVec::iterator it=args.begin();it<args.end();++it)
-    {
-	if (*it == 0)
-	    break;
-	argv[argc++]=*it;
-//	D__ << *it << " ";
-    }
-    for(RpmArgVec::const_iterator it2=options.begin();it2<options.end();++it2)
-    {
-	argv[argc++]=*it2;
-//	D__ << *it2 << " ";
+      argv[argc++]=*it2;
     }
 
-    argv[argc] = 0;
+  argv[argc] = 0;
 
-//    D__ << endl;
+  // Launch the program with default locale
+  I__ << "Lauch:";
+  for ( argc = 0; argv[argc]; ++argc ) {
+    I__ << ' ' << argv[argc];
+  }
+  I__ << endl;
 
-    if ( process != NULL )
-    {
-	delete process;
-	process = NULL;
-    }
-    // Launch the program with default locale
-    process = new ExternalProgram(argv, disp, false, -1, true);
+  process = new ExternalProgram(argv, disp, false, -1, true);
+  return;
 }
 
 /*--------------------------------------------------------------*/
@@ -1392,10 +1486,10 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 	if (pos2 >= msg.length() )
 	    break;
 
-	if (!_rootdir.empty() && _rootdir != "/")
+	if (!_root.empty() && _root != "/")
 	{
-	    file1 = _rootdir.asString() + msg.substr (0, pos1);
-	    file2 = _rootdir.asString() + msg.substr (pos2);
+	    file1 = _root.asString() + msg.substr (0, pos1);
+	    file2 = _root.asString() + msg.substr (pos2);
 	}
 	else
 	{
@@ -1407,7 +1501,7 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 	int ret = Diff::differ (file1, file2, out, 25);
 	if (ret)
 	{
-	    Pathname notifydir = Pathname(_rootdir) + WARNINGMAILPATH;
+	    Pathname notifydir = Pathname(_root) + WARNINGMAILPATH;
 	    if (PathInfo::assert_dir(notifydir) != 0)
 	    {
 		ERR << "Could not create " << notifydir.asString() << endl;
@@ -1449,10 +1543,16 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
     }
 }
 
-// inststall package filename with flags iflags
-PMError
-RpmDb::installPackage(const Pathname& filename, unsigned flags)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::installPackage
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 {
+    FAILIFNOTINITIALIZED;
+
     Logfile progresslog;
     RpmArgVec opts;
 
@@ -1467,6 +1567,7 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 	}
     }
 
+    tagModified();
     _packages._valid = false;
 
     opts.push_back ("-U");
@@ -1490,32 +1591,30 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
     // %s = filename of rpm package
     // progresslog() << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
 
+    ProgressCounter pcnt( _cb_installPkg );
+    pcnt.start( 100 );
     run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
 
     string line;
     string rpmmsg;
-    double old_percent = 0.0;
     vector<string> configwarnings;
+    vector<string> errorlines;
 
     while (systemReadLine(line))
     {
+      WAR << line << endl;
 	if (line.substr(0,2)=="%%")
 	{
-	    double percent;
-	    sscanf (line.c_str () + 2, "%lg", &percent);
-	    if (percent >= old_percent + 5.0)
-	    {
-		old_percent = int (percent / 5) * 5;
-		ReportProgress(static_cast<int>(percent));
-	    }
+	    int percent;
+	    sscanf (line.c_str () + 2, "%d", &percent);
+	    pcnt.set( percent );
 	}
 	else
 	    rpmmsg += line+'\n';
 
-	if( line.substr(0,8) == "warning:" )
+	if( line.substr(0,8) == "warning:" || line.substr(0,6) == "error:" )
 	{
 	    configwarnings.push_back(line);
-
 	}
     }
     int rpm_status = systemStatus();
@@ -1535,6 +1634,7 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 		_("rpm created %s as %s.\nHere are the first 25 lines of difference:\n"));
     }
 
+#warning UNRELIABLE RETURNCODE
     if (rpm_status != 0)
     {
 	// %s = filename of rpm package
@@ -1552,13 +1652,17 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
     return Error::E_ok;
 }
 
-// remove package named label
-PMError
-RpmDb::removePackage(const string& label, unsigned flags)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::removePackage
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::removePackage( const string & label, unsigned flags )
 {
-    RpmArgVec opts;
+    FAILIFNOTINITIALIZED;
 
-    FAILIFNOTINITIALIZED
+    RpmArgVec opts;
 
     if(_packagebackups)
     {
@@ -1568,9 +1672,11 @@ RpmDb::removePackage(const string& label, unsigned flags)
 	}
     }
 
+    tagModified();
     _packages._valid = false;
 
     opts.push_back("-e");
+    opts.push_back("--allmatches");
 
     if (flags & RPMINST_NOSCRIPTS)
 	opts.push_back("--noscripts");
@@ -1591,9 +1697,11 @@ RpmDb::removePackage(const string& label, unsigned flags)
 
     while (systemReadLine(line))
     {
+      WAR << line << endl;
 	rpmmsg += line+'\n';
     }
     int rpm_status = systemStatus();
+#warning UNRELIABLE RETURNCODE
     if (rpm_status != 0)
     {
 	ERR << "rpm failed, message was: " << rpmmsg << endl;
@@ -1725,7 +1833,7 @@ RpmDb::backupPackage(const string& packageName)
     Logfile progresslog;
     bool ret = true;
     Pathname backupFilename;
-    Pathname filestobackupfile = _rootdir+_backuppath+FILEFORBACKUPFILES;
+    Pathname filestobackupfile = _root+_backuppath+FILEFORBACKUPFILES;
 
     if (_backuppath.empty())
     {
@@ -1748,7 +1856,7 @@ RpmDb::backupPackage(const string& packageName)
 	return true;
     }
 
-    if (PathInfo::assert_dir(_rootdir + _backuppath) != 0)
+    if (PathInfo::assert_dir(_root + _backuppath) != 0)
     {
 	return false;
     }
@@ -1767,7 +1875,7 @@ RpmDb::backupPackage(const string& packageName)
 	int num = 0;
 	do
 	{
-	    backupFilename = _rootdir + _backuppath
+	    backupFilename = _root + _backuppath
 		+ stringutil::form("%s-%d-%d.tar.gz",packageName.c_str(), date, num);
 
 	}
@@ -1807,7 +1915,7 @@ RpmDb::backupPackage(const string& packageName)
 	    "tar",
 	    "-czhP",
 	    "-C",
-	    _rootdir.asString().c_str(),
+	    _root.asString().c_str(),
 	    "--ignore-failed-read",
 	    "-f",
 	    backupFilename.asString().c_str(),
@@ -1816,7 +1924,7 @@ RpmDb::backupPackage(const string& packageName)
 	    NULL
 	};
 
-	// execute tar in inst-sys (we dont know if there is a tar below _rootdir !)
+	// execute tar in inst-sys (we dont know if there is a tar below _root !)
 	ExternalProgram tar(argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
 
 	string tarmsg;

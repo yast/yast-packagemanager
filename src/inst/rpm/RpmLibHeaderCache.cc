@@ -30,7 +30,7 @@
 using namespace std;
 
 #undef Y2LOG
-#define Y2LOG "binHeaderCache"
+#define Y2LOG "RpmLibHeaderCache"
 
 ///////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,7 @@ bool RpmLibHeaderCache::magicOk()
 }
 
 ///////////////////////////////////////////////////////////////////
-#define RETURN_IF_CLOSED(R) if ( !isOpen() ) { ERR << "Cache not open: " << _cpath << endl; return(R); }
+#define RETURN_IF_CLOSED(R) if ( !isOpen() ) { ERR << "Cache not open: " << _cpath << endl; return R; }
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
@@ -92,11 +92,11 @@ bool RpmLibHeaderCache::magicOk()
 //
 constRpmLibHeaderPtr RpmLibHeaderCache::getFirst( Pathname & citem_r, int & isSource_r, pos & at_r )
 {
-  RETURN_IF_CLOSED( 0 );
+  RETURN_IF_CLOSED( (RpmLibHeader*)0 );
 
   if ( seek( _cheaderStart ) == npos ) {
     ERR << "Can't seek to first header at " << _cheaderStart << endl;
-    return 0;
+    return (RpmLibHeader*)0;
   }
 
   return getNext( citem_r, isSource_r, at_r );
@@ -110,7 +110,7 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getFirst( Pathname & citem_r, int & isSo
 //
 constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSource_r, pos & at_r )
 {
-  RETURN_IF_CLOSED( 0 );
+  RETURN_IF_CLOSED( constRpmLibHeaderPtr() );
 
   static const unsigned sigsize = 8;
 
@@ -122,12 +122,12 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSou
     if ( count ) {
       ERR << "Error reading entry." << endl;
     } // else EOF?
-    return 0;
+    return (RpmLibHeader*)0;
   }
 
   if ( sig[0] != '@' || sig[sigsize-1] != '@' ) {
     ERR << "Invalid entry." << endl;
-    return 0;
+    return (RpmLibHeader*)0;
   }
 
   sig[sigsize-1] = '\0';
@@ -138,7 +138,7 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSou
 
   if ( readData( citem, count ) != count ) {
     ERR << "Error reading entry data." << endl;
-    return 0;
+    return (RpmLibHeader*)0;
   }
 
   isSource_r = ( citem[0] == 's' );
@@ -157,17 +157,17 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSou
 //
 constRpmLibHeaderPtr RpmLibHeaderCache::getAt( pos at_r )
 {
-  RETURN_IF_CLOSED( 0 );
+  RETURN_IF_CLOSED( constRpmLibHeaderPtr() );
 
   if ( seek( at_r ) == npos ) {
     ERR << "Can't seek to header at " << at_r << endl;
-    return 0;
+    return (RpmLibHeader*)0;
   }
 
   binHeaderPtr bp = readHeader();
   if ( !bp ) {
     ERR << "Can't read header at " << at_r << endl;
-    return 0;
+    return (RpmLibHeader*)0;
   }
 
   return new RpmLibHeader( bp );
@@ -190,8 +190,8 @@ ostream & operator<<( ostream & str, const RpmLibHeaderCache & obj )
 //
 ///////////////////////////////////////////////////////////////////
 #include <y2util/PathInfo.h>
-#include "RpmLib.h"
 extern "C" {
+#include <rpm/rpmlib.h>
 #include <netinet/in.h>
   // from rpm: lib/header.c
   struct entryInfo {

@@ -21,13 +21,13 @@
 #ifndef RpmLibHeaderPtr_h
 #define RpmLibHeaderPtr_h
 
-#include <y2util/RepDef.h>
+#include <y2pm/binHeaderPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //	CLASS NAME : RpmLibHeaderPtr
 //	CLASS NAME : constRpmLibHeaderPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_BASE_POINTER(RpmLibHeader);
+DEFINE_DERIVED_POINTER(RpmLibHeader,binHeader,binHeader);
 
 #if 0 // just for kdoc
 /**

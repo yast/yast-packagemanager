@@ -19,11 +19,14 @@
 
 /-*/
 
+extern "C" {
+#include <rpm/rpmlib.h>
+}
+
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
 
-#include "RpmLib.h"
 #include <y2pm/binHeader.h>
 
 using namespace std;
@@ -110,12 +113,30 @@ std::string binHeader::stringList::operator[]( const unsigned idx_r ) const {
 //	METHOD NAME : binHeader::binHeader
 //	METHOD TYPE : Constructor
 //
-binHeader::binHeader( Header h )
-    : _h( h )
+binHeader::binHeader( Header h_r )
+    : _h( h_r )
 {
   if ( _h ) {
     ::headerLink( _h );
   }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : binHeader::binHeader
+//	METHOD TYPE : Constructor
+//
+binHeader::binHeader( binHeaderPtr & rhs )
+{
+  I__ << "INJECT from " << rhs;
+  if ( ! (rhs && rhs->_h) ) {
+    _h = 0;
+  } else {
+    _h = rhs->_h;  // ::headerLink already done in rhs
+    rhs->_h = 0;
+  }
+  I__ << ": " << *this << "   (" << rhs << ")" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////

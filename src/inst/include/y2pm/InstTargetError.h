@@ -50,20 +50,18 @@ class InstTargetError {
       E_error = PMError::C_InstTargetError,	// some error
       // more specific errors start here:
       E_system,		// see errno
-      E_RpmDB_not_found,
-      E_RpmDB_create_failed,
-      E_RpmDB_check_old_version_failed,
-      E_RpmDB_mkdir_failed,
-      E_RpmDB_initdb_failed,
-      E_RpmDB_copy_tmpdb_failed,
-      E_RpmDB_rebuilddb_failed,
-      E_RpmDB_not_initialized,
-      E_RpmDB_subprocess_failed,
-      E_RpmDB_old_db,
+      E_invalid_argument,
       //
-      E_RpmLib_read_config_failed,
-      E_RpmLib_dbopen_failed,
-      E_RpmLib_db_not_open,
+      E_RpmDB_global_init_failed,
+      E_RpmDB_already_open,
+      E_RpmDB_init_failed,
+      E_RpmDB_open_failed,
+      E_RpmDB_convert_failed,
+      E_RpmDB_rebuild_failed,
+      E_RpmDB_access_blocked,
+      E_RpmDB_not_open,
+      //
+      E_RpmDB_subprocess_failed,
       //
       E_SelDB_already_open,
       E_SelDB_open_failed,

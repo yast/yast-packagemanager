@@ -70,7 +70,6 @@ class binHeaderCache {
 
     pos _cheaderStart;
 
-
   protected:
 
     virtual bool magicOk() { return _cmagic.empty(); }
