@@ -210,7 +210,7 @@ class MediaAccess : virtual public Rep {
 
     public:
 
-      /**ProvideFile
+      /**
        * Helper class that provides file on construction
        * and cleans up on destruction.
        *
