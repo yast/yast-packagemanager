@@ -9,7 +9,7 @@ pkgincludedir = $(includedir)/y2pm
 pkginclude_HEADERS =	\
 	PMPackage.h PMPackagePtr.h \
 	PMPackageDataProvider.h PMPackageDataProviderPtr.h \
-	PMPackageManager.h PMPackageManager_update.h \
+	PMPackageManager.h PMPackageManagerCallbacks.h PMPackageManager_update.h \
 	PMPackageImEx.h PMPackageImExPtr.h
 
 #<INSTALL-HEADER-TARGET>

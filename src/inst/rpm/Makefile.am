@@ -23,7 +23,7 @@ liby2pminstrpmsrc_la_SOURCES = 	librpm.h	\
 	librpmDb.cc librpmDb.cv3.cc		\
 	binHeader.cc binHeaderCache.cc		\
 	RpmHeader.cc RpmHeaderCache.cc		\
-	RpmDb.cc 				\
+	RpmDb.cc RpmDbCallbacks.cc		\
 	PMRpmPackageDataProvider.cc
 
 liby2pminstrpmsrc_la_LIBADD = -ly2util -lrpm -lpopt

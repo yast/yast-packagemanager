@@ -21,7 +21,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 noinst_LTLIBRARIES = liby2pminstsrc.la
 
 liby2pminstsrc_la_SOURCES = \
-	InstSrcManager.cc 		\
+	InstSrcManager.cc InstSrcManagerCallbacks.cc	\
 	\
 	InstSrc.cc 			\
 	InstData.cc 			\
@@ -38,6 +38,7 @@ liby2pminstsrc_la_SOURCES = \
 	\
 	InstTarget.cc			\
 	InstTargetError.cc		\
+	InstTargetCallbacks.cc		\
 	InstTargetSelDB.cc		\
 	InstTargetProdDB.cc		\
 	UpdateInfParser.cc

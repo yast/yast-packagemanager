@@ -29,16 +29,15 @@
 #include <vector>
 #include <string>
 
-#include <y2pm/RpmDbPtr.h>
-
 #include <y2util/Pathname.h>
-#include <y2util/ProgressCounter.h>
 #include <y2util/ExternalProgram.h>
+
+#include <y2pm/RpmDbPtr.h>
+#include <y2pm/PMError.h>
 
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
 
-#include <y2pm/InstTargetError.h>
 #include <y2pm/RpmHeaderPtr.h>
 #include <y2pm/FileDeps.h>
 
@@ -55,58 +54,9 @@ class RpmDb: virtual public Rep
   public:
 
     /**
-     * default error class
+     * Default error class
      **/
-    typedef InstTargetError Error;
-
-    ///////////////////////////////////////////////////////////////////
-    //
-    // Installation log
-    //
-    ///////////////////////////////////////////////////////////////////
-  private:
-
-    /**
-     * Progress of installation may be logged to file
-     **/
-    class Logfile;
-
-  public:
-
-    /**
-     * Set logfile for progress log. Empty filename to disable logging.
-     **/
-    static bool setInstallationLogfile( const Pathname & filename );
-
-    ///////////////////////////////////////////////////////////////////
-    //
-    // Callbacks
-    //
-    ///////////////////////////////////////////////////////////////////
-  private:
-
-    static ProgressCounter::Callback _cb_convertDb;
-
-    static ProgressCounter::Callback _cb_rebuildDb;
-
-    static ProgressCounter::Callback _cb_installPkg;
-
-  public:
-
-    /**
-     * @return Callback for reporting progress of database conversion (@ref initDatabase).
-     **/
-    static ProgressCounter::Callback & cb_convertDb() { return _cb_convertDb; }
-
-    /**
-     * @return Callback for reporting progress of database rebuild (@ref rebuildDatabase).
-     **/
-    static ProgressCounter::Callback & cb_rebuildDb() { return _cb_rebuildDb; }
-
-    /**
-     * @return Callback for reporting progress of package installation.
-     **/
-    static ProgressCounter::Callback & cb_installPkg() { return _cb_installPkg; }
+    typedef class InstTargetError Error;
 
     ///////////////////////////////////////////////////////////////////
     //
@@ -542,6 +492,26 @@ class RpmDb: virtual public Rep
      * Dump debug info.
      **/
     virtual std::ostream & dumpOn( std::ostream & str ) const;
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Installation log
+    //
+    ///////////////////////////////////////////////////////////////////
+  private:
+
+    /**
+     * Progress of installation may be logged to file
+     **/
+    class Logfile;
+
+  public:
+
+    /**
+     * Set logfile for progress log. Empty filename to disable logging.
+     **/
+    static bool setInstallationLogfile( const Pathname & filename );
+
 };
 
 #endif // RpmDb_h

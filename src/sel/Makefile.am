@@ -23,4 +23,4 @@ noinst_LTLIBRARIES = liby2pmsel.la
 liby2pmsel_la_SOURCES = \
 	PMSelection.cc \
 	PMSelectionDataProvider.cc \
-	PMSelectionManager.cc
+	PMSelectionManager.cc PMSelectionManagerCallbacks.cc

@@ -22,19 +22,21 @@
 		- contents (list of package, list of selections, ...)
 
 /-*/
+#include <cctype>
 
 #include <iostream>
 #include <fstream>
-#include <ctype.h>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
+#include <y2util/stringutil.h>
 
 #include <Y2PM.h>
 #include <y2pm/Timecount.h>
 
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcError.h>
+#include <y2pm/InstSrcManagerCallbacks.h>
 
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstSrcDescr.h>
@@ -44,6 +46,7 @@
 #include <y2pm/InstSrcDataPLAIN.h>
 
 using namespace std;
+using namespace InstSrcManagerCallbacks;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -72,8 +75,6 @@ InstSrc::InstSrc()
     : _cache_deleteOnExit( false )
     , _may_use_cache( true )
     , _specialCache( -1 )
-    , _mediachangefunc (0)
-    , _mediachangedata (0)
     , _medianr (0)
 {
   MIL << "New InstSrc " << *this << endl;
@@ -615,31 +616,6 @@ InstSrc::Type InstSrc::fromString( std::string s )
   return T_UNKNOWN;
 }
 
-
-static
-std::string number2string (int nr)
-{
-    static int digits[] = { 1000, 100, 10, 1 };
-    static char num[5];
-    char *nptr = num;
-    if (nr > 1000)
-	return string();
-    for (int pos = 0; pos < 4; ++pos)
-    {
-	int digit = nr / digits[pos];
-	if (digit > 0)
-	{
-	    *nptr++ = '0' + digit;
-	    nr -= digit * digits[pos];
-	}
-    }
-    *nptr = 0;
-
-    return string (num);
-}
-
-
-
 /******************************************************************
 ** private
 **
@@ -649,9 +625,12 @@ std::string number2string (int nr)
 **	DESCRIPTION : provide media by medianr
 **
 */
+#warning NEEDS REWRITE: provideMedia
 PMError
 InstSrc::provideMedia (int medianr) const
 {
+  MediaChangeReport::Send report( mediaChangeReport );
+
     PMError err;
     string reply;
 
@@ -685,7 +664,7 @@ InstSrc::provideMedia (int medianr) const
 
 	}
 
-	Pathname mediafile ("/media."+number2string(medianr)+"/media");
+	Pathname mediafile ( stringutil::form( "/media.%d/media", medianr ) );
 
 	err = _media->provideFile (mediafile);
 	if (err == MediaError::E_ok)
@@ -711,7 +690,7 @@ InstSrc::provideMedia (int medianr) const
 		}
 		mediaf.close();
 		MIL << "vendor '" << vendor << "' id '" << id << "'" << endl;
-		if (_mediachangefunc != 0)
+		if ( report->isSet() )
 		{
 		    string error = string(vendor) + " != " + (const std::string &)(_descr->media_vendor());
 		    if (id[0] != 0)
@@ -727,7 +706,8 @@ InstSrc::provideMedia (int medianr) const
 		    string changereply;
 		    for (;;)
 		    {
-			changereply = (*_mediachangefunc) (error, url.asString(), product, -1, medianr, _mediachangedata);
+			changereply = report->changeMedia( error, url.asString(), product,
+							   -1, medianr );
 
 			if (changereply != "E")		// eject
 			    break;
@@ -797,13 +777,13 @@ InstSrc::provideMedia (int medianr) const
 	    {
 		path.erase (path.size()-1);		// remove trailing digits
 	    }
-	    path += number2string (medianr);		// attach medianr
+	    path += stringutil::numstring( medianr );	// attach medianr
 	    url.setPath (path);
 	    MIL << "Re-open url '" << url << "'" << endl;
 	    continue;					// try re-open
 	}
 
-	if (_mediachangefunc == 0)
+	if ( ! report->isSet() )
 	{
 	    ERR << "Can't find medium, can't ask user" << endl;
 	    medianr = 0;
@@ -816,7 +796,8 @@ InstSrc::provideMedia (int medianr) const
 	string changereply;
 	for (;;)
 	{
-	    changereply = (*_mediachangefunc) (err.errstr(), url.asString(), product, _medianr, medianr, _mediachangedata);
+	    changereply = report->changeMedia( err.errstr(), url.asString(), product,
+					       _medianr, medianr );
 
 	    if (changereply != "E")		// eject
 		break;

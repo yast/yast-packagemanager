@@ -26,23 +26,31 @@
 #include <y2util/Y2SLog.h>
 
 #include <Y2PM.h>
+#include <y2pm/Y2PMCallbacks.h>
 
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/InstYou.h>
 
 using namespace std;
+using namespace Y2PMCallbacks;
 
 ///////////////////////////////////////////////////////////////////
 #undef Y2LOG
 #define Y2LOG "Y2PM"
 ///////////////////////////////////////////////////////////////////
 
-/*
- * get LangCode from LANG
- */
+/******************************************************************
+**
+**
+**	FUNCTION NAME : getLangEnvironment
+**	FUNCTION TYPE : static LangCode
+**
+** Get LangCode from LANG environment variable.
+*/
 static LangCode getLangEnvironment()
 {
     char *lang = getenv ("LANG");
@@ -144,158 +152,6 @@ void Y2PM::packageSelectionClearSaveState() {
 }
 
 ///////////////////////////////////////////////////////////////////
-// CallBacks
-///////////////////////////////////////////////////////////////////
-
-Y2PM::CallBacks Y2PM::_callbacks = Y2PM::CallBacks::CallBacks();
-
-Y2PM::CallBacks::CallBacks()
-{
-    _provide_start_func = NULL;
-    _provide_start_data = NULL;
-    _provide_progress_func = NULL;
-    _provide_progress_data = NULL;
-    _provide_done_func = NULL;
-    _provide_done_data = NULL;
-    _package_start_func = NULL;
-    _package_start_data = NULL;
-    _package_progress_func = NULL;
-    _package_progress_data = NULL;
-    _package_done_func = NULL;
-    _package_done_data = NULL;
-    _rebuilddb_progress_func = NULL;
-    _rebuilddb_progress_data = NULL;
-    _source_change_func = NULL;
-    _source_change_data = NULL;
-#warning Switch to new callback interface
-    // Translate new InstTarget Callbacks:
-    InstTarget::cb_rpmConvertDb().set( cbfConvertDb );
-    InstTarget::cb_rpmRrebuildDb().set( cbfRebuildDb );
-    InstTarget::cb_rpmInstallPkg().set( cbfInstallPkg );
-};
-
-void Y2PM::cbfConvertDb( const ProgressCounter & pc, const void * ) {
-  // WFM does not yet support it, so drop a debug line every 100 packages processed.
-  if ( pc.state() == ProgressCounter::st_value && pc.val() % 100 )
-    return;
-  DBG << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
-      << pc.val() << " " << pc.precent() << "%" << endl;
-
-}
-void Y2PM::cbfRebuildDb( const ProgressCounter & pc, const void * ) {
-  if ( _callbacks._rebuilddb_progress_func ) {
-    _callbacks._rebuilddb_progress_func( (int)pc.precent(), _callbacks._rebuilddb_progress_data );
-  }
-}
-void Y2PM::cbfInstallPkg( const ProgressCounter & pc, const void * ) {
-  static int lastP = 0;
-  switch ( pc.state() ) {
-  case ProgressCounter::st_start:
-  case ProgressCounter::st_stop:
-    lastP = 0; // reset
-    break;
-  case ProgressCounter::st_value:
-    if ( pc.precent() - lastP < 5 ) {
-      return; // WFM likes 5% steps
-    }
-    lastP = (int)pc.precent();
-  }
-  // report
-  if ( _callbacks._package_progress_func ) {
-    _callbacks._package_progress_func( (int)pc.precent(), _callbacks._package_progress_data );
-  }
-}
-
-/**
- * called right before package 'name' is provided
- * */
-void
-Y2PM::setProvideStartCallback(void (*func)(const std::string& name, const FSize&, bool, void*), void* data)
-{
-    _callbacks._provide_start_func = func;
-    _callbacks._provide_start_data = data;
-}
-
-/**
- * called while package providal is in progress
- * */
-void
-Y2PM::setProvideProgressCallback(void (*func)(int percent, void*), void* data)
-{
-#warning Pass 'provide progress' callback to Media
-    _callbacks._provide_progress_func = func;
-    _callbacks._provide_progress_data = data;
-}
-
-/**
- * called right after a package was provided
- * */
-void
-Y2PM::setProvideDoneCallback(std::string (*func)(PMError err, const std::string&, const std::string&, void*), void* data)
-{
-    _callbacks._provide_done_func = func;
-    _callbacks._provide_done_data = data;
-}
-
-/**
- * called right before package 'name' is installed or deleted
- * */
-void
-Y2PM::setPackageStartCallback(bool (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data)
-{
-    _callbacks._package_start_func = func;
-    _callbacks._package_start_data = data;
-}
-
-/**
- * called multiple times during package installation, 'progress' is the
- * already installed percentage
- * */
-void
-Y2PM::setPackageProgressCallback(void (*func)(int percent, void*), void* data)
-{
-    _callbacks._package_progress_func = func;
-    _callbacks._package_progress_data = data;
-   // from cbfInstallPkg: instTarget().setPackageInstallProgressCallback (func, data);
-}
-
-/**
- * called after a package got installed or deleted
- * */
-void
-Y2PM::setPackageDoneCallback(std::string (*func)(PMError, const std::string&, void*), void* data)
-{
-    _callbacks._package_done_func = func;
-    _callbacks._package_done_data = data;
-}
-
-
-/**
- * called multiple times during rpm rebuilddb, 'progress' is the
- * rebuild progress
- * */
-void
-Y2PM::setRebuildDBProgressCallback(void (*func)(int percent, void*), void* data)
-{
-    _callbacks._rebuilddb_progress_func = func;
-    _callbacks._rebuilddb_progress_data = data;
-    // from cbfRebuildDb: instTarget().setRebuildDBProgressCallback(func, data);
-}
-
-
-/**
- * called when switching sources during package commit (install loop)
- * informal callback for user interface, no user interaction necessary
- * */
-void
-Y2PM::setSourceChangeCallback(void (*func)(InstSrcManager::ISrcId srcid, int medianr, void*), void* data)
-{
-    _callbacks._source_change_func = func;
-    _callbacks._source_change_data = data;
-}
-
-///////////////////////////////////////////////////////////////////
-
 
 PkgArch
 Y2PM::baseArch(void)
@@ -329,7 +185,7 @@ InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
 	MIL << "Init InstTarget at '" << root << "'..." << endl;
 	_instTarget_rootdir = root;
 	PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
-	if( dbstat != InstTargetError::E_ok )
+	if( dbstat != PMError::E_ok )
 	{
 	    ERR << "error initializing target: " << dbstat << endl;
 #warning error value dropped
@@ -481,12 +337,106 @@ PMYouPatchManager & Y2PM::youPatchManager()
 /******************************************************************
 **
 **
-**	FUNCTION NAME : commitSucceeded
-**	FUNCTION TYPE : inline void
+**	FUNCTION NAME : commitProvide
+**	FUNCTION TYPE : PMError
+**
+** Handle package provision for src/bin(srcpkg_r) packages. Callback request
+** to RETRY on error is handled here. Request to SKIP/CANCEL is passed back as
+** InstSrcError::E_skip_media/InstSrcError::E_cancel_media.
+**
+** On success the local path to the provided package is returned via retpath_r.
 */
-inline void commitSucceeded( const PMPackagePtr & pkg_r )
+static PMError commitProvide( PMPackagePtr pkg_r, bool srcpkg_r, Pathname & retpath_r )
 {
-  // adjust selectables state
+  retpath_r = "";
+
+  CommitProvideReport::Send report( commitProvideReport );
+  report->start( pkg_r, srcpkg_r );
+
+  PMError err;
+  Pathname localpath;
+  unsigned attempt = 0;
+  CBSuggest proceed;
+
+  do {
+    proceed = report->attempt( ++attempt );
+    switch ( proceed ) {
+    case CBSuggest::SKIP:
+      err = InstSrcError::E_skip_media;   // skip current media
+      break;
+    case CBSuggest::CANCEL:
+      err = InstSrcError::E_cancel_media; // cancel all
+      break;
+    case CBSuggest::PROCEED:              // proceed
+    case CBSuggest::RETRY:                // ignored
+      err = PMError::E_ok;
+      break;
+    }
+    if ( err ) {
+      break; // canceled
+    }
+
+    if ( srcpkg_r ) {
+      err = pkg_r->provideSrcPkgToInstall( localpath );
+    } else {
+      err = pkg_r->providePkgToInstall( localpath );
+    }
+
+    proceed = report->result( err, localpath );
+    switch ( proceed ) {
+    case CBSuggest::PROCEED:              // return original error
+      retpath_r = localpath;
+      break;
+    case CBSuggest::SKIP:
+      err = InstSrcError::E_skip_media;   // skip current media
+      break;
+    case CBSuggest::CANCEL:
+      err = InstSrcError::E_cancel_media; // cancel all
+      break;
+    case CBSuggest::RETRY:                // retry !
+      break;
+    }
+  } while( err && proceed == CBSuggest::RETRY );
+
+  report->stop( err, retpath_r );
+  return err;
+}
+
+inline PMError commitProvideSrc( PMPackagePtr pkg_r, Pathname & retpath_r ) {
+  return commitProvide( pkg_r, /*srcpkg_r*/true, retpath_r );
+}
+
+inline PMError commitProvidePkg( PMPackagePtr pkg_r, Pathname & retpath_r ) {
+  return commitProvide( pkg_r, /*srcpkg_r*/false, retpath_r );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : commitSrcSucceeded
+**	FUNCTION TYPE : void
+**
+** Adjust an associated selectables state after successfull
+** source package install.
+*/
+inline void commitSrcSucceeded( const PMPackagePtr & pkg_r )
+{
+  if ( pkg_r && pkg_r->hasSelectable() ) {
+    pkg_r->getSelectable()->set_source_install( false );
+  }
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : commitPkgSucceeded
+**	FUNCTION TYPE : void
+**
+** Adjust an associated selectables state after successfull
+** package install/delete.
+*/
+inline void commitPkgSucceeded( const PMPackagePtr & pkg_r )
+{
   if ( pkg_r && pkg_r->hasSelectable() ) {
     pkg_r->getSelectable()->user_unset();
   }
@@ -495,188 +445,556 @@ inline void commitSucceeded( const PMPackagePtr & pkg_r )
 /******************************************************************
 **
 **
-**	FUNCTION NAME : commitSrcSucceeded
-**	FUNCTION TYPE : inline void
+**	FUNCTION NAME : commitInstall
+**	FUNCTION TYPE : PMError
+**
+** Install the src/bin(srcpkg_r) package available at path_r. Callback request
+** to RETRY on error is handled here. Request to SKIP/CANCEL is passed back as
+** InstSrcError::E_skip_media/InstSrcError::E_cancel_media.
 */
-inline void commitSrcSucceeded( const PMPackagePtr & pkg_r )
+static PMError commitInstall( PMPackagePtr pkg_r, bool srcpkg_r, const Pathname & path_r )
 {
-  // adjust selectables state
-  if ( pkg_r && pkg_r->hasSelectable() ) {
-    pkg_r->getSelectable()->set_source_install( false );
-  }
+  CommitInstallReport::Send report( commitInstallReport );
+  report->start( pkg_r, srcpkg_r, path_r );
+
+  PMError err;
+  unsigned attempt = 0;
+  CBSuggest proceed;
+
+  do {
+    proceed = report->attempt( ++attempt );
+    switch ( proceed ) {
+    case CBSuggest::SKIP:
+      err = InstSrcError::E_skip_media;   // skip current media
+      break;
+    case CBSuggest::CANCEL:
+      err = InstSrcError::E_cancel_media; // cancel all
+      break;
+    case CBSuggest::PROCEED:              // proceed
+    case CBSuggest::RETRY:                // ignored
+      err = PMError::E_ok;
+      break;
+    }
+    if ( err ) {
+      break; // canceled
+    }
+
+    err = Y2PM::instTarget().installPackage( path_r );
+    if ( ! err ) {
+      if ( srcpkg_r ) {
+	commitSrcSucceeded( pkg_r );
+      } else {
+	commitPkgSucceeded( pkg_r );
+      }
+    }
+
+    proceed = report->result( err );
+    switch ( proceed ) {
+    case CBSuggest::PROCEED:              // return original error
+      break;
+    case CBSuggest::SKIP:
+      err = InstSrcError::E_skip_media;   // skip current media
+      break;
+    case CBSuggest::CANCEL:
+      err = InstSrcError::E_cancel_media; // cancel all
+      break;
+    case CBSuggest::RETRY:                // retry !
+      break;
+    }
+  } while( err && proceed == CBSuggest::RETRY );
+
+  report->stop( err );
+  return err;
 }
 
+inline PMError commitInstallSrc( PMPackagePtr pkg_r, const Pathname & path_r ) {
+  return commitInstall( pkg_r, /*srcpkg_r*/true, path_r );
+}
+
+inline PMError commitInstallPkg( PMPackagePtr pkg_r, const Pathname & path_r ) {
+  return commitInstall( pkg_r, /*srcpkg_r*/false, path_r );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : commitRemovePkg
+**	FUNCTION TYPE : PMError
+**
+** Remove the package. Callback request to RETRY on error is handled here.
+** Request to SKIP/CANCEL is passed back as InstSrcError::E_skip_media/
+** InstSrcError::E_cancel_media.
+*/
+static PMError commitRemovePkg( PMPackagePtr pkg_r )
+{
+  CommitRemoveReport::Send report( commitRemoveReport );
+  report->start( pkg_r );
+
+  PMError err;
+  unsigned attempt = 0;
+  CBSuggest proceed;
+
+  do {
+    proceed = report->attempt( ++attempt );
+    switch ( proceed ) {
+    case CBSuggest::SKIP:
+      err = InstSrcError::E_skip_media;   // skip current media
+      break;
+    case CBSuggest::CANCEL:
+      err = InstSrcError::E_cancel_media; // cancel all
+      break;
+    case CBSuggest::PROCEED:              // proceed
+    case CBSuggest::RETRY:                // ignored
+      err = PMError::E_ok;
+      break;
+    }
+    if ( err ) {
+      break; // canceled
+    }
+
+    err = Y2PM::instTarget().removePackage( pkg_r );
+    if ( ! err ) {
+      commitPkgSucceeded( pkg_r );
+    }
+
+    proceed = report->result( err );
+    switch ( proceed ) {
+    case CBSuggest::PROCEED:              // return original error
+      break;
+    case CBSuggest::SKIP:
+      err = InstSrcError::E_skip_media;   // skip current media
+      break;
+    case CBSuggest::CANCEL:
+      err = InstSrcError::E_cancel_media; // cancel all
+      break;
+    case CBSuggest::RETRY:                // retry !
+      break;
+    }
+  } while( err && proceed == CBSuggest::RETRY );
+
+  report->stop( err );
+  return err;
+}
 
 /******************************************************************
 **
 **
 **	FUNCTION NAME : installSpmFromMedia
-**	FUNCTION TYPE : bool
+**	FUNCTION TYPE : PMError
 **
-**	install spms from package source 'current_src_ptr',
-**	  media number 'current_src_media'
-**	loop through srclist and pick all spms matching the wanted
-**	  media
+** Loop through srclist and pick all spms matching source current_src_ptr,
+** and media number current_src_media. The media is expected to be available.
+**
+** On successfull installation the entry is removed fom srclist.
+**
+** Returns PMError::E_ok if all selected packages were installed, otherwise PMError::E_error.
+** Callback requests to SKIP/CANCEL however are passed back as InstSrcError::E_skip_media/
+** InstSrcError::E_cancel_media, hiding previous errors.
 */
-bool
-Y2PM::installSpmFromMedia (unsigned int current_src_media,
-			   constInstSrcPtr current_src_ptr,
-			   std::list<PMPackagePtr>& srclist)
+static PMError installSpmFromMedia( constInstSrcPtr current_src_ptr_r, unsigned current_src_media_r,
+				    list<PMPackagePtr> & srclist_r )
 {
-    // no-op if we don't have a medium yet
+  PMError ret; // error returned
 
-    if (current_src_media == 0)
-	return true;
-    if (current_src_ptr == 0)
-	return true;
+  // no-op if we don't have a medium yet
+  if ( ! ( current_src_ptr_r && current_src_media_r ) )
+    return ret;
 
+  // Loop through srclist
+  PMError err; // error within loop
+  bool eraseit = false; // whether to advance iterator or to erase the current element
+  for ( list<PMPackagePtr>::iterator it = srclist_r.begin(); it != srclist_r.end();
+	( eraseit ? it = srclist_r.erase( it ) : ++it ) ) {
+
+    // first of all check for cancel request in previous loop:
+    switch ( err ) {
+    case InstSrcError::E_skip_media:   // skip current media
+    case InstSrcError::E_cancel_media: // cancel all
+      break;
+    default:
+      err = PMError::E_ok;
+      break;
+    }
+    if ( err ) {
+      break; // canceled
+    }
+    // go
+
+    PMPackagePtr & cpkg( *it );
+    eraseit = false;
+
+    if ( cpkg->source() != current_src_ptr_r ) {
+      continue; // unwanted source
+    }
+
+    unsigned cpkgMedia = atoi( cpkg->sourceloc().c_str() );
+
+    if ( cpkgMedia != current_src_media_r ) {
+      if ( ! cpkgMedia ) {
+	// will never get installed
+	ERR << "No source location for " << cpkg << endl;
+      }
+      continue; // unwanted media number
+    }
+
+    // let source provide the package
+    Pathname path;
+    err = commitProvideSrc( cpkg, path );
+    if ( err ) {
+      ret = PMError::E_error;
+      continue; // SKIP/CANCEL evaluated at loop start/end
+    }
+
+    // install provided source package
+    err = commitInstallSrc( cpkg, path );
+    if ( err ) {
+      // check cpkg settings in case any error occurred after
+      // successfull install.
+      if ( cpkg && cpkg->hasSelectable() && ! cpkg->getSelectable()->source_install() ) {
+	eraseit = true;
+      }
+      ret = PMError::E_error;
+      continue; // SKIP/CANCEL evaluated at loop start/end
+    } else {
+      eraseit = true;
+    }
+
+  } // loop over source packages
+
+
+  // check for cancel request in loop:
+  switch ( err ) {
+  case InstSrcError::E_skip_media:   // skip current media
+  case InstSrcError::E_cancel_media: // cancel all
+    // hides any previous PMError::E_error
+    ret = err;
+    break;
+  default:
+    // report what actually happened
+    break;
+  }
+  return ret;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : internal_commitPackages
+**	FUNCTION TYPE : int
+**
+**      commit all changes in the package manager
+**		==> actually delete/install packages
+**		relies on callbacks for media change
+**		!! DOES NOT SOLVE !!
+**
+**	if media_nr is != 0, only packages from this media are
+**	installed. media_nr==0 means install all packages from all media.
+**
+**	returns number of sucessfully installed packages
+**	  negated if the installation was aborted
+**
+**	returns failed packages in 'errors_r'
+**	returns uninstalled packages (because media not available) in 'remaining_r'
+**	returns uninstalled source packages in 'srcremaining_r'
+*/
+static int internal_commitPackages( unsigned mediaNr_r,
+				    std::list<std::string> & errors_r,
+				    std::list<std::string> & remaining_r,
+				    std::list<std::string> & srcremaining_r,
+				    InstSrcManager::ISrcIdList installrank_r )
+{
+  CommitReport::Send report( commitReport );
+
+#warning loosing version information when using remaining_r etc.
+  errors_r.clear();
+  remaining_r.clear();
+  srcremaining_r.clear();
+
+  // get packages to process
+  std::list<PMPackagePtr> dellist;
+  std::list<PMPackagePtr> inslist;
+  std::list<PMPackagePtr> srclist;
+  Y2PM::packageManager().getPackagesToInsDel( dellist, inslist, srclist, installrank_r );
+  if ( mediaNr_r ) {
+    MIL << "Restrict to media number " << mediaNr_r << endl;
+  }
+
+  PMError error;
+
+  ///////////////////////////////////////////////////////////////////
+  // first, remove all packages marked for deletion
+  ///////////////////////////////////////////////////////////////////
+  for ( list<PMPackagePtr>::iterator it = dellist.begin(); it != dellist.end(); ++it ) {
+
+    PMError res = commitRemovePkg( *it );
+
+    switch ( res ) {
+    case InstSrcError::E_cancel_media: // cancel all
+    case InstSrcError::E_skip_media:   // skip remaining
+      error = res;
+      break;
+    default:                           // continue
+      break;
+    }
+    if ( error ) {
+      break; // canceled
+    }
+  }
+
+  switch ( error ) {
+  case InstSrcError::E_cancel_media: // cancel all
+    return 0;
+    break;
+  default:
+    error = PMError::E_ok;
+    break;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // One may argue whether selection data should be installed before
+  // or after any packages. Doing it before has the benefit, that the
+  // selection DB reflects what the user wanted. In case of trouble it
+  // should be easier to check and manualy repair.
+  ///////////////////////////////////////////////////////////////////
+  {
+    PMError res = Y2PM::selectionManager().installOnTarget();
+    if ( res ) {
+      ERR << "Error installing selection data: " << res << endl;
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // install loop
+  ///////////////////////////////////////////////////////////////////
+
+  int             count = 0;
+  constInstSrcPtr current_src_ptr = 0;   // current source
+  unsigned        current_src_media = 0; // current media number
+
+  for ( list<PMPackagePtr>::iterator it = inslist.begin(); it != inslist.end(); ++it ) {
+
+    PMPackagePtr & cpkg( *it );
+
+    // Check whether package fits a requested mediaNr_r
+    unsigned cpkgMedianr = cpkg->medianr();
+
+    if ( mediaNr_r && cpkgMedianr != mediaNr_r ) {
+      remaining_r.push_back ( cpkg->name() ); // package unprocessed
+      continue;
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // !!! Always update statistics for the current package, but make
+    // shure any error reaches the end of the loop, where SKIP/CANCEL
+    // requests are processed.
+    ///////////////////////////////////////////////////////////////////
+    PMError res;
+
+    ///////////////////////////////////////////////////////////////////
+    // Check whether we need to change the media
+    ///////////////////////////////////////////////////////////////////
+    constInstSrcPtr cpkgSource = cpkg->source();
+
+    if ( ! ( cpkgSource == current_src_ptr && cpkgMedianr == current_src_media ) ) {
+
+      ///////////////////////////////////////////////////////////////////
+      // Install any source packages before we're going to change media
+      ///////////////////////////////////////////////////////////////////
+      res = installSpmFromMedia( current_src_ptr, current_src_media, srclist );
+      if ( res ) {
+#warning Unevaluated SKIP/CANCEL from installSpmFromMedia
+	res = PMError::E_ok;
+      }
+
+      ///////////////////////////////////////////////////////////////////
+      // Change the media
+      ///////////////////////////////////////////////////////////////////
+      if ( ! res ) {
+	// If source changes, physically release any old media attached
+	if ( current_src_ptr && cpkgSource != current_src_ptr ) {
+	  current_src_ptr->releaseMedia( /*if_removable_r*/true );
+	}
+
+	// Change the media (physically changed when accessed access)
+	current_src_ptr = cpkgSource;
+	current_src_media = cpkgMedianr;
+	report->advanceToMedia( current_src_ptr, current_src_media );
+      }
+
+    }
+    if ( res ) {
+      remaining_r.push_back ( cpkg->name() ); // package unprocessed
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Provide the binary package to install
+    ///////////////////////////////////////////////////////////////////
+    Pathname cpkgPath;
+
+    if ( ! res ) {
+      res = commitProvidePkg( cpkg, cpkgPath );
+      if ( res ) {
+	remaining_r.push_back ( cpkg->name() ); // package unprocessed
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Install the binary package
+    ///////////////////////////////////////////////////////////////////
+    if ( ! res ) {
+      res = commitInstallPkg( cpkg, cpkgPath );
+      if ( res ) {
+	// check cpkg settings in case any error occurred after
+	// successfull install.
+	if ( cpkg && cpkg->hasSelectable() && ! cpkg->getSelectable()->to_install() ) {
+	  ++count;
+	} else {
+#warning Classification may be incorrect. Must distinguish between action error and callback request
+	  // InstSrcError:: hides install failed/succeeded.
+	  switch ( res ) {
+	  case InstSrcError::E_cancel_media: // cancel all
+	  case InstSrcError::E_skip_media:   // skip current media
+	    remaining_r.push_back ( cpkg->name() ); // package unprocessed
+	    break;
+	  default:
+	    errors_r.push_back( cpkg->name() );
+	    break;
+	  }
+	}
+      } else {
+	++count;
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Evaluate res
+    ///////////////////////////////////////////////////////////////////
+    switch ( res ) {
+    case InstSrcError::E_cancel_media: // cancel all
+      for ( ; it != inslist.end(); ++it ) {
+	remaining_r.push_back( (*it)->name() ); // package unprocessed
+      }
+      error = res;
+      break;
+    case InstSrcError::E_skip_media:   // skip current media
+      for ( ; it != inslist.end(); ++it ) {
+	if ( (*it)->source() == current_src_ptr && (*it)->medianr() == current_src_media ) {
+	  remaining_r.push_back( (*it)->name() ); // package unprocessed
+	} else {
+	  --it; // not to miss the fist package of next medis
+	  break;
+	}
+      }
+      break;
+    default:                           // continue
+      break;
+    }
+    if ( error ) {
+      break; // canceled
+    }
+
+  } // install loop
+
+  switch ( error ) {
+  case InstSrcError::E_cancel_media: // cancel all
+    // delay until commit end
+    break;
+  default:
+    error = PMError::E_ok;
+    break;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Now loop over srclist and install remaining sources.
+  // Start with the currently attached media, if any and loop through
+  // all allowed media numbers (limited by media_nr), this effectively
+  // sorts the list of source rpms to install by media number
+  ///////////////////////////////////////////////////////////////////
+  if ( ! error && srclist.size() ) {
+#warning Actually we want to install all remaining sourcepkgs not on media we already skipped. But we miss some!
+    // we retry previously skipped media if it matches current_src_media
+    // we will omitt any medianr below current_src_media if it didn't contain a binpkg
+
+    unsigned int next_src_media = current_src_media; // number of currently attached media, if any
     bool go_on = true;
-    bool retry;		// flag for inner 'retry' loops
-    PMError err;
 
-    //---------------------------------------------
-    // install spm packages while the current media is still available
-
-    //-------------------------------------------------------
-    // loop over all source rpms (.srpm) selected for installation
-
-    for (std::list<PMPackagePtr>::iterator it = srclist.begin();
-	 it != srclist.end();)				// NO ++it here, see erase() at bottom !
+    while (go_on)
     {
-	string srcloc = (*it)->sourceloc();
-	if (srcloc.empty())
+	if (srclist.size() == 0)			// we're done
+	    break;
+
+	// find first package in source list which matches next medium
+	unsigned pkgmedianr = 0;
+	std::list<PMPackagePtr>::iterator it = srclist.begin();
+	for (; it != srclist.end(); ++it)
 	{
-	    ERR << "No source location for " << (*it)->name() << endl;
-	    ++it;
-	    continue;
-	}
-
-	if ((*it)->source() != current_src_ptr)			// wrong package source
-	{
-	    ++it;
-	    continue;
-	}
-
-	unsigned int spmmedia = atoi (srcloc.c_str());
-
-	if (spmmedia != current_src_media)			// wrong media
-	{
-	    ++it;
-	    continue;
-	}
-
-	bool is_remote = (*it)->isRemote();		// if current package source is remote
-
-	string pkgname = (*it)->name().asString() + ".spm";
-
-        Pathname path;
-
-	//---------------------------------------------------
-	// fetch (provide) source package for installation
-
-	do		// retry loop for package providing (fetching rpm from possibly remote source)
-	{
-	    retry = false;	// default: don't retry
-
-	    // if source is remote, show progress bar while fetching package
-
-	    if (is_remote
-		&& (_callbacks._provide_start_func != 0))
+	    string srcloc = (*it)->sourceloc();
+	    if (srcloc.empty())
 	    {
-		(*_callbacks._provide_start_func)(pkgname, (*it)->sourcesize(), true, _callbacks._provide_start_data);
+		continue;
 	    }
-
-	    err = (*it)->provideSrcPkgToInstall(path);
-
-	    if ((err || is_remote)
-		&& (_callbacks._provide_done_func != 0))
+	    pkgmedianr = atoi (srcloc.c_str());
+	    if ( !pkgmedianr ) {
+	      continue;	// can not install this.
+	    }
+	    if (  ((next_src_media > 0)				// if we already have an attached/wanted media number
+		    && (pkgmedianr != next_src_media))	// and the current package is not on this media
+	        ||((mediaNr_r > 0)				// or we only want a specific media number
+		    && (pkgmedianr != mediaNr_r)))		// and the current package is not on this media
 	    {
-		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), path.asString(), _callbacks._provide_done_data);
-
-		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
-		if (done_result == "C")
-		{
-		    err = InstSrcError::E_cancel_media;		// cancel it all
-		}
-		else if (done_result == "S")
-		{
-		    err = InstSrcError::E_skip_media;		// skip current media
-		}
-		else if (done_result == "R")
-		{
-		    retry = true;				// retry !
-		}
+		continue;					// keep on searching
 	    }
-	}
-	while (retry);
-
-	if (err != PMError::E_ok)				// pack source provide
-	{
-	    ++it;
-	    continue;
+	    break;
 	}
 
-	//---------------------------------------------------
-	// install provided source package
-
-	do
-	{
-	    retry = false;	// default: don't retry
-
-	    if (_callbacks._package_start_func)
-	    {
-		go_on = (*_callbacks._package_start_func) (pkgname, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
-		if (!go_on)
-		{
-		    break;
-		}
-	    }
-
-	    err = instTarget().installPackage (path);
-
-	    if ( ! err ) {
-	      commitSrcSucceeded( *it );
-	    }
-
-	    if (_callbacks._package_done_func)
-	    {
-		std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
-
-		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
-		if (done_result == "C")
-		{
-		    err = InstSrcError::E_cancel_media;		// cancel it all
-		    go_on = false;
-		}
-		else if (done_result == "S")
-		{
-		    err = InstSrcError::E_skip_media;		// skip current media
-		}
-		else if (done_result == "R")
-		{
-		    retry = true;				// retry !
-		}
-	    }
-	}
-	while (retry);
-
-	if (!go_on)
+	if (it == srclist.end())				// no matching package found
 	{
 	    break;
 	}
 
-	if (err == PMError::E_ok)
+	// ok, we have a matching package
+
+	if (((*it)->source() != current_src_ptr)		// source or media change ?
+	    || (pkgmedianr != current_src_media))
 	{
-	    it = srclist.erase(it);			// ok, take out of list
-	}
-	else
-	{
-	    ++it;					// bad, keep in list
+	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
+		&& (current_src_ptr != 0))		// if we have an old media attached
+	    {
+		current_src_ptr->releaseMedia (true);	// release if removable (CD/DVD)
+	    }
+
+	    current_src_ptr = (*it)->source();
+	    current_src_media = pkgmedianr;
+	    report->advanceToMedia( current_src_ptr, current_src_media );
 	}
 
-    } // loop over source packages
+	PMError res = installSpmFromMedia (current_src_ptr, current_src_media, srclist);	// install sources from it while we have it attached
+	if ( res == InstSrcError::E_cancel_media ) {
+	  error = res;
+	  go_on = false;
+	}
+	if (!go_on)
+	    break;
 
-    return go_on;
+	if (mediaNr_r > 0)				// if a specific media number is requested
+	    break;
+
+	next_src_media++;				// go on with loop and next medium
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // cleanup
+  ///////////////////////////////////////////////////////////////////
+
+  // media release is handled in Y2PM::commitPackages
+
+  // copy remaining sources to srcremaining_r
+  for ( std::list<PMPackagePtr>::iterator it = srclist.begin(); it != srclist.end(); ++it ) {
+    srcremaining_r.push_back ((*it)->name());
+  }
+
+  return (error ? count : -count);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -700,375 +1018,21 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 //	returns uninstalled packages (because media not available) in 'remaining_r'
 //	returns uninstalled source packages in 'srcremaining_r'
 //
-int Y2PM::commitPackages( unsigned int media_nr,
-			  std::list<std::string>& errors_r,
-			  std::list<std::string>& remaining_r,
-			  std::list<std::string>& srcremaining_r,
-			  InstSrcManager::ISrcIdList installrank )
+int Y2PM::commitPackages( unsigned mediaNr_r,
+			  std::list<std::string> & errors_r,
+			  std::list<std::string> & remaining_r,
+			  std::list<std::string> & srcremaining_r,
+			  InstSrcManager::ISrcIdList installrank_r )
 {
-    int count = 0;
-    bool go_on = true;
+#warning Check for initialized target/packagemanager?
 
-    errors_r.clear();
-    remaining_r.clear();
-    srcremaining_r.clear();
+  int ret = internal_commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r, installrank_r );
 
-    std::list<PMPackagePtr> dellist;
-    std::list<PMPackagePtr> inslist;
-    std::list<PMPackagePtr> srclist;
+  // Release all source media
+  instSrcManager().releaseAllMedia();
 
-    if (installrank.empty())
-    {
-	packageManager().getPackagesToInsDel (dellist, inslist, srclist);	// compute order
-    }
-    else
-    {
-	MIL << "ranked install !" << endl;
-	packageManager().getPackagesToInsDel (dellist, inslist, srclist, installrank);	// compute order
-    }
-
-    bool retry;		// flag for inner 'retry' loops
-
-    //-----------------------------------------------------
-    // first, remove all packages marked for deletion
-
-    for (std::list<PMPackagePtr>::iterator it = dellist.begin();
-	 it != dellist.end(); ++it)
-    {
-	string fullname = (*it)->name().asString() + "-" + (*it)->version();
-
-	do		// retry loop for package deletion
-	{
-	    retry = false;	// default: don't retry
-
-	    if (_callbacks._package_start_func)
-	    {
-		go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), true, _callbacks._package_start_data);
-		if (!go_on)
-		{
-		    return 0;		// user cancelled it all
-		}
-	    }
-	    PMError err = instTarget().removePackage (*it);
-	    if ( ! err ) {
-	      commitSucceeded( *it );
-	    }
-
-	    if (_callbacks._package_done_func)
-	    {
-		// show deletion result to user, if err is set, pops up a window with buttons
-		std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
-
-		// check for "" (ignore), "R" retry, "C" cancel/abort all, "S" skip remaining
-		if (done_result == "C")
-		{
-		    return 0;				// cancel all
-		}
-		else if (done_result == "S")
-		{
-		    go_on = false;			// skip remaining
-		}
-		else if (done_result == "R")
-		{
-		    retry = true;			// retry !
-		}
-		// default: ok/ignore
-	    }
-	}
-	while (retry);
-
-	if (!go_on)
-	    break;
-    }
-
-
-    ///////////////////////////////////////////////////////////////////
-    // One may argue whether selection data should be installed before
-    // or after any packages. Doing it before has the benefit, that the
-    // selection DB reflects what the user wanted. In case of trouble it
-    // should be easier to check and manualy repair.
-    ///////////////////////////////////////////////////////////////////
-    PMError err = selectionManager().installOnTarget();
-    if ( err ) {
-      ERR << "Error installing selection data." << err << endl;
-    }
-
-    ///////////////////////////////////////////////////////////////////
-    // install loop
-    ///////////////////////////////////////////////////////////////////
-
-    unsigned int current_src_media = 0;			// number of currently attached media
-    constInstSrcPtr current_src_ptr = 0;		// pointer to media handler
-    unsigned int pkgmedianr = 0;			// media number of current package
-
-    for (std::list<PMPackagePtr>::iterator it = inslist.begin();
-	 it != inslist.end(); ++it)
-    {
-	pkgmedianr = (*it)->medianr();
-	if ((media_nr > 0)				// if a specific media number is requested
-	    && (pkgmedianr != media_nr))		// and the current package is not on this media
-	{
-#warning loosing version information
-	    remaining_r.push_back ((*it)->name());	// push it to the remaining list for later
-	    continue;
-	}
-
-	bool is_remote = (*it)->isRemote();		// if current package source is remote
-	string fullname = (*it)->name().asString() + "-" + (*it)->version();
-
-	//-----------------------------------------------------------
-	// check if we need a new media
-
-	if (((*it)->source() != current_src_ptr)	// source or media change
-	    || (pkgmedianr != current_src_media))
-	{
-	    go_on = installSpmFromMedia (current_src_media, current_src_ptr, srclist);	// install sources from it while we have it attached
-
-	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
-		&& (current_src_ptr != 0))		// if we have an old media attached
-	    {
-		InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
-		ptr->releaseMedia (true);	// release if removable (CD/DVD)
-	    }
-
-	    current_src_ptr = (*it)->source();
-	    current_src_media = pkgmedianr;
-
-	    if (_callbacks._source_change_func != 0)
-	    {
-		(*_callbacks._source_change_func)(current_src_ptr, pkgmedianr, _callbacks._source_change_data);
-	    }
-	}
-
-	//-----------------------------------------------------------
-	// fetch (provide) the binary package to install
-
-	Pathname path;
-
-	do		// retry loop for package providing (fetching rpm from possibly remote source)
-	{
-	    retry = false;
-
-	    // showing a progress bar only makes sense for really remote sources
-	    if (is_remote
-		&& (_callbacks._provide_start_func != 0))
-	    {
-		(*_callbacks._provide_start_func)(fullname, (*it)->archivesize(), true, _callbacks._provide_start_data);
-	    }
-
-	    err = (*it)->providePkgToInstall(path);	// fetch package from source for later installation
-
-	    if ((err || is_remote)
-		&& (_callbacks._provide_done_func != 0))
-	    {
-		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), path.asString(), _callbacks._provide_done_data);
-
-		// check for "" (ignore), "R" retry, "C" cancel/abort all, "S" skip remaining
-		if (done_result == "C")
-		{
-		    err = InstSrcError::E_cancel_media;		// cancel it all
-		}
-		else if (done_result == "S")
-		{
-		    err = InstSrcError::E_skip_media;		// skip current media
-		}
-		else if (done_result == "R")
-		{
-		    retry = true;				// retry !
-		}
-	    }
-	}
-	while (retry);
-
-	switch (err)
-	{
-	    case PMError::E_ok:
-	    break;
-	    case InstSrcError::E_cancel_media:		// cancel all
-	    {
-		while (it != inslist.end())
-		{
-		    remaining_r.push_back ((*it)->name());
-		    ++it;
-		}
-	    }
-	    break;
-	    case InstSrcError::E_skip_media:		// skip current for this source
-	    {
-		while (it != inslist.end())
-		{
-		    if (((*it)->medianr() != pkgmedianr)		// break on next media
-			|| (current_src_ptr != (*it)->source()))	// or next source
-		    {
-			--it;
-			break;
-		    }
-		    remaining_r.push_back ((*it)->name());
-		    ++it;
-		}
-		if (it != inslist.end())
-		    continue;			// go on with next package/source
-	    }
-	    break;
-	    default:
-		ERR << "Media can't provide package to install for " << (*it) << ":" << err.errstr() << endl;
-		remaining_r.push_back ((*it)->name());
-		continue;
-	        break;
-	}
-
-	// skip_media or cancel_media might have advanced the iterator until the end
-	if (it == inslist.end())
-	    break;
-
-	//-----------------------------------------------------------
-	// install the binary package to install
-
-	do		// retry loop for package deletion
-	{
-	    retry = false;	// default: don't retry
-
-	    if (_callbacks._package_start_func)
-	    {
-		go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), false, _callbacks._package_start_data);
-		if (!go_on)
-		{
-		    break;		// user cancelled it all
-		}
-	    }
-
-	    err = instTarget().installPackage (path);
-	    if ( ! err ) {
-	      commitSucceeded( *it );
-	    }
-
-	    if (_callbacks._package_done_func)
-	    {
-		std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
-
-		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
-		if (done_result == "C")
-		{
-		    err = InstSrcError::E_cancel_media;		// cancel it all
-		}
-		else if (done_result == "S")
-		{
-		    err = InstSrcError::E_skip_media;		// skip current media
-		}
-		else if (done_result == "R")
-		{
-		    retry = true;				// retry !
-		}
-	    }
-	}
-	while (retry);
-	if (!go_on)
-	{
-	    break;
-	}
-
-	if (err)
-	{
-	    errors_r.push_back ((*it)->name());
-	}
-	else
-	{
-	    count++;
-	}
-
-    } // loop over inslist
-
-
-    // all binary packages installed
-
-    //---------------------------------------------------------------
-    // now loop over srclist and install remaining sources
-    // start with the currently attached media, if any and loop through
-    // all allowed media numbers (limited by media_nr), this effectively
-    // sorts the list of source rpms to install by media number
-
-    unsigned int next_src_media = current_src_media;			// number of currently attached media, if any
-
-    while (go_on)
-    {
-	if (srclist.size() == 0)			// we're done
-	    break;
-
-	// find first package in source list which matches next medium
-
-	std::list<PMPackagePtr>::iterator it = srclist.begin();
-	for (; it != srclist.end(); ++it)
-	{
-	    string srcloc = (*it)->sourceloc();
-	    if (srcloc.empty())
-	    {
-		continue;
-	    }
-	    pkgmedianr = atoi (srcloc.c_str());
-
-	    if (  ((next_src_media > 0)				// if we already have an attached/wanted media number
-		    && (pkgmedianr != next_src_media))	// and the current package is not on this media
-	        ||((media_nr > 0)				// or we only want a specific media number
-		    && (pkgmedianr != media_nr)))		// and the current package is not on this media
-	    {
-		continue;					// keep on searching
-	    }
-	    break;
-	}
-
-	if (it == srclist.end())				// no matching package found
-	{
-	    break;
-	}
-
-	// ok, we have a matching package
-
-	if (((*it)->source() != current_src_ptr)		// source or media change ?
-	    || (pkgmedianr != current_src_media))
-	{
-	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
-		&& (current_src_ptr != 0))		// if we have an old media attached
-	    {
-		InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
-		ptr->releaseMedia (true);	// release if removable (CD/DVD)
-	    }
-
-	    current_src_ptr = (*it)->source();
-	    current_src_media = pkgmedianr;
-
-	    if (_callbacks._source_change_func != 0)
-	    {
-		(*_callbacks._source_change_func)(current_src_ptr, current_src_media, _callbacks._source_change_data);
-	    }
-	}
-
-	go_on = installSpmFromMedia (current_src_media, current_src_ptr, srclist);	// install sources from it while we have it attached
-	if (!go_on)
-	    break;
-
-	if (media_nr > 0)				// if a specific media number is requested
-	    break;
-
-	next_src_media++;				// go on with loop and next medium
-    }
-
-    if (current_src_ptr != 0)
-    {
-	InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
-	ptr->releaseMedia (false);		// release any media
-    }
-
-    // copy remaining sources to srcremaining_r
-
-    for (std::list<PMPackagePtr>::iterator it = srclist.begin();
-	 it != srclist.end(); ++it)
-    {
-	srcremaining_r.push_back ((*it)->name());
-    }
-
-    return (go_on ? count : -count);
+  return ret;
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -1077,18 +1041,10 @@ int Y2PM::commitPackages( unsigned int media_nr,
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION : install a single, locally availabe rpm file, uses callbacks !
-PMError
-Y2PM::installFile (const Pathname& path)
+PMError Y2PM::installFile( const Pathname & path_r )
 {
-    if (_callbacks._package_start_func)
-	(*_callbacks._package_start_func) (path.asString(), "", 0, false, _callbacks._package_start_data);
-
-    PMError err = instTarget().installPackage (path, RpmDb::RPMINST_NONE);
-
-    if (_callbacks._package_done_func)
-	(*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
-
-    return err;
+#warning Check for initialized target?
+  return instTarget().installPackage( path_r, RpmDb::RPMINST_NONE );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1098,16 +1054,8 @@ Y2PM::installFile (const Pathname& path)
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION : remove a single package by name, uses callbacks !
-PMError
-Y2PM::removePackage (const std::string& pkgname)
+PMError Y2PM::removePackage( const std::string & pkgname_r )
 {
-    if (_callbacks._package_start_func)
-	(*_callbacks._package_start_func) (pkgname, "", 0, true, _callbacks._package_start_data);
-
-    PMError err = instTarget().removePackage (pkgname);
-
-    if (_callbacks._package_done_func)
-	(*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
-
-    return err;
+#warning Check for initialized target?
+  return instTarget().removePackage( pkgname_r );
 }

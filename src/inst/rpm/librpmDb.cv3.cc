@@ -326,9 +326,10 @@ exit:
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
-#include <y2util/ProgressCounter.h>
 
+#include <y2pm/Timecount.h>
 #include <y2pm/librpmDb.h>
+#include <y2pm/RpmDbCallbacks.h>
 
 using namespace std;
 
@@ -338,16 +339,15 @@ using namespace std;
 /******************************************************************
 **
 **
-**	FUNCTION NAME : convertV3toV4
+**	FUNCTION NAME : internal_convertV3toV4
 **	FUNCTION TYPE : int
 */
-PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r,
-		       unsigned & V3toV4Written_r, unsigned & V3toV4Errors_r,
-		       ProgressCounter pcnt_r )
+PMError internal_convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r,
+				RpmDbCallbacks::ConvertDbReport::Send & report )
 {
   typedef librpmDb::Error Error;
-
-  V3toV4Written_r = V3toV4Errors_r = 0;
+  Timecount _t( "convert V3 to V4" );
+  MIL << "Convert rpm3 database to rpm4" << endl;
 
 ///////////////////////////////////////////////////////////////////
 #ifdef FAKELIBRPM
@@ -395,35 +395,60 @@ PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r,
     return err;
   }
 
-  // Check ammount of packages to process. Initialize ProgressCounter.
+  // Check ammount of packages to process.
   int max = 0;
   for ( int offset = fadFirstOffset(fd); offset; offset = fadNextOffset(fd, offset) ) {
     ++max;
   }
   MIL << "Packages in rpmV3 database " << v3db_r << ": " << max << endl;
-  pcnt_r.start( max );
 
-  // Start conversion.
+  ProgressData pd( max );
+  unsigned failed      = 0;
+  unsigned ignored     = 0;
+  unsigned alreadyInV4 = 0;
+  report->progress( pd, failed, ignored, alreadyInV4 );
+
   if ( !max ) {
-    ::rpmdbClose( db );
     Fclose( fd );
-    return Error::E_ok;
+    ::rpmdbClose( db );
+    return err;
   }
 
-  for ( int offset = fadFirstOffset(fd); offset;
-	offset = fadNextOffset(fd, offset), pcnt_r.incr() ) {
+  // Start conversion.
+  CBSuggest proceed;
+  for ( int offset = fadFirstOffset(fd); offset && proceed != CBSuggest::CANCEL;
+	offset = fadNextOffset(fd, offset),
+	report->progress( pd.incr(), failed, ignored, alreadyInV4 ) ) {
 
     // have to use lseek instead of Fseek because headerRead
     // uses low level IO
-    if (lseek(Fileno(fd), (off_t)offset, SEEK_SET) == -1) {
-      ERR << "Skip rpmV3 database entry: Can't seek to offset " << offset << " (errno " << errno << ")" << endl;
-      ++V3toV4Errors_r;
+    if ( lseek( Fileno( fd ), (off_t)offset, SEEK_SET ) == -1 ) {
+      proceed = report->dbReadError( offset );
+      ostream * reportAs = &(ERR);
+      if ( proceed == CBSuggest::SKIP ) {
+	// ignore this error
+	++ignored;
+	reportAs = &(WAR << "IGNORED: ");
+      } else {
+	// PROCEED will fail after conversion; CANCEL immediately stop loop
+	++failed;
+      }
+      (*reportAs) << "rpmV3 database entry: Can't seek to offset " << offset << " (errno " << errno << ")" << endl;
       continue;
     }
     Header h = headerRead(fd, HEADER_MAGIC_NO);
-    if (!h) {
-      ERR << "Skip rpmV3 database entry: No header at offset " << offset << endl;
-      ++V3toV4Errors_r;
+    if ( ! h ) {
+      proceed = report->dbReadError( offset );
+      ostream * reportAs = &(ERR);
+      if ( proceed == CBSuggest::SKIP ) {
+	// ignore this error
+	++ignored;
+	reportAs = &(WAR << "IGNORED: ");
+      } else {
+	// PROCEED will fail after conversion; CANCEL immediately stop loop
+	++failed;
+      }
+      (*reportAs) << "rpmV3 database entry: No header at offset " << offset << endl;
       continue;
     }
     compressFilelist(h);
@@ -432,34 +457,69 @@ PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r,
     const char *version = 0;
     const char *release = 0;
     headerNVR(h, &name, &version, &release);
+    string nrv( string(name) + "-" +  version + "-" + release );
     rpmdbMatchIterator mi = rpmdbInitIterator(db, RPMTAG_NAME, name, 0);
     rpmdbSetIteratorRE(mi, RPMTAG_VERSION, RPMMIRE_DEFAULT, version);
     rpmdbSetIteratorRE(mi, RPMTAG_RELEASE, RPMMIRE_DEFAULT, release);
     if (rpmdbNextIterator(mi)) {
-      WAR << "Skip rpmV3 database entry: " << name << "-" << version << "-" << release
-	<< " is already in rpmV4 database" << endl;
+      report->dbInV4( nrv );
+      WAR << "SKIP: rpmV3 database entry: " << nrv << " is already in rpmV4 database" << endl;
       rpmdbFreeIterator(mi);
       headerFree(h);
+      ++alreadyInV4;
       continue;
     }
     rpmdbFreeIterator(mi);
-    if (rpmdbAdd(db, -1, h, 0, 0)){
-      ERR << "Skip rpmV3 database entry: could not add " << name << "-" << version << "-" << release
-	<< " to rpmV4 database" << endl;
+    if (rpmdbAdd(db, -1, h, 0, 0)) {
+      report->dbWriteError( nrv );
+      proceed = CBSuggest::CANCEL; // immediately stop loop
+      ++failed;
+      ERR << "rpmV4 database error: could not add " << nrv << " to rpmV4 database" << endl;
       headerFree(h);
-      ++V3toV4Errors_r;
       continue;
     }
     headerFree(h);
-    ++V3toV4Written_r;
   }
 
-  ::rpmdbClose(db);
   Fclose(fd);
+  ::rpmdbClose(db);
 
-  MIL << "Packages from rpmV3 database converted: " << V3toV4Written_r << ", failed: " << V3toV4Errors_r << endl;
-  return Error::E_ok;
+  if ( failed ) {
+    ERR << "Convert rpm3 database to rpm4: Aborted after "
+      << pd.val() << " package(s) and " << (failed+ignored) << " error(s)."
+	<< endl;
+    err = Error::E_RpmDB_convert_failed;
+  } else {
+    MIL << "Convert rpm3 database to rpm4: " << max << " package(s) processed";
+    if ( alreadyInV4 ) {
+      MIL << "; " << alreadyInV4 << " already present in rpmV4 database";
+    }
+    if ( ignored ) {
+      MIL << "; IGNORED: " << ignored << " unconverted due to error";
+    }
+    MIL << endl;
+  }
+
+  return err;
 ///////////////////////////////////////////////////////////////////
 #endif // ! FAKELIBRPM
 ///////////////////////////////////////////////////////////////////
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : convertV3toV4
+**	FUNCTION TYPE : int
+*/
+PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r )
+{
+  // report
+  RpmDbCallbacks::ConvertDbReport::Send report( RpmDbCallbacks::convertDbReport );
+  report->start( v3db_r );
+
+  PMError err = internal_convertV3toV4( v3db_r, v4db_r, report );
+
+  report->stop( err );
+  return err;
 }

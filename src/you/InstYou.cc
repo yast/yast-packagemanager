@@ -35,6 +35,7 @@
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstTargetError.h>
 #include <y2pm/PMYouServers.h>
 #include <y2pm/MediaCurl.h>
 
@@ -91,12 +92,12 @@ PMError InstYou::servers( list<PMYouServer> &servers )
   PMYouServers youServers( _paths );
 
   PMError error = youServers.requestServers();
-  
+
   if ( error ) {
     ERR << "Error fetching servers: " << error << endl;
     return error;
   }
-  
+
   servers = youServers.servers();
 
   return PMError();
@@ -181,7 +182,7 @@ PMError InstYou::retrievePatchInfo( bool reload, bool checkSig )
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
       D__ << "  Package: " << (*itPkg)->name() << endl;
-      if ( hasPatchRpm( *itPkg ) ) {        
+      if ( hasPatchRpm( *itPkg ) ) {
         _info->packageDataProvider()->setArchiveSize( *itPkg, (*itPkg)->patchRpmSize() );
         D__ << "    Using patch RPM" << endl;
       }
@@ -253,10 +254,10 @@ void InstYou::selectPatches( int kinds )
       }
     }
   }
-  
+
   // Read Taboo states
   Y2PM::youPatchManager().readSettings();
-  
+
   updatePackageStates();
 }
 
@@ -304,7 +305,7 @@ void InstYou::updatePackageStates()
         INT << "Package has no Selectable." << endl;
       }
     }
-    
+
     if ( toInstall ) {
       list<PMYouFile> files = (*it)->files();
       list<PMYouFile>::const_iterator itFile;
@@ -359,7 +360,7 @@ PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
 {
   if ( resetProgress ) {
     _progressCurrent = 0;
-    _progressTotal = 0; 
+    _progressTotal = 0;
     std::list<PMYouPatchPtr>::const_iterator it;
     for ( it = _patches.begin(); it != _patches.end(); ++it ) {
       PMSelectablePtr selectable = (*it)->getSelectable();
@@ -368,7 +369,7 @@ PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
         _progressTotal++;
       }
     }
-    
+
     _progressTotal *= 2;
   }
 
@@ -491,7 +492,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     } else {
       fileName = (*itPkg)->location();
     }
-    D__ << "INSTALL PKG " << fileName << endl;  
+    D__ << "INSTALL PKG " << fileName << endl;
     if ( dryrun ) {
       cout << "INSTALL: " << fileName << endl;
     } else {
@@ -525,7 +526,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 
   error = patchProgress( 100 );
   if ( error ) return error;
-  
+
   return error;
 }
 
@@ -588,12 +589,12 @@ class CurlCallbacks : public MediaCurl::Callbacks
         return true;
       }
     }
-    
+
     void setBaseProgress( int current )
     {
       _current = current;
     }
-  
+
   private:
     int _total;
     int _current;
@@ -673,7 +674,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
 
   PMError error = patchProgress( 98 );
   if ( error ) return error;
-  
+
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
     PMError error = retrieveScript( patch->preScript(), reload, checkSig );
@@ -682,10 +683,10 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
       return error;
     }
   }
-  
+
   error = patchProgress( 99 );
   if ( error ) return error;
-  
+
   if ( !patch->postScript().empty() ) {
     PMError error = retrieveScript( patch->postScript(), reload, checkSig );
     if ( error ) {
@@ -696,7 +697,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
 
   error = patchProgress( 100 );
   if ( error ) return error;
-  
+
   return PMError();
 }
 
@@ -708,7 +709,7 @@ PMError InstYou::retrieveScript( const string &script, bool reload,
   Pathname scriptPath = _paths->scriptPath( script );
 
   PMError error = _media.provideFile( scriptPath, !reload );
-  
+
   if ( error ) {
     ERR << "Error downloading script from '"
         << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
@@ -741,7 +742,7 @@ PMError InstYou::retrieveScript( const string &script, bool reload,
       }
     }
   }
-  
+
   return PMError();
 }
 
@@ -810,7 +811,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
       D__ << "Downloading RPM '" << pkg->name() << "' failed: " << error
           << endl;
       if ( error == MediaError::E_user_abort ) return error;
-          
+
       // If patch RPM was requested first, try to get full RPM now.
       if ( patchRpm ) {
         rpmPath = _paths->rpmPath( pkg, *it, false );
@@ -837,7 +838,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
   string details = error.details();
   if ( !details.empty() ) details += "\n";
   details += pkg->nameEd();
-  
+
   error.setDetails( details );
 
   return error;
@@ -1066,7 +1067,7 @@ int InstYou::lastUpdate()
   Date lastUpdate( date );
   DBG << "LastUpdate: " << lastUpdate << endl;
 
-  int diff = Date::now() - lastUpdate;  
+  int diff = Date::now() - lastUpdate;
 
   DBG << diff << endl;
 
@@ -1097,13 +1098,13 @@ int InstYou::quickCheckUpdates()
   D__ << "InstYou::quickCheckUpdates(): " << url << endl;
 
   _info->processMediaDir();
-  
+
   Pathname path = url.path();
   path += _paths->patchPath() + _paths->directoryFileName();
   url.setPath( path.asString() );
-  
+
   Pathname dest = _paths->localWriteDir() + "quickcheck";
-  
+
   PMError error = MediaAccess::getFile( url, dest );
   if ( error ) {
     ERR << "Quick check Updates: " << error << endl;

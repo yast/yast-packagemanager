@@ -45,6 +45,9 @@
 #include <y2util/diff.h>
 
 #include <y2pm/RpmDb.h>
+#include <y2pm/InstTargetError.h>
+#include <y2pm/RpmDbCallbacks.h>
+
 #include <y2pm/librpmDb.h>
 #include <y2pm/PMRpmPackageDataProvider.h>
 #include <y2pm/PMPackageManager.h>
@@ -57,6 +60,7 @@
 #endif
 
 using namespace std;
+using namespace RpmDbCallbacks;
 
 /******************************************************************
 **
@@ -67,23 +71,6 @@ using namespace std;
 inline string stringPath( const Pathname & root_r, const Pathname & sub_r )
 {
   return librpmDb::stringPath( root_r, sub_r );
-}
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : testCB
-**	FUNCTION TYPE : static void
-*/
-static void testCB( const ProgressCounter & pc, const void * )
-{
-  int mod = pc.max()/3;
-  if ( !mod )
-     mod = 1;
-  if ( pc.state() == ProgressCounter::st_value && pc.val() % mod )
-    return;
-  DBG << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
-      << pc.val() << " " << pc.precent() << "%" << endl;
 }
 
 /******************************************************************
@@ -119,7 +106,6 @@ ostream & operator<<( ostream & str, const RpmDb::DbStateInfoBits & obj )
 IMPL_BASE_POINTER(RpmDb);
 
 #define WARNINGMAILPATH "/var/adm/notify/warnings"
-
 #define FILEFORBACKUPFILES "YaSTBackupModifiedFiles"
 
 ///////////////////////////////////////////////////////////////////
@@ -263,10 +249,6 @@ class RpmDb::Packages {
 //
 ///////////////////////////////////////////////////////////////////
 
-ProgressCounter::Callback RpmDb::_cb_convertDb( testCB );
-ProgressCounter::Callback RpmDb::_cb_rebuildDb( testCB );
-ProgressCounter::Callback RpmDb::_cb_installPkg( testCB );
-
 #define FAILIFNOTINITIALIZED if( ! initialized() ) { WAR << "No database access: " << Error::E_RpmDB_not_open << endl; return Error::E_RpmDB_not_open; }
 
 ///////////////////////////////////////////////////////////////////
@@ -280,7 +262,7 @@ ProgressCounter::Callback RpmDb::_cb_installPkg( testCB );
 RpmDb::RpmDb()
     : _dbStateInfo( DbSI_NO_INIT )
     , _packages( * new Packages ) // delete in destructor
-#warning LET old dbname block everything until db init, pkg install/delete are checked.
+#warning Check for obsolete memebers
     , _backuppath ("/var/adm/backup")
     , _packagebackups(false)
     , _warndirexists(false)
@@ -506,27 +488,19 @@ PMError RpmDb::internal_initDatabase( const Pathname & root_r, const Pathname & 
     MIL << "Found rpm3 database " << dbInfo.dbV3() << endl;
 
     if ( dbEmpty ) {
-      MIL << "Convert rpm3 database to rpm4" << endl;
-      extern PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r,
-				    unsigned & V3toV4Written_r, unsigned & V3toV4Errors_r,
-				    ProgressCounter pcnt_r );
-      Timecount _t( "convert V3 to V4" );
-      unsigned V3toV4Written = 0;
-      unsigned V3toV4Errors  = 0;
-      err = convertV3toV4( dbInfo.dbV3().path(), dbptr,
-			   V3toV4Written, V3toV4Errors, _cb_convertDb );
-      _t.stop();
+      extern PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r );
+
+      err = convertV3toV4( dbInfo.dbV3().path(), dbptr );
+      // Invalidate all outstanding database handles as the database got modified.
+      dbptr = 0;
+      librpmDb::dbRelease( true );
 
       // Invalidate all outstanding database handles as the database got modified.
       dbptr = 0;
       librpmDb::dbRelease( true );
 
       if ( err ) {
-	ERR << "Convert rpm3 database to rpm4: " << err << endl;
-	return Error::E_RpmDB_convert_failed;
-      } else if ( V3toV4Errors ) {
-	ERR << "Convert rpm3 database to rpm4: " << V3toV4Errors << " package(s) failed"  << endl;
-	return Error::E_RpmDB_convert_failed;
+	return err;
       }
 
       // create a backup copy
@@ -545,6 +519,10 @@ PMError RpmDb::internal_initDatabase( const Pathname & root_r, const Pathname & 
 
       WAR << "Non empty rpm3 and rpm4 database found: using rpm4" << endl;
 #warning EXCEPTION: nonempty rpm4 and rpm3 database found.
+      //ConvertDbReport::Send report( RpmDbCallbacks::convertDbReport );
+      //report->start( dbInfo.dbV3().path() );
+      //report->stop( some error );
+
       // set DbSI_MODIFIED_V4 as it's not a temporary which can be removed.
       dbsi_set( info_r, DbSI_MODIFIED_V4 );
 
@@ -654,7 +632,7 @@ void RpmDb::removeV3( const Pathname & dbdir_r )
     }
   }
 
-#warning CHECK: compare vs existiing v3 backup. notify root
+#warning CHECK: compare vs existing v3 backup. notify root
   pi( dbdir_r + master );
   if ( pi.isFile() ) {
     Pathname m( pi.path() );
@@ -1450,24 +1428,29 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 {
     FAILIFNOTINITIALIZED;
-
     Logfile progresslog;
-    RpmArgVec opts;
 
     MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
 
-    if (_packagebackups)
-    {
-	if (!backupPackage (filename))
-	{
-	    ERR << "backup of " << filename.asString() << " failed" << endl;
-	    progresslog() << "backup of " << filename.asString() << " failed" << endl;
-	}
+    // report
+    InstallPkgReport::Send report( installPkgReport );
+    report->start( filename );
+    ProgressData pd;
+
+    // backup
+    if ( _packagebackups ) {
+      report->progress( pd.init( -2, 100 ) ); // allow 1% for backup creation.
+      if ( ! backupPackage( filename ) ) {
+	ERR << "backup of " << filename.asString() << " failed" << endl;
+	progresslog() << "backup of " << filename.asString() << " failed" << endl;
+      }
+      report->progress( pd.set( 0 ) ); // allow 1% for backup creation.
+    } else {
+      report->progress( pd.init( 100 ) );
     }
 
-    tagModified();
-    _packages._valid = false;
-
+    // run rpm
+    RpmArgVec opts;
     opts.push_back ("-U");
     opts.push_back ("--percent");
 
@@ -1486,12 +1469,10 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 
     opts.push_back (filename.asString().c_str());
 
-    // %s = filename of rpm package
-    // progresslog() << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
-
-    run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
-    ProgressCounter pcnt( _cb_installPkg );
-    pcnt.start( 100 );
+    run_rpm( opts, ExternalProgram::Stderr_To_Stdout );
+#warning Combine tagModified and _packages._valid
+    tagModified();
+    _packages._valid = false;
 
     string line;
     string rpmmsg;
@@ -1504,7 +1485,7 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 	{
 	    int percent;
 	    sscanf (line.c_str () + 2, "%d", &percent);
-	    pcnt.set( percent );
+	    report->progress( pd.set( percent ) );
 	}
 	else
 	    rpmmsg += line+'\n';
@@ -1516,6 +1497,7 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
     }
     int rpm_status = systemStatus();
 
+    // evaluate result
     for(vector<string>::iterator it = configwarnings.begin();
 	it != configwarnings.end(); ++it)
     {
@@ -1531,22 +1513,24 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 		_("rpm created %s as %s.\nHere are the first 25 lines of difference:\n"));
     }
 
-#warning UNRELIABLE RETURNCODE
-    if (rpm_status != 0)
-    {
-	// %s = filename of rpm package
-	progresslog() << stringutil::form(_("%s failed"), Pathname::basename(filename).c_str()) << endl;
-	ERR << "rpm failed, message was: " << rpmmsg << endl;
-	progresslog() << _("rpm output:") << endl << rpmmsg << endl;
-	return Error::E_RpmDB_subprocess_failed;
-    }
-    // %s = filename of rpm package
-    progresslog() << stringutil::form(_("%s installed ok"), Pathname::basename(filename).c_str()) << endl;
-    if(!rpmmsg.empty())
-    {
+    PMError err;
+
+    if ( rpm_status != 0 )  {
+      // %s = filename of rpm package
+      progresslog() << stringutil::form(_("%s failed"), Pathname::basename(filename).c_str()) << endl;
+      ERR << "rpm failed, message was: " << rpmmsg << endl;
+      progresslog() << _("rpm output:") << endl << rpmmsg << endl;
+      err = Error::E_RpmDB_subprocess_failed;
+    } else {
+      // %s = filename of rpm package
+      progresslog() << stringutil::form(_("%s installed ok"), Pathname::basename(filename).c_str()) << endl;
+      if( ! rpmmsg.empty() ) {
 	progresslog() << _("Additional rpm output:") << endl << rpmmsg << endl;
+      }
     }
-    return Error::E_ok;
+
+    report->stop( err );
+    return err;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1559,19 +1543,26 @@ PMError RpmDb::removePackage( const string & label, unsigned flags )
 {
     FAILIFNOTINITIALIZED;
 
-    RpmArgVec opts;
+    MIL << "RpmDb::removePackage(" << label << "," << flags << ")" << endl;
 
-    if(_packagebackups)
-    {
-	if(!backupPackage(label))
-	{
-	    ERR << "backup of " << label << " failed" << endl;
-	}
+    // report
+    RemovePkgReport::Send report( removePkgReport );
+    report->start( label );
+    ProgressData pd;
+
+    // backup
+    if ( _packagebackups ) {
+      report->progress( pd.init( -2, 100 ) ); // allow 1% for backup creation.
+      if ( ! backupPackage( label ) ) {
+	ERR << "backup of " << label << " failed" << endl;
+      }
+      report->progress( pd.set( 0 ) );
+    } else {
+      report->progress( pd.init( 100 ) );
     }
 
-    tagModified();
-    _packages._valid = false;
-
+    // run rpm
+    RpmArgVec opts;
     opts.push_back("-e");
     opts.push_back("--allmatches");
 
@@ -1587,27 +1578,36 @@ PMError RpmDb::removePackage( const string & label, unsigned flags )
 
     opts.push_back(label.c_str());
 
-    //XXX maybe some log for the user too?
-    DBG << "Removing " << label << endl;
-
     run_rpm (opts, ExternalProgram::Stderr_To_Stdout);
+#warning Combine tagModified and _packages._valid
+    tagModified();
+    _packages._valid = false;
 
-    string rpmmsg;
     string line;
+    string rpmmsg;
 
+    // got no progress from command, so we fake it:
+    // 5  - command started
+    // 50 - command completed
+    // 100 if no error
+    report->progress( pd.set( 5 ) );
     while (systemReadLine(line))
     {
 	rpmmsg += line+'\n';
     }
+    report->progress( pd.set( 50 ) );
     int rpm_status = systemStatus();
 
-#warning UNRELIABLE RETURNCODE
-    if (rpm_status != 0)
-    {
-	ERR << "rpm failed, message was: " << rpmmsg << endl;
-	return Error::E_RpmDB_subprocess_failed;
+    // evaluate result
+    PMError err;
+
+    if ( rpm_status != 0 ) {
+      ERR << "rpm failed, message was: " << rpmmsg << endl;
+      err =  Error::E_RpmDB_subprocess_failed;
     }
-    return Error::E_ok;
+
+    report->stop( err );
+    return err;
 }
 
 string

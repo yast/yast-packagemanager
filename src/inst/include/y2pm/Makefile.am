@@ -7,7 +7,7 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
-	InstSrcManager.h			\
+	InstSrcManager.h InstSrcManagerCallbacks.h	\
 	\
 	InstSrcError.h				\
 	InstSrc.h	InstSrcPtr.h		\
@@ -24,6 +24,7 @@ pkginclude_HEADERS =	\
 	UpdateInfParser.h			\
 	\
 	InstTargetError.h			\
+	InstTargetCallbacks.h			\
 	InstTarget.h				\
 	InstTargetSelDB.h InstTargetSelDBPtr.h	\
 	InstTargetProdDB.h InstTargetProdDBPtr.h\

@@ -6,18 +6,19 @@ pkgincludedir = $(includedir)/y2pm
 
 # these go to $(pkgincludedir)
 
-pkginclude_HEADERS =	\
+pkginclude_HEADERS = Y2PMCallbacks.h \
 	Timecount.h	\
 	Alternatives.h	\
 	PkgSet.h	\
 	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h PkgDu.h PkgChangelog.h	\
 	\
-	PMError.h				\
+	PMError.h			\
+	PMCallbacks.h			\
 	\
 	PMSolvable.h PMSolvablePtr.h	\
 	PMObject.h PMObjectPtr.h	\
 	\
-	PMManager.h	\
+	PMManager.h		\
 	PMObjectContainerIter.h	\
 	\
 	PMSelectable.h PMSelectablePtr.h SelState.h

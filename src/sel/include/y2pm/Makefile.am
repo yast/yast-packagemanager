@@ -10,7 +10,7 @@ pkginclude_HEADERS =	\
 	PMSelection.h \
 	PMSelectionDataProvider.h \
 	PMSelectionDataProviderPtr.h \
-	PMSelectionManager.h \
+	PMSelectionManager.h PMSelectionManagerCallbacks.h \
 	PMSelectionPtr.h
 
 #<INSTALL-HEADER-TARGET>

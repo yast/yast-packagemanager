@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Fri Aug 29 01:15:03 CEST 2003 - ma@suse.de
+
+- Introduced new Callbacks able to provide more data and more
+  control on errors. All knowledge about the needs of a certain
+  kind of callback recipient (like YCPCallbacks) and how they
+  operate is removed from the code here. (#29484 as far as
+  packagemanager is affected).
+- Speedup database conversion and rebuild.
+- Overworked commitPackages.
+- 2.8.7
+
+-------------------------------------------------------------------
 Mon Aug 25 14:30:12 CEST 2003 - sh@suse.de
 
 - First part of fix for bug #19603: RPM groups not translated

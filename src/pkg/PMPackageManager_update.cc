@@ -205,23 +205,6 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	    DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
 	    ++opt_stats_r.chk_to_downgrade;
 	  }
-#if 0 // foreign now covered by taboo
-	  if ( installed->buildtime() < candidate->buildtime() ) {
-	    if (    installed->vendor().isSuSE()
-		 && candidate->vendor().isSuSE() ) {
-	      state->appl_set_install();
-	      DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
-	      ++opt_stats_r.chk_to_downgrade;
-	    } else {
-	      DBG << " ==> (foreign downgrade)" << candidate << endl;
-	      ++opt_stats_r.chk_to_keep_downgrade;
-	      _update_items.insert( state );
-	    }
-	  } else {
-	    DBG << " ==> (keep installed)" << candidate << endl;
-	    ++opt_stats_r.chk_to_keep_installed;
-	  }
-#endif
 	}
       } else {
 	DBG << " ==> INSTALL (preselected): " << candidate << endl;
@@ -229,15 +212,6 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       }
 
     } else {
-
-#if 0 // foreign now covered by taboo
-      if ( ! installed->vendor().isSuSE() ) {
-	DBG << " ==> (keep non SuSE package)" << endl;
-	++opt_stats_r.chk_keep_foreign;
-	_update_items.insert( state );
-	continue; // no check for splits
-      }
-#endif
 
       // replaced or dropped (ayway there's no candidate for this!)
       // If unique provides exists check if obsoleted (replaced).

@@ -11,10 +11,9 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		media/include		\
 		query/include		\
 		libPkgDep/include	\
-	   ) -I$(includedir)
-#	 -I/usr/include/rpm
+	   ) -I$(includedir) -I/Local/ma/yast2/current/source/core/wfm/src
 
-LDADD = $(top_builddir)/src/liby2pm.la
+LDADD = $(top_builddir)/src/liby2pm.la /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 
 #LDFLAGS = -static
 
@@ -30,7 +29,7 @@ ma_test_bin_SOURCES = ma_test.cc
 ma_test_bin_LDADD = $(LDADD)
 
 rpmtest_bin_SOURCES = rpmtest.cc
-rpmtest_bin_LDADD = $(LDADD)
+rpmtest_bin_LDADD = $(LDADD) -lycp
 
 test_librpm_seek_bin_SOURCES =  test_librpm_seek.cc
 test_librpm_seek_bin_LDADD = -ly2util -lrpm
