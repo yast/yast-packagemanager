@@ -44,19 +44,7 @@ struct PkgNameEd {
 	 **/
 	PkgNameEd( const PkgName & n, const PkgEdition & e )
 		: name(n), edition(e) {}
-	/**
-	 * Constructor
-	 *
-	 * Versions string <code>v</code> may code an epoch. It may
-	 * code a release, if no explicit release string <code>r</code>
-	 * is given.
-	 * @see PkgEdition
-	 **/
-	PkgNameEd( int bd, int mh,
-		   const std::string & n,
-		   const std::string & v,
-		   const std::string & r = "" )
-		: name(n), edition(bd,mh,v,r) {}
+
 	// default copy constructor and assigment are ok
 
 	bool operator==( const PkgNameEd & ne2 ) const {

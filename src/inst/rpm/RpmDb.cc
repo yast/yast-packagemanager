@@ -488,7 +488,7 @@ RpmDb::installTmpDatabase( void )
 std::string
 RpmDb::pkg2rpm (constPMPackagePtr package)
 {
-    return ((const string &)package->name()) + "-" + package->edition().as_string();
+    return ((const string &)package->name()) + "-" + package->edition().asString();
 }
 
 
@@ -757,9 +757,9 @@ RpmDb::getPackages (void)
 		// XXX: use strtol instead?
 		buildtime = atoi (pkgattribs[RPM_BUILDTIME].c_str());
 	    }
-	    PkgEdition edi( buildtime, 0,
-			    pkgattribs[RPM_VERSION],
-			    pkgattribs[RPM_RELEASE]);
+	    PkgEdition edi( pkgattribs[RPM_VERSION],
+			    pkgattribs[RPM_RELEASE],
+			    buildtime );
 
 	    PMRpmPackageDataProviderPtr dataprovider = new PMRpmPackageDataProvider (this);
 	    PMPackagePtr p = new PMPackage(
