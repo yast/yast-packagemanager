@@ -59,6 +59,11 @@ class InstYou {
     ~InstYou();
 
     /**
+      Init you with product information from installed system.
+    */
+    PMError initProduct();
+
+    /**
      * Get list of patch servers.
      */
     PMError servers( std::list<Url> & );
@@ -142,6 +147,11 @@ class InstYou {
      * Get object holding path information.
      */
     PMYouPatchPathsPtr paths() const { return _paths; }
+
+    /**
+     * Get object holding patch information.
+     */
+    PMYouPatchInfoPtr patchInfo() const { return _info; }
 
     /**
      * Remove downloaded packages.

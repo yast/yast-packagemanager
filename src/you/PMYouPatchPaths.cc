@@ -25,11 +25,14 @@
 
 #include <y2util/Y2SLog.h>
 
+#include <Y2PM.h>
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/Wget.h>
 #include <y2pm/YouError.h>
+#include <y2pm/InstTarget.h>
+#include <y2pm/InstSrcDescr.h>
 
 #include <y2pm/PMYouPatchPaths.h>
 
@@ -55,6 +58,19 @@ PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
 }
 
 void PMYouPatchPaths::init( const string &product, const string &version,
+                            const string &baseArch, const string &path,
+                            bool business )
+{
+  _product = product;
+  _version = version;
+  _baseArch = PkgArch( baseArch );
+
+  _businessProduct = business;
+
+  init( path );
+}
+
+void PMYouPatchPaths::init( const string &product, const string &version,
                             const string &baseArch )
 {
   _product = product;
@@ -66,15 +82,59 @@ void PMYouPatchPaths::init( const string &product, const string &version,
   string path = baseArch + "/update/";
   if ( _businessProduct  ) {
     path += product + "/";
+  }
+  path += version;
+  
+  init ( path );
+}
+
+void PMYouPatchPaths::init( const string &path )
+{  
+  if ( _businessProduct  ) {
     _patchUrl = Url( "http://support.suse.de/" );
   } else {
     _patchUrl = Url( "ftp://ftp.suse.com/pub/suse/" );
   }
-  path += version;
-  
+
   _patchPath = path + "/patches/";
   _rpmPath = path + "/rpm/";
   _scriptPath = path + "/scripts/";
+}
+
+PMError PMYouPatchPaths::initProduct()
+{
+  InstTarget &instTarget = Y2PM::instTarget( true );
+  const std::list<constInstSrcDescrPtr> &products = instTarget.getProducts();
+  std::list<constInstSrcDescrPtr>::const_iterator it = products.begin();
+
+  if ( it == products.end() ) {
+    E__ << "No products installed." << endl;
+    return YouError::E_error;
+  }
+
+  constInstSrcDescrPtr descr = *it;
+
+  PkgNameEd prodEd = descr->content_product();
+
+  string product = prodEd.name;
+  string version = prodEd.edition.version();
+  string baseArch = descr->content_defaultbase();
+  string youType = descr->content_youtype();
+  string youPath = descr->content_youpath();
+
+  D__ << "PRODUCT NAME: " << product << endl;
+  D__ << "PRODUCT VERSION: " << version << endl;
+  D__ << "BASEARCH: " << baseArch << endl;
+  D__ << "YOUTYPE: " << youType << endl;
+  D__ << "YOUPATH: " << youPath << endl;
+
+  if ( youPath.empty() ) {
+    init( product, version, baseArch );
+  } else {
+    init( product, version, baseArch, youPath, youType == "business" );
+  }
+
+  return PMError();
 }
 
 void PMYouPatchPaths::setPatchPath( const Pathname &path )

@@ -29,6 +29,7 @@
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/YouError.h>
+#include <y2pm/InstSrcDescr.h>
 
 #include <y2pm/InstYou.h>
 
@@ -42,7 +43,6 @@ using namespace std;
 
 InstYou::InstYou()
 {
-#warning FIXME: get information about product/version/arch
   _paths = new PMYouPatchPaths();
   _info = new PMYouPatchInfo();
 
@@ -65,6 +65,11 @@ InstYou::~InstYou()
 void InstYou::init()
 {
   _selectedPatchesIt = _patches.begin();
+}
+
+PMError InstYou::initProduct()
+{
+  return _paths->initProduct();
 }
 
 PMError InstYou::servers( list<Url> &servers )
