@@ -58,7 +58,7 @@ class PMPackage : virtual public Rep, public PMObject {
      * @see PMPackageDataProvider
      **/
     // splitprovides
-    std::list<std::string> splitprovides()  const;
+    PkgSplitSet            splitprovides() const;
 
     Date                   buildtime()    const;
     std::string            buildhost()    const;

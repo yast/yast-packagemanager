@@ -50,7 +50,7 @@ std::list<std::string> PMPackage::delnotify()    const { DP_GET( delnotify ); }
 FSize                  PMPackage::size()         const { DP_GET( size ); }
 bool                   PMPackage::providesSources() const { DP_GET( providesSources ); }
 // PMPackage attributes
-std::list<std::string> PMPackage::splitprovides()const { DP_GET( splitprovides ); }
+PkgSplitSet            PMPackage::splitprovides()const { DP_GET( splitprovides ); }
 Date                   PMPackage::buildtime()    const { DP_GET( buildtime ); }
 std::string            PMPackage::buildhost()    const { DP_GET( buildhost ); }
 Date                   PMPackage::installtime()  const { DP_GET( installtime ); }

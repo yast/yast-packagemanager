@@ -220,17 +220,15 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 	unsigned int before = pkglist.size();
 	// filter splitprovides out
 	for (std::list<std::string>::iterator it = pkglist.begin();
-	     it != pkglist.end();)
+	      it != pkglist.end(); /*advanc inside*/)
 	{
-	    if (it->find (":/") != string::npos)
-	    {
-		dataprovider->_attr_SPLITPROVIDES.push_back (*it);
-		it = pkglist.erase (it);
-	    }
-	    else
-	    {
-		++it;
-	    }
+	  PkgSplit testsplit( *it, /*quiet*/true );
+	  if ( testsplit.valid() ) {
+	    dataprovider->_attr_SPLITPROVIDES.insert(testsplit);
+	    it = pkglist.erase (it);
+	  } else {
+	    ++it;
+	  }
 	}
 	if (dataprovider->_attr_SPLITPROVIDES.size () + pkglist.size() != before)
 	{

@@ -120,10 +120,10 @@ PMULPackageDataProvider::size ( const PMPackage & pkg_r ) const
 }
 
 
-std::list<std::string>
+PkgSplitSet
 PMULPackageDataProvider::splitprovides ( const PMPackage & pkg_r ) const
 {
-    FALLBACK(_attr_SPLITPROVIDES,authors);
+    FALLBACK(_attr_SPLITPROVIDES,splitprovides);
     return _attr_SPLITPROVIDES;
 }
 

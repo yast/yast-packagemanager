@@ -71,7 +71,8 @@ class PkgSplit {
     /**
      * Construct from string <CODE>"pkgname:/absolute/path"</CODE>. If the string
      * does not form a valid splitprovides, an error is reported, unless quiet_r
-     * is true.
+     * is true. To form a valid splitprovides, the string must not contain whitespace
+     * and neither pkgname nor path may be empty.
      **/
     PkgSplit( const std::string & splitprovides_r, const bool quiet_r = false );
 
