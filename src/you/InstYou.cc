@@ -105,8 +105,8 @@ PMError InstYou::servers( list<PMYouServer> &servers )
 PMError InstYou::readUserPassword()
 {
   SysConfig cfg( _paths->passwordFile() );
-  _username = cfg.readEntry( "USERNAME" );
-  _password = cfg.readEntry( "PASSWORD" );
+  _username = cfg.readEntry( "USERNAME_" + _paths->patchUrl().asString() );
+  _password = cfg.readEntry( "PASSWORD_" + _paths->patchUrl().asString() );
 
   _paths->setUsernamePassword( _username, _password );
 
@@ -127,8 +127,8 @@ PMError InstYou::setUserPassword( const string &username,
   }
 
   SysConfig cfg( _paths->passwordFile() );
-  cfg.writeEntry( "USERNAME", u );
-  cfg.writeEntry( "PASSWORD", p );
+  cfg.writeEntry( "USERNAME_" + _paths->patchUrl().asString(), u );
+  cfg.writeEntry( "PASSWORD_" + _paths->patchUrl().asString(), p );
   cfg.save();
 
   PathInfo::chmod( _paths->passwordFile(), 0600 );
