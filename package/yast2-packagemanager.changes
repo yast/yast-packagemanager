@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 10 21:24:05 CEST 2002 - kkaempf@suse.de
+
+- read complete description from rpmdb.
+
+-------------------------------------------------------------------
 Tue Sep 10 19:01:20 CEST 2002 - lnussel@suse.de
 
 - do not complain about broken requirements of installed but obsolete packages
