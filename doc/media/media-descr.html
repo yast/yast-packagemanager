@@ -55,6 +55,7 @@ toplevel path to packages (i.e "suse/" on SuSE media, "unitedlinux/" on
 UL media, etc.)</li>
 <LI>default language<br>
 default language if no language is determinable.</li>
+<LI>inital server for online update</LI>
 <li>no wildcard search for files<br>
 doing a wildcard search is cheap on a local media but almost impossible
 via HTTP. So it should be avoided if possible.</li>
@@ -231,7 +232,8 @@ Proposal:<BR>
 Mandatory key strings
 <TABLE border>
 <tr><th>prio</th><th>key</th><th>allowed value</th></tr>
-<tr><td>M</td><td><tt>PRODUCT</tt></td><td>english product name in ASCII</td></tr>
+<tr><td>M</td><td><tt>PRODUCT</tt></td><td>product name<br>
+For SuSE products: path as used on YOU maintenance web</td></tr>
 <tr><td>M</td><td><tt>VERSION</tt></td><td>product version and release as in RPM<BR><tt>&lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</tt></td></tr>
 <tr><td>M</td><td><tt>DISTPRODUCT</tt></td><td>distribution id (vendor specific)</td></tr>
 <tr><td>M</td><td><tt>DISTVERSION</tt></td><td>distribution version (vendor specific)</tt></td></tr>
@@ -259,6 +261,8 @@ be determined.</td></tr>
 (relative to product directory)</td></tr>
 <tr><td>O</td><td><tt>LANGUAGE</tt></td><td>default language code</td></tr>
 <tr><td>O</td><td><tt>TIMEZONE</tt></td><td>default timezone</td></tr>
+<tr><td>O</td><td><tt>YOU</tt></td><td><tt>business</tt> for SuSE business products<br>
+(triggers YOU to look at the maintenance web server for updates.</td></tr>
 </table>
 <smaller>prio 'M' == mandatory, 'O' == optional</smaller><br>
 Either <tt>LABEL</tt> or <tt>LABEL&lt;lang&gt;</tt> must be present.
