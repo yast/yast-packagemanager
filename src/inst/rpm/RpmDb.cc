@@ -100,6 +100,7 @@ RpmDb::~RpmDb()
    if ( temporary )
    {
       // Removing all files of the temporary DB
+
       string command = "rm -R ";
 
 //XXX system
@@ -611,6 +612,7 @@ PMError
 RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 {
     string rpmquery;
+    MIL << "RpmDb::getPackages()" << endl;
 
     FAILIFNOTINITIALIZED
 
@@ -753,7 +755,7 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     {
 	return Error::E_RpmDB_subprocess_failed;
     }
-
+    MIL << "Found " << pkglist.size() << " packages" << endl;
     return Error::E_ok;
 }
 
