@@ -123,6 +123,15 @@ PMError MediaCIFS::attachTo(bool next)
     environment["USER"] = username;
     environment["PASSWD"] = password;
 
+    //////////////////////////////////////////////////////
+#warning waiting for mount to pass environment to smbmount
+    // unless plain mount supports this we add username
+    // and password again.
+    options["username"] = username;
+    options["password"] = password;
+    //
+    //////////////////////////////////////////////////////
+
     ret = mount.mount( path, mountpoint, filesystem,
 		       options.asString(), environment );
     if(ret != Error::E_ok)
