@@ -8,3 +8,4 @@ test_libcurl
 err_test
 test_patchinfo
 callback_test
+test_media
