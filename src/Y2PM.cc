@@ -77,6 +77,40 @@ void Y2PM::cleanupAtExit()
 }
 
 ///////////////////////////////////////////////////////////////////
+//
+// Locale settings
+//
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::preferredLocaleChanged
+//	METHOD TYPE : PMError
+//
+PMError Y2PM::preferredLocaleChanged()
+{
+  MIL << "New preferred locale: '" << getPreferredLocale() << "'" << endl;
+  return PMError::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::requestedLocalesChanged
+//	METHOD TYPE : PMError
+//
+PMError Y2PM::requestedLocalesChanged( const LocaleSet & addLocales_r, const LocaleSet & delLocales_r )
+{
+  MIL << "New requested locales: {";
+  for ( LocaleSet::const_iterator it = getRequestedLocales().begin(); it != getRequestedLocales().end(); ++it ) {
+    MIL << " " << *it;
+  }
+  MIL << " }" << endl;
+  return PMError::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
 // packageSelection [package/selectionManager]
 ///////////////////////////////////////////////////////////////////
 

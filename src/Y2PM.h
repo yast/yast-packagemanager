@@ -59,9 +59,6 @@ class Y2PM {
 
     static bool _cache_to_ramdisk;
 
-    class LocaleSettings;
-    static LocaleSettings & localeSettings();
-
     // the current base architecture of the target
     static PkgArch _base_arch;
     // the current list of allowed architectures
@@ -85,6 +82,11 @@ class Y2PM {
 
     static void cleanupAtExit();
 
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Locale settings
+    //
+    ///////////////////////////////////////////////////////////////////
   public:
 
     typedef std::set<LangCode> LocaleSet;
@@ -142,6 +144,21 @@ class Y2PM {
       tmpset.insert( requested_locale_r );
       return delRequestedLocales( tmpset );
     }
+
+  private:
+
+    class LocaleSettings;
+    static LocaleSettings & localeSettings();
+
+    /**
+     * Triggered if preferred locale value actually changed.
+     **/
+    static PMError Y2PM::preferredLocaleChanged();
+    /**
+     * Triggered if requested locale value actually changed.
+     **/
+    static PMError Y2PM::requestedLocalesChanged( const LocaleSet & addLocales_r,
+						  const LocaleSet & delLocales_r );
 
   public:
 
