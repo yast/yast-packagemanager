@@ -59,7 +59,10 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
   TodoMap     addProvided;
   TodoMap     addMultiProvided;
 
-  MIL << "doUpdate start..." << endl;
+  MIL << "doUpdate start... "
+    << "(delete_unmaintained:" << (delete_unmaintained?"yes":"no") << ")"
+    << endl;
+
 
   ///////////////////////////////////////////////////////////////////
   // Reset all auto states and build PkgSet of available candidates
@@ -199,6 +202,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	  } else {
 	    DBG << " ==> (candidate older)" << candidate << endl;
 	    ++opt_stats_r.chk_to_keep_old;
+	    foreign_and_drop_set.insert( state );
 	  }
 	}
       } else {
@@ -211,6 +215,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       if ( ! installed->vendor().isSuSE() ) {
 	DBG << " ==> (keep non SuSE package)" << endl;
 	++opt_stats_r.chk_keep_foreign;
+	foreign_and_drop_set.insert( state );
 	continue; // no check for splits
       }
 
@@ -233,22 +238,26 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	}
       }
 
-#warning Should autodelete discontinued packages ?
-      state->appl_set_delete();
 
       switch ( mpkg.size() ) {
       case 0:
+	if ( opt_stats_r.delete_unmaintained ) {
+	  state->appl_set_delete();
+	}
 	DBG << " ==> (dropped)" << endl;
 	++opt_stats_r.chk_dropped;
+	foreign_and_drop_set.insert( state );
 	break;
       case 1:
         addProvided[installed] = mpkg;
+	state->appl_set_delete();
 	// must check obsoletes ?
 	DBG << " ==> RENAMED to: " << (*mpkg.begin()) << endl;
 	++opt_stats_r.chk_renamed;
 	break;
       default:
 	addMultiProvided[installed] = mpkg;
+	state->appl_set_delete();
 	DBG << " ==> pass 2 (" << mpkg.size() << " times provided)" << endl;
 	// count stats later
 	break;
