@@ -34,6 +34,7 @@
 #include <y2util/LangCode.h>
 
 #include <y2pm/InstSrcDescrPtr.h>
+#include <y2pm/InstSrcTags.h>
 
 #include <y2pm/InstSrc.h>
 #include <y2pm/PkgRelation.h>
@@ -157,7 +158,13 @@ class InstSrcDescr : virtual public Rep {
      **/
     Pathname _content_datadir;
 
-  public:
+    
+    /**
+     * internal use - fill data from tag set into object 
+     **/
+    static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset );
+
+public:
 
     ///////////////////////////////////////////////////////////////////
     // access functions
