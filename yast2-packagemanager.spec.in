@@ -86,6 +86,8 @@ mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2/you/mnt
 %{_libdir}/liby2pm.la
 @includedir@
 %doc @docdir@
+/usr/lib/YaST2
+/usr/lib/YaST2/bin/
 
 %post
 %{fillup_only -n onlineupdate}

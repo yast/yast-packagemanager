@@ -21,4 +21,7 @@ liby2pmyou_la_SOURCES = \
         YouError.cc \
         PMYouProduct.cc
 
-EXTRA_DIST = youservers
+ybin_SCRIPTS = create_you_patch
+
+EXTRA_DIST = youservers $(ybin_SCRIPTS)
+
