@@ -145,8 +145,12 @@ class PMSolvable : virtual public Rep {
 
   public:
 
-    PMSolvable();
-
+    /**
+     * constructor
+     * @param PkgName name
+     * @param PkgEdition edition
+     * @param PkgArch arch
+     */
     PMSolvable( const PkgName& name,
 		const PkgEdition& edition,
 		const PkgArch& arch);
@@ -155,51 +159,83 @@ class PMSolvable : virtual public Rep {
 
   public:
 
-    // print package data in ASCII summary format
+    /**
+     * print package data in ASCII summary format
+     */
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 
-    // add a provides:
+    /**
+     * add a provides: by PkgName
+     */
     const PkgRelation& addProvides( PkgName name ) {
       _provides.push_front( PkgRelation( name, EQ, PkgEdition(PkgEdition::UNSPEC) ));
       return *(_provides.begin());
     }
+
+    /**
+     * add a provides: by const char *
+     */
     const PkgRelation& addProvides( const char *name ) {
       return addProvides( PkgName(name) );
     }
 
+    /**
+     * set provides list
+     */
     const PkgRelList_type& setProvides(PkgRelList_type& provides)
     {
       _provides = provides;
       return _provides;
     }
+
+    /**
+     * set requires list
+     */
     const PkgRelList_type& setRequires(PkgRelList_type& requires)
     {
       _requires = requires;
       return _requires;
     }
+
+    /**
+     * set prerequires list
+     */
     const PkgRelList_type& setPreRequires(PkgRelList_type& prerequires)
     {
       _prerequires = prerequires;
       return _prerequires;
     }
+
+    /**
+     * set obsoletes list
+     */
     const PkgRelList_type& setObsoletes(PkgRelList_type& obsoletes)
     {
       _obsoletes = obsoletes;
       return _obsoletes;
     }
+
+    /**
+     * set conflicts list
+     */
     const PkgRelList_type& setConflicts(PkgRelList_type& conflicts)
     {
       _conflicts = conflicts;
       return _conflicts;
     }
 
+    /**
+     * add a requires relation to the front
+     */
     const PkgRelation& addRequires(PkgRelation& r) {
       _requires.push_front(r);
       return *(_requires.begin());
     }
 
-    // iterator for stepping through all provided names (including the
-    // auto-providing of the package name)
+    /**
+     * iterator for stepping through all provided names (including the
+     * auto-providing of the package name)
+     */
     Provides_iterator all_provides_begin() const {
       return Provides_iterator(constPMSolvablePtr(this));
     }
@@ -210,12 +246,23 @@ class PMSolvable : virtual public Rep {
       return PkgRelation( _name, EQ, _edition );
     }
 
-    // access methods for components
+    /**
+     * access methods for components
+     */
     const PkgName& name() const { return _name; }
-    const std::string & version() const { return _edition.version(); }
-    const std::string & release() const { return _edition.release(); }
     const PkgEdition& edition() const { return _edition; }
     const PkgArch& arch() const { return _arch; }
+
+    /**
+     * helper functions for edition
+     */
+    const std::string & version() const { return _edition.version(); }
+    const std::string & release() const { return _edition.release(); }
+
+    /**
+     * access methods for dependencies
+     * use PkgRelList2StringList to convert them to list<string>
+     */
     const PkgRelList_type& requires() const { return _requires; }
     const PkgRelList_type& prerequires() const { return _prerequires; }
     const PkgRelList_type& conflicts() const { return _conflicts; }
@@ -225,8 +272,6 @@ class PMSolvable : virtual public Rep {
 
     PkgAttributeValue PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const;
     std::list<std::string> PkgRelList2StringList ( const PkgRelList_type & rellist_r ) const;
-
-    void setName(PkgName& n) { _name = n; };
 
     // for convenience: directly return an iterator for relation lists
 #define decl_PkgRelList_iterators(name)					\

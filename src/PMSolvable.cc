@@ -77,18 +77,6 @@ IMPL_BASE_POINTER(PMSolvable);
 //
 //	DESCRIPTION :
 //
-PMSolvable::PMSolvable()
-{
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMSolvable::PMSolvable
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION :
-//
 PMSolvable::PMSolvable( const PkgName& name,
 			const PkgEdition& edition,
 			const PkgArch& arch )
