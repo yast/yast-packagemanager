@@ -72,7 +72,6 @@ PkgAttributeValue
 PMULPackageDataProvider::getValue( constPMObjectPtr obj_r,
 				PMPackage::PMPackageAttribute attr )
 {
-    std::list<std::string> value;
     TagCacheRetrieval *retrieval = _package_retrieval;
     TagCacheRetrieval::retrieval_t *pos_ptr;
 
@@ -163,13 +162,21 @@ PMULPackageDataProvider::getValue( constPMObjectPtr obj_r,
 	break;
 
 	default:
-	    return PkgAttributeValue("?");
+	    return PkgAttributeValue();
     }
+
+    if (pos_ptr->begin >= pos_ptr->end)
+	return PkgAttributeValue ();
+
+    std::list<std::string> value;
 
     if (!retrieval->retrieveData (*pos_ptr, value))
     {
-	    return PkgAttributeValue("ERR");
-    }	
+	return PkgAttributeValue("ERR");
+    }
+    if (value.empty())
+	return PkgAttributeValue ();
+
     return PkgAttributeValue (value);
 }
 
@@ -185,7 +192,14 @@ PkgAttributeValue
 PMULPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
 					PMObject::PMObjectAttribute attr )
 {
-    return getValue (obj_r, (PMPackage::PMPackageAttribute)attr);
+    PkgAttributeValue value = getValue (obj_r, (PMPackage::PMPackageAttribute)attr);
+    if (_fallback_provider != 0
+	&& value.empty())
+    {
+MIL << "Fallback from " << this << " to " << _fallback_provider << endl;
+	return _fallback_provider->getAttributeValue (obj_r, attr);
+    }
+    return value;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -200,7 +214,14 @@ PkgAttributeValue
 PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
 					PMPackage::PMPackageAttribute attr )
 {
-    return getValue (pkg_r, (PMPackage::PMPackageAttribute)attr);
+    PkgAttributeValue value = getValue (pkg_r, (PMPackage::PMPackageAttribute)attr);
+    if (_fallback_provider != 0
+	&& value.empty())
+    {
+MIL << "Fallback from " << this << " to " << _fallback_provider << endl;
+	return _fallback_provider->getAttributeValue (pkg_r, attr);
+    }
+    return value;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -293,6 +314,6 @@ PMULPackageDataProvider::setAttributeValue(
 ostream &
 PMULPackageDataProvider::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str );
-  return str;
+    Rep::dumpOn( str );
+    return str;
 }
