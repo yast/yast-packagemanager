@@ -98,7 +98,7 @@ std::istream & PMPackageImEx::Magic::readFrom( std::istream & str )
   *this = Magic();
 
   if ( str ) {
-    streampos curpos = str.tellg();
+    streamoff curpos = streamoff( str.tellg() );
     string line = stringutil::getline( str );
     std::vector<std::string> words;
     if ( stringutil::split( line, words ) == 3
