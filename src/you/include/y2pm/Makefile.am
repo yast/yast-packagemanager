@@ -6,7 +6,7 @@ pkgincludedir = $(includedir)/y2pm
 
 # these go to $(pkgincludedir)
 
-pkginclude_HEADERS =	\
+pkginclude_HEADERS =			\
 	InstYou.h			\
 	PMYouPatch.h			\
 	PMYouPatchPtr.h			\
@@ -17,9 +17,10 @@ pkginclude_HEADERS =	\
 	PMYouPatchTags.h		\
 	PMYouPatchManager.h		\
 	PMYouPatchPaths.h		\
-	PMYouPatchPathsPtr.h            \
-        PMYouServers.h                  \
-        YouError.h
+	PMYouPatchPathsPtr.h		\
+	PMYouServers.h			\
+	PMYouServersPtr.h		\
+	YouError.h
 
 #<INSTALL-HEADER-TARGET>
 
