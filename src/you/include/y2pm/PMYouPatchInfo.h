@@ -65,7 +65,7 @@ class PMYouPatchInfo : virtual public Rep {
     /**
       Get directory file listing all available patches.
     */
-    PMError getDirectory();
+    PMError getDirectory( bool useMediaDir );
 
     /**
      * Get patches from specified location.
@@ -79,14 +79,15 @@ class PMYouPatchInfo : virtual public Rep {
                         bool reload = true, bool checkSig = true );
     
     /**
-     * Read patch info files from directory.
-     *
-     * @param baseUrl    Base of URL where patches are located.
-     * @param patches    List of patch objects where the results are stored.
-     * @param checkSig   If true, check GPG signature of patch info files.
-     **/
+      Read patch info files from directory.
+
+      @param baseUrl          Base of URL where patches are located.
+      @param patches          List of patch objects where the results are stored.
+      @param checkSig         If true, check GPG signature of patch info files.
+      @param processMediaDir  If true, read patch file from media directory.
+    **/
     PMError readDir( std::list<PMYouPatchPtr> &patches, bool reload = true,
-                     bool checkSig = true );
+                     bool checkSig = true, bool useMediaDir = true );
 
     /**
      * Read patch info from file.
