@@ -10,7 +10,7 @@ pkginclude_HEADERS =	\
 	Timecount.h	\
 	Alternatives.h	\
 	PkgSet.h	\
-	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h PkgDu.h	\
+	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h PkgDu.h PkgChangelog.h	\
 	\
 	PMError.h				\
 	\

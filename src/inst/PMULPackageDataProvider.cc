@@ -294,15 +294,23 @@ PMULPackageDataProvider::keywords ( const PMPackage & pkg_r ) const
     return value;
 }
 
-std::list<std::string>
-PMULPackageDataProvider::du ( const PMPackage & pkg_r ) const
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::du
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMULPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) const
 {
-    FALLBACK(_attr_DU,du);
-    std::list<std::string> value;
-    _du_retrieval->retrieveData (_attr_DU, value);
-    return value;
+  dudata_r.clear();
+  if ( _attr_DU.empty() )
+    return;
+  std::list<std::string> value;
+  _du_retrieval->retrieveData (_attr_DU, value);
+  dudata_r.setFrom( value );
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //

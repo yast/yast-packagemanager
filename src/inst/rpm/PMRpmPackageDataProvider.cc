@@ -44,7 +44,7 @@ PMPackagePtr         PMRpmPackageDataProvider::_cachedPkg;
 constRpmLibHeaderPtr PMRpmPackageDataProvider::_cachedData;
 
 #define TRY_CACHE(fnc) \
-  constRpmLibHeaderPtr h = fillCache (mkPtr(pkg_r)); \
+  constRpmLibHeaderPtr h = fillCache( mkPtr(pkg_r) ); \
   if ( !h ) return PMPackageDataProvider::fnc()
 
 ///////////////////////////////////////////////////////////////////
@@ -253,13 +253,15 @@ PMRpmPackageDataProvider::filenames ( const PMPackage & pkg_r ) const
 //
 //
 //	METHOD NAME : PMRpmPackageDataProvider::du
-//	METHOD TYPE : std::list<std::string>
+//	METHOD TYPE : void
 //
 //	DESCRIPTION :
 //
-std::list<std::string> PMRpmPackageDataProvider::du( const PMPackage & pkg_r ) const
+void PMRpmPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) const
 {
-  I__ << "TBD PMRpmPackageDataProvider::du( " << pkg_r.nameEd() << " )" << endl;
-  return PMPackageDataProvider::du();
+  constRpmLibHeaderPtr h = fillCache (mkPtr(pkg_r));
+  if ( !h )
+    PMPackageDataProvider::du( dudata_r );
+  else
+    h->tag_du( dudata_r );
 }
-

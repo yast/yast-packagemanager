@@ -82,7 +82,6 @@ std::list<std::string> PMPackage::suggests()     const { DP_GET( suggests ); }
 std::string            PMPackage::location()     const { DP_GET( location ); }
 unsigned int           PMPackage::medianr()      const { DP_GET( medianr ); }
 std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
-std::list<std::string> PMPackage::du()	         const { DP_GET( du ); }
 std::string            PMPackage::externalUrl()  const { DP_GET( externalUrl ); }
 std::list<PkgEdition>  PMPackage::patchRpmBaseVersions() const { DP_GET( patchRpmBaseVersions ); }
 FSize                  PMPackage::patchRpmSize() const { DP_GET( patchRpmSize ); }
@@ -95,8 +94,15 @@ PMError                PMPackage::providePkgToInstall(Pathname& path) const { DP
 PMError                PMPackage::provideSrcPkgToInstall(Pathname& path) const { DP_ARG_GET( provideSrcPkgToInstall, path ); }
 // who's providing this package
 constInstSrcPtr  PMPackage::source()		 const { DP_GET ( source ); }
-
 #undef DP_GET
+
+// dudata is special
+void PMPackage::du( PkgDu & dudata_r ) const {
+  if ( _dataProvider )
+    _dataProvider->du( *this, dudata_r );
+  else
+    PMPackageDataProvider::du( dudata_r );
+}
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
@@ -112,7 +118,7 @@ PMPackage::PMPackage( const PkgName &    name_r,
 		      const PkgArch &    arch_r,
 		      PMPackageDataProviderPtr dataProvider_r )
     : PMObject( name_r, edition_r, arch_r )
-    , _pkgdu( * new PkgDu )
+    , _pkgdu( * new PkgDuSlave )
     , _dataProvider( dataProvider_r )
 {
   if ( !_dataProvider ) {

@@ -15,7 +15,7 @@
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Helper classes to collect package disk usage info.
 
 /-*/
 #ifndef PkgDu_h
@@ -23,11 +23,231 @@
 
 #include <iosfwd>
 #include <string>
+#include <list>
 #include <set>
 
 #include <y2util/FSize.h>
 
 #include <y2pm/PMPackagePtr.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PkgDu
+/**
+ * @short Helper classe to collect package diskspace usage info.
+ *
+ * <code>PkgDu</code> maintains a set of <code>PkgDu::Entry</code> to
+ * keep inforamtion about diskspace usage in several directories.
+ *
+ * A <code>PkgDu::Entry</code> is identified by a directory name (expected to be
+ * an absolute path, a trailing '/' is appended if not present). Values for size
+ * and number of files within this directory are mutable.
+ *
+ * As the diskspace usage depends on the filesystems blocksize, you'll probabely
+ * get the closest result counting filesizes rounded up to full Kb (@ref FSize::fillBlock)
+ * and the number of files. Diskspace usage calculation will then add additional
+ * half blocksize for each file.
+ **/
+class PkgDu {
+
+  public:
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    //	CLASS NAME : PkgDu::Entry
+    /**
+     * @short Helper classe to collect package diskspace usage info.
+     **/
+    struct Entry {
+
+      friend std::ostream & operator<<( std::ostream & str, const Entry & obj );
+
+      /**
+       * Directory name (absolute path, trailing '/' is appended if missing)
+       **/
+      std::string _dirname;
+      /**
+       * Ammount of byte within this directory
+       **/
+      mutable FSize    _size;
+      /**
+       * Nunber of files within this directory
+       **/
+      mutable unsigned _files;
+
+      /**
+       * Constructor
+       **/
+      Entry( const std::string & dirname_r, const FSize & size_r = 0, const unsigned & files_r = 0 )
+	: _dirname( dirname_r ), _size( size_r ), _files( files_r )
+      {
+	if ( _dirname.size() && _dirname[_dirname.size()-1] != '/' ) {
+	  _dirname += '/';
+	}
+      }
+
+      /**
+       * Default constructor
+       **/
+      Entry() : _files( 0 ) {}
+      /**
+       * Test for equality based on directory name.
+       **/
+      bool operator==( const Entry & rhs ) const {
+        return 	_dirname == rhs._dirname;
+      }
+      /**
+       * Order based on directory name.
+       **/
+      bool operator<( const Entry & rhs ) const {
+        return 	_dirname < rhs._dirname;
+      }
+
+      /**
+       * Return true if this entry denotes a directory equal to or below rhs._dirname.
+       **/
+      bool isBelow( const Entry & rhs ) const {
+	// whether _dirname has prefix rhs._dirname
+        return(	_dirname.compare( 0, rhs._dirname.size(), rhs._dirname ) == 0 );
+      }
+      /**
+       * Return true if this entry denotes a directory equal to or below dirname_r.
+       **/
+      bool isBelow( const std::string & dirname_r ) const {
+        return 	isBelow( Entry( dirname_r ) );
+      }
+
+      /**
+       * Numerical operation based on size and files values.
+       **/
+      const Entry & operator+=( const Entry & rhs ) const {
+	_size  += rhs._size;
+	_files += rhs._files;
+	return *this;
+      }
+      /**
+       * Numerical operation based on size and files values.
+       **/
+      const Entry & operator-=( const Entry & rhs ) const {
+	_size  -= rhs._size;
+	_files -= rhs._files;
+	return *this;
+      }
+    };
+
+    ///////////////////////////////////////////////////////////////////
+
+  private:
+
+    typedef std::set<Entry> EntrySet;
+
+    EntrySet _dirs;
+
+  public:
+
+    /**
+     * Constructor
+     **/
+    PkgDu() {}
+
+    /**
+     * Add an entry. If already present, sum up the new entries size and files value.
+     **/
+    void add( const Entry & newent_r ) {
+      std::pair<EntrySet::iterator,bool> res = _dirs.insert( newent_r );
+      if ( !res.second ) {
+	*res.first += newent_r;
+      }
+    }
+
+    /**
+     * Add an entry. If already present, sum up the new entries size and files value.
+     **/
+    void add( const std::string & dirname_r, const FSize & size_r = 0, const unsigned & files_r = 0 ) {
+      add( Entry( dirname_r, size_r, files_r ) );
+    }
+
+    /**
+     * Number of entries
+     **/
+    unsigned size() const { return _dirs.size(); }
+
+    /**
+     * Clear EntrySet
+     **/
+    void clear() { _dirs.clear(); }
+
+  public:
+
+    /**
+     * Add entries parsed from a packages.DU file
+     **/
+    void addFrom( const std::list<std::string> & dudata_r );
+
+    /**
+     * Set entries parsed from a packages.DU file
+     **/
+    void setFrom( const std::list<std::string> & dudata_r ) {
+      clear();
+      addFrom( dudata_r );
+    }
+
+  public:
+
+    /**
+     * Sum up any entries for dirname_r and its descendants and remove them
+     * on the fly. Return the result.
+     **/
+    Entry extract( const std::string & dirname_r );
+
+  public:
+
+   typedef EntrySet::iterator               iterator;
+   typedef EntrySet::reverse_iterator       reverse_iterator;
+
+   /**
+    * Forward iterator pointing to the first entry (if any)
+    **/
+   iterator begin() { return _dirs.begin(); }
+   /**
+    * Forward iterator pointing behind the last entry.
+    **/
+   iterator end() { return _dirs.end(); }
+   /**
+    * Reverse iterator pointing to the last entry (if any)
+    **/
+   reverse_iterator rbegin() { return _dirs.rbegin(); }
+   /**
+    * Reverse iterator pointing before the first entry.
+    **/
+   reverse_iterator rend() { return _dirs.rend(); }
+
+   typedef EntrySet::const_iterator         const_iterator;
+   typedef EntrySet::const_reverse_iterator const_reverse_iterator;
+
+   /**
+    * Forward const iterator pointing to the first entry (if any)
+    **/
+   const_iterator begin() const { return _dirs.begin(); }
+   /**
+    * Forward const iterator pointing behind the last entry.
+    **/
+   const_iterator end() const { return _dirs.end(); }
+   /**
+    * Reverse const iterator pointing to the last entry (if any)
+    **/
+   const_reverse_iterator rbegin() const { return _dirs.rbegin(); }
+   /**
+    * Reverse const iterator pointing before the first entry.
+    **/
+   const_reverse_iterator rend()const { return _dirs.rend(); }
+
+  public:
+
+   friend std::ostream & operator<<( std::ostream & str, const PkgDu & obj );
+};
+
+///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -107,7 +327,7 @@ class PkgDuMaster {
 
   private:
 
-    friend class PkgDu;
+    friend class PkgDuSlave;
 
     void add( FSize * data_r );
     void sub( FSize * data_r );
@@ -162,21 +382,21 @@ class PkgDuMaster {
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PkgDu
+//	CLASS NAME : PkgDuSlave
 /**
  * @short PMPackage helper to calculate and provide du information.
  **/
-class PkgDu {
+class PkgDuSlave {
 
-  PkgDu & operator=( const PkgDu & ); // no assign
-  PkgDu            ( const PkgDu & ); // no copy
+  PkgDuSlave & operator=( const PkgDuSlave & ); // no assign
+  PkgDuSlave            ( const PkgDuSlave & ); // no copy
 
   private:
 
     friend class PMPackage;
 
-    PkgDu();
-    ~PkgDu();
+    PkgDuSlave();
+    ~PkgDuSlave();
 
     typedef PkgDuMaster::MountPoint MountPoint;
 

@@ -37,6 +37,8 @@
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/InstSrcPtr.h>
 
+class PkgDu;
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMPackageDataProvider
@@ -99,7 +101,6 @@ class PMPackageDataProvider : virtual public Rep {
     static std::string            location()    { return std::string(); }
     static unsigned int           medianr()     { return 0; }
     static std::list<std::string> keywords()    { return std::list<std::string>(); }
-    static std::list<std::string> du()		{ return std::list<std::string>(); }
     static std::string            externalUrl() { return std::string(); }
     static std::list<PkgEdition>  patchRpmBaseVersions() { return std::list<PkgEdition>(); }
     static FSize                  patchRpmSize() { return FSize( 0 ); }
@@ -111,6 +112,9 @@ class PMPackageDataProvider : virtual public Rep {
     static PMError provideSrcPkgToInstall(Pathname& path_r) { path_r = Pathname(); return 1; }
     // source for this package, needed for callbacks
     static constInstSrcPtr source()		{ return (constInstSrcPtr)0; }
+
+    // dudata is special
+    static void du( PkgDu & dudata_r );
 
   protected:
 
@@ -169,7 +173,6 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::string            location    ( const PMPackage & pkg_r ) const { return location(); }
     virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const { return medianr(); }
     virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const { return keywords(); }
-    virtual std::list<std::string> du	       ( const PMPackage & pkg_r ) const { return du(); }
     virtual std::string            externalUrl ( const PMPackage & pkg_r ) const { return externalUrl(); }
     virtual std::list<PkgEdition>  patchRpmBaseVersions( const PMPackage & pkg_r ) const { return patchRpmBaseVersions(); }
     virtual FSize                  patchRpmSize( const PMPackage & pkg_r ) const { return patchRpmSize(); }
@@ -181,6 +184,9 @@ class PMPackageDataProvider : virtual public Rep {
     virtual PMError provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return provideSrcPkgToInstall(path_r); }
     // source for this package, needed for callbacks
     virtual constInstSrcPtr source 		(const PMPackage & pkg_r ) const { return source (pkg_r); }
+
+    // dudata is special
+    virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const { return du( dudata_r ); }
 };
 
 ///////////////////////////////////////////////////////////////////

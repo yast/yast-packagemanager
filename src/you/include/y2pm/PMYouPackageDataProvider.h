@@ -120,27 +120,27 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
           Set file size of RPM archive.
         */
         void setArchiveSize( const PMPackagePtr &, const FSize & );
-        
+
         /**
           Get file size of RPM archive.
         */
         FSize archivesize( const PMPackage & ) const;
-    
+
         /**
           Set file size of patch RPM.
         */
         void setPatchRpmSize( const PMPackagePtr &, const FSize & );
-        
+
         /**
           Get file size of patch RPM.
         */
         FSize patchRpmSize( const PMPackage & ) const;
-    
+
         /**
           Return disk usage information. This includes the required disk space
           for downloading the RPMs.
         */
-        std::list<std::string> du ( const PMPackage & pkg_r ) const;
+        virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const;
 
     private:
         std::map<PMPackagePtr,std::string> _summaries;
@@ -148,7 +148,7 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         std::map<PMPackagePtr,FSize> _sizes;
         std::map<PMPackagePtr,std::string> _locations;
         std::map<PMPackagePtr,std::string> _externalUrls;
-        std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;        
+        std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;
         std::map<PMPackagePtr,YStringTreeItem *> _rpmGroups;
         std::map<PMPackagePtr,FSize> _archiveSizes;
         std::map<PMPackagePtr,FSize> _patchRpmSizes;
