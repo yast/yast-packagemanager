@@ -2,8 +2,8 @@
 # Makefile.am for packagemanager/testsuite/media
 
 noinst_DATA = \
-	selections
-	*.sel
+	selections \
+	*.sel	\
 	packages*
 
 EXTRA_DIST = $(noinst_DATA)
