@@ -97,11 +97,12 @@ constInstSrcPtr  PMPackage::source()		 const { DP_GET ( source ); }
 #undef DP_GET
 
 // dudata is special
-void PMPackage::du( PkgDu & dudata_r ) const {
+PkgDu & PMPackage::du( PkgDu & dudata_r ) const {
   if ( _dataProvider )
     _dataProvider->du( *this, dudata_r );
   else
     PMPackageDataProvider::du( dudata_r );
+  return dudata_r;
 }
 ///////////////////////////////////////////////////////////////////
 

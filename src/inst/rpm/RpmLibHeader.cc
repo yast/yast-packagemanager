@@ -843,11 +843,11 @@ PkgChangelog RpmLibHeader::tag_changelog() const
 //
 //
 //	METHOD NAME : RpmLibHeader::tag_du
-//	METHOD TYPE : void
+//	METHOD TYPE : PkgDu &
 //
 //	DESCRIPTION :
 //
-void RpmLibHeader::tag_du( PkgDu & dudata_r ) const
+PkgDu & RpmLibHeader::tag_du( PkgDu & dudata_r ) const
 {
   dudata_r.clear();
   stringList basenames;
@@ -899,5 +899,6 @@ void RpmLibHeader::tag_du( PkgDu & dudata_r ) const
       }
     }
   }
+  return dudata_r;
 }
 

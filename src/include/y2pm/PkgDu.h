@@ -34,7 +34,7 @@
 //
 //	CLASS NAME : PkgDu
 /**
- * @short Helper classe to collect package diskspace usage info.
+ * @short Class to store package diskspace usage info.
  *
  * <code>PkgDu</code> maintains a set of <code>PkgDu::Entry</code> to
  * keep inforamtion about diskspace usage in several directories.
@@ -44,9 +44,22 @@
  * and number of files within this directory are mutable.
  *
  * As the diskspace usage depends on the filesystems blocksize, you'll probabely
- * get the closest result counting filesizes rounded up to full Kb (@ref FSize::fillBlock)
- * and the number of files. Diskspace usage calculation will then add additional
+ * get the closest result counting filesizes rounded up to full Kb and the
+ * number of files. Diskspace usage calculation will then add additional
  * half blocksize for each file.
+ *
+ * <pre>
+ * PkgDu dudata;
+ *
+ * for ( all dirs ) {
+ *   PkgDu::Entry dirdata( dir.name );
+ *   for ( all files in dir ) {
+ *     dirdata._size += FSize( file.size ).fullBlock( **defaults to 1K** );
+ *     ++dirdata._files;
+ *   }
+ *   dudata.add( dirdata );
+ * }
+ * </pre>
  **/
 class PkgDu {
 
@@ -254,11 +267,22 @@ class PkgDu {
 //	CLASS NAME : PkgDuMaster
 /**
  * @short PMPackageManager helper to collect disk usage info.
+ *
+ * The per package diskusage calculation perdormed by @ref PkgDuSlave
+ * is based on the set of mountpoint data held within the
+ * <code>PkgDuMaster</code>.
+ *
+ * <b>Asserted:</b> The set of <code>MountPoint</code>s is
+ * alphabetically ordered by <code>MountPoint::_mountpoint</code>.
+ *
+ * <b>Asserted:</b> Whenever the set of <code>MountPoint</code>s
+ * changes (add/remove mountpoints or changing a mountpoints _blocksize
+ * value), <code>PkgDuMaster::_count</code> <b>must be incremented</b>.
  **/
 class PkgDuMaster {
 
-  PkgDuMaster & operator=( const PkgDuMaster & ); // no assign
-  PkgDuMaster            ( const PkgDuMaster & ); // no copy
+  //PkgDuMaster & operator=( const PkgDuMaster & ); // no assign
+  //PkgDuMaster            ( const PkgDuMaster & ); // no copy
 
   public:
 
@@ -317,19 +341,39 @@ class PkgDuMaster {
 
     static unsigned _counter;
 
+    /**
+     * <b>Asserted:</b> Incremented whenever vital mountpoint data change.
+     **/
     unsigned _count;
 
+    /**
+     * Increment _count.
+     **/
     void newcount() { _count = ++_counter; }
 
   private:
 
+    /**
+     * set of mountpoints
+     **/
     std::set<MountPoint> _mountpoints;
+
+    /**
+     * Total pkg_diff
+     **/
+    FSize _pkg_diff;
 
   private:
 
     friend class PkgDuSlave;
 
+    /**
+     * Add per package data stored within a <code>PkgDuSlave</code>.
+     **/
     void add( FSize * data_r );
+    /**
+     * Subtract per package data stored within a <code>PkgDuSlave</code>.
+     **/
     void sub( FSize * data_r );
 
   public:
@@ -339,38 +383,31 @@ class PkgDuMaster {
 
   public:
 
+    /**
+     * Return current @ref _count value.
+     **/
     unsigned sync_count() const { return _count; }
 
+    /**
+     * Reset package usage to 0 for all mounpoints. Returns the number
+     * of mountoints currently stored.
+     **/
     unsigned resetStats();
 
+    /**
+     * Set a new set of mountpoints.
+     **/
     void setMountPoints( const std::set<MountPoint> & mountpoints_r );
 
+    /**
+     * Return the set of mountoints.
+     **/
     const std::set<MountPoint> & mountpoints() const { return _mountpoints; }
 
-  private:
-
-    MountPoint _overall;
-
-  public:
-
     /**
-     * Overall stats (not per partition)
+     * Total pkg_diff (summ of all partitions)
      **/
-    FSize               total()             const { return _overall.total(); }
-    // current usage without packages taken into accout
-    FSize               initial_used()      const { return _overall.initial_used(); }
-    FSize               initial_available() const { return _overall.initial_available(); }
-    int                 initial_u_percent() const { return _overall.initial_u_percent(); }
-    // current usage with packages taken into accout
-    FSize               pkg_diff()          const { return _overall.pkg_diff(); }
-    FSize               pkg_used()          const { return _overall.pkg_used(); }
-    FSize               pkg_available()     const { return _overall.pkg_available(); }
-    int                 pkg_u_percent()     const { return _overall.pkg_u_percent(); }
-
-  public:
-
-    void add( const FSize & szs_r ) { _overall._pkgusage += szs_r; }
-    void sub( const FSize & szs_r ) { _overall._pkgusage -= szs_r; }
+    FSize pkg_diff() const { return _pkg_diff; }
 
   public:
 

@@ -104,8 +104,8 @@ class PMPackage : virtual public Rep, public PMObject {
     unsigned int           medianr()      const;
     std::list<std::string> keywords()     const;
 
-    // from packages.DU
-    void du( PkgDu & dudata_r )		  const;
+    // from packages.DU (argument returned for convenience)
+    PkgDu & du( PkgDu & dudata_r )        const;
 
     // YOU attributes
     std::string            externalUrl()  const;
