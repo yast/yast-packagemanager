@@ -91,6 +91,8 @@ void order(vector<string>& argv);
 void upgrade(vector<string>& argv);
 void commit(vector<string>& argv);
 
+void cdattach(vector<string>& argv);
+
 struct Funcs {
     const char* name;
     void (*func)(vector<string>&);
@@ -133,6 +135,7 @@ static struct Funcs func[] = {
     { "commit",		commit,		1,	"commit changes to and actually perform installation" },
     { "setsel",		setsel,		1,	"mark selection for installation, need to call solvesel" },
     { "solvesel",	solvesel,	1,	"solve selection dependencies" },
+    { "cdattach",	cdattach,	0,	"cdattach" },
 
     { NULL,		NULL,		0,	NULL }
 };
@@ -1184,6 +1187,49 @@ void remove(vector<string>& argv)
 	}
     }
 }
+
+void cdattach(vector<string>& argv)
+{
+    MediaAccessPtr media = new MediaAccess;
+
+    Url mediaurl_r = (string("cd:///;") + argv[1]);
+
+
+    PMError err;
+    if ( (err = media->open( mediaurl_r, "/tmp/blub" )) )
+    {
+	ERR << "Failed to open " << mediaurl_r << " " << err << endl;
+	return;
+    }
+
+
+    DBG << "open ok" << endl;
+    bool repeat = true;
+    bool notfirst =false;
+    do
+    {
+	if(media->isAttached())
+	{
+	    DBG << "release medium" << endl;
+	    cout << media->release() << endl;
+	}
+	DBG << "attach medium" << endl;
+	if ( (err = media->attach(notfirst)) )
+	{
+	    ERR << "Failed to attach media: " << err << endl;
+	    repeat = false;
+	    return;
+	}
+	notfirst = true;
+    } while (repeat);
+
+    if(media->isAttached())
+    {
+	DBG << "release medium final" << endl;
+	media->release();
+    }
+}
+
 /*
 void solve(vector<string>& argv)
 {
@@ -1210,6 +1256,7 @@ void solve(vector<string>& argv)
     }
 }
 */
+
 int main( int argc, char *argv[] )
 {
     char prompt[]="y2pm > ";
