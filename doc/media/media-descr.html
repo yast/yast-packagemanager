@@ -259,6 +259,7 @@ be determined.</td></tr>
 (relative to product directory)</td></tr>
 <tr><td>O</td><td><tt>LANGUAGE</tt></td><td>default language code</td></tr>
 <tr><td>O</td><td><tt>TIMEZONE</tt></td><td>default timezone</td></tr>
+<tr><td>O</td><td><tt>FLAGS</tt></td><td>product specific capabilities, see below</td></tr>
 <tr><td>O</td><td><tt>YOUURL</tt></td><td>URL of text file containing list of online update servers</td></tr>
 <tr><td>O</td><td><tt>YOUTYPE</tt></td><td><tt>business</tt> for SuSE business products</td></tr>
 <tr><td>O</td><td><tt>YOUPATH</tt></td><td>path to patches on the server<br>
@@ -283,6 +284,13 @@ The first package matching the architecture is taken as the preferred candidate.
 Packages with architectures not in this list are discarded and do not appear
 for selection. Packages with 'lower' architectures are still available for selection,
 so the user can manually choose such a package.<br>
+<br>
+The <tt>FLAGS</tt> line is used to describe the (installation) capabilities of
+the product. It's value is a list of space separated keywords.<br>
+The following keywords are currently defined:<br>
+<table>
+<tr><td><tt>update</tt></td><td>&nbsp;&nbsp;</td><td>Offer update button in YaST</td></tr>
+</table>
 <br>
 The location of the rpm file for a package on the installation media
 is determined by the <tt>=Loc:</tt> line
@@ -309,6 +317,7 @@ DESCRDIR suse/setup/descr
 DATADIR suse
 LANGUAGE de_DE
 TIMEZONE Europe/Berlin
+FLAGS update
 YOUURL http://www.suse.de/cgi-bin/suseservers.cgi
 YOUTYPE business
 YOUPATH i386/update/SuSE-SLES/8
