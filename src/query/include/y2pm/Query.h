@@ -31,8 +31,7 @@
 
 #include <y2pm/PMSelectablePtr.h>
 #include <y2pm/PMPackagePtr.h>
-#include <y2pm/PMSelectionPtr.h>
-#include <y2pm/PMManager.h>
+#include <y2pm/PMPackageManager.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -44,28 +43,73 @@ class Query : virtual public Rep {
     REP_BODY(Query);
 
     private:
+	/**
+	 * bitmask for marking matches in selectable
+	 * Bit 0: installed matches
+	 * Bit 1..: available n matches
+	 */
+	typedef unsigned int BitMask;
+
 	struct qnode *_query;
+
+	/**
+	 * position of error in query string
+	 */
 	int _errpos;
 
-	bool checkSelectable (PMSelectablePtr selectable);
-	bool checkPackage (PMPackagePtr package);
-	bool checkSelection (PMSelectionPtr selection);
+	/**
+	 * just called queryPackackage, following nextPackage()
+	 * is initial
+	 */
+	bool _initial;
+
+	/**
+	 * current iterator for nextPackage()
+	 */
+	PMManager::PMSelectableVec::const_iterator _current;
+
+	/**
+	 * backlog of packages still to be retrieved via nextPackage()
+	 */
+	BitMask _backlog;	// all bits
+	BitMask _logpos;	// mask of last returned package
+
+	/**
+	 * check query against selectable
+	 */
+	BitMask checkSelectable (PMSelectablePtr selectable, struct qnode *query);
+
+	/**
+	 * check query against package
+	 */
+	bool checkPackage (PMPackagePtr package, struct qnode *query);
+
+	BitMask findCandidate (PMSelectablePtr selectable);
+	BitMask checkSelectableFlag (PMSelectablePtr selectable, int flag);
+	BitMask checkSelectableOpCompare (PMSelectablePtr selectable, struct qnode *query);
+	BitMask checkSelectableOpBoolean (PMSelectablePtr selectable, struct qnode *query);
+	BitMask checkSelectableValue (PMSelectablePtr selectable, struct qvalue *value);
+
     public:
 	Query();
 	~Query();
+
 	/**
 	 * parse textual query to internal format
 	 */
-	PMError parseQuery (const std::string& query);
+	PMError queryPackage (const std::string& query);
+
 	/**
 	 * failure position if parseQuery returned an error
 	 * gives position in query string
 	 * -1 if no error
 	 */
 	int failedPos () { return _errpos; }
-	const std::list<PMSelectablePtr> querySelectables(const PMManager& packageManager);
-	const std::list<PMPackagePtr> queryPackages(const PMManager& packageManager);
-	const std::list<PMSelectionPtr> querySelections(const PMManager& selectionManager);
+
+	/**
+	 * return next match for current query
+	 */
+	const PMPackagePtr nextPackage (const PMPackageManager& packageManager);
 };
 
 ///////////////////////////////////////////////////////////////////
