@@ -1,10 +1,9 @@
 #include <unistd.h>
-#include <PkgDep.h>
-#include <y2pm/PkgDb.h>
-#include <y2pm/Package.h>
-#include <y2pm/PackageSource.h>
-#include <Exception.h>
 #include <y2util/timeclass.h>
+#include <y2util/Y2SLog.h>
+#include <Y2PM.h>
+#include <y2pm/PkgDep.h>
+#include <y2pm/PMPackage.h>
 
 using namespace std;
 
@@ -43,32 +42,6 @@ int main( int argc, char *argv[] )
     int verbose = 1;
 //    PkgPool.add_installed_packages();
 
-    PkgDb pkgpool(new PkgDbRep());
-
-    // TODO: this has to be done by some dlopen magic
-    new MediaAccess_FileRep();
-    PackageDataProvider::Ref source;
-    try
-    {
-	source = new SuSEClassicDataProvider(pkgpool,Url("file:///mounts/machcd3/dists/full-i386/"));
-	source->addAllPackages();
-//	PackageDataProvider* inst = new SuSEClassicDataProvider(Url("file:///suse/lnussel/prog/phi/test"));
-//	inst->addAllPackages();
-    }
-    catch(const PkgDbExcp& excp)
-    {
-	cerr << excp << endl;
-	return 1;
-    }
-    catch(const char* str )
-    {
-	cerr << str << endl;
-    }
-    catch(...)
-    {
-	cerr << "unexpected exception" << endl;
-	return 2;
-    }
 
     // build sets
     PkgSet installed; //( DTagListI0() );
@@ -91,18 +64,24 @@ int main( int argc, char *argv[] )
 //    candidates.add(PkgPool.get(PkgName("kdebase3"),PkgEdition("3.0-5")));
 //    candidates.add(available->lookup("dialog"));
 
-    // create set of all packages
-    for( PkgDbRep::const_iterator p = pkgpool->begin(); p != pkgpool->end(); ++p ) {
-	    available->add( p->value );
+
+    PMPackageManager& manager = Y2PM::packageManager();
+
+    INT << manager.size() << endl;
+
+    for(PMManager::PMSelectableVec::const_iterator it = manager.begin();
+	it != manager.end(); ++it )
+    {
+	// create set of all packages
+	available->add( (*it)->installedObj() );
     }
-    pkgpool->attach_set( available );
 
     for (int i=1; i < argc ; i++) {
-	if (!available->lookup(argv[i])) {
+	if (available->lookup(PkgName(argv[i])) == NULL) {
 		std::cerr << "package " << argv[i] << " is not available.\n";
 		return 1;
 	}
-	candidates.add(available->lookup(argv[i]));
+	candidates.add(available->lookup(PkgName(argv[i])));
     }
 /*
     if (!oncmdline) {
@@ -160,7 +139,7 @@ int main( int argc, char *argv[] )
     cout << "*** Packages to remove ***" << endl;
     for(PkgDep::NameList::const_iterator q=to_remove.begin();q!=to_remove.end();++q) {
 	switch (verbose) {
-	case 0: cout << "remove " << (const char*)*q << endl;break;
+	case 0: cout << "remove " << *q << endl;break;
 	default: cout << "remove " << *q << endl;break;
 	}
 	numrem++;

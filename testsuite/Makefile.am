@@ -10,9 +10,10 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		inst/include	\
 		inst/rpm/include\
 		media/include	\
+		libPkgDep/include \
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-noinst_PROGRAMS = test_rpmdb ma_test.exe
+noinst_PROGRAMS = test_rpmdb ma_test.exe testinstall
 
 # testinstall_SOURCES = testinstall.cc
 # testinstall_LDFLAGS = -L$(libdir)	\
@@ -29,3 +30,7 @@ ma_test_exe_LDFLAGS = -static
 test_rpmdb_SOURCES = test_rpmdb.cc
 test_rpmdb_LDADD = $(top_srcdir)/src/liby2pm.la
 test_rpmdb_LDFLAGS = -static
+
+testinstall_SOURCES = testinstall.cc
+testinstall_LDADD = $(top_srcdir)/src/liby2pm.la
+testinstall_LDFLAGS = -static

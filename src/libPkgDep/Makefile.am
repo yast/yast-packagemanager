@@ -1,5 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
+SUBDIRS = include
+
 noinst_LTLIBRARIES = libPkgDep.la
 
 # first look into source tree, then into $(includedir)
@@ -8,6 +10,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		pkg/include	\
 		inst/include	\
 		media/include	\
+		libPkgDep/include \
 	   ) -I$(includedir) -I$(QTDIR)/include
 
 #LDADD = $(top_srcdir)/src/libPkgDb/libPkgDb.la
