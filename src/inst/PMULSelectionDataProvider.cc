@@ -75,13 +75,17 @@ PMULSelectionDataProvider::~PMULSelectionDataProvider()
 PMULSelectionDataProvider::posmapIT
 PMULSelectionDataProvider::posmapFind (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const
 {
-    posmapIT it = theMap.find (locale);
+    posmapIT it = theMap.find (locale);				// try full locale
     if (it == theMap.end())
     {
 	const std::string lang = locale;
 	if (lang.size() > 2)
 	{
-	    it = theMap.find (LangCode (lang.substr (0, 2)));
+	    it = theMap.find (LangCode (lang.substr (0, 2)));	// try 2-char locale
+	    if (it == theMap.end())
+	    {
+		it = theMap.find (LangCode ("default"));	// try "default" locale
+	    }
 	}
     }
     return it;
