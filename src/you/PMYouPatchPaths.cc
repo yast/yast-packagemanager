@@ -23,6 +23,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <pwd.h>
+
 #include <y2util/Y2SLog.h>
 #include <y2util/SysConfig.h>
 
@@ -236,8 +238,8 @@ Pathname PMYouPatchPaths::localWriteDir()
   if ( getuid() == 0 ) {
     return localDir();
   } else {
-    Pathname path = getenv( "HOME" );
-    path += ".yast2/you";
+    string user = getpwuid( getuid() )->pw_name;
+    Pathname path = "/var/tmp/you-" + user;
     int err = PathInfo::assert_dir( path );
     if ( err ) {
       ERR << "Unable to assert '" << path << "' errno: " << err << endl;
