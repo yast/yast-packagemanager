@@ -291,7 +291,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
 //
 void PMManager::poolAdjust()
 {
-  DBG << "SATRT Pool size " << _items.size() << endl;
+  DBG << "START Pool size " << _items.size() << endl;
   Rep::dumpRepStats( DBG ) << endl;
 
   for ( PMSelectableVec::iterator it = begin(); it != end(); /*advanced inside*/ ) {
