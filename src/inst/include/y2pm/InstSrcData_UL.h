@@ -27,6 +27,7 @@
 #include <y2util/TagCacheRetrieval.h>
 
 #include <y2pm/PMULPackageDataProviderPtr.h>
+#include <y2pm/PMULSelectionDataProviderPtr.h>
 #include <y2pm/InstSrcData_ULPtr.h>
 #include <y2pm/InstSrcData.h>
 #include <y2pm/PMPackage.h>
@@ -69,7 +70,7 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
 	 *
 	 * must be static because called by static trygetData()
 	 */
-	static PMSelectionPtr Tag2Selection ( const std::string& sortby, TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset );
+	static PMSelectionPtr Tag2Selection ( PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset );
 
   public:
 
@@ -275,6 +276,8 @@ public:
 	SUMMARY,	// short summary (label)
 	CATEGORY,
 	VISIBLE,
+	ORDER,		// ordering data
+	SUGGESTS,
 	REQUIRES,
 	PROVIDES,
 	CONFLICTS,
@@ -295,6 +298,9 @@ public:
 	createTag( "=Sum", SUMMARY);
 	createTag( "=Cat", CATEGORY);
 	createTag( "=Vis", VISIBLE);
+	createTag( "=Ord", ORDER);
+	t = createTag( "+Sug", SUGGESTS);	// list of suggests tags
+	t->setEndTag("-Sug");
 	t = createTag( "+Req", REQUIRES);	// list of requires tags
 	t->setEndTag("-Req");
 	t = createTag( "+Prv", PROVIDES);	// list of provides tags

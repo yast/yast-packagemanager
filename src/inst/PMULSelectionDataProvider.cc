@@ -42,9 +42,9 @@ IMPL_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMDataPro
 //	DESCRIPTION : open packages stream and keep pointer to tag parser
 //		      for later value retrieval on-demand
 //
-PMULSelectionDataProvider::PMULSelectionDataProvider(TagCacheRetrieval *selection_retrieval)
-    : _selection_retrieval (selection_retrieval)
+PMULSelectionDataProvider::PMULSelectionDataProvider(const std::string &selectionname)
 {
+    _selection_retrieval = new TagCacheRetrieval (selectionname);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -57,6 +57,7 @@ PMULSelectionDataProvider::PMULSelectionDataProvider(TagCacheRetrieval *selectio
 //
 PMULSelectionDataProvider::~PMULSelectionDataProvider()
 {
+    delete _selection_retrieval;
 }
 
 const std::string
@@ -101,8 +102,9 @@ PMULSelectionDataProvider::size() const
 const std::string
 PMULSelectionDataProvider::category () const
 {
-    return _attr_CATEGORY?"base":"addon";
+    return _attr_CATEGORY;
 }
+
 const bool
 PMULSelectionDataProvider::visible () const
 {
@@ -140,9 +142,9 @@ PMULSelectionDataProvider::archivesize () const
 }
 
 const std::string
-PMULSelectionDataProvider::sortby () const
+PMULSelectionDataProvider::order () const
 {
-    return _attr_SORTBY;
+    return _attr_ORDER;
 }
 
 

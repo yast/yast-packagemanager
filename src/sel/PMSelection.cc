@@ -88,7 +88,7 @@ PMSelection::delpacks(const std::string& lang) const { return _dataProvider->del
 const FSize
 PMSelection::archivesize() const { return _dataProvider->archivesize(); }
 const std::string
-PMSelection::sortby() const { return _dataProvider->sortby(); }
+PMSelection::order() const { return _dataProvider->order(); }
 
 
 ///////////////////////////////////////////////////////////////////
