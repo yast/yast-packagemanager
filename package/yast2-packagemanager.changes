@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 09 11:21:20 CEST 2003 - arvin@suse.de
+
+- fixed compilation
+
+-------------------------------------------------------------------
 Tue Sep  9 10:34:54 CEST 2003 - ma@suse.de
 
 - Fixed missing Fclose reading rpm header from package. (#29916)
