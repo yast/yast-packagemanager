@@ -8,12 +8,12 @@ pkgincludedir = $(includedir)/y2pm
 
 pkginclude_HEADERS =	\
 	MediaAccess.h \
+	MediaAccessPtr.h \
+	MediaHandler.h \
 	MediaDIR.h \
 	MediaHTTP.h \
 	MediaSMB.h \
-	MediaAccessPtr.h \
 	MediaDISK.h \
-	MediaHandler.h \
 	MediaNFS.h \
 	MediaCD.h \
 	MediaFTP.h \
