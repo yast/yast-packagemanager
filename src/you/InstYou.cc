@@ -130,9 +130,11 @@ PMError InstYou::setUserPassword( const string &username,
   }
 
   SysConfig cfg( _paths->passwordFile() );
-  cfg.writeEntry( "USERNAME", _username );
-  cfg.writeEntry( "PASSWORD", _password );
+  cfg.writeEntry( "USERNAME", u );
+  cfg.writeEntry( "PASSWORD", p );
   cfg.save();
+
+  PathInfo::chmod( _paths->passwordFile(), 0600 );
 
   return PMError();
 }
