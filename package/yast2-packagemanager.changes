@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 15 13:13:56 CEST 2003 - cschum@suse.de
+
+- Fixed MediaCurl download on x86_64 (#25817). 
+
+-------------------------------------------------------------------
 Thu Apr 10 17:11:43 CEST 2003 - sh@suse.de
 
 - Fixed bug #25804: FTP download shows pkg build no. 

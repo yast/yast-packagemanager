@@ -327,6 +327,8 @@ int MediaCurl::progressCallback( void *clientp, double dltotal, double dlnow,
     if ( _callbacks->progress( dlnow * 100 / dltotal ) ) return 0;
     else return 1;
   }
+
+  return 0;
 }
 
 int MediaCurl::passwordCallback( void *client, char *prompt, char* buffer,
