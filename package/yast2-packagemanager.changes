@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Aug 11 00:23:30 CEST 2004 - ma@suse.de
+
+- Selections enhanced with architecture info (#43145)
+- 2.10.5
+
+-------------------------------------------------------------------
 Tue Aug 10 13:24:00 CEST 2004 - lnussel@suse.de
 
 - online_update:

@@ -176,7 +176,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 
     std::vector<std::string> splitted;
 
-    stringutil::split (single, splitted, " ", false);
+    stringutil::split (single, splitted);
 //MIL << "-----------------------------" << endl;
 //MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
@@ -212,7 +212,6 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 	    } // binary package to current source found
 
 	} // this is a src/nosrc package
-
 	return InstSrcError::E_ok;
 
     } // not allowed arch

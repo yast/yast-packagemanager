@@ -22,6 +22,7 @@
 #include <y2pm/InstTarget.h>
 #include <y2pm/Timecount.h>
 #include <y2pm/PMPackageImEx.h>
+#include <y2pm/InstTargetSelDB.h>
 
 #include "PMCB.h"
 
@@ -149,7 +150,7 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   str << "+++[dumpSelWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); it != SMGR.end(); ++it ) {
     if ( all || (*it)->to_modify() ) {
-      (*it)->dumpStateOn( str ) << endl;
+      (*it)->dumpStateOn( str ) << " " << *it << endl;
     }
   }
   str << "---[dumpSelWhatIf]---------------------------------------------------" << endl;
@@ -302,97 +303,31 @@ int main( int argc, char * argv[] )
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
     Y2PM::instTargetInit("/");
-    _t.start( "Launch PMPackageManager" );
-    Y2PM::packageManager();
-    _t.start( "Launch PMSelectionManager" );
-    Y2PM::selectionManager();
-    _t.start( "Launch InstSrcManager" );
-    Y2PM::instSrcManager();
+    //_t.start( "Launch PMPackageManager" );
+    //Y2PM::packageManager();
+    //_t.start( "Launch PMSelectionManager" );
+    //Y2PM::selectionManager();
+    //_t.start( "Launch InstSrcManager" );
+    //Y2PM::instSrcManager();
     _t.stop();
     INT << "Total Packages "   << PMGR.size() << endl;
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  Y2PM::packageManager();
-  Y2PM::selectionManager();
+  InstTargetSelDB sdb;
+  MIL << sdb.open() << endl;
+  MIL << sdb.isOpen() << endl;
+  MIL << sdb.dbPath() << endl;
+  MIL << sdb.getSelections() << endl;
+  INT << sdb.isInstalled( "/Basis-Sound.sel" ) << endl;
+  INT << sdb.isInstalled( "/Basis-Sound-1-2.i386.sel" ) << endl;
+  INT << sdb.install( "/tmp/Basis-Sound.sel" ) << endl;
+  MIL << sdb.getSelections() << endl;
+  INT << sdb.install( "/tmp/Basis-Sound-1-2.i386.sel" ) << endl;
+  MIL << sdb.getSelections() << endl;
+  INT << sdb.install( "/tmp/Basis-Sound.sel" ) << endl;
+  MIL << sdb.getSelections() << endl;
 
-  Pathname localp;
-  Y2PM::instTargetInit("/");
-  Y2PM::instSrcManager();
-
-  pcandlog( PMGR["3ddiag"] );
-  pcandlog( PMGR["rpm"] );
-
-
-#if 0
-  Y2PM::setNotRunningFromSystem();
-
-  PMPackagePtr pkg ( PMGR["3ddiag"]->candidateObj() );
-  INT << pkg->providePkgToInstall( localp ) << endl;
-  INT << localp << endl;
-
-  pkg = PMGR["rpm"]->candidateObj();
-  INT << pkg->providePkgToInstall( localp ) << endl;
-  INT << localp << endl;
-
-
-
-#endif
-  ISM.disableAllSources();
-  Y2PM::instTargetClose();
-
-#if 0
-  PMError err;
-  //Url mediaurl_r( "ftp://schnell/CD-ARCHIVE/9.0/SuSE-9.0-FTP-i386-RC1" );
-  //Url mediaurl_r( "ftp://machcd2/CDs/SuSE-9.1-DVD-i386-RC2/CD1" );
-  Url mediaurl_r( "/tmp/isrc" );
-  MediaAccessPtr  media = new MediaAccess;
-  if ( (err = media->open( mediaurl_r )) ) {
-    ERR << "Failed to open " << mediaurl_r << " " << err << endl;
-    return err;
-  }
-  if ( (err = media->attach()) ) {
-    ERR << "Failed to attach media: " << err << endl;
-    return err;
-  }
-
-  INT << media << endl;
-
-  PathInfo::dircontent content;
-  if ( (err = media->dirInfo( content, "" )) ) {
-    ERR << "Failed dirInfo: " << err << endl;
-    return err;
-  }
-
-  MIL << content << endl;
-
-  if ( (err = media->provideDir( "" )) ) {
-    ERR << "Failed to provideDir: " << err << endl;
-    return err;
-  }
-
-  //if ( (err = media->provideFile( "media.1/media" )) ) {
-  //  ERR << "Failed to provideFile: " << err << endl;
-  //}
-  int i;
-  cout << "get:" << endl;
-  cin >> i;
-#endif
-
-#if 0
-  MIL << "=========================" << endl;
-  MIL << Y2PM::getRequestedLocales() << endl;
-  MIL << "=========================" << endl;
-  MIL << Y2PM::getRequestedLocales() << endl;
-  Y2PM::setRequestedLocales( LangCode("de_AT") );
-  MIL << Y2PM::getRequestedLocales() << endl;
-  Y2PM::addRequestedLocales( LangCode("de_DE@euro") );
-  MIL << Y2PM::getRequestedLocales() << endl;
-  Y2PM::delRequestedLocales( LangCode("de_AT") );
-  MIL << Y2PM::getRequestedLocales() << endl;
-  Y2PM::setRequestedLocales( LangCode("de_DE@euro") );
-  MIL << Y2PM::getRequestedLocales() << endl;
-#endif
 
   SEC << "STOP" << endl;
   return 0;
