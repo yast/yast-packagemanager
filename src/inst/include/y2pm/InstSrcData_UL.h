@@ -69,7 +69,7 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
 	 *
 	 * must be static because called by static trygetData()
 	 */
-	static PMSelectionPtr Tag2Selection ( TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset );
+	static PMSelectionPtr Tag2Selection ( const std::string& sortby, TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset );
 
   public:
 

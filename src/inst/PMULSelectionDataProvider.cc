@@ -139,6 +139,12 @@ PMULSelectionDataProvider::archivesize () const
     return _attr_ARCHIVESIZE;
 }
 
+const std::string
+PMULSelectionDataProvider::sortby () const
+{
+    return _attr_SORTBY;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////

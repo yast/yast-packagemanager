@@ -86,7 +86,7 @@ class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
 	// suse packages values
 	virtual const std::list<std::string> recommends() const;
 	virtual const std::list<std::string> suggests() const;
-	virtual const std::list<std::string> location() const;
+	virtual const std::string location() const;
 	virtual const std::list<std::string> keywords() const;
 
     /**

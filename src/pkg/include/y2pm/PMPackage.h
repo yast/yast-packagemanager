@@ -107,7 +107,7 @@ class PMPackage : virtual public Rep, public PMObject {
 	// suse packages values
 	const std::list<std::string> recommends() const;
 	const std::list<std::string> suggests() const;
-	const std::list<std::string> location() const;
+	const std::string location() const;
 	const std::list<std::string> keywords() const;
 
 	/**
