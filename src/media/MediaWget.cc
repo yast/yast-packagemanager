@@ -89,9 +89,6 @@ MediaWget::attachTo (const Pathname & to)
 MediaResult
 MediaWget::release (bool eject)
 {
-    if (umount (_attachPoint.asString().c_str()) != 0) {
-	return E_system;
-    }
     _attachPoint = string();
     return E_none;
 }
@@ -108,12 +105,13 @@ MediaResult MediaWget::provideFile (const Pathname & filename) const {
     if(!_url.isValid())
 	return E_bad_url;
 
+    if(_url.getHost().empty())
+	return E_bad_url;
+
     Wget wget;
     string tmp;
 
-    wget.setUser(_user,_pass);
-//    wget.setProxyUser(_proxyuser, _proxypass);
-    wget.setProxyUser("heinz","ketchup");
+    wget.setProxyUser(_url.getOption("proxyuser"), _url.getOption("proxypassword"));
 
     Pathname path = "/";
     path += _url.getPath();

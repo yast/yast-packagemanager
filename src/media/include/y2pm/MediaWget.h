@@ -28,18 +28,10 @@
 //	CLASS NAME : MediaWget
 class MediaWget : public MediaHandler {
 
-	std::string _user;		// username
-	std::string _pass;		// password
-	std::string _proxyhost;	// proxy server
-	std::string _proxyport;		// proxy port
-	std::string _proxyuser;		// proxy user
-	std::string _proxypass;		// proxy pass
-	std::string _proxytype;	// proxy type ("ftp", "http")
-
     public:
 	/** constructor
 	 *
-	 * @param options user, pass, proxyhost, proxyport, proxytype (ftp,http), proxyuser, proxypass
+	 * @param url Url to base directory
 	 * */
 	MediaWget (const Url& url);
 

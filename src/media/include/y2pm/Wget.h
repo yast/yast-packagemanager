@@ -17,6 +17,9 @@
    
 /*
  * $Log$
+ * Revision 1.3  2002/07/05 12:05:13  lnussel
+ * catch more wget errors
+ *
  * Revision 1.2  2002/07/02 15:32:45  lnussel
  * added testprogram for ftp method, can already retreive files
  *
@@ -53,7 +56,10 @@
  */
 
 enum WgetStatus { WGET_OK, WGET_ERROR_FILE, 
-		  WGET_ERROR_LOGIN, WGET_ERROR_CONNECT };
+		  WGET_ERROR_LOGIN, WGET_ERROR_CONNECT,
+		  WGET_ERROR_PROXY_AUTH,
+		  WGET_ERROR_SERVER,
+		  WGET_ERROR_UNEXPECTED };
 
 
 class Wget
@@ -78,10 +84,11 @@ public:
    
   /**
    * Set password and user
+   * <p><b>obsolete, encode user and password into url when calling getFile</b>
    */
-    
+/*    
   void setUser( const std::string username, const std::string passwd);
-
+*/
   /**
    * Set password and user of the proxy
    */
@@ -99,8 +106,8 @@ private:
   /** 
    * user
    */
-    std::string user;
-    std::string password;
+//    std::string user;
+//    std::string password;
 
   /** 
    * proxy user 

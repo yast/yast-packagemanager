@@ -18,6 +18,9 @@
    
 /*
  * $Log$
+ * Revision 1.3  2002/07/05 12:05:13  lnussel
+ * catch more wget errors
+ *
  * Revision 1.2  2002/07/02 15:32:45  lnussel
  * added testprogram for ftp method, can already retreive files
  *
@@ -50,7 +53,16 @@
 #include <y2pm/Wget.h>
 
 #define WRONGUSER "401 Unauthorized"
+#define AUTHREQUIRED "401 Authorization Required"
 #define NOTFOUND "404 Not Found"
+#define PROXYAUTH "407 Proxy Authentication Required"
+#define SERVERERROR "500 Internal Server Error"
+
+#define CONNREFUSED "failed: Connection refused"
+
+#ifndef N_
+#define N_(STR) STR
+#endif
 
 using namespace std;
 
@@ -77,8 +89,8 @@ create_directories(string name)
 /*-------------------------------------------------------------*/
 Wget::Wget()
 {
-    user = "";
-    password = "";
+//    user = "";
+//    password = "";
     proxyUser = "";
     proxyPassword = "";
     process = 0;
@@ -110,17 +122,25 @@ string Wget::error_string ( WgetStatus status )
     switch ( status )
     {
 	case WGET_OK:
-	    ret = "ok";
+	    ret = N_("Ok");
 	    break;
-	case WGET_ERROR_FILE:
+	case N_(WGET_ERROR_FILE):
+	    ret = N_("file not found");
+	    break;
 	case WGET_ERROR_CONNECT:
-	    ret = "error_path";
+	    ret = N_("connection failed");
 	    break;
 	case WGET_ERROR_LOGIN:
-	    ret = "error_login";
+	    ret = N_("login failed");
+	    break;
+	case WGET_ERROR_PROXY_AUTH:
+	    ret = N_("proxy authentication required");
+	    break;
+	case WGET_ERROR_SERVER:
+	    ret = N_("remote server error");
 	    break;
 	default:
-	    ret = "error_path";
+	    ret = N_("unexpected error");
 	    break;
     }
     
@@ -130,13 +150,14 @@ string Wget::error_string ( WgetStatus status )
 /*--------------------------------------------------------------*/
 /* Set password and user					*/
 /*--------------------------------------------------------------*/
+/*
 void Wget::setUser( const string username,
 			  const string passwd )
 {
     user = username;
     password = passwd;
 }
-
+*/
 /*--------------------------------------------------------------*/
 /* Set password and user of a proxy				*/
 /*--------------------------------------------------------------*/
@@ -165,7 +186,7 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
 	    ExternalProgram::Stderr_To_Stdout);
 
    if ( process == NULL )
-       return WGET_ERROR_CONNECT;
+       return WGET_ERROR_UNEXPECTED;
    
    string value;
    string output = process->receiveLine();
@@ -205,13 +226,41 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
       {
 	  ok = WGET_ERROR_FILE;
       }
+      if  ( value.find ( AUTHREQUIRED ) != string::npos )
+      {
+	  ok = WGET_ERROR_LOGIN;
+      }
+      if  ( value.find ( PROXYAUTH ) != string::npos )
+      {
+	  ok = WGET_ERROR_PROXY_AUTH;
+      }
+      if  ( value.find ( SERVERERROR ) != string::npos )
+      {
+	  ok = WGET_ERROR_SERVER;
+      }
+      if  ( value.find ( CONNREFUSED ) != string::npos )
+      {
+	  ok = WGET_ERROR_CONNECT;
+      }
+
+	// ftp
+      if  ( value.find ( "The server refuses login" ) != string::npos )
+      {
+	  ok = WGET_ERROR_LOGIN;
+      }
+      else if  ( value.find ( "No such directory" ) != string::npos
+		|| value.find ( "No such file" ) != string::npos )
+      {
+	  ok = WGET_ERROR_FILE;
+      }
+
       output = process->receiveLine();            
    }
 
    if ( systemStatus() != 0
 	&& ok == WGET_OK )
    {
-       ok = WGET_ERROR_CONNECT;
+       ok = WGET_ERROR_UNEXPECTED;
    }
    
    return ( ok );
@@ -238,12 +287,16 @@ void Wget::run_wget(int n_opts, const char *const *options,
   // Create the argument array
   const char *argv[argc];
   int i = 0;
-  string passwd = "--http-passwd=" + password;
-  string usr = "--http-user=" + user;
+//  string passwd = "--http-passwd=" + password;
+//  string usr = "--http-user=" + user;
   string proxyUsr = "--proxy-user=" + proxyUser;
   string proxyPasswd = "--proxy-passwd=" + proxyPassword;
   
   argv[i++] = "wget";
+
+  argv[i++] = "--tries=3";
+  argv[i++] = "--waitretry=2";
+  /*
   if ( user != "" )
   {
       argv[i++] = usr.c_str();
@@ -260,7 +313,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
   {
       argv[i++] = "";      
   }
-
+*/
   if ( proxyUser != "" )
   {
       argv[i++] = proxyUsr.c_str();
@@ -286,7 +339,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
 
   string output = "";
   int k;
-  for ( k = 0; k < argc-1; k++ )
+  for ( k = 0; k < i; k++ )
   {
      output = output + " " + argv[k];
   }
@@ -299,7 +352,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
      process = NULL;
   }
   // Launch the program
-  process = new ExternalProgram(argv, disp);
+  process = new ExternalProgram(argv, disp, false, -1, true);
 }
 
 /*--------------------------------------------------------------*/
