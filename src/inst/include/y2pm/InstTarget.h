@@ -78,6 +78,11 @@ class InstTarget: virtual public Rep {
 	 * */
 	typedef enum RpmDb::checkPackageResult checkPackageResult;
 
+        /**
+	 * default error class
+	 **/
+        typedef InstTargetError Error;
+
     protected:
 
 #if 0

@@ -34,10 +34,13 @@
 
 #include <y2util/Pathname.h>
 #include <y2util/ExternalProgram.h>
+
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PkgAttributeValue.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
+
+#include <y2pm/InstTargetError.h>
 
 /**
  * @short Interface to the rpm program
@@ -49,26 +52,10 @@ class RpmDb: virtual public Rep
 
     public:
 
-	enum DbStatus
-	{
-	    RPMDB_OK = 0,
-	    RPMDB_NOT_FOUND,
-	    RPMDB_OLD_VERSION, // informational
-	    RPMDB_NEW_CREATED, // informational
-	    RPMDB_ERROR_CREATED,
-	    RPMDB_ERROR_CHECK_OLD_VERSION,
-	    RPMDB_ERROR_MKDIR,
-	    RPMDB_ERROR_INITDB,
-	    RPMDB_ERROR_COPY_TMPDB,
-	    RPMDB_ERROR_REBUILDDB,
-	    RPMDB_ERROR_NOT_INITIALIZED,
-	    RPMDB_ERROR_SUBPROCESS_FAILED,
-
-	    RPMDB_NUM_ERRORS
-	};
-
-// TODO
-//	const char* const _errorstrings[];
+        /**
+	 * default error class
+	 **/
+        typedef InstTargetError Error;
 
 	typedef std::set<std::string> FileList;
 
@@ -129,12 +116,12 @@ class RpmDb: virtual public Rep
 	 * @param createNew create a new database if none exists. This
 	 * parameter does no harm if a database already exists.
 	 */
-	DbStatus initDatabase( bool createNew = false);
+	PMError initDatabase( bool createNew = false);
 
 	/**
 	 * Rebuild the rpm database
 	 * */
-	DbStatus rebuildDatabase();
+	PMError rebuildDatabase();
 
 	/**
 	 * Creating a temporary rpm-database.
@@ -143,7 +130,7 @@ class RpmDb: virtual public Rep
 	 *
 	 * not yet implemented
 	 */
-	DbStatus createTmpDatabase(bool copyOldRpm = false );
+	PMError createTmpDatabase(bool copyOldRpm = false );
 
 	/**
 	 * Installing the rpm-database to /var/lib/rpm, if the
@@ -151,13 +138,13 @@ class RpmDb: virtual public Rep
 	 *
 	 * not yet implemented
 	 */
-	DbStatus installTmpDatabase( void );
+	PMError installTmpDatabase( void );
 
 	/** acquire data about installed packages
 	 *
 	 * @param pkglist where to store newly created PMPackages
 	 * */
-	DbStatus getPackages (std::list<PMPackagePtr>& pkglist);
+	PMError getPackages (std::list<PMPackagePtr>& pkglist);
 
 	/**
 	 * Check rpm with rpm --checksig
@@ -302,6 +289,12 @@ class RpmDb: virtual public Rep
 	/** packages.rpm */
 	Pathname _rpmdbname;
 
+	/** whether a new database was created */
+	bool _creatednew;
+
+	/** whether an old database is present */
+	bool _old_present;
+
 	/* parse string of the form name/number/version into rellist. number is
 	 * the rpm number representing the operator <, <=, = etc. number&64
 	 * means prerequires
@@ -334,12 +327,16 @@ class RpmDb: virtual public Rep
 	 * checkPackageResult
 	 * */
 	static std::string checkPackageResult2string(unsigned code);
+
+    private:
+	// forbidden
+	RpmDb();
 };
 
 
 /**
  * Write enum value as string
  **/
-extern std::ostream & operator<<( std::ostream & str, const RpmDb::DbStatus & obj );
+//extern std::ostream & operator<<( std::ostream & str, const RpmDb::DbStatus & obj );
 
 #endif

@@ -10,7 +10,7 @@
 |                                                     (C) 2002 SuSE AG |
 \----------------------------------------------------------------------/
 
-   File:       CommonPkdParser.cc
+   File:       RpmDb.cc
    Purpose:    Interface to installed RPM system
    Author:     Stefan Schubert <schubi@suse.de>
    Maintainer: Ludwig Nussel <lnussel@suse.de>
@@ -61,7 +61,9 @@ RpmDb::RpmDb(string name_of_root) :
     _rootdir(name_of_root),
     _varlibrpm("/var/lib/rpm"),
     _varlib("/var/lib"),
-    _rpmdbname("packages.rpm")
+    _rpmdbname("packages.rpm"),
+    _creatednew(false),
+    _old_present(false)
 {
    process = 0;
    exit_code = -1;
@@ -104,11 +106,11 @@ RpmDb::~RpmDb()
 /* If Flag "createNew" is set, than it will be created, if not	*/
 /* exist --> returns DbNewCreated if successfully created 	*/
 /*--------------------------------------------------------------*/
-RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
+PMError RpmDb::initDatabase( bool createNew )
 {
     Pathname     dbFilename;
     struct stat  dummyStat;
-    DbStatus	 dbStatus = RPMDB_OK;
+    PMError	 dbStatus = Error::E_ok;
 
     DBG << "calling initDatabase" << endl;
 
@@ -140,27 +142,28 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 	    if ( systemStatus() != 0 )
 	    {
 		// error
-		dbStatus = RPMDB_ERROR_CREATED;
+		dbStatus = Error::E_RpmDB_create_failed;
 		ERR << "Error creating rpm database, rpm error was: " << rpmerrormsg << endl;
 	    }
 	    else
 	    {
-		dbStatus = RPMDB_NEW_CREATED;
+		_creatednew = true;
+		dbStatus = Error::E_ok;
 	    }
 	}
 	else
-	    dbStatus = RPMDB_ERROR_MKDIR;
+	    dbStatus = Error::E_RpmDB_mkdir_failed;
     }
     else
     {
 	ERR << "dbFilename not found " << dbFilename.asString() << endl;
 
 	// DB not found
-	dbStatus = RPMDB_NOT_FOUND;
+	dbStatus = Error::E_RpmDB_not_found;
     }
 
     // check for installed rpm package
-    if ( dbStatus == RPMDB_OK )
+    if ( !_creatednew && dbStatus == Error::E_ok )
     {
        // Check, if it is an old rpm-Db
        RpmArgVec opts(2);
@@ -180,7 +183,7 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
        if ( rpmmsg.empty() )
        {
 	  // error
-	  dbStatus = RPMDB_ERROR_CHECK_OLD_VERSION;
+	  dbStatus = Error::E_RpmDB_check_old_version_failed;
 	  ERR << "rpm silently failed while checking old rpm version" << endl;
        }
        else
@@ -188,7 +191,7 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 	  if ( rpmmsg.find ( "old format database is present" ) !=
 	       string::npos )
 	  {
-	     dbStatus = RPMDB_OLD_VERSION;
+	     _old_present = true;
 	     WAR <<  "RPM-Db on the system is old"  << endl;
 	  }
 	  else
@@ -196,7 +199,7 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 	     if ( status != 0 )
 	     {
 		// error
-		dbStatus = RPMDB_ERROR_CHECK_OLD_VERSION;
+		dbStatus = Error::E_RpmDB_check_old_version_failed;
 		ERR << "checking for old rpm version failed, rpm output was: "
 		    << rpmmsg << endl;
 	     }
@@ -210,10 +213,10 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 }
 
 // rebuild rpm database
-RpmDb::DbStatus RpmDb::rebuildDatabase()
+PMError RpmDb::rebuildDatabase()
 {
     RpmArgVec opts(1);
-    DbStatus status = RPMDB_OK;
+    PMError status = Error::E_ok;
 
     DBG << endl;
 
@@ -229,7 +232,7 @@ RpmDb::DbStatus RpmDb::rebuildDatabase()
     if ( systemStatus() != 0 )
     {
 	// error
-	status = RPMDB_ERROR_REBUILDDB;
+	status = Error::E_RpmDB_rebuilddb_failed;
 	ERR << "Error rebuilding rpm database, rpm error was: " << rpmerrormsg << endl;
     }
 
@@ -241,9 +244,9 @@ RpmDb::DbStatus RpmDb::rebuildDatabase()
 /* If copyOldRpm == true than the rpm-database from		*/
 /* /var/lib/rpm will be copied.					*/
 /*--------------------------------------------------------------*/
-RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
+PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
 {
-    return RPMDB_OK;
+    return Error::E_ok;
 #warning "createTmpDatabase yet implemented"
 #if 0
    // searching a non-existing rpm-path
@@ -352,9 +355,9 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
 /* Installing the rpm-database to /var/lib/rpm, if the		*/
 /* current has been created by "createTmpDatabase".		*/
 /*--------------------------------------------------------------*/
-RpmDb::DbStatus RpmDb::installTmpDatabase( void )
+PMError RpmDb::installTmpDatabase( void )
 {
-    return RPMDB_OK;
+    return Error::E_ok;
 #warning "installTmpDatabase not yet implemented"
 #if 0
    DbStatus err = RPMDB_OK;
@@ -573,7 +576,7 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 }
 
 // fill pkglist with installed packages
-RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
+PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 {
     string rpmquery;
 
@@ -612,7 +615,7 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     run_rpm(opts, ExternalProgram::Discard_Stderr);
 
     if(!process)
-	return RPMDB_ERROR_SUBPROCESS_FAILED;
+	return Error::E_RpmDB_subprocess_failed;
 
     string value;
     string output;
@@ -696,10 +699,10 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 
     if ( systemStatus() != 0 )
     {
-	return RPMDB_ERROR_SUBPROCESS_FAILED;
+	return Error::E_RpmDB_subprocess_failed;
     }
 
-    return RPMDB_OK;
+    return Error::E_ok;
 }
 
 
@@ -1382,6 +1385,7 @@ string RpmDb::checkPackageResult2string(unsigned code)
     return msg;
 }
 
+#if 0
 /******************************************************************
 **
 **
@@ -1411,4 +1415,4 @@ std::ostream & operator<<( std::ostream & str, const RpmDb::DbStatus & obj )
   return str << "RPMDB_ERROR_UNKNOWN";
 #undef ENUM_OUT
 }
-
+#endif

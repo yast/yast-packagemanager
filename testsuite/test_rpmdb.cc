@@ -78,9 +78,8 @@ int main(int argc, char* argv[])
     }
 
     RpmDbPtr rpmdb = new RpmDb(root);
-    RpmDb::DbStatus stat = RpmDb::RPMDB_OK;
-    stat = rpmdb->initDatabase(true);
-    if( ! (stat == RpmDb::RPMDB_OK || stat == RpmDb::RPMDB_NEW_CREATED))
+    PMError stat = rpmdb->initDatabase(true);
+    if( stat != RpmDb::Error::E_ok )
     {
 	cout << "error initializing rpmdb: " << stat << endl;
 	return 1;
@@ -195,9 +194,8 @@ int main(int argc, char* argv[])
     }
     else if(command == "rebuilddb")
     {
-	RpmDb::DbStatus stat = RpmDb::RPMDB_OK;
-	stat = rpmdb->rebuildDatabase();
-	if(stat != RpmDb::RPMDB_OK)
+	PMError stat = rpmdb->rebuildDatabase();
+	if(stat != RpmDb::Error::E_ok)
 	{
 	    return 1;
 	}
