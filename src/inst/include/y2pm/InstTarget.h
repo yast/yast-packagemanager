@@ -285,6 +285,28 @@ class InstTarget: virtual public Rep, public InstData {
   public:
     ///////////////////////////////////////////////////////////////////
     //
+    // RPM database public keys
+    //
+    ///////////////////////////////////////////////////////////////////
+
+    /**
+     * Import ascii armored public key in file pubkey_r into RPM database
+     **/
+    PMError importPubkey( const Pathname & pubkey_r ) { return _rpmdb->importPubkey( pubkey_r ); }
+
+    /**
+     * Import ascii armored public key keyname_r exported by keyring_r into RPM database
+     **/
+    PMError importPubkey( const Pathname & keyring_r, const std::string & keyname_r ) { return _rpmdb->importPubkey( keyring_r, keyname_r ); }
+
+    /**
+     * Return the editions of all installed public keys in RPM database.
+     **/
+    std::set<PkgEdition> pubkeys() const { return _rpmdb->pubkeys(); }
+
+  public:
+    ///////////////////////////////////////////////////////////////////
+    //
     // Direct RPM database retrieval forwarded to RpmDb
     //
     ///////////////////////////////////////////////////////////////////

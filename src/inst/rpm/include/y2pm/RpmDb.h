@@ -198,6 +198,11 @@ class RpmDb: virtual public Rep
      **/
     PMError importPubkey( const Pathname & keyring_r, const std::string & keyname_r );
 
+    /**
+     * Return the editions of all installed public keys.
+     **/
+    std::set<PkgEdition> pubkeys() const;
+
     ///////////////////////////////////////////////////////////////////
     //
     // Cached RPM database retrieval via librpm.
