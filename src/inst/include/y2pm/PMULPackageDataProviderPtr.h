@@ -10,25 +10,25 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMPackageDataProviderULPtr.h
+   File:       PMULPackageDataProviderPtr.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef PMPackageDataProviderULPtr_h
-#define PMPackageDataProviderULPtr_h
+#ifndef PMULPackageDataProviderPtr_h
+#define PMULPackageDataProviderPtr_h
 
-#include <y2pm/PMPackageDataProviderUL.h>
+#include <y2pm/PMULPackageDataProvider.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPackageDataProviderULPtr
-//	CLASS NAME : constPMPackageDataProviderULPtr
+//	CLASS NAME : PMULPackageDataProviderPtr
+//	CLASS NAME : constPMULPackageDataProviderPtr
 /**
  *
  **/
-DEFINE_DERIVED_POINTER(PMPackageDataProviderUL, PMPackageDataProvider, PMPackageDataProvider );
+DEFINE_DERIVED_POINTER(PMULPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
 
-#endif // PMPackageDataProviderULPtr_h
+#endif // PMULPackageDataProviderPtr_h
 

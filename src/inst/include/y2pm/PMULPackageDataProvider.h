@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMPackageDataProviderUL.h
+  File:       PMULPackageDataProvider.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -18,8 +18,8 @@
   Purpose: Realized PackageDataProvider for UnitedLinux packages format
 
 /-*/
-#ifndef PMPackageDataProviderUL_h
-#define PMPackageDataProviderUL_h
+#ifndef PMULPackageDataProvider_h
+#define PMULPackageDataProvider_h
 
 #include <iosfwd>
 #include <string>
@@ -32,13 +32,13 @@
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPackageDataProviderUL
+//	CLASS NAME : PMULPackageDataProvider
 /**
  * @short Realizes PackageDataProvider for UnitedLinux packages format
  * @see DataProvider
  **/
-class PMPackageDataProviderUL : public PMPackageDataProvider  {
-  REP_BODY(PMPackageDataProviderUL);
+class PMULPackageDataProvider : public PMPackageDataProvider  {
+  REP_BODY(PMULPackageDataProvider);
   private:
     // save file position and size data for each attribute
     typedef struct {std::streampos pos; int size;} attrpos_t;
@@ -49,9 +49,9 @@ class PMPackageDataProviderUL : public PMPackageDataProvider  {
 
   protected:
 
-    PMPackageDataProviderUL();
+    PMULPackageDataProvider();
 
-    ~PMPackageDataProviderUL();
+    ~PMULPackageDataProvider();
 
   public:
 
@@ -79,4 +79,4 @@ class PMPackageDataProviderUL : public PMPackageDataProvider  {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMPackageDataProviderUL_h
+#endif // PMULPackageDataProvider_h
