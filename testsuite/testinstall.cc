@@ -1210,7 +1210,7 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 	    continue;
 	switch(s)
 	{
-	    case PMSelectable::S_Keep:
+	    case PMSelectable::S_Protected:
 	    case PMSelectable::S_Taboo:
 	    case PMSelectable::S_Del:
 	    case PMSelectable::S_Update:
@@ -1458,7 +1458,7 @@ void testset(vector<string>& argv)
     cout << mallinfo() << endl;
     PkgSet* testset = new PkgSet;
     cout << mallinfo() << endl;
-    
+
     if(!testset)
     {
 	ERR << "out of memory" << endl;
@@ -1493,7 +1493,7 @@ void testset(vector<string>& argv)
 	}
 
 	testset->add(solp);
-	if(i<5) 
+	if(i<5)
 	{
 	    cout << mallinfo() << endl;
 	}
@@ -1504,7 +1504,7 @@ void testset(vector<string>& argv)
 
     delete testset;
     testset = NULL;
-    
+
     cout << mallinfo() << endl;
 }
 
