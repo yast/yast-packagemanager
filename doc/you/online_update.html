@@ -507,6 +507,38 @@ e.g. the path on ftp server is:
 the directory structure on the CD ROM is:
 <tt>{ARCHITECTURE}/update/{SuSE-Version}/patches/*</tt>.</p>
 
+<h2>Support for Patch CD Updates from multiple CDs</h2>
+
+<p>Since 9.1 YOU supports patch CD updates from more than one CD. This requires
+some additional files to identify the CDs and to specify the distribution of
+patches on the CDs.</p>
+
+<p>CDs are identified in the same way as installation CDs (see <a
+href="media-descr.html">UL Media description</a>) by a file "/media.x/media"
+where the x is the actual number of the CD. The media file contains at least two
+lines of text which are used as identification of the media set.</p>
+
+<p>Distribution of patches on the CDs is specified by a file
+"mediamap" in the "patches" directory. It contains a list of patches together
+with the number of the CD which contains the patch. The patch is
+listed by its file name the media number follows on the same line separated by a
+space. Patches which aren't listed in this file are assumed to be on the same
+CD as the last patch listed with a number. The order of patches is
+taken from the "directory.3" file.<p>
+
+<p>Example of mediamap file:</p>
+
+<pre>
+patch-1 1
+patch-5 2
+</pre>
+
+<p>All parts of a patch (patch file, packages, scripts and additional files)
+have to be on the same CD. All patch CDs have to contain the patch files for all
+patches on all CDs. The "directory.3" file is only needed on the first patch CD.
+Leaving it out from the other CDs prevents that the patch CD update is started
+from another than the first CD which doesn't work.</p>
+
 <hr>
 <address><a href="mailto:cschum@suse.de">Cornelius Schumacher</a></address>
 </body>
