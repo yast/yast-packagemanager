@@ -461,7 +461,7 @@ PMError RpmDb::internal_initDatabase( const Pathname & root_r, const Pathname & 
     return err;
   }
 
-  DBG << "Acess state: " << info_r << ": " << stringPath( root_r, dbPath_r );
+  DBG << "Access state: " << info_r << ": " << stringPath( root_r, dbPath_r );
   librpmDb::dumpState( DBG ) << endl;
 
   ///////////////////////////////////////////////////////////////////
@@ -715,99 +715,68 @@ PMError RpmDb::closeDatabase()
 //
 PMError RpmDb::rebuildDatabase()
 {
-#warning NO REBUILDDB
-  INT << "NOOP: rebuildDatabase -> TBD" << endl;
-  return Error::E_RpmDB_rebuild_failed;
-}
+  FAILIFNOTINITIALIZED;
 
-#if 0
-// rebuild rpm database
-// beware: you must report 100% before return
-PMError
-RpmDb::rebuildDatabase()
-{
-    RpmArgVec opts;
-    PMError status = Error::E_ok;
-    Pathname tmpdbpath;
-    Pathname rpmdb = _root + _varlibrpm + _rpmdbname;
-    Pathname rebuilddbdir = "/var/lib/rpmrebuilddb.";
+  MIL << "RpmDb::rebuildDatabase" << *this << endl;
+  Timecount _t( "RpmDb::rebuildDatabase" );
 
-    FAILIFNOTINITIALIZED
+  PathInfo dbMaster( root() + dbPath() + "Packages" );
+  PathInfo dbMasterBackup( dbMaster.path().extend( ".y2backup" ) );
 
-    PathInfo rpmpi( rpmdb );
+  // report
+  RebuildDbReport::Send report( rebuildDbReport );
+  report->start();
+  ProgressData pd;
+  // current size should be upper limit for new db
+  report->progress( pd.init( dbMaster.size() ) );
 
-    off_t oldsize = rpmpi.size();
+  // run rpm
+  RpmArgVec opts;
+  opts.push_back("--rebuilddb");
+  opts.push_back("-vv");
 
-    DBG << endl;
+  // don't call modifyDatabase because it would remove the old
+  // rpm3 database, if the current database is a temporary one.
+  // But do invalidate packages list.
+  _packages._valid = false;
+  run_rpm (opts, ExternalProgram::Stderr_To_Stdout);
 
-    opts.push_back("--rebuilddb");
+  // progress report: watch this file growing
+  PathInfo newMaster( root()
+		      + dbPath().extend( stringutil::form( "rebuilddb.%d",
+							   process?process->getpid():0) )
+		      + "Packages" );
 
-    run_rpm (opts);
-    if(process)
-	tmpdbpath = _root + Pathname::extend(rebuilddbdir,stringutil::form("%d",process->getpid())) + _rpmdbname;
+  string       line;
+  string       errmsg;
 
-    string rpmerrormsg, str;
-
-    while(process)
-    {
-	FILE* stream = process->outputFile();
-	int fd = ::fileno(stream);
-
-	if(fd == -1) break;
-
-	fd_set rfds;
-	struct timeval tv;
-	int retval;
-
-	FD_ZERO(&rfds);
-	FD_SET(fd, &rfds);
-	tv.tv_sec = 0;
-	tv.tv_usec = 600000;
-
-	retval = ::select(fd+1, &rfds, NULL, NULL, &tv);
-
-	if(retval > 0 )
-	{
-	    if(!systemReadLine(str)) break;
-
-	    rpmerrormsg+=str;
-
-	    checkrebuilddbstatus(tmpdbpath, oldsize);
-	}
-	else if(retval == 0) // no data within timeout
-	{
-	    checkrebuilddbstatus(tmpdbpath, oldsize);
-	}
-	else // select error
-	    break;
-    }
-    if ( systemStatus() != 0 )
-    {
-	// error
-	status = Error::E_RpmDB_rebuilddb_failed;
-	ERR << "Error rebuilding rpm database, rpm error was: " << rpmerrormsg << endl;
+  while ( systemReadLine( line ) ) {
+    if ( newMaster() ) { // file is removed at the end of rebuild.
+      report->progress( pd.set( newMaster.size() ) );
     }
 
-    _rebuilddbProgressCB( 100 );
-
-    return status;
-}
-
-void RpmDb::checkrebuilddbstatus(Pathname tmpdbpath, off_t oldsize)
-{
-    if(tmpdbpath.empty()) return;
-
-    PathInfo pi(tmpdbpath);
-
-    off_t size = pi.size();
-
-    if(size && oldsize)
-    {
-	int p = static_cast<int>(static_cast<double>(size)/oldsize*100);
-	_rebuilddbProgressCB( p );
+    if ( line.compare( 0, 2, "D:" ) ) {
+      errmsg += line + '\n';
+      report->notify( line );
+      WAR << line << endl;
     }
+  }
+
+  int rpm_status = systemStatus();
+
+  // evaluate result
+  PMError err;
+
+  if ( rpm_status != 0 ) {
+    ERR << "rpm failed, message was:" << endl << errmsg; // has trailing NL
+    err =  Error::E_RpmDB_subprocess_failed;
+  } else {
+    report->progress( pd.toMax() ); // 100%
+  }
+
+  report->stop( err );
+  return err;
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -942,38 +911,6 @@ set<PkgEdition> RpmDb::pubkeys() const
   return ret;
 }
 
-
-// split in into pieces seperated by sep, return vector out
-// produce up to max tokens. if max is zero the number of tokens is unlimited
-//
-unsigned
-RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
-{
-    unsigned count = 0;
-    string::size_type pos1=0, pos2=0;
-    while(pos1 != string::npos && (max>0?count<max-1:true))
-    {
-	count++;
-	pos2 = in.find(sep,pos1);
-	if(pos2 != string::npos)
-	{
-	    out.push_back(in.substr(pos1,pos2-pos1));
-	    pos1=pos2+1;
-	}
-	else
-	{
-	    out.push_back(in.substr(pos1));
-	    pos1=pos2;
-	}
-    }
-    if(max && count >= max-1 && pos1 != string::npos)
-    {
-	count++;
-	out.push_back(in.substr(pos1));
-    }
-    return count;
-}
-
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -999,9 +936,13 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
     return _packages._list;
   }
 
+  // report
   Timecount _t( "RpmDb::getPackages" );
+  ScanDbReport::Send report( scanDbReport );
+  report->start();
 
-#warning may implement callback for rpmdb reread
+#warning how to detect corrupt db while reading.
+
   _packages.clear();
 
   ///////////////////////////////////////////////////////////////////
@@ -1009,13 +950,23 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   // multiple entries for the same PkgName. If so we consider the last
   // one installed to be the one we're interesed in.
   ///////////////////////////////////////////////////////////////////
-  librpmDb::db_const_iterator iter;
-  if ( iter.dbError() ) {
-    ERR << "No database access: " << iter.dbError() << endl;
-    return _packages._list;
+  ProgressData pd;
+  librpmDb::db_const_iterator iter; // findAll
+  {
+    // quick check
+    unsigned expect = 0;
+    for ( ; *iter; ++iter ) {
+      ++expect;
+    }
+    if ( iter.dbError() ) {
+      ERR << "No database access: " << iter.dbError() << endl;
+      report->stop( iter.dbError() );
+      return _packages._list;
+    }
+    report->progress( pd.init( expect ) );
   }
 
-  for ( ; *iter; ++iter ) {
+  for ( iter.findAll(); *iter; ++iter, report->progress( pd.incr() ) ) {
 
     PkgName name = iter->tag_name();
     if ( name == PkgName( "gpg-pubkey" ) ) {
@@ -1068,6 +1019,7 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   ///////////////////////////////////////////////////////////////////
   _packages.buildList();
   DBG << "Found installed packages: " << _packages._list.size() << endl;
+  report->stop( PMError::E_ok );
   return _packages._list;
 }
 

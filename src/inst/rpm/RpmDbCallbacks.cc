@@ -58,7 +58,21 @@ namespace RpmDbCallbacks {
   }
   void RebuildDbCallback::progress( const ProgressData & prg ) {
   }
+  void RebuildDbCallback::notify( const string & msg ) {
+  }
   void RebuildDbCallback::stop( PMError error ) {
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Reporting progress reading the rpm database
+  ///////////////////////////////////////////////////////////////////
+  ScanDbReport scanDbReport;
+
+  void ScanDbCallback::start() {
+  }
+  void ScanDbCallback::progress( const ProgressData & prg ) {
+  }
+  void ScanDbCallback::stop( PMError error ) {
   }
 
   ///////////////////////////////////////////////////////////////////
