@@ -4,7 +4,7 @@
 
 SUBDIRS = include inst pkg sel you media libPkgDep query
 
-AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
+AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -DLOCALEDIR=\"${localedir}\" -Wall
 
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\

@@ -58,6 +58,25 @@ static LangCode getLangEnvironment()
 	return LangCode (langstr.substr (0, sizepos));
     return LangCode (langstr);
 }
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : initGettext
+**	FUNCTION TYPE : static void
+**
+**	DESCRIPTION :
+*/
+static void initGettext()
+{
+  static bool done = false;
+  if ( !done ) {
+    bindtextdomain( "rpm-groups", LOCALEDIR );
+    bind_textdomain_codeset( "rpm-groups", "utf8" );
+    done = true;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 // global settings
 ///////////////////////////////////////////////////////////////////
@@ -236,6 +255,7 @@ InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
 {
     if ( !_instTarget )
     {
+        initGettext();
 	MIL << "Launch InstTarget..." << endl;
 	_instTarget = new InstTarget ();
 	MIL << "Created InstTarget" << endl;
@@ -274,6 +294,7 @@ InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
 bool Y2PM::noAutoInstSrcManager()
 {
   if ( !_instSrcManager ) {
+    initGettext();
     MIL << "Launch InstSrcManager (no auto enable)..." << endl;
     _instSrcManager = new InstSrcManager ( /*autoEnable*/false );
     MIL << "Created InstSrcManager (no auto enable) @" << _instSrcManager << endl;
@@ -293,6 +314,7 @@ bool Y2PM::noAutoInstSrcManager()
 InstSrcManager & Y2PM::instSrcManager()
 {
   if ( !_instSrcManager ) {
+    initGettext();
     MIL << "Launch InstSrcManager..." << endl;
     _instSrcManager = new InstSrcManager ();
     MIL << "Created InstSrcManager @" << _instSrcManager << endl;
@@ -312,6 +334,7 @@ PMPackageManager & Y2PM::packageManager()
 {
   if ( !_packageManager )
   {
+    initGettext();
     MIL << "Launch PackageManager..." << endl;
     _packageManager = new PMPackageManager;
     MIL << "Created PackageManager @" << _packageManager << endl;
@@ -331,6 +354,7 @@ PMPackageManager & Y2PM::packageManager()
 PMSelectionManager & Y2PM::selectionManager()
 {
   if ( !_selectionManager ) {
+    initGettext();
     MIL << "Launch SelectionManager..." << endl;
     _selectionManager = new PMSelectionManager;
     MIL << "Created SelectionManager @" << _selectionManager << endl;
@@ -349,6 +373,7 @@ PMSelectionManager & Y2PM::selectionManager()
 PMYouPatchManager & Y2PM::youPatchManager()
 {
   if ( !_youPatchManager ) {
+    initGettext();
     MIL << "Launch YouPatchManager..." << endl;
 
     _youPatchManager = new PMYouPatchManager;

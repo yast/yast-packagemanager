@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 14 19:04:37 CET 2003 - ma@suse.de
+
+- Bind textdomain "rpm-groups" to get translations (#19603)
+- 2.7.12
+
+-------------------------------------------------------------------
 Fri Feb 14 17:37:31 CET 2003 - ma@suse.de
 
 - Per default protect installed non SuSE packages.
