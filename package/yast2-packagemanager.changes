@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Dec  2 11:57:23 CET 2004 - ma@suse.de
+
+- As some proxies forbid to pass username and password through the
+  URL, strip them from the URL and pass them as options to libcurl.
+  (#48506)
+- Use proxy settings passed as URL option, but strip non RFC
+  conform URL options before calling curl. (#47246)
+- 2.11.3
+
+-------------------------------------------------------------------
 Thu Dec  2 11:46:31 CET 2004 - ma@suse.de
 
 - Always cache the package signing keys found on a new InstSrc. It
