@@ -90,6 +90,17 @@ class PMYouPatchPaths : virtual public Rep {
     PMError initProduct();
 
     /**
+      Set path prefix. This is the path read from the file "media.1/patches". It
+      is prepended to the product dependent path to the patches.
+    */
+    void setPathPrefix( const Pathname & );
+    
+    /**
+      Get patch prefix.
+    */
+    Pathname pathPrefix();
+
+    /**
       Set path on server to directory containing the "patches", "rpms" and
       "scripts" directories. This path depends on the product.
     */
@@ -109,6 +120,11 @@ class PMYouPatchPaths : virtual public Rep {
       path.
     */
     Url patchUrl();
+
+    /**
+      Return path to patch meta information file (aka media.1/patches).
+    */
+    Pathname mediaPatchesFile();
 
     /**
       Return path to RPM for base architecture.
@@ -226,6 +242,8 @@ class PMYouPatchPaths : virtual public Rep {
     void init( const std::string &path );
 
   private:
+    Pathname _pathPrefix;
+
     Pathname _patchPath;
     Pathname _rpmPath;
     Pathname _scriptPath;

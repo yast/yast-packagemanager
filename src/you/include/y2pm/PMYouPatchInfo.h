@@ -131,6 +131,8 @@ class PMYouPatchInfo : virtual public Rep {
 
     PMError createPackage( const PMYouPatchPtr &patch );
 
+    PMError processMediaDir( const Url & );
+
   private:
     YOUPatchTagSet _patchTagSet;
     YOUPackageTagSet _packageTagSet;

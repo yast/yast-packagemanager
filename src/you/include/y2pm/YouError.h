@@ -60,7 +60,8 @@ class YouError {
       E_postscript_failed,
       E_rpm_failed,
       E_install_failed,
-      E_empty_location
+      E_empty_location,
+      E_read_mediapatches_failed
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {

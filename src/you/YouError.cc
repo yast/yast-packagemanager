@@ -67,6 +67,7 @@ std::string YouError::errtext( const unsigned e )
   case E_rpm_failed: return N_("rpm failed.");
   case E_install_failed: return N_("Installation failed.");
   case E_empty_location: return N_("Package location is empty.");
+  case E_read_mediapatches_failed: return N_("Error getting media.1/patches file.");
   };
 
   return stringutil::numstring( e );

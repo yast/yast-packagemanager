@@ -354,7 +354,9 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       return PMError( YouError::E_error, errMsg );
     }
 
-    PMError error = _media.open( baseUrl, _paths->attachPoint() );
+    MediaAccess media;
+
+    PMError error = media.open( baseUrl, _paths->attachPoint() );
     if ( error != PMError::E_ok ) {
       string errMsg = "Can't open " + baseUrl.asString();
       ERR << "MediaAccess::open() failed: " << errMsg << endl;
@@ -362,37 +364,37 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       return error;
     }
 
-    error = _media.attach( );
+    error = media.attach( );
     if ( error != PMError::E_ok ) {
       ERR << "MediaAccess::attach() failed." << endl;
-      string errMsg = "Attach point: " + _media.localRoot().asString();
+      string errMsg = "Attach point: " + media.localRoot().asString();
       error.setDetails( errMsg );
       return error;
     }
 
-    D__ << "Attach point: " << _media.localRoot() << endl;
+    D__ << "Attach point: " << media.localRoot() << endl;
 
     list<string> patchFiles;
 
     Pathname directoryFile = patchPath + _paths->directoryFileName();
 
-    error = _media.provideFile( directoryFile );
+    error = media.provideFile( directoryFile );
     if ( error ) {
       WAR << "no directory file found." << endl;
       if ( error == MediaError::E_login_failed ||
            error == MediaError::E_proxyauth_failed ) {
-          _media.release();
+          media.release();
           return error;
       }
 
-      PMError dirError = _media.dirInfo( patchFiles, patchPath );
+      PMError dirError = media.dirInfo( patchFiles, patchPath );
       if ( dirError ) {
         if ( dirError == MediaError::E_not_supported_by_media ) {
-	  ERR << "dirInfo not supported on " << _media << ": " << error << endl;
+	  ERR << "dirInfo not supported on " << media << ": " << error << endl;
         } else {
           ERR << dirError << endl;
         }
-        _media.release();
+        media.release();
         
         string errMsg = "Unable to get '" + directoryFile.asString() +
                         "' or to read the directory.";
@@ -401,7 +403,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
         return error;
       }
     } else {
-      Pathname dirFile = _media.localRoot() + patchPath +
+      Pathname dirFile = media.localRoot() + patchPath +
                          _paths->directoryFileName();
 
       string buffer;
@@ -427,9 +429,9 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
              (*it).substr( 0, 9 ) == "directory" ) continue;
 
         Pathname filePath = patchPath + *it;
-        Pathname localPath = _media.localPath( filePath );
+        Pathname localPath = media.localPath( filePath );
         
-        error = _media.provideFile( filePath, !reload );
+        error = media.provideFile( filePath, !reload );
         if ( error != PMError::E_ok ) {
             ERR << "ERR: " << error << ": " << filePath << endl;
         } else {
@@ -438,17 +440,17 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                 if ( !gpg.check_file( localPath ) ) {
                     ERR << "Signature check for '" << localPath << "' failed."
                         << endl;
-                    _media.release();
+                    media.release();
                     return PMError( YouError::E_bad_sig_file, "Patch: " + *it );
                 }
                 DBG << "Signature ok." << endl;
             }
 
             D__ << "read patch: file: " << *it << endl;
-            error = readFile( _media.localPath( patchPath ), *it, patches );
+            error = readFile( media.localPath( patchPath ), *it, patches );
             if ( error != PMError::E_ok ) {
                 ERR << "Error reading patch " << *it << endl;
-                _media.release();
+                media.release();
                 error.setDetails( "Patch: " + *it );
                 return error;
             }
@@ -457,7 +459,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
     }
     Y2PM::youPatchManager().instYou().progress( 100 );
 
-    error = _media.release();
+    error = media.release();
     if ( error ) {
         ERR << "Error releasing media." << endl;
         return error;
@@ -485,9 +487,61 @@ PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
     _paths->config()->writeEntry( "LastServer", url.saveAsString() );
     _paths->config()->save();
 
-    PMError error = readDir( paths->patchUrl(), paths->patchPath(), patches,
-                             reload, checkSig );
+    PMError error = processMediaDir( url );
+    if ( error ) return error;
+
+    error = readDir( url, _paths->patchPath(), patches, reload, checkSig );
+
     return error;
+}
+
+PMError PMYouPatchInfo::processMediaDir( const Url &url )
+{
+    MediaAccess media;
+
+    PMError error = media.open( url, _paths->attachPoint() );
+    if ( error ) {
+      string errMsg = "Unable to open URL '" + url.asString() + "'";
+      error.setDetails( errMsg );
+      ERR << errMsg << endl;
+      return error;
+    }
+
+    error = media.attach();
+    if ( error ) {
+      ERR << "MediaAccess::attach() failed." << endl;
+      string errMsg = "Attach point: " + media.localRoot().asString();
+      error.setDetails( errMsg );
+      return error;
+    }
+
+    Pathname path = _paths->mediaPatchesFile();
+    error = media.provideFile( path );
+    if ( error ) {
+        string errMsg = "Unable to get file '" + url.asString() + "/" +
+                        path.asString() + "'";
+        error.setDetails( errMsg );
+        WAR << error << endl;
+    } else {
+        string line;
+        ifstream in( media.localPath( path ).asString().c_str() );
+        if ( in.fail() ) {
+          ERR << "Error reading " << path << endl;
+          media.release();
+          return PMError( YouError::E_read_mediapatches_failed, url.asString() );
+        }
+        getline( in, line );
+        D__ << "Read from media1/patches: " << line << endl;
+        int pos = line.find( ' ' );
+        string prefix = line.substr( 0, pos );
+        D__ << "Prefix: " << prefix << endl;
+
+        _paths->setPathPrefix( prefix );
+    }
+    
+    media.release();
+
+    return PMError();
 }
 
 string PMYouPatchInfo::tagMultiValue( YOUPatchTagSet::Tags tagIndex,
