@@ -559,6 +559,11 @@ ULPackagesParser::fromPath (const Pathname& path, const Pathname& localepath, co
     TagCacheRetrievalPtr localecache (new TagCacheRetrieval (localepath));
     TagCacheRetrievalPtr ducache (new TagCacheRetrieval (dupath));
 
+    pkgcache->startRetrieval();
+    localecache->startRetrieval();
+    ducache->startRetrieval();
+
+    PMError ret = PMError::E_ok;
     for (;;)
     {
 	TaggedFile::assignstatus status = _tagset.assignSet (_parser, pkgstream);
@@ -578,11 +583,16 @@ ULPackagesParser::fromPath (const Pathname& path, const Pathname& localepath, co
 	    ERR << "Status " << (int)status << ", Last tag read: " << _parser.currentTag();
 	    if (!_parser.currentLocale().empty()) ERR << "." << _parser.currentLocale();
 	    ERR << endl;
-	    return InstSrcError::E_data_bad_packages;
+	    ret = InstSrcError::E_data_bad_packages;
+	    break;
 	}
     }
 
-    return PMError::E_ok;
+    pkgcache->stopRetrieval();
+    localecache->stopRetrieval();
+    ducache->stopRetrieval();
+
+    return ret;
 }
 
 

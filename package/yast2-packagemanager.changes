@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 17 15:38:47 CET 2004 - lnussel@suse.de
+
+- use startRetrieval()/stopRetrieval() to avoid excessive open/close operations
+  during package file parsing
+
+-------------------------------------------------------------------
 Wed Mar 17 11:55:45 CET 2004 - cschum@suse.de
 
 - Implemented basic support for Patch CD updates from multiple CDs.

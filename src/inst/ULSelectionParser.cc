@@ -132,6 +132,7 @@ ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
 	ERR << "No selcache!" << endl;
 	return selection;
     }
+    selcache->startRetrieval();
     TaggedFile::Tag *tagptr;	// for SET_CACHE
 #define SET_VALUE(tagname,value) \
     do { dataprovider->_attr_##tagname = value; } while (0)
@@ -205,6 +206,8 @@ ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
 #undef GET_TAG
 #undef SET_CACHE
 #undef SET_LCACHE
+
+    selcache->stopRetrieval();
 
     return selection;
 }
