@@ -46,6 +46,8 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	 * @see PMPackageDataProvider
 	 **/
 	virtual std::string location( const PMPackage & pkg_r ) const;
+
+        FSize size( const PMPackage & pkg_r ) const;
 };
 
 #endif // PMYouPackageDataProvider_h

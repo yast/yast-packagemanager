@@ -147,6 +147,9 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
                                    dataProvider ) );
   patch->addPackage( pkg );
 
+  value = tagValue( YOUPackageTagSet::SIZE );
+  setSize( pkg, FSize( atoll( value.c_str() ) ) );
+
   value = tagValue( YOUPackageTagSet::OBSOLETES );
   list<PkgRelation> relations = PkgRelation::parseRelations( value );
   pkg->setObsoletes( relations );
@@ -522,6 +525,18 @@ string PMYouPatchInfo::translateLangCode( const LangCode &lang )
     D__ << "Translated " << lang << " to " << result << endl;
 
     return result;
+}
+
+FSize PMYouPatchInfo::size( const PMPackagePtr &pkg ) const
+{
+  map<PMPackagePtr,FSize>::const_iterator it = _sizes.find( pkg );
+  if ( it == _sizes.end() ) return FSize( 0 );
+  else return it->second;
+}
+
+void PMYouPatchInfo::setSize( const PMPackagePtr &pkg, const FSize &size )
+{
+  _sizes[ pkg ] = size;
 }
 
 const string PMYouPatchInfo::location( const PMPackagePtr &pkg ) const
