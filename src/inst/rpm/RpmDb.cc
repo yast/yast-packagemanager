@@ -780,8 +780,7 @@ RpmDb::getPackages (void)
     string value;
     string output;
 
-    typedef map<PkgNameEd, PMSolvablePtr> nameed2ptr_t; // used for filereqs
-    nameed2ptr_t mypackages;
+    PkgSet mypackages;
 
     output = process->receiveLine();
 
@@ -842,8 +841,7 @@ RpmDb::getPackages (void)
 				PkgArch(pkgattribs[RPM_ARCH]),
 			        dataprovider);
 
-	    
-	    mypackages[PkgNameEd(name,edi)] = p;
+	    mypackages.add(p);
 
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type provides;
@@ -886,23 +884,21 @@ RpmDb::getPackages (void)
     {
 	// query rpm, returns name-version-edition
 	string str = belongsTo(string(*fileit));
+	WAR << "belongs to returned " << str << " for " << *fileit << endl;
 	
 	if(str.empty())
 	    continue;
 	
 	PkgNameEd nameed = PkgNameEd::fromString(str);
+	PkgName name = nameed.name;
+	PkgEdition edi = nameed.edition;
 
-	nameed2ptr_t::iterator pkgit = mypackages.find(nameed);
-
-	if(pkgit == mypackages.end())
-	    continue;
-
-	PMSolvablePtr ptr = pkgit->second;
+	PMSolvablePtr ptr = mypackages.lookup(name);
 
 	if(ptr == NULL)
 	    { INT << "ptr can not be NULL" << endl; continue; }
 
-	D__ << nameed.name << " provides " << *fileit << endl;
+	D__ << ptr->name() << " provides " << *fileit << endl;
 	ptr->addProvides(*fileit);
     }
 
