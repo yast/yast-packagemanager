@@ -67,7 +67,7 @@ MediaCD::MediaCD( const Url &      url_r,
     Url::OptionMapType::iterator it;
 
     // chop up devices and put them in a list
-    if((it=options.find("devices")) != options.end())
+    if ((it=options.find("devices")) != options.end())
     {
 	string devices=it->second;
 	string::size_type pos;
@@ -76,12 +76,12 @@ MediaCD::MediaCD( const Url &      url_r,
 	{
 	    pos = devices.find(',');
 	    string device = devices.substr(0,pos);
-	    if(!device.empty())
+	    if (!device.empty())
 	    {
 		_devices.push_back(device);
 		D__ << "use device " << device << endl;
 	    }
-	    if(pos!=string::npos)
+	    if (pos!=string::npos)
 		devices=devices.substr(pos+1);
 	    else
 		devices.erase();
@@ -115,7 +115,7 @@ PMError MediaCD::attachTo(bool next)
 
     DBG << "next " << next << " last " << _lastdev << " lastdevice " << _mounteddevice << endl;
 
-    if(next && _lastdev == -1) return Error::E_not_supported_by_media;
+    if (next && _lastdev == -1) return Error::E_not_supported_by_media;
 
     string options = _url.getOption("mountoptions");
     if (options.empty())
@@ -138,7 +138,7 @@ PMError MediaCD::attachTo(bool next)
 	; ++it, count++ )
     {
 	DBG << "count " << count << endl;
-	if(next && count<=_lastdev )
+	if (next && count<=_lastdev )
 	{
 		DBG << "skip" << endl;
 		continue;
@@ -157,7 +157,7 @@ PMError MediaCD::attachTo(bool next)
 	    ; ++fsit)
 	{
 	    ret = mount.mount (*it, mountpoint, *fsit, options);
-	    if( ret == Error::E_ok )
+	    if ( ret == Error::E_ok )
 	    {
 		mountsucceeded = true;
 		MIL << " succeded" << endl;
@@ -171,7 +171,7 @@ PMError MediaCD::attachTo(bool next)
 	}
     }
 
-    if(!mountsucceeded)
+    if (!mountsucceeded)
     {
 	_mounteddevice.erase();
 	_lastdev = -1;
@@ -192,8 +192,25 @@ PMError MediaCD::attachTo(bool next)
 //
 PMError MediaCD::releaseFrom( bool eject )
 {
-    if(_mounteddevice.empty())
+    if (_mounteddevice.empty())		// no device mounted
     {
+	if (eject)			// eject wanted -> eject all devices
+	{
+	    for (DeviceList::iterator it = _devices.begin()
+		; it != _devices.end()
+		; ++it )
+	    {
+		int fd;
+		MIL << "eject " << (*it) << endl;
+		fd = ::open ((*it).c_str(), O_RDONLY|O_NONBLOCK);
+		if (fd != -1)
+		{
+		    ::ioctl (fd, CDROMEJECT);
+		    ::close (fd);
+		}
+	    }
+	    return Error::E_ok;
+	}
 	return Error::E_not_attached;
     }
 
@@ -208,15 +225,15 @@ PMError MediaCD::releaseFrom( bool eject )
     }
 
     // eject device
-    if(eject)
+    if (eject)
     {
 	int fd;
 	MIL << "eject " << _mounteddevice << endl;
-	fd = ::open(_mounteddevice.c_str(), O_RDONLY|O_NONBLOCK);
-	if(fd != -1)
+	fd = ::open (_mounteddevice.c_str(), O_RDONLY|O_NONBLOCK);
+	if (fd != -1)
 	{
-	    ::ioctl(fd,CDROMEJECT);
-	    ::close(fd);
+	    ::ioctl (fd,CDROMEJECT);
+	    ::close (fd);
 	}
     }
 
