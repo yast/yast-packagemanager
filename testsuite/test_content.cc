@@ -36,15 +36,19 @@ inline string dec( unsigned i ) {
 **
 **	DESCRIPTION :
 */
-int main()
+int main(int argc, char **argv)
 {
   Y2SLog::setLogfileName("-");
   MIL << "START" << endl;
-
+  if (argc != 3)
+  {
+    std::cerr << "Usage: " << argv[0] << " <media_url> <product_dir>" << endl;
+    exit (1);
+  }
   InstSrcPtr nsrc;
 
-  Url      url     ( "dir:///" );  // media
-  Pathname proddir ( "/8.1" );	      // product dir
+  Url      url     ( argv[1] );  // media
+  Pathname proddir ( argv[2] );	      // product dir
   Pathname cache   ( "/tmp/tcache" ); // cachedir (must not exist)
 
   PMError err = InstSrc::vconstruct( nsrc, cache, url, proddir, InstSrc::T_UnitedLinux );
