@@ -220,7 +220,7 @@ void phcAddMagic( FD_t fd )
 unsigned phcAddHeader( FD_t fd, Header h, const Pathname & citem_r, int isSource )
 {
   string entry = stringutil::form( "%c%s", (isSource?'s':'b'), citem_r.asString().c_str() );
-  entry = stringutil::form( "@%6d@%s", entry.size(), entry.c_str() );
+  entry = stringutil::form( "@%6zu@%s", entry.size(), entry.c_str() );
 
   ::Fwrite( entry.c_str(), sizeof(char), entry.size(), fd );
   ::headerWrite( fd, h, HEADER_MAGIC_YES );
