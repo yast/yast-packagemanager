@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 14 13:56:58 CET 2003 - ma@suse.de
+
+- Filter cdroms and other unwanted mountpoints (e.g. /mnt,/media)
+  for disk usage calculation. (#23544)
+
+-------------------------------------------------------------------
 Fri Mar 14 01:22:16 CET 2003 - ma@suse.de
 
 - Enabled using plain RPM sources as InstSource. With media other
