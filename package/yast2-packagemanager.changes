@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 24 14:37:37 CET 2003 - cschum@suse.de
+
+- Create /var/lib/YaST2/you/ for update check, if it doesn't exist
+  (#23804).
+
+-------------------------------------------------------------------
 Fri Feb 21 21:14:37 CET 2003 - ma@suse.de
 
 - Able to import/export package selection. Fixes #23923, as soon as
