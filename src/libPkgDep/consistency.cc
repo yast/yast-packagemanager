@@ -9,7 +9,7 @@ bool PkgDep::consistent( ErrorResultList& failures )
 	failures = ErrorResultList();
 
 	// for all installed packages...
-	ci_for( PkgSet::, _pkg, installed. ) {
+	ci_for( PkgSet::,, _pkg, installed., ) {
 		PMSolvablePtr pkg = _pkg->value;
 		ErrorResult err(*this,pkg);
 		if (!pkg_consistent( pkg, &err ))
@@ -26,14 +26,14 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 	bool error = false;
 
 	// for all requirements of the current package
-	ci_for( PMSolvable::PkgRelList_, req, pkg->requires_ ) {
+	ci_for( PMSolvable::,PkgRelList_, req, pkg->,requires_ ) {
 		bool match_found = false;
 
 /*
 		if (!strncmp(req->name(),"rpmlib(",strlen("rpmlib(")))
 			continue;
 */
-/*		
+/*
 		// ignore rpmlib requirements
 		if(req->name()->find("rpmlib(") != string::npos)
 		    continue;
@@ -53,7 +53,7 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 		    {
 			case UNRES_IGNORE:
 			case UNRES_TAKETHIS:
-			    continue; 
+			    continue;
 			case UNRES_FAIL:
 			    break;
 		    }
@@ -66,7 +66,7 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 	} // /requirements
 
 	// for all conflicts of the current package
-	ci_for( PMSolvable::PkgRelList_, confl, pkg->conflicts_ ) {
+	ci_for( PMSolvable::,PkgRelList_, confl, pkg->,conflicts_ ) {
 		RevRel_for( installed.provided()[confl->name()], prov ) {
 			if (confl->matches( prov->relation() ) && prov->pkg() != pkg) {
 				if (err)

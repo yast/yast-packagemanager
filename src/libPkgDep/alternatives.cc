@@ -8,7 +8,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 {
 	PMSolvablePtr cand = alt_info.pkg;
 	PkgName reqname = alt_info.req.name();
-	
+
 	// Has this alternative already been handled? This can happen because
 	// add_package stores the alternatives that need later processing on a
 	// list, so double entries can happen. We need those double entries so
@@ -32,8 +32,8 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 			 << alt_info.req << "\"\nProviders are:\n";
 	else
 		D__ << " (all providers are self-conflicting candidates\n";
-	
-	ci_for( RevRelList_, alt, alt_info.providers. ) {
+
+	ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 		D__ << "  " << alt->pkg()->name() << "-" << alt->pkg()->edition()
 			 << " provides: " << alt->relation() << endl;
 	}
@@ -41,7 +41,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	// check status of alternatives: an alt could 1) conflict with something,
 	// 2) require more packages, or 3) nothing of the above
 	hash<PkgName,alternative_kind> altkind;
-	ci_for( RevRelList_, alt, alt_info.providers. ) {
+	ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 		PkgName altname = alt->pkg()->name();
 		D__ << "Checking consistency of alternative " << altname << ": ";
 		ErrorResult err( *this, alt->pkg() );
@@ -86,7 +86,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 			// filter out defaults that do not exist or not provide what we
 			// need
 			D__ << "Filtering defaults:\n";
-			ci_for( Alternatives::AltDefaultList::, def, defaults. ) {
+			ci_for( Alternatives::AltDefaultList::,, def, defaults., ) {
 				D__ << "  " << *def << ": ";
 				if (!available.includes(*def)) {
 					D__ << "not available -- skipping\n";
@@ -94,7 +94,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 				}
 				PMSolvablePtr pkg = available[*def];
 				bool found_match = false;
-				ci_for( PMSolvable::Provides_, prov, pkg->all_provides_ ) {
+				ci_for( PMSolvable::,Provides_, prov, pkg->,all_provides_ ) {
 					if (alt_info.req.matches( *prov )) {
 						found_match = true;
 						break;
@@ -125,10 +125,10 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		else {
 			// filter out defaults that aren't on the providers list
 			D__ << "Filtering defaults:\n";
-			ci_for( Alternatives::AltDefaultList::, def, defaults. ) {
+			ci_for( Alternatives::AltDefaultList::,, def, defaults., ) {
 				D__ << "  " << *def << ": ";
 				bool found = false;
-				ci_for( RevRelList_, alt, alt_info.providers. ) {
+				ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 					if (alt->pkg()->name() == *def) {
 						found = true;
 						break;
@@ -148,7 +148,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		// requirements ignored here -- if it's a default, accept that we
 		// maybe need more packages for it). If no conflict-free default
 		// found, use the first one.
-		ci_for( Alternatives::AltDefaultList::, def, useable_defaults. ) {
+		ci_for( Alternatives::AltDefaultList::,, def, useable_defaults., ) {
 			if (altkind[*def] != CONFLICT) {
 				use_pkg = available[*def];
 				break;
@@ -163,7 +163,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	  auto_select:
 		// Pick a random provider from the first non-empty class of
 		// (no-requirements, requirements, conflicts)
-		ci_for( RevRelList_, alt, alt_info.providers. ) {
+		ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == SIMPLE) {
 				use_pkg = alt->pkg();
@@ -173,7 +173,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		if (use_pkg)
 			break;
 
-		ci_for( RevRelList_, alt, alt_info.providers. ) {
+		ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == REQUIRES_MORE) {
 				use_pkg = alt->pkg();
@@ -190,7 +190,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		D__ << "Selected " << use_pkg->name() << " as alternative.\n";
 		candidates->add( use_pkg, true );
 		to_check.push_back( use_pkg );
-		
+
 		if (cand) {
 			add_referer( use_pkg, cand, alt_info.req );
 			D__ << "Candidate " << cand->name() << " ok\n";
@@ -204,17 +204,17 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		// the alternatives list is sorted by kind (SIMPLE, REQUIRES, CONFL)
 		D__ << "No alternative selected -- generating ErrorResult\n";
 		ErrorResult err(*this,reqname);
-		ci_for( RevRelList_, alt, alt_info.providers. ) {
+		ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == SIMPLE)
 				err.add_alternative( alt->pkg(), altkind[altname] );
 		}
-		ci_for( RevRelList_, alt, alt_info.providers. ) {
+		ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == REQUIRES_MORE)
 				err.add_alternative( alt->pkg(), altkind[altname] );
 		}
-		ci_for( RevRelList_, alt, alt_info.providers. ) {
+		ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == CONFLICT)
 				err.add_alternative( alt->pkg(), altkind[altname] );
@@ -230,9 +230,9 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 			bad->push_back( res );
 		}
 		else {
-			ci_for( RevRelList_, alt, alt_info.providers. ) {
+			ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 				ErrorResult e(*this, alt->pkg());
-				ci_for( RevRelList_, alt2, alt_info.providers. ) {
+				ci_for( ,RevRelList_, alt2, alt_info.providers., ) {
 					if (alt2->pkg() != alt->pkg())
 						e.add_conflict( alt2->pkg(), alt_info.req,
 										*this, NULL, NULL );
@@ -241,7 +241,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 			}
 		}
 	}
-	
+
 	alts_handled.insert( reqname );
 }
 

@@ -46,7 +46,7 @@ static void deselect_referers(
 	    return;
 	visited.insert(pkgname);
 
-	ci_for( list<PkgDep::RelInfo>::, p, referers. ) {
+	ci_for( list<PkgDep::RelInfo>::,, p, referers., ) {
 //		D__ << " deselecting " << p->name << "\n";
 		if (p->name == pkgname)
 			continue;
@@ -56,12 +56,12 @@ static void deselect_referers(
 			candidates.remove( cand );
 			noinstcandidates.insert( cand );
 		}
-		ci_for( PkgDep::ResultList::, q, good. )
+		ci_for( PkgDep::ResultList::,, q, good., )
 			if (q->name == p->name)
 			{
 				deselect_referers( visited, p->name, candidates, noinstcandidates, q->referers, good, bad );
 			}
-		ci_for( PkgDep::ErrorResultList::, q, bad. )
+		ci_for( PkgDep::ErrorResultList::,, q, bad., )
 			if (q->name == p->name)
 			{
 				deselect_referers( visited, p->name, candidates, noinstcandidates, q->referers, good, bad );
@@ -85,13 +85,13 @@ bool PkgDep::upgrade(
 	set<PMSolvablePtr> brokeninstalled;
 
 #warning function unusable
-	
+
 	D__ << "Starting upgrade\n";
 
 //	installed.dumpOn(cout);
 
 	{
-	    ci_for( PkgSet::, it, installed. ) {
+	    ci_for( PkgSet::,, it, installed., ) {
 		PkgName iname = it->key;
 		PMSolvablePtr instd = it->value;
 		// ignore if installed is already a candidate
@@ -107,13 +107,13 @@ bool PkgDep::upgrade(
 		}
 	    }
 	    D__ << "moving inconsistent from installed to candidates: ";
-	    i_for( set<PMSolvablePtr>::, bit, brokeninstalled. )
+	    i_for( set<PMSolvablePtr>::,, bit, brokeninstalled., )
 	    {
 		if(installed.includes((*bit)->name()))
 		{
 		    SolvableList toremove;
 		    remove_package(&installed, *bit, toremove);
-		    ci_for(SolvableList::, it, toremove.)
+		    ci_for(SolvableList::,, it, toremove.,)
 		    {
 			brokeninstalled.insert(*it);
 			candidates.add( *it );
@@ -124,10 +124,10 @@ bool PkgDep::upgrade(
 	    D__ << endl;
 	}
 
-	
+
 	if (!none && (all || candidates.empty())) {
 		// for all installed packages...
-		ci_for( PkgSet::, p, installed. ) {
+		ci_for( PkgSet::,, p, installed., ) {
 			PkgName iname = p->key;
 			PMSolvablePtr ipkg = p->value;
 			bool added = false;
@@ -176,7 +176,7 @@ bool PkgDep::upgrade(
 			goto out;
 
 		// fix fixable problems
-		ci_for( ErrorResultList::, p, out_bad. ) {
+		ci_for( ErrorResultList::,, p, out_bad., ) {
 			if (p->install_to_avoid_break)
 				avoid_break_installs.insert( p->name );
 			if (p->upgrade_to_remove_conflict)
@@ -216,7 +216,7 @@ bool PkgDep::upgrade(
 					all_ok = false;
 					goto out;
 				}
-				ci_for( SolvableList::, q, p->remove_to_solve_conflict. ) {
+				ci_for( SolvableList::,, q, p->remove_to_solve_conflict., ) {
 					if (candidates.includes((*q)->name())) {
 						D__ << "removing candidate " << (*q)->name()
 							 << " due to conflict with " << p->name << endl;
@@ -231,7 +231,7 @@ bool PkgDep::upgrade(
 			}
 		}
 
-		ci_for( ResultList::, p, out_good. ) {
+		ci_for( ResultList::,, p, out_good., ) {
 			if (p->install_to_avoid_break)
 				avoid_break_installs.insert( p->name );
 			if (p->upgrade_to_remove_conflict)
@@ -240,25 +240,25 @@ bool PkgDep::upgrade(
 
 		// ok, everything fixed, remove to_remove pkgs from installed
 		//DBG << "Ok, removing " << to_remove << endl;
-		ci_for( SolvableList::, p, to_remove. )
+		ci_for( SolvableList::,, p, to_remove., )
 			installed.remove( (*p)->name() );
 	}
   out:
 	if (endless_protect <= 0)
 		all_ok = false;
-	
+
 	if (!all_ok)
 		// revert installed list
 		installed = installed_backup;
 	else {
-		i_for( PkgDep::ResultList::, p, out_good. ) {
+		i_for( PkgDep::ResultList::,, p, out_good., ) {
 			p->from_input_list = real_from_input_list.exists( p->name );
 			if (avoid_break_installs.exists( p->name ))
 				p->install_to_avoid_break = true;
 			if (upgrades_solving_conflicts.exists( p->name ))
 				p->upgrade_to_remove_conflict = true;
 		}
-		i_for( PkgDep::ErrorResultList::, p, out_bad. ) {
+		i_for( PkgDep::ErrorResultList::,, p, out_bad., ) {
 			p->from_input_list = real_from_input_list.exists( p->name );
 			if (avoid_break_installs.exists( p->name ))
 				p->install_to_avoid_break = true;
@@ -270,7 +270,7 @@ bool PkgDep::upgrade(
 
 	// go through not installed candidates, mark those as to_remove that
 	// originally were broken installed packages
-	ci_for( set<PMSolvablePtr>::, bit, noinstcandidates. )
+	ci_for( set<PMSolvablePtr>::,, bit, noinstcandidates., )
 	{
 	    if(brokeninstalled.find(*bit) != brokeninstalled.end())
 	    {
@@ -294,14 +294,14 @@ bool PkgDep::solvesystemnoauto(
 	unsigned numinconsistent = 0;
 	set<PMSolvablePtr> noinstcandidates;
 	PkgSet brokeninstalled;
-	
+
 	D__ << "Starting upgrade\n";
 
 //	installed.dumpOn(cout);
 
 //	go through all installed, put all inconsistent into candidates and remove them from installed
 	{
-	    ci_for( PkgSet::, it, installed. )
+	    ci_for( PkgSet::,, it, installed., )
 	    {
 		bool obsolete = false;
 		PkgName iname = it->key;
@@ -331,16 +331,16 @@ bool PkgDep::solvesystemnoauto(
     //		notes[instd->name()].inconsistent = true;
 		}
 	    }
-	    
+
 	    D__ << "moving inconsistent from installed to candidates: ";
-	    i_for( PkgSet::, bit, brokeninstalled. )
+	    i_for( PkgSet::,, bit, brokeninstalled., )
 	    {
 		if(installed.includes(bit->value->name()))
 		{
 		    /*
 		    SolvableList toremove;
 		    remove_package(&installed, *bit, toremove);
-		    ci_for(SolvableList::, it, toremove.)
+		    ci_for(SolvableList::,, it, toremove.,)
 		    {
 			brokeninstalled.insert(*it);
 			candidates.add( *it );
@@ -368,7 +368,7 @@ bool PkgDep::solvesystemnoauto(
 			goto out;
 
 		// fix fixable problems
-		ci_for( ErrorResultList::, p, out_bad. ) {
+		ci_for( ErrorResultList::,, p, out_bad., ) {
 			if (p->install_to_avoid_break)
 				avoid_break_installs.insert( p->name );
 			if (p->upgrade_to_remove_conflict)
@@ -404,7 +404,7 @@ bool PkgDep::solvesystemnoauto(
 					all_ok = false;
 					goto out;
 				}
-				ci_for( SolvableList::, q, p->remove_to_solve_conflict. ) {
+				ci_for( SolvableList::,, q, p->remove_to_solve_conflict., ) {
 					if (candidates.includes((*q)->name())) {
 						D__ << "removing candidate " << (*q)->name()
 							 << " due to conflict with " << p->name << endl;
@@ -419,7 +419,7 @@ bool PkgDep::solvesystemnoauto(
 			}
 		}
 
-		ci_for( ResultList::, p, out_good. ) {
+		ci_for( ResultList::,, p, out_good., ) {
 			if (p->install_to_avoid_break)
 				avoid_break_installs.insert( p->name );
 			if (p->upgrade_to_remove_conflict)
@@ -428,25 +428,25 @@ bool PkgDep::solvesystemnoauto(
 
 		// ok, everything fixed, remove to_remove pkgs from installed
 		//DBG << "Ok, removing " << to_remove << endl;
-		ci_for( SolvableList::, p, to_remove. )
+		ci_for( SolvableList::,, p, to_remove., )
 			installed.remove( (*p)->name() );
 	}
   out:
 	if (endless_protect <= 0)
 		all_ok = false;
-	
+
 	if (!all_ok)
 		// revert installed list
 		installed = installed_backup;
 	else {
-		i_for( PkgDep::ResultList::, p, out_good. ) {
+		i_for( PkgDep::ResultList::,, p, out_good., ) {
 			p->from_input_list = real_from_input_list.exists( p->name );
 			if (avoid_break_installs.exists( p->name ))
 				p->install_to_avoid_break = true;
 			if (upgrades_solving_conflicts.exists( p->name ))
 				p->upgrade_to_remove_conflict = true;
 		}
-		i_for( PkgDep::ErrorResultList::, p, out_bad. ) {
+		i_for( PkgDep::ErrorResultList::,, p, out_bad., ) {
 			p->from_input_list = real_from_input_list.exists( p->name );
 			if (avoid_break_installs.exists( p->name ))
 				p->install_to_avoid_break = true;
@@ -458,7 +458,7 @@ bool PkgDep::solvesystemnoauto(
 
 	// go through not installed candidates, mark those as to_remove that
 	// originally were broken installed packages
-	ci_for( set<PMSolvablePtr>::, bit, noinstcandidates. )
+	ci_for( set<PMSolvablePtr>::,, bit, noinstcandidates., )
 	{
 	    if(brokeninstalled.find(*bit) != brokeninstalled.end())
 	    {
@@ -475,7 +475,7 @@ bool PkgDep::solvesystemnoauto(
 #if 0
 	// go through not installed candidates, mark those as to_remove that
 	// originally were broken installed packages
-	ci_for( set<PMSolvablePtr>::, bit, noinstcandidates. )
+	ci_for( set<PMSolvablePtr>::,, bit, noinstcandidates., )
 	{
 	    if(brokeninstalled.find(*bit) != brokeninstalled.end())
 	    {
