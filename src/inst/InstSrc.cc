@@ -644,7 +644,7 @@ std::string number2string (int nr)
 
 
 /******************************************************************
-**
+** private
 **
 **	FUNCTION NAME : provideMedia
 **	FUNCTION TYPE : PMError
