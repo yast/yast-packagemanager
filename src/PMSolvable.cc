@@ -115,6 +115,8 @@ const PMSolvable::PkgRelList_type& PMSolvable::addPreRequires(PMSolvable::PkgRel
 	    }
 	}
     }
+
+    return _requires;
 }
 
 PMSolvable::PkgRelList_type PMSolvable::prerequires() const
@@ -129,6 +131,8 @@ PMSolvable::PkgRelList_type PMSolvable::prerequires() const
 	    newlist.push_back(*rit);
 	}
     }
+
+    return newlist;
 }
 
 ///////////////////////////////////////////////////////////////////
