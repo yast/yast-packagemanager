@@ -53,6 +53,72 @@ using namespace std;
 IMPL_BASE_POINTER(ParseDataUL);
 
 
+
+///////////////////////////////////////////////////////////////////
+// private
+//
+//	METHOD NAME : PMULSelectionDataProvider::lookupSelections
+//	METHOD TYPE : std::list<PMPackagePtr>
+//
+//	DESCRIPTION : lookup selection names to PMSelectionPtr
+//
+std::list<PMSelectionPtr>
+ParseDataUL::lookupSelections (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections)
+{
+    std::list<PMSelectionPtr> selection_ptrs;
+
+    for (std::list<std::string>::const_iterator selIt = selections.begin();
+	 selIt != selections.end(); ++selIt)
+    {
+	std::list<PMSelectionPtr> matches = InstData::findSelections (all_selections, *selIt);
+	if (matches.size() == 0)
+	{
+	    WAR << "No match for selection \"" << *selIt << "\"" << endl;
+	}
+	else if (matches.size() > 1)
+	{
+	    WAR << "Multiple matches for selection \"" << *selIt << "\"" << endl;
+	}
+	else
+	{
+	    selection_ptrs.push_back (matches.front());
+	}
+    }
+
+    return selection_ptrs;
+}
+
+///////////////////////////////////////////////////////////////////
+// private
+//
+//	METHOD NAME : PMULSelectionDataProvider::lookupPackages
+//	METHOD TYPE : std::list<PMPackagePtr>
+//
+//	DESCRIPTION : lookup package names to PMPackagePtr
+//
+std::list<PMPackagePtr>
+ParseDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages)
+{
+    std::list<PMPackagePtr> package_ptrs;
+
+    for (std::list<std::string>::const_iterator pkgIt = packages.begin();
+	 pkgIt != packages.end(); ++pkgIt)
+    {
+	std::list<PMPackagePtr> matches = InstData::findPackages (all_packages, *pkgIt);
+	if (matches.size() == 0)
+	{
+	    WAR << "No match for package \"" << *pkgIt << "\"" << endl;
+	}
+	else
+	{
+	    package_ptrs.push_back (matches.front());
+	}
+    }
+
+    return package_ptrs;
+}
+
+
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
@@ -676,6 +742,37 @@ ParseDataUL::fillSelections (InstSrcDataPtr & ndata)
 {
     PMError err;
 
+    for (std::list<PMSelectionPtr>::iterator selIt = ndata->_selections.begin();
+	 selIt != ndata->_selections.end(); ++selIt)
+    {
+	MIL << "fillSelection (" << (*selIt)->name() << ")" << endl;
+	PMULSelectionDataProviderPtr selDp = (*selIt)->dataProvider();
+#if 1
+	selDp->_ptrs_attr_SUGGESTS = lookupSelections (ndata->getSelections(), (*selIt)->suggests());
+	selDp->_ptrs_attr_RECOMMENDS = lookupSelections (ndata->getSelections(), (*selIt)->recommends());
+
+	for (map <std::string,TagCacheRetrievalPos>::iterator tagIt = selDp->_attr_INSPACKS.begin();
+	     tagIt != selDp->_attr_INSPACKS.end(); ++tagIt)
+	{
+	    // get language packages
+	    std::list<std::string> packages = (*selIt)->inspacks (tagIt->first);
+	    if (!packages.empty())
+	    {
+		selDp->_ptrs_attr_INSPACKS[tagIt->first] = lookupPackages (ndata->getPackages(), packages);
+	    }
+	}
+	for (map <std::string,TagCacheRetrievalPos>::iterator tagIt = selDp->_attr_DELPACKS.begin();
+	     tagIt != selDp->_attr_DELPACKS.end(); ++tagIt)
+	{
+	    // get language packages
+	    std::list<std::string> packages = (*selIt)->delpacks (tagIt->first);
+	    if (!packages.empty())
+	    {
+		selDp->_ptrs_attr_DELPACKS[tagIt->first] = lookupPackages (ndata->getPackages(), packages);
+	    }
+	}
+#endif
+    }
     return err;
 }
 ///////////////////////////////////////////////////////////////////

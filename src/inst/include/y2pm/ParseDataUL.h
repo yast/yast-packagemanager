@@ -44,6 +44,9 @@ class ParseDataUL : virtual public Rep {
 
     private:
 
+	std::list<PMSelectionPtr> lookupSelections (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections);
+	std::list<PMPackagePtr> lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages);
+
 	/**
 	 * fill tagset from packages to PMPackage
 	 *
