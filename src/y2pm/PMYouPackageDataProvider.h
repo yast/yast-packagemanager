@@ -137,6 +137,16 @@ class PMYouPackageDataProvider : public PMPackageDataProvider {
         FSize patchRpmSize( const PMPackage & ) const;
 
         /**
+          Set ForceInstall flag.
+        */
+        void setForceInstall( const PMPackagePtr &, bool );
+        
+        /**
+          Get value of ForceInstall flag.
+        */
+        bool forceInstall( const PMPackage & ) const;
+
+        /**
           Return disk usage information. This includes the required disk space
           for downloading the RPMs.
         */
@@ -152,6 +162,7 @@ class PMYouPackageDataProvider : public PMPackageDataProvider {
         std::map<PMPackagePtr,YStringTreeItem *> _rpmGroups;
         std::map<PMPackagePtr,FSize> _archiveSizes;
         std::map<PMPackagePtr,FSize> _patchRpmSizes;
+        std::map<PMPackagePtr,bool> _forceInstalls;
 };
 
 #endif // PMYouPackageDataProvider_h

@@ -85,7 +85,7 @@ std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
 std::string            PMPackage::externalUrl()  const { DP_GET( externalUrl ); }
 std::list<PkgEdition>  PMPackage::patchRpmBaseVersions() const { DP_GET( patchRpmBaseVersions ); }
 FSize                  PMPackage::patchRpmSize() const { DP_GET( patchRpmSize ); }
-
+bool                   PMPackage::forceInstall() const { DP_GET( forceInstall ); }
 // package file comes from remote
 bool		       PMPackage::isRemote()	 const { DP_GET( isRemote ); }
 // physical access to the rpm file.

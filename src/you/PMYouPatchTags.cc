@@ -59,4 +59,5 @@ YOUPackageTagSet::YOUPackageTagSet() : TagSet()
   addTag( "Conflicts",       CONFLICTS,            TaggedFile::SINGLE );
   addTag( "PatchRpmBasedOn", PATCHRPMBASEVERSIONS, TaggedFile::SINGLE );
   addTag( "Series",          ARCH,                 TaggedFile::SINGLE );
+  addTag( "ForceInstall",    FORCEINSTALL,         TaggedFile::SINGLE );
 }
