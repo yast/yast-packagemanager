@@ -23,9 +23,8 @@ bool PkgDep::also_provided_by_installed( const PkgRelation& req )
 	return also_provided_by_installed;
 }
 
-unsigned PkgDep::count_providers_for(
-	const PkgSet* set, const PkgRelation& req
-) const {
+unsigned PkgDep::count_providers_for( const PkgSet* set, const PkgRelation& req)
+{
 	unsigned providers = 0;
 	
 	RevRel_for( set->provided()[req.name()], prov ) {

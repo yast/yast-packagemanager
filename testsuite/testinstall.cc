@@ -59,6 +59,8 @@ static bool _initialized = false;
 
 static vector<string> nullvector;
 
+static const char* statestr[] = { "= ", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
+    
 
 //void installold(vector<string>& argv);
 void install(vector<string>& argv);
@@ -74,15 +76,15 @@ void instlog(vector<string>& argv);
 void setroot(vector<string>& argv);
 void source(vector<string>& argv);
 void deselect(vector<string>& argv);
-void upgrade(vector<string>& argv);
-void showstate(vector<string>& argv);
-void setmaxremove(vector<string>& argv);
-void solveinstall(vector<string>& argv);
+void showpackage(vector<string>& argv);
+//void setmaxremove(vector<string>& argv);
 void solve(vector<string>& argv);
 void showtimes(vector<string>& argv);
 void createbackups(vector<string>& argv);
 void rebuilddb(vector<string>& argv);
 void du(vector<string>& argv);
+void showselection(vector<string>& argv);
+void installselection(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -94,7 +96,6 @@ struct Funcs {
 static struct Funcs func[] = {
 //    { "installold",    installold,    "simulated install of a package, direct PkgDep" },
     { "install",	install,	1,	"select packages for installation" },
-    { "solveinstall",	solveinstall,	1,	"solve installation" },
     { "rpminstall",	rpminstall,	1,	"install rpm files" },
     { "consistent",	consistent,	1,	"check consistency" },
     { "init",		init,		1,	"initialize packagemanager" },
@@ -107,14 +108,20 @@ static struct Funcs func[] = {
     { "setroot",	setroot,	0,	"set root directory for operation" },
     { "source",		source,		1,	"scan media for inst sources" },
     { "deselect",	deselect,	1,	"deselect packages marked for installation" },
-    { "upgrade",	upgrade,	1,	"upgrade whole system" },
-    { "showstate",	showstate,	1,	"show state of package or all if none specified" },
-    { "setmaxremove",	setmaxremove,	1,	"set maximum number of packages that will be removed on upgrade" },
+//    { "setmaxremove",	setmaxremove,	1,	"set maximum number of packages that will be removed on upgrade" },
     { "solve",		solve,		1,	"solve" },
     { "showtimes",	showtimes,	0,	"showtimes" },
     { "createbackups",	createbackups,	0,	"createbackups" },
     { "rebuilddb",	rebuilddb,	1,	"rebuild rpm db" },
     { "du",		du,		1,	"display disk space forecast" },
+    
+    { "showselection",	showselection,	1,
+	"show state of selection (all if none specified. Not installed will be suppressed if verbose=0)" },
+    { "showpackage",	showpackage,	1,
+	"show state of package (all if none specified. Not installed will be suppressed if verbose=0)" },
+
+    { "installselection",	installselection,	1,	"mark selection for installation" },
+
     { NULL,		NULL,		0,	NULL }
 };
 
@@ -236,6 +243,7 @@ void rebuilddb(vector<string>& argv)
 	cout << "done" << endl;
 }
 
+/*
 void setmaxremove(vector<string>& argv)
 {
     if(argv.size()<2)
@@ -256,6 +264,7 @@ void setmaxremove(vector<string>& argv)
 
     cout << "maxremove set to " << _maxremove << endl;
 }
+*/
 void debug(vector<string>& argv)
 {
     if(Y2SLog::dbg_enabled_bm)
@@ -387,9 +396,10 @@ void init(vector<string>& argv)
     }
     _initialized = true;
 
-    cout << "initializing packagemanager ... " << endl;
+    cout << "initializing ... " << endl;
 
     Y2PM::packageManager();
+    Y2PM::selectionManager();
     PMError dbstat = Y2PM::instTarget().init(_rootdir, false);
     if( dbstat != InstTargetError::E_ok )
     {
@@ -398,7 +408,8 @@ void init(vector<string>& argv)
     else
     {
 	Y2PM::instTarget().createPackageBackups(_createbackups);
-	Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
+	Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages() );
+	Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections() );
     }
 }
 
@@ -577,14 +588,14 @@ int printbadlist(PkgDep::ErrorResultList& bad)
     return numbad;
 }
 
-void install(vector<string>& argv)
+static void install_internal(PMManager& manager, vector<string>& argv)
 {
     for (unsigned i=1; i < argv.size() ; i++) {
 	string pkg = stringutil::trim(argv[i]);
 
 	if(pkg.empty()) continue;
 	
-	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
+	PMSelectablePtr selp = manager.getItem(pkg);
 	if(!selp || !selp->has_candidate())
 	{
 	    std::cout << "package " << pkg << " is not available.\n";
@@ -604,7 +615,17 @@ void install(vector<string>& argv)
     }
 }
 
-void solveinstall(vector<string>& argv)
+void install(vector<string>& argv)
+{
+    install_internal(Y2PM::packageManager(), argv);
+}
+
+void installselection(vector<string>& argv)
+{
+    install_internal(Y2PM::selectionManager(), argv);
+}
+
+void solve(vector<string>& argv)
 {
     int numinst=0,numbad=0;
     bool success = false;
@@ -857,7 +878,7 @@ void rpminstall(vector<string>& argv)
     else
 	Y2PM::instTarget().installPackages(pkgs);
 }
-
+/*
 void upgrade(vector<string>& argv)
 {
     PkgDep::ResultList good;
@@ -904,12 +925,10 @@ void upgrade(vector<string>& argv)
 	cout << "*** upgrade failed, manual intervention required to solve conflicts ***" << endl;
     }
 }
-
-void showstate(vector<string>& argv)
+*/
+static void showstate_internal(PMManager& manager, vector<string>& argv)
 {
 
-    char* statestr[] = { "= ", " -", " >", " +", "a-", "a>", "a+", " i", " N" };
-    
     PMManager::PMSelectableVec selectables;
     PMManager::PMSelectableVec::const_iterator begin, end;
     if(argv.size()>1)
@@ -919,7 +938,7 @@ void showstate(vector<string>& argv)
 
 	    if(pkg.empty()) continue;
 	    
-	    PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
+	    PMSelectablePtr selp = manager.getItem(pkg);
 	    if(!selp)
 	    {
 		std::cout << "package " << pkg << " is not available.\n";
@@ -934,8 +953,8 @@ void showstate(vector<string>& argv)
     }
     else
     {
-	begin = Y2PM::packageManager().begin();
-	end = Y2PM::packageManager().end();
+	begin = manager.begin();
+	end = manager.end();
     }
 
     for(PMManager::PMSelectableVec::const_iterator cit = begin;
@@ -955,9 +974,37 @@ void showstate(vector<string>& argv)
 	    case PMSelectable::S_AutoInstall:
 	    case PMSelectable::S_KeepInstalled:
 	    case PMSelectable::S_NoInst:
-	    cout << statestr[s] << "   " << (*cit)->name() << endl;
+	    cout << statestr[s] << "   " << (*cit)->name();
+	    if(_verbose > 1)
+	    {
+		if((*cit)->has_installed())
+		{
+		    cout << " (" << (*cit)->installedObj()->edition();
+			if((*cit)->has_candidate())
+			{
+			    if((*cit)->to_install())
+				cout << " -> ";
+			    else
+				cout << " / ";
+
+			    cout << (*cit)->candidateObj()->edition();
+			}
+			cout << ")";
+		}
+	    }
+	    cout << endl;
 	}
     }
+}
+
+void showpackage(vector<string>& argv)
+{
+    showstate_internal(Y2PM::packageManager(),argv);
+}
+
+void showselection(vector<string>& argv)
+{
+    showstate_internal(Y2PM::selectionManager(),argv);
 }
 
 void remove(vector<string>& argv)
@@ -981,7 +1028,7 @@ void remove(vector<string>& argv)
 	}
     }
 }
-
+/*
 void solve(vector<string>& argv)
 {
     PkgDep::ResultList good;
@@ -1006,7 +1053,7 @@ void solve(vector<string>& argv)
 	cout << "*** selection broken, manual intervention required to solve conflicts ***" << endl;
     }
 }
-
+*/
 int main( int argc, char *argv[] )
 {
     char prompt[]="y2pm > ";

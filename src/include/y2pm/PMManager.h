@@ -197,7 +197,7 @@ class PMManager {
      *
      * DO NOT USE ATM
      * */
-    bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
+    //bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
 
 
 //    bool solveEverythingRight(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
@@ -213,7 +213,7 @@ class PMManager {
      * set maximum number of packages that will be automatically selected for
      * removal on upgrade
      * */
-    void setMaxRemoveThreshold(unsigned nr);
+    //void setMaxRemoveThreshold(unsigned nr);
 
     /**
      * compute relative space requirement

@@ -66,6 +66,29 @@ static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
 }
 */
 
+static void buildinstalledonly(PMManager& manager, PkgSet& installed)
+{
+    for ( PMManager::PMSelectableVec::iterator it = manager.begin(); it != manager.end(); ++it )
+    {
+	bool hasi = (*it)->has_installed();
+	bool toi  = (*it)->to_install();
+	if(( hasi && !(*it)->to_delete()) || toi )
+	{
+	    PMSolvablePtr sp;
+	    if(hasi)
+		sp = (*it)->installedObj();
+	    else
+		sp = (*it)->candidateObj();
+
+	    if(sp != NULL)
+	    {
+		installed.add(sp);
+	    }
+	    else
+		ERR << "oops, got NULL despite Selectable said it has installed obj" << endl;
+	}
+    }
+}
 
 void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstall)
 {
@@ -122,7 +145,7 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
 
 // set packages not from input list to auto, those that can't be set to auto
 // are added to bad list
-static void setAutoState(PkgDep::ResultList& good, PkgDep::ErrorResultList&
+static void setAutoState(PkgSet& installed, PkgDep::ResultList& good, PkgDep::ErrorResultList&
 bad, PkgDep::SolvableList& to_remove)
 {
     bool deletedone = false;
@@ -161,6 +184,52 @@ bad, PkgDep::SolvableList& to_remove)
 	    }
     }
 
+//    PkgSet available; //fake
+//    PkgDep engine(installed,available);
+
+    for(PkgDep::ErrorResultList::iterator it = bad.begin();
+	    it != bad.end(); ++it)
+    {
+	/* don't do that yet. would have to check consistency, alternatives and
+	 * install (add_conflict using functions)
+	 *
+	if(!it->conflicts_with.empty())
+	{
+	    PkgDep::SolvableList nix;
+	    it->remove_to_solve_conflict = nix;
+	    for(PkgDep::RelInfoList::iterator rit = it->conflicts_with.begin()
+		; rit != it->conflicts_with.end(); ++rit)
+	    {
+		PMSolvablePtr p = rit->solvable;
+		if(!p)
+		    {INT << "p is NULL" << endl; continue; }
+
+		if(p == it->solvable) continue; // do not remove the package that has the conflict
+		    
+		PkgSet fakei = installed;
+		PkgDep::remove_package(&fakei, p, it->remove_to_solve_conflict);
+	    }
+	}
+	*/
+    	if(it->state_change_not_possible)
+	{
+	    PkgSet fakei = installed;
+	    for(PkgDep::RelInfoList::iterator rit = it->referers.begin()
+		; rit != it->referers.end(); ++rit)
+	    {
+		PMSolvablePtr p = rit->solvable;
+		if(!p)
+		    {INT << "p is NULL" << endl; continue; }
+
+		if(p == it->solvable) continue; // do not remove the package that has the conflict
+
+		if(!fakei.includes(p->name())) continue;
+		//DBG << "remove " <<  p->name() << endl;
+		PkgDep::remove_package(&fakei, p, it->remove_to_solve_conflict);
+	    }
+	}
+}
+
     for(PkgDep::SolvableList::iterator it = to_remove.begin();
 	    it != to_remove.end(); ++it)
     {
@@ -194,7 +263,10 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
     bool success = engine.solvesystemnoauto( toinstall, good, bad);
     PkgDep::SolvableList to_remove;
 
-    setAutoState(good, bad, to_remove);
+    PkgSet nowinstalled; // assumed state after operation
+    buildinstalledonly(*this,nowinstalled);
+
+    setAutoState(nowinstalled, good, bad, to_remove);
 
     return success;
 }
@@ -215,7 +287,7 @@ bool PMManager::solveConsistent(PkgDep::ErrorResultList& bad)
     return success;
 }
 
-
+/*
 bool PMManager::solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList& to_remove)
 {
     PkgSet installed; // already installed
@@ -238,7 +310,7 @@ void PMManager::setMaxRemoveThreshold(unsigned nr)
 {
     PkgDep::set_default_max_remove(nr);
 }
-
+*/
 #if 0
 bool PMManager::solveEverythingRight(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove)
 {
