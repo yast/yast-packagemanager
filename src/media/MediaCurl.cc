@@ -97,28 +97,31 @@ PMError MediaCurl::attachTo (bool next)
 
   SysConfig cfg( "proxy" );
 
-  if ( _url.getProtocol() == "ftp" ) {
-    _proxy = cfg.readEntry( "FTP_PROXY" );
-  } else if ( _url.getProtocol() == "http" ){
-     _proxy = cfg.readEntry( "HTTP_PROXY" );
-  } else {
-    _proxy = "";
-  }
-
-  if ( !_proxy.empty() ) {
-    ret = curl_easy_setopt( _curl, CURLOPT_PROXY, _proxy.c_str() );
-    if ( ret != 0 ) {
-      return PMError( Error::E_curl_setopt_failed, _curlError );
+  if ( cfg.readBoolEntry( "PROXY_ENABLED", false ) ) {
+    if ( _url.getProtocol() == "ftp" ) {
+      _proxy = cfg.readEntry( "FTP_PROXY" );
+    } else if ( _url.getProtocol() == "http" ) {
+       _proxy = cfg.readEntry( "HTTP_PROXY" );
+    } else {
+      _proxy = "";
     }
-    
-    string user = cfg.readEntry( "PROXY_USER" );
-    string password = cfg.readEntry( "PROXY_PASSWORD" );
-    if ( !user.empty() && !password.empty() ) {
-      _proxyuserpwd = user + ":" + password;
+
+    D__ << "Proxy: " << _proxy << endl;
+
+    if ( !_proxy.empty() ) {
+      ret = curl_easy_setopt( _curl, CURLOPT_PROXY, _proxy.c_str() );
+      if ( ret != 0 ) {
+        return PMError( Error::E_curl_setopt_failed, _curlError );
+      }
+
+      string curlrcFile = string( getenv("HOME") ) + string( "/.curlrc" );
+      SysConfig curlrc( curlrcFile );
+      _proxyuserpwd = curlrc.readEntry( "proxy-user" );      
+
       ret = curl_easy_setopt( _curl, CURLOPT_PROXYUSERPWD,
                               _proxyuserpwd.c_str() );
       if ( ret != 0 ) {
-        return PMError( Error::E_curl_setopt_failed, _curlError );
+          return PMError( Error::E_curl_setopt_failed, _curlError );
       }
     }
   }
