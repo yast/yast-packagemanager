@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <y2util/Pathname.h>
+#include <Y2PM.h>
 #include <y2pm/PMError.h>
 #include <y2pm/PMSelection.h>
 #include <y2pm/PMSelectionPtr.h>
@@ -136,6 +137,20 @@ int main(int argc, char* argv[])
 	    command = "";
     }
 
+    Y2PM y2pm;
+
+    y2pm.packageManager(false);		// start without target
+#if 0
+    InstSrcManager& mgr = y2pm.instSrcManager();
+    InstSrcManager::ISrcIdList nids;
+
+    PMError err = mgr.scanMedia( nids, url );
+    if ( nids.size() )
+    {
+	InstSrcManager::ISrcId source_id = *nids.begin();
+	err = mgr.enableSource( source_id );
+    }
+#endif
     InstSrcPtr nsrc;
 
     Pathname cache   ( "/tmp/tcache" ); // cachedir (must not exist)
