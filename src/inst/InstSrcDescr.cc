@@ -163,27 +163,28 @@ ostream & InstSrcDescr::dumpOn( ostream & str ) const
 //
 ///////////////////////////////////////////////////////////////////
 
-static const std::string TypeTag      = "Type";
-static const std::string UrlTag       = "URL";
-static const std::string ProdDirTag   = "ProductDir";
-static const std::string DefActTag    = "Default_activate";
-static const std::string DefRankTag   = "Default_rank";
-static const std::string MediaTag     = "Media";
-static const std::string ProductTag   = "Product";
-static const std::string ArchTag      = "Arch";
-static const std::string RequiresTag  = "Requires";
-static const std::string DefBaseTag   = "DefaultBase";
-static const std::string LabelMapTag  = "LabelMap";
-static const std::string LinguasTag   = "Linguas";
-static const std::string LabelTag     = "Label";
-static const std::string LangTag      = "Language";
-static const std::string TimeTag      = "Timezone";
-static const std::string DescrDirTag  = "DescriptionDir";
-static const std::string DataDirTag   = "DataDir";
-static const std::string FlagsTag     = "Flags";
-static const std::string YouUrlTag    = "YouUrl";
-static const std::string YouTypeTag   = "YouType";
-static const std::string YouPathTag   = "YouPath";
+static const std::string TypeTag	= "Type";
+static const std::string UrlTag		= "URL";
+static const std::string ProdDirTag	= "ProductDir";
+static const std::string DefActTag	= "Default_activate";
+static const std::string DefRankTag	= "Default_rank";
+static const std::string MediaTag	= "Media";
+static const std::string ProductTag	= "Product";
+static const std::string ArchTag	= "Arch";
+static const std::string RequiresTag	= "Requires";
+static const std::string DefBaseTag	= "DefaultBase";
+static const std::string LabelMapTag	= "LabelMap";
+static const std::string LinguasTag	= "Linguas";
+static const std::string LabelTag	= "Label";
+static const std::string LangTag	= "Language";
+static const std::string TimeTag	= "Timezone";
+static const std::string DescrDirTag	= "DescriptionDir";
+static const std::string DataDirTag	= "DataDir";
+static const std::string FlagsTag	= "Flags";
+static const std::string RelnotesUrlTag	= "RelnotesUrl";
+static const std::string YouUrlTag	= "YouUrl";
+static const std::string YouTypeTag	= "YouType";
+static const std::string YouPathTag	= "YouPath";
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -276,6 +277,9 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   // flags
   str << "=" << FlagsTag << ": " << _content_flags << endl;
 
+  // relnotesurl
+  str << "=" << RelnotesUrlTag << ": " << _content_relnotesurl << endl;
+
   // youurl
   str << "=" << YouUrlTag << ": " << _content_youurl << endl;
 
@@ -359,32 +363,33 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 	        ACTIVATE, RANK,
 	        MEDIA, PRODUCT, DEFBASE, ARCH,
 		REQUIRES, LANGUAGE, LABEL, LABELMAP, LINGUAS, TIMEZONE, DESCRDIR, DATADIR,
-		FLAGS,
+		FLAGS, RELNOTESURL,
 		YOUURL, YOUTYPE, YOUPATH };
 
     // for the 'description' file
 
-    tagset.addTag (TypeTag,	TYPE,	    TaggedFile::SINGLE, TaggedFile::START);
-    tagset.addTag (UrlTag,	URL,	    TaggedFile::SINGLE);
-    tagset.addTag (ProdDirTag,  PRODUCTDIR, TaggedFile::SINGLE);	// product dir below _url
-    tagset.addTag (DefActTag,	ACTIVATE,   TaggedFile::SINGLE);	// 1 = true (default activated), 0 = false
-    tagset.addTag (DefRankTag,	RANK,       TaggedFile::SINGLE);	// RankValue, if provided
-    tagset.addTag (MediaTag,	MEDIA,	    TaggedFile::MULTI);		// _media_vendor, _media_id, _media_count
-    tagset.addTag (ProductTag,	PRODUCT,    TaggedFile::MULTI);		// _content_product, _content_distproduct, _content_baseproduct, _content_vendor
-    tagset.addTag (DefBaseTag,	DEFBASE,    TaggedFile::SINGLE);	// _content_defaultbase
-    tagset.addTag (ArchTag,	ARCH,	    TaggedFile::MULTI);		// _content_archmap
-    tagset.addTag (RequiresTag, REQUIRES,   TaggedFile::SINGLE);	// _content_requires
-    tagset.addTag (LangTag,	LANGUAGE,   TaggedFile::SINGLE);	// _content_language
-    tagset.addTag (LabelTag,	LABEL,	    TaggedFile::SINGLE);	// _content_label
-    tagset.addTag (LabelMapTag,	LABELMAP,   TaggedFile::MULTI);	        // _content_labelmap
-    tagset.addTag (LinguasTag,	LINGUAS,    TaggedFile::MULTI);		// _content_linguas
-    tagset.addTag (TimeTag,	TIMEZONE,   TaggedFile::SINGLE);	// _content_timezone
-    tagset.addTag (DescrDirTag, DESCRDIR,   TaggedFile::SINGLE);	// _content_descrdir
-    tagset.addTag (DataDirTag,	DATADIR,    TaggedFile::SINGLE);	// _content_datadir
-    tagset.addTag (FlagsTag,	FLAGS,      TaggedFile::SINGLE);	// _content_flags
-    tagset.addTag (YouUrlTag,	YOUURL,     TaggedFile::SINGLE);	// _content_youurl
-    tagset.addTag (YouTypeTag,	YOUTYPE,    TaggedFile::SINGLE);	// _content_youtype
-    tagset.addTag (YouPathTag,	YOUPATH,    TaggedFile::SINGLE);	// _content_youpath
+    tagset.addTag (TypeTag,		TYPE,	    TaggedFile::SINGLE, TaggedFile::START);
+    tagset.addTag (UrlTag,		URL,	    TaggedFile::SINGLE);
+    tagset.addTag (ProdDirTag,  	PRODUCTDIR, TaggedFile::SINGLE);	// product dir below _url
+    tagset.addTag (DefActTag,		ACTIVATE,   TaggedFile::SINGLE);	// 1 = true (default activated), 0 = false
+    tagset.addTag (DefRankTag,		RANK,       TaggedFile::SINGLE);	// RankValue, if provided
+    tagset.addTag (MediaTag,		MEDIA,	    TaggedFile::MULTI);		// _media_vendor, _media_id, _media_count
+    tagset.addTag (ProductTag,		PRODUCT,    TaggedFile::MULTI);		// _content_product, _content_distproduct, _content_baseproduct, _content_vendor
+    tagset.addTag (DefBaseTag,		DEFBASE,    TaggedFile::SINGLE);	// _content_defaultbase
+    tagset.addTag (ArchTag,		ARCH,	    TaggedFile::MULTI);		// _content_archmap
+    tagset.addTag (RequiresTag, 	REQUIRES,   TaggedFile::SINGLE);	// _content_requires
+    tagset.addTag (LangTag,		LANGUAGE,   TaggedFile::SINGLE);	// _content_language
+    tagset.addTag (LabelTag,		LABEL,	    TaggedFile::SINGLE);	// _content_label
+    tagset.addTag (LabelMapTag,		LABELMAP,   TaggedFile::MULTI);	        // _content_labelmap
+    tagset.addTag (LinguasTag,		LINGUAS,    TaggedFile::MULTI);		// _content_linguas
+    tagset.addTag (TimeTag,		TIMEZONE,   TaggedFile::SINGLE);	// _content_timezone
+    tagset.addTag (DescrDirTag, 	DESCRDIR,   TaggedFile::SINGLE);	// _content_descrdir
+    tagset.addTag (DataDirTag,		DATADIR,    TaggedFile::SINGLE);	// _content_datadir
+    tagset.addTag (FlagsTag,		FLAGS,      TaggedFile::SINGLE);	// _content_flags
+    tagset.addTag (RelnotesUrlTag,	RELNOTESURL,TaggedFile::SINGLE);	// _content_relnotesurl
+    tagset.addTag (YouUrlTag,		YOUURL,     TaggedFile::SINGLE);	// _content_youurl
+    tagset.addTag (YouTypeTag,		YOUTYPE,    TaggedFile::SINGLE);	// _content_youtype
+    tagset.addTag (YouPathTag,		YOUPATH,    TaggedFile::SINGLE);	// _content_youpath
 
     TaggedParser parser;
 
@@ -495,6 +500,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     ndescr->set_content_descrdir( Pathname(GET_STRING (DESCRDIR)));
     ndescr->set_content_datadir( Pathname(GET_STRING (DATADIR)));
     ndescr->set_content_flags( GET_STRING (FLAGS));
+    ndescr->set_content_relnotesurl( GET_STRING (RELNOTESURL));
     ndescr->set_content_youurl( GET_STRING (YOUURL));
     ndescr->set_content_youtype( GET_STRING (YOUTYPE));
     ndescr->set_content_youpath( GET_STRING (YOUPATH));

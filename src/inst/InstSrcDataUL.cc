@@ -270,6 +270,10 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	{
 	    ndescr->set_content_flags (value);
 	}
+	else if (tag == "RELNOTESURL")
+	{
+	    ndescr->set_content_relnotesurl (value);
+	}
 	else if (tag == "YOUURL")
 	{
 	    ndescr->set_content_youurl (value);
