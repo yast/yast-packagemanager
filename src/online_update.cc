@@ -22,7 +22,7 @@ using namespace std;
 void usage()
 {
   cout << "Usage: online-update [-u url] [-p product] [-v version]"
-       << "[-a arch] [-d] [security] [recommended] [document]"
+       << "[-a arch] [-d] [-n] [security] [recommended] [document]"
        << " [optional]"
        << endl;
   exit( 1 );
@@ -172,7 +172,7 @@ int main( int argc, char **argv )
 
   you.filterPatchSelection();
 
-  error = you.retrievePatches();
+  error = you.retrievePatches( checkSig );
   if ( error ) {
     cerr << "Error retrieving packages: " << error << endl;
     exit( 1 );

@@ -22,11 +22,13 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/GPGCheck.h>
 
 #include <Y2PM.h>
 
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/YouError.h>
 
 #include <y2pm/InstYou.h>
 
@@ -150,18 +152,20 @@ PMError InstYou::attachSource()
   return error;
 }
 
-PMError InstYou::retrievePatches()
+PMError InstYou::retrievePatches( bool checkSig )
 {
+  D__ << "Retrieve patches." << endl;
+
   PMError error = attachSource();
   if ( error ) return error;
 
   PMYouPatchPtr patch;
   for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    PMError error = retrievePatch( patch );
+    error = retrievePatch( patch, checkSig );
     if ( error ) return error;
   }
 
-  return PMError();
+  return error;
 }
 
 PMYouPatchPtr InstYou::firstPatch()
@@ -203,14 +207,14 @@ PMError InstYou::installCurrentPatch()
   return installPatch( *_selectedPatchesIt );
 }
 
-PMError InstYou::retrieveCurrentPatch()
+PMError InstYou::retrieveCurrentPatch( bool checkSig )
 {
   if ( _selectedPatchesIt == _patches.end() ) {
     E__ << "No more patches." << endl;
     return PMError( InstSrcError::E_error );
   }
 
-  return retrievePatch( *_selectedPatchesIt );
+  return retrievePatch( *_selectedPatchesIt, checkSig );
 }
 
 PMError InstYou::installPatches( bool dryrun )
@@ -277,21 +281,34 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   return error;
 }
 
-PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
+PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
 {
-//  D__ << "PATCH: " << (*itPatch)->name() << endl;
+  D__ << "PATCH: " << patch->name() << endl;
+
+  RpmDb rpm;
+
   list<PMPackagePtr> packages = patch->packages();
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
     Pathname rpmPath = _paths->rpmPath( *itPkg );
-//    D__ << "  RPM: " << (*itPkg)->name() << ": " << rpmPath.asString() << endl;
+    D__ << "  RPM: " << (*itPkg)->name() << ": " << rpmPath.asString() << endl;
     PMError error = _media.provideFile( rpmPath );
     if ( error ) {
       E__ << "Error downloading RPM '" << (*itPkg)->name() << "' from '"
           << _paths->patchUrl() << "/" << rpmPath << "'" << endl;
       return error;
     }
+    if ( checkSig ) {
+      string localRpm = _media.localPath( rpmPath ).asString();
+      unsigned result = rpm.checkPackage( localRpm );
+      if ( result != 0 ) {
+        E__ << "Signature check failed for " << localRpm << endl;
+        return PMError( YouError::E_bad_sig_rpm );
+      }
+    }
   }
+
+  GPGCheck gpg;
 
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
@@ -302,6 +319,13 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
           << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
       return error;
     }
+    if ( checkSig ) {
+      string localScript = _media.localPath( scriptPath ).asString();
+      if ( !gpg.check_file( localScript ) ) {
+        E__ << "Signature check failed for script " << localScript << endl;
+        return PMError( YouError::E_bad_sig_file );
+      }
+    }
   }
   
   if ( !patch->postScript().empty() ) {
@@ -311,6 +335,13 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
       E__ << "Error downloading post script from '"
           << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
       return error;
+    }
+    if ( checkSig ) {
+      string localScript = _media.localPath( scriptPath ).asString();
+      if ( !gpg.check_file( localScript ) ) {
+        E__ << "Signature check failed for script " << localScript << endl;
+        return PMError( YouError::E_bad_sig_file );
+      }
     }
   }
   
