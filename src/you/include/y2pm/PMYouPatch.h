@@ -201,8 +201,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
 
     PMYouPatch( const PkgName &    name_r,
 		const PkgEdition & edition_r,
-                const PkgArch &    arch_r,
-		constInstSrcPtr	   source );
+                const PkgArch &    arch_r );
 
     virtual ~PMYouPatch();
 

@@ -3,9 +3,8 @@
 struct rpmCache {
     std::list<std::string> _description;
     std::string _buildhost;
-    Date _installtime;
+    Date        _installtime;
     std::string _distribution;
-    std::string _vendor;
     std::string _license;
     std::string _packager;
     std::string _url;

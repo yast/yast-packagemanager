@@ -24,13 +24,14 @@
 #include <iosfwd>
 #include <string>
 
-#include <y2util/FSize.h>
 #include <y2util/Date.h>
+#include <y2util/FSize.h>
+#include <y2util/Vendor.h>
+#include <y2util/Pathname.h>
 #include <y2util/YRpmGroupsTree.h>
 
 #include <y2pm/PMPackageDataProviderPtr.h>
-
-#include <y2pm/PMPackage.h>
+#include <y2pm/PMPackagePtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -67,7 +68,7 @@ class PMPackageDataProvider : virtual public Rep {
     static std::string            buildhost()   { return std::string(); }
     static Date                   installtime() { return Date(0); }
     static std::string            distribution(){ return std::string(); }
-    static std::string            vendor()      { return std::string(); }
+    static Vendor                 vendor()      { return Vendor(); }
     static std::string            license()     { return std::string(); }
     static std::string            packager()    { return std::string(); }
     static std::string            group()       { return std::string(); }
@@ -89,8 +90,10 @@ class PMPackageDataProvider : virtual public Rep {
     static std::string            location()    { return std::string(); }
     static unsigned int           medianr()     { return 0; }
     static std::list<std::string> keywords()    { return std::list<std::string>(); }
-
     static std::list<std::string> du()		{ return std::list<std::string>(); }
+
+    // physical access to the rpm file.
+    static Pathname providePkgToInstall()       { return Pathname(); }
 
   protected:
 
@@ -122,7 +125,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::string            buildhost   ( const PMPackage & pkg_r ) const { return buildhost(); }
     virtual Date                   installtime ( const PMPackage & pkg_r ) const { return installtime(); }
     virtual std::string            distribution( const PMPackage & pkg_r ) const { return distribution(); }
-    virtual std::string            vendor      ( const PMPackage & pkg_r ) const { return vendor(); }
+    virtual Vendor                 vendor      ( const PMPackage & pkg_r ) const { return vendor(); }
     virtual std::string            license     ( const PMPackage & pkg_r ) const { return license(); }
     virtual std::string            packager    ( const PMPackage & pkg_r ) const { return packager(); }
     virtual std::string            group       ( const PMPackage & pkg_r ) const { return group(); }
@@ -146,6 +149,8 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const { return keywords(); }
     virtual std::list<std::string> du	       ( const PMPackage & pkg_r ) const { return du(); }
 
+    // physical access to the rpm file.
+    virtual Pathname providePkgToInstall( const PMPackage & pkg_r ) const { return providePkgToInstall(); }
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -247,3 +247,18 @@ PMULPackageDataProvider::du ( const PMPackage & pkg_r ) const
     _du_retrieval->retrieveData (_attr_DU, value);
     return value;
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::providePkgToInstall
+//	METHOD TYPE : Pathname
+//
+//	DESCRIPTION :
+//
+Pathname PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r ) const
+{
+#warning MUST REALIZE providePkgToInstall
+  return PMPackageDataProvider::providePkgToInstall();
+}
+

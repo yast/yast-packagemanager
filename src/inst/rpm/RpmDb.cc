@@ -32,6 +32,7 @@
 
 #include <y2util/Date.h>
 #include <y2util/FSize.h>
+#include <y2util/Vendor.h>
 #include <y2util/Y2SLog.h>
 #include <y2util/TagParser.h>
 #include <y2util/Pathname.h>
@@ -1398,7 +1399,7 @@ RpmDb::belongsTo (const Pathname& name, bool full_name)
     }
     return result;
 }
-    
+
 #if 0
 /*--------------------------------------------------------------*/
 /* Evaluate all files of a package which have been changed	*/

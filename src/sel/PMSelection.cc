@@ -79,9 +79,8 @@ const bool                PMSelection::isBase()          const { DP_GET( isBase 
 PMSelection::PMSelection( const PkgName &    name_r,
 			  const PkgEdition & edition_r,
 			  const PkgArch &    arch_r,
-			  PMSelectionDataProviderPtr dataProvider_r,
-			  constInstSrcPtr    source )
-    : PMObject( name_r, edition_r, arch_r, source )
+			  PMSelectionDataProviderPtr dataProvider_r )
+    : PMObject( name_r, edition_r, arch_r )
     , _dataProvider( dataProvider_r )
 {
   if ( !_dataProvider ) {

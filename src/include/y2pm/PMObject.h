@@ -48,10 +48,6 @@ class PMObject : virtual public Rep, public PMSolvable {
     // back pointer to selectable if this object is managed
     PMSelectablePtr _selectable;
 
-    // pointer to the source providing this package
-    // if NULL, the object is coming from the target
-    constInstSrcPtr _source;
-
   public:
 
     /**
@@ -70,14 +66,11 @@ class PMObject : virtual public Rep, public PMSolvable {
 
     PMObject( const PkgName &    name_r,
 	      const PkgEdition & edition_r,
-	      const PkgArch &    arch_r,
-	      constInstSrcPtr	 source = 0 );
+	      const PkgArch &    arch_r );
 
     virtual ~PMObject();
 
   public:
-
-    constInstSrcPtr source (void) { return _source; }
 
     ///////////////////////////////////////////////////////////////////
     // Shortcuts that tell about the Objects status within

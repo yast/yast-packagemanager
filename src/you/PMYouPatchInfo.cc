@@ -302,12 +302,12 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     D__ << "Name: " << name << endl;
     D__ << "Version: " << version << endl;
-    
+
     if ( name.empty() ) name = fileName;
     if ( version.empty() ) version = "0";
 #warning TBD InstSrcPtr for PMYouPatch
     PMYouPatchPtr p( new PMYouPatch( PkgName( name ), PkgEdition( version ),
-                                     _paths->baseArch(), 0 ) );
+                                     _paths->baseArch() ) );
 
     p->setLocalFile( path + fileName );
 

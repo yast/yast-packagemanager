@@ -133,7 +133,7 @@ PMRpmPackageDataProvider::distribution ( const PMPackage & pkg_r ) const
     return _theCache._distribution;
 }
 
-std::string
+Vendor
 PMRpmPackageDataProvider::vendor ( const PMPackage & pkg_r ) const
 {
     return _attr_VENDOR;

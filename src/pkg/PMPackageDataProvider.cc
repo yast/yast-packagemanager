@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <y2pm/PMPackageDataProvider.h>
+#include <y2pm/PMPackage.h>
 
 using namespace std;
 
