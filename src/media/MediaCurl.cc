@@ -218,7 +218,13 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     if(_url.host().empty())
 	return Error::E_no_host_specified;
 
-    string path = _url.path() + filename.asString();
+    string path = _url.path();
+    if ( !path.empty() && path != "/" && *path.rbegin() == '/' &&
+         filename.absolute() ) {
+      path += filename.asString().substr( 1, filename.asString().size() - 1 );
+    } else {
+      path += filename.asString();
+    }
 
     Url url( _url );
     url.setPath( path );
