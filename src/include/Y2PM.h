@@ -270,11 +270,13 @@ class Y2PM {
 	 * deletes/installs all packages currently marked in packageManager()
 	 * if media_nr == 0, install everything regardless of media nr
 	 * if media_nr > 0, install only from this media nr
-	 * return list of failed package names in errors
-	 * return list of unavailable packages (due to InstSrc errors or wrong media nr) in remaining
+	 * return list of failed package names in errors_r
+	 * return list of unavailable packages (due to InstSrc errors or wrong media nr) in remaining_r
+	 * return list of unavailable source packages (due to InstSrc errors or wrong media nr) in srcremaining_r
 	 * return number of sucessfully installed packages
 	 * */
-	static int commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining);
+	static int commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
+		std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r);
 
 	/**
 	 * install a single rpm file

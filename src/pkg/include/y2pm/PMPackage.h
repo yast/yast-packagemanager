@@ -87,7 +87,8 @@ class PMPackage : virtual public Rep, public PMObject {
     std::list<std::string> postin()       const;
     std::list<std::string> preun()        const;
     std::list<std::string> postun()       const;
-    std::string            sourcerpm()    const;
+    std::string            sourceloc()    const;
+    FSize		   sourcesize()   const;
     FSize                  archivesize()  const;
     std::list<std::string> authors()      const;
     std::list<std::string> filenames()    const;

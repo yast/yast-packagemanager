@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep  9 19:08:15 CEST 2002 - kkaempf@suse.de
+
+- Installation of src/nosrc rpms.
+
+-------------------------------------------------------------------
 Mon Sep  9 15:52:29 CEST 2002 - lnussel@suse.de
 
 - remove proxy settings from wget class, works automatically through ~/.wgetrc

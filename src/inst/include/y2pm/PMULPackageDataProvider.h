@@ -75,7 +75,8 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// POSTIN
 	// PREUN
 	// POSTUN
-	TagRetrievalPos		_attr_SOURCERPM;
+	TagRetrievalPos		_attr_SOURCELOC;
+	FSize			_attr_SOURCESIZE;		// if > 0, has source
 	FSize			_attr_ARCHIVESIZE;
 	TagRetrievalPos		_attr_AUTHORS;
 	// FILENAMES
@@ -145,7 +146,8 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	//virtual std::list<std::string> postin      ( const PMPackage & pkg_r ) const;
 	//virtual std::list<std::string> preun       ( const PMPackage & pkg_r ) const;
 	//virtual std::list<std::string> postun      ( const PMPackage & pkg_r ) const;
-	virtual std::string            sourcerpm   ( const PMPackage & pkg_r ) const;
+	virtual std::string            sourceloc   ( const PMPackage & pkg_r ) const;
+	virtual FSize		       sourcesize  ( const PMPackage & pkg_r ) const;
 	virtual FSize                  archivesize ( const PMPackage & pkg_r ) const;
 	virtual std::list<std::string> authors     ( const PMPackage & pkg_r ) const;
 	//virtual std::list<std::string> filenames   ( const PMPackage & pkg_r ) const;

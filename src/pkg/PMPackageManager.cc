@@ -160,13 +160,17 @@ PMPackageManager::anythingToInstall (void)
 //	METHOD NAME : PMPackageManager::getPackagesToInsDel
 //	METHOD TYPE : void
 //
-//	DESCRIPTION :
+//	DESCRIPTION : go through all packages and check for install/delete/installsource
+//		status. Sort package according to prereq and return these
+//		packages via dellist_r, instlist_r, srclist_r
 //
 void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
-					    std::list<PMPackagePtr> & instlist_r )
+					    std::list<PMPackagePtr> & instlist_r,
+					    std::list<PMPackagePtr> & srclist_r )
 {
     dellist_r.clear();
     instlist_r.clear();
+    srclist_r.clear();
 
     DBG << "getPackagesToInsDel..." << endl;
 
@@ -203,6 +207,18 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 		INT << "NULL installed to delete" << endl;
 	    }
 	}
+	else if (sel->source_install())
+	{
+	    if ( sel->candidateObj() )
+	    {
+		// unordered list for backup
+		srclist_r.push_back( sel->candidateObj() );
+	    }
+	    else
+	    {
+		INT << "NULL candidate to source install" << endl;
+	    }
+	}
     }
 
     DBG << "num packages: delete " << dellist_r.size() << ", install " << instlist_r.size() << endl;
@@ -229,7 +245,7 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
     {
 	PkgSet iset; // for install order
 
-	// loop over packages, adding matchin medianr to set
+	// loop over packages, adding matching medianr to set
 	for (std::list<PMPackagePtr>::const_iterator pkgIt = instbackup_r.begin();
 	     pkgIt != instbackup_r.end(); ++pkgIt)
 	{
