@@ -103,9 +103,7 @@ InstYou::InstYou( const PMYouPatchInfoPtr &info,
 
 InstYou::~InstYou()
 {
-  if ( _media.isOpen() && _media.isAttached() ) {
-    _media.release();
-  }
+  releaseSource();
 }
 
 void InstYou::init()
@@ -390,6 +388,17 @@ PMError InstYou::attachSource()
   }
 
   return error;
+}
+
+PMError InstYou::releaseSource()
+{
+  PMError error;
+
+  if ( _media.isOpen() && _media.isAttached() ) {
+    error = _media.release();
+  }
+
+  return error;  
 }
 
 PMError InstYou::processPatches()
@@ -1656,6 +1665,12 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
     log( " " );
   
     if ( callback->isSet() ) {
+      PMError error = releaseSource();
+      if ( error ) {
+        ERR << "Release source failed." << endl;
+        return error;
+      }
+    
       string errorStr = _("Media not found");
       string productStr = _("YOU Patch CD");
       string result = callback->changeMedia( errorStr, "", productStr,
@@ -1679,7 +1694,13 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
       return YouError::E_wrong_media;
     }
     
-    PMError error = mediaInstance->readInfo( number );
+    PMError error = attachSource();
+    if ( error ) {
+      ERR << "Attach source failed." << endl;
+      return error;
+    }
+
+    error = mediaInstance->readInfo( number );
     if ( error ) {
       WAR << "Unable to read media info: " << error << endl;
     }
