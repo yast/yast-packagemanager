@@ -139,21 +139,66 @@ FSize PMYouPatchManager::totalDownloadSize()
   return instYou().totalDownloadSize();
 }
 
-list<string> PMYouPatchManager::rawPatchInfo( const PMYouPatchPtr &patch )
+string PMYouPatchManager::rawPatchInfo( const PMYouPatchPtr &patch )
 {
-  list<string> text;
+  string text;
+
+  text += "<pre>";
 
   if ( patch ) {
     ifstream in( patch->localFile().asString().c_str() );
     if ( in.fail() ) {
       ERR << "Unable to load '" << patch->localFile() << "'" << endl;
     } else {
-      string line;
-      while( getline( in, line ) ) {
-        text.push_back( line );
+      int skipLines = 3;
+      string rawLine;
+      while( getline( in, rawLine ) ) {
+        if ( !rawLine.empty() ) {
+          if ( --skipLines > 0 ) continue;
+
+          if ( rawLine.substr( 0, 14 ) == "-----BEGIN PGP" ) break;
+
+          // Escape special chars
+          string line;
+          string::iterator it;
+          for( it = rawLine.begin(); it != rawLine.end(); ++it ) {
+            switch ( *it ) {
+              case '<':
+                line += "&lt;";
+                break;
+              case '>':
+                line += "&gt;";
+                break;
+              default:
+                line += *it;
+                break;
+            }
+          }
+        
+          char firstChar = *rawLine.begin();
+          if ( firstChar == '#' || firstChar == '-' ) {
+            text += "<em>" + line + "</em>";
+          } else {
+            int colonPos = line.find( ':' );
+            int spacePos = line.find( ' ' );
+            if ( colonPos > 0 && ( spacePos < 0 || spacePos > colonPos ) ) {
+              if ( line.substr( 0, colonPos ) != "Hash" ) {
+                text += "<b>" + line.substr( 0, colonPos + 1 ) + "</b>";
+                text += line.substr( colonPos + 1, line.length() - colonPos );
+              } else {
+                text += "<em>Hash:</em>";
+              }
+            } else {
+              text += line;
+            }
+          }
+        }
+        text += "\n";
       }
     }
   }
+
+  text += "</pre>";
 
   return text;
 }

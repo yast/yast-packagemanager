@@ -87,7 +87,7 @@ class PMYouPatchManager : public PMManager {
     /**
       Return raw content of patch info file.
     */
-    std::list<std::string> rawPatchInfo( const PMYouPatchPtr & );
+    std::string rawPatchInfo( const PMYouPatchPtr & );
 
   private:
     InstYou *_instYou;
