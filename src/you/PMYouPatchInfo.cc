@@ -291,6 +291,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     PMYouPatch::Kind kind = PMYouPatch::kind_invalid;
     if ( value == "security" ) { kind = PMYouPatch::kind_security; }
     else if ( value == "recommended" ) { kind = PMYouPatch::kind_recommended; }
+    else if ( value == "patchlevel" ) { kind = PMYouPatch::kind_patchlevel; }
     else if ( value == "document" ) { kind = PMYouPatch::kind_document; }
     else if ( value == "optional" ) { kind = PMYouPatch::kind_optional; }
     else if ( value == "YaST2" ) { kind = PMYouPatch::kind_yast; }

@@ -69,7 +69,7 @@ void usage()
        << _("-V, --verbose            Be verbose.") << endl
        << _("-D, --debug              Debug output.") << endl
        << endl
-       << "security | recommended | document | optional   "
+       << "security | recommended | patchlevel | document | optional   "
        << _("Types of patches to be installed.") << endl;
   exit( 1 );
 }
@@ -222,6 +222,7 @@ int main( int argc, char **argv )
       string arg = argv[optind++];
       if ( arg == "security" ) kinds |= PMYouPatch::kind_security;
       else if ( arg == "recommended" ) kinds |= PMYouPatch::kind_recommended;
+      else if ( arg == "patchlevel" ) kinds |= PMYouPatch::kind_patchlevel;
       else if ( arg == "document" ) kinds |= PMYouPatch::kind_document;
       else if ( arg == "optional" ) kinds |= PMYouPatch::kind_optional;
       else if ( arg == "all" ) {
@@ -232,13 +233,15 @@ int main( int argc, char **argv )
   }
 
   if ( kinds == PMYouPatch::kind_invalid ) {
-    kinds = PMYouPatch::kind_security | PMYouPatch::kind_recommended;
+    kinds = PMYouPatch::kind_security | PMYouPatch::kind_recommended |
+            PMYouPatch::kind_patchlevel;
   }
 
   if ( verbose ) {
     cout << "Types of patches to be installed:";
     if ( kinds & PMYouPatch::kind_security ) cout << " security";
     if ( kinds & PMYouPatch::kind_recommended ) cout << " recommended";
+    if ( kinds & PMYouPatch::kind_patchlevel ) cout << " patchlevel";
     if ( kinds & PMYouPatch::kind_document ) cout << " document";
     if ( kinds & PMYouPatch::kind_optional ) cout << " optional";
     cout << endl;
