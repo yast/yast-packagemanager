@@ -21,6 +21,12 @@
 
 #include <iostream>
 
+#include <stdio.h>
+#include <ctype.h>
+
+#include <y2util/Y2SLog.h>
+#include <y2util/PathInfo.h>
+
 #include <y2pm/InstSrcData_UL.h>
 
 #include <y2pm/InstSrcDescr.h>
@@ -81,8 +87,10 @@ ostream & InstSrcData_UL::dumpOn( ostream & str ) const
 //	DESCRIPTION :
 //
 PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
-				     MediaAccessPtr media_r, const Pathname & produduct_dir_r )
+				     MediaAccessPtr media_r, const Pathname & product_dir_r )
 {
+      MIL << "InstSrcData_UL::tryGetDescr(" << product_dir_r << ")" << endl;
+
   ndescr_r = 0;
   PMError err;
 
@@ -92,8 +100,150 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   // parse InstSrcDescr from media_r and fill ndescr
   ///////////////////////////////////////////////////////////////////
 
-  // TBD
-  err = Error::E_error;
+  Pathname contentname = product_dir_r + "/content";
+  MIL << "provideFile (" << contentname << ")" << endl;
+  err = media_r->provideFile (contentname);
+  if (err != Error::E_ok)
+  {
+    return err;
+  }
+  MIL << "fopen(" << (media_r->getAttachPoint() + contentname) << ")" << endl;
+  FILE *content = fopen ("/8.1/content", "r");
+  if (content == 0)
+  {
+     return Error::E_no_instsrc_on_media;
+  }
+  MIL << "ok" << endl;
+
+  err = Error::E_ok;
+
+  PkgName pname, bname;
+  PkgEdition pversion, bversion;	// base product
+  InstSrcDescr::ArchMap archmap;
+  InstSrcDescr::LabelMap labelmap;
+
+  while (!feof (content))
+  {
+    char lbuf[201];
+
+    if (fgets (lbuf, 200, content) != lbuf)
+    {
+      if (feof (content))
+	break;
+      MIL << "fgets() failed" << endl;
+      err = Error::E_no_instsrc_on_media;
+      break;
+    }
+
+    char *lptr = lbuf;
+    while (!isblank (*lptr)) lptr++;
+    if (*lptr == '\n')		// empty value
+	continue;
+    *lptr++ = 0;
+    while (isblank (*lptr)) lptr++;
+    if (*lptr == '\n')		// empty value
+	continue;
+    char *vptr = lptr;		// vptr == value
+    while (*lptr) lptr++;
+    lptr--;
+    if (*lptr == '\n')		// remove trailing \n
+	*lptr = 0;
+
+     MIL << lbuf << "=" << vptr << endl;
+
+    if (strcmp (lbuf, "PRODUCT") == 0)
+    {
+	pname = PkgName (vptr);
+    }
+    else if (strcmp (lbuf, "VERSION") == 0)
+    {
+	pversion = PkgEdition (vptr);
+    }
+    else if (strcmp (lbuf, "BASEPRODUCT") == 0)
+    {
+	bname = PkgName (vptr);
+    }
+    else if (strcmp (lbuf, "BASEVERSION") == 0)
+    {
+	bversion = PkgEdition (vptr);
+    }
+    else if (strcmp (lbuf, "VENDOR") == 0)
+    {
+	ndescr->set_content_vendor (vptr);
+    }
+    else if (strcmp (lbuf, "DEFAULTBASE") == 0)
+    {
+	ndescr->set_content_defaultbase (vptr);
+    }
+    else if (strncmp (lbuf, "ARCH.", 5) == 0)
+    {
+	std::list<Pathname> pathlist;
+	char *path = vptr;
+	while (*vptr)
+	{
+	    if (isblank (*vptr))
+	    {
+		*vptr++ = 0;
+		pathlist.push_back (Pathname (path));
+		path = vptr;
+	    }
+	    vptr++;
+	}
+	pathlist.push_back (Pathname (path));
+	archmap[lbuf+5] = pathlist;
+    }
+    else if (strcmp (lbuf, "LINGUAS") == 0)
+    {
+	std::list<LangCode> langlist;
+	char *lang = vptr;
+	while (*vptr)
+	{
+	    if (isblank (*vptr))
+	    {
+		*vptr++ = 0;
+		langlist.push_back (LangCode (lang));
+		lang = vptr;
+	    }
+	    vptr++;
+	}
+	langlist.push_back (LangCode (lang));
+	ndescr->set_content_linguas (langlist);
+    }
+    else if (strcmp (lbuf, "LANGUAGE") == 0)
+    {
+	ndescr->set_content_language (LangCode (vptr));
+    }
+    else if (strcmp (lbuf, "LABEL") == 0)
+    {
+	ndescr->set_content_label (vptr);
+    }
+    else if (strncmp (lbuf, "LABEL.", 6) == 0)
+    {
+	labelmap[LangCode(lbuf+6)] = vptr;
+    }
+    else if (strcmp (lbuf, "TIMEZONE") == 0)
+    {
+	ndescr->set_content_timezone (vptr);
+    }
+    else if (strcmp (lbuf, "DESCRDIR") == 0)
+    {
+	ndescr->set_content_descrdir (vptr);
+    }
+    else if (strcmp (lbuf, "DATADIR") == 0)
+    {
+	ndescr->set_content_datadir (vptr);
+    }
+    else if (strcmp (lbuf, "REQUIRES") == 0)
+    {
+	ndescr->set_content_requires (PkgRelation (PkgName (vptr), NONE, PkgEdition ()));
+    }
+  }
+  fclose (content);
+
+  ndescr->set_content_product (PkgNameEd (pname, pversion));
+  ndescr->set_content_baseproduct (PkgNameEd (bname, bversion));
+  ndescr->set_content_archmap (archmap);
+  ndescr->set_content_labelmap (labelmap);
 
   ///////////////////////////////////////////////////////////////////
   // done
