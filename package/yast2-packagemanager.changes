@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar  4 18:55:34 CET 2003 - ma@suse.de
+
+- Parse content files FLAGS value. Stored and provided via
+  InstSrcDescr::content_flags(). (needed for #21561)
+- 2.7.21
+
+-------------------------------------------------------------------
 Tue Mar  4 17:20:35 CET 2003 - lnussel@suse.de
 
 - don't generate error when a package is obsoleted and breaks another package

@@ -179,6 +179,7 @@ static const std::string LangTag      = "Language";
 static const std::string TimeTag      = "Timezone";
 static const std::string DescrDirTag  = "DescriptionDir";
 static const std::string DataDirTag   = "DataDir";
+static const std::string FlagsTag     = "Flags";
 static const std::string YouUrlTag    = "YouUrl";
 static const std::string YouTypeTag   = "YouType";
 static const std::string YouPathTag   = "YouPath";
@@ -271,6 +272,9 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   // datadir
   str << "=" << DataDirTag << ": " << _content_datadir << endl;
 
+  // flags
+  str << "=" << FlagsTag << ": " << _content_flags << endl;
+
   // youurl
   str << "=" << YouUrlTag << ": " << _content_youurl << endl;
 
@@ -354,6 +358,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 	        ACTIVATE, RANK,
 	        MEDIA, PRODUCT, DEFBASE, ARCH,
 		REQUIRES, LANGUAGE, LABEL, LABELMAP, LINGUAS, TIMEZONE, DESCRDIR, DATADIR,
+		FLAGS,
 		YOUURL, YOUTYPE, YOUPATH };
 
     // for the 'description' file
@@ -375,6 +380,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     tagset.addTag (TimeTag,	TIMEZONE,   TaggedFile::SINGLE);	// _content_timezone
     tagset.addTag (DescrDirTag, DESCRDIR,   TaggedFile::SINGLE);	// _content_descrdir
     tagset.addTag (DataDirTag,	DATADIR,    TaggedFile::SINGLE);	// _content_datadir
+    tagset.addTag (FlagsTag,	FLAGS,      TaggedFile::SINGLE);	// _content_flags
     tagset.addTag (YouUrlTag,	YOUURL,     TaggedFile::SINGLE);	// _content_youurl
     tagset.addTag (YouTypeTag,	YOUTYPE,    TaggedFile::SINGLE);	// _content_youtype
     tagset.addTag (YouPathTag,	YOUPATH,    TaggedFile::SINGLE);	// _content_youpath
@@ -487,6 +493,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     ndescr->set_content_timezone(GET_STRING (TIMEZONE));
     ndescr->set_content_descrdir( Pathname(GET_STRING (DESCRDIR)));
     ndescr->set_content_datadir( Pathname(GET_STRING (DATADIR)));
+    ndescr->set_content_flags( GET_STRING (FLAGS));
     ndescr->set_content_youurl( GET_STRING (YOUURL));
     ndescr->set_content_youtype( GET_STRING (YOUTYPE));
     ndescr->set_content_youpath( GET_STRING (YOUPATH));
