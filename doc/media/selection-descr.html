@@ -41,7 +41,8 @@ A selection has a release, which should be increased for every change
 of the selection.</LI>
 <LI><b>Architecture</b><br>
 A selection might have an architecture which restricts
-it to systems with this architecture.</LI>
+it to systems supporting this architecture but no <i>better</i> architecture.<br>
+The order of architectures is defined in the <a href="media-descr.html"><b><tt>content</tt></b></a> file.</LI>
 <LI><b>Summary</b><br>
 A short label describing the selection (in multiple languages!)</LI>
 <LI><b>Category</b><br>
@@ -97,10 +98,13 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 <H2>Selection keywords</H2>
 <TABLE border>
 <tr><th>Keyword&nbsp;&nbsp;&nbsp;</th><th>Value</th><th>Comment</th></tr>
-<tr><td valign=top>=Ver</td><td valign=top><i>Syntax version of this file</i></td><td>Minimal parser version needed to parse this file.</td></tr>
+<tr><td valign=top>=Ver</td><td valign=top><i><b>Syntax version</b> of this file</i></td><td>Minimal parser version needed to parse this file.<br>
+	Should be set to <tt>4.0</tt> for SUSE Linux 9.2</td></tr>
 <tr><td valign=top>=Sel</td><td valign=top><i>name</i> <i>version</i> <i>release</i> <i>architecture</i></td>
 	<td>These name, version, and release identify a selection unambiguously and are used as a key.<br>
-	The architecture is used like in the packages file, the best matching architecture for a selection (according
+	The <b><tt>version</tt></b> should match the product version, i.e. <tt>9.2</tt> for SUSE Linux 9.2<br>
+	The <b><tt>release</tt></b> should be incremented every time the selection file is changed, just like it's done for packages.<br> 
+	The <b><tt>architecture</tt></b> is used like in the packages file, the best matching architecture for a selection (according
 	to the architecture ordering given in the <b>content</b> file) is choosen.</td></tr>
 <tr><td valign=top>=Sum</td><td valign=top><i>summary</i></td><td>one line label in default language</td></tr>
 <tr><td valign=top>=Sum.<i>lang</i></td><td valign=top><i>summary</i></td><td>one line language specific label</td></tr>
@@ -148,13 +152,13 @@ The generic format is <tt><i>name</i>-<i>version</i>-<i>release</i>.<i>architect
 Filename is <tt>Kde-Desktop-8.1-42.i386.sel</tt>
 <br>
 <pre>
-# SuSE-Linux-Package-Selection 8.1-42.i386 -- (c) 2002 SuSE Linux AG
+# SuSE-Linux-Package-Selection 9.2-1.i386 -- (c) 2002 SuSE Linux AG
 # Needs parser version 4.0 or greater
 # generated on Sat Aug 10 17:55:42 UTC 2002
 
 =Ver: 4.0
 
-=Sel: Kde-Desktop 8.1 42 i386
+=Sel: Kde-Desktop 9.2 1 i386
 
 =Siz: 123456 1234567
 
