@@ -190,7 +190,7 @@ void InstYou::selectPatches( int kinds )
 
   if ( yastPatch ) {
     yastPatch->user_set_install();
-    D__ << "Select yast patch: " << yastPatch->name() << endl;
+    DBG << "Select yast patch: " << yastPatch->name() << endl;
   } else {
     for ( it = _patches.begin(); it != _patches.end(); ++it ) {
       D__ << "Check patch " << (*it)->fullName() << " ("
@@ -208,7 +208,7 @@ void InstYou::selectPatches( int kinds )
         else D__ << " has no candidate." << endl;
         D__ << "Kind: " << candidate->kindLabel() << endl;
         if ( candidate && ( candidate->kind() & kinds ) ) {
-          D__ << "Select patch: " << (*it)->fullName() << endl;
+          DBG << "Select patch: " << (*it)->fullName() << endl;
           selectable->user_set_install();
         }
       }

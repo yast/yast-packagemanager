@@ -93,6 +93,10 @@ class PMYouPatchPaths : virtual public Rep {
 
     Pathname localSuseServers();
 
+    Pathname localYouServers();
+
+    Pathname cachedYouServers();
+
     std::string directoryFileName();
 
     std::string product();
@@ -131,6 +135,9 @@ class PMYouPatchPaths : virtual public Rep {
     std::string encodeUrl( const std::string &url );
 
     void addPackageVersion( const std::string &pkgName, std::string &url );
+
+    PMError readServers( const Pathname & );
+    void addServer( const Url & );
 
   private:
     Pathname _patchPath;
