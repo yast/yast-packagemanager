@@ -18,6 +18,7 @@
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstYou.h>
+#include <y2pm/InstSrcDescr.h>
 
 #include <Y2PM.h>
 
@@ -55,6 +56,52 @@ int main( int argc, char **argv )
 {
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
+
+  InstTarget &TMGR( Y2PM::instTarget( true ) );
+
+#if 1
+  InstSrcManager &MGR( Y2PM::instSrcManager() );
+
+  InstSrcManager::ISrcIdList nids;
+  MGR.getSources( nids, true ); // nids = InstSrcIds aller enableten Quellen
+
+  if ( nids.begin() == nids.end() ) {
+    cerr << "No sources." << endl;
+    exit( 1 );
+  }
+
+  // such die passende Quelle raus und hol ihre InstSrcDescr
+  constInstSrcDescrPtr p = (*nids.begin())->descr();
+  
+  D__ << "DESCR: " << p->content_product().name << endl;
+  
+  PMError err = TMGR.installProduct(p); // Installiert das Produkt auf dem InstTarget
+
+  if ( err ) {
+    E__ << err << endl;
+    cerr << err << endl;
+  }
+#endif
+
+  const std::list<constInstSrcDescrPtr> &products = TMGR.getProducts();
+  
+  std::list<constInstSrcDescrPtr>::const_iterator it = products.begin();
+
+  if ( it == products.end() ) {
+    cerr << "No products installed." << endl;
+    exit ( 1 );
+  }
+
+  constInstSrcDescrPtr product = *it;
+
+  PkgNameEd prodEd = product->content_product();
+
+  cout << "PRODUCT NAME: " << prodEd.name << endl;
+  cout << "PRODUCT VERSION: " << prodEd.edition.version() << endl;
+  cout << "BASEARCH: " << TMGR.baseArch() << endl;
+
+  cout << "YOUTYPE: " << product->content_youtype() << endl;
+  cout << "YOUPATH: " << product->content_youpath() << endl;
 
 #if 0
   PMPackageManager &mgr = Y2PM::packageManager();
