@@ -129,7 +129,7 @@ void InstYou::init()
   _installedPatches = 0;
 
   SysConfig syscfg( "onlineupdate" );
-  _usedeltas = syscfg.readBoolEntry("YAST2_YOU_USE_DELTAS", true);
+  _usedeltas = syscfg.readBoolEntry("YOU_USE_DELTAS", true);
 
   if(_usedeltas)
   {
@@ -453,6 +453,23 @@ PMError InstYou::releaseSource()
   return error;
 }
 
+// sort deltas by source and media nr of base package so packages of one medium
+// can be fetched in a row
+struct DeltaSortBySourceCriterion
+{
+  bool operator()(const InstYou::DeltaToApply* lhs, const InstYou::DeltaToApply* rhs)
+  {
+    if(lhs->_basepkg->source() != rhs->_basepkg->source())
+    {
+      return lhs->_basepkg->source() < rhs->_basepkg->source();
+    }
+    else
+    {
+      return lhs->_basepkg->medianr() < rhs->_basepkg->medianr();
+    }
+  }
+};
+
 PMError InstYou::processPatches()
 {
   MIL << "Process patches." << endl;
@@ -544,9 +561,9 @@ PMError InstYou::processPatches()
 
     bool skipAll = false;
 
-    string text = stringutil::form( _("Retrieving %s: \"%s\" "),
+    string text = stringutil::form( _("Retrieving %s: \"%s\""),
                                     patch->name().asString().c_str(),
-                                    patch->summary().c_str() );
+                                    patch->summary().c_str() ) + " ... ";
     log( text );
 
     if ( skipAll || patch->skipped() ) {
@@ -612,19 +629,22 @@ PMError InstYou::processPatches()
     patch = nextPatch();
   }
 
+  log("\n");
   if ( error == YouError::E_user_abort ) {
-    log( _("Download aborted.\n") );
+    log(string(_("Download aborted.")) + "\n" );
   } else if ( error ) {
-    log( _("Download failed.\n") );
+    log( string(_("Download failed.")) + "\n" );
   } else {
-    log( _("Download finished.\n") );
-    log( "\n" );
+    log( string(_("Download finished. You may disconnect from the internet now.")) + "\n" );
   }
+  log( "\n" );
 
   disconnect();
 
   if(_usedeltas)
   {
+    sort(_deltastoapply.begin(), _deltastoapply.end(), DeltaSortBySourceCriterion());
+
     for (std::vector<DeltaToApply*>::iterator it = _deltastoapply.begin();
 	  it != _deltastoapply.end(); ++it)
     {
@@ -632,7 +652,7 @@ PMError InstYou::processPatches()
       Pathname rpmPath = delta->_patch->product()->rpmPath( delta->_pkg, false );
       Pathname dest = _media.localPath( rpmPath );
 
-      log(stringutil::form(_("Fetching package %s from installation medium\n"), delta->_basepkg->name()->c_str()));
+      log(stringutil::form(_("Fetching package %s from installation medium"), delta->_basepkg->name()->c_str()) + " ... ");
 
       Pathname orig;
       error = delta->_basepkg->providePkgToInstall(orig);
@@ -675,18 +695,21 @@ PMError InstYou::processPatches()
 	NULL
       };
 
-      log(_("Applying delta\n"));
+      log(string(_("Applying delta")) + " ... ");
 
       ExternalProgram prg(argv);
+      string output;
       for ( string line( prg.receiveLine() ); line.length(); line = prg.receiveLine() )
       {
 	ERR << line << endl;
+	output += line;
       }
       ret = prg.close();
 
       if(ret)
       {
-	PMError err(YouError::E_reassemble_rpm_from_delta_failed, string("Delta: ") + delta->_delta.filename());
+	PMError err(YouError::E_reassemble_rpm_from_delta_failed,
+	  string("Delta: ") + delta->_delta.filename() + "\nOutput was:\n" + output);
 	log(err.errstr() + "\n");
 	return err;
       }
@@ -950,7 +973,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
       if ( error ) {
         E__ << "Installation of RPM " << fileName << " of patch "
             << patch->name() << "failed" << endl;
-        return PMError( YouError::E_rpm_failed, fileName.asString() );
+        //return PMError( YouError::E_rpm_failed, fileName.asString() );
+        return error;
       }
     }
   }
