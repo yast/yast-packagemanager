@@ -43,6 +43,21 @@ Pathname MediaCurl::_cookieFile = "/var/lib/YaST2/cookies";
 MediaCurl::Callbacks *MediaCurl::_callbacks = 0;
 
 ///////////////////////////////////////////////////////////////////
+
+static inline void escape( string & str_r,
+			   const char char_r, const string & escaped_r ) {
+  for ( string::size_type pos = str_r.find( char_r );
+	pos != string::npos; pos = str_r.find( char_r, pos ) ) {
+    str_r.replace( pos, 1, escaped_r );
+  }
+}
+
+static inline string escapedPath( string path_r ) {
+  escape( path_r, ' ', "%20" );
+  return path_r;
+}
+
+///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaCurl
 //
@@ -308,7 +323,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     }
 
     Url url( _url );
-    url.setPath( path );
+    url.setPath( escapedPath(path) );
 
     // Use absolute file name to prevent access of files outside of the
     // hierarchy below the attach point.
