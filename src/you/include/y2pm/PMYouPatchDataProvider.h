@@ -39,13 +39,17 @@
 class PMYouPatchDataProvider : virtual public Rep, public PMDataProvider  {
   REP_BODY(PMYouPatchDataProvider);
 
-  protected:
+    PMYouPatchPtr _patch;
+
+  public:
 
     PMYouPatchDataProvider();
 
     virtual ~PMYouPatchDataProvider();
 
   public:
+
+    void setPatch( const PMYouPatchPtr &p ) { _patch = p; }
 
 	/**
 	 * hint before accessing multiple attributes
