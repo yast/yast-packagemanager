@@ -218,6 +218,14 @@ class MediaAccess : virtual public Rep {
        * FileProvider instances, that provide the same file from the
        * same media. If the first one goes out of scope, the file is
        * cleaned. It's just a convenience for 'access and forgett'.
+       *
+       * <b>Caution:</b> We should either store the refernce MediaAccess'
+       * MediaHandler here (for this MediaHandler must become a
+       * ref counting pointer class), or we need more info from MediaHandler
+       * (whether he's downloading to the local fs. If not, no releasefile
+       * is necessary).
+       * Cutrrently we can not releaseFile after the media was closed
+       * (it's passed to the handler, which is deleted on close).
        **/
       class FileProvider {
 	FileProvider( const FileProvider & );             // no copy
