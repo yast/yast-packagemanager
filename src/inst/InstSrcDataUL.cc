@@ -56,12 +56,23 @@ using namespace std;
 IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
 
 
-
-PMError
-InstSrcDataUL::readMediaFile(MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count)
+#warning Put MediaFile parsing and data into some class or struct!
+/**
+ * read media.X/media file
+ *
+ * @param media_r MediaAccessPtr
+ * @param number the X in media.X
+ * @param vendor where to store vendor
+ * @param id where to store id
+ * @param count where to store count
+ **/
+static PMError readMediaFile( MediaAccessPtr media_r,
+			      unsigned number, std::string& vendor, std::string& id,
+			      unsigned& count, bool & doublesided )
 {
     vendor = id = string();
     count = 0;
+    doublesided = false;
 
     Pathname filename = stringutil::form("/media.%d/media", number);
 
@@ -77,14 +88,14 @@ InstSrcDataUL::readMediaFile(MediaAccessPtr media_r, unsigned number, std::strin
 	return InstSrcError::E_open_file;
     }
 
-    enum MF_state { MF_VENDOR = 0, MF_ID, MF_COUNT, MF_NUM_STATES } state = MF_VENDOR;
+    enum MF_state { MF_VENDOR = 0, MF_ID, MF_COUNT, MF_FLAG, MF_NUM_STATES } state = MF_VENDOR;
 
     string value;
     // If not reading trimmed, at least rtrim value
     for ( value = stringutil::getline( content, true );
-	content.good() && state < MF_NUM_STATES;
-	value = stringutil::getline( content, true ),
-	    state = MF_state(state+1))
+	  content.good() && state < MF_NUM_STATES;
+	  value = stringutil::getline( content, true ),
+	  state = MF_state(state+1))
     {
 	switch (state)
 	{
@@ -99,6 +110,10 @@ InstSrcDataUL::readMediaFile(MediaAccessPtr media_r, unsigned number, std::strin
 	    case MF_COUNT:
 		    count = atoi(value.c_str());
 		    DBG << "count " << count << endl;
+		break;
+	    case MF_FLAG:
+	            doublesided = (value == "doublesided");
+		    DBG << "doublesided " << doublesided << endl;
 		break;
 	    case MF_NUM_STATES:
 		break;
@@ -142,8 +157,10 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	// read media.1/media
 	string vendor;
 	string id;
-	unsigned count,
-	err = readMediaFile(media_r, 1, vendor, id, count);
+	unsigned count;
+	bool doublesided;
+
+	err = readMediaFile(media_r, 1, vendor, id, count, doublesided);
 	if(err != PMError::E_ok )
 	    return err;
 
@@ -162,6 +179,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	ndescr->set_media_vendor( Vendor(vendor) );
 	ndescr->set_media_id(id);
 	ndescr->set_media_count(count);
+	ndescr->set_media_doublesided(doublesided);
     }
 
     Pathname filename = product_dir_r + "/content";

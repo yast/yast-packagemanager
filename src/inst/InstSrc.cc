@@ -626,6 +626,7 @@ InstSrc::Type InstSrc::fromString( std::string s )
 **
 */
 #warning NEEDS REWRITE: provideMedia
+#warning Actually it's InstSrcData which has to somehow confirm it's the correct media.
 PMError
 InstSrc::provideMedia (int medianr) const
 {
