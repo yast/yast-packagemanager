@@ -208,8 +208,9 @@ class Y2PM {
 
 	    /**
 	     * called right before package 'name' is installed or deleted
+	     * should return 'true' to continue, 'false' to abort
 	     * */
-	    void (*_package_start_func)(const std::string& name,
+	    bool (*_package_start_func)(const std::string& name,
 						     const std::string& summary,
 						     const FSize& size, bool is_delete, void* data);
 	    void* _package_start_data;
@@ -257,7 +258,7 @@ class Y2PM {
 	/**
 	 * called right before package 'name' is installed or deleted
 	 * */
-	static void setPackageStartCallback(void (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data);
+	static void setPackageStartCallback(bool (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data);
 
 	/**
 	 * called multiple times during package installation, 'progress' is the

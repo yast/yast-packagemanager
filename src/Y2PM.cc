@@ -137,7 +137,7 @@ Y2PM::setProvideDoneCallback(void (*func)(PMError err, const std::string&, void*
  * called right before package 'name' is installed or deleted
  * */
 void
-Y2PM::setPackageStartCallback(void (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data)
+Y2PM::setPackageStartCallback(bool (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data)
 {
     _callbacks._package_start_func = func;
     _callbacks._package_start_data = data;
@@ -362,6 +362,11 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 	std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r)
 {
     int count = 0;
+    bool go_on = true;
+
+    errors_r.clear();
+    remaining_r.clear();
+    srcremaining_r.clear();
 
     std::list<PMPackagePtr> dellist;
     std::list<PMPackagePtr> inslist;
@@ -375,14 +380,20 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 	string fullname = (*it)->nameEd();
 
 	if (_callbacks._package_start_func)
-	    (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), true, _callbacks._package_start_data);
-
+	{
+	    go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), true, _callbacks._package_start_data);
+	    if (!go_on)
+		break;
+	}
 	PMError err = instTarget().removePackage (*it);
 
 	if (_callbacks._package_done_func)
 	    (*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
 
     }
+
+    if (!go_on)
+	return 0;
 
     // install loop
 
@@ -447,7 +458,11 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 	}
 
 	if (_callbacks._package_start_func)
-	    (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), false, _callbacks._package_start_data);
+	{
+	    go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), false, _callbacks._package_start_data);
+	    if (!go_on)
+		break;
+	}
 
 	err = instTarget().installPackage (path);
 
@@ -504,7 +519,11 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 		}
 
 		if (_callbacks._package_start_func)
-		    (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
+		{
+		    go_on = (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
+		    if (!go_on)
+			break;
+		}
 
 		err = instTarget().installPackage (path);
 
