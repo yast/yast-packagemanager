@@ -207,6 +207,26 @@ int main( int argc, char * argv[] )
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
+  Y2PM::youPatchManager();
+  dumpPkgWhatIf( INT, true );
+  SEC << Y2PM::youPatchManager().size() << endl;
+
+  string lang= "de";
+
+  string product= "SuSE-Linux";
+
+  string version= "9.1";
+
+  string arch= "i386";
+
+  PMYouSettingsPtr settings = new PMYouSettings( product, version, arch );
+  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( settings );
+
+  InstYou you( patchInfo, settings );
+  you.retrievePatchInfo();
+
+
+#if 0
   //Y2PM::setNotRunningFromSystem();
   //Y2PM::instTargetInit("/");
   //Y2PM::instSrcManager();
@@ -232,6 +252,7 @@ int main( int argc, char * argv[] )
     ERR << "Failed to provide: " << err << endl;
     return err;
   }
+#endif
 
   SEC << "STOP" << endl;
   return 0;

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Oct  6 17:07:37 CEST 2004 - ma@suse.de
+
+- Try to workaround YOU not withdrawing its packages from the
+  packagemanager, after online update is done. (workaround #46738)
+
+-------------------------------------------------------------------
 Fri Oct  1 14:28:03 CEST 2004 - ma@suse.de
 
 - mount cifs/smbfs: pass username and password via environment,

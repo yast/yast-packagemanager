@@ -257,6 +257,18 @@ PMError InstYou::retrievePatchInfo()
 {
   D__ << "retrievePatchInfo()" << endl;
 
+  // XXX move to separate function, it's copy&paste from SDGHVAT
+  if(!_patches.empty())
+  {
+      Y2PM::youPatchManager().poolRemoveCandidates( _patches );
+
+      vector<PMYouPatchPtr>::iterator itPatch;
+      for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
+         if ( !_settings->getAll() ) filterArchitectures( *itPatch );
+         Y2PM::packageManager().poolRemoveCandidates( (*itPatch)->packages() );
+      }
+      Y2PM::packageManager().setNothingSelected();
+  }
   _patches.clear();
 
   if ( !_username.empty() && !_password.empty() ) {
@@ -670,7 +682,7 @@ PMError InstYou::processPatches()
 
     patch = nextPatch();
   }
-  
+
   disconnect();
 
   log("\n");
@@ -857,6 +869,18 @@ PMError InstYou::processPatches()
     writeLastUpdate();
   }
 
+  // XXX move to separate function, it's copy&paste from SDGHVAT
+  if(!_patches.empty())
+  {
+      Y2PM::youPatchManager().poolRemoveCandidates( _patches );
+
+      vector<PMYouPatchPtr>::iterator itPatch;
+      for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
+         if ( !_settings->getAll() ) filterArchitectures( *itPatch );
+         Y2PM::packageManager().poolRemoveCandidates( (*itPatch)->packages() );
+      }
+      Y2PM::packageManager().setNothingSelected();
+  }
   PMError releaseError = releaseSource();
   if ( releaseError ) {
     ERR << "Error releasing media: " << releaseError << endl;
