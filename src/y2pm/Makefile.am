@@ -112,7 +112,8 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	YouError.h			\
 	DbHeader.h			\
 	PMInserter.h			\
-	PMDequeInserter.h
+	PMDequeInserter.h		\
+	PMPackageDelta.h
 
 #<INSTALL-HEADER-TARGET>
 
