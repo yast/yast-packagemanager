@@ -6,7 +6,7 @@ pkgincludedir = $(includedir)/y2pm
 
 # these go to $(pkgincludedir)
 
-pkginclude_HEADERS = PkgDep.h
+pkginclude_HEADERS = PkgDep.h InstallOrder.h
 noinst_HEADERS = PkgDep_int.h
 
 #<INSTALL-HEADER-TARGET>
