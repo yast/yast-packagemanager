@@ -40,6 +40,7 @@
 
 #include <y2pm/InstSrcData.h>
 #include <y2pm/InstSrcDataUL.h>
+#include <y2pm/InstSrcDataPLAIN.h>
 
 using namespace std;
 
@@ -166,20 +167,23 @@ PMError InstSrc::enableSource()
 
   //-----------------------------------------------------------------
   // Determine search path for providePackage
+#warning Thats actually nothing InstSrc has to deal with. It is InstSrcDataUL specific!!!
 
   //std::map<std::string,std::list<Pathname> >
   InstSrcDescr::ArchMap archmap = _descr->content_archmap();
-
   InstSrcDescr::ArchMap::const_iterator archIt = archmap.find ((const std::string &)(Y2PM::baseArch()));
-  if (archIt == archmap.end())
-  {
-    WAR << "No 'ARCH." << Y2PM::baseArch() << "' line, using ARCH." << _descr->content_defaultbase() << endl;
-    archIt = archmap.find (_descr->content_defaultbase());
-  }
-  if (archIt == archmap.end())
-  {
-    ERR << "Unable to determine ARCH. line" << endl;
-    return Error::E_src_no_description;
+
+  if ( _descr->type() == T_UnitedLinux ) {
+    if (archIt == archmap.end())
+    {
+      WAR << "No 'ARCH." << Y2PM::baseArch() << "' line, using ARCH." << _descr->content_defaultbase() << endl;
+      archIt = archmap.find (_descr->content_defaultbase());
+    }
+    if (archIt == archmap.end())
+    {
+      ERR << "Unable to determine ARCH. line" << endl;
+      return Error::E_src_no_description;
+    }
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -194,6 +198,10 @@ PMError InstSrc::enableSource()
 
   case T_UnitedLinux:
     err = InstSrcDataUL::tryGetData( this, ndata, _media, _descr->descrdir(), archIt->second, Y2PM::getPreferredLocale() );
+    break;
+
+  case T_PlainDir:
+    err = InstSrcDataPLAIN::tryGetData( ndata, this );
     break;
 
     ///////////////////////////////////////////////////////////////////
@@ -219,8 +227,10 @@ PMError InstSrc::enableSource()
   ///////////////////////////////////////////////////////////////////
   if ( !err ) {
 #warning TBD which is the correct list of allowed architectures if multiple products are installed ?
-    if (Y2PM::allowedArchs().empty())
+    if ( _descr->type() == T_UnitedLinux ) {
+      if (Y2PM::allowedArchs().empty())
 	Y2PM::setAllowedArchs (archIt->second);
+    }
     _data = ndata;
     _data->_instSrc_attach( this );
     _data->_instSrc_propagate();    // propagate Objects to Manager classes.
@@ -498,6 +508,10 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
 	err = InstSrcDataUL::tryGetDescr( ndescr, _media, product_dir_r );
 	break;
 
+    case T_PlainDir:
+	err = InstSrcDataPLAIN::tryGetDescr( ndescr, this, _media, product_dir_r, mediaurl_r );
+	break;
+
     ///////////////////////////////////////////////////////////////////
     // no default: let compiler warn '... not handled in switch'
     ///////////////////////////////////////////////////////////////////
@@ -568,6 +582,7 @@ string InstSrc::toString( const Type t )
 
 #define ENUM_OUT(V) case T_##V: return #V; break
     ENUM_OUT( UnitedLinux );
+    ENUM_OUT( PlainDir );
     ENUM_OUT( AUTODETECT );
 #undef ENUM_OUT
 
@@ -867,20 +882,30 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir,
 	ERR << "Media can't provide '" << dir+name << "': " << err.errstr() << endl;
 	return err;
     }
-    path_r = _media->localPath (filename);
 
-#warning Hack not to keep more than one downloaded package
-    if ( isRemote() && previouslyDnlPackage != path_r ) {
-	if(! previouslyDnlPackage.empty())
-	{
-	    PathInfo::unlink( previouslyDnlPackage );
-	}
-	previouslyDnlPackage = path_r;
-    }
+    path_r = _media->localPath (filename);
+    rememberPreviouslyDnlPackage( path_r ); // Hack not to keep more than one downloaded package
 
     return PMError::E_ok;
 }
 
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrc::rememberPreviouslyDnlPackage
+//	METHOD TYPE : void
+//
+void InstSrc::rememberPreviouslyDnlPackage( const Pathname & newpath_r ) const
+{
+#warning Hack not to keep more than one downloaded package
+  if ( isRemote() && previouslyDnlPackage != newpath_r ) {
+    if ( ! previouslyDnlPackage.empty() ) {
+      PathInfo::unlink( previouslyDnlPackage );
+    }
+    previouslyDnlPackage = newpath_r;
+  }
+}
 
 /******************************************************************
 **
@@ -959,6 +984,9 @@ InstSrc::isRemote () const
   case MediaAccess::HTTP:
   case MediaAccess::HTTPS:
     return true;
+
+  default:
+    break;
   }
 
   return false;
