@@ -79,7 +79,7 @@ class PMPackageManager : public PMManager {
      * each level as required.
      * Returns the tree entry for this RPM group.
      **/
-    YStringTreeItem * addRpmGroup( std::string rpmGroup )
+    YStringTreeItem * addRpmGroup( const std::string & rpmGroup )
 	{ return _rpmGroupsTree->addRpmGroup( rpmGroup ); }
 
     /**
