@@ -128,7 +128,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual std::list<std::string> delnotify   ( const PMPackage & pkg_r ) const;
 	virtual FSize                  size        ( const PMPackage & pkg_r ) const;
 	virtual bool                   providesSources( const PMPackage & pkg_r ) const;
-	virtual std::string            instSrcLablel  ( const PMPackage & pkg_r ) const;
+	virtual std::string            instSrcLabel   ( const PMPackage & pkg_r ) const;
 	virtual Vendor                 instSrcVendor  ( const PMPackage & pkg_r ) const;
 
 	// PMPackage attributes
