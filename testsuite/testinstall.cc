@@ -85,6 +85,7 @@ void rebuilddb(vector<string>& argv);
 void du(vector<string>& argv);
 void showselection(vector<string>& argv);
 void installselection(vector<string>& argv);
+void order(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -121,6 +122,8 @@ static struct Funcs func[] = {
 	"show state of package (all if none specified. Not installed will be suppressed if verbose=0)" },
 
     { "installselection",	installselection,	1,	"mark selection for installation" },
+    
+    { "order",		order,		1,	"compute installation order" },
 
     { NULL,		NULL,		0,	NULL }
 };
@@ -400,10 +403,10 @@ void init(vector<string>& argv)
 
     Y2PM::packageManager();
     Y2PM::selectionManager();
-    PMError dbstat = Y2PM::instTarget().init(_rootdir, false);
+    PMError dbstat = Y2PM::instTarget().init(_rootdir, true);
     if( dbstat != InstTargetError::E_ok )
     {
-	ERR << "error initializing target: " << dbstat << endl;
+	cout << "error initializing target: " << dbstat << endl;
     }
     else
     {
@@ -643,6 +646,31 @@ void solve(vector<string>& argv)
     cout << numbad << " bad, " << numinst << " to install" << endl;
 }
 
+
+void order(vector<string>& argv)
+{
+    PkgSet toinstall;
+    for (PMManager::PMSelectableVec::iterator it = Y2PM::packageManager().begin();
+	it != Y2PM::packageManager().end(); ++it )
+    {
+	if((*it)->to_install())
+	{
+	    toinstall.add((*it)->candidateObj());
+	}
+    }
+
+    InstallOrder order(toinstall);
+    order.startrdfs();
+
+    cout << "Installation order:" << endl;
+    for(InstallOrder::SolvableList::const_iterator cit = order.getTopSorted().begin();
+	cit != order.getTopSorted().end(); ++cit)
+    {
+	cout << (*cit)->name() << " ";
+    }
+    cout << endl;
+
+}
 #if 0
 void installold(vector<string>& argv)
 {
