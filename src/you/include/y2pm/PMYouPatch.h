@@ -145,6 +145,24 @@ class PMYouPatch : virtual public Rep, public PMObject {
     bool updateOnlyInstalled() const { return _updateOnlyInstalled; }
 
     /**
+     * Set name of script which is executed before installation of patch.
+     */
+    void setPreScript( const std::string &preScript ) { _preScript = preScript; }
+    /**
+     * Return name of script which is executed before installation of patch.
+     */
+    std::string preScript() const { return _preScript; }
+
+    /**
+     * Set name of script which is executed after installation of patch.
+     */
+    void setPostScript( const std::string &postScript ) { _postScript = postScript; }
+    /**
+     * Return name of script which is executed after installation of patch.
+     */
+    std::string postScript() const { return _postScript; }
+
+    /**
      * Add a package to this patch.
      *
      */
@@ -154,7 +172,13 @@ class PMYouPatch : virtual public Rep, public PMObject {
      */
     std::list<PMPackagePtr> packages() const { return _packages; }
 
+    /**
+     * Set name of file where patch info is stored on local system.
+     */
     void setLocalFile( const Pathname &localFile ) { _localFile = localFile; }
+    /**
+     * Return name of file where patch info is stored on local system.
+     */
     Pathname localFile() const { return _localFile; }
 
   private:
@@ -163,7 +187,8 @@ class PMYouPatch : virtual public Rep, public PMObject {
     std::string _minYastVersion;
     Kind _kind;
     bool _updateOnlyInstalled;
-
+    std::string _preScript, _postScript;
+    
     std::list<PMPackagePtr> _packages;
 
     Pathname _localFile;

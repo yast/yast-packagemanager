@@ -315,3 +315,14 @@ PMError InstTarget::installPatch( const Pathname &filename )
 
     return PMError();
 }
+
+PMError InstTarget::executeScript( const Pathname &scriptname )
+{
+    int result = system( ( "/bin/bash " + scriptname.asString() ).c_str() );
+    if ( result != 0 ) {
+        E__ << "Script failed. Exit code " << result << endl;
+        return PMError( InstTargetError::E_error );
+    }
+
+    return PMError();
+}

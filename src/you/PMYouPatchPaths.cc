@@ -72,6 +72,7 @@ void PMYouPatchPaths::init( const string &product, const string &version,
   
   _patchPath = path + "/patches/";
   _rpmPath = path + "/rpm/";
+  _scriptPath = path + "/scripts/";
 }
 
 void PMYouPatchPaths::setPatchPath( const Pathname &path )
@@ -82,6 +83,16 @@ void PMYouPatchPaths::setPatchPath( const Pathname &path )
 Pathname PMYouPatchPaths::patchPath()
 {
   return _patchPath;
+}
+
+void PMYouPatchPaths::setPatchUrl( const Url &url )
+{
+  _patchUrl = url;
+}
+
+Url PMYouPatchPaths::patchUrl()
+{
+  return _patchUrl;
 }
 
 Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg )
@@ -97,14 +108,9 @@ Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg )
   return _rpmPath + rpmName;
 }
 
-void PMYouPatchPaths::setPatchUrl( const Url &url )
+Pathname PMYouPatchPaths::scriptPath( const string &scriptName )
 {
-  _patchUrl = url;
-}
-
-Url PMYouPatchPaths::patchUrl()
-{
-  return _patchUrl;
+  return _scriptPath + scriptName;
 }
 
 Pathname PMYouPatchPaths::localDir()

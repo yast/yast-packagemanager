@@ -108,6 +108,8 @@ ostream & PMYouPatch::dumpOn( ostream & str ) const
   str << "PreInformation:" << endl << _preInformation << endl;
   str << "PostInformation:" << endl << _postInformation << endl;
   str << "UpdateOnlyInstalled:" << ( _updateOnlyInstalled ? "true" : "false" ) << endl;
+  str << "Prescript: " << _preScript << endl;
+  str << "Postscript: " << _postScript << endl;
 
   return str;
 }
