@@ -6,6 +6,20 @@
 
 using namespace std;
 
+/* return first pointer from candidates that obsoletes instd, NULL if there is none */
+static PMSolvablePtr is_obsoleted_by_candidate(PkgSet& candidates, PMSolvablePtr instd)
+{
+    if(!instd) return NULL;
+    RevRel_for( PkgSet::getRevRelforPkg(candidates.obsoleted(),instd->name()), obs )
+    {
+	if (obs->relation().matches( instd->self_provides() ))
+	{
+		return obs->pkg();
+	}
+    }
+    return NULL;
+}
+
 bool PkgDep::install( PkgSet& in_candidates,
 			  ResultList& out_good,
 			  ErrorResultList& out_bad,
@@ -40,6 +54,7 @@ bool PkgDep::install( PkgSet& in_candidates,
 		else {
 			bool pushfront=false;
 			numtocheck++;
+#if 0
 			// ensure that packages that obsolete something
 			// installed are checked first
 			for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
@@ -58,6 +73,7 @@ bool PkgDep::install( PkgSet& in_candidates,
 			    to_check.push_front( cand );
 			}   
 			else
+#endif
 			{
 			    to_check.push_back( cand );
 			}
@@ -174,8 +190,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	    goto add_package_error_out;
 	}
 
-	/* we don't do that, we just remove them from vinstalled
-	 *
+#if 0
 	// check if the candidates obsoletes something already installed
 	// if yes, check if requirements would be broken by the replacement
 	// (conflict-by-obsoletion); otherwise, remove the obsoleted package from
@@ -197,7 +212,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			}
 		}
 	}
-	*/
+#endif
 
 	for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
 	    obs != cand->obsoletes_end(); ++obs )
@@ -545,7 +560,15 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg, PMSolvablePtr newpkg, 
 			}
 
 			if (!obsdoesntmatter && !req_ok_after_upgrade( req->relation(), oldpkg, newpkg )) {
-				if (PMSolvablePtr upgrade = try_upgrade_requirerer(
+				if(PMSolvablePtr obsoletor = is_obsoleted_by_candidate(*candidates,req->pkg()))
+				{
+					// TODO: turn this into W__ after beta
+					WAR << "installed/accepted "
+					    << req->pkg()->name()
+					    << " is obsoleted by at least candidate "
+					    << obsoletor->name() << endl;
+				}
+				else if (PMSolvablePtr upgrade = try_upgrade_requirerer(
 						req->pkg(), oldpkg, newpkg )) {
 					do_upgrade_for_conflict( upgrade );
 				}
