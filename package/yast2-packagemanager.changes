@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 28 13:20:53 CET 2003 - lnussel@suse.de
+
+- better handling of obsoleted packages, problems are now reported in
+  ErrorResultList
+
+-------------------------------------------------------------------
 Mon Jan 27 13:27:07 CET 2003 - ma@suse.de
 
 - Fixed configure checks.

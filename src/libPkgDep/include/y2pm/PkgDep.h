@@ -50,6 +50,11 @@ class PkgDep {
 
 	/** RelInfo, Alternative, and NeededEditionRange are for returning results */
 	struct RelInfo {
+
+		enum Kind {
+			REQUIREMENT = 0, CONFLICT, OBSOLETION
+		};
+
 		/**
 		 * name of package causing the relation
 		 * */
@@ -59,27 +64,28 @@ class PkgDep {
 		 * from name, then name provides rel.name)
 		 * */
 		PkgRelation rel;
+
 		/**
-		 * true if the relation is a conflict, false if
-		 * it's a requires
+		 * Tells you what this relation means
 		 * */
-		bool is_conflict;
+		
+		Kind kind;
 
 		/**
 		 * PMSolvablePtr if applicable.
 		 * */
 		PMSolvablePtr solvable;
 
-		RelInfo( PMSolvablePtr s, PkgRelation r, bool is_c = false)
+		RelInfo( PMSolvablePtr s, PkgRelation r, Kind k = REQUIREMENT )
 			: name(s->name()), rel(r),
-			is_conflict(is_c), solvable(s)
+			kind(k), solvable(s)
 			{}
-		RelInfo( PkgName n, PkgRelation r, bool is_c = false, PMSolvablePtr s = NULL )
-			: name(n), rel(r), is_conflict(is_c), solvable(s)
+		RelInfo( PkgName n, PkgRelation r, Kind k = REQUIREMENT, PMSolvablePtr s = NULL )
+			: name(n), rel(r), kind(k), solvable(s)
 			{}
-		RelInfo( PkgRevRelation r, bool is_c = false )
+		RelInfo( PkgRevRelation r, Kind k = REQUIREMENT )
 			: name(r.pkg()->name()), rel(r.relation()),
-			is_conflict(is_c), solvable(r.pkg())
+			kind(k), solvable(r.pkg())
 			{}
 	};
 
@@ -244,7 +250,7 @@ class PkgDep {
 		 * This field lists all kinds of conflicts of the
 		 * package with installed packages or other packages
 		 * to be installed. The RelInfos can be requirements
-		 * or conflicts. An entry can be generated if:
+		 * conflicts or obsoletions. An entry can be generated if:
 		 *
 		 * <ul>
 		 * 
@@ -257,10 +263,19 @@ class PkgDep {
 		 * <li>if a previously satisfied requirement of an
 		 * installed package is broken by installing
 		 * (probably upgrading) this package (in this case
-		 * is_conflict in the RelInfo is unset)</li>
+		 * kind in the RelInfo is CONFLICT)</li>
+		 *
+		 * <li>if an already installed package obsoletes
+		 * this one (kind = OBSOLETION, together with
+		 * state_change_not_possible<li>
+		 *
+		 * <li>if this package obsoletes an installed one
+		 * (kind = OBSOLETION, together with
+		 * state_change_not_possible<li>
 		 * 
 		 * </ul>
 		 * */
+
 		RelInfoList conflicts_with;
 		/**
 		 * This is an auxiliary field to conflicts_with. The
@@ -285,12 +300,17 @@ class PkgDep {
 						   const PkgDep& dep,
 						   PMSolvablePtr to_remove,
 						   PMSolvablePtr assume_instd,
-						   bool is_conflict = true );
+						   RelInfo::Kind kind = RelInfo::CONFLICT );
+		/**
+		 * This Result has a problem with s and its relation
+		 * rel. To solve the conflict, to_remove must be
+		 * removed/not installed.
+		 * */
 		void add_conflict( PMSolvablePtr s, const PkgRelation& rel,
 						   const PkgDep& dep,
 						   PMSolvablePtr to_remove,
 						   PMSolvablePtr assume_instd,
-						   bool is_conflict = true );
+						   RelInfo::Kind kind = RelInfo::CONFLICT );
 		void add_alternative( PMSolvablePtr p, alternative_kind k );
 		void add_notes( const Notes& notes );
 
@@ -403,7 +423,7 @@ class PkgDep {
 	std::deque<PMSolvablePtr > to_check;
 	AltInfoList alts_to_check;
 	noval_hash<PkgName> alts_handled;
-	NameList i_obsoleted;
+	ErrorResultList* i_obsoleted; // obsolete packages
 	ResultList *good;
 	ErrorResultList *bad;
 
@@ -480,8 +500,10 @@ public:
 	 * install packages (if good result, add candidates to installed set)
 	 * */
 	bool install( PkgSet& candidates,
-				  ResultList& good, ErrorResultList& bad,
-				  bool commit_to_installed = true);
+			  ResultList& good,
+			  ErrorResultList& bad,
+			  ErrorResultList& out_obsoleted,
+			  bool commit_to_installed = true);
 	/** remove a list of packages; the 'pkgs' list will be extended by all
 	 * packages that have to be removed, too, to make the installed set
 	 * consistent again */
@@ -498,14 +520,25 @@ public:
 	 * @param none if true, candidates will not be used at all
 	 * @param max_remove maximum number of packages that will
 	 * automatically be removed
+	 * 
+	 * DONT USE!
 	 * */
+	/*
 	bool upgrade(	PkgSet&candidates, ResultList& out_good,
 			ErrorResultList& out_bad, SolvableList& to_remove,
 			bool all = false, bool none = false,
 			unsigned max_remove = default_max_remove );
+	*/
 
+	/**
+	 * just like install but also try to fix inconsistent
+	 * installed packages
+	 * */
 	bool solvesystemnoauto(
-		PkgSet &candidates, ResultList& out_good, ErrorResultList& out_bad );
+		PkgSet &candidates,
+		ResultList& out_good,
+		ErrorResultList& out_bad,
+		ErrorResultList& out_obsoleted);
 
 
 	/** return current installed set for inspection */

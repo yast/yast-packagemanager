@@ -70,6 +70,7 @@ static void deselect_referers(
 }
 
 
+#if 0
 // probably fucked up
 bool PkgDep::upgrade(
 	PkgSet &candidates, ResultList& out_good, ErrorResultList& out_bad,
@@ -283,9 +284,13 @@ bool PkgDep::upgrade(
 
 	return all_ok;
 }
+#endif
 
 bool PkgDep::solvesystemnoauto(
-	PkgSet &candidates, ResultList& out_good, ErrorResultList& out_bad)
+	PkgSet &candidates,
+	ResultList& out_good,
+	ErrorResultList& out_bad,
+	ErrorResultList& out_obsoleted)
 {
 	PkgSet installed_backup = installed;
 //	noval_hash<PkgName> real_from_input_list;
@@ -295,7 +300,7 @@ bool PkgDep::solvesystemnoauto(
 	set<PMSolvablePtr> noinstcandidates;
 	PkgSet brokeninstalled;
 
-	D__ << "Starting upgrade\n";
+	D__ << "Starting solver\n";
 
 //	installed.dumpOn(cout);
 
@@ -359,7 +364,7 @@ bool PkgDep::solvesystemnoauto(
 
 	// try installation of the candidates
 	DBG << "-------------------- install run --------------------\n";
-	install( candidates, out_good, out_bad, true );
+	install( candidates, out_good, out_bad, out_obsoleted, true );
 	DBG << "-------------------- install end --------------------\n";
 
 #if 0
@@ -490,7 +495,6 @@ bool PkgDep::solvesystemnoauto(
 	out_good.remove_if( fromBrokeninstalled(brokeninstalled) );
 
 	return out_bad.empty();
-
 }
 
 // Local Variables:

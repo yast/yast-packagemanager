@@ -19,6 +19,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/stringutil.h>
+#include <y2util/timeclass.h>
 
 #include <y2pm/PMManager.h>
 #include <y2pm/PkgSet.h>
@@ -149,13 +150,20 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
     MIL << stringutil::form("%d installed, %d available, %d to install", ni, na, nt) << endl;
 }
 
+// predicate class for finding results for a PkgName
+struct ResultEqName {
+	PkgName name;
+	ResultEqName( PkgName n ) : name(n) {}
+	bool operator() ( const PkgDep::Result& res ) { return res.name == name; }
+};
+
 // set packages not from input list to auto, those that can't be set to auto
 // are added to bad list
 //
 // installed is a set of packages that are assumed to be installed,
 // used for building remove_to_solve_conflict lists
 static void setAutoState(PkgSet& installed, PkgDep::ResultList& good, PkgDep::ErrorResultList&
-bad, PkgDep::SolvableList& to_remove)
+bad, PkgDep::ErrorResultList& obsolete)
 {
     bool deletedone = false;
     for(PkgDep::ResultList::iterator it = good.begin();
@@ -233,21 +241,28 @@ bad, PkgDep::SolvableList& to_remove)
 	}
     }
 
-    for(PkgDep::SolvableList::iterator it = to_remove.begin();
-	    it != to_remove.end(); ++it)
+    for(PkgDep::ErrorResultList::iterator it = obsolete.begin();
+	    it != obsolete.end(); ++it)
     {
-	PMObjectPtr op = *it;
+	PkgDep::ErrorResult* err = &(*it);
 
-	if( op == NULL )
-	    { ERR << (*it)->name() << "is no PMObject" << endl; continue; }
+	PMObjectPtr op = err->solvable;
+
+	if(!op)
+		{ ERR << "result " << err->name << " didn't contain a valid object" << endl; continue; };
 
 	PMSelectablePtr selp = op->getSelectable();
 
 	if(selp == NULL)
-	    { ERR << "good result with NULL selectable: " << (*it)->name() << endl; continue; }
+	    { ERR << "good result with NULL selectable: " << err->name << endl; continue; }
 
 	if(!selp->auto_set_delete())
-	    { ERR << "could not set " << (*it)->name() << " to status auto delete" << endl; continue; }
+	{
+		ERR << "could not set " << err->name << " to status auto delete" << endl;
+		err->state_change_not_possible = true;
+		bad.push_back(*err);
+		good.remove_if( ResultEqName(err->name) );
+	}
     }
 }
 
@@ -257,6 +272,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
     bool repeat = false;
     short count = 5; // repeat maximal five times, shouldn't happen more then once but who knows ...
     bool success = false;
+    PkgDep::ErrorResultList obsolete;
 
     do
     {
@@ -264,16 +280,24 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 	PkgSet installed; // already installed
 	PkgSet available; // available for installation
 	PkgSet toinstall; // user selected for installion
+	TimeClass t;
 
+	t.startTimer();
 	buildSets(installed, available, toinstall);
+	MIL << "building sets took " << t.stopTimer() << "seconds" << endl;
 
+	t.startTimer();
 	PkgDep engine( installed, available ); // TODO alternative_default
+	MIL << "constructing engine took " << t.stopTimer() << "seconds" << endl;
 
-	success = engine.solvesystemnoauto( toinstall, good, bad);
-	PkgDep::SolvableList to_remove;
+	t.startTimer();
+	success = engine.solvesystemnoauto( toinstall, good, bad, obsolete);
+	MIL << "solving took " << t.stopTimer() << "seconds" << endl;
 
+	t.startTimer();
 	PkgSet nowinstalled; // assumed state after operation
 	buildinstalledonly(*this,nowinstalled);
+	MIL << "building nowinstallset took " << t.stopTimer() << "seconds" << endl;
 	
 	if(!success && filter_conflicts_with_installed)
 	{
@@ -297,7 +321,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 		    if(!o) continue;
 		    PMSelectablePtr what = o->getSelectable(); // what is causing the conflict, e.g. sendmail
 		    // only conflicts
-		    if(!what || !rlit->is_conflict) continue;
+		    if(!what || rlit->kind != PkgDep::RelInfo::CONFLICT) continue;
 
 		    if(what->has_installed() && who->by_appl())
 		    {
@@ -315,7 +339,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 	}
 	else
 	{
-	    setAutoState(nowinstalled, good, bad, to_remove);
+	    setAutoState(nowinstalled, good, bad, obsolete);
 	}
 
 	count--;
