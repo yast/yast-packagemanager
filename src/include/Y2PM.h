@@ -98,12 +98,12 @@ class Y2PM {
      * Not necessarily the same as _instTarget_rootdir (e.g. if we'd install into a
      * local directory).
      **/
-    static const Pathname & systemRoot() { return _system_rootdir; }
+    //static const Pathname & systemRoot() { return _system_rootdir; }
 
     /**
      *
      **/
-    static bool haveSystem() { return ! _system_rootdir.empty(); }
+    //static bool haveSystem() { return ! _system_rootdir.empty(); }
 
     /**
      * If false, root is ramdisk, and system to install is (or will be) mounted
@@ -112,6 +112,9 @@ class Y2PM {
      * is available below _system_rootdir.
      **/
     static bool runningFromSystem() { return( _system_rootdir == "/" ); }
+    static void setNotRunningFromSystem() {
+      _system_rootdir = Pathname();
+    }
 
   public:
 

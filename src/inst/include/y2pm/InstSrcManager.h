@@ -178,6 +178,8 @@ class InstSrcManager {
      * Should be replaced by some Iterator.
      **/
     void getSources( ISrcIdList & idlist_r, const bool enabled_only = false ) const;
+
+    PMError cacheCopyTo( const Pathname & newRoot_r );
 };
 
 ///////////////////////////////////////////////////////////////////
