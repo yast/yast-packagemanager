@@ -517,6 +517,10 @@ PMError RpmDb::internal_initDatabase( const Pathname & root_r, const Pathname & 
 			   V3toV4Written, V3toV4Errors, _cb_convertDb );
       _t.stop();
 
+      // Invalidate all outstanding database handles as the database got modified.
+      dbptr = 0;
+      librpmDb::dbRelease( true );
+
       if ( err ) {
 	ERR << "Convert rpm3 database to rpm4: " << err << endl;
 	return Error::E_RpmDB_convert_failed;
