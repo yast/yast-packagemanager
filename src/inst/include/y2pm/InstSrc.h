@@ -291,19 +291,19 @@ class InstSrc: virtual public Rep {
 
 	/** media change callback
 	    - product name (i.e "SuSE Linux Professional 8.1")
-	    - product url
+	    - product error
 	    - media type (0=CD, 1=DVD, ...)
 	    - expected media number
 	    - found media number (0 == none)
-	    return 0: retry, 1: skip, 2 cancel, 3 new url
+	    return "": retry, "1": skip, "2" cancel, else new url
 	 */
-	int (*_mediachangefunc)(const std::string& product, Url& url, int expected, int current, void*);
+	std::string (*_mediachangefunc)(const std::string& product, const std::string& error, int expected, int current, void*);
 
 	/** media error callback
 	    - error code
 	*/
 
-	int (*_mediaerrorfunc)(PMError error, void*);
+	std::string (*_mediaerrorfunc)(PMError error, void*);
 
 	/** arbitrary data to pass back for progress callback */
 	void* _mediachangedata;
@@ -317,7 +317,7 @@ class InstSrc: virtual public Rep {
 	 * @param func callback function
 	 * @param data arbitrary data to pass when function is called
 	 * */
-	void setMediaChangeCallback(int (*func)(const std::string&,Url&,int,int,void*), void* data)
+	void setMediaChangeCallback(std::string (*func)(const std::string&,const std::string&,int,int,void*), void* data)
 	{
 	    _mediachangefunc = func;
 	    _mediachangedata = data;
@@ -328,7 +328,7 @@ class InstSrc: virtual public Rep {
 	 * @param func callback function
 	 * @param data arbitrary data to pass when function is called
 	 * */
-	void setMediaErrorCallback(int (*func)(PMError,void*), void* data)
+	void setMediaErrorCallback(std::string (*func)(PMError,void*), void* data)
 	{
 	    _mediaerrorfunc = func;
 	    _mediaerrordata = data;
