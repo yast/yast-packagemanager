@@ -1,9 +1,9 @@
-# SuSE-Linux-Package-Selection 2.1 -- (c) 1994-2001 SuSE GmbH
-# generated on Sat Aug 10 03:12:00 UTC 2002
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:33 UTC 2002
 
 =Ver: 3.0
-=Ord: 001
-=Sel: Minimal 8.1 1
+
+=Sel:  Minimal
 
 =Sum: Minimum system
 =Sum.cs: Minimální systém
@@ -15,7 +15,6 @@
 =Sum.hu: Minimális rendszer
 =Sum.it: Sistema minimo
 =Sum.ja: 最小限のシステム
-=Sum.lt: Minimum system
 =Sum.nl: Minimaal systeem
 =Sum.pt: Minimum system
 =Sum.sv: Minimum system
@@ -27,8 +26,12 @@ default
 Standard
 Alles
 -Con:
+
 =Cat: baseconf
+
 =Vis: true
+
+=Ord: 01
 
 +Ins:
 SuSEfirewall2
@@ -63,6 +66,7 @@ fbset
 file
 filesystem
 fileutils
+fillup
 findutils
 finger
 gawk
@@ -95,6 +99,7 @@ libgcc
 libstdc++
 libxcrypt
 libxml2
+liby2util
 lilo
 logrotate
 lsof
@@ -103,6 +108,7 @@ lvm
 m4
 mailx
 man
+mdadm
 mktemp
 modutils
 ncurses
@@ -133,7 +139,6 @@ reiserfs
 rpm
 rsh
 s390-tools
-s390utils
 sash
 sed
 sh-utils
@@ -165,6 +170,7 @@ yast2-bootloader
 yast2-core
 yast2-country
 yast2-firewall
+yast2-inetd
 yast2-installation
 yast2-ldap-client
 yast2-mail
@@ -177,6 +183,7 @@ yast2-nis-client
 yast2-nis-server
 yast2-nisplus-client
 yast2-online-update
+yast2-packagemanager
 yast2-packager
 yast2-pam
 yast2-restore
@@ -193,6 +200,10 @@ yast2-xml
 zlib
 -Ins:
 
++Ins.bs:
+yast2-trans-bs
+-Ins.bs:
+
 +Ins.cs:
 yast2-trans-cs
 -Ins.cs:
@@ -200,6 +211,18 @@ yast2-trans-cs
 +Ins.de:
 yast2-trans-de
 -Ins.de:
+
++Ins.el:
+yast2-trans-el_GR
+-Ins.el:
+
++Ins.es:
+yast2-trans-es
+-Ins.es:
+
++Ins.fr:
+yast2-trans-fr
+-Ins.fr:
 
 +Ins.it:
 yast2-trans-it
@@ -211,4 +234,36 @@ kon2
 kon2font
 yast2-trans-ja
 -Ins.ja:
+
++Ins.lt:
+yast2-trans-lt
+-Ins.lt:
+
++Ins.nl:
+yast2-trans-nl
+-Ins.nl:
+
++Ins.pt:
+yast2-trans-pt_BR
+-Ins.pt:
+
++Ins.sk:
+yast2-trans-sk
+-Ins.sk:
+
++Ins.sl:
+yast2-trans-sl_SI
+-Ins.sl:
+
++Ins.sv:
+yast2-trans-sv
+-Ins.sv:
+
++Ins.tr:
+yast2-trans-tr
+-Ins.tr:
+
++Ins.zh_CN:
+yast2-trans-zh_CN
+-Ins.zh_CN:
 

@@ -1,0 +1,150 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:35 UTC 2002
+
+=Ver: 3.0
+
+=Sel:  Multimedia
+
+=Sum: Multimedia
+=Sum.cs: Multimédia
+=Sum.de: Multimedia
+=Sum.en: Multimedia
+=Sum.es: Multimedia
+=Sum.fr: Multimédia
+=Sum.gl: Multimedia
+=Sum.hu: Multimédia
+=Sum.it: Multimedia
+=Sum.ja: マルチメディア
+=Sum.nl: Multimedia
+=Sum.pt: Multimedia
+=Sum.sv: Multimedia
+=Sum.tr: Multimedia
+
++Req:
+X11
+Basis-Sound
+-Req:
+
++Con:
+Minimal
+-Con:
+
+=Cat: addon
+
+=Vis: true
+
+=Ord: 17
+
++Ins:
+ImageMagick
+SDL
+aalib
+alevt
+alsa
+alsa-tools
+arts
+atk
+audiofile
+broadcast2000
+cdcons
+cdda2wav
+cdparanoia
+cdrdao
+cdrecord
+cups-libs
+curl
+dap
+dialog
+esound
+fam
+fftw
+gamix
+gd
+gdk-pixbuf
+gimp
+gle
+glib2
+gnome-libs
+gqview
+grip
+gstransf
+gtk2
+gtkam
+gtkglarea
+gxmhtml
+id3lib
+jazz
+kalsatools
+kde2-compat
+kdelibs3
+kwintv
+ladspa
+libao
+libavc1394
+libdv
+libexif
+libexif-gtk
+libghttp
+libgphoto2
+libjasper
+libmikmod
+libmpeg3
+libogg
+libquicktime
+libraw1394
+libtool
+libvorbis
+libwmf
+libxml
+libxml2
+libxslt
+lirc
+mkisofs
+mpg123
+noteedit
+openmotif
+orbit
+pango
+pbm2l7k
+pcre
+pcsc-lite
+perl-Parse-RecDescent
+pia
+pixmp
+plugger
+povray
+psgplay
+python
+qt
+rplay
+sapphire
+sced
+sidplay
+slab
+slang
+smix
+smpeg
+sox
+terminatorX
+timidity
+tse3
+tv-common
+tv-fonts
+v4l-conf
+vkeybd
+vorbis-tools
+wavplay
+wsndpref
+wsndsrv
+wv
+xanim
+xawtv
+xforms
+xgrabsc
+xmcd
+xmp
+xv
+yiff
+zvbi
+-Ins:
+
