@@ -25,11 +25,11 @@ PkgSet::PkgSet( PackageDataProvider* provider )
 		if (pkg->is_from_provider( provider ))
 			add( pkg );
 	}
-	PkgPool.attach_set( PkgSet::Ref(this) );
+	PkgPool.attach_set( this );
 }
 
 PkgSet::~PkgSet() {
-	PkgPool.detach_set( PkgSet::Ref(this) );
+	PkgPool.detach_set( this );
 }
 
 #define RelList_for(field,var)											\

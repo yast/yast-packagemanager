@@ -28,31 +28,35 @@ class Size
 //****************** move to own header
 
 // class for transparent handling of files on various media
-class MediaAccess
+class MediaAccessRep
 {
     private:
-	MediaAccess(const MediaAccess&);
+	MediaAccessRep(const MediaAccessRep&);
     protected:
 	std::string _urlprefix;
     public:
-	typedef RefObject<MediaAccess> Ref;
 
-	MediaAccess(std::string urlprefix = "file");
-	virtual ~MediaAccess();
+	MediaAccessRep(std::string urlprefix = "file");
+	virtual ~MediaAccessRep();
 	virtual std::string getFile(const std::string& file, bool purge = false)=0;
 };
 
-class MediaAccess_File : public MediaAccess
+typedef RefObject<MediaAccessRep> MediaAccess;
+
+class MediaAccess_FileRep : public MediaAccessRep
 {
     public:
-	MediaAccess_File();
-	~MediaAccess_File();
+
+	MediaAccess_FileRep();
+	~MediaAccess_FileRep();
 	// purge means remember the file and delete it on destruction of the
 	// object, e.g for temporary ftp downloads
 	std::string getFile(const std::string& file, bool purge=false);
 };
 
-extern hash<std::string,RefObject<MediaAccess> > media_access_handlers;
+typedef DerRefObject<MediaAccess_FileRep,MediaAccessRep> MediaAccess_File;
+
+extern hash<std::string,MediaAccess> media_access_handlers;
 
 // *********************************
 
@@ -61,11 +65,11 @@ class Url
 {
     private:
 //	Url(const Url&);
-	MediaAccess::Ref _access;
+	MediaAccess _access;
 	std::string _path;
     public:
 	Url(const std::string& url);
-	MediaAccess::Ref getAccess();
+	MediaAccess getAccess();
 	const std::string& getPath() const;
 };
 

@@ -5,6 +5,7 @@
 #include <y2pm/Package.h>
 #include <y2pm/PackageSource.h>
 
+#include <Y2UTIL.h>
 #include <y2util/Pathname.h>
 #include <y2util/timeclass.h>
 
@@ -13,13 +14,13 @@
 
 using namespace std;
 
-hash<string,MediaAccess::Ref> media_access_handlers;
+hash<string,MediaAccess> media_access_handlers;
 
 #define startswith(Str,With) Str.substr(0,sizeof(With)-1)==With
 
 Url::Url(const string& url)
 {
-    MediaAccess::Ref access;
+    MediaAccess access;
     string access_str;
     string::size_type pos = url.find("://");
     access_str = url.substr(0, pos);
@@ -27,7 +28,7 @@ Url::Url(const string& url)
 	access_str="file";
     access = media_access_handlers[access_str];
 
-    if(access.null())
+    if(access==NULL)
 	throw PkgDbExcp("unkown url");
 
     _access = access;
@@ -40,7 +41,7 @@ const string& Url::getPath() const
     return _path;
 }
 
-MediaAccess::Ref Url::getAccess()
+MediaAccess Url::getAccess()
 {
     return _access;
 }
@@ -48,8 +49,9 @@ MediaAccess::Ref Url::getAccess()
 void SuSEClassicDataProvider::ParseCommonPkd()
 {
     Pathname pathtocommonpkd(Pathname::cat(_url.getPath(),_commonpkd));
-
-    std::ifstream commonpkd(_url.getAccess()->getFile(pathtocommonpkd.asString()).c_str());
+    string pkdpath(_url.getAccess()->getFile(pathtocommonpkd.asString()));
+    debug("trying to open " << pkdpath);
+    std::ifstream commonpkd(pkdpath.c_str());
     if (!commonpkd)
     {
 	throw PkgDbExcp("commonpkd not found");
@@ -218,28 +220,28 @@ void SuSEClassicDataProvider::ParseCommonPkd()
     cerr << "Read " << i << " Packages in "<< time(NULL) - starttime<<" seconds from common.pkd" << endl;
 }
 
-MediaAccess::MediaAccess(string urlprefix)
+MediaAccessRep::MediaAccessRep(string urlprefix)
 {
     _urlprefix = urlprefix;
-    media_access_handlers[_urlprefix]=MediaAccess::Ref(this);
+    media_access_handlers[_urlprefix]=MediaAccess(this);
 }
-MediaAccess::~MediaAccess()
+MediaAccessRep::~MediaAccessRep()
 {
     media_access_handlers.erase(_urlprefix);
 }
 
-MediaAccess_File::MediaAccess_File():MediaAccess("file")
+MediaAccess_FileRep::MediaAccess_FileRep():MediaAccessRep("file")
 {
 }
 
-MediaAccess_File::~MediaAccess_File()
+MediaAccess_FileRep::~MediaAccess_FileRep()
 {
 }
 
-string MediaAccess_File::getFile(const string& file, bool purge)
+string MediaAccess_FileRep::getFile(const string& file, bool purge)
 {
     if(purge)
-	cerr << "MediaAccess_File::getFile() -- purge not implemented" << endl;
+	cerr << "MediaAccess_FileRep::getFile() -- purge not implemented" << endl;
     return file;
 }
 

@@ -252,7 +252,7 @@ void PkgDb::check_new_ReqFiles( Package *pkg, const ReqFiles_type& RF )
 void PkgDb::notify_sets_of_new_provides( const Package *pkg,
 										 const PkgRelation& new_p )
 {
-	for( list<PkgSet::Ref>::iterator p = attached_sets.begin();
+	for( list<PkgSet*>::iterator p = attached_sets.begin();
 		 p != attached_sets.end(); ++p )
 		(*p)->new_provides( pkg, new_p );
 }

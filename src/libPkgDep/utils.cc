@@ -28,7 +28,7 @@ unsigned PkgDep::count_providers_for(
 	RevRel_for( set->provided()[req.name()], prov ) {
 		if (prov->relation().matches( req )) {
 			DBG( "    satisfied by " << prov->pkg()->name()
-				 << " with Provides: " << prov->relation() << endl );
+				 << " with Provides: " << prov->relation() << std::endl );
 			++providers;
 		}
 	}
@@ -42,7 +42,7 @@ const Package *PkgDep::try_upgrade_conflictor( const Package *pkg,
 	PkgName name = pkg->name();
 
 	DBG( "Trying to upgrade conflictor " << name << "-" << pkg->edition()
-		 << " to solve confl source provides " << provides << endl );
+		 << " to solve confl source provides " << provides << std::endl );
 	// if no different version is available, we can't upgrade
 	const Package *upgrade = available_upgrade(pkg);
 	if (!upgrade)

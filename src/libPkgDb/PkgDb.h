@@ -42,7 +42,7 @@ class PkgDb {
 	AltDefault_type alt_defaults;
 	
 	// list of PkgSet using the pool (for new_provides notifications)
-	std::list<PkgSet::Ref> attached_sets;
+	std::list<PkgSet*> attached_sets;
 
 	// constructor helpers
 	void read_override_list();
@@ -118,10 +118,10 @@ class PkgDb {
 	}
 	
 	// attach and detach PkgSets
-	void attach_set( PkgSet::Ref set ) {
+	void attach_set( PkgSet* set ) {
 		attached_sets.push_back( set );
 	}
-	void detach_set( PkgSet::Ref set ) {
+	void detach_set( PkgSet* set ) {
 		attached_sets.remove( set );
 	}
 };

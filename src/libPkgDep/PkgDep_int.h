@@ -2,7 +2,7 @@
 #define _PkgDep_int_h
 
 #ifdef PKGDEP_DEBUG
-#define DBG(expr)	do { cout << expr; } while(0)
+#define DBG(expr)	do { std::cout << expr; } while(0)
 #else
 #define DBG(expr)
 #endif
