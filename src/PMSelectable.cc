@@ -678,16 +678,19 @@ bool PMSelectable::downgrade_condition() const
   PMPackagePtr inst( installedObj() );
   if ( !inst )
     return false; // not package objects
+
   PMPackagePtr cand( candidateObj() );
 
   if ( inst->edition() < cand->edition() )
     return false; // candidate is newer
 
-  // SuSE specific exeption: version downgrade due to newer buildtime
-  if ( inst->buildtime() < cand->buildtime()
-       && inst->vendor().isSuSE()
-       && cand->vendor().isSuSE() )
-    return false;
+  // Here: downgrade. candidate is same or older version.
+
+  // SuSE specific exeption:
+  // Version downgrade during update or due to newer buildtime is ok.
+  if ( inst->vendor().isSuSE() && cand->vendor().isSuSE() ) {
+    return( Y2PM::runningFromSystem() && inst->buildtime() >= cand->buildtime() );
+  }
 
   return true;
 }
