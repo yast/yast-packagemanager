@@ -1,3 +1,10 @@
+/**
+ * test_rpmdb.cc
+ *
+ * test frontend for class RpmDb
+ *
+ */
+
 #include <list>
 #include <string>
 #include <vector>
@@ -5,6 +12,8 @@
 #include <y2pm/PMPackage.h>
 #include <iostream>
 #include <algorithm>
+
+#include "show_pm.h"
 
 using namespace std;
 
@@ -89,67 +98,19 @@ int main(int argc, char* argv[])
     {
 
 	list<PMPackagePtr> pkglist;
-	rpmdb->getPackages(pkglist);
-	for(;argpos<argnum;argpos++)
+	rpmdb->getPackages (pkglist);
+	for (; argpos < argnum; argpos++)
 	{
 	    cout << "querying " << args[argpos] << endl;
 	    typedef list<PMPackagePtr>::iterator PkgLI;
-	    PkgLI p = find_if(pkglist.begin(),pkglist.end(),PMPkg_eq(args[argpos]));
-	    if(p == pkglist.end())
+	    PkgLI p = find_if (pkglist.begin(), pkglist.end(), PMPkg_eq(args[argpos]));
+	    if (p == pkglist.end())
 	    {
 		cout << args[argpos] << " is not installed" << endl;
 	    }
 	    else
 	    {
-		for (PMPackage::PMSolvableAttribute attr
-			= PMPackage::PMSolvableAttribute(PMPackage::PMSLV_ATTR_BEGIN);
-		    attr < PMPackage::PMSLV_NUM_ATTRIBUTES;
-		    attr = PMPackage::PMSolvableAttribute(attr+1))
-		{
-		    cout
-			<< (*p)->getAttributeName(attr)
-			<< ": "
-			<< (*p)->getAttributeValue(attr)
-			<< endl;
-		}
-
-
-		for (PMPackage::PMObjectAttribute attr
-			= PMPackage::PMObjectAttribute(PMPackage::PMOBJ_ATTR_BEGIN);
-		    attr < PMPackage::PMOBJ_NUM_ATTRIBUTES;
-		    attr = PMPackage::PMObjectAttribute(attr+1))
-		{
-		    cout
-			<< (*p)->getAttributeName(attr)
-			<< ": "
-			<< (*p)->getAttributeValue(attr)
-			<< endl;
-		}
-
-	    	for (PMPackage::PMPackageAttribute attr
-			= PMPackage::PMPackageAttribute(PMPackage::PKG_ATTR_BEGIN);
-		    attr < PMPackage::PMPKG_NUM_ATTRIBUTES;
-		    attr = PMPackage::PMPackageAttribute(attr+1))
-		{
-		    cout
-			<< (*p)->getAttributeName(attr)
-			<< ": "
-			<< (*p)->getAttributeValue(attr)
-			<< endl;
-		}
-
-		cout << (*p)->getAttributeName(PMPackage::ATTR_GROUP)
-		    << ": "
-		    << (*p)->getAttributeValue(PMPackage::ATTR_GROUP)
-		    << endl;
-		cout << (*p)->getAttributeName(PMPackage::ATTR_GROUP)
-		    << ": "
-		    << (*p)->getAttributeValue(PMPackage::ATTR_GROUP)
-		    << endl;
-		cout << (*p)->getAttributeName(PMPackage::ATTR_SUMMARY)
-		    << ": "
-		    << (*p)->getAttributeValue(PMPackage::ATTR_SUMMARY)
-		    << endl;
+		show_pmpackage (*p);
 	    }
 	}
     }
