@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <ctype.h>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
@@ -66,6 +67,9 @@ const Pathname InstSrc::_c_media_dir( "MEDIA" );
 //	DESCRIPTION :
 InstSrc::InstSrc()
     : _cache_deleteOnExit( false )
+    , _mediachangefunc (0)
+    , _mediachangedata (0)
+    , _medianr (0)
 {
   MIL << "New InstSrc " << *this << endl;
 }
@@ -149,6 +153,25 @@ PMError InstSrc::enableSource()
     ERR << "Cannot enable without source description" << endl;
     return Error::E_src_no_description;
   }
+
+
+  // Determine search path for provideLocation
+
+  //std::map<std::string,std::list<Pathname> >
+  InstSrcDescr::ArchMap archmap = _descr->content_archmap();
+
+  InstSrcDescr::ArchMap::const_iterator archIt = archmap.find ((const std::string &)(_descr->base_arch()));
+  if (archIt == archmap.end())
+  {
+    WAR << "No 'ARCH." << _descr->base_arch() << "' line" << endl;
+    archIt = archmap.find (_descr->content_defaultbase());
+  }
+  if (archIt == archmap.end())
+  {
+    ERR << "Unable to determine ARCH. line" << endl;
+    return Error::E_src_no_description;
+  }
+  _datasubdirs = archIt->second;
 
   ///////////////////////////////////////////////////////////////////
   // create InstSrcData according to Type stored in InstSrcDescr
@@ -583,6 +606,160 @@ InstSrc::Type InstSrc::fromString( std::string s )
       return ctype;
   }
   return T_UNKNOWN;
+}
+
+
+static
+std::string number2string (int nr)
+{
+    static int digits[] = { 1000, 100, 10, 1 };
+    static char num[5];
+    char *nptr = num;
+    if (nr > 1000)
+	return string();
+    for (int pos = 0; pos < 4; ++pos)
+    {
+	int digit = nr / digits[pos];
+	if (digit > 0)
+	{
+	    *nptr++ = '0' + digit;
+	    nr -= digit * digits[pos];
+	}
+    }
+    *nptr = 0;
+
+    return string (num);
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : provideLocation
+**	FUNCTION TYPE : std::string
+**
+**	DESCRIPTION : provide file by medianr and location
+*/
+Pathname
+InstSrc::provideLocation (int medianr, const Pathname& location)
+{
+    MIL << "provideLocation (" << medianr << ", " << location << ")" << endl;
+    PMError err;
+
+    int reply = 0;
+
+    // if the url ends with digits, try re-opening with
+    // digits replaced by medianr
+    bool triedReOpen = false;
+
+    Url url = _descr->url();
+    while (medianr != _medianr)
+    {
+	if (!_media->isAttached())
+	{
+	    _medianr = 0;
+
+	    MIL << "attach" << endl;
+	    err = _media->attach();
+
+	    if (err == MediaError::E_not_open)
+	    {
+		MIL << "Not open, doing initial open '" << url << "'" << endl;
+		err = _media->open (url, cache_media_dir());
+		if (err != PMError::E_ok)
+		{
+		    MIL << "open (" << url << ") failed" << endl;
+		}
+		else
+		{
+		    err = _media->attach();
+		}
+	    }
+
+	    if (err != PMError::E_ok)
+	    {
+		MIL << "media error:" << err.errstr() << endl;
+		if (_mediaerrorfunc != 0)
+		{
+		    reply = (*_mediaerrorfunc) (err.errstr(), _mediaerrordata);
+		}
+		if (reply != 0)
+		    break;
+	    }
+	}
+
+	Pathname mediafile ("/media."+number2string(medianr)+"/media");
+
+	MIL << "provide '" << mediafile << "'" << endl;
+	err = _media->provideFile (mediafile);
+	if (err == PMError::E_ok)
+	{
+	    MIL << "Media OK" << endl;
+	    _medianr = medianr;
+	    break;
+	}
+	else
+	{
+	    MIL << "provideFile failed: " << err.errstr() << endl;
+	}
+#warning TDB eject CD on PPC/MAC
+	_media->release();
+
+	std::string path = _descr->url().getPath();
+	if (!triedReOpen
+	    && isdigit(path[path.size()-1]))
+	{
+	    triedReOpen = true;				// don't come here again
+	    MIL << "Closing path '" << path << "'" << endl;
+	    _media->close();				// close medium
+	    while (isdigit(path[path.size()-1])
+		   && !path.empty())
+	    {
+		path.erase(path.size()-1);		// remove trailing digits
+	    }
+	    path += number2string(medianr);		// attach medianr
+	    url.setPath (path);
+	    MIL << "Re-open url '" << url << "'" << endl;
+	    continue;					// try re-open
+	}
+
+	if (_mediachangefunc == 0)
+	{
+	    ERR << "Can't find medium, can't ask user" << endl;
+	    _medianr = 0;
+	    break;
+	}
+
+	MIL << "callback!" << endl;
+#warning TDB use gettext
+	reply = (*_mediachangefunc) (0, _medianr, medianr, _mediachangedata);
+	if (reply != 0)
+	{
+	    break;
+	}
+    }
+
+    if (reply != 0)
+	return Pathname();
+
+    Pathname datadir = _descr->content_datadir();
+    Pathname filename;
+
+    for (std::list<Pathname>::const_iterator pathIt = _datasubdirs.begin();
+	 pathIt != _datasubdirs.end(); ++pathIt)
+    {
+	filename = datadir + *pathIt + Pathname (location);
+	MIL << "provideFile (" << filename << ")" << endl;
+	err = _media->provideFile (filename);
+	if (err == PMError::E_ok)
+	    break;
+    }
+    if (err != PMError::E_ok)
+    {
+	ERR << "Media can't provide '" << location << "': " << err.errstr() << endl;
+	return Pathname();
+    }
+    MIL << "OK at (" << filename << ")" << endl;
+    return _media->localPath (filename);
 }
 
 /******************************************************************

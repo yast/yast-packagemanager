@@ -250,7 +250,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
   MIL << "Going to remove " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    DBG << "--remove object " << *iter_r << endl;
+//    DBG << "--remove object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -307,7 +307,7 @@ void PMManager::poolAdjust()
       // delete tdel
       if ( (*tdel)->rep_cnt() != 2 )
 	DBG << "(OUTSIDE REFERENCED) ";
-      DBG << "Going to delete " << *tdel << endl;
+//      DBG << "Going to delete " << *tdel << endl;
 
       // pool first
       PMSelectablePool::iterator iter = _itemPool.find( (*tdel)->name() );
