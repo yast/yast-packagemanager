@@ -72,6 +72,7 @@ IMPL_BASE_POINTER(RpmDb);
 /* creates a RpmDb					       */
 /*-------------------------------------------------------------*/
 RpmDb::RpmDb() :
+    _packages_valid(false),
     _backuppath ("/var/adm/backup"),
     _progressfunc(NULL),
     _progressdata(NULL),
@@ -638,13 +639,17 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
 const std::list<PMPackagePtr>&
 RpmDb::getPackages (void)
 {
-    string rpmquery;
     MIL << "RpmDb::getPackages()" << endl;
 
-    _packages.clear();
+    if (_packages_valid
+	|| _old_present
+	|| !_initialized)
+    {
+	return _packages;
+    }
 
-    if (_old_present) return _packages;
-    if (!_initialized) return _packages;
+    string rpmquery;
+    _packages.clear();
 
     // this enum tells the position in rpmquery string
     //
@@ -799,6 +804,7 @@ RpmDb::getPackages (void)
     {
 	ERR << "RpmDB subprocess stop failed" << endl;
     }
+    _packages_valid = true;
     return _packages;
 }
 
@@ -1669,6 +1675,8 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 
     FAILIFNOTINITIALIZED
 
+    _packages_valid = false;
+
     opts.push_back("-U");
     opts.push_back("--percent");
 
@@ -1751,6 +1759,8 @@ RpmDb::removePackage(const string& label, unsigned flags)
     RpmArgVec opts;
 
     FAILIFNOTINITIALIZED
+
+    _packages_valid = false;
 
     opts.push_back("-e");
 

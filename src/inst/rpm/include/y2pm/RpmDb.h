@@ -56,6 +56,11 @@ class RpmDb: virtual public Rep
 	//
 	std::list<PMPackagePtr> _packages;
 
+	// if the _packages list is valid.
+	// any package installation or deletion invalidates the
+	// list
+	bool _packages_valid;
+
 	Pathname _backuppath;
 
     public:
