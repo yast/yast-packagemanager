@@ -679,7 +679,9 @@ PMError InstYou::processPatches()
   } else if ( error ) {
     log( string(_("Download failed.")) + "\n" );
   } else {
+#ifdef can_use_file_tag_for_nvidia__bug_46342
     log( string(_("Download finished. You may disconnect from the Internet now.")) + "\n" );
+#endif
   }
   log( "\n" );
 

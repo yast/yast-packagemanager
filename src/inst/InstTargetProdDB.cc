@@ -439,6 +439,7 @@ PMError InstTargetProdDB::install( const constInstSrcDescrPtr & isd_r )
 //
 //	DESCRIPTION :
 //
+#warning API: dont pass reference as that breaks reference counting on the pointer
 PMError InstTargetProdDB::remove( const constInstSrcDescrPtr & isd_r )
 {
   PMError err = assert_open();
