@@ -7,15 +7,19 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
-	PMYouPatch.h \
-	PMYouPatchDataProvider.h \
-	PMYouPatchDataProviderPtr.h \
-	PMYouPackageDataProvider.h \
-	PMYouPackageDataProviderPtr.h \
-	PMYouPatchInfo.h \
-	PMYouPatchTags.h \
-	PMYouPatchManager.h \
-	PMYouPatchPtr.h
+	InstYou.h			\
+	PMYouPatch.h			\
+	PMYouPatchPtr.h			\
+	PMYouPatchDataProvider.h	\
+	PMYouPatchDataProviderPtr.h	\
+	PMYouPackageDataProvider.h	\
+	PMYouPackageDataProviderPtr.h	\
+	PMYouPatchInfo.h		\
+	PMYouPatchInfoPtr.h		\
+	PMYouPatchTags.h		\
+	PMYouPatchManager.h		\
+	PMYouPatchPaths.h		\
+	PMYouPatchPathsPtr.h
 
 #<INSTALL-HEADER-TARGET>
 
