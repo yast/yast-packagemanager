@@ -212,6 +212,18 @@ class PMSelectable : virtual public Rep {
      **/
     bool clrUserCandidate() { return setUserCandidate( PMObjectPtr() ); }
 
+  public:
+
+    enum UI_Status {
+      S_Del,                 // delete  installedObj
+      S_Install,             // install candidateObj ( have no installedObj ) ( clears taboo )
+      S_Update,              // install candidateObj ( have installedObj )
+      S_NoInst,              // no modification      ( have no installedObj )
+      S_KeepInstalled,       // no modification      ( have installedObj )
+      S_Auto,                // like S_Install, but not requested by user, does not clear taboo
+      S_Taboo,               // hide candidateObj so it can't be installed. ( have no installedObj )
+    };
+
   private:
 
     /**
@@ -221,41 +233,29 @@ class PMSelectable : virtual public Rep {
      * Anyway return whether there is (or would be) a
      * candidateObj available afterwards.
      **/
-    bool clearTaboo( const bool doit = true );
+    bool clearTaboo( const bool doit );
+
+    /**
+     * Test or trigger status change according to doit.
+     **/
+    bool intern_set_status( const UI_Status state_r, const bool doit );
 
   public:
 
-    enum UI_Status {
-      S_Del,                 // delete installedObj
-      S_Install,             // install candidateObj ( have no installedObj ) ( clears taboo )
-      S_Update,              // install candidateObj ( have installedObj )    ( clears taboo )
-      S_NoInst,              // no modification      ( have no installedObj )
-      S_KeepInstalled,       // no modification      ( have installedObj )
-      S_Auto,                // like S_Install, but not requested by user, does not clear taboo
-      // flags
-      F_Taboo,               // Never install this
-    };
-
     /**
-     * If possible trigger action according to state_r.
+     * If possible, trigger action according to state_r.
      **/
-    bool set_status( const UI_Status state_r, const bool doit = true );
+    bool set_status( const UI_Status state_r ) { return intern_set_status( state_r, true ); }
 
     /**
      * Test whether set_status(state_r) would succseed..
      **/
-    bool test_set_status( const UI_Status state_r ) { return set_status( state_r, false ); }
+    bool test_set_status( const UI_Status state_r ) { return intern_set_status( state_r, false ); }
 
     /**
      * Return the current ui_status (no flags returned)
      **/
     UI_Status status() const;
-
-    /**
-     * For flags return whether they are set. Otherwise return whether status()
-     * equals state_r.
-     **/
-    bool has_status( const UI_Status state_r ) const;
 
   public:
 

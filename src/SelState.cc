@@ -64,10 +64,13 @@ void SelState::set_has_installed( bool b )
     return;
   if ( b ) {
     set( B_IS_I );
+    if (  is_taboo() ) {
+      clr( B_F_TABOO );
+    }
   } else {
     clr( B_IS_I );
     if ( to_delete() )
-      user_unset();
+      user_unset( true );
   }
 }
 
@@ -91,7 +94,7 @@ void SelState::set_has_candidate( bool b )
   } else {
     clr( B_IS_C );
     if ( to_install() )
-      user_unset();
+      user_unset( true );
   }
 }
 
@@ -159,11 +162,11 @@ bool SelState::user_set_install( const bool doit )
 //
 bool SelState::user_set_taboo( const bool doit )
 {
-  if ( ! is_taboo() ) {
-    if ( doit ) {
-      set_has_candidate( false );
-      set( B_F_TABOO );
-    }
+  if ( ! has_candidate_only() )
+    return false;
+  if ( doit ) {
+    set_has_candidate( false );
+    set( B_F_TABOO );
   }
 
   return true;
@@ -237,8 +240,6 @@ bool SelState::auto_set_delete( const bool doit )
 //
 bool SelState::auto_set_install( const bool doit )
 {
-  if ( is_taboo() )
-    return false;
   if ( to_install() )
     return true;
   if ( by_user() || ! has_candidate() )
