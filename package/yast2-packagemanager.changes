@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Sep 17 15:22:55 CEST 2003 - lnussel@suse.de
+
+- First check obsoletes, then conflicts. Fixes #31001 and #31031.
+- Fix internal program testinstall and add missing header
+- Include release in output operator of RelInfoList (used in testinstall for
+  debugging purpose)
+
+-------------------------------------------------------------------
 Wed Sep 17 08:48:52 CEST 2003 - ma@suse.de
 
 - Adjusted return code of commitPackages. Calling functions were
