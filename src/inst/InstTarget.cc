@@ -78,8 +78,8 @@ PMError InstTarget::init (const Pathname & rootpath, bool createnew)
 {
     _rootdir = rootpath;
 
-    _proddb->open( _rootdir, true );
-    _seldb->open( _rootdir, true );
+    _proddb->open( _rootdir, createnew );
+    _seldb->open( _rootdir, createnew );
 
     return _rpmdb->initDatabase(_rootdir.asString(), createnew);
 }

@@ -76,7 +76,7 @@ InstTargetSelDB::~InstTargetSelDB()
 PMError InstTargetSelDB::open( const Pathname & system_root_r, const bool create_r )
 {
   if ( isOpen() ) {
-    ERR << *this << " " << Error::E_SelDB_already_open << endl;
+    WAR << *this << " " << Error::E_SelDB_already_open << endl;
     return Error::E_SelDB_already_open;
   }
 
