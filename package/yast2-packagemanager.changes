@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 23 12:26:01 CET 2003 - cschum@suse.de
+
+- Correctly calculate patch size and total download size taking
+  into account, if patch RPMs or full RPMs are used.
+
+-------------------------------------------------------------------
 Wed Jan 22 12:59:31 CET 2003 - lnussel@suse.de
 
 - look in virtual installed set for provides of installed packages, fixes
