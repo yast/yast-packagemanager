@@ -50,7 +50,7 @@ std::list<std::string> PMPackage::insnotify()    const { DP_GET( insnotify ); }
 std::list<std::string> PMPackage::delnotify()    const { DP_GET( delnotify ); }
 FSize                  PMPackage::size()         const { DP_GET( size ); }
 bool                   PMPackage::providesSources() const { DP_GET( providesSources ); }
-std::string            PMPackage::instSrcLablel()const { DP_GET( instSrcLablel ); }
+std::string            PMPackage::instSrcLabel() const { DP_GET( instSrcLabel ); }
 Vendor                 PMPackage::instSrcVendor()const { DP_GET( instSrcVendor ); }
 // PMPackage attributes
 PkgSplitSet            PMPackage::splitprovides()const { DP_GET( splitprovides ); }

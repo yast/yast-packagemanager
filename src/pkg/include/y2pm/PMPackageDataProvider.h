@@ -65,7 +65,7 @@ class PMPackageDataProvider : virtual public Rep {
     static std::list<std::string> delnotify()   { return std::list<std::string>(); }
     static FSize                  size()        { return FSize(0); }
     static bool                   providesSources() { return false; }
-    static std::string            instSrcLablel()   { return std::string(); }
+    static std::string            instSrcLabel()    { return std::string(); }
     static Vendor                 instSrcVendor()   { return Vendor(); }
 
     // PMPackage attributes
@@ -129,7 +129,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::list<std::string> delnotify   ( const PMPackage & pkg_r ) const { return delnotify(); }
     virtual FSize                  size        ( const PMPackage & pkg_r ) const { return size(); }
     virtual bool                   providesSources( const PMPackage & pkg_r ) const { return providesSources(); }
-    virtual std::string            instSrcLablel  ( const PMPackage & pkg_r ) const { return instSrcLablel(); }
+    virtual std::string            instSrcLabel   ( const PMPackage & pkg_r ) const { return instSrcLabel(); }
     virtual Vendor                 instSrcVendor  ( const PMPackage & pkg_r ) const { return instSrcVendor(); }
 
     // PMPackage attributes

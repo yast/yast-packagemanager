@@ -60,7 +60,7 @@ class PMSelectionDataProvider : virtual public Rep {
     static std::list<std::string>    delnotify  ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
     static FSize                     size()            { return FSize(0); }
     static bool                      providesSources() { return false; }
-    static std::string               instSrcLablel()   { return std::string(); }
+    static std::string               instSrcLabel()    { return std::string(); }
     static Vendor                    instSrcVendor()   { return Vendor(); }
 
     // PMSelection attributes
@@ -103,7 +103,7 @@ class PMSelectionDataProvider : virtual public Rep {
     virtual std::list<std::string>    delnotify      ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delnotify(); }
     virtual FSize                     size           ( const PMSelection & sel_r ) const { return size(); }
     virtual bool                      providesSources( const PMSelection & sel_r ) const { return providesSources(); }
-    virtual std::string               instSrcLablel  ( const PMSelection & sel_r ) const { return instSrcLablel(); }
+    virtual std::string               instSrcLabel   ( const PMSelection & sel_r ) const { return instSrcLabel(); }
     virtual Vendor                    instSrcVendor  ( const PMSelection & sel_r ) const { return instSrcVendor(); }
 
     // PMSelection attributes

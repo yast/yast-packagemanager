@@ -196,7 +196,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
     virtual FSize                  size()            const { return patchSize(); }
     virtual bool                   providesSources() const { return PMObject::providesSources(); }
 
-    virtual std::string            instSrcLablel()   const { return PMObject::instSrcLablel(); }
+    virtual std::string            instSrcLabel()    const { return PMObject::instSrcLabel(); }
     virtual Vendor                 instSrcVendor()   const { return PMObject::instSrcVendor(); }
 
   private:

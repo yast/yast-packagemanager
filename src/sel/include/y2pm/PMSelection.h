@@ -60,7 +60,7 @@ class PMSelection : virtual public Rep, public PMObject {
     virtual FSize                  size()        const;
     virtual bool                   providesSources() const;
 
-    virtual std::string            instSrcLablel()   const;
+    virtual std::string            instSrcLabel()    const;
     virtual Vendor                 instSrcVendor()   const;
 
     /**

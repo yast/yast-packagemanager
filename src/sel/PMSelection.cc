@@ -50,7 +50,7 @@ std::list<std::string>    PMSelection::insnotify  ( const LangCode& locale ) con
 std::list<std::string>    PMSelection::delnotify  ( const LangCode& locale ) const { DP_ARG_GET( delnotify, locale ); }
 FSize                     PMSelection::size()            const { DP_GET( size ); }
 bool                      PMSelection::providesSources() const { DP_GET( providesSources ); }
-std::string               PMSelection::instSrcLablel()   const { DP_GET( instSrcLablel ); }
+std::string               PMSelection::instSrcLabel()    const { DP_GET( instSrcLabel ); }
 Vendor                    PMSelection::instSrcVendor()   const { DP_GET( instSrcVendor ); }
 // PMSelection attributes
 std::string               PMSelection::category()        const { DP_GET( category ); }

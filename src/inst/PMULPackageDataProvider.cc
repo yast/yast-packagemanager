@@ -129,12 +129,12 @@ PMULPackageDataProvider::providesSources( const PMPackage & pkg_r ) const
 }
 
 std::string
-PMULPackageDataProvider::instSrcLablel( const PMPackage & pkg_r ) const
+PMULPackageDataProvider::instSrcLabel( const PMPackage & pkg_r ) const
 {
   if ( _source && _source->descr() ) {
     return _source->descr()->label();
   }
-  return PMPackageDataProvider::instSrcLablel();
+  return PMPackageDataProvider::instSrcLabel();
 }
 
 Vendor
