@@ -45,8 +45,10 @@ IMPL_DERIVED_POINTER( PMSelection, PMObject, PMSolvable );
 //	DESCRIPTION :
 //
 PMSelection::PMSelection( const PkgName &    name_r,
-			  const PkgEdition & edition_r )
+			  const PkgEdition & edition_r,
+			  PMSelectionDataProviderPtr dataProvider_r )
     : PMObject( name_r, edition_r )
+    , _dataProvider( dataProvider_r )
 {
 }
 

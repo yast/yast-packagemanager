@@ -420,7 +420,7 @@ PMError RpmDb::installTmpDatabase( void )
       string command = "cp -a ";
       command = command + Pathname::cat(_rootdir, _varlibrpm).asString() + "/* " + oldPath.asString();
 
-// XXX system
+// XXX system */
       if ( system ( command.c_str() ) == 0)
       {
 	 err = RPMDB_OK;
@@ -436,7 +436,7 @@ PMError RpmDb::installTmpDatabase( void )
    if ( !err )
    {
       string command = "cp -a ";
-      command = command + Pathname::cat(_rootdir, dbPath).asString() + "/* " +
+      command = command + Pathname::cat(_rootdir, dbPath).asString() + "/* " + // */
 	 Pathname::cat(_rootdir, _varlibrpm).asString();
 
       if ( system ( command.c_str() ) == 0)
@@ -579,7 +579,12 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 
 	}
 
-	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,cdep_Ci.version.c_str());
+	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,cdep_Ci.version);
+#warning SUSPICIOUS usage of version to create PkgEdition
+	// ma: IMHO version part of depend. query may be [epoch:]version-release
+	// maybe 'PkgEdition::fromString( cdep_Ci.version )' creates the Edition
+	// you need.
+
 //	D__ << dep << endl;
 
 	dep.setPreReq(cdep_Ci.isprereq);
@@ -679,15 +684,14 @@ PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	    PMPackagePtr p = new PMPackage(
 				PkgName(pkgattribs[RPM_NAME]),
 				edi,
-				PkgArch(pkgattribs[RPM_ARCH]));
+				PkgArch(pkgattribs[RPM_ARCH]),
+			        _dataprovider);
 
 	    if(_dataprovider != NULL)
 	    {
 		_dataprovider->setAttributeValue(p,PMPackage::ATTR_SIZE,pkgattribs[RPM_SIZE]);
 		_dataprovider->setAttributeValue(p,PMPackage::ATTR_GROUP,pkgattribs[RPM_GROUP]);
 	    }
-
-	    p->setDataProvider(_dataprovider);
 
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type provides;
@@ -1054,7 +1058,7 @@ PkgAttributeValue RpmDb::queryPackage(const char *format, string packageName, bo
     RpmArgVec opts(4);
 
     if(!_initialized) return value;
-    
+
     if(installed)
 	opts[0] = "-q";
     else

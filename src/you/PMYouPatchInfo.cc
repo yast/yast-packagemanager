@@ -81,7 +81,7 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 {
     _tagset = new YOUPatchTagSet( lang );
     _tagset->setEncoding(CommonPkdParser::Tag::UTF8);
-    
+
     _patchFiles = new list<string>;
 }
 
@@ -161,13 +161,16 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
       E__ << "No '-' in '" << fileName << "'" << endl;
       return PMError( InstSrcError::E_error );
     }
-    
+
     string name = fileName.substr( 0, pos );
     string version = fileName.substr( pos + 1, fileName.length() - pos );
 
+    // ma: NULL PMYouPatchDataProviderPtr provided to be able to compile.
+    // Finaly we should make shure that there is one, or we don't need it at all.
     PMYouPatchPtr p( new PMYouPatch( PkgName( name ),
-                                     PkgEdition( version.c_str() ) ) );
-    
+                                     PkgEdition( version.c_str() ),
+				     PMYouPatchDataProviderPtr() ) );
+
     string value = tagValue( YOUPatchTagSet::KIND );
     PMYouPatch::Kind kind = PMYouPatch::kind_invalid;
     if ( value == "security" ) { kind = PMYouPatch::kind_security; }
@@ -176,7 +179,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     else if ( value == "optional" ) { kind = PMYouPatch::kind_optional; }
     else if ( value == "YaST2" ) { kind = PMYouPatch::kind_yast; }
     p->setKind( kind );
-    
+
     p->setShortDescription( tagValue( YOUPatchTagSet::SHORTDESCRIPTION ) );
     p->setLongDescription( tagValue( YOUPatchTagSet::LONGDESCRIPTION ) );
     p->setPreInformation( tagValue( YOUPatchTagSet::PREINFORMATION ) );
@@ -226,7 +229,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
       patchFiles = _patchFiles;
       _patchFiles->clear();
-      
+
       string buffer;
       ifstream in( dirFile.asString().c_str() );
       while( getline( in, buffer ) ) {
@@ -274,6 +277,6 @@ string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex )
     if ( !tag ) {
         return "";
     }
-    
+
     return tag->Data();
 }

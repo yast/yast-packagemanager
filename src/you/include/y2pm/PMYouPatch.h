@@ -171,17 +171,10 @@ class PMYouPatch : virtual public Rep, public PMObject {
   public:
 
     PMYouPatch( const PkgName &    name_r,
-		const PkgEdition & edition_r );
+		const PkgEdition & edition_r,
+		PMYouPatchDataProviderPtr dataProvider_r );
 
     virtual ~PMYouPatch();
-
-  public:
-
-    /** assign a data provider
-     * @param dataprovider the dataprovider
-     * */
-    void setDataProvider(PMYouPatchDataProviderPtr dataprovider)
-    { _dataProvider = dataprovider; }
 
   public:
 

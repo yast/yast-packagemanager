@@ -46,9 +46,11 @@ IMPL_DERIVED_POINTER( PMPackage, PMObject, PMSolvable );
 //
 PMPackage::PMPackage( const PkgName &    name_r,
 		      const PkgEdition & edition_r,
-		      const PkgArch &    arch_r )
+		      const PkgArch &    arch_r,
+		      PMPackageDataProviderPtr dataProvider_r )
     : PMObject( name_r, edition_r )
     , _arch( arch_r )
+    , _dataProvider( dataProvider_r )
 {
 }
 

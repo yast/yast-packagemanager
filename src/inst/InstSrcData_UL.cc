@@ -305,9 +305,9 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     CommonPkdParser::TagSet* tagset;
     tagset = new InstSrcData_ULTags ();
-    
+
     bool parse = true;
-    
+
     while( parse && parser.lookupTag (packages))
     {
 	bool repeatassign = false;
@@ -351,7 +351,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 	std::cerr << "*** parsing was aborted ***" << std::endl;
     else
 	std::cerr << "*** parsed " << count << " packages ***" << std::endl;
-    
+
     ///////////////////////////////////////////////////////////////////
     // done
     ///////////////////////////////////////////////////////////////////
@@ -392,7 +392,8 @@ MIL << multi[0] << "-" << multi[1] << "-" << multi[2] << "." << multi[3] << endl
     PkgName name (multi[0]);
     PkgEdition edition (multi[1].c_str(), multi[2].c_str());
     PkgArch arch (multi[3]);
-    PMPackagePtr pac( new PMPackage (name, edition, arch));
+    PMPackagePtr pac( new PMPackage (name, edition, arch, PMPackageDataProviderPtr() ));
+#warning NULL PMPackageDataProviderPtr used to create a package.
 
     // REQUIRES, list of requires tags
     multi =  (tagset->getTagByIndex(InstSrcData_ULTags::REQUIRES))->MultiData();
@@ -459,7 +460,7 @@ MIL << "SharedWith: " << sharewith << endl;
 MIL << "Keywords: " << vector2string(multi) << endl;
 
 //    PMPackageDataProviderPtr ( new InstSrcProvide_UL());
-//    pac->setDataProvider (new 
+//    pac->setDataProvider (new
     return pac;
 }
 

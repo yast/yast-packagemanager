@@ -107,21 +107,14 @@ class PMPackage : virtual public Rep, public PMObject {
 
     PMPackage( const PkgName &    name_r,
 	       const PkgEdition & edition_r,
-	       const PkgArch &    arch_r );
+	       const PkgArch &    arch_r,
+	       PMPackageDataProviderPtr dataProvider_r );
 
     virtual ~PMPackage();
 
   public:
 
-    const PkgArch& arch() const { return _arch; }
-
-  public:
-
-    /** assign a data provider
-     * @param dataprovider the dataprovider
-     * */
-    void setDataProvider(PMPackageDataProviderPtr dataprovider)
-    { _dataProvider = dataprovider; }
+    const PkgArch & arch() const { return _arch; }
 
   public:
 
