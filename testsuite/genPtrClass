@@ -85,8 +85,10 @@ function H_include () {
 }
 
 function H_derived () {
-	if [ -n "$DERIVED" ]; then
-		echo -ne ", public ${FROM}"
+	if [ -z "$DERIVED" ]; then
+		echo -ne "public CountedRep"
+	else
+		echo -ne "public ${FROM}"
 	fi
 }
 
@@ -102,7 +104,7 @@ function PTR_def () {
 	if [ -z "$DERIVED" ]; then
 		echo -ne "DEFINE_BASE_POINTER(${CLASS});"
 	else
-		echo -ne "DEFINE_DERIVED_POINTER(${CLASS},${FROM},${BASE});"
+		echo -ne "DEFINE_DERIVED_POINTER(${CLASS},${BASE});"
 	fi
 }
 
@@ -110,7 +112,7 @@ function PTR_impl () {
 	if [ -z "$DERIVED" ]; then
 		echo -ne "IMPL_BASE_POINTER(${CLASS});"
 	else
-		echo -ne "IMPL_DERIVED_POINTER(${CLASS},${FROM},${BASE});"
+		echo -ne "IMPL_DERIVED_POINTER(${CLASS},${BASE});"
 	fi
 }
 
@@ -142,7 +144,7 @@ $(catLogo)
 /**
  *
  **/
-class ${CLASS} : virtual public Rep$(H_derived) {
+class ${CLASS} : $(H_derived) {
   REP_BODY(${CLASS});
 
   public:
@@ -255,21 +257,6 @@ $(PTR_include)
 //	CLASS NAME : const${CLASS}Ptr
 ///////////////////////////////////////////////////////////////////
 $(PTR_def)
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref ${CLASS} *></code>
- *
- * <b>See:</> @ref ${CLASS}
- **/
-class ${CLASS}Ptr {};
-/**
- * @short Refcounting <code>&lt;const @ref ${CLASS} *></code>
- *
- * <b>See:</> @ref ${CLASS}
- **/
-class const${CLASS}Ptr {};
-#endif // just for kdoc
 
 #endif // ${CLASS}Ptr_h
 

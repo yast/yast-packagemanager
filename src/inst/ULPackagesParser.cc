@@ -755,7 +755,7 @@ ULPackagesParser::fromPathDU (const Pathname& path)
 PMError
 ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 		MediaAccessPtr media_r, const Pathname& descr_dir_r,
-		const std::list<PkgArch>& allowed_archs, const LangCode& locale)
+		const std::list<PkgArch>& allowed_archs, const LangCode & locale)
 {
     PMError err;
 
@@ -776,7 +776,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
     }
 
     bool have_locale = true;
-    string localestr = (const std::string&)locale;
+    string localestr = locale.code();
     if (localestr.size() < 2)
 	localestr = "en";
 

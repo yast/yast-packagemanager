@@ -81,6 +81,7 @@ class PMSelection : public PMObject {
 
     const bool			isBase()           const;
 
+    PM::LocaleSet               supportedLocales() const;
     /**
      * <code>PackageManager</code>s list of Selectables included in
      * this Selection for a given locale. This is probaeely <b>not</b>,

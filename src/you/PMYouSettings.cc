@@ -314,7 +314,7 @@ void PMYouSettings::setLangCode( const LangCode &l )
 
   _lang = l;
 
-  if ( _lang.asString().empty() ) _lang = Y2PM::getPreferredLocale();
+  if ( ! _lang.isSet() ) _lang = Y2PM::getPreferredLocale();
 }
 
 string PMYouSettings::locale() const
@@ -329,12 +329,12 @@ string PMYouSettings::defaultLocale() const
 
 string PMYouSettings::translateLangCode( const LangCode &lang )
 {
-  string result = lang;
+  string result = lang.code();
 
   const char **code = langmap;
   while( *code ) {
 
-    if ( LangCode( *code ) == lang ) {
+    if ( *code == lang ) {
       result = *(code + 1);
       break;
     }

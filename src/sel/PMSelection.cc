@@ -63,6 +63,7 @@ std::list<std::string>    PMSelection::recommends()      const { DP_GET( recomme
 std::list<PMSelectionPtr> PMSelection::recommends_ptrs()       { DP_GET( recommends_ptrs ); }
 std::list<std::string>    PMSelection::inspacks     ( const LangCode& locale ) const { DP_ARG_GET( inspacks, locale ); }
 std::list<std::string>    PMSelection::delpacks     ( const LangCode& locale ) const { DP_ARG_GET( delpacks, locale ); }
+PM::LocaleSet             PMSelection::supportedLocales() const { DP_GET( supportedLocales ); }
 std::set<PMSelectablePtr> PMSelection::inspacks_ptrs( const LangCode& locale )       { DP_ARG_GET( inspacks_ptrs, locale ); }
 std::set<PMSelectablePtr> PMSelection::delpacks_ptrs( const LangCode& locale )       { DP_ARG_GET( delpacks_ptrs, locale ); }
 FSize                     PMSelection::archivesize()     const { DP_GET( archivesize ); }

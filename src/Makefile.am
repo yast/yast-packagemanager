@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src
 #
 
-SUBDIRS = inst pkg sel you media libPkgDep y2pm
+SUBDIRS = inst pkg sel you LanguageManager media libPkgDep y2pm
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -DLOCALEDIR=\"${localedir}\" -Wall
 AM_LDFLAGS = -L$(libdir) -lslp
@@ -43,6 +43,7 @@ liby2pm_la_LDFLAGS = -version-info 2:0
 liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			sel/liby2pmsel.la	\
 			you/liby2pmyou.la	\
+			LanguageManager/liby2pmLanguageManager.la	\
 			inst/liby2pminstsrc.la	\
 			media/liby2pmMedia.la   \
 			libPkgDep/libPkgDep.la	\

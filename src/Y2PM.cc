@@ -35,6 +35,7 @@
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
+#include <y2pm/PMLanguageManager.h>
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/InstYou.h>
 #include <y2pm/PMLocale.h>
@@ -69,7 +70,11 @@ PMPackageManager *   Y2PM::_packageManager = 0;
 
 PMSelectionManager * Y2PM::_selectionManager = 0;
 
+PMLanguageManager *   Y2PM::_languageManager = 0;
+
 PMYouPatchManager *  Y2PM::_youPatchManager = 0;
+
+bool Y2PM::_languageManagerDirty = true;
 
 void Y2PM::cleanupAtExit()
 {
@@ -144,6 +149,7 @@ PMError Y2PM::setCandidateOrder( PM::CandidateOrder neworder_r )
     if ( _selectionManager ) {
       selectionManager().poolSortCandidates();
     }
+    languageManagerTagDirty();
   }
   return PMError::E_ok;
 }
@@ -499,6 +505,29 @@ PMSelectionManager & Y2PM::selectionManager()
     }
   }
   return *_selectionManager;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::languageManager
+//	METHOD TYPE : PMLanguageManager &
+//
+//	DESCRIPTION :
+//
+PMLanguageManager & Y2PM::languageManager()
+{
+  if ( !_languageManager )
+  {
+    MIL << "Launch LanguageManager..." << endl;
+    _languageManager = new PMLanguageManager;
+    MIL << "Created LanguageManager @" << _languageManager << endl;
+  }
+  if ( _languageManagerDirty ) {
+    _languageManagerDirty = false;
+    languageManager().rescan();
+  }
+  return *_languageManager;
 }
 
 ///////////////////////////////////////////////////////////////////

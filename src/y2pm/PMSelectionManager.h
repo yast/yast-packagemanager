@@ -43,6 +43,20 @@ class PMSelectionManager : public PMManager {
   PMSelectionManager            ( const PMSelectionManager & );
 
   private:
+    /**
+     * Post poolSetInstalled hook
+     **/
+    virtual void postPSI();
+    /**
+     * Post poolAddCandidates hook
+     **/
+    virtual void postPAC();
+    /**
+     * Post poolRemoveCandidates hook
+     **/
+    virtual void postPRC();
+
+  private:
 
     friend class Y2PM;
     PMSelectionManager();

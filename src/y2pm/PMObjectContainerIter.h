@@ -98,6 +98,13 @@ class PMObjectContainerIter {
       private:
 	const Ptr &                  _cont;
 	typename Ptr::const_iterator _iter;
+
+	template <typename Tp>
+	PMObjectPtr _get( const Tp & ) const { return *_iter; }
+
+	template <typename Tp,class ObjPtr>
+	PMObjectPtr _get( const std::map<Tp,ObjPtr> & ) const { return _iter->second; }
+
       public:
 	StdCont( const Ptr & cont_r ) : _cont( cont_r ) { _iter = cont_r.begin(); }
 	virtual ~StdCont() {}
@@ -106,16 +113,34 @@ class PMObjectContainerIter {
  	virtual void        setBegin()       { _iter = _cont.begin(); }
 	virtual void        setNext()        { ++_iter; }
 	virtual bool        atEnd()    const { return ( _iter == _cont.end() ); }
-	virtual PMObjectPtr get()      const { return *_iter; }
+	virtual PMObjectPtr get()      const { return _get( _cont ); }
 	virtual unsigned    size()     const { return _cont.size(); }
    };
+
 
   private:
 
     ContBase * _cont;
 
   public:
+    template <class ObjPtr>
+    PMObjectContainerIter( const std::vector<ObjPtr> & cont_r ) {
+      _cont = new StdCont<std::vector<ObjPtr> >( cont_r );
+    }
+    template <class ObjPtr>
+    PMObjectContainerIter( const std::list<ObjPtr> & cont_r ) {
+      _cont = new StdCont<std::list<ObjPtr> >( cont_r );
+    }
+    template <class ObjPtr>
+    PMObjectContainerIter( const std::set<ObjPtr> & cont_r ) {
+      _cont = new StdCont<std::set<ObjPtr> >( cont_r );
+    }
+    template <typename Tp,class ObjPtr>
+    PMObjectContainerIter( const std::map<Tp,ObjPtr> & cont_r ) {
+      _cont = new StdCont<std::map<Tp,ObjPtr> >( cont_r );
+    }
 
+#if 0
     PMObjectContainerIter( const std::vector<PMObjectPtr> & cont_r ) {
       _cont = new StdCont<std::vector<PMObjectPtr> >( cont_r );
     }
@@ -155,6 +180,7 @@ class PMObjectContainerIter {
     PMObjectContainerIter( const std::set<PMYouPatchPtr> & cont_r ) {
       _cont = new StdCont<std::set<PMYouPatchPtr> >( cont_r );
     }
+#endif
 
   public:
 

@@ -19,6 +19,8 @@
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
+#include <y2pm/PMLanguageManager.h>
+#include <y2pm/PMLanguage.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/Timecount.h>
 #include <y2pm/PMPackageImEx.h>
@@ -33,6 +35,7 @@ using namespace std;
 #define TMGR Y2PM::instTarget()
 #define PMGR Y2PM::packageManager()
 #define SMGR Y2PM::selectionManager()
+#define LMGR Y2PM::languageManager()
 #define ISM  Y2PM::instSrcManager()
 
 ostream & operator<<( ostream & str, const PathInfo::direntry & obj ) {
@@ -159,6 +162,18 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
+ostream & dumpLangWhatIf( ostream & str, bool all = false  )
+{
+  str << "+++[dumpLangWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  for ( PMManager::PMSelectableVec::const_iterator it = LMGR.begin(); it != LMGR.end(); ++it ) {
+    if ( all || (*it)->to_modify() ) {
+      (*it)->dumpStateOn( str ) << " " << *it << endl
+	<< (*it)->name() << " " << (*it)->theObject()->summary() << endl;
+    }
+  }
+  str << "---[dumpLangWhatIf]---------------------------------------------------" << endl;
+  return str;
+}
 
 ostream & dump( ostream & str, const Url & url ) {
   str << url << endl;
@@ -189,7 +204,7 @@ int main( int argc, char * argv[] )
   set_log_filename( "-" );
   MIL << "START (" << argc << ")" << endl;
 
-  if ( 0 ) {
+  if ( 1 ) {
     //Y2PM::setNotRunningFromSystem();
     //Y2PM::setCacheToRamdisk( false );
     //Y2PM::noAutoInstSrcManager();
@@ -207,52 +222,17 @@ int main( int argc, char * argv[] )
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  Y2PM::youPatchManager();
-  dumpPkgWhatIf( INT, true );
-  SEC << Y2PM::youPatchManager().size() << endl;
+  if ( 1 ) {
+    LMGR;
+    for ( PMManager::PMSelectableVec::const_iterator it = LMGR.begin(); it != LMGR.end(); ++it ) {
 
-  string lang= "de";
+      (*it)->dumpStateOn( WAR ) << " " << *it << endl
+	<< (*it)->name() << " " << (*it)->theObject()->summary() << endl;
 
-  string product= "SuSE-Linux";
-
-  string version= "9.1";
-
-  string arch= "i386";
-
-  PMYouSettingsPtr settings = new PMYouSettings( product, version, arch );
-  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( settings );
-
-  InstYou you( patchInfo, settings );
-  you.retrievePatchInfo();
-
-
-#if 0
-  //Y2PM::setNotRunningFromSystem();
-  //Y2PM::instTargetInit("/");
-  //Y2PM::instSrcManager();
-  //InstSrcManager::ISrcId nid = newSrc( "/mounts/work/CDs/all/full-x86_64/suse/i586" );
-  //InstSrcManager::ISrcId nid = newSrc( "/tmp/foo" );
-  //ISM.enableSource( nid );
-  //ISM.disableAllSources();
-  string u( "ftp://10.20.0.20/netboot/find/SuSE-9.2-Prof-i386-Beta2-CD1/media.1" );
-  u += ";proxy=10.20.1.24;proxyport=8080;proxyuser=wrzl:prmpf";
-
-  Url url( u );
-  PMError err;
-  MediaAccessPtr  media = new MediaAccess;
-  if ( (err = media->open( url )) ) {
-    ERR << "Failed to open " << url << " " << err << endl;
-    return err;
+      PMLanguageManager::PkgSelectables packages( LMGR.getLangPackagesFor( *it ) );
+      MIL << packages << endl;
+    }
   }
-  if ( (err = media->attach()) ) {
-    ERR << "Failed to attach media: " << err << endl;
-    return err;
-  }
-  if ( (err = media->provideFile( "/media" )) ) {
-    ERR << "Failed to provide: " << err << endl;
-    return err;
-  }
-#endif
 
   SEC << "STOP" << endl;
   return 0;

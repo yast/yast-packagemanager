@@ -64,6 +64,10 @@ class Y2PM {
 
     static PMYouPatchManager * _youPatchManager;
 
+    static PMLanguageManager * _languageManager;
+
+    static bool _languageManagerDirty;
+
     static void cleanupAtExit();
 
     ///////////////////////////////////////////////////////////////////
@@ -300,6 +304,16 @@ class Y2PM {
      * Access to the Selection manager
      **/
     static PMSelectionManager & selectionManager();
+
+    /**
+     * Access to the Language manager
+     **/
+    static PMLanguageManager & languageManager();
+
+    /**
+     * Access to the Language manager
+     **/
+    static void languageManagerTagDirty() { _languageManagerDirty = true; }
 
     /**
      * Access to the YouPatch  manager

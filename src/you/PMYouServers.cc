@@ -68,13 +68,13 @@ SLPBoolean PMAttrCallback(SLPHandle hslp,
 //
 // Callback for SLPFindSrvs
 //
-SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp, 
-				const char* srvurl, 
-				unsigned short lifetime, 
-				SLPError errcode, 
-				void* mydata ) 
+SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
+				const char* srvurl,
+				unsigned short lifetime,
+				SLPError errcode,
+				void* mydata )
 {
-    if ( errcode == SLP_OK || errcode == SLP_LAST_CALL ) 
+    if ( errcode == SLP_OK || errcode == SLP_LAST_CALL )
     {
 	if ( srvurl )
 	{
@@ -99,7 +99,7 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
 	    }
 
 	    string descr = "Local YOU Server";
-	    
+
 	    if ( err == SLP_OK )
 	    {
 		// attributes e.g.:	(description=YOU Server Local),(attr2=value2)
@@ -131,12 +131,12 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
 									"",		// directory
 									PMYouServer::Slp ) );	// type
 	}
-    } 
+    }
 
-    /* return SLP_TRUE because we want to be called again */ 
-    /* if more services were found                        */ 
+    /* return SLP_TRUE because we want to be called again */
+    /* if more services were found                        */
 
-    return SLP_TRUE; 
+    return SLP_TRUE;
 }
 
 
@@ -254,7 +254,7 @@ PMYouServers::~PMYouServers()
 }
 
 Pathname PMYouServers::localSuseServers()
-{	
+{
   return "/etc/suseservers";
 }
 
@@ -271,11 +271,11 @@ Pathname PMYouServers::cachedYouServers()
 PMError PMYouServers::requestServers( bool check )
 {
   SysConfig *cfg = _settings->config();
-  
+
   string lastServerStr = cfg->readEntry( "LastServer" );
   string lastServerTypeStr = cfg->readEntry( "LastServerType" );
   PMYouServer::Type lastServerType = PMYouServer::typeFromString( lastServerTypeStr );
-  
+
   PMYouServer lastServer( lastServerStr, lastServerType );
 
   D__ << "Last Server: " << lastServer.toString() << endl;
@@ -293,7 +293,7 @@ PMError PMYouServers::requestServers( bool check )
     y2milestone ("Cecking for SLP servers" );
     addSLPServers();
   }
-    
+
   if ( syscfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
     PMYouProductPtr product = _settings->primaryProduct();
     string url;
@@ -305,17 +305,17 @@ PMError PMYouServers::requestServers( bool check )
 	url += "&version=" + product->version();
 	url += "&basearch=" + string( product->baseArch() );
 	url += "&arch=" + string( product->arch() );
-    
-	url += "&lang=" + string( _settings->langCode() );
-    
+
+	url += "&lang=" + string( _settings->langCode().code() );
+
 	url += "&business=";
 	if ( product->businessProduct() ) url += "1";
 	else url += "0";
-	
+
 	url += "&check=";
 	if ( check ) url += "1";
 	else url += "0";
-    
+
 	url += "&distproduct=" + product->distProduct();
     }
     addPackageVersion( "yast2-online-update", url );
@@ -336,7 +336,7 @@ PMError PMYouServers::requestServers( bool check )
       ERR << "Unable to create " << writeDir << ": errno " << ret
           << endl;
     }
-    
+
     // Disable media callbacks
     ReportRedirect<MediaCallbacks::DownloadProgressCallback>
       saver( MediaCallbacks::downloadProgressReport, 0 );
@@ -387,7 +387,7 @@ PMError PMYouServers::readServers( const Pathname &file, PMYouServer::Type type 
     DBG << "File doesn't exist." << endl;
     return PMError();
   }
-  
+
   string line;
   ifstream in( file.asString().c_str() );
   if ( in.fail() ) {
@@ -411,45 +411,45 @@ bool PMYouServers::addSLPServers( )
 {
     D__ << "Add SLP servers" << endl;
 
-    SLPError err; 
+    SLPError err;
     SLPHandle hslp;
-    
-    err = SLPOpen( NULL, SLP_FALSE, &hslp); 
-    if ( err != SLP_OK ) 
-    { 
+
+    err = SLPOpen( NULL, SLP_FALSE, &hslp);
+    if ( err != SLP_OK )
+    {
         y2error( "Error opening slp handle %i\n", err );
 	return false;
-    } 
+    }
 
 
-    if( err != SLP_OK ) 
-    { 
-        y2error( "Error registering service with slp" ); 
+    if( err != SLP_OK )
+    {
+        y2error( "Error registering service with slp" );
     }
     else
     {
 
-	err = SLPFindSrvs( hslp, 
-			   "you.suse", 
-			   0,                    /* use configured scopes */ 
-			   0,                    /* no attr filter        */ 
-			   PMSLPSrvURLCallback, 
-			   this ); 
+	err = SLPFindSrvs( hslp,
+			   "you.suse",
+			   0,                    /* use configured scopes */
+			   0,                    /* no attr filter        */
+			   PMSLPSrvURLCallback,
+			   this );
 
-	if( err != SLP_OK ) 
-	{ 
-	    y2error( "Error registering service with slp" ); 
-	} 
+	if( err != SLP_OK )
+	{
+	    y2error( "Error registering service with slp" );
+	}
     }
 
-    SLPClose(hslp); 
+    SLPClose(hslp);
 
     if ( err == SLP_OK )
 	return true;
     else
 	return false;
-    
-    D__ << "Add SLP servers done" << endl;    
+
+    D__ << "Add SLP servers done" << endl;
 }
 
 void PMYouServers::addServer( const PMYouServer &server )
@@ -517,7 +517,7 @@ string PMYouServers::encodeUrl( const string &url )
   D__ << url << endl;
 
   string result;
-  
+
   string::const_iterator it;
   for( it = url.begin(); it != url.end(); ++it ) {
     switch ( *it ) {

@@ -216,7 +216,7 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
     const PM::LocaleString::datamap & data( it->second._datamap );
     for ( PM::LocaleString::datamap::const_iterator el = data.begin(); el != data.end(); ++el ) {
       str << "MEDIA" << it->first;
-      if ( ! el->first->empty() ) {
+      if ( ! el->first.isSet() ) {
 	str << '.' << el->first;
       }
       str << ' ' << el->second << endl;

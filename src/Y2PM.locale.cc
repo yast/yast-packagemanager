@@ -54,35 +54,11 @@ class Y2PM::LocaleSettings {
     static LangCode _locale_fallback;
 
     /**
-     * Strip any trailing '[@.].*' from lang_r and
-     * return true if lang_r is not empty after this.
+     * @ref purge unset value in langset and return true if langset
+     * is not empty after this.
      **/
-    static bool purge( LangCode & lang_r ) {
-      string::size_type sep = lang_r->find_first_of( "@." );
-      if ( sep != string::npos ) {
-	lang_r = LangCode( lang_r->substr( 0, sep ) );
-      }
-      return lang_r->size();
-    }
-
-    /**
-     * @ref purge values in langset and return true if langset
-     * is not empty after this. Ignored locale values are returned via
-     * failedSet_r.
-     **/
-    static bool purge( LocaleSet & langset_r, LocaleSet & failedSet_r ) {
-      failedSet_r.clear();
-      LocaleSet newSet;
-      for ( LocaleSet::const_iterator it = langset_r.begin(); it != langset_r.end(); ++it ) {
-	LangCode lang( *it );
-	if ( purge( lang ) ) {
-	  newSet.insert( lang );
-	} else {
-	  // empty after purge
-	  failedSet_r.insert( *it );
-	}
-      }
-      langset_r.swap( newSet );
+    static bool purge( LocaleSet & langset_r ) {
+      langset_r.erase( LangCode() );
       return langset_r.size();
     }
 
@@ -95,7 +71,7 @@ class Y2PM::LocaleSettings {
       if ( envlang ) {
 	MIL << "$LANG='" << envlang << "'" << endl;
 	LangCode lang( envlang );
-	if ( purge( lang ) ) {
+	if ( lang.isSet() ) {
 	  _preferred_locale = lang;
 	}
       }
@@ -113,8 +89,8 @@ class Y2PM::LocaleSettings {
      * Set preferred_locale. Return true if value actually changed.
      **/
     bool setPreferredLocale( LangCode newLocale_r ) {
-      if ( ! purge( newLocale_r ) ) {
-	// empty after purge -> use fallback
+      if ( ! newLocale_r.isSet() ) {
+	// empty -> use fallback
 	newLocale_r = LocaleSettings::_locale_fallback;
       }
 
@@ -130,14 +106,13 @@ class Y2PM::LocaleSettings {
      * Ignored, added and deleted locale values are passed back.
      **/
     bool setRequestedLocales( const LocaleSet & newLocales_r,
-			      LocaleSet & failedSet_r,
 			      LocaleSet & addSet_r,
 			      LocaleSet & delSet_r ) {
       addSet_r.clear();
       delSet_r.clear();
       LocaleSet newSet = newLocales_r;
 
-      if ( purge( newSet, failedSet_r ) ) {
+      if ( purge( newSet ) ) {
 	addSet_r = set_difference( newSet, _requested_locales );
 	delSet_r = set_difference( _requested_locales, newSet );
       }
@@ -152,21 +127,20 @@ class Y2PM::LocaleSettings {
      * Set requested_locales. Return true if value actually changed.
      **/
     bool setRequestedLocales( const LocaleSet & newLocales_r ) {
-      LocaleSet failedSet_r, addSet_r, delSet_r;
-      return setRequestedLocales( newLocales_r, failedSet_r, addSet_r, delSet_r );
+      LocaleSet addSet_r, delSet_r;
+      return setRequestedLocales( newLocales_r, addSet_r, delSet_r );
     }
 
     /**
      * Add addLocales_r to requested_locales. Return true if value actually changed.
-     * Ignored and added locale values are passed back.
+     * Added locale values are passed back.
      **/
     bool addRequestedLocales( const LocaleSet & addLocales_r,
-			      LocaleSet & failedSet_r,
 			      LocaleSet & addSet_r ) {
       addSet_r.clear();
       LocaleSet tmpSet = addLocales_r;
 
-      if ( purge( tmpSet, failedSet_r ) ) {
+      if ( purge( tmpSet ) ) {
 	addSet_r = set_difference( tmpSet, _requested_locales );
       }
 
@@ -180,21 +154,20 @@ class Y2PM::LocaleSettings {
      * Add addLocales_r to requested_locales. Return true if value actually changed.
      **/
     bool addRequestedLocales( const LocaleSet & addLocales_r ) {
-      LocaleSet failedSet_r, addSet_r;
-      return addRequestedLocales( addLocales_r, failedSet_r, addSet_r );
+      LocaleSet addSet_r;
+      return addRequestedLocales( addLocales_r, addSet_r );
     }
 
     /**
      * Delete delLocales_r from requested_locales. Return true if value actually changed.
-     * Ignored and deleted locale values are passed back.
+     * Deleted locale values are passed back.
      **/
     bool delRequestedLocales( const LocaleSet & delLocales_r,
-			      LocaleSet & failedSet_r,
 			      LocaleSet & delSet_r ) {
       delSet_r.clear();
       LocaleSet tmpSet = delLocales_r;
 
-      if ( purge( tmpSet, failedSet_r ) ) {
+      if ( purge( tmpSet ) ) {
 	delSet_r = set_intersection( tmpSet, _requested_locales );
       }
 
@@ -209,8 +182,8 @@ class Y2PM::LocaleSettings {
      * Delete delLocales_r from requested_locales. Return true if value actually changed.
      **/
     bool delRequestedLocales( const LocaleSet & delLocales_r ) {
-      LocaleSet failedSet_r, delSet_r;
-      return delRequestedLocales( delLocales_r, failedSet_r, delSet_r );
+      LocaleSet delSet_r;
+      return delRequestedLocales( delLocales_r, delSet_r );
     }
 };
 
@@ -238,7 +211,7 @@ inline Y2PM::LocaleSettings & Y2PM::localeSettings() {
 Y2PM::LocaleOrder Y2PM::getLocaleFallback( const LangCode & locale_r ) {
   LocaleOrder ret;
 
-  if ( locale_r->empty() ) {
+  if ( ! locale_r.isSet() ) {
     // _locale_fallback only
     ret.push_back( LocaleSettings::_locale_fallback );
   } else {
@@ -248,7 +221,7 @@ Y2PM::LocaleOrder Y2PM::getLocaleFallback( const LangCode & locale_r ) {
 
     if ( locale_r.hasCountry() ) {
       // country code stripped
-      ret.push_back( locale_r.languageOnly() );
+      ret.push_back( locale_r.language() );
     }
 
     if ( ret.back() != LocaleSettings::_locale_fallback ) {
@@ -304,10 +277,9 @@ const Y2PM::LocaleSet & Y2PM::getRequestedLocales()
 //
 PMError Y2PM::setRequestedLocales( const Y2PM::LocaleSet & newLocales_r )
 {
-  LocaleSet failedSet;
   LocaleSet addSet;
   LocaleSet delSet;
-  if ( localeSettings().setRequestedLocales( newLocales_r, failedSet, addSet, delSet ) ) {
+  if ( localeSettings().setRequestedLocales( newLocales_r, addSet, delSet ) ) {
     requestedLocalesChanged( addSet, delSet );
   }
   return PMError::E_ok;
@@ -321,9 +293,8 @@ PMError Y2PM::setRequestedLocales( const Y2PM::LocaleSet & newLocales_r )
 //
 PMError Y2PM::addRequestedLocales( const LocaleSet & addLocales_r )
 {
-  LocaleSet failedSet;
   LocaleSet addSet;
-  if ( localeSettings().addRequestedLocales( addLocales_r, failedSet, addSet ) ) {
+  if ( localeSettings().addRequestedLocales( addLocales_r, addSet ) ) {
     LocaleSet delSet;
     requestedLocalesChanged( addSet, delSet );
   }
@@ -338,9 +309,8 @@ PMError Y2PM::addRequestedLocales( const LocaleSet & addLocales_r )
 //
 PMError Y2PM::delRequestedLocales( const LocaleSet & delLocales_r )
 {
-  LocaleSet failedSet;
   LocaleSet delSet;
-  if ( localeSettings().delRequestedLocales( delLocales_r, failedSet, delSet ) ) {
+  if ( localeSettings().delRequestedLocales( delLocales_r, delSet ) ) {
     LocaleSet addSet;
     requestedLocalesChanged( addSet, delSet );
   }
