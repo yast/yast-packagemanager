@@ -21,6 +21,7 @@
 
 #include <iosfwd>
 #include <set>
+#include <map>
 #include <list>
 
 #include <y2pm/InstSrc.h>
@@ -276,7 +277,7 @@ class InstSrcManager {
     unsigned knownSources() const { return _knownSources.size(); }
 
     /**
-     * Return the ISrcId's of all known InsrSrces. Or enabled InsrSrces
+     * Return the ISrcId's of all known InstSrces. Or enabled InsrSrces
      * only, if enabled_only == true.
      *
      * TODO: Should be replaced by some Iterator.
@@ -284,7 +285,7 @@ class InstSrcManager {
     ISrcIdList getSources( const bool enabled_only = false ) const;
 
     /**
-     * Return the ISrcId's of all known InsrSrces. Or enabled InsrSrces
+     * Return the ISrcId's of all known InstSrces. Or enabled InsrSrces
      * only, if enabled_only == true.
      *
      * TODO: Should be replaced by some Iterator.
@@ -292,6 +293,19 @@ class InstSrcManager {
     void getSources( ISrcIdList & idlist_r, const bool enabled_only = false ) const {
       idlist_r = getSources( enabled_only );
     }
+
+    /**
+     * Convert the numeric srcID back to an ISrcId.
+     *
+     * As an ISrcId basically is a 'constInstSrcPtr', it may get reused by deleting and creating
+     * InstSrc'es. Besides this an ISrcId keeps an open reference to the InstSrc. So they are not
+     * intended to be stored longer than necessary.
+     *
+     * Rut each InstSrc owns a unique numeric ID, which may be retrieved by calling @ref InstSrc::srcID.
+     * Providing this srcID, the coresponding ISrcId is returned, or NULL, if the InstSrc not found in
+     * the list of known InstSrces (e.g. meanwhile deleted).
+     **/
+    ISrcId getSourceByID( InstSrc::UniqueID srcID_r ) const;
 
     /**
      * Disable all InstSrc'es.
@@ -323,6 +337,60 @@ class InstSrcManager {
      * available in the running system after boot.
      **/
     PMError cacheCopyTo( const Pathname & newRoot_r );
+
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Temporary interface for handling install order (yast.order)
+    // during installation/update.
+    //
+    ///////////////////////////////////////////////////////////////////
+
+  public:
+
+    typedef std::vector<InstSrc::UniqueID> InstOrder;
+
+  private:
+
+    InstOrder _instOrder;
+
+  public:
+
+    /**
+     * Explicitly set an install order.
+     *
+     * orderedSrcID_r is expected to contain valid numeric InstSrc IDs
+     * (see @ref getSourceByID). @ref instOrderSources will then put all
+     * enabled InstSrces according to orderedSrcID_r in front of the list.
+     * Enabled InstSrces not mentioned in orderedSrcID_r will be appended
+     * in default order.
+     **/
+    void setInstOrder( const InstOrder & newOrder_r );
+
+    /**
+     * The default install order is sorted by rank, thus the same as
+     * returned by @ref getSources(true).
+     **/
+    void setDefaultInstOrder();
+
+    /**
+     * Return the current InstOrder.
+     **/
+    const InstOrder & instOrder() const { return _instOrder; }
+
+    /**
+     * Return the ISrcId's of all enabled InstSrces in install order.
+     * The default install order is sorted by rank, thus the same as
+     * returned by @ref getSources(true). See @ref setInstOrder.
+     **/
+    ISrcIdList instOrderSources() const;
+
+    /**
+     * Return the index [0..n] of isrc_r in @ref instOrderSources,
+     * or -1 if isrc_r is not enabled or NULL.
+     **/
+    int instOrderIndex( const ISrcId & isrc_r ) const;
+
 };
 
 ///////////////////////////////////////////////////////////////////

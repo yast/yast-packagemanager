@@ -249,6 +249,9 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
+  INT << PkgModuleError( E_bad_args, __FUNCTION__ ) << endl;
+  return 0;
+
   wfm.init();
   INT << "START" << endl;
   wfm.SourceStartManager( false );

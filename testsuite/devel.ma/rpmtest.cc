@@ -39,6 +39,15 @@ using namespace std;
 #define SMGR Y2PM::selectionManager()
 #define ISM  Y2PM::instSrcManager()
 
+ostream & operator <<( ostream & str, const InstSrcManager::ISrcIdList & obj ) {
+  str << '[' << endl;
+  for ( InstSrcManager::ISrcIdList::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+    str << "  " << *it << endl;
+  }
+
+  return str << ']';
+}
+
 ostream & operator <<( ostream & str, const list<string> & t ) {
   stringutil::dumpOn( str, t, true );
   return str;
@@ -236,25 +245,36 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
+  //Y2PM::noAutoInstSrcManager();
   Y2PM::instSrcManager();
-  Y2PM::instTargetUpdate();
 
-  INT << PMGR["MPlayer"]->user_set_taboo() << endl;
-  INT << PMGR["MPlayer-w32codecs"]->user_set_taboo() << endl;
+  //newSrc( "/schnell/CD-ARCHIVE/8.2/SuSE-8.2-DVD-i386-RC2/CD1" );
+  //newSrc( "/schnell/CD-ARCHIVE/8.1/SuSE-8.1-DVD-i386-Int-RC5" );
+  //newSrc( "/schnell/CD-ARCHIVE/8.0/suse80-dvd-de-i386-RC4" );
 
-  PMUpdateStats opt_stats;
-  PMGR.doUpdate( opt_stats );
+  MIL << "ISM.getSources " << ISM.getSources() << endl;
+  MIL << "ISM.instOrderSources " << ISM.instOrderSources() << endl;
 
-  dumpPkgWhatIf( INT );
-
-  // get packages to process
-  std::list<PMPackagePtr> dellist;
-  std::list<PMPackagePtr> inslist;
-  std::list<PMPackagePtr> srclist;
-  Y2PM::packageManager().getPackagesToInsDel( dellist, inslist, srclist );
-  for ( list<PMPackagePtr>::iterator it = dellist.begin(); it != dellist.end(); ++it ) {
-    SEC << *it << endl;
+  InstSrcManager::InstOrder order;
+  {
+    InstSrcManager::ISrcIdList obj( ISM.getSources() );
+    order.reserve( obj.size() );
+    for ( InstSrcManager::ISrcIdList::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+      DBG << (*it)->srcID() << endl;
+      order.insert( order.begin(), (*it)->srcID() );
+    }
   }
+
+  ISM.setInstOrder( order );
+  MIL << "ISM.instOrderSources " << ISM.instOrderSources() << endl;
+
+  {
+    InstSrcManager::ISrcIdList obj( ISM.getSources() );
+    for ( InstSrcManager::ISrcIdList::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+      DBG << (*it)->srcID() << " -> " << ISM.instOrderIndex( *it ) << endl;
+    }
+  }
+
 
   SEC << "STOP -> " << ret << endl;
   return ret;

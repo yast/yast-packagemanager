@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 13 22:59:57 CET 2003 - ma@suse.de
+
+- InstSrcManager: Now able to handle an install order.
+- 2.9.5
+
+-------------------------------------------------------------------
 Thu Nov  6 13:46:13 CET 2003 - mvidner@suse.cz
 
 - Use doxygen instead of kdoc.

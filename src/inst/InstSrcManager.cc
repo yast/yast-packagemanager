@@ -744,6 +744,23 @@ InstSrcManager::ISrcIdList InstSrcManager::getSources( const bool enabled_only )
   return ret;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::getSourceByID
+//	METHOD TYPE : InstSrcManager::ISrcId
+//
+InstSrcManager::ISrcId InstSrcManager::getSourceByID( InstSrc::UniqueID srcID_r ) const
+{
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    if ( (*it)->srcID() == srcID_r ) {
+      return *it;
+    }
+  }
+  // not found
+  return 0;
+}
+
 /******************************************************************
 **
 **
@@ -1004,4 +1021,85 @@ PMError InstSrcManager::intern_cacheCopyTo()
   }
 
   return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+// Temporary interface for handling install order (yast.order)
+// during installation/update.
+//
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::setInstOrder
+//	METHOD TYPE : void
+//
+void InstSrcManager::setInstOrder( const InstOrder & newOrder_r )
+{
+  _instOrder = newOrder_r;
+
+  if ( _instOrder.empty() ) {
+    MIL << "Empty InstOrder: using default." << endl;
+  } else {
+    MIL << "New InstOrder:" << endl;
+    for ( unsigned i = 0; i < _instOrder.size(); ++i ) {
+      MIL << stringutil::form( "[%d](%d) ", i, _instOrder[i] ) << getSourceByID( _instOrder[i] ) << endl;
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::setDefaultInstOrder
+//	METHOD TYPE : void
+//
+void InstSrcManager::setDefaultInstOrder()
+{
+  _instOrder.clear();
+  MIL << "InstOrder set to default." << endl;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::instOrderSources
+//	METHOD TYPE : InstSrcManager::ISrcIdList
+//
+InstSrcManager::ISrcIdList InstSrcManager::instOrderSources() const
+{
+  ISrcIdList enabled( getSources( /*enabled_only*/true ) );
+
+  // reverse iterate _instOrder and move sources to list begin.
+  for ( InstOrder::const_reverse_iterator it = _instOrder.rbegin(); it != _instOrder.rend(); ++it ) {
+
+    for ( ISrcIdList::iterator el = enabled.begin(); el != enabled.end(); ++el ) {
+      if ( (*el)->srcID() == *it ) {
+	enabled.splice( enabled.begin(), enabled, el );
+	break;
+      }
+    }
+  }
+  return enabled;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::instOrderIndex
+//	METHOD TYPE : int
+//
+int InstSrcManager::instOrderIndex( const ISrcId & isrc_r ) const
+{
+  ISrcIdList ordered( instOrderSources() );
+
+  int idx = 0;
+  for ( ISrcIdList::const_iterator it = ordered.begin(); it != ordered.end(); ++it, ++idx ) {
+    if ( *it == isrc_r )
+      return idx;
+  }
+  // not found:
+  return -1;
 }
