@@ -1,6 +1,6 @@
 @HEADER-COMMENT@
 
-# neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools doxygen libpng readline readline-devel acl attr curl curl-devel openssl openssl-devel rpm rpm-devel popt popt-devel openslp openslp-devel
+# neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools doxygen libpng readline readline-devel acl attr curl curl-devel openssl openssl-devel rpm rpm-devel popt popt-devel openslp openslp-devel pkgconfig
 
 Provides:	libpkg
 Obsoletes:	libpkg
