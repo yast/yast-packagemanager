@@ -167,6 +167,9 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	case PMPackage::ATTR_AUTHOR:
 	    // not available as rpm tag
 	    return "";
+	case PMPackage::ATTR_FILENAMES:
+	    queryformat = "[%{FILENAMES}\n]";
+	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid
 	    return "invalid query";

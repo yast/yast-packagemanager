@@ -60,6 +60,49 @@ PMObject::~PMObject()
 {
 }
 
+string PMObject::getAttributeName(PMSolvableAttribute attr)
+{
+    const char* str = NULL;
+    switch(attr)
+    {
+	case ATTR_NAME:
+	    str = "NAME";
+	    break;
+	case ATTR_VERSION:
+	    str = "VERSION";
+	    break;
+	case ATTR_RELEASE:
+	    str = "RELEASE";
+	    break;
+	case ATTR_REQUIRES:
+	    str = "REQUIRES";
+	    break;
+	case ATTR_PREREQUIRES:
+	    str = "PREREQUIRES";
+	    break;
+	case ATTR_PROVIDES:
+	    str = "PROVIDES";
+	    break;
+	case ATTR_OBSOLETES:
+	    str = "OBSOLETES";
+	    break;
+	case ATTR_CONFLICTS:
+	    str = "CONFLICTS";
+	    break;
+	case PMSLV_NUM_ATTRIBUTES:
+	    // invalid
+	    return "invalid query";
+    }
+
+    if(!str)
+    {
+	ERR << "invalid enum value" << endl;
+	str = "invalid query";
+    }
+
+    return str;
+}
+
 string PMObject::getAttributeName(PMObjectAttribute attr)
 {
     const char* str = NULL;

@@ -98,7 +98,21 @@ int main(int argc, char* argv[])
 	    }
 	    else
 	    {
-		for (PMPackage::PMObjectAttribute attr = PMPackage::PMObjectAttribute(0);
+		for (PMPackage::PMSolvableAttribute attr
+			= PMPackage::PMSolvableAttribute(PMPackage::PMSLV_ATTR_BEGIN);
+		    attr < PMPackage::PMSLV_NUM_ATTRIBUTES;
+		    attr = PMPackage::PMSolvableAttribute(attr+1))
+		{
+		    cout
+			<< (*p)->getAttributeName(attr)
+			<< ": "
+			<< (*p)->getAttributeValue(attr)
+			<< endl;
+		}
+
+
+		for (PMPackage::PMObjectAttribute attr
+			= PMPackage::PMObjectAttribute(PMPackage::PMOBJ_ATTR_BEGIN);
 		    attr < PMPackage::PMOBJ_NUM_ATTRIBUTES;
 		    attr = PMPackage::PMObjectAttribute(attr+1))
 		{
@@ -108,9 +122,9 @@ int main(int argc, char* argv[])
 			<< (*p)->getAttributeValue(attr)
 			<< endl;
 		}
-		/*
-	    	for (PMPackage::PMPackageAttribute attr =
-			PMPackage::PMPackageAttribute(PMPackage::PMOBJ_NUM_ATTRIBUTES);
+
+	    	for (PMPackage::PMPackageAttribute attr
+			= PMPackage::PMPackageAttribute(PMPackage::PKG_ATTR_BEGIN);
 		    attr < PMPackage::PKG_NUM_ATTRIBUTES;
 		    attr = PMPackage::PMPackageAttribute(attr+1))
 		{
@@ -120,7 +134,7 @@ int main(int argc, char* argv[])
 			<< (*p)->getAttributeValue(attr)
 			<< endl;
 		}
-		*/
+
 		cout << (*p)->getAttributeName(PMPackage::ATTR_GROUP)
 		    << ": "
 		    << (*p)->getAttributeValue(PMPackage::ATTR_GROUP)

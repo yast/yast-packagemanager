@@ -46,11 +46,12 @@ class PMObject : virtual public Rep, public PMSolvable {
   public:
 
     enum PMObjectAttribute {
-      ATTR_SUMMARY = 0,
-      ATTR_DESCRIPTION,
-      ATTR_SIZE, // installed size
+	PMOBJ_ATTR_BEGIN = PMSLV_NUM_ATTRIBUTES,
+	ATTR_SUMMARY = PMOBJ_ATTR_BEGIN,
+	ATTR_DESCRIPTION,
+	ATTR_SIZE, // installed size
 
-      PMOBJ_NUM_ATTRIBUTES
+	PMOBJ_NUM_ATTRIBUTES
     };
 
   public:
@@ -72,6 +73,8 @@ class PMObject : virtual public Rep, public PMSolvable {
      * @return Attribute value
      * */
     virtual std::string getAttributeValue(PMObjectAttribute attr) = 0;
+    
+    virtual std::string getAttributeValue(PMSolvableAttribute attr) = 0;
 
     /** get the name of an attribute
      *
@@ -79,6 +82,8 @@ class PMObject : virtual public Rep, public PMSolvable {
      * @return Attribute name
      * */
     virtual std::string getAttributeName(PMObjectAttribute attr);
+    
+    virtual std::string getAttributeName(PMSolvableAttribute attr);
 
   public:
 
