@@ -422,7 +422,7 @@ PMError Y2PM::rcInit()
       // This is how old versions did it.
       _yp2pmrc.requestedLocales.insert( getPreferredLocale() );
 
-      // Make shure new rcfioe gets written.
+      // Make shure new rcfile gets written.
       _yp2pmrc._rcfile = _yp2pmrc.defaultRcPath();
 
       // Writing an initial rcfile
@@ -464,6 +464,48 @@ PMError Y2PM::rcSave()
   }
 
   PMError err = _yp2pmrc.saveTo( rcfile );
+  if ( err ) {
+    ERR << "Save returned " << err << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::rcCopyTo
+//	METHOD TYPE : PMError
+//
+PMError Y2PM::rcCopyTo()
+{
+  if ( runningFromSystem() ) {
+    return rcSave();
+  }
+  //
+  // installation / update
+  //
+  PMError err;
+
+  if ( ! _yp2pmrc._initialized ) {
+    rcInit();
+  }
+
+  if ( ! ( _instTarget && instTarget().initialized() ) ) {
+    err = InstTargetError::E_not_initialized;
+    ERR << "Unable to access rcfile: " << err << endl;
+    return err;
+  }
+
+  Pathname rcfile( instTarget().rootdir() + _yp2pmrc.defaultRcPath() );
+
+  int res = PathInfo::assert_dir( rcfile.dirname() );
+  if ( res ) {
+    ERR << "Error(" << res << ") creating directory '" << rcfile.dirname() << "'" << endl;
+    return PMError::E_error;
+  }
+
+  err = _yp2pmrc.saveTo( rcfile );
   if ( err ) {
     ERR << "Save returned " << err << endl;
   }

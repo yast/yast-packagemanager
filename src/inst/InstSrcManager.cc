@@ -1009,6 +1009,8 @@ PMError InstSrcManager::cacheCopyTo( const Pathname & newRoot_r )
     MIL << "cacheCopyTo '" << newRoot_r << "' done" << endl;
   }
 
+  Y2PM::rcCopyTo(); // install rcfile
+
   return err;
 }
 
