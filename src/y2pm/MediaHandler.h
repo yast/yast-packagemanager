@@ -293,11 +293,7 @@ class MediaHandler {
 	 *
 	 * Returns empty pathname if E_bad_attachpoint
 	 **/
-	Pathname localPath( const Pathname & pathname ) const {
-	  if ( _localRoot.empty() )
-	    return _localRoot;
-	  return _localRoot + pathname.absolutename();
-	}
+         Pathname localPath( const Pathname & pathname ) const;
 
         /**
 	 * Use concrete handler to isconnect media.

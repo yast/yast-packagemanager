@@ -34,7 +34,7 @@ if [[ "$yast_found_librpm" = "yes" ]]; then
 	#include <rpm/rpmdb.h>
 	#include <stdio.h>
 	int main() {
-	  if ( DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 1 )
+	  if ( DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1 )
 	    return 0;
 	  fprintf( stderr, "Expected DB_VERSION 4.1. Found %d.%d\n", DB_VERSION_MAJOR, DB_VERSION_MINOR );
 	  return 1;
