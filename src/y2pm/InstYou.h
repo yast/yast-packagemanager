@@ -253,10 +253,13 @@ class InstYou {
 
   protected:
     /**
-     * Attach source of patches.
-     *
-     */
+      Attach source of patches.
+    */
     PMError attachSource();
+    /**
+      Release source of patches.
+    */
+    PMError releaseSource();
 
     void resetProgress();
     bool incrementProgress();
