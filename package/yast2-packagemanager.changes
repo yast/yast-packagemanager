@@ -2,7 +2,7 @@
 Tue Mar  1 15:21:28 CET 2005 - ma@suse.de
 
 - Fixed MediaChange failure switching back from a CDn to a CD1
-  directory. Most commonlt needed on nfs install. (#66645)
+  directory. Most commonly needed on nfs install. (#66645)
 - 2.11.24
 
 -------------------------------------------------------------------
