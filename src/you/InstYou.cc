@@ -87,6 +87,7 @@ PMError InstYou::initProduct()
 
 PMError InstYou::initDu()
 {
+#if 0
   std::set<PkgDuMaster::MountPoint> mountpoints;
 
   std::string dname = "/var/lib/YaST2/you";
@@ -103,6 +104,7 @@ PMError InstYou::initDu()
   mountpoints.insert (point);
 
   Y2PM::packageManager().setMountPoints(mountpoints);
+#endif
 
   return PMError();
 }
