@@ -35,6 +35,8 @@ EXTRA_PROGRAMS = \
 	autosolvertest	\
 	test_updateinf
 
+EXTRA_DIST=README.autosolvertest rpm2hdr
+
 test_updateinf_SOURCES = test_updateinf.cc
 test_updateinf_LDADD = $(top_builddir)/src/liby2pm.la
 
