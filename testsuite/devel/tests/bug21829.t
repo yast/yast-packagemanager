@@ -2,7 +2,7 @@
 # Problem:
 #   - only lprng gets lsb as referer
 #   - remove list contains lsb despite /usr/bin/lpr is satisfied by cups-client
-lsb cups-client lprng
+lsb lprng cups-client 
 # 2
 lsb cups-client
 # 3

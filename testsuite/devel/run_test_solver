@@ -1,5 +1,5 @@
 #!/bin/bash
-TESTS="01simple 02conflict bug21829 inconsistent1 inconsistent2 inconsistent3 inconsistent4"
+TESTS="01simple 02conflict bug21829 inconsistent1 inconsistent2 inconsistent3 inconsistent4 inconsistent5"
 
 set -e
 
@@ -11,10 +11,11 @@ Y2SLOG_FILE=autosolvertest.y2log
 export Y2DEBUG Y2SLOG_FILE
 
 for test in $TESTS; do
+	echo "############# run test $test ##################" >> $Y2SLOG_FILE
 	./autosolvertest tests/$test >/dev/null 2>&1
 done
 
 for test in $TESTS; do
 	echo -n "test $test: "
-	diff tests/$test.ref tests/$test.out > tests/$test.diff && echo passed || echo FAILED
+	diff -u tests/$test.ref tests/$test.out > tests/$test.diff && echo passed || echo FAILED
 done

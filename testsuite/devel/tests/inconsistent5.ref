@@ -1,0 +1,6 @@
+--- Test 1
+
+Name: libsomething
+Edition: 1-1
+Referers: shadow-1.0-1 requires libsomething.so.0
+

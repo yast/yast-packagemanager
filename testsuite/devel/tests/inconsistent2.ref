@@ -8,5 +8,6 @@ Remove-Referers: at, shadow
 
 Name: shadow
 Edition: 1.0-1
+Was-Inconsistent: yes
 Unresolvable: shadow-1.0-1 requires libsomething.so.0
 

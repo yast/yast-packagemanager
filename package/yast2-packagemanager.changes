@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 23 13:59:16 CET 2004 - lnussel@suse.de
+
+- compare edition instead of pointer when determining whether an inconsistent
+  package is the same as the one to be installed (#36472)
+- adapt automatic solver tests
+
+-------------------------------------------------------------------
 Mon Mar 22 16:13:48 CET 2004 - cschum@suse.de
 
 - YOU: Remeber last server only if it was a custom server or if it

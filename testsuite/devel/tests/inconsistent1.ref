@@ -3,4 +3,5 @@
 Name: shadow
 Edition: 1.1-1
 Is-Upgrade-From: 1.0-1
+Was-Inconsistent: yes
 

@@ -34,10 +34,10 @@ class InconsistentSameAsInstalled
 	    if(_installed && result.was_inconsistent && result.solvable != NULL)
 	    {
 		PMSolvablePtr p = _installed->lookup(result.name);
-		if(p == result.solvable)
+		if(p->edition() == result.solvable->edition())
 		{
-		    D__ << "don't reinstall inconsistent " << result.solvable->nameEd()
-			<< " as exact same is already installed" << endl;
+		    DBG << "don't reinstall inconsistent " << result.solvable->nameEd()
+			<< " as same edition is already installed" << endl;
 		    return true;
 		}
 	    }

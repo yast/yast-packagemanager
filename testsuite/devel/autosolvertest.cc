@@ -794,6 +794,17 @@ class ResultSortCriterion
 	}
 };
 
+// sort alternatives by name
+class AlternativesSortCriterion
+{
+    public:
+	bool operator()(const PkgDep::Alternative& l, const PkgDep::Alternative& r)
+	{
+	    return (l.solvable->name() < r.solvable->name());
+	}
+};
+
+
 int main(int argc, char* argv[])
 {
     if(argc<2)
@@ -846,8 +857,9 @@ int main(int argc, char* argv[])
 	     p != good.end(); ++p ) {
 	    of << *p << endl;
 	}
-	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
+	for( PkgDep::ErrorResultList::iterator p = bad.begin();
 	     p != bad.end(); ++p ) {
+	    p->alternatives.sort(AlternativesSortCriterion());
 	    of << *p << endl;
 	}
     }
