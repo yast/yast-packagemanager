@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar  8 11:25:13 CET 2005 - lnussel@suse.de
+
+- before suggesting to remove a refering package, check if requirements are
+  fulfilled by some other package (#66376).
+- 2.11.26
+
+-------------------------------------------------------------------
 Fri Mar  4 16:38:35 CET 2005 - ma@suse.de
 
 - Workaround distributed packages with faulty vendor tag. Otherwise
