@@ -42,23 +42,24 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstTarget::InstTarget
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION :
-    /**
-     * constructor
-     * @param rootpath, path to root ("/") of target system
-     * Usually "/" if the InstTarget object is actually running
-     * inside the target. But might be "/mnt" during installation
-     * (running in inst-sys) or "/whatever" if installing into
-     * a directory
-     */
-InstTarget::InstTarget ( const std::string & rootpath )
+IMPL_BASE_POINTER(InstTarget);
+
+/**
+ * constructor
+ * @param rootpath, path to root ("/") of target system
+ * Usually "/" if the InstTarget object is actually running
+ * inside the target. But might be "/mnt" during installation
+ * (running in inst-sys) or "/whatever" if installing into
+ * a directory
+ */
+InstTarget::InstTarget ( const std::string & rootpath ) :
+    _progressfunc(NULL),
+    _progressdata(NULL),
+    _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
+    _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
+    _rootdir(rootpath)
 {
+    _rpmdb = new RpmDb(_rootdir.asString());
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -73,6 +74,16 @@ InstTarget::~InstTarget()
 {
 }
 
+PMError InstTarget::init( bool createnew)
+{
+    return _rpmdb->initDatabase(createnew);
+}
+
+PMError InstTarget::bringIntoCleanState()
+{
+    return _rpmdb->rebuildDatabase();
+}
+
 //-----------------------------
 // general functions
 
@@ -82,10 +93,11 @@ InstTarget::~InstTarget()
 bool
 InstTarget::Erase()
 {
-    D__ << __FUNCTION__ << std::endl;
+    //TODO
+    D__ << std::endl;
     return false;
 }
-
+#if 0
 /**
  * @return description of Installation source
  * This is needed by the InstTargetMgr
@@ -134,6 +146,7 @@ InstTarget::setActivation (bool yesno)
 
 //-----------------------------
 // source content access
+#endif
 
 /**
  * return the number of selections on this source
@@ -141,8 +154,9 @@ InstTarget::setActivation (bool yesno)
 int
 InstTarget::numSelections() const
 {
-    D__ << __FUNCTION__ << std::endl;
-    return _data->numSelections();
+    //TODO
+    D__ << std::endl;
+    return 0;
 }
 
 
@@ -152,8 +166,9 @@ InstTarget::numSelections() const
 int
 InstTarget::numPackages() const
 {
-    D__ << __FUNCTION__ << std::endl;
-    return _data->numPackages();
+    //TODO
+    D__ << std::endl;
+    return 0;
 }
 
 
@@ -163,52 +178,83 @@ InstTarget::numPackages() const
 int
 InstTarget::numPatches() const
 {
-    D__ << __FUNCTION__ << std::endl;
-    return _data->numPatches();
+    D__ << std::endl;
+    return 0;
 }
 
 
-/**
- * generate PMSolvable objects for each selection on the source
- * @return list of PMSolvablePtr on this source
- */
-const std::list<PMSolvablePtr> *
-InstTarget::getSelections() const
+
+PMError InstTarget::getPackages (std::list<PMPackagePtr>& pkglist)
 {
-    D__ << __FUNCTION__ << std::endl;
-    return _data->getSelections();
+    return _rpmdb->getPackages(pkglist);
 }
 
-/**
- * generate PMPackage objects for each Item on the source
- * @return list of PMPackagePtr on this source
- * */
-const std::list<PMPackagePtr> *
-InstTarget::getPackages() const
+PMError InstTarget::getSelections (std::list<PMSelectionPtr>& sellist)
 {
-    D__ << __FUNCTION__ << std::endl;
-    return _data->getPackages();
+    //TODO
+    return 0;
 }
 
-/**
- * generate PMSolvable objects for each patch on the source
- * @return list of PMSolvablePtr on this source
- */
-const std::list<PMSolvablePtr> *
-InstTarget::getPatches() const
+PMError InstTarget::getYOUPatches (std::list<PMYouPatchPtr>& youpatchlist)
 {
-    D__ << __FUNCTION__ << std::endl;
-    return _data->getPatches();
+    //TODO
+    return 0;
 }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstTarget::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
+void InstTarget::setPkgInstFlags(unsigned flags)
+{
+    _rpminstflags = flags;
+}
+
+unsigned InstTarget::getPkgInstFlags() const
+{
+    return _rpminstflags;
+}
+
+void InstTarget::setPkgRemoveFlags(unsigned flags)
+{
+    _rpmremoveflags = flags;
+}
+
+unsigned InstTarget::getPkgRemoveFlags() const
+{
+    return _rpmremoveflags;
+}
+
+PMError InstTarget::installPackage (const std::string& filename, unsigned flags)
+{
+    return _rpmdb->installPackage(filename,flags?flags:_rpminstflags);
+}
+
+PMError InstTarget::installPackages (const std::list<std::string>& filenames, unsigned flags)
+{
+    for(list<string>::const_iterator it= filenames.begin(); it != filenames.end(); ++it)
+    {
+	installPackage(*it,flags);
+    }
+    return 0;
+}
+
+PMError InstTarget::removePackage(const std::string& label, unsigned flags)
+{
+    return _rpmdb->removePackage(label,flags?flags:_rpminstflags);
+}
+
+PMError InstTarget::removePackages(const std::list<std::string>& labels, unsigned flags)
+{
+    for(list<string>::const_iterator it= labels.begin(); it != labels.end(); ++it)
+    {
+	removePackage(*it,flags);
+    }
+    return 0;
+}
+
+const std::string& InstTarget::getRoot() const
+{
+    return _rootdir.asString();
+}
+
+
 ostream &
 InstTarget::dumpOn( ostream & str ) const
 {

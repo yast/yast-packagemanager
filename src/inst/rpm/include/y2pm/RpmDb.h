@@ -189,21 +189,14 @@ class RpmDb: virtual public Rep
 	 */
 	PkgAttributeValue queryPackage(const char *format, std::string packagelabel, bool installed = true);
 
-	/** set parameters to use on installation/update
-	 *
-	 * @param flags which parameters to use by default, eg. RPMINST_NODOCS|RPMINST_NOSCRIPTS
-	 * */
-	void setInstFlags(unsigned flags) { _rpminstflags = flags; }
-
 	/** install rpm package
 	 *
 	 * @param filename file to install
-	 * @param flags which rpm options to use, will be or'ed with flags set by setInstFlags()
+	 * @param flags which rpm options to use
 	 *
 	 * @return success
 	 * */
-	bool installPackage(const std::string& filename,
-	    unsigned flags = RPMINST_NODEPS|RPMINST_FORCE|RPMINST_IGNORESIZE );
+	bool installPackage(const std::string& filename, unsigned flags = 0 );
 
 	/** remove rpm package
 	 *
@@ -214,7 +207,7 @@ class RpmDb: virtual public Rep
 	 *
 	 * @return success
 	 * */
-	bool removePackage(const std::string& label, unsigned iflags);
+	bool removePackage(const std::string& label, unsigned flags = 0);
 
 	/** set callback function for reporting progress of package
 	 * installation
@@ -228,6 +221,11 @@ class RpmDb: virtual public Rep
 	    _progressdata = data;
 	}
 
+	/**
+	 * @return destination root directory
+	 * */
+	const std::string& getRoot() const { return _rootdir.asString(); }
+
     private:
 
 	/** progress callback */
@@ -235,10 +233,6 @@ class RpmDb: virtual public Rep
 
 	/** arbitrary data to pass back for progress callback */
 	void* _progressdata;
-
-	/** parameters to use on installation/update
-	 * */
-	unsigned _rpminstflags;
 
 	/** dataprovider that is given to every created package
 	 * */
