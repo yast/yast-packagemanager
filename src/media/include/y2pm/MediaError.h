@@ -79,7 +79,8 @@ class MediaError {
       E_not_supported_by_media,
       // libcurl errors
       E_curl_setopt_failed,
-      E_write_error
+      E_write_error,
+      E_user_abort
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {

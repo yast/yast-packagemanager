@@ -36,6 +36,7 @@
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/PMYouServers.h>
+#include <y2pm/MediaCurl.h>
 
 #include <y2pm/InstYou.h>
 
@@ -543,6 +544,39 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   return error;
 }
 
+class CurlCallbacks : public MediaCurl::Callbacks
+{
+  public:
+    CurlCallbacks( InstYou *instYou, int total )
+      : _instYou( instYou ), _total( total ), _current( 0 )
+    {
+    }
+
+    bool progress( int percent )
+    {
+      D__ << "Curl Progress: " << percent << endl;
+
+      PMError error = _instYou->patchProgress( ( _current + percent ) * 100 /
+                                               _total );
+
+      if ( error ) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    
+    void setBaseProgress( int current )
+    {
+      _current = current;
+    }
+  
+  private:
+    int _total;
+    int _current;
+    InstYou *_instYou;
+};
+
 PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
                                 bool checkSig, bool noExternal )
 {
@@ -551,13 +585,20 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
   RpmDb rpm;
 
   list<PMPackagePtr> packages = patch->packages();
-  int progressTotal = packages.size() + 2; // number of packages plus pre and post script
+  int progressTotal = packages.size() * 100 * 100/98;
   int progressCurrent = 0;
+
+  CurlCallbacks callbacks( this, progressTotal );
+
+  MediaCurl::setCallbacks( &callbacks );
+
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-    PMError error = patchProgress( progressCurrent++ * 100 /
-                                   progressTotal );
+    callbacks.setBaseProgress( progressCurrent );
+    PMError error = patchProgress( progressCurrent * 100 / progressTotal );
     if ( error ) return error;
+    progressCurrent += 100;
+
     if ( patch->updateOnlyInstalled() ) {
       if ( !(*itPkg)->hasInstalledObj() ) {
         D__ << "Don't download '" << (*itPkg)->name()
@@ -567,7 +608,13 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
     }
 
     error = retrievePackage( *itPkg, reload, noExternal );
-    if ( error ) return error;
+    if ( error ) {
+      if ( error == MediaError::E_user_abort ) {
+        return YouError::E_user_abort;
+      } else {
+        return error;
+      }
+    }
     if ( checkSig ) {
       string localRpm;
       string externalUrl = (*itPkg)->externalUrl();
@@ -583,6 +630,8 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
       }
     }
   }
+
+  MediaCurl::setCallbacks( 0 );
 
   PMError error = patchProgress( 98 );
   if ( error ) return error;
@@ -711,6 +760,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
     if ( error ) {
       D__ << "Downloading RPM '" << pkg->name() << "' failed: " << error
           << endl;
+      if ( error == MediaError::E_user_abort ) return error;
           
       // If patch RPM was requested first, try to get full RPM now.
       if ( patchRpm ) {
@@ -719,7 +769,8 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
             << "'" << endl;
         error = _media.provideFile( rpmPath, !reload );
         if ( error ) {
-          D__ << "Download failed." << endl;
+          D__ << "Download failed: " << error << endl;
+          if ( error == MediaError::E_user_abort ) return error;
         }
       }
     }

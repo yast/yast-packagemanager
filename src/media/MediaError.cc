@@ -86,6 +86,7 @@ std::string MediaError::errtext( const unsigned e )
   // libcurl
   case E_curl_setopt_failed:    return N_("curl_setopt() failed");
   case E_write_error:           return N_("unable to write file");
+  case E_user_abort:            return N_("User aborted operation.");
 
   ///////////////////////////////////////////////////////////////////
   // In a hurry? Write:
