@@ -114,7 +114,7 @@ class InstSrcManager {
 
   private:
 
-    typedef std::set<InstSrcPtr> ISrcPool;
+    typedef std::list<InstSrcPtr> ISrcPool;
 
     ISrcPool _knownSources;
 
@@ -126,7 +126,12 @@ class InstSrcManager {
     /**
      * Create InstSrc from cache and add it to ISrcPool.
      **/
-    PMError scanSrcCache( const Pathname & srccache_r, const bool autoEnable_r );
+    PMError scanSrcCache( const Pathname & srccache_r );
+
+    /**
+     * Rewrite rank values of all known sources. Used by initSrcPool.
+     **/
+    PMError writeNewRanks( const bool autoEnable_r = false );
 
     /**
      * Find InstSrcPtr in _knownSources by ISrcId.
@@ -143,8 +148,16 @@ class InstSrcManager {
     /**
      * Add nsrc_r to _knownSources if same product is not yet present.
      * Return ISrcId for the added nsrc_r, or NULL if duplicate.
+     *
+     * If nsrc has no rank assigned, it gets least priority.
+     *
+     * <b>Note:</> If norankcheck_r is true, ranks are not checked,
+     * and added sources are not attached to the InstSrcManager.
+     * This is to be used by initSrcPool/scanSrcCache at startup
+     * only! They take care of ranking and attaching after all
+     * cached sources were loaded.
      **/
-    ISrcId poolAdd( InstSrcPtr nsrc_r );
+    ISrcId poolAdd( InstSrcPtr nsrc_r, bool rankcheck_r = true );
 
     /**
      * helper for cacheCopyTo fake
@@ -202,6 +215,12 @@ class InstSrcManager {
      * it will get highest priority.
      **/
     PMError rankBefore( const ISrcId isrc_r, const ISrcId point_r );
+
+    /**
+     * To be called by InstSrc Editor to write the current ranking
+     * to disk.
+     **/
+    PMError setNewRanks();
 
     /**
      * Delete InstSrc. Erase it together with all cached info.

@@ -90,6 +90,9 @@ PMError InstSrcManager::initSrcPool( const bool autoEnable_r )
   PMError err;
   unsigned count = 0;
 
+  ///////////////////////////////////////////////////////////////////
+  // scan cachedir and add sources
+  ///////////////////////////////////////////////////////////////////
   list<string> retlist;
   int res = PathInfo::readdir( retlist, cache_root_dir(), false );
   if ( res ) {
@@ -98,10 +101,29 @@ PMError InstSrcManager::initSrcPool( const bool autoEnable_r )
     for ( list<string>::iterator it = retlist.begin(); it != retlist.end(); ++it ) {
       DBG << "Check '" << *it << "'" << endl;
       if ( it->find( "IS_CACHE_" ) == 0 ) {
-	if ( ! scanSrcCache( cache_root_dir() + *it, autoEnable_r ) ) {
+	if ( ! scanSrcCache( cache_root_dir() + *it ) ) {
 	  // no error
 	  ++count;
 	}
+      }
+    }
+  }
+
+  // check rank values
+  err = writeNewRanks();
+
+  // autoenable, if desired
+  if ( autoEnable_r ) {
+    for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+      if ( (*it)->descr()->default_activate() ) {
+	err = enableSource( *it );
+	if ( !err ) {
+	  MIL << "Auto enabled: " << *it << endl;
+	} else {
+	  ERR << "Failed auto enable: " << *it << endl;
+	}
+      } else {
+	MIL << "Stays disabled: " << *it << endl;
       }
     }
   }
@@ -123,7 +145,7 @@ PMError InstSrcManager::initSrcPool( const bool autoEnable_r )
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r, const bool autoEnable_r )
+PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r )
 {
   MIL << "Read InstSrc from cache " << srccache_r << endl;
 
@@ -134,23 +156,31 @@ PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r, const bool au
     return Error::E_isrc_cache_invalid;
   }
 
-  ISrcId nid = poolAdd( nsrc );
+  ISrcId nid = poolAdd( nsrc, /*rankcheck*/false );
   if ( ! nid ) {
     WAR << "Duplicate InstSrc cache at " << srccache_r << endl;
     return Error::E_isrc_cache_duplicate;
-  } else {
-    if ( autoEnable_r && nid->descr()->default_activate() ) {
-      err = enableSource( nid );
-      if ( !err ) {
-	MIL << "Auto enabled: " << nid << endl;
-      } else {
-	ERR << "Failed auto enable: " << nid << endl;
-      }
-    } else {
-      MIL << "Stays disabled: " << nid << endl;
-    }
   }
   return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::writeNewRanks
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::writeNewRanks( const bool autoEnable_r )
+{
+  unsigned rank = 0;
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it, ++rank ) {
+    (*it)->descr()->set_default_rank( rank );
+    (*it)->_mgr_attach();
+  }
+  DBG << *this;
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -200,10 +230,14 @@ PMError InstSrcManager::scanProductsFile( const Pathname & file_r, ProductSet & 
 //
 InstSrcPtr InstSrcManager::lookupId( const ISrcId & isrc_r ) const
 {
-  InstSrcPtr it = InstSrcPtr::cast_away_const( isrc_r );
-  if ( _knownSources.find( it ) == _knownSources.end() )
-    return 0;
-  return it;
+  if ( isrc_r ) {
+    InstSrcPtr item = InstSrcPtr::cast_away_const( isrc_r );
+    for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+      if ( *it == item )
+	return item;
+    }
+  }
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -235,7 +269,7 @@ InstSrcPtr InstSrcManager::lookupInstSrc( const InstSrcPtr & isrc_r ) const
 //
 //	DESCRIPTION :
 //
-InstSrcManager::ISrcId InstSrcManager::poolAdd( InstSrcPtr nsrc_r )
+InstSrcManager::ISrcId InstSrcManager::poolAdd( InstSrcPtr nsrc_r, bool rankcheck_r )
 {
   if ( ! nsrc_r ) {
     INT << "Try to add NULL InstSrc" << endl;
@@ -253,8 +287,51 @@ InstSrcManager::ISrcId InstSrcManager::poolAdd( InstSrcPtr nsrc_r )
     return 0;
   }
 
-  _knownSources.insert( nsrc_r );
-  nsrc_r->_mgr_attach();
+  ///////////////////////////////////////////////////////////////////
+  // Insert sorted by default_rank
+  //
+  // On startup only rankchecks are disabled. Assignment of new ranks
+  // and _mgr_attach() are handled afterwars.
+  ///////////////////////////////////////////////////////////////////
+
+  unsigned rank = nsrc_r->descr()->default_rank();
+
+  if ( rank == NO_RANK ) {
+
+    if ( rankcheck_r ) {
+      // assign new rank (highest rank -> least priority)
+      unsigned nrank = ( _knownSources.size() ? (*_knownSources.rbegin())->descr()->default_rank() + 1
+					      : 0 );
+      nsrc_r->descr()->set_default_rank( nrank );
+      DBG << "Assigned rank " << nrank << " to " << nsrc_r << endl;
+    }
+    // insert at end
+    _knownSources.push_back( nsrc_r );
+
+  } else {
+
+    ISrcPool::iterator it = _knownSources.begin();
+    for ( ; it != _knownSources.end(); ++it ) {
+      unsigned itrank = (*it)->descr()->default_rank();
+      if ( rank == itrank && rankcheck_r ) {
+	INT << "Duplicate InstSrc rank " << itrank << endl;
+	continue;
+      }
+      if ( rank < itrank ) {
+	_knownSources.insert( it, nsrc_r );
+	break;
+      }
+    }
+    if ( it == _knownSources.end() ) {
+      _knownSources.insert( it, nsrc_r );
+    }
+
+  }
+
+  if ( rankcheck_r ) {
+    nsrc_r->_mgr_attach();
+    DBG << *this;
+  }
 
   MIL << "Added InstSrc " << nsrc_r << endl;
   return nsrc_r;
@@ -349,7 +426,7 @@ PMError InstSrcManager::enableSource( const ISrcId & isrc_r )
     return it->enableSource();
   }
 
-  E__ << "bad ISrcId " << isrc_r << endl;
+  WAR << "bad ISrcId " << isrc_r << endl;
   return Error::E_bad_id;
 }
 
@@ -368,7 +445,7 @@ PMError InstSrcManager::disableSource( const ISrcId & isrc_r )
     return it->disableSource();
   }
 
-  E__ << "bad ISrcId " << isrc_r << endl;
+  WAR << "bad ISrcId " << isrc_r << endl;
   return Error::E_bad_id;
 }
 
@@ -386,12 +463,12 @@ PMError InstSrcManager::setAutoenable( const ISrcId isrc_r, const bool yesno )
   if ( it ) {
     if ( it->descr()->default_activate() != yesno ) {
       it->descr()->set_default_activate( yesno );
-      it->writeDescrCache();
+      return it->writeDescrCache();
     }
     return Error::E_ok;
   }
 
-  E__ << "bad ISrcId " << isrc_r << endl;
+  WAR << "bad ISrcId " << isrc_r << endl;
   return Error::E_bad_id;
 }
 
@@ -450,6 +527,19 @@ PMError InstSrcManager::rankBefore( const ISrcId isrc_r, const ISrcId point_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::setNewRanks
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::setNewRanks()
+{
+  return Error::E_TBD;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::deleteSource
 //	METHOD TYPE : PMError
 //
@@ -470,7 +560,19 @@ PMError InstSrcManager::deleteSource( const ISrcId & isrc_r )
 //
 PMError InstSrcManager::rewriteUrl( const ISrcId isrc_r, const Url & newUrl_r )
 {
-  return Error::E_TBD;
+  if ( !newUrl_r.isValid() ) {
+    WAR << "Won't write invalid url: " << newUrl_r << endl;
+    return Error::E_bad_url;
+  }
+
+  InstSrcPtr it( lookupId( isrc_r ) );
+  if ( it ) {
+    it->descr()->set_url( newUrl_r );
+    return it->writeDescrCache();
+  }
+
+  WAR << "bad ISrcId " << isrc_r << endl;
+  return Error::E_bad_id;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -501,6 +603,13 @@ void InstSrcManager::getSources( ISrcIdList & idlist_r, const bool enabled_only 
 */
 ostream & operator<<( ostream & str, const InstSrcManager & obj )
 {
+  str << "===[known sources]===================" << endl;
+  for ( InstSrcManager::ISrcPool::const_iterator it = obj._knownSources.begin();
+	it != obj._knownSources.end(); ++it ) {
+    str << (*it)->descr()->default_activate() << " [" << (*it)->descr()->default_rank() << "] "
+	<< (*it) << endl;
+  }
+  str << "=====================================" << endl;
   return str;
 }
 
