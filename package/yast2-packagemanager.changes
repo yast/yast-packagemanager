@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Feb 21 18:19:40 CET 2003 - cschum@suse.de
+
+- Correctly handle proxy settings (#21431).
+
+-------------------------------------------------------------------
 Wed Feb 19 15:16:04 CET 2003 - lnussel@suse.de
 
 - Don't check dependencies of packages that provide their requires and are
