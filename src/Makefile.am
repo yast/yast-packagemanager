@@ -25,7 +25,9 @@ liby2pm_la_SOURCES = \
 	InstSrcManager.cc	\
 	\
 	InstSrc.cc	\
+		InstSrcSuSE.cc	\
 	InstSrcData.cc	\
+		InstSrcDataCommonPkd.cc	\
 	InstSrcDescr.cc	\
 	\
 	PMDataProvider.cc	\

@@ -39,9 +39,8 @@ IMPL_HANDLES(PMObject);
 //
 PMObject::PMObject( const PkgName &    name_r,
 		const PkgEdition & edition_r )
+    : PMSolvable(name_r, edition_r)
 {
-  _name    = name_r;
-  _edition = edition_r;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -66,7 +65,8 @@ PMObject::~PMObject()
 //
 ostream & PMObject::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str ) << '(' << _name << ")(" << _edition.version() << ")(" << _edition.release() << ')';
+//  Rep::dumpOn( str ) << '(' << _name << ")(" << _edition.version() << ")(" << _edition.release() << ')';
+  PMSolvable::dumpOn(str);
   return str;
 }
 

@@ -24,7 +24,9 @@ pkginclude_HEADERS =	\
 	InstSrcManager.h	\
 	\
 	InstSrc.h InstSrcPtr.h	\
+		InstSrcSuSE.h InstSrcSuSEPtr.h	\
 	InstSrcData.h InstSrcDataPtr.h	\
+		InstSrcDataCommonPkd.h InstSrcDataCommonPkdPtr.h	\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
 	\
 	PMDataProvider.h PMDataProviderPtr.h	\

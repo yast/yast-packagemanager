@@ -114,12 +114,8 @@ class REP_CLASS(PMSolvable) {
 
     PMSolvable();
 
-    PMSolvable( PkgName& name,
-		PkgEdition& edition,
-		PkgRelList_type& requires,
-		PkgRelList_type& conflicts,
-		PkgRelList_type& provides,
-		PkgRelList_type& obsoletes );
+    PMSolvable( const PkgName& name,
+		const PkgEdition& edition);
 
     virtual ~PMSolvable();
 
@@ -129,15 +125,26 @@ class REP_CLASS(PMSolvable) {
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 
     // add a provides:
-    const PkgRelation& add_provides( PkgName name ) {
+    const PkgRelation& addProvides( PkgName name ) {
       _provides.push_front( PkgRelation( name, EQ, PkgEdition(PkgEdition::UNSPEC) ));
       return *(_provides.begin());
     }
-    const PkgRelation& add_provides( const char *name ) {
-      return add_provides( PkgName(name) );
+    const PkgRelation& addProvides( const char *name ) {
+      return addProvides( PkgName(name) );
+    }
+    
+    const PkgRelList_type& setProvides(PkgRelList_type& provides)
+    {
+      _provides = provides;
+      return _provides;
+    }
+    const PkgRelList_type& setRequires(PkgRelList_type& requires)
+    {
+      _requires = requires;
+      return _requires;
     }
 
-    const PkgRelation& add_requires(PkgRelation& r) {
+    const PkgRelation& addRequires(PkgRelation& r) {
       _requires.push_front(r);
       return *(_requires.begin());
     }

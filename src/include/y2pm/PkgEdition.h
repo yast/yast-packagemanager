@@ -5,6 +5,7 @@
 #include <iostream>
 
 enum rel_op { NONE, EQ, NE, LT, LE, GT, GE };
+extern const char* op_str[];
 
 // PkgEdition represents version, release, and epoch of a package.
 // It provides methods for comparing.

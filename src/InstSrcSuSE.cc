@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcManager.cc
+   File:       InstSrcSuSE.cc
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
@@ -20,106 +20,109 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
-#include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrc.h>
-#include <y2pm/PMPackageManager.h>
+#include <y2pm/InstSrcSuSE.h>
+#include <y2pm/InstSrcDataCommonPkd.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : InstSrcSuSE
+//
+///////////////////////////////////////////////////////////////////
 
-InstSrcManager * InstSrcManager::_ISM = 0;
+IMPL_HANDLES(InstSrcSuSE);
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::ISM
-//	METHOD TYPE : InstSrcManager &
-//
-//	DESCRIPTION :
-//
-InstSrcManager & InstSrcManager::ISM()
-{
-  if ( !_ISM )
-    _ISM = new InstSrcManager;
-  return *_ISM;
-}
-
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcManager::InstSrcManager
+//	METHOD NAME : InstSrcSuSE::InstSrcSuSE
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-InstSrcManager::InstSrcManager()
+InstSrcSuSE::InstSrcSuSE( MediaInfoPtr media_r )
+  : InstSrc( media_r )
 {
-  MIL << "Launch ISM..." << endl;
-  MIL << "Created ISM" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::~InstSrcManager
+//	METHOD NAME : InstSrcSuSE::~InstSrcSuSE
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-InstSrcManager::~InstSrcManager()
+InstSrcSuSE::~InstSrcSuSE()
 {
-  MIL << "Shtudown ISM..." << endl;
-  MIL << "Deleted ISM" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::scanMedia
-//	METHOD TYPE : PMError
+//	METHOD NAME : InstSrcSuSE::dumpOn
+//	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::scanMedia( constInstSrcPtr & isrc_r,
-				   MediaInfoPtr      media_r,
-				   const ISrcType    type_r )
+ostream & InstSrcSuSE::dumpOn( ostream & str ) const
 {
-  MIL << "scanMedia (" << type_r << ") " << media_r << endl;
-  DBG << "scanMedia " << isrc_r << endl;
-
-  isrc_r = 0;
-
-  if ( !media_r )
-    return E_NO_MEDIA;
-
-  return E_Error;
-}
-
-PMError InstSrcManager::enableSource( InstSrcPtr & isrc_r )
-{
-  D__ << endl;
-  if(isrc_r->Activate())
-  {
-    PMPackageManager::PM().addPackages( isrc_r->getPackages() );
-    return E_OK;
-  }
-  return E_Error;
-}
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : operator<<
-**	FUNCTION TYPE : ostream &
-**
-**	DESCRIPTION :
-*/
-ostream & operator<<( ostream & str, const InstSrcManager & obj )
-{
+  Rep::dumpOn( str );
   return str;
 }
 
 
+int InstSrcSuSE::numItems()
+{
+  if(!_activated) return 0;
+  return _pkglist.size();
+}
+
+bool InstSrcSuSE::Activate()
+{
+  if(_activated) return true;
+  _activated=true;
+  _data = new InstSrcDataCommonPkd(_media);
+  return true;
+}
+
+bool InstSrcSuSE::Deactivate()
+{
+  if(!_activated) return true;
+  _data = NULL;
+  _activated=false;
+  return true;
+}
+
+bool InstSrcSuSE::Erase()
+{
+  D__ << "not implemented" << std::endl;
+  return true;
+}
+
+std::list<PMPackagePtr> InstSrcSuSE::getPackages()
+{
+  D__ << endl;
+  if(!_activated || _data == NULL)
+  {
+    D__ << "not activated or no data" << endl;
+    std::list<PMPackagePtr> empty;
+    return empty;
+  }
+  _pkglist = _data->getPackages();
+  return _pkglist;
+}
+
+std::list<PMPackagePtr> InstSrcSuSE::Immediate(const std::list<PMPackagePtr>& l)
+{
+  if(l.empty())
+  {
+    return _pkglist;
+  }
+  else
+  {
+    return l;
+  }
+}

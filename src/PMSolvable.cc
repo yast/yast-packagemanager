@@ -49,19 +49,10 @@ PMSolvable::PMSolvable()
 //
 //	DESCRIPTION :
 //
-PMSolvable::PMSolvable( PkgName& name,
-			PkgEdition& edition,
-			PkgRelList_type& requires,
-			PkgRelList_type& conflicts,
-			PkgRelList_type& provides,
-			PkgRelList_type& obsoletes )
+PMSolvable::PMSolvable( const PkgName& name,
+			const PkgEdition& edition )
+      : _name(name), _edition(edition)
 {
-  _name=name;
-  _edition=edition;
-  _requires=requires;
-  _conflicts=conflicts;
-  _provides=provides;
-  _obsoletes=obsoletes;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -86,6 +77,7 @@ PMSolvable::~PMSolvable()
 //
 ostream & PMSolvable::dumpOn( ostream & os ) const
 {
+  Rep::dumpOn( os );
   os << "Name: " << (const char *)_name << endl;
   os << "Version: " << _edition.version() << endl;
   if (_edition.has_release())
@@ -94,13 +86,13 @@ ostream & PMSolvable::dumpOn( ostream & os ) const
     os << "Epoch: " << _edition.epoch() << endl;
 
   if (_requires.size())
-    cout << "Requires: " << _requires << endl;
+    os << "Requires: " << _requires << endl;
   if (_conflicts.size())
-    cout << "Conflicts: " << _conflicts << endl;
+    os << "Conflicts: " << _conflicts << endl;
   if (_provides.size())
-    cout << "Provides: " << _provides << endl;
+    os << "Provides: " << _provides << endl;
   if (_obsoletes.size())
-    cout << "Obsoletes: " << _obsoletes << endl;
+    os << "Obsoletes: " << _obsoletes << endl;
 
   //	os << "Size: " << _size << endl;
 

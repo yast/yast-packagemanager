@@ -10,48 +10,46 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMObject.h
+   File:       InstSrcDataCommonPkd.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef PMObject_h
-#define PMObject_h
+#ifndef InstSrcDataCommonPkd_h
+#define InstSrcDataCommonPkd_h
 
 #include <iosfwd>
-#include <string>
 
-#include <y2pm/PMObjectPtr.h>
-
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PkgArch.h>
+#include <y2pm/InstSrcDataCommonPkdPtr.h>
+#include <y2pm/InstSrcData.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMObject
+//	CLASS NAME : InstSrcDataCommonPkd
 /**
- * @short Interface class for stuff common to all objects (Packages, Selections,..)
+ *
  **/
-class REP_CLASS(PMObject), public PMSolvable {
-  REP_BODY(PMObject)
+class InstSrcDataCommonPkd: virtual public Rep, public InstSrcData {
+  REP_BODY(InstSrcDataCommonPkd)
 
   public:
 
-    PMObject( const PkgName &    name_r,
-	      const PkgEdition & edition_r );
+    InstSrcDataCommonPkd(MediaInfoPtr media_r);
 
-    virtual ~PMObject();
-
-  public:
-
-    virtual std::string Summary() const { return "--not available--"; }
+    virtual ~InstSrcDataCommonPkd();
 
   public:
+
+    /** generate PMPackage objects for each Item on the source
+     * @return list of PMPackagePtr on this source
+     * */
+    virtual std::list<PMPackagePtr> getPackages();
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMObject_h
+#endif // InstSrcDataCommonPkd_h
+

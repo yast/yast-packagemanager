@@ -6,6 +6,8 @@
 
 using namespace std;
 
+const char* op_str[GE+1] = { "none","==","!=","<","<=",">",">=" };
+
 //
 // compare two editions
 //

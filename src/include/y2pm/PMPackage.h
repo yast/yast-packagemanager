@@ -56,7 +56,7 @@ class REP_CLASS(PMPackage), public PMObject {
 
   public:
 
-    virtual std::string label() const;
+    virtual std::string Summary() const;
 
   public:
 

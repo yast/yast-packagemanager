@@ -10,48 +10,52 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMObject.h
+   File:       InstSrcSuSE.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef PMObject_h
-#define PMObject_h
+#ifndef InstSrcSuSE_h
+#define InstSrcSuSE_h
 
 #include <iosfwd>
-#include <string>
 
-#include <y2pm/PMObjectPtr.h>
-
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PkgArch.h>
+#include <y2pm/InstSrcSuSEPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMObject
+//	CLASS NAME : InstSrcSuSE
 /**
- * @short Interface class for stuff common to all objects (Packages, Selections,..)
+ *
  **/
-class REP_CLASS(PMObject), public PMSolvable {
-  REP_BODY(PMObject)
+class InstSrcSuSE: virtual public Rep, public InstSrc {
+  REP_BODY(InstSrcSuSE)
 
   public:
 
-    PMObject( const PkgName &    name_r,
-	      const PkgEdition & edition_r );
+    InstSrcSuSE( MediaInfoPtr media_r );
 
-    virtual ~PMObject();
-
-  public:
-
-    virtual std::string Summary() const { return "--not available--"; }
+    virtual ~InstSrcSuSE();
 
   public:
+  
+    virtual int numItems();
+
+    virtual bool Activate();
+
+    virtual bool Deactivate();
+
+    virtual bool Erase();
+
+    virtual std::list<PMPackagePtr> getPackages();
+    
+    virtual std::list<PMPackagePtr> Immediate(const std::list<PMPackagePtr>& l);
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMObject_h
+#endif // InstSrcSuSE_h
+

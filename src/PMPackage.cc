@@ -63,20 +63,20 @@ PMPackage::~PMPackage()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackage::label
+//	METHOD NAME : PMPackage::Summary
 //	METHOD TYPE : string
 //
 //	DESCRIPTION :
 //
-string PMPackage::label() const
+string PMPackage::Summary() const
 {
   if ( !_dataProvider ) {
     ERR << "No DataProvider for " << *this << endl;
-    return PMObject::label();
+    return PMObject::Summary();
   }
 
   // TBD: get data from _dataProvider
-  return string( "Faked label for Package" ) + string( name() );
+  return string( "Faked summary for Package" ) + string( name() );
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -39,8 +39,9 @@ IMPL_HANDLES(InstSrc);
 //
 //	DESCRIPTION :
 //
-InstSrc::InstSrc( MediaInfoPtr media_r )
+InstSrc::InstSrc( MediaInfoPtr media_r ) :_media(media_r), _activated(false) 
 {
+	//TODO somehow load the description
 }
 
 ///////////////////////////////////////////////////////////////////

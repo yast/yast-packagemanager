@@ -10,48 +10,25 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMObject.h
+   File:       InstSrcDataCommonPkdPtr.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef PMObject_h
-#define PMObject_h
+#ifndef InstSrcDataCommonPkdPtr_h
+#define InstSrcDataCommonPkdPtr_h
 
-#include <iosfwd>
-#include <string>
-
-#include <y2pm/PMObjectPtr.h>
-
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PkgArch.h>
+#include <y2pm/InstSrcDataPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMObject
+//	CLASS NAME : InstSrcDataCommonPkdPtr
+//	CLASS NAME : constInstSrcDataCommonPkdPtr
 /**
- * @short Interface class for stuff common to all objects (Packages, Selections,..)
+ *
  **/
-class REP_CLASS(PMObject), public PMSolvable {
-  REP_BODY(PMObject)
+DEFINE_DERIVED_HANDLES( InstSrcDataCommonPkd, public, InstSrcData );
 
-  public:
+#endif // InstSrcDataCommonPkdPtr_h
 
-    PMObject( const PkgName &    name_r,
-	      const PkgEdition & edition_r );
-
-    virtual ~PMObject();
-
-  public:
-
-    virtual std::string Summary() const { return "--not available--"; }
-
-  public:
-
-    virtual std::ostream & dumpOn( std::ostream & str ) const;
-};
-
-///////////////////////////////////////////////////////////////////
-
-#endif // PMObject_h
