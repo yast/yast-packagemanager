@@ -26,9 +26,7 @@ using namespace std;
 
 void usage()
 {
-  cout << "Usage: online-update [-u url] [-p product] [-v version] "
-       << "[-a arch] [-d] [-s] [-n] [-g] [-i] [security] [recommended] [document]"
-       << " [optional]"
+  cout << "Usage: online-update [options] [types]"
        << endl << endl
        << "-u, --url URL            Base URL of directory tree used to get patches from." << endl
        << "                         Supported protocols: http, ftp, smb, nfs, cd, dvd, file." << endl
