@@ -26,14 +26,17 @@
 #include <y2util/CommonPkdParser.h>
 
 
-const std::string ArchTag = "=Arch";
+
 const std::string TypeTag = "=Type";
 const std::string UrlTag  = "=URL";
 const std::string ProdDirTag = "=ProductDir";
 const std::string DefActTag = "=Default_activate";
 const std::string MediaBTag = "+Media";
 const std::string MediaETag = "-Media";
-
+const std::string ContentBTag = "+Content";
+const std::string ContentETag = "-Content";
+const std::string ArchBTag = "+Arch";
+const std::string ArchETag = "-Arch";
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -54,6 +57,7 @@ public:
 	PRODUCTDIR,	// product dir below _url
 	ACTIVATE,	// 1 = true (default activated), 0 = false
 	MEDIA,		// _media_vendor, _media_id, _media_count
+	CONTENT, 	// all _content_... values
 	NUM_TAGS
     };
 
@@ -62,13 +66,16 @@ public:
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
-	createTag( ArchTag, ARCH );
 	createTag( TypeTag, TYPE );
 	createTag( UrlTag, URL );
 	createTag( ProdDirTag, PRODUCTDIR );
 	createTag( DefActTag, ACTIVATE );
 	t = createTag( MediaBTag, MEDIA );
 	t->setEndTag( MediaETag );
+	t = createTag( ContentBTag, CONTENT );
+	t->setEndTag( ContentETag );
+	t = createTag( ArchBTag, ARCH );
+	t->setEndTag( ArchETag );
     };
 
 private:
