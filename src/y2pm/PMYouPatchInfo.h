@@ -45,8 +45,7 @@
 //
 //	CLASS NAME : PMYouPatchInfo
 /**
- * @short facilitates to read and parse patch information 
- * and patches from a given media.
+ * @short facilitates reading and parsing patch information and patches from a given media.
  *
  **/
 
@@ -72,18 +71,19 @@ class PMYouPatchInfo : public CountedRep {
     ~PMYouPatchInfo();
 
     /**
-      Get directory file listing all available patches.
-      ???
+      First, goes through the mediamap file (when useMediaDir is true).
+      Then, reads directory file (or just listing the directory) and adds all
+      found patchfiles to _settings. 
 
-      @param useMediaDir If true, read patch file from media directory.
+      @param useMediaDir if true, read mediamap file patches file in media directory.
     */
     PMError getDirectory( bool useMediaDir );
 
     /**
-     * same as processMediaDir()
-     * Also saves last used server in sysconfig
+     * reads patch files
      *
      * @param patches   Return: List of patch objects
+     * @return vector<PMYouPatchPtr> found patches
      **/
     PMError getPatches( std::vector<PMYouPatchPtr> &patches );
     
@@ -147,9 +147,8 @@ class PMYouPatchInfo : public CountedRep {
                                std::list<std::string> &patchFiles );
 
     /**
-     * reads the media file (_settings->mediaPatchesFile()
+     * reads the mediamap file (which patches are on which media instance)
      * updates _settings
-     * ???
      **/
     PMError processMediaDir();
 
@@ -175,6 +174,12 @@ class PMYouPatchInfo : public CountedRep {
 
     std::string tagValue( YOUPackageTagSet::Tags tag );
 
+    /**
+     * adds another package to the patch
+     * @param patch Here the packages are added
+     * @param strm  From this stream the tags are read. Old position will be
+     *              restored.
+     **/
     PMError createPackage( const PMYouPatchPtr &patch, std::istream& strm );
 
     void readMediaMap( const Pathname &file );
@@ -189,7 +194,12 @@ class PMYouPatchInfo : public CountedRep {
 
     PMYouPackageDataProviderPtr _packageDataProvider;
     
-    bool _doneMediaDir;
+    /**
+     * The last media for which the mediamap file was read successfully.
+     * This attribute is handled exclusively by processMediaDir()
+     **/
+    Url _mediaDirLastVisited;
+
     bool _doneDirectory;
 
     int _totalPatchFileCount;
