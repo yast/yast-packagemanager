@@ -25,6 +25,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
 #include <y2pm/PMPackage.h>
+#include <y2util/YRpmGroupsTree.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -48,12 +49,40 @@ class PMPackageManager : public PMManager {
   private:
 
     /**
-     * Make shure the passed PMObjectPtr actually references a PMPackage. If not,
-     * rerport error and return NULL.
+     * Make sure the passed PMObjectPtr actually references a PMPackage. If not,
+     * report error and return NULL.
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
+    YRpmGroupsTree * _rpmGroupsTree;
+
   public:
+
+    /**
+     * Retrieve the internal RPM groups tree (for cloning tree items in the UI etc.).
+     **/
+    YRpmGroupsTree * rpmGroupsTree() const { return _rpmGroupsTree; }
+
+    /**
+     * Insert an RPM group into this tree if not already present.
+     * Splits the RPM group string ("abc/def/ghi") and creates tree items for
+     * each level as required.
+     * Returns the tree entry for this RPM group.
+     **/
+    YStringTreeItem * addRpmGroup( std::string rpmGroup )
+	{ return _rpmGroupsTree->addRpmGroup( rpmGroup ); }
+
+    /**
+     * Returns the complete (untranslated) RPM group tag string for 'node'.
+     **/
+    std::string rpmGroup( const YStringTreeItem * node )
+	{ return _rpmGroupsTree->rpmGroup( node ); }
+    
+    /**
+     * Returns the complete translated RPM group tag string for 'node'.
+     **/
+    std::string translatedRpmGroup( const YStringTreeItem * node )
+	{ return _rpmGroupsTree->translatedRpmGroup( node ); }
 
 };
 
