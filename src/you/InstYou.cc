@@ -21,7 +21,12 @@
 
 /-*/
 
+#include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <iostream>
+#include <fstream>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/GPGCheck.h>
@@ -171,7 +176,7 @@ PMError InstYou::retrievePatchInfo()
 
   Y2PM::youPatchManager().poolAddCandidates( _patches );
 
-  list<PMYouPatchPtr>::iterator itPatch;
+  vector<PMYouPatchPtr>::iterator itPatch;
   for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
     if ( !_settings->getAll() ) filterArchitectures( *itPatch );
     Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
@@ -218,7 +223,7 @@ PMError InstYou::retrievePatchInfo()
 
 void InstYou::selectPatches( int kinds )
 {
-  list<PMYouPatchPtr>::const_iterator it;
+  vector<PMYouPatchPtr>::const_iterator it;
 
   if ( _settings->getAll() ) {
     for( it = _patches.begin(); it != _patches.end(); ++it ) {
@@ -293,7 +298,7 @@ void InstYou::updatePackageStates()
 
   _totalDownloadSize = 0;
 
-  list<PMYouPatchPtr>::const_iterator it;
+  vector<PMYouPatchPtr>::const_iterator it;
   for ( it = _patches.begin(); it != _patches.end(); ++it ) {
 //    D__ << "Patch: " << (*it)->name() << endl;
 
@@ -363,7 +368,11 @@ PMError InstYou::attachSource()
 
 PMError InstYou::processPatches()
 {
-  MIL << "Retrieve patches." << endl;
+  MIL << "Process patches." << endl;
+
+  resetProgress();
+  _installedPatches = 0;
+  vector<PMYouPatchPtr> patchesToInstall;
 
   bool hasPreInformation = false;
 
@@ -386,22 +395,48 @@ PMError InstYou::processPatches()
     patch = nextPatch();
   }
 
-  PMError error = attachSource();
-  if ( error ) {
-    showError( error );
-    return error;
-  }
+  _currentMediaNumber = -1;
+  int lastMediaNumber = -1;
 
-  patch = firstPatch();
+  patch =  firstPatch();
   
   if ( !patch ) {
     log( _("No patches have been selected for installation.\n") );
     return PMError::E_ok;
   }
 
-  bool skipAll = false;
+
+  PMError error;
 
   while( patch ) {
+
+    INT << "TODO: Check for right media ID" << endl;
+
+    D__ << "Media number, current: " << _currentMediaNumber << " last: "
+        << lastMediaNumber << endl;
+
+    if ( _currentMediaNumber > 0 && _currentMediaNumber != lastMediaNumber ) {
+      INT << "TODO: Check for media " << _currentMediaNumber << endl;
+      
+      PMError error = installPatches( patchesToInstall );
+      if ( error ) {
+        ERR << "Install Patches (media " << _currentMediaNumber << "): "
+            << error << endl;
+        return error;
+      }
+      patchesToInstall.clear();
+      
+      lastMediaNumber = _currentMediaNumber;
+    }
+
+    error = attachSource();
+    if ( error ) {
+      showError( error );
+      return error;
+    }
+
+    bool skipAll = false;
+
     string text = stringutil::form( _("Retrieving %s: \"%s\" "),
                                     patch->name().asString().c_str(),
                                     patch->summary().c_str() );
@@ -414,10 +449,11 @@ PMError InstYou::processPatches()
       patch->setSkipped( false );
       error = retrievePatch( patch );
       if ( !error ) {
+        patchesToInstall.push_back( patch );
         log( _("Ok\n") );
       } else {
         DBG << "Patch retrieval error: " << error << endl;
-      
+
         if ( error == YouError::E_user_abort ) {
           log( _("Aborted\n") );
           PMError callbackError = showError( "abort", "", "" );
@@ -464,6 +500,8 @@ PMError InstYou::processPatches()
       }
     }
 
+    if ( !incrementProgress() ) return YouError::E_user_abort;
+
     patch = nextPatch();
   }
 
@@ -472,25 +510,64 @@ PMError InstYou::processPatches()
   } else if ( error ) {
     log( _("Download failed.\n") );
   } else {
-    log( _("Download finished.\n\n") );
+    log( _("Download finished.\n") );
+    log( "\n" );
   }
 
-  if ( _settings->getOnly() || _settings->getAll() ) return error;
+  error = installPatches( patchesToInstall );
+
+  if ( error ) {
+    ERR << "Install Patches (media " << _currentMediaNumber << "): "
+        << error << endl;
+    return error;
+  }
+
+  list<PMYouPatchPtr> patches;  
+  for( patch = firstPatch(); patch; patch = nextPatch() ) {
+    if ( patch->skipped() ) continue;
+    string postInfo = patch->postInformation();
+    if ( !postInfo.empty() ) {
+      patches.push_back( patch );
+    }
+  }
+  if ( !patches.empty() ) {
+    log( _("Show post-installation messages...\n") );
+    PMError callbackError = showMessage( "postinfo", patches );
+  }
+
+  log( _("Installation finished.\n") );
+  log( "\n" );
+
+  if ( _installedPatches == 0 ) {
+    log( _("No patches have been installed.") );
+  } else if ( _installedPatches == 1 ) {
+    log( _("1 patch has been installed") );
+  } else {
+    log( stringutil::form( _("%d patches have been installed."),
+                           _installedPatches ) );
+  }
+
+  if ( error ) {
+    showError( "message", _("Installation failed."), "" );
+  } else {
+    writeLastUpdate();
+  }
+
+  return error;
+}
+
+PMError InstYou::installPatches( const vector<PMYouPatchPtr> &patches )
+{
+  if ( _settings->getOnly() || _settings->getAll() ) return PMError::E_ok;
 
   MIL << "Install patches." << endl;
 
-  patch = firstPatch();
+  bool skipAll = false;
+
+  vector<PMYouPatchPtr>::const_iterator it;
+  for( it = patches.begin(); it != patches.end(); ++it ) {
+    PMYouPatchPtr patch = *it;
   
-  if ( !patch ) {
-    log( _("No patches have been selected for installation.\n") );
-    return PMError::E_ok;
-  }
-
-  skipAll = false;
-
-  _installedPatches = 0;
-
-  while ( patch ) {
     string text = stringutil::form( _("Installing %s: \"%s\" "),
                                     patch->name().asString().c_str(),
                                     patch->summary().c_str() );
@@ -500,7 +577,7 @@ PMError InstYou::processPatches()
       log( _("Skipped\n") );
     } else {
       if ( !patch->skipped() ) {
-        error = installPatch( patch );
+        PMError error = installPatch( patch );
         if ( !error ) {
           _installedPatches++;
           log( _("Ok\n") );
@@ -541,66 +618,28 @@ PMError InstYou::processPatches()
       }
     }
 
-    patch = nextPatch();
+    if ( !incrementProgress() ) return YouError::E_user_abort;
   }
 
-  list<PMYouPatchPtr> patches;  
-  for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    if ( patch->skipped() ) continue;
-    string postInfo = patch->postInformation();
-    if ( !postInfo.empty() ) {
-      patches.push_back( patch );
-    }
-  }
-  if ( !patches.empty() ) {
-    log( _("Show post-installation messages...\n") );
-    PMError callbackError = showMessage( "postinfo", patches );
-  }
-
-  log( _("Installation finished.\n") );
-  log( "\n" );
-
-  if ( _installedPatches == 0 ) {
-    log( _("No patches have been installed.") );
-  } else if ( _installedPatches == 1 ) {
-    log( _("1 patch has been installed") );
-  } else {
-    log( stringutil::form( _("%d patches have been installed."),
-                           _installedPatches ) );
-  }
-
-  if ( error ) {
-    showError( "message", _("Installation failed."), "" );
-  } else {
-    writeLastUpdate();
-  }
-
-  return error;
+  return PMError::E_ok;
 }
 
-PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
+void InstYou::resetProgress()
 {
-  if ( resetProgress ) {
-    _progressCurrent = 0;
-    _progressTotal = 0;
-    std::list<PMYouPatchPtr>::const_iterator it;
-    for ( it = _patches.begin(); it != _patches.end(); ++it ) {
-      if ( (*it)->isSelected() ) _progressTotal++;
-    }
-
-    _progressTotal *= 2;
+  _progressCurrent = 0;
+  _progressTotal = 0;
+  vector<PMYouPatchPtr>::const_iterator it;
+  for ( it = _patches.begin(); it != _patches.end(); ++it ) {
+    if ( (*it)->isSelected() ) _progressTotal++;
   }
+
+  _progressTotal *= 2;
 
   D__ << "_progressTotal: " << _progressTotal << endl;
-
-  _selectedPatchesIt = _patches.begin();
-
-  return nextSelectedPatch();
 }
 
-PMYouPatchPtr InstYou::nextPatch( bool *ok )
+bool InstYou::incrementProgress()
 {
-  ++_selectedPatchesIt;
   ++_progressCurrent;
 
   int p;
@@ -609,17 +648,31 @@ PMYouPatchPtr InstYou::nextPatch( bool *ok )
 
   PMError err = progress( p );
 
-  if ( ok ) {
-    if ( err == YouError::E_user_abort ) *ok = false;
-    else *ok = true;
-  }
-
-  return nextSelectedPatch();
+  if ( err == YouError::E_user_abort ) return false;
+  else return true;
 }
 
-PMYouPatchPtr InstYou::nextSelectedPatch()
+PMYouPatchPtr InstYou::firstPatch()
 {
+  _selectedPatchesIt = _patches.begin();
+
+  if ( _selectedPatchesIt == _patches.end() ) return PMYouPatchPtr();
+
+  _currentMediaNumber = _info->mediaNumber( *_selectedPatchesIt );
+
+  if ( (*_selectedPatchesIt)->isSelected() ) return *_selectedPatchesIt;
+
+  return nextPatch();
+}
+
+PMYouPatchPtr InstYou::nextPatch()
+{
+  ++_selectedPatchesIt;
+  
   while ( _selectedPatchesIt != _patches.end() ) {
+    int mediaNumber = _info->mediaNumber( *_selectedPatchesIt );
+    if ( mediaNumber >= 0 ) _currentMediaNumber = mediaNumber;
+
     if ( (*_selectedPatchesIt)->isSelected() ) {
       return *_selectedPatchesIt;
     }
@@ -1150,7 +1203,7 @@ PMError InstYou::removePackages()
 
 void InstYou::showPatches( bool verbose )
 {
-  list<PMYouPatchPtr>::const_iterator it;
+  vector<PMYouPatchPtr>::const_iterator it;
   for( it = _patches.begin(); it != _patches.end(); ++it ) {
     PMSelectablePtr sel = (*it)->getSelectable();
     if ( sel ) {
@@ -1335,7 +1388,7 @@ PMError InstYou::showMessage( const string &type, list<PMYouPatchPtr> &patches )
     return _callbacks->showMessage( type, patches );
   } else {
     return YouError::E_callback_missing;
-  }  
+  }
 }
 
 void InstYou::log( const string &text )
@@ -1346,6 +1399,23 @@ void InstYou::log( const string &text )
     _callbacks->log( text );
   } else {
     D__ << "No callback set" << endl;
+  }
+
+  if ( _settings->isLogEnabled() && !text.empty() && text != "\n" ) {
+    time_t timestamp = time( 0 );
+    struct tm *brokentime = localtime( &timestamp );
+    char date[ 50 ];
+    strftime ( date, sizeof( date ), "%F %H:%M:%S", brokentime );
+
+    pid_t pid = getpid();
+
+    string logFile = _settings->logFile().asString();
+    ofstream out( logFile.c_str(), ios::app );
+    if ( out.fail() ) {
+      ERR << "Unable to save '" << logFile << "'" << endl;
+    }
+    out << date << " (" << pid << "): " << text.c_str();
+    if ( *(text.rbegin() ) != '\n' ) out << endl;
   }
 }
 

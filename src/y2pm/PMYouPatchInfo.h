@@ -75,7 +75,7 @@ class PMYouPatchInfo : public CountedRep {
      * @param reload    If true, reload patch files from server.
      * @param checkSig  If true, check GPG signature of patch info files.
      **/
-    PMError getPatches( std::list<PMYouPatchPtr> &patches );
+    PMError getPatches( std::vector<PMYouPatchPtr> &patches );
     
     /**
       Read patch info files from directory.
@@ -85,7 +85,7 @@ class PMYouPatchInfo : public CountedRep {
       @param checkSig         If true, check GPG signature of patch info files.
       @param processMediaDir  If true, read patch file from media directory.
     **/
-    PMError readDir( std::list<PMYouPatchPtr> &patches,
+    PMError readDir( std::vector<PMYouPatchPtr> &patches,
                      bool useMediaDir = true );
 
     /**
@@ -119,6 +119,8 @@ class PMYouPatchInfo : public CountedRep {
 
     PMError processMediaDir();
 
+    int mediaNumber( const PMYouPatchPtr & );
+
   protected:
     std::string tagValueLocale ( YOUPatchTagSet::Tags tagIndex,
                                  std::istream &input );
@@ -131,6 +133,8 @@ class PMYouPatchInfo : public CountedRep {
     std::string tagValue( YOUPackageTagSet::Tags tag );
 
     PMError createPackage( const PMYouPatchPtr &patch );
+
+    void readMediaMap( const Pathname &file );
 
   private:
     YOUPatchTagSet _patchTagSet;
@@ -146,6 +150,8 @@ class PMYouPatchInfo : public CountedRep {
     bool _doneDirectory;
 
     int _totalPatchFileCount;
+
+    std::map<std::string,int> _mediaMap;
 };
 
 ///////////////////////////////////////////////////////////////////

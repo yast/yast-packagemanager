@@ -159,6 +159,11 @@ class PMYouSettings : public CountedRep
     std::string directoryFileName();
 
     /**
+      Return name of file holding the media map for the patches.
+    */
+    std::string mediaMapFileName();
+
+    /**
       Return path to file used for storing cookies.
     */
     Pathname cookiesFile();
@@ -172,6 +177,11 @@ class PMYouSettings : public CountedRep
       Return path to file used for storing passwords.
     */
     Pathname passwordFile();
+
+    /**
+      Return path to file used for special YOU logs.
+    */
+    Pathname logFile();
 
     /**
       Return configuration object for file at configFile().
@@ -276,6 +286,15 @@ class PMYouSettings : public CountedRep
     */
     bool getOnly() const;
 
+    /**
+      Enable writing of separate YOU log.
+    */
+    void setLogEnabled( bool );
+    /**
+      Return if the separate YOU log is enabled.
+    */
+    bool isLogEnabled() const;
+
   protected:
     void init();
 
@@ -296,6 +315,7 @@ class PMYouSettings : public CountedRep
     bool _dryRun;
     bool _getAll;
     bool _getOnly;
+    bool _isLogEnabled;
 };
 
 #endif

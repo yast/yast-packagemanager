@@ -260,6 +260,15 @@ class PMYouPatch : public PMObject
     */
     bool isSelected() const;
 
+    /**
+      Set name of patch file.
+    */
+    void setFileName( const std::string &n ) { _fileName = n; }
+    /**
+      Return name of patch file.
+    */
+    std::string fileName() const { return _fileName; }
+
   public:
 
     /**
@@ -290,6 +299,7 @@ class PMYouPatch : public PMObject
     std::list<PMPackagePtr> _packages;
 
     Pathname _localFile;
+    std::string _fileName;
 
     bool _packagesInstalled;
 

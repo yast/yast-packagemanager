@@ -278,6 +278,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     p = new PMYouPatch( PkgName( name ), PkgEdition( version ), arch );
 
     p->setLocalFile( path + fileName );
+    p->setFileName( fileName );
 
     string value = tagValue( YOUPatchTagSet::REQUIRES, patchstream );
     list<PkgRelation> relations = PkgRelation::parseRelations( value );
@@ -331,7 +332,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 //
 //	DESCRIPTION :
 //
-PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches,
+PMError PMYouPatchInfo::readDir( vector<PMYouPatchPtr> &patches,
                                  bool useMediaDir )
 {
     if ( !_doneDirectory ) {
@@ -467,6 +468,7 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
   D__ << "Attach point: " << media.localRoot() << endl;
 
   _totalPatchFileCount = 0;
+  _mediaMap.clear();
 
   list<PMYouProductPtr> products = _settings->products();
   list<PMYouProductPtr>::reverse_iterator it;
@@ -521,6 +523,19 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
 
     product->setPatchFiles( patchFiles );
     _totalPatchFileCount += patchFiles.size();
+
+    Pathname mediaMapFile = patchPath + _settings->mediaMapFileName();
+    DBG << "MediaMap file: " << mediaMapFile << endl;
+    error = media.provideFile( mediaMapFile );
+
+    if ( error ) {
+      WAR << "Unable to read '" << _settings->mediaMapFileName() << "'" << endl;
+    } else {
+      Pathname mediaMap = media.localRoot() + patchPath +
+                         _settings->mediaMapFileName();
+
+      readMediaMap( mediaMap );
+    }
   }
 
 #warning Shouldnt MediaAccess::release() be called in ~MediaAccess()?
@@ -531,6 +546,26 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
   return PMError();
 }
 
+void PMYouPatchInfo::readMediaMap( const Pathname &file )
+{
+  string line;
+  ifstream in( file.asString().c_str() );
+  while( getline( in, line ) ) {
+    if ( !line.empty() && (*line.begin() != '#') ) {
+      vector<string> fields;
+      stringutil::split( line, fields );
+      if ( fields.size() != 2 ) {
+        ERR << "Illegal line in media map file: '" << line << "'" << endl;
+      } else {
+        string patchFileName = fields[ 0 ];
+        int mediaNumber = atoi( fields[ 1 ].c_str() );
+        D__ << "Media map: " << patchFileName << " " << mediaNumber << endl;
+        _mediaMap[ patchFileName ] = mediaNumber;
+      }
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -539,7 +574,7 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
 //
 //	DESCRIPTION :
 //
-PMError PMYouPatchInfo::getPatches( list<PMYouPatchPtr> &patches )
+PMError PMYouPatchInfo::getPatches( vector<PMYouPatchPtr> &patches )
 {
     PMYouServer server = _settings->patchServer();
 
@@ -700,4 +735,11 @@ PMError PMYouPatchInfo::readDirectoryFile( const Pathname &file,
   }
 
   return PMError();
+}
+
+int PMYouPatchInfo::mediaNumber( const PMYouPatchPtr &patch )
+{
+  map<string,int>::const_iterator it = _mediaMap.find( patch->fileName() );
+  if ( it == _mediaMap.end() ) return -1;
+  return it->second;
 }

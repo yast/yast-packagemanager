@@ -258,20 +258,14 @@ class InstYou {
      */
     PMError attachSource();
 
-    /**
-      Get first selected patch.
-    
-      @param resetProgress If true reset progress indicator. 
-    */
-    PMYouPatchPtr firstPatch( bool resetProgress = true );
+    void resetProgress();
+    bool incrementProgress();
 
     /**
-      Get next selected patch.
-     
-      @param ok Pointer to bool variable which is set to false on error and
-                true on success.
+      Get first selected patch.
     */
-    PMYouPatchPtr nextPatch( bool *ok = 0 );
+    PMYouPatchPtr firstPatch();
+    PMYouPatchPtr nextPatch();
 
     /**
      * Download next patch in list of selected patches.
@@ -297,6 +291,7 @@ class InstYou {
     */
     PMError writeLastUpdate();
 
+    PMError installPatches( const vector<PMYouPatchPtr> & );
     PMError installPatch( const PMYouPatchPtr & );
     PMError retrievePatch( const PMYouPatchPtr & );
     PMError retrievePackage( const PMPackagePtr &pkg, const PMYouProductPtr & );
@@ -341,15 +336,15 @@ class InstYou {
     bool hasPatchRpm( const PMPackagePtr &pkg );
 
   private:
-    PMYouPatchPtr nextSelectedPatch();
-
-  private:
     PMYouPatchInfoPtr _info;
     PMYouSettingsPtr _settings;
     
-    std::list<PMYouPatchPtr> _patches;
+    std::vector<PMYouPatchPtr> _patches;
 
-    std::list<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
+    std::vector<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
+
+    std::map<std::string,int> _mediaMap;
+
     int _progressTotal;
     int _progressCurrent;
     
@@ -361,6 +356,8 @@ class InstYou {
     FSize _totalDownloadSize;
 
     int _installedPatches;
+
+    int _currentMediaNumber;
 };
 
 ///////////////////////////////////////////////////////////////////

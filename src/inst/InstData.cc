@@ -92,10 +92,10 @@ InstData::getPackages (void) const
  * Default implementation provided returning an empty list.
  * @return list of PMSolvablePtr on this source
  */
-const std::list<PMYouPatchPtr>&
+const std::vector<PMYouPatchPtr>&
 InstData::getPatches (void) const
 {
-    static std::list<PMYouPatchPtr> patches;
+    static std::vector<PMYouPatchPtr> patches;
     return patches;
 }
 

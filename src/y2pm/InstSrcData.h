@@ -160,7 +160,7 @@ class InstSrcData: public CountedRep, public InstData {
     /**
      * Default for concrete InstSrcData providing no Patches
      **/
-    virtual const std::list<PMYouPatchPtr> &  getPatches()    const { return InstData::getPatches(); }
+    virtual const std::vector<PMYouPatchPtr> &  getPatches()    const { return InstData::getPatches(); }
 
     /**
      * Backreference to InstSrc (provided on attach, NULL after detach)

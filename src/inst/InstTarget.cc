@@ -213,7 +213,7 @@ InstTarget::getPackages (void) const
  * generate PMYouPatch objects for each patch on the target
  * @return list of PMYouPatchPtr on this target
  */
-const std::list<PMYouPatchPtr>&
+const std::vector<PMYouPatchPtr>&
 InstTarget::getPatches (void) const
 {
     if ( !_patchesInitialized ) {

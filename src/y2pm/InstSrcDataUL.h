@@ -70,7 +70,7 @@ class InstSrcDataUL : public InstSrcData {
 	 * @return list of PMYouPatchPtr on this target
 	 * Return empty list as we do not hold Patches
 	 */
-	const std::list<PMYouPatchPtr>& getPatches (void) const { return InstData::getPatches(); }
+	const std::vector<PMYouPatchPtr>& getPatches (void) const { return InstData::getPatches(); }
 
   public:
 
