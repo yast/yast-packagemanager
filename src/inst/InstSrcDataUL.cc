@@ -48,23 +48,6 @@
 
 #include <Y2PM.h>
 
-
-// lookup optimization
-//
-// dont store all package pointers in a single list
-// but in a vector of lists
-// the vector index is determined by the package name
-// and architecture
-// For binary packages starting with a letter, vector positions
-// 0..25 are reserved
-// For binary packages not starting with a letter, vector position
-// 26 is reserved
-// For src and nosrc packages, vector position 27 is reserved
-
-typedef std::vector<std::list<PMPackagePtr> > pkgPtrVec
-
-static pkgPtrVec theVector;
-
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -73,82 +56,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////
 IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
 
-//-------------------------------------------------------------------
-// pkgPtrVec handling
 
-static int
-pkgname2index (const std::string& name, bool is_source)
-{
-    if (name.empty())
-	return 26;
-    if (is_source)
-	return 27;
-
-    char first = name[0];
-    if (isupper (first))
-	first = tolower (first);
-
-    if (isalpha (first))
-	return *first - 'a';
-    return 26;
-}
-
-static void
-putPkgToVector (const PMPackagePtr package, pkgPtrVec& pkgVector)
-{
-    string arch = (std::string)(package->arch());
-    bool is_source = (arch == "src" || arch == "nosrc");
-    int idx = pkgname2index (package->name(), is_source);
-
-    pkgVector[idx].push_back (package);
-
-    return;
-}
-
-static PMPackagePtr
-getPkgFromVector (const std::string& package, const pkgPtrVec& pkgVector)
-{
-    int idx = pkgname2index (package->name(), false);
-    
-    if (is_source)
-    {
-	string strpath = location.asString();
-	string::size_type rpmpos = strpath.rfind (".rpm");
-	if (rpmpos == string::npos)
-	{
-	    ERR << "Not .rpm: '" << strpath << "'" << endl;
-	    return Pathname();
-	}
-	rpmpos--;
-	string::size_type dotpos = strpath.rfind (".", rpmpos);
-	if (dotpos == string::npos)
-	{
-	    ERR << "Not .(no)src.rpm: '" << strpath << "'" << endl;
-	    return Pathname();
-	}
-	filename = datadir + Pathname (strpath.substr (dotpos+1, rpmpos-dotpos)) + location;
-	err = _media->provideFile (filename);
-    }
-    else
-    {
-	for (std::list<Pathname>::const_iterator pathIt = _datasubdirs.begin();
-	     pathIt != _datasubdirs.end(); ++pathIt)
-	{
-	    filename = datadir + *pathIt + location;
-	    err = _media->provideFile (filename);
-	    if (err == PMError::E_ok)
-		break;
-	}
-    } // !is_source
-
-    std::list<PMPackagePtr> matches = InstData::findPackages (pkgVector[idx], package);
-    if (matches.empty())
-	return PMPackagePtr;
-    return matches.front();
-}
-
-//-------------------------------------------------------------------
-// Tag parsing
 
 namespace PkgTags {
     enum Tags {
@@ -239,13 +147,9 @@ InstSrcDataUL::lookupSelections (const std::list<PMSelectionPtr> all_selections,
 //	METHOD TYPE : std::list<PMPackagePtr>
 //
 //	DESCRIPTION : lookup package names to PMPackagePtr
-//			for each package listed in 'packages' look it up
-//			in 'all_packages' and return a PMPackagePtr
-//			Ideally, the number of ptrs returned is identical
-//			to the number of package names.
 //
 std::list<PMPackagePtr>
-InstSrcDataUL::lookupPackages (const std::list<std::string>& packages)
+InstSrcDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages)
 {
     std::list<PMPackagePtr> package_ptrs;
 
@@ -253,12 +157,39 @@ InstSrcDataUL::lookupPackages (const std::list<std::string>& packages)
 	 pkgIt != packages.end(); ++pkgIt)
     {
 	string name = *pkgIt;
-	PMPackagePtr match;
+	std::list<PMPackagePtr> matches;
 
+	// check for alternative package
+	string::size_type spacepos = name.find_first_of (" ");
+	if (spacepos != string::npos)
+	{
+	    string wantedname = name.substr (0, spacepos);
+	    matches = InstData::findPackages (all_packages, wantedname);
+	    if (matches.size() == 0)
+	    {
+		string::size_type startpos = name.find_first_of ("(", spacepos);
+		if (startpos != string::npos)
+		{
+		    string::size_type endpos = name.find_first_of (")", startpos);
+		    if (endpos != string::npos)
+		    {
+			string alternative = name.substr (startpos+1, endpos-startpos-1);
+			matches = InstData::findPackages (all_packages, alternative);
+		    }
+		}
+	    }
+	}
+	else
+	{
 #warning lookup in arch order
-	match = getPkgFromVector (name, theVector);
-	if (match)
-	package_ptrs.push_back (matches.front());
+	    matches = InstData::findPackages (all_packages, name);
+	}
+
+	// silently ignore packages not found
+	if (matches.size() > 0)
+	{
+	    package_ptrs.push_back (matches.front());
+	}
     }
     return package_ptrs;
 }
@@ -1331,8 +1262,6 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
     ndata_r = 0;
     PMError err;
 
-    theVector.resize (28);
-
     //-----------------------------------------------------
     // create instance of _own_ class
     //-----------------------------------------------------
@@ -1353,8 +1282,6 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
     // set up lists of PMSelectionPtr and PMPackagePtr
     // for suggests, inspacks, delpacks
     fillSelections (ndata->_selections, ndata->_packages);
-
-    theVector.clear();
 
     ///////////////////////////////////////////////////////////////////
     // done
