@@ -33,52 +33,7 @@
 #include <y2pm/PMYouPatchPtr.h>
 #include <y2pm/PMYouPackageDataProviderPtr.h>
 #include <y2pm/PMYouPatchTags.h>
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : PMYouPatchPaths
-/**
- * Pathes for patches.
- **/
-class PMYouPatchPaths {
-
-  public:
-    PMYouPatchPaths( const std::string &product, const std::string &version,
-                     const std::string &arch );
-
-    void setPatchPath( const Pathname & );
-    Pathname patchPath();
-
-    Pathname rpmPath( const PMPackagePtr &pkg );
-
-    void setPatchUrl( const Url & );
-    Url patchUrl();
-
-    Pathname localDir();
-
-    PkgArch arch();
-
-    bool businessProduct();
-
-    PMError requestServers( const std::string &url = "",
-                            const std::string &file = "" );
-
-    std::list<Url> servers();
-    
-    Url defaultServer();
-
-  private:
-    Pathname _patchPath;
-    Pathname _rpmPath;
-    Url _patchUrl;
-    
-    PkgArch _arch;
-    
-    std::list<Url> _servers;
-
-    bool _businessProduct;
-};
-
+#include <y2pm/PMYouPatchPaths.h>
 
 ///////////////////////////////////////////////////////////////////
 //
