@@ -117,58 +117,58 @@ std::string PMPackage::getAttributeName(PMPackageAttribute attr)
     const char* str = NULL;
     switch(attr)
     {
-	case PMPackage::PKG_BUILDTIME:
+	case ATTR_BUILDTIME:
 	    str = "BUILDTIME";
 	    break;
-	case PMPackage::PKG_BUILDHOST:
+	case ATTR_BUILDHOST:
 	    str = "BUILDHOST";
 	    break;
-	case PMPackage::PKG_INSTALLTIME:
+	case ATTR_INSTALLTIME:
 	    str = "INSTALLTIME";
 	    break;
-	case PMPackage::PKG_DISTRIBUTION:
+	case ATTR_DISTRIBUTION:
 	    str = "DISTRIBUTION";
 	    break;
-	case PMPackage::PKG_VENDOR:
+	case ATTR_VENDOR:
 	    str = "VENDOR";
 	    break;
-	case PMPackage::PKG_LICENSE:
+	case ATTR_LICENSE:
 	    str = "LICENSE";
 	    break;
-	case PMPackage::PKG_PACKAGER:
+	case ATTR_PACKAGER:
 	    str = "PACKAGER";
 	    break;
-	case PMPackage::PKG_GROUP:
+	case ATTR_GROUP:
 	    str = "GROUP";
 	    break;
-	case PMPackage::PKG_CHANGELOG:
+	case ATTR_CHANGELOG:
 	    str = "CHANGELOG";
 	    break;
-	case PMPackage::PKG_URL:
+	case ATTR_URL:
 	    str = "URL";
 	    break;
-	case PMPackage::PKG_OS:
+	case ATTR_OS:
 	    str = "OS";
 	    break;
-	case PMPackage::PKG_ARCH:
+	case ATTR_ARCH:
 	    str = "ARCH";
 	    break;
-	case PMPackage::PKG_PREIN:
+	case ATTR_PREIN:
 	    str = "PREIN";
 	    break;
-	case PMPackage::PKG_POSTIN:
+	case ATTR_POSTIN:
 	    str = "POSTIN";
 	    break;
-	case PMPackage::PKG_PREUN:
+	case ATTR_PREUN:
 	    str = "PREUN";
 	    break;
-	case PMPackage::PKG_POSTUN:
+	case ATTR_POSTUN:
 	    str = "POSTUN";
 	    break;
-	case PMPackage::PKG_SOURCERPM:
+	case ATTR_SOURCERPM:
 	    str = "SOURCERPM";
 	    break;
-	case PMPackage::PKG_ARCHIVESIZE:
+	case ATTR_ARCHIVESIZE:
 	    str = "ARCHIVESIZE";
 	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:

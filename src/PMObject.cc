@@ -64,16 +64,16 @@ string PMObject::getAttributeName(PMObjectAttribute attr)
     const char* str = NULL;
     switch(attr)
     {
-	case PMObject::PMOBJ_DESCRIPTION:
+	case ATTR_DESCRIPTION:
 	    str = "DESCRIPTION";
 	    break;
-	case PMObject::PMOBJ_SUMMARY:
+	case ATTR_SUMMARY:
 	    str = "SUMMARY";
 	    break;
-	case PMObject::PMOBJ_SIZE:
+	case ATTR_SIZE:
 	    str = "SIZE";
 	    break;
-	case PMObject::PMOBJ_NUM_ATTRIBUTES:
+	case PMOBJ_NUM_ATTRIBUTES:
 	    // invalid
 	    return "invalid query";
     }

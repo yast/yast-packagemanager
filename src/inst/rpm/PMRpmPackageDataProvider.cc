@@ -55,13 +55,13 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 
     switch(attr)
     {
-	case PMObject::PMOBJ_SUMMARY:
+	case PMObject::ATTR_SUMMARY:
 	    queryformat = "%{SUMMARY}\n";
 	    break;
-	case PMObject::PMOBJ_DESCRIPTION:
+	case PMObject::ATTR_DESCRIPTION:
 	    queryformat = "%{DESCRIPTION}\n";
 	    break;
-	case PMObject::PMOBJ_SIZE:
+	case PMObject::ATTR_SIZE:
 	    queryformat = "%{SIZE}\n";
 	    break;
 	case PMObject::PMOBJ_NUM_ATTRIBUTES:
@@ -80,59 +80,59 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 
     switch(attr)
     {
-	case PMPackage::PKG_BUILDTIME:
+	case PMPackage::ATTR_BUILDTIME:
 	    queryformat = "%{BUILDTIME}";
 	    break;
-	case PMPackage::PKG_BUILDHOST:
+	case PMPackage::ATTR_BUILDHOST:
 	    queryformat = "%{BUILDHOST}";
 	    break;
-	case PMPackage::PKG_INSTALLTIME:
+	case PMPackage::ATTR_INSTALLTIME:
 	    queryformat = "%{INSTALLTIME}";
 	    break;
-	case PMPackage::PKG_DISTRIBUTION:
+	case PMPackage::ATTR_DISTRIBUTION:
 	    queryformat = "%{DISTRIBUTION}";
 	    break;
-	case PMPackage::PKG_VENDOR:
+	case PMPackage::ATTR_VENDOR:
 	    queryformat = "%{VENDOR}";
 	    break;
-	case PMPackage::PKG_LICENSE:
+	case PMPackage::ATTR_LICENSE:
 	    queryformat = "%{LICENSE}";
 	    break;
-	case PMPackage::PKG_PACKAGER:
+	case PMPackage::ATTR_PACKAGER:
 	    queryformat = "%{PACKAGER}";
 	    break;
-	case PMPackage::PKG_GROUP:
+	case PMPackage::ATTR_GROUP:
 	    queryformat = "%{GROUP}";
 	    break;
-	case PMPackage::PKG_CHANGELOG:
+	case PMPackage::ATTR_CHANGELOG:
 	    queryformat =
     "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\n\n%{CHANGELOGTEXT}\n\n]";
 	    break;
-	case PMPackage::PKG_URL:
+	case PMPackage::ATTR_URL:
 	    queryformat = "%{URL}";
 	    break;
-	case PMPackage::PKG_OS:
+	case PMPackage::ATTR_OS:
 	    queryformat = "%{OS}";
 	    break;
-	case PMPackage::PKG_ARCH:
+	case PMPackage::ATTR_ARCH:
 	    queryformat = "%{ARCH}";
 	    break;
-	case PMPackage::PKG_PREIN:
+	case PMPackage::ATTR_PREIN:
 	    queryformat = "%{PREIN}";
 	    break;
-	case PMPackage::PKG_POSTIN:
+	case PMPackage::ATTR_POSTIN:
 	    queryformat = "%{POSTIN}";
 	    break;
-	case PMPackage::PKG_PREUN:
+	case PMPackage::ATTR_PREUN:
 	    queryformat = "%{PREUN}";
 	    break;
-	case PMPackage::PKG_POSTUN:
+	case PMPackage::ATTR_POSTUN:
 	    queryformat = "%{POSTUN}";
 	    break;
-	case PMPackage::PKG_SOURCERPM:
+	case PMPackage::ATTR_SOURCERPM:
 	    queryformat = "%{SOURCERPM}";
 	    break;
-	case PMPackage::PKG_ARCHIVESIZE:
+	case PMPackage::ATTR_ARCHIVESIZE:
 	    queryformat = "%{ARCHIVESIZE}";
 	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:
