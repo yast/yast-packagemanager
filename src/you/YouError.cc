@@ -62,6 +62,10 @@ std::string YouError::errtext( const unsigned e )
   case E_auth_failed: return N_("Authentification failed.");
   case E_user_abort: return N_("User aborted operation.");
   case E_parse_error: return N_("Error parsing patch description.");
+  case E_prescript_failed: return N_("Prescript failed.");
+  case E_postscript_failed: return N_("Postscript failed.");
+  case E_rpm_failed: return N_("rpm failed.");
+  case E_install_failed: return N_("Installation failed.");
   };
 
   return stringutil::numstring( e );
