@@ -1,0 +1,47 @@
+		     Keywords in YaST2 Software Selection
+		    ======================================
+
+Author:	 Stefan Hundhammer <sh@suse.de>
+Updated: 2002-05-22
+
+
+Base for pkg keywords can be obtained by:
+
+     rpm -q --requires <pkg> | grep <typical-lib>
+
+
+UI style:
+
+libkdecore			-> KDE
+libqt, but no libkdecore	-> Qt
+libgnome*			-> GNOME
+libgdk, but no libgnome*	-> GTK
+libXm				-> Motif
+libXaw				-> Athena
+
+libncurses			-> NCurses
+tk				-> Tcl/Tk
+/usr/bin/wish			-> Tcl
+
+
+(see also posting to [research] on 2002-05-21 15:38)
+
+libX11, but none of the above	-> Xlib (XView? Tcl/Tk? static Motif?)
+
+libX11 doesn't say too much - there might be a lot of statically linked libs
+involved. All it does say is "this very likely has a GUI".
+
+
+requires cdrecord or cdrdao	-> CD recording
+sane				-> scanner
+
+
+pkg name "perl-.*"		-> Perl
+pkg name "^tk.*"		-> Tcl/Tk
+
+
+Keywords for licenses:
+
+GPL
+BSD
+...
