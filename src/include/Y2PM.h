@@ -190,6 +190,11 @@ class Y2PM {
     static bool noAutoInstSrcManager();
 
     /**
+     * Returns true, if an InstSrcManager is present.
+     **/
+    static bool hasInstSrcManager() { return _instSrcManager; }
+
+    /**
      * Access to the installation source manager
      **/
     static InstSrcManager & instSrcManager();
