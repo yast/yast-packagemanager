@@ -109,7 +109,7 @@ std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
   ///////////////////////////////////////////////////////////////////
   // no default: let compiler warn '... not handled in switch'
   ///////////////////////////////////////////////////////////////////
-  case PKG_NUM_ATTRIBUTES:
+  case PMPKG_NUM_ATTRIBUTES:
     // illegal attr value
     break;
   }

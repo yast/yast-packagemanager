@@ -177,7 +177,7 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr
 	case PMPackage::ATTR_FILENAMES:
 	    queryformat = "[%{FILENAMES}\\n]";
 	    break;
-	case PMPackage::PKG_NUM_ATTRIBUTES:
+	case PMPackage::PMPKG_NUM_ATTRIBUTES:
 	    // invalid
 	    return PkgAttributeValue("invalid query");
 	// FIXME
