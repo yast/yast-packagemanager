@@ -290,6 +290,8 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
     scanProductsFile( pfile(), products );
   }
 
+  media = 0; // release media
+
   ///////////////////////////////////////////////////////////////////
   // scan products found
   ///////////////////////////////////////////////////////////////////
