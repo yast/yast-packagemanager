@@ -148,10 +148,10 @@ InstData::getPackages() const
  * find list of packages
  * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
  */
-const std::list<PMPackagePtr> *
+const std::list<PMPackagePtr>
 InstData::findPackages (const std::list<PMPackagePtr> *packagelist, const string& name, const string& version, const string& release, const string& arch)
 {
-    std::list<PMPackagePtr> *hits = new (std::list<PMPackagePtr>);
+    std::list<PMPackagePtr> hits;
     if (packagelist == 0)
     {
 	ERR << "InstData::findPackages (NULL, ...)" << endl;
@@ -181,7 +181,7 @@ InstData::findPackages (const std::list<PMPackagePtr> *packagelist, const string
 	{
 	    continue;
 	}
-	hits->push_back (*pkg);
+	hits.push_back (*pkg);
     }
     return hits;
 }
