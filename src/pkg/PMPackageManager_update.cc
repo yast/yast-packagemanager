@@ -83,10 +83,14 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       continue;
     }
 
+    if ( (*it)->is_taboo() ) {
+      D__ << "doUpdate available: SKIP taboo candidate " << (*it) << endl;
+      ++opt_stats_r.pre_nocand;
+      continue;
+    }
+
     PMPackagePtr candidate( (*it)->candidateObj() );
     ++opt_stats_r.pre_avcand;
-
-    // if installed not SuSE -> not available ???
     available.add( candidate );
 
     // remember any splitprovides to packages actually installed.
@@ -164,6 +168,13 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       continue;
     }
 
+    if ( (*it)->is_taboo() ) {
+      DBG << "SKIP taboo: " << (*it)->installedObj() << endl;
+      ++opt_stats_r.chk_is_taboo;
+      _update_items.insert( *it ); // remember in problem list ?
+      continue;
+    }
+
     PMSelectablePtr state( *it );
     PMPackagePtr    installed( (*it)->installedObj() );
     PMPackagePtr    candidate( (*it)->candidateObj() );
@@ -171,12 +182,6 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     bool probabely_dropped = false;
 
     DBG << "REPLACEMENT FOR " << installed << endl;
-
-    // if installed not SuSE -> no action ???
-
-    // Taboo - currently an installed package can't be taboo,
-    // but if -> no action ???
-
     ///////////////////////////////////////////////////////////////////
     // figure out replacement
     ///////////////////////////////////////////////////////////////////
@@ -192,6 +197,15 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	  // check whether to downgrade:
 	  // both must have vendor 'SuSE' and candidates buildtime must be
 	  // newer.
+	  if ( state->downgrade_condition() ) {
+	    DBG << " ==> (keep installed)" << candidate << endl;
+	    ++opt_stats_r.chk_to_keep_installed;
+	  } else {
+	    state->appl_force_install();
+	    DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
+	    ++opt_stats_r.chk_to_downgrade;
+	  }
+#if 0 // foreign now covered by taboo
 	  if ( installed->buildtime() < candidate->buildtime() ) {
 	    if (    installed->vendor().isSuSE()
 		 && candidate->vendor().isSuSE() ) {
@@ -207,6 +221,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	    DBG << " ==> (keep installed)" << candidate << endl;
 	    ++opt_stats_r.chk_to_keep_installed;
 	  }
+#endif
 	}
       } else {
 	DBG << " ==> INSTALL (preselected): " << candidate << endl;
@@ -215,12 +230,14 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 
     } else {
 
+#if 0 // foreign now covered by taboo
       if ( ! installed->vendor().isSuSE() ) {
 	DBG << " ==> (keep non SuSE package)" << endl;
 	++opt_stats_r.chk_keep_foreign;
 	_update_items.insert( state );
 	continue; // no check for splits
       }
+#endif
 
       // replaced or dropped (ayway there's no candidate for this!)
       // If unique provides exists check if obsoleted (replaced).
@@ -316,10 +333,10 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     for ( PackageSet::iterator sit = tset.begin(); sit != tset.end(); ++sit ) {
       if ( ! (*sit)->getSelectable()->to_install() ) {
 	(*sit)->getSelectable()->appl_set_install();
-	if ( ! (*sit)->getSelectable()->candidateObj()->doesObsolete( it->first ) ) {
-	  it->first->getSelectable()->appl_set_delete();
-	}
 	++opt_stats_r.chk_replaced;
+      }
+      if ( ! (*sit)->getSelectable()->candidateObj()->doesObsolete( it->first ) ) {
+	it->first->getSelectable()->appl_set_delete();
       }
     }
   }
@@ -396,6 +413,7 @@ std::ostream & operator<<( std::ostream & str, const PMUpdateStats & obj )
   str << "chk_installed_total  " << obj.chk_installed_total << endl;
   str << endl;
   str << "chk_already_todel    " << obj.chk_already_todel << endl;
+  str << "chk_is_taboo         " << obj.chk_is_taboo << endl;
   str << endl;
   str << "chk_already_toins    " << obj.chk_already_toins << endl;
   str << "chk_to_update        " << obj.chk_to_update << endl;
