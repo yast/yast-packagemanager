@@ -240,7 +240,7 @@ class PMSolvable : virtual public Rep {
     /**
      * Returns "name-version-release" string
      **/
-    std::string nameEd() const { return (const std::string &)_name + '-' + _edition.asString(); }
+    std::string nameEd() const { return (const std::string &)_name + '-' + _edition.as_string(); }
 
     /**
      * Returns "name-version-release-arch" string
