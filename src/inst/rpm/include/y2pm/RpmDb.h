@@ -328,11 +328,12 @@ class RpmDb: virtual public Rep
 	 *
 	 * @param in string to tokenize
 	 * @param sep separator character
+	 * @param max produce up to this number of tokens, zero for unlimited
 	 * @out out vector of tokens
 	 *
 	 * @return number of tokens found
 	 **/
-	static unsigned tokenize(const std::string& in, char sep, std::vector<std::string>& out);
+	static unsigned tokenize(const std::string& in, char sep, unsigned max, std::vector<std::string>& out);
 
 	/** create error description of bits set according to
 	 * checkPackageResult

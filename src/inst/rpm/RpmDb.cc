@@ -471,13 +471,14 @@ RpmDb::installTmpDatabase( void )
 }
 
 // split in into pieces seperated by sep, return vector out
+// produce up to max tokens. if max is zero the number of tokens is unlimited
 //
 unsigned
-RpmDb::tokenize(const string& in, char sep, vector<string>& out)
+RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 {
     unsigned count = 0;
     string::size_type pos1=0, pos2=0;
-    while(pos1 != string::npos)
+    while(pos1 != string::npos && (max>0?count<=max:true))
     {
 	count++;
 	pos2 = in.find(sep,pos1);
@@ -531,7 +532,7 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
     deps.clear();
 
     vector<string> depvec;
-    tokenize(depstr, ',', depvec);
+    tokenize(depstr, ',', 0, depvec);
 
 //    D__ << "split " << depstr << " into " << depvec.size() << " pieces" << endl;
 
@@ -619,7 +620,7 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     //
     enum {
 	// PMSolvable
-	RPM_NAME,
+	RPM_NAME = 0,
 	RPM_VERSION,
 	RPM_RELEASE,
 	RPM_ARCH,
@@ -628,6 +629,7 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	RPM_OBSOLETES,
 	RPM_CONFLICTS,
 	RPM_BUILDTIME,		// passed to PkgEdition()
+	RPM_SUMMARY,
 	NUM_RPMTAGS
     };
 
@@ -646,8 +648,8 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     rpmquery += "[%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},];";
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
     rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
-    rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},]";
-    rpmquery += "%{BUILDTIME};";
+    rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},];";
+    rpmquery += "%{BUILDTIME};%{SUMMARY}";
     rpmquery += "\\n";
 
     RpmArgVec opts(4);
@@ -696,7 +698,7 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 
 	vector<string> pkgattribs;
 
-	tokenize (value, ';', pkgattribs);
+	tokenize (value, ';', NUM_RPMTAGS, pkgattribs);
 
 	if( pkgattribs.size() != NUM_RPMTAGS )
 	{
