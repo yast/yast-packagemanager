@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jun 25 13:40:23 CEST 2003 - cschum@suse.de
+
+- MediaNFS: Call mount with option "nolock" to prevent the mount
+  command hanging when portmapper is not running.
+
+-------------------------------------------------------------------
 Tue Jun 24 11:21:34 CEST 2003 - cschum@suse.de
 
 - Added progress callback for InstTarget::executeScript().
