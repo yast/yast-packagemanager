@@ -30,6 +30,7 @@
 #include <string>
 
 #include <y2util/Url.h>
+#include <y2util/Vendor.h>
 #include <y2util/Pathname.h>
 #include <y2util/LangCode.h>
 
@@ -116,7 +117,7 @@ class InstSrcDescr : virtual public Rep {
     // media file ( _url / media.N / media )
     ///////////////////////////////////////////////////////////////////
 
-    std::string _media_vendor;		//
+    Vendor      _media_vendor;		//
     std::string _media_id;		// ID code for media match
     unsigned    _media_count;		//
 
@@ -126,7 +127,7 @@ class InstSrcDescr : virtual public Rep {
 
     PkgNameEd   _content_product;
     PkgNameEd   _content_baseproduct;
-    std::string _content_vendor;
+    Vendor      _content_vendor;
 
 
     std::string _content_defaultbase;
@@ -154,7 +155,7 @@ class InstSrcDescr : virtual public Rep {
     std::string _content_youurl;
     std::string _content_youtype;
     std::string _content_youpath;
-    
+
 public:
 
     ///////////////////////////////////////////////////////////////////
@@ -166,13 +167,13 @@ public:
     const Pathname &     product_dir()         const { return _product_dir; }
     bool                 default_activate()    const { return _default_activate; }
 
-    const std::string &  media_vendor()        const { return _media_vendor; }
+    const Vendor &       media_vendor()        const { return _media_vendor; }
     const std::string &  media_id()            const { return _media_id; }
     const unsigned &     media_count()         const { return _media_count; }
 
     const PkgNameEd &    content_product()     const { return _content_product; }
     const PkgNameEd &    content_baseproduct() const { return _content_baseproduct; }
-    const std::string &  content_vendor()      const { return _content_vendor; }
+    const Vendor &       content_vendor()      const { return _content_vendor; }
     const std::string &  content_defaultbase() const { return _content_defaultbase; }
     const ArchMap &      content_archmap()     const { return _content_archmap; }
     const PkgRelation &  content_requires()    const { return _content_requires; }
@@ -183,9 +184,9 @@ public:
     const std::string &  content_timezone()    const { return _content_timezone; }
     const Pathname &     content_descrdir()    const { return _content_descrdir; }
     const Pathname &     content_datadir()     const { return _content_datadir; }
-    const std::string &  content_youurl()      const { return _content_youurl; } 
-    const std::string &  content_youtype()     const { return _content_youtype; } 
-    const std::string &  content_youpath()     const { return _content_youpath; } 
+    const std::string &  content_youurl()      const { return _content_youurl; }
+    const std::string &  content_youtype()     const { return _content_youtype; }
+    const std::string &  content_youpath()     const { return _content_youpath; }
 
     ///////////////////////////////////////////////////////////////////
     // convenience functions
@@ -212,13 +213,13 @@ public:
     void set_product_dir( const Pathname & val_r )          { _product_dir = val_r; }
     void set_default_activate( bool val_r )                 { _default_activate = val_r; }
 
-    void set_media_vendor( const std::string & val_r )      { _media_vendor = val_r; }
+    void set_media_vendor( const Vendor & val_r )           { _media_vendor = val_r; }
     void set_media_id( const std::string & val_r )          { _media_id = val_r; }
     void set_media_count( unsigned val_r )                  { _media_count = val_r; }
 
     void set_content_product( const PkgNameEd & val_r )     { _content_product = val_r; }
     void set_content_baseproduct( const PkgNameEd & val_r ) { _content_baseproduct = val_r; }
-    void set_content_vendor( const std::string & val_r )    { _content_vendor = val_r; }
+    void set_content_vendor( const Vendor & val_r )         { _content_vendor = val_r; }
     void set_content_defaultbase ( const std::string & val_r ) { _content_defaultbase = val_r; }
     void set_content_archmap( const ArchMap & val_r )       { _content_archmap = val_r; }
     void set_content_requires( const PkgRelation & val_r )  { _content_requires = val_r; }

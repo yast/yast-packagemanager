@@ -87,7 +87,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	TagRetrievalPos		_attr_DU;
 
 	// the source
-	const InstSrcPtr _source;
+	const constInstSrcPtr _source;
 
 	// retrieval pointer for packages data
 	const TagCacheRetrievalPtr _package_retrieval;
@@ -103,7 +103,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 
     public:
 
-	PMULPackageDataProvider (InstSrcPtr source,
+	PMULPackageDataProvider (constInstSrcPtr source,
 				 TagCacheRetrievalPtr package_retrieval,
 				 TagCacheRetrievalPtr locale_retrieval,
 				 TagCacheRetrievalPtr du_retrieval);
@@ -133,7 +133,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	//virtual std::string            buildhost   ( const PMPackage & pkg_r ) const;
 	//virtual Date                   installtime ( const PMPackage & pkg_r ) const;
 	//virtual std::string            distribution( const PMPackage & pkg_r ) const;
-	//virtual std::string            vendor      ( const PMPackage & pkg_r ) const;
+	virtual Vendor                 vendor      ( const PMPackage & pkg_r ) const;
 	virtual std::string            license     ( const PMPackage & pkg_r ) const;
 	//virtual std::string            packager    ( const PMPackage & pkg_r ) const;
 	virtual std::string            group       ( const PMPackage & pkg_r ) const;

@@ -24,6 +24,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PMULPackageDataProvider.h>
+#include <y2pm/InstSrcDescr.h>
 #include <Y2PM.h>
 
 using namespace std;
@@ -43,7 +44,7 @@ IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMPackageData
 //	DESCRIPTION : open packages stream and keep pointer to tag parser
 //		      for later value retrieval on-demand
 //
-PMULPackageDataProvider::PMULPackageDataProvider (InstSrcPtr source,
+PMULPackageDataProvider::PMULPackageDataProvider (constInstSrcPtr source,
 			TagCacheRetrievalPtr package_retrieval,
 			TagCacheRetrievalPtr locale_retrieval,
 			TagCacheRetrievalPtr du_retrieval)
@@ -132,6 +133,15 @@ Date
 PMULPackageDataProvider::buildtime ( const PMPackage & pkg_r ) const
 {
     return _attr_BUILDTIME;
+}
+
+Vendor
+PMULPackageDataProvider::vendor( const PMPackage & pkg_r ) const
+{
+  if ( _source && _source->descr() ) {
+    return _source->descr()->content_vendor();
+  }
+  return PMPackageDataProvider::vendor();
 }
 
 std::string
