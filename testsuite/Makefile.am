@@ -26,5 +26,5 @@ test_rpmdb_LDADD = $(top_builddir)/src/liby2pm.la
 test_rpmdb_LDFLAGS = -static
 
 testinstall_SOURCES = testinstall.cc
-testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline
+testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline -lncurses
 testinstall_LDFLAGS = -static
