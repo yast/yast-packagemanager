@@ -42,11 +42,11 @@ ostream& operator<<( ostream& os, const PkgDep::ErrorResult& res )
 		os << "Remove-To-Solve-Conflict: ";
 		ci_for( PkgDep::SolvableList::, it, res.remove_to_solve_conflict.)
 		{
-		    os << (*it)->name();
 		    if(it != res.remove_to_solve_conflict.begin())
 		    {
 			cout << ", ";
 		    }
+		    os << (*it)->name();
 		}
 		os << endl;
 	}

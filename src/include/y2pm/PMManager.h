@@ -177,7 +177,7 @@ class PMManager {
     /**
      * resolve dependencies for packages marked for installation
      *
-     * @param good (output) list of PkgDep::Result that can be installed
+     * @param good (output) list of PkgDep::Result that have been marked for installation/upgrade
      * @param bad (output) list of PkgDep::ErrorResult that have trouble
      *
      * @return true if no conflicts where found (i.e no bad)
@@ -185,14 +185,23 @@ class PMManager {
     bool solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad);
     
     /**
-     * resolve dependencies for packages marked for upgrade
+     * resolve dependencies for all packages that are marked for installation
+     * or are available with newer version
      *
-     * @param good (output) list of PkgDep::Result that can be installed
+     * @param good (output) list of PkgDep::Result that have been marked for installation/upgrade
      * @param bad (output) list of PkgDep::ErrorResult that have trouble
+     * @param to_remove (output) list of PMSolvablePtr that have been marked for removal
      *
-     * @return true if no conflicts where found (i.e no bad)
+     * @return false if upgrade failed (probably due to max_remove). Results
+     * may not be reliable and manual intervention is required
      * */
-    bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList to_remove);
+    bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
+
+    /**
+     * set maximum number of packages that will be automatically selected for
+     * removal on upgrade
+     * */
+    void setMaxRemoveThreshold(unsigned nr);
 
   private:
 

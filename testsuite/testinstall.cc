@@ -45,6 +45,7 @@
 using namespace std;
 
 static int _verbose = 0;
+static int _maxremove = -1;
 
 static string _instlog;
 static string _rootdir = "/";
@@ -56,7 +57,7 @@ static vector<string> nullvector;
 #define DOINIT \
     if(!_initialized) init(nullvector);
 
-void installold(vector<string>& argv);
+//void installold(vector<string>& argv);
 void install(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
@@ -71,6 +72,8 @@ void setroot(vector<string>& argv);
 void source(vector<string>& argv);
 void deselect(vector<string>& argv);
 void upgrade(vector<string>& argv);
+void showstate(vector<string>& argv);
+void setmaxremove(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -79,7 +82,7 @@ struct Funcs {
 };
 
 static struct Funcs func[] = {
-    { "installold",    installold,    "simulated install of a package, direct PkgDep" },
+//    { "installold",    installold,    "simulated install of a package, direct PkgDep" },
     { "install",    install,    "simulated install of a package, through manager" },
     { "rpminstall", rpminstall, "install rpm files" },
     { "consistent", consistent, "check consistency" },
@@ -94,6 +97,8 @@ static struct Funcs func[] = {
     { "source",     source,     "scan media for inst sources" },
     { "deselect",   deselect,   "deselect packages marked for installation" },
     { "upgrade",    upgrade,    "upgrade whole system" },
+    { "showstate",  showstate,  "show state of package or all if none specified" },
+    { "setmaxremove",  setmaxremove,  "set maximum number of packages that will be removed on upgrade" },
     { NULL,         NULL,       NULL }
 };
 
@@ -163,7 +168,7 @@ void verbose(vector<string>& argv)
 {
     if(argv.size()<2)
     {
-	cout << "need argument" << endl;
+	cout << "verbose level: " << _verbose << endl;
 	return;
     }
 
@@ -172,6 +177,26 @@ void verbose(vector<string>& argv)
     cout << "verbose level set to " << _verbose << endl;
 }
 
+void setmaxremove(vector<string>& argv)
+{
+    if(argv.size()<2)
+    {
+	cout << "current max remove: "
+	    << (_maxremove<0?string("default"):stringutil::form("%d", _maxremove)) << endl;
+	return;
+    }
+    int tmp = atoi(argv[1].c_str());
+    if(tmp < 0)
+    {
+	cout  << "maxremove must be positive" << endl;
+	return;
+    }
+
+    _maxremove = tmp;
+    Y2PM::packageManager().setMaxRemoveThreshold(_maxremove);
+
+    cout << "maxremove set to " << _maxremove << endl;
+}
 void debug(vector<string>& argv)
 {
     if(Y2SLog::dbg_enabled_bm)
@@ -270,6 +295,13 @@ void source(vector<string>& argv)
 
 	Url url(param);
 
+	if(!url.isValid())
+	{
+	    cout << "invalid url" << endl;
+	    return;
+	}
+
+	cout << "scanning " << url << endl;
 	PMError err = Y2PM::instSrcManager().scanMedia(_isrclist, url);
 
 	if(err != PMError::E_ok)
@@ -426,15 +458,86 @@ PkgSet* getAvailable()
     return set;
 }
 
+int printgoodlist(PkgDep::ResultList& good)
+{
+    int numinst = 0;
+    cout << "*** Packages to install ***" << endl;
+
+     // otherwise, print what should be installed and what removed
+    for(PkgDep::ResultList::const_iterator p=good.begin();p!=good.end();++p)
+    {
+	switch (_verbose) {
+	    case 0:
+		if(p!=good.begin())
+		    cout << " ";
+		cout <<  p->name;
+		break;
+	    case 1:
+		cout << "install " << p->name << "-" << p->edition << endl;
+		break;
+	    default:
+		cout << "install " << *p << endl;
+		break;
+	}
+	numinst++;
+
+    }
+    if(!_verbose) cout << endl;
+
+    return numinst;
+}
+
+int printremovelist(PkgDep::SolvableList& to_remove)
+{
+    int numrem = 0;
+
+    cout << "*** Packages to remove ***" << endl;
+    for(PkgDep::SolvableList::const_iterator q=to_remove.begin();q!=to_remove.end();++q)
+    {
+	switch (_verbose)
+	{
+	    case 0:
+		if(q!=to_remove.begin())
+		    cout << " ";
+		cout << (*q)->name();
+		break;
+	    case 1:
+		cout << (*q)->name() << "-" << (*q)->edition() << endl;
+		break;
+	    default:
+		cout << *q << endl;
+		break;
+	}
+	numrem++;
+    }
+    if(!_verbose) cout << endl;
+
+    return numrem;
+}
+
+int printbadlist(PkgDep::ErrorResultList& bad)
+{
+    int numbad = 0;
+    
+    if(bad.empty()) return 0;
+    
+    cout << "*** Conflicts ***" << endl;
+    for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
+	 p != bad.end(); ++p ) {
+	cout << *p << endl;
+	numbad++;
+    }
+    return numbad;
+}
+
 void install(vector<string>& argv)
 {
     DOINIT
 
     PkgDep::ResultList good;
     PkgDep::ErrorResultList bad;
-    PkgDep::NameList to_remove;
 
-    int numinst=0,numrem=0,numbad=0;
+    int numinst=0,numbad=0;
     bool success = false;
 
     for (unsigned i=1; i < argv.size() ; i++) {
@@ -468,41 +571,15 @@ void install(vector<string>& argv)
 
     t.stopTimer();
 
-    if (!success) {
-	// if it failed, print problems
-	cout << "*** Conflicts ***" << endl;
-	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
-	     p != bad.end(); ++p ) {
-	    cout << *p << endl;
-	    numbad++;
-	}
-    }
+    numbad = printbadlist(bad);
+    numinst = printgoodlist(good);
 
-    cout << "*** Packages to install ***" << endl;
-
-    // otherwise, print what should be installed and what removed
-    for(PkgDep::ResultList::const_iterator p=good.begin();p!=good.end();++p) {
-	switch (_verbose) {
-	case 0: cout << "install " << p->name << endl;break;
-	case 1: cout << "install " << p->name << "-" << p->edition << endl;break;
-	default: cout << "install " << *p << endl;break;
-	}
-	numinst++;
-
-    }
-    cout << "*** Packages to remove ***" << endl;
-    for(PkgDep::NameList::const_iterator q=to_remove.begin();q!=to_remove.end();++q) {
-	switch (_verbose) {
-	case 0: cout << "remove " << *q << endl;break;
-	default: cout << "remove " << *q << endl;break;
-	}
-	numrem++;
-    }
     cout << "***" << endl;
-    cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
+    cout << numbad << " bad, " << numinst << " to install" << endl;
     cout << "Time consumed: " << t.getTimer() << endl;
 }
 
+#if 0
 void installold(vector<string>& argv)
 {
     DOINIT
@@ -606,6 +683,7 @@ void installold(vector<string>& argv)
     }
     cout << endl;
 }
+#endif
 
 void remove(vector<string>& argv)
 {
@@ -774,40 +852,72 @@ void upgrade(vector<string>& argv)
 
     t.stopTimer();
 
-    if (!success) {
-	// if it failed, print problems
-	cout << "*** Conflicts ***" << endl;
-	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
-	     p != bad.end(); ++p ) {
-	    cout << *p << endl;
-	    numbad++;
-	}
-    }
+    numbad = printbadlist(bad);
+    numinst = printgoodlist(good);
+    numrem = printremovelist(to_remove);
 
-    cout << "*** Packages to install ***" << endl;
-
-    // otherwise, print what should be installed and what removed
-    for(PkgDep::ResultList::const_iterator p=good.begin();p!=good.end();++p) {
-	switch (_verbose) {
-	case 0: cout << "install " << p->name << endl;break;
-	case 1: cout << "install " << p->name << "-" << p->edition << endl;break;
-	default: cout << "install " << *p << endl;break;
-	}
-	numinst++;
-
-    }
-    cout << "*** Packages to remove ***" << endl;
-    for(PkgDep::SolvableList::const_iterator q=to_remove.begin();q!=to_remove.end();++q) {
-	switch (_verbose) {
-	case 0: cout << "remove " << (*q)->name() << endl;break;
-	case 1: cout << "remove " << (*q)->name() << "-" << (*q)->edition() << endl;break;
-	default: cout << "remove " << *q << endl;break;
-	}
-	numrem++;
-    }
     cout << "***" << endl;
     cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
+    if(!success)
+    {
+	cout << "*** upgrade failed, manual intervention required to solve conflicts ***" << endl;
+    }
     cout << "Time consumed: " << t.getTimer() << endl;
+}
+
+void showstate(vector<string>& argv)
+{
+
+    char* statestr[] = { " T", " D", " U", " I", "AD", "AU", "AI", " X", " N" };
+    
+    PMManager::PMSelectableVec selectables;
+    PMManager::PMSelectableVec::const_iterator begin, end;
+    if(argv.size()>1)
+    {
+	for (unsigned i=1; i < argv.size() ; i++) {
+	    string pkg = stringutil::trim(argv[i]);
+
+	    if(pkg.empty()) continue;
+	    
+	    PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
+	    if(!selp)
+	    {
+		std::cout << "package " << pkg << " is not available.\n";
+	    }
+	    else
+	    {
+		selectables.insert(selp);
+	    }
+	}
+	begin = selectables.begin();
+	end = selectables.end();
+    }
+    else
+    {
+	begin = Y2PM::packageManager().begin();
+	end = Y2PM::packageManager().end();
+    }
+
+    for(PMManager::PMSelectableVec::const_iterator cit = begin;
+	cit != end; ++cit)
+    {
+	PMSelectable::UI_Status s = (*cit)->status();
+	if(!_verbose && s == PMSelectable::S_NoInst)
+	    continue;
+	switch(s)
+	{
+	    case PMSelectable::S_Taboo:
+	    case PMSelectable::S_Del:
+	    case PMSelectable::S_Update:
+	    case PMSelectable::S_Install:
+	    case PMSelectable::S_AutoDel:
+	    case PMSelectable::S_AutoUpdate:
+	    case PMSelectable::S_AutoInstall:
+	    case PMSelectable::S_KeepInstalled:
+	    case PMSelectable::S_NoInst:
+	    cout << statestr[s] << "   " << (*cit)->name() << endl;
+	}
+    }
 }
 
 int main( int argc, char *argv[] )
@@ -817,33 +927,50 @@ int main( int argc, char *argv[] )
     char* buf = NULL;
     string inputstr;
 
+    DOINIT
+
     cout << "type help for help, ^D to exit" << endl << endl;
 
     buf = readline(prompt);
     while(buf)
     {
-	vector<string> argv;
-	unsigned i;
-	if(RpmDb::tokenize(buf, ' ', 0, argv) < 1)
-	{
-	    free(buf);
-	    break;
-	}
-	for(i=0; func[i].name; i++)
-	{
-	    if(argv[0] == func[i].name)
-		break;
-	}
-	if(func[i].func)
-	{
-	    func[i].func(argv);
-	}
-	else
-	{
-	    cout << "unknown function " << argv[0] << endl;
-	}
-	add_history(buf);
+	vector<string> cmds;
+
+	inputstr = buf?buf:"";
+	inputstr = stringutil::trim(inputstr);
 	free(buf);
+	buf = NULL;
+
+	if(inputstr.empty()) goto readnext;
+
+	if(RpmDb::tokenize(inputstr, ';', 0, cmds) < 1)
+	    { break; }
+
+	for(vector<string>::iterator vit = cmds.begin(); vit != cmds.end(); ++vit)
+	{
+	    vector<string> argv;
+	    unsigned i;
+	    if(RpmDb::tokenize(stringutil::trim(*vit), ' ', 0, argv) < 1)
+	    {
+		break;
+	    }
+	    for(i=0; func[i].name; i++)
+	    {
+		if(argv[0] == func[i].name)
+		    break;
+	    }
+	    if(func[i].func)
+	    {
+		func[i].func(argv);
+	    }
+	    else
+	    {
+		cout << "unknown function " << argv[0] << endl;
+	    }
+	}
+
+	add_history(inputstr.c_str());
+    readnext:
 	buf = readline(prompt);
     }
 

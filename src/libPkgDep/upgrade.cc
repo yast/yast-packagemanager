@@ -27,8 +27,8 @@ static void deselect_referers(
 
 bool PkgDep::upgrade(
 	PkgSet &candidates, ResultList& out_good, ErrorResultList& out_bad,
-	SolvableList& to_remove, unsigned max_remove
-) {
+	SolvableList& to_remove, bool all, unsigned max_remove )
+	{
 	PkgSet installed_backup = installed;
 	noval_hash<PkgName> real_from_input_list;
 	noval_hash<PkgName> upgrades_solving_conflicts;
@@ -37,7 +37,7 @@ bool PkgDep::upgrade(
 	
 	D__ << "Starting upgrade\n";
 	
-	if (candidates.empty()) {
+	if (all || candidates.empty()) {
 		// for all installed packages...
 		ci_for( PkgSet::, p, installed. ) {
 			PkgName iname = p->key;

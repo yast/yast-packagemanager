@@ -36,8 +36,13 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
 	{
 	    (*it)->auto_unset();
 	}
+
 	if ( (*it)->to_delete() )
-	  continue;
+	{
+	    DBG << "skip " << (*it)->name() << endl;
+	    continue;
+	}
+
 	// installed into installed set
 	if((*it)->has_installed())
 	{
@@ -74,7 +79,7 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
 }
 
 // set packages not from input list to auto
-static void setAutoState(PkgDep::ResultList good)
+static void setAutoState(PkgDep::ResultList& good, PkgDep::SolvableList& to_remove)
 {
     for(PkgDep::ResultList::iterator it = good.begin();
 	    it != good.end(); ++it)
@@ -96,7 +101,24 @@ static void setAutoState(PkgDep::ResultList good)
 	    { ERR << "good result with NULL selectable: " << it->name << endl; continue; }
 
 	if(!selp->auto_set_install())
-	    { ERR << "could not set " << it->name << " to status auto" << endl; continue; }
+	    { ERR << "could not set " << it->name << " to status auto install" << endl; continue; }
+    }
+
+    for(PkgDep::SolvableList::iterator it = to_remove.begin();
+	    it != to_remove.end(); ++it)
+    {
+	PMObjectPtr op = *it;
+
+	if( op == NULL )
+	    { ERR << (*it)->name() << "is no PMObject" << endl; continue; }
+
+	PMSelectablePtr selp = op->getSelectable();
+
+	if(selp == NULL)
+	    { ERR << "good result with NULL selectable: " << (*it)->name() << endl; continue; }
+
+	if(!selp->auto_set_delete())
+	    { ERR << "could not set " << (*it)->name() << " to status auto delete" << endl; continue; }
     }
 }
 
@@ -112,13 +134,14 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 //    engine.set_unresolvable_callback(unresolvable_callback); //TODO
 
     bool success = engine.install( toinstall, good, bad);
-
-    setAutoState(good);
+    PkgDep::SolvableList to_remove;
+    
+    setAutoState(good, to_remove);
 
     return success;
 }
 
-bool PMManager::solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList to_remove)
+bool PMManager::solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList& to_remove)
 {
     PkgSet installed; // already installed
     PkgSet available; // available for installation
@@ -129,9 +152,14 @@ bool PMManager::solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
     PkgDep engine( installed, available ); // TODO alternative_default
 //    engine.set_unresolvable_callback(unresolvable_callback); //TODO
 
-    bool success = engine.upgrade( toinstall, good, bad, to_remove);
+    bool success = engine.upgrade( toinstall, good, bad, to_remove, true);
 
-    setAutoState(good);
+    setAutoState(good, to_remove);
 
     return success;
+}
+
+void PMManager::setMaxRemoveThreshold(unsigned nr)
+{
+    PkgDep::set_default_max_remove(nr);
 }
