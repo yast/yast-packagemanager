@@ -18,13 +18,21 @@
   Purpose: Wraps acces to rpmdb via librpm.
 
 /-*/
+extern "C" {
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+}
 
 #include "RpmLib.h"
 
 #include <iostream>
+#include <fstream>
 #include <map>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/stringutil.h>
+#include <y2util/PathInfo.h>
 
 #include <y2pm/RpmLibDb.h>
 #include <y2pm/RpmLibHeader.h>
@@ -485,4 +493,480 @@ ostream & operator<<( ostream & str, const RpmLibDb & obj )
     str << (obj._globalInitialized ? "closed" : "noinit" );
 
   return str << ')';
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::getData
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr RpmLibDb::getData( const Pathname & path )
+{
+  PathInfo file( path );
+  if ( ! file.isFile() ) {
+    ERR << "Not a file: " << file << endl;
+    return 0;
+  }
+
+  FD_t fd = ::Fopen( file.asString().c_str(), "r" );
+  if ( fd == 0 || ::Ferror(fd) ) {
+    ERR << "Can't open file for reading: " << file << " (" << ::Fstrerror(fd) << ")" << endl;
+    if ( fd )
+      ::Fclose( fd );
+    return 0;
+  }
+
+  Header nh    = 0;
+  int isSource = 0;
+  int major    = 0;
+  int minor    = 0;
+
+  int res = ::rpmReadPackageHeader( fd, &nh, &isSource, &major, &minor );
+  ::Fclose( fd );
+  if ( res || !nh ) {
+    ERR << "Error reading: " << file << (res==1?" (bad magic)":"") << endl;
+    return 0;
+  }
+
+  constRpmLibHeaderPtr h( new RpmLibHeader( nh, isSource ) );
+  MIL << major << "." << minor << "-" << (isSource?"src ":"bin ") << h << " from " << path << endl;
+
+  return h;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PkgHeaderCache
+//
+///////////////////////////////////////////////////////////////////
+#undef Y2LOG
+#define Y2LOG "PkgHeaderCache"
+
+static const unsigned PHC_MAGIC_SZE = 64; // dont change!
+static const string   PHC_MAGIC( "YaST-PHC-1.0-0" );
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : phcAddMagic
+**	FUNCTION TYPE : void
+*/
+void phcAddMagic( FD_t fd )
+{
+  char magic[PHC_MAGIC_SZE];
+  memset( magic, 0, PHC_MAGIC_SZE );
+  strcpy( magic, PHC_MAGIC.c_str() );
+  strcpy( magic+PHC_MAGIC.size()+1, stringutil::numstring( Date::now() ).c_str() );
+
+  ::Fwrite( magic, sizeof(char), PHC_MAGIC_SZE, fd );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : phcReadMagic
+**	FUNCTION TYPE : void
+*/
+int phcReadMagic( FD_t fd, time_t & date_r )
+{
+  char magic[PHC_MAGIC_SZE+1];
+  memset( magic, 0, PHC_MAGIC_SZE+1 );
+  size_t got = ::Fread( magic, sizeof(char), PHC_MAGIC_SZE, fd );
+  if ( got != PHC_MAGIC_SZE ) {
+    return -1;
+  }
+  if ( strcmp( magic, PHC_MAGIC.c_str() ) ) {
+    return -2;
+  }
+  date_r = strtoul( magic+PHC_MAGIC.size()+1, 0, 10 );
+  return 0;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : phcAddHeader
+**	FUNCTION TYPE : unsigned
+*/
+unsigned phcAddHeader( FD_t fd, Header h, const Pathname & citem_r, int isSource )
+{
+  string entry = stringutil::form( "%c%s", (isSource?'s':'b'), citem_r.asString().c_str() );
+  entry = stringutil::form( "@%6d@%s", entry.size(), entry.c_str() );
+
+  ::Fwrite( entry.c_str(), sizeof(char), entry.size(), fd );
+  ::headerWrite( fd, h, HEADER_MAGIC_YES );
+
+  return 1;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : phcReadHeader
+**	FUNCTION TYPE : Header
+*/
+Header phcReadHeader( FD_t fd, unsigned & at_r )
+{
+  at_r = ::Fseek( fd, 0, SEEK_CUR );
+  Header h = ::headerRead( fd, HEADER_MAGIC_YES );
+  if ( !h ) {
+    ERR << "Error reading header (" << ::Fstrerror(fd) << ")" << endl;
+  }
+  return h;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : phcGetHeader
+**	FUNCTION TYPE : Header
+*/
+Header phcGetHeader( FD_t fd, Pathname & citem_r, int & isSource_r, unsigned & at_r )
+{
+  char sig[] = "xxxxxxxx";
+
+  size_t got = ::Fread( sig, sizeof(char), 8, fd );
+  if ( got != 8 ) {
+    if ( got || ::Ferror(fd) ) {
+      ERR << "Error reading entry (" << ::Fstrerror(fd) << ")" << endl;
+    }
+    return 0;
+  }
+
+  if ( sig[0] != '@' || sig[7] != '@' ) {
+    ERR << "Invalid entry." << endl;
+    return 0;
+  }
+
+  sig[7] = '\0';
+  unsigned count = atoi( &sig[1] );
+
+  char citem[count+1];
+  if ( ::Fread( citem, sizeof(char), count, fd ) != count ) {
+    ERR << "Error reading entry data (" << ::Fstrerror(fd) << ")" << endl;
+    return 0;
+  }
+  citem[count] = '\0';
+
+  isSource_r = ( citem[0] == 's' );
+  citem_r    = &citem[1];
+
+  return phcReadHeader( fd, at_r );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : phcAddFile
+**	FUNCTION TYPE : unsigned
+*/
+unsigned phcAddFile( FD_t fd, const PathInfo & cpath_r, const Pathname & citem_r )
+{
+  FD_t pkg = ::Fopen( cpath_r.asString().c_str(), "r" );
+  if ( pkg == 0 || ::Ferror(pkg) ) {
+    ERR << "Can't open file for reading: " << cpath_r << " (" << ::Fstrerror(pkg) << ")" << endl;
+    if ( pkg )
+      ::Fclose( pkg );
+    return 0;
+  }
+
+  Header h     = 0;
+  int isSource = 0;
+  int major    = 0;
+  int minor    = 0;
+
+  int res = ::rpmReadPackageHeader( pkg, &h, &isSource, &major, &minor );
+  ::Fclose( pkg );
+
+  if ( res || !h ) {
+    WAR << "Error reading: " << cpath_r << (res==1?" (bad magic)":"") << endl;
+    return 0;
+  }
+
+  constRpmLibHeaderPtr dummy( new RpmLibHeader( h, isSource ) ); // to handle header free
+  MIL << major << "." << minor << "-" << (isSource?"src ":"bin ") << dummy << " for " << citem_r << endl;
+
+  return phcAddHeader( fd, h, citem_r, isSource );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : phcScanDir
+**	FUNCTION TYPE : unsigned
+*/
+unsigned phcScanDir( FD_t fd, const PathInfo & cpath_r, const Pathname & prfx_r )
+{
+  DBG << "SCAN " << cpath_r << " (" << prfx_r << ")" << endl;
+
+  list<string> retlist;
+  int res = PathInfo::readdir( retlist, cpath_r.path(), false );
+  if ( res ) {
+    ERR << "Error reading content of " << cpath_r << " (readdir " << res << ")" << endl;
+    return 0;
+  }
+
+  unsigned count = 0;
+  for (  list<string>::const_iterator it = retlist.begin(); it != retlist.end(); ++it ) {
+    PathInfo cpath( cpath_r.path() + *it, PathInfo::LSTAT );
+    if ( cpath.isFile() ) {
+      count += phcAddFile( fd, cpath, prfx_r + *it );
+    }
+  }
+
+  return count;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::buildPkgHeaderCache
+//	METHOD TYPE : int
+//
+int PkgHeaderCache::buildPkgHeaderCache( const Pathname & cache_r,
+					 const Pathname & pkgroot_r, const list<Pathname> & pkglist_r )
+{
+  ///////////////////////////////////////////////////////////////////
+  // Prepare cache file
+  ///////////////////////////////////////////////////////////////////
+  FD_t fd = ::Fopen( cache_r.asString().c_str(), "w"  );
+  if ( fd == 0 || ::Ferror(fd) ) {
+    ERR << "Can't open cache for writing: " << cache_r << " (" << ::Fstrerror(fd) << ")" << endl;
+    if ( fd )
+      ::Fclose( fd );
+    return -1;
+  }
+
+  phcAddMagic( fd );
+
+  ///////////////////////////////////////////////////////////////////
+  // Check pkgroot
+  ///////////////////////////////////////////////////////////////////
+
+  PathInfo pkgroot( pkgroot_r );
+  if ( !pkgroot.isDir() ) {
+    ERR << "Not a directory: Pkgroot " << pkgroot << endl;
+    ::Fclose( fd );
+    return -2;
+  }
+
+  if ( pkglist_r.empty() ) {
+    ERR << "Pkglist is empty" << endl;
+    ::Fclose( fd );
+    return -3;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Scan pkglist
+  // Symlinks to directories are ok. Symlinks to files are ignored,
+  // as we frequently use constructs like:
+  //  package-1.0-1.rpm
+  //  package-1.1-1.rpm
+  //  package-1.2-1.rpm
+  //  package-2.0-1.rpm
+  //  package.rmp -> package-2.0-1.rpm
+  ///////////////////////////////////////////////////////////////////
+  MIL << "Start scan below " << pkgroot_r << endl;
+  unsigned count = 0;
+
+  for ( list<Pathname>::const_iterator it = pkglist_r.begin(); it != pkglist_r.end(); ++it ) {
+    Pathname citem( it->absolutename() );
+    PathInfo cpath( pkgroot_r + citem, PathInfo::LSTAT );
+    DBG << "CPATH " << cpath << endl;
+    if ( cpath.isFile() ) {
+      count += phcAddFile( fd, cpath, citem );
+    } else {
+      if ( cpath.isLink() ) {
+	cpath.stat(); // restat
+      }
+      if ( cpath.isDir() ) {
+	count += phcScanDir( fd, cpath, citem );
+      }
+    }
+  }
+
+  if ( ::Ferror(fd) ) {
+    ERR << "Error writing cache: " << cache_r << " (" << ::Fstrerror(fd) << ")" << endl;
+    ::Fclose( fd );
+    return -1;
+  }
+
+  MIL << "Found " << count << " package(s) below " << pkgroot_r << endl;
+  ::Fclose( fd );
+  return count;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PkgHeaderCache::Cache
+//
+struct PkgHeaderCache::Cache {
+
+  FD_t   fd;
+  time_t _cdate;
+
+  void close() {
+    if ( fd )
+      ::Fclose( fd );
+    fd = 0;
+    _cdate = 0;
+  }
+
+  bool open( const Pathname & file_r ) {
+    close();
+    fd = ::Fopen( file_r.asString().c_str(), "r"  );
+    if ( fd == 0 || ::Ferror(fd) ) {
+      ERR << "Can't open cache for reading: " << file_r << " (" << ::Fstrerror(fd) << ")" << endl;
+      close();
+      return false;
+    }
+    if ( phcReadMagic( fd, _cdate ) < 0 ) {
+      ERR << "Not a cache file. (" << ::Fstrerror(fd) << ")" << endl;
+      close();
+      return false;
+    }
+    return true;
+  }
+
+  bool isOpen() const { return( fd != 0 ); }
+
+  Cache() : fd( 0 ), _cdate( 0 ) {}
+
+  ~Cache() { close(); }
+};
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::PkgHeaderCache
+//	METHOD TYPE : Constructor
+//
+PkgHeaderCache::PkgHeaderCache( const Pathname & cache_r )
+    : _cpath( cache_r )
+    , _c( new Cache )
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::~PkgHeaderCache
+//	METHOD TYPE : Destructor
+//
+PkgHeaderCache::~PkgHeaderCache()
+{
+  delete _c;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::openCache
+//	METHOD TYPE : bool
+//
+bool PkgHeaderCache::openCache()
+{
+  if ( _c->isOpen() )
+    return true;
+  return _c->open( _cpath );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::closeCache
+//	METHOD TYPE : void
+//
+void PkgHeaderCache::closeCache()
+{
+  _c->close();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::cacheOk
+//	METHOD TYPE : bool
+//
+bool PkgHeaderCache::cacheOk() const
+{
+  if ( !_c->isOpen() ) {
+    DBG << "Cache not open: " << _cpath << endl;
+    return false;
+  }
+  if ( ::Ferror(_c->fd) ) {
+    INT << "Ferror: " << ::Fstrerror(_c->fd) << endl;
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::cacheCdate
+//	METHOD TYPE : time_t
+//
+time_t PkgHeaderCache::cacheCdate() const
+{
+  return _c->_cdate;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::getFirst
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr PkgHeaderCache::getFirst( Pathname & citem_r, int & isSource_r, unsigned & at_r )
+{
+  if ( !_c->isOpen() ) {
+    ERR << "Cache not open: " << _cpath << endl;
+    return 0;
+  }
+
+  ::Fseek( _c->fd, PHC_MAGIC_SZE, SEEK_SET );
+  return getNext( citem_r, isSource_r, at_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::getNext
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr PkgHeaderCache::getNext( Pathname & citem_r, int & isSource_r, unsigned & at_r )
+{
+  if ( !_c->isOpen() ) {
+    ERR << "Cache not open: " << _cpath << endl;
+    return 0;
+  }
+
+  Header h = phcGetHeader( _c->fd, citem_r, isSource_r, at_r );
+  if ( !h ) {
+    return 0;
+  }
+  return new RpmLibHeader( h );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgHeaderCache::getAt
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr PkgHeaderCache::getAt( unsigned at_r )
+{
+  if ( !_c->isOpen() ) {
+    ERR << "Cache not open: " << _cpath << endl;
+    return 0;
+  }
+
+  ::Fseek( _c->fd, at_r, SEEK_SET );
+  Header h = phcReadHeader( _c->fd, at_r );
+  if ( !h ) {
+    return 0;
+  }
+  return new RpmLibHeader( h );
 }
