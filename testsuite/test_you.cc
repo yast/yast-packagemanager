@@ -15,12 +15,13 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/MediaAccess.h>
+#include <y2pm/InstYou.h>
 
 using namespace std;
 
 void usage()
 {
-  cout << "Usage: online_update [-u url] [-p product] [-v version]"
+  cout << "Usage: online-update [-u url] [-p product] [-v version]"
        << "[-a arch] [security] [recommended] [document]"
        << " [optional]"
        << endl;
@@ -75,36 +76,28 @@ int main( int argc, char **argv )
     }
   }
 
-  bool security = false;
-  bool recommended = false;
-  bool document = false;
-  bool optional = false;
-
-  bool custom = false;
+  int kinds = PMYouPatch::kind_invalid;
 
   if (optind < argc) {
     while (optind < argc) {
       string arg = argv[optind++];
-      if ( arg == "security" ) security = true;
-      else if ( arg == "recommended" ) recommended = true;
-      else if ( arg == "document" ) document = true;
-      else if ( arg == "optional" ) optional = true;
+      if ( arg == "security" ) kinds |= PMYouPatch::kind_security;
+      else if ( arg == "recommended" ) kinds |= PMYouPatch::kind_recommended;
+      else if ( arg == "document" ) kinds |= PMYouPatch::kind_document;
+      else if ( arg == "optional" ) kinds |= PMYouPatch::kind_optional;
       else usage();
-      
-      custom = true;
     }
   }
 
-  if ( !custom ) {
-    security = true;
-    recommended = true;
+  if ( kinds == PMYouPatch::kind_invalid ) {
+    kinds = PMYouPatch::kind_security | PMYouPatch::kind_recommended;
   }
 
   cout << "Types of patches to be installed:";
-  if ( security ) cout << " security";
-  if ( recommended ) cout << " recommended";
-  if ( document ) cout << " document";
-  if ( optional ) cout << " optional";
+  if ( kinds & PMYouPatch::kind_security ) cout << " security";
+  if ( kinds & PMYouPatch::kind_recommended ) cout << " recommended";
+  if ( kinds & PMYouPatch::kind_document ) cout << " document";
+  if ( kinds & PMYouPatch::kind_optional ) cout << " optional";
   cout << endl;
 
   PMError error;
@@ -127,8 +120,8 @@ int main( int argc, char **argv )
   if ( archStr ) arch = archStr;
   else arch = "i386";
 
-  PMYouPatchInfo patchInfo( lang );
-  PMYouPatchPaths *patchPaths = new PMYouPatchPaths( product, version, arch );
+  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( lang );
+  PMYouPatchPathsPtr patchPaths = new PMYouPatchPaths( product, version, arch );
 
   cout << "Product:      " << product << endl;
   cout << "Version:      " << version << endl;
@@ -157,91 +150,27 @@ int main( int argc, char **argv )
   
   cout << "URL: " << url.asString() << endl;
 
-  patchPaths->setPatchUrl( url );
-  
+  InstYou you( patchInfo, patchPaths );
 
-  // Download patch infos.
-
-  list<PMYouPatchPtr> patches;
-  error = patchInfo.getPatches( patchPaths, patches );
+  error = you.retrievePatches( url );
   if ( error ) {
-    cerr << "Error downloading patchinfos: " << error << endl;
+    cerr << "Error retrieving patches: " << error << endl;
     exit( 1 );
   }
 
-  // Select patches.
+  you.selectPatches( kinds );
 
-  // If Yast2 patch, only install this one.
-
-  bool yastPatch = false;
-
-  list<PMYouPatchPtr> selectedPatches;
-  list<PMYouPatchPtr>::const_iterator itPatch;
-  for( itPatch = patches.begin(); itPatch != patches.end(); ++itPatch ) {
-    if ( (*itPatch)->kind() == PMYouPatch::kind_yast ) {
-      selectedPatches.push_back( *itPatch );
-      yastPatch = true;
-    }
-  }
-
-  if ( !yastPatch ) {
-    for( itPatch = patches.begin(); itPatch != patches.end(); ++itPatch ) {
-      int kind = (*itPatch)->kind();
-      if ( kind == PMYouPatch::kind_security && security ||
-           kind == PMYouPatch::kind_recommended && recommended ||
-           kind == PMYouPatch::kind_document && document ||
-           kind == PMYouPatch::kind_optional && optional ) {
-        selectedPatches.push_back( *itPatch );
-      }
-    }
-  }
-
-
-  // Download packages.
-
-  MediaAccess media;
-  error = media.open( patchPaths->patchUrl(), patchPaths->localDir() );
+  error = you.retrievePackages();
   if ( error ) {
-    cerr << "Error opening URL '" << patchPaths->patchUrl() << "'" << endl;
-    exit( 1 );
-  }
-  error = media.attach();
-  if ( error ) {
-    cerr << "Error attaching media." << endl;
+    cerr << "Error retriwving packages: " << error << endl;
     exit( 1 );
   }
 
-  for( itPatch = selectedPatches.begin(); itPatch != selectedPatches.end();
-       ++itPatch ) {
-//    cout << "PATCH: " << (*itPatch)->name() << endl;
-    list<PMPackagePtr> packages = (*itPatch)->packages();
-    list<PMPackagePtr>::const_iterator itPkg;
-    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      Pathname rpmPath = patchPaths->rpmPath( *itPkg );
-//      cout << "  RPM: " << (*itPkg)->name() << ": " << rpmPath.asString() << endl;
-      error = media.provideFile( rpmPath );
-      if ( error ) {
-        cerr << "Error downloading RPM '" << (*itPkg)->name() << "' from '"
-             << patchPaths->patchUrl() << "/" << rpmPath << "'" << endl;
-        exit( 1 );
-      }
-    }
+  error = you.installPatches();
+  if ( error ) {
+    cerr << "Error installing packages: " << error << endl;
+    exit( 1 );
   }
-
-
-  // Install packages.
-
-  for( itPatch = selectedPatches.begin(); itPatch != selectedPatches.end();
-       ++itPatch ) {
-    cout << "INSTALL: " << (*itPatch)->name() << endl;
-    list<PMPackagePtr> packages = (*itPatch)->packages();
-    list<PMPackagePtr>::const_iterator itPkg;
-    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      cout << "  rpm -i --force --nodeps "
-           << media.localPath( patchPaths->rpmPath( *itPkg ) ) << endl;
-    }
-  }
-
 
   MIL << "END" << endl;
   return 0;

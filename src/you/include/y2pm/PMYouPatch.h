@@ -87,12 +87,12 @@ class PMYouPatch : virtual public Rep, public PMObject {
      * Definitions for the kind of the patch.
      */
     enum Kind {
-      kind_invalid,
-      kind_security,
-      kind_recommended,
-      kind_optional,
-      kind_document,
-      kind_yast
+      kind_invalid = 0,
+      kind_security = 1,
+      kind_recommended = 2,
+      kind_optional = 4,
+      kind_document = 8,
+      kind_yast = 16
     };
     /**
      * Set kind attribute.

@@ -35,13 +35,16 @@
 #include <y2pm/PMYouPatchTags.h>
 #include <y2pm/PMYouPatchPaths.h>
 
+#include <y2pm/PMYouPatchInfoPtr.h>
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMYouPatchInfo
 /**
  * Patch information.
  **/
-class PMYouPatchInfo {
+class PMYouPatchInfo : virtual public Rep {
+  REP_BODY(PMYouPatchInfo);
 
   public:
     /**
@@ -62,7 +65,7 @@ class PMYouPatchInfo {
      * @param paths   Object holding the path location information.
      * @param patches List of patch objects where the results are stored.
      **/
-    PMError getPatches( PMYouPatchPaths *paths,
+    PMError getPatches( PMYouPatchPathsPtr paths,
                         std::list<PMYouPatchPtr> &patches );
     
     /**
@@ -108,7 +111,7 @@ class PMYouPatchInfo {
 
     PMYouPackageDataProviderPtr _packageProvider;
 
-    PMYouPatchPaths *_paths;
+    PMYouPatchPathsPtr _paths;
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -71,21 +71,21 @@ int main( int argc, char **argv )
     return 0;
   }
 
-  PMYouPatchInfo patchInfo( "german" );
+  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( "german" );
   list<PMYouPatchPtr> patches;
 
   PMError error;
 
   if ( readFile ) {
-    error = patchInfo.readFile( "", readFile, patches );
+    error = patchInfo->readFile( "", readFile, patches );
   } else {
     string patchPath =
         "/build/yast2-cvs/yast2/source/packagemanager/testsuite/patches/";
 
 #if 0
-    PMYouPatchPaths *paths = new PMYouPatchPaths( "eMail-Server", "3.1", "i386" );
+    PMYouPatchPathsPtr paths = new PMYouPatchPaths( "eMail-Server", "3.1", "i386" );
 #else
-    PMYouPatchPaths *paths = new PMYouPatchPaths( "Dummy", "1.0", "i386" );
+    PMYouPatchPathsPtr paths = new PMYouPatchPaths( "Dummy", "1.0", "i386" );
 #endif
 
 #if 0
@@ -95,7 +95,7 @@ int main( int argc, char **argv )
     paths->setPatchUrl( Url( "http://localhost/you/" ) );
 #endif
 
-    PMError error = patchInfo.getPatches( paths, patches );
+    PMError error = patchInfo->getPatches( paths, patches );
     if ( error != PMError::E_ok ) {
       cerr << error << endl;
       exit( 1 );
