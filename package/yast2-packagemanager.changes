@@ -1,4 +1,22 @@
 -------------------------------------------------------------------
+Thu Sep  5 20:15:35 CEST 2002 - kkaempf@suse.de
+
+- added update (ma@suse.de)
+- added package backup (lnussel@suse.de)
+- added rebuilddb progress (lnussel@suse.de)
+- added rebuilddb progress callback (lnussel@suse.de, kkaempf@suse.de)
+- fallback to ".default" locale (#18763) 
+- use solver for selection dependencies
+- implement size differ to take deleted packages into account
+  (lnussel@suse.de)
+- provisions for source package install
+- properly init locale from LANG
+- online update enhancements (cschum@suse.de)
+- report wget errors properly
+
+- 2.6.6
+
+-------------------------------------------------------------------
 Thu Sep  5 16:31:48 CEST 2002 - kkaempf@suse.de
 
 - fallback i686->i586 if cx8/cmov are missing. (#18885)
@@ -6,7 +24,7 @@ Thu Sep  5 16:31:48 CEST 2002 - kkaempf@suse.de
 -------------------------------------------------------------------
 Thu Sep  5 14:18:27 CEST 2002 - kkaempf@suse.de
 
-- dont changes maps while iterating
+- dont change maps while iterating
 - 2.6.5 + diff
 
 -------------------------------------------------------------------
