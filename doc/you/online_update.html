@@ -6,7 +6,8 @@
 <body bgcolor="white">
 <h1>YaST Online Update</h1>
 
-<em>This document applies to the online update of SuSE Linux 8.1.</em>
+<em>Where not otherwise mentioned this document applies to the online update of
+SuSE Linux 8.1/SLES 8.</em>
 
 <h2>Overview</h2>
 <p>The online update has a patch structure. Each patch has a patch description
@@ -35,7 +36,13 @@ script).
 <h4>Download URLs</h4>
 
 <p>The download base URLs are determined by reading a list of URLs from the URL
-<tt>http://www.suse.de/cgi-bin/suseservers.cgi</tt>. The list is stored locally at
+<tt>http://www.suse.de/cgi-bin/suseservers.cgi</tt> by default. This URL can be overridden
+by a product-specific URL by the creator of the product (see media specification). In a
+running system the URL used for getting the list of YOU servers is saved in the file
+<tt>/var/adm/YaST/ProdDB/prod_00000001</tt> or in the file with the highest number, if there
+is more than one.</p>
+
+<p>The list is stored locally at
 <tt>/etc/suseservers</tt>. If the variable <tt>YAST2_LOADFTPSERVER</tt> in the file
 <tt>/etc/sysconfig/onlineupdate</tt> is set to <tt>no</tt>, the server isn't contacted and
 the download base URLs are read from the local file <tt>/etc/suseservers</tt>.</p>
@@ -317,7 +324,7 @@ Segakcap:
   <td>PatchRpmSize</td>
   <td>two integers separated by a space</td>
   <td>The first number is the size of the installed package in bytes, the second
-  number is the size of the patch RPM archive file.</td>
+  number is the size of the patch RPM archive file.<br><em>Since 8.2</em></td>
 </tr>
 <tr>
   <td>PatchRpmBasedOn</td>
