@@ -62,6 +62,7 @@ class PMPackageDataProvider : virtual public Rep {
     static std::list<std::string> insnotify()   { return std::list<std::string>(); }
     static std::list<std::string> delnotify()   { return std::list<std::string>(); }
     static FSize                  size()        { return FSize(0); }
+    static bool                   providesSources() { return false; }
 
     // PMPackage attributes
     static std::list<std::string> splitprovides() { return std::list<std::string>(); }
@@ -95,7 +96,9 @@ class PMPackageDataProvider : virtual public Rep {
 
     static bool isRemote()			{ return false; }
     // physical access to the rpm file.
-    static PMError providePkgToInstall(Pathname& path_r) { return PMError::E_ok; }
+    static PMError providePkgToInstall(Pathname& path_r) { path_r = Pathname(); return 1; }
+    // physical access to the src.rpm file.
+    static PMError provideSrcPkgToInstall(Pathname& path_r) { path_r = Pathname(); return 1; }
 
   protected:
 
@@ -120,6 +123,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::list<std::string> insnotify   ( const PMPackage & pkg_r ) const { return insnotify(); }
     virtual std::list<std::string> delnotify   ( const PMPackage & pkg_r ) const { return delnotify(); }
     virtual FSize                  size        ( const PMPackage & pkg_r ) const { return size(); }
+    virtual bool                   providesSources( const PMPackage & pkg_r ) const { return providesSources(); }
 
     // PMPackage attributes
     virtual std::list<std::string> splitprovides( const PMPackage & pkg_r ) const { return splitprovides(); }
@@ -155,6 +159,8 @@ class PMPackageDataProvider : virtual public Rep {
     virtual bool		   isRemote    ( const PMPackage & pkg_r ) const { return isRemote(); }
     // physical access to the rpm file.
     virtual PMError providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return providePkgToInstall(path_r); }
+    // physical access to the src.rpm file.
+    virtual PMError provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return provideSrcPkgToInstall(path_r); }
 };
 
 ///////////////////////////////////////////////////////////////////

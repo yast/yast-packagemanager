@@ -607,6 +607,39 @@ bool PMSelectable::set_status( const UI_Status state_r )
   return ret;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::providesSources
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::providesSources() const
+{
+  return candidateObj() && candidateObj()->providesSources();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::set_source_install
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::set_source_install( const bool install_r )
+{
+  if ( install_r == source_install() )
+    return true;
+
+  if ( !install_r )
+    return _state.user_clr_srcins( true );
+
+  // install
+  return( providesSources() && _state.user_set_srcins( true ) );
+}
+
 /******************************************************************
 **
 **

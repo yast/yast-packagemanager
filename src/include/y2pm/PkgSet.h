@@ -62,8 +62,10 @@ class PkgSet {
 //	PkgSet( PackageDataProvider* provider );
 	~PkgSet();
 	// default copy constructor and assigment are ok
-	//
-	bool empty() { return contents.empty(); }
+
+	bool empty() const { return contents.empty(); }
+
+	unsigned size() const { return contents.size(); }
 
 	/** Adds a package to the set. If force is false, the package is added
 	 * only if no equal or newer edition is already member of the set.

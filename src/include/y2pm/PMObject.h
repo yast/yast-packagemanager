@@ -56,11 +56,12 @@ class PMObject : virtual public Rep, public PMSolvable {
      * no data a concrete Object could provide, call PMObjects default
      * implementation.
      **/
-    virtual std::string            summary()     const = 0;
-    virtual std::list<std::string> description() const = 0;
-    virtual std::list<std::string> insnotify()   const = 0;
-    virtual std::list<std::string> delnotify()   const = 0;
-    virtual FSize                  size()        const = 0;
+    virtual std::string            summary()         const = 0;
+    virtual std::list<std::string> description()     const = 0;
+    virtual std::list<std::string> insnotify()       const = 0;
+    virtual std::list<std::string> delnotify()       const = 0;
+    virtual FSize                  size()            const = 0;
+    virtual bool                   providesSources() const { return false; }
 
   public:
 

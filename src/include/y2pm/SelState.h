@@ -50,10 +50,11 @@ class SelState {
     static const bits B_BY_USER  = 0x10; // modification requested by user
     static const bits B_BY_APPL  = 0x20; // modification requested by application
 
-    //static const bits B_UNUSED  = 0x40;
-
-    static const bits B_F_TABOO  = 0x80; // In absence of installed object
+    static const bits B_F_TABOO  = 0x40; // In absence of installed object
                                          // forbid to install candidate object
+
+    static const bits B_F_SRCINS = 0x80; // Installation of sources desired
+
 
     static const bits M_IS = B_IS_I | B_IS_C;
 
@@ -156,6 +157,11 @@ class SelState {
      **/
     bool is_taboo()      const { return( _bits & B_F_TABOO ); }
 
+    /**
+     * True if install sources flag is set.
+     **/
+    bool is_srcins()     const { return( _bits & B_F_SRCINS ); }
+
   public:
 
     /**
@@ -184,6 +190,16 @@ class SelState {
      * Clear taboo flag.
      **/
     bool user_clr_taboo( const bool doit );
+
+    /**
+     * Set install sources flag.
+     **/
+    bool user_set_srcins( const bool doit );
+
+    /**
+     * Clear install sources flag.
+     **/
+    bool user_clr_srcins( const bool doit );
 
   public:
 

@@ -46,11 +46,12 @@ class PMPackage : virtual public Rep, public PMObject {
      * PMObject attributes that should be realized by each concrete Object.
      * @see PMObject
      **/
-    virtual std::string            summary()     const;
-    virtual std::list<std::string> description() const;
-    virtual std::list<std::string> insnotify()   const;
-    virtual std::list<std::string> delnotify()   const;
-    virtual FSize                  size()        const;
+    virtual std::string            summary()         const;
+    virtual std::list<std::string> description()     const;
+    virtual std::list<std::string> insnotify()       const;
+    virtual std::list<std::string> delnotify()       const;
+    virtual FSize                  size()            const;
+    virtual bool                   providesSources() const;
 
     /**
      * PMPackage attributes passed off to PMPackageDataProvider
@@ -95,6 +96,8 @@ class PMPackage : virtual public Rep, public PMObject {
 
     // physical access to the rpm file.
     PMError providePkgToInstall(Pathname&) const;
+    // physical access to the src.rpm file.
+    PMError provideSrcPkgToInstall(Pathname&) const;
 
   protected:
 
