@@ -60,6 +60,7 @@ class PMSelection : virtual public Rep, public PMObject {
 	const std::list<std::string> description() const;
 	const std::list<std::string> insnotify() const;
 	const std::list<std::string> delnotify() const;
+	const FSize size() const;
 
     /**
      * Get attribute name as string.

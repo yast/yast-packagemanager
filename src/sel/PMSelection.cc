@@ -62,6 +62,8 @@ const std::list<std::string>
 PMSelection::insnotify() const { return _dataProvider->insnotify(); }
 const std::list<std::string>
 PMSelection::delnotify() const { return _dataProvider->delnotify(); }
+const FSize
+PMSelection::size() const { return _dataProvider->size(); }
 
 
 ///////////////////////////////////////////////////////////////////

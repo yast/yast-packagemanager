@@ -24,8 +24,8 @@
 #include <iosfwd>
 #include <string>
 
-//#include <y2util/Date.h>
-//#include <y2util/FSize.h>
+#include <y2util/Date.h>
+#include <y2util/FSize.h>
 
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
@@ -82,11 +82,12 @@ class PMPackage : virtual public Rep, public PMObject {
 	const std::list<std::string> description() const;
 	const std::list<std::string> insnotify() const;
 	const std::list<std::string> delnotify() const;
+	const FSize size() const;
 
 	// PMPackage functions come here
-	const long buildtime() const;
+	const Date buildtime() const;
 	const std::string buildhost() const;
-	const long installtime() const;
+	const Date installtime() const;
 	const std::string distribution() const;
 	const std::string vendor() const;
 	const std::string license() const;
@@ -100,7 +101,7 @@ class PMPackage : virtual public Rep, public PMObject {
 	const std::list<std::string> preun() const;
 	const std::list<std::string> postun() const;
 	const std::string sourcerpm() const;
-	const long archivesize() const;
+	const FSize archivesize() const;
 	const std::list<std::string> authors() const;
 	const std::list<std::string> filenames() const;
 	// suse packages values

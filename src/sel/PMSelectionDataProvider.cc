@@ -82,3 +82,9 @@ PMSelectionDataProvider::delnotify() const
     return std::list<std::string>();
 }
 
+const FSize
+PMSelectionDataProvider::size() const
+{
+    return FSize(0);
+}
+

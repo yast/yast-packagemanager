@@ -24,6 +24,7 @@
 #include <iosfwd>
 #include <string>
 
+#include <y2util/FSize.h>
 #include <y2pm/PMSelectionDataProviderPtr.h>
 #include <y2pm/PMDataProvider.h>
 
@@ -55,6 +56,7 @@ class PMSelectionDataProvider : virtual public Rep, public PMDataProvider  {
 	const std::list<std::string> description() const;
 	const std::list<std::string> insnotify() const;
 	const std::list<std::string> delnotify() const;
+	const FSize size() const;
 
     /**
      * Selection attribute retrieval.

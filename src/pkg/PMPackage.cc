@@ -68,12 +68,14 @@ const std::list<std::string>
 PMPackage::insnotify() const { return _dataProvider->insnotify(); }
 const std::list<std::string>
 PMPackage::delnotify() const { return _dataProvider->delnotify(); }
+const FSize
+PMPackage::size () const { return _dataProvider->size(); }
 
-const long
+const Date
 PMPackage::buildtime() const { return _dataProvider->buildtime(); }
 const std::string
 PMPackage::buildhost() const { return _dataProvider->buildhost(); }
-const long
+const Date
 PMPackage::installtime() const { return _dataProvider->installtime(); }
 const std::string
 PMPackage::distribution() const { return _dataProvider->distribution(); }
@@ -101,7 +103,7 @@ const std::list<std::string>
 PMPackage::postun() const { return _dataProvider->postun(); }
 const std::string
 PMPackage::sourcerpm() const { return _dataProvider->sourcerpm(); }
-const long
+const FSize
 PMPackage::archivesize() const { return _dataProvider->archivesize(); }
 const std::list<std::string>
 PMPackage::authors() const { return _dataProvider->authors(); }
