@@ -109,40 +109,7 @@ class InstSrcData: virtual public Rep, public InstData {
      **/
     virtual void withdrawObjects();
 
-    //--------------------------------------------------------------------
-    // InstData interface  
-
-    //-----------------------------
-    // cache file handling
-    /**
-     * write media content data to cache file
-     * @param pathname of corresponding InstSrcDescr cache file
-     * @return pathname of written cache
-     * writes content cache data to an ascii file
-     */
-    virtual const Pathname writeCache (const Pathname &descrpathname);
-
   public:
-
-    /**
-     * generate PMSelection objects for each selection on the source
-     * @return list of PMSelectionPtr on this source
-     */
-    virtual const std::list<PMSelectionPtr>& getSelections (void) const = 0;
-
-    /**
-     * generate PMPackage objects for each Item on the source/target
-     * @return list of PMPackagePtr on this source
-     * */
-    virtual const std::list<PMPackagePtr>& getPackages (void) const = 0;
-
-    /**
-     * generate PMSolvable objects for each patch on the source
-     * @return list of PMSolvablePtr on this source
-     */
-    virtual const std::list<PMYouPatchPtr>& getPatches (void) const = 0;
-
-    virtual std::ostream & dumpOn( std::ostream & str ) const;
 
     /**
      * Any concrete InstSrcData must realize this, as it knows the expected
