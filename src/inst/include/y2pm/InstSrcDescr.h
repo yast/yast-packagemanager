@@ -61,7 +61,7 @@ class InstSrcDescr : virtual public Rep {
      **/
     typedef InstSrcError Error;
 
-    typedef std::map<PkgArch,std::list<Pathname> > ArchMap;
+    typedef std::map<std::string,std::list<Pathname> >  ArchMap;
     typedef std::map<LangCode,std::string>         LabelMap;
     typedef std::list<LangCode>                    LinguasList;
 
@@ -115,7 +115,7 @@ class InstSrcDescr : virtual public Rep {
     /**
      * Should Instsrc be activated by default.
      **/
-    bool _default_acitivate;
+    bool _default_activate;
 
     ///////////////////////////////////////////////////////////////////
     // media file ( _url / media.N / media )
@@ -134,7 +134,7 @@ class InstSrcDescr : virtual public Rep {
     std::string _content_vendor;
 
 
-    PkgArch _content_defaultarch;
+    std::string _content_defaultbase;
     ArchMap _content_archmap;
 
     PkgRelation _content_requires;
@@ -167,7 +167,7 @@ class InstSrcDescr : virtual public Rep {
     InstSrc::Type        type()                const { return _type; }
     const Url &          url()                 const { return _url; }
     const Pathname &     product_dir()         const { return _product_dir; }
-    bool                 default_acitivate()   const { return _default_acitivate; }
+    bool                 default_activate()    const { return _default_activate; }
 
     const std::string &  media_vendor()        const { return _media_vendor; }
     const std::string &  media_id()            const { return _media_id; }
@@ -176,7 +176,7 @@ class InstSrcDescr : virtual public Rep {
     const PkgNameEd &    content_product()     const { return _content_product; }
     const PkgNameEd &    content_baseproduct() const { return _content_baseproduct; }
     const std::string &  content_vendor()      const { return _content_vendor; }
-    const PkgArch &      content_defaultarch() const { return _content_defaultarch; }
+    const std::string &  content_defaultbase() const { return _content_defaultbase; }
     const ArchMap &      content_archmap()     const { return _content_archmap; }
     const PkgRelation &  content_requires()    const { return _content_requires; }
     const LangCode &     content_language()    const { return _content_language; }
@@ -197,7 +197,7 @@ class InstSrcDescr : virtual public Rep {
     void set_type( InstSrc::Type val_r )                    { _type = val_r; }
     void set_url( const Url & val_r )                       { _url = val_r; }
     void set_product_dir( const Pathname & val_r )          { _product_dir = val_r; }
-    void set_default_acitivate( bool val_r )                { _default_acitivate = val_r; }
+    void set_default_activate( bool val_r )                 { _default_activate = val_r; }
 
     void set_media_vendor( const std::string & val_r )      { _media_vendor = val_r; }
     void set_media_id( const std::string & val_r )          { _media_id = val_r; }
@@ -206,7 +206,7 @@ class InstSrcDescr : virtual public Rep {
     void set_content_product( const PkgNameEd & val_r )     { _content_product = val_r; }
     void set_content_baseproduct( const PkgNameEd & val_r ) { _content_baseproduct = val_r; }
     void set_content_vendor( const std::string & val_r )    { _content_vendor = val_r; }
-    void set_content_defaultarch( const PkgArch & val_r )   { _content_defaultarch = val_r; }
+    void set_content_defaultbase ( const std::string & val_r ) { _content_defaultbase = val_r; }
     void set_content_archmap( const ArchMap & val_r )       { _content_archmap = val_r; }
     void set_content_requires( const PkgRelation & val_r )  { _content_requires = val_r; }
     void set_content_language(const LangCode & val_r )      { _content_language = val_r; }
