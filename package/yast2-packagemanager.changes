@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Feb 25 17:16:44 CET 2004 - gs@suse.de
+
+- SLP support added to PMYouServers 
+
+-------------------------------------------------------------------
 Wed Feb 25 12:45:45 CET 2004 - ma@suse.de
 
 - Dropped man-made restrictions when creating new InstSrces.
