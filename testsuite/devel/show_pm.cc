@@ -139,16 +139,23 @@ show_pmobject (PMObjectPtr p, bool only_cached)
 void
 show_pmpackage (PMPackagePtr p, bool only_cached)
 {
-    cout << "-- Package --" << endl;
-
     if (!p)
 	return;
 
     show_pmobject ((PMObjectPtr)p, only_cached);
 
-//    cout << "Splitprovides: " << strlist2string(p->splitprovides(), "\n") << endl;
-#warning splitprovides
-    cout << "Splitprovides: " << "***FIXME***" << endl;
+    cout << "-- Package --" << endl;
+
+    cout << "Splitprovides: ";
+    {
+	PkgSplitSet sps = p->splitprovides();
+	for (PkgSplitSet::iterator it = sps.begin(); it != sps.end(); ++it)
+	{
+	    if(it!= sps.begin()) cout << ' ';
+	    cout << *it;
+	}
+	cout << endl;
+    }
     cout << "Buildtime: " << p->buildtime() << endl;
     cout << "Group: " << p->group() << endl;
 
