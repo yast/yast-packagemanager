@@ -24,6 +24,7 @@
 #include <iosfwd>
 
 #include <y2pm/PMCallbacks.h>
+#include <y2pm/InstSrcPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 namespace InstSrcManagerCallbacks {
@@ -45,7 +46,8 @@ namespace InstSrcManagerCallbacks {
      * - found media number (0 == none)
      * return "": retry, "S": skip, "C" cancel, "I" ignore, "E" eject, else new url
      **/
-    virtual std::string changeMedia( const std::string & error,
+    virtual std::string changeMedia( constInstSrcPtr instSrc,
+				     const std::string & error,
 				     const std::string & url,
 				     const std::string & product,
 				     int expected,
@@ -56,12 +58,14 @@ namespace InstSrcManagerCallbacks {
     virtual bool isSet() {
       return MediaChangeCallback::isSet();
     }
-    virtual std::string changeMedia( const std::string & error,
+    virtual std::string changeMedia( constInstSrcPtr instSrc,
+				     const std::string & error,
 				     const std::string & url,
 				     const std::string & product,
 				     int expected,
 				     int current ) {
-      return MediaChangeCallback::changeMedia( error, url, product,
+      return MediaChangeCallback::changeMedia( instSrc,
+					       error, url, product,
 					       expected, current );
     }
   };

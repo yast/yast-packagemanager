@@ -128,9 +128,10 @@ class InstSrcDescr : virtual public Rep {
     // media file ( _url / media.N / media )
     ///////////////////////////////////////////////////////////////////
 
-    Vendor      _media_vendor;		//
+    Vendor      _media_vendor;		// media vendor
     std::string _media_id;		// ID code for media match
-    unsigned    _media_count;		//
+    unsigned    _media_count;		// total number if is split up on multiple media
+    bool        _media_doublesided;     // true if doublesided media
 
     ///////////////////////////////////////////////////////////////////
     // content file ( _url / _product_dir / content )
@@ -188,6 +189,7 @@ class InstSrcDescr : virtual public Rep {
     const Vendor &       media_vendor()        const { return _media_vendor; }
     const std::string &  media_id()            const { return _media_id; }
     const unsigned &     media_count()         const { return _media_count; }
+    bool                 media_doublesided()   const { return _media_doublesided; }
 
     const PkgNameEd &    content_product()     const { return _content_product; }
     const PkgNameEd &    content_distproduct() const { return _content_distproduct; }
@@ -244,6 +246,7 @@ class InstSrcDescr : virtual public Rep {
     void set_media_vendor( const Vendor & val_r )             { _media_vendor = val_r; }
     void set_media_id( const std::string & val_r )            { _media_id = val_r; }
     void set_media_count( unsigned val_r )                    { _media_count = val_r; }
+    void set_media_doublesided( bool val_r )                  { _media_doublesided = val_r; }
 
     void set_content_product( const PkgNameEd & val_r )       { _content_product = val_r; }
     void set_content_distproduct( const PkgNameEd & val_r )   { _content_distproduct = val_r; }

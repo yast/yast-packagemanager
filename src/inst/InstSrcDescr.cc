@@ -64,6 +64,7 @@ InstSrcDescr::InstSrcDescr()
     , _default_activate   ( true )
     , _default_rank       ( NO_RANK )
     , _media_count        ( 0 )
+    , _media_doublesided  ( false )
     , _content_product    ( PkgName(), PkgEdition() )
     , _content_distproduct( PkgName(), PkgEdition() )
     , _content_baseproduct( PkgName(), PkgEdition() )
@@ -186,6 +187,8 @@ static const std::string YouUrlTag	= "YouUrl";
 static const std::string YouTypeTag	= "YouType";
 static const std::string YouPathTag	= "YouPath";
 
+static const std::string FlagMediaDoublesided( "doublesided" );
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -206,6 +209,9 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   str << _media_vendor << endl;
   str << _media_id << endl;
   str << _media_count << endl;
+  if ( _media_doublesided ) {
+    str << FlagMediaDoublesided << endl;
+  }
   str << "-" << MediaTag << ":" << endl;
 
   // product data from content file
@@ -421,10 +427,16 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     if ( multi.size() >= 3 )
     {
 	std::list<std::string>::iterator multi_pos = multi.begin();
-	//  only check if ( !(*multi_pos).empty() ) if an empty string is an error
-	ndescr->set_media_vendor( Vendor(*multi_pos++) );
-	ndescr->set_media_id( *multi_pos++ );
+	// only check if ( !(*multi_pos).empty() ) if an empty string is an error
+	ndescr->set_media_vendor( Vendor(*multi_pos) );
+	++multi_pos;
+	ndescr->set_media_id(*multi_pos);
+	++multi_pos;
 	ndescr->set_media_count( atoi(multi_pos->c_str()) );
+	if ( multi.size() > 3 ) {
+	  ++multi_pos;
+	  ndescr->set_media_doublesided( *multi_pos == FlagMediaDoublesided );
+	}
     }
 
     ndescr->set_url( Url (GET_STRING(URL) ));
