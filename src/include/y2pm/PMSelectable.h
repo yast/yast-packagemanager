@@ -26,6 +26,7 @@
 
 #include <y2pm/SelState.h>
 #include <y2pm/PkgName.h>
+#include <y2pm/PkgArch.h>
 #include <y2pm/PMObjectPtr.h>
 
 ///////////////////////////////////////////////////////////////////
@@ -167,15 +168,16 @@ class PMSelectable : virtual public Rep {
     }
 
     /**
+     * Find candidate matching arch
+     * May be NULL, if no candidate for given arch is available.
+     **/
+    PMObjectPtr archCandidate (const PkgArch& arch) const;
+
+    /**
      * Best among the availableObjs() Determined by ranking.
      * May be NULL, if no available is better than the installed.
      **/
-    PMObjectPtr autoCandidate() const {
-      // PRELIMINARILY:
-      if ( availableObjs() )
-	return *av_begin();
-      return PMObjectPtr();
-    }
+    PMObjectPtr autoCandidate() const;
 
     /**
      * One among the availableObjs() explicitly requested by user.
