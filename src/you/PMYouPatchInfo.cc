@@ -99,7 +99,7 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
 
   PkgEdition edition( version, release );
 
-  PMPackagePtr pkg( new PMPackage( name, edition, _paths->arch(),
+  PMPackagePtr pkg( new PMPackage( name, edition, _paths->baseArch(),
                                    _packageProvider ) );
   patch->addPackage( pkg );
 
@@ -267,7 +267,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     // ma: NULL PMYouPatchDataProviderPtr provided to be able to compile.
     // Finaly we should make shure that there is one, or we don't need it at all.
     PMYouPatchPtr p( new PMYouPatch( PkgName( name ), PkgEdition( version ),
-                                     _paths->arch(),
+                                     _paths->baseArch(),
 				     PMYouPatchDataProviderPtr() ) );
 
     string value = tagValue( YOUPatchTagSet::KIND );
