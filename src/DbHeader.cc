@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <unistd.h>
+#include <errno.h>
 
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PMPackage.h>
