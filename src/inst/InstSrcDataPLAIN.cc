@@ -270,13 +270,17 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   ndescr_r = 0;
   PMError err;
 
+  PathInfo cpath;
+
+  // FIXME: indentation
+  if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() ) {
   ///////////////////////////////////////////////////////////////////
   // Check local cache
   ///////////////////////////////////////////////////////////////////
 
   Pathname cdir( source_r->cache_data_dir() );
 
-  PathInfo cpath( cdir );
+  cpath( cdir );
   if ( !cpath.isDir() ) {
     WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
     return Error::E_src_cache_disabled;
@@ -349,6 +353,17 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     MIL << "Created cache for " << res << " packages found." << endl;
   }
 
+  }
+  else
+  {
+    PMError err = media_r->provideFile( "IS_PLAINcache" );
+    if ( err ) {
+	ERR << "Media can't provide 'IS_PLAINcache' " << err << endl;
+	return err;
+    }
+    cpath = media_r->localPath("IS_PLAINcache");
+  }
+
   ///////////////////////////////////////////////////////////////////
   // looks good? So create descr.
   ///////////////////////////////////////////////////////////////////
@@ -389,6 +404,7 @@ PMError InstSrcDataPLAIN::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr
 {
   ndata_r = 0;
   PMError err;
+  PathInfo cpath;
 
   ///////////////////////////////////////////////////////////////////
   // Check local cache
@@ -396,7 +412,9 @@ PMError InstSrcDataPLAIN::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr
 
   Pathname cdir( source_r->cache_data_dir() );
 
-  PathInfo cpath( cdir );
+  if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() ) {
+
+  cpath( cdir );
   if ( !cpath.isDir() ) {
     WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
     return Error::E_src_cache_disabled;
@@ -410,6 +428,12 @@ PMError InstSrcDataPLAIN::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr
     if ( !cpath.isFile() ) {
       WAR << "No cachefile " << cpath << endl;
     }
+  }
+
+  }
+  else
+  {
+    cpath = source_r->media()->localPath("IS_PLAINcache");
   }
 
   if ( !cpath.isFile() ) {

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Mar 27 14:16:30 CET 2004 - lnussel@suse.de
+
+- add patch for uncached plain sources again. This time really only plain
+  sources are affected.
+
+-------------------------------------------------------------------
 Thu Mar 25 18:03:23 CET 2004 - cschum@suse.de
 
 - Disable standard media callbacks in YOU.
