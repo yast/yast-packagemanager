@@ -78,29 +78,53 @@ PMError MediaSMB::attachTo(bool next)
     path += _url.host();
     path += _url.path();
 
-    string options = _url.option("mountoptions");
+    Mount::Options options( _url.option("mountoptions") );
     string username = _url.username();
     string password = _url.password();
-    // need to add guest to prevent smbmount from asking for password
-    if(options.empty())
-    {
-	options="ro,guest";
-    }
-    else if ( password.empty()
-	    && options.find("guest") == string::npos
-	    && options.find("credentials") == string::npos
-	    && options.find("password") == string::npos )
-    {
-	options += ",guest";
+
+    options["guest"]; // prevent smbmount from asking for password
+
+    if ( ! options.has( "rw" ) ) {
+      options["ro"];
     }
 
-    if(!username.empty())
-	options += ",username=" + username;
+    Mount::Options::iterator toEnv;
 
-    if(!password.empty())
-	options += ",password=" + password;
+    // extract 'username', do not overwrite any _url.username
+    toEnv = options.find("username");
+    if ( toEnv != options.end() ) {
+      if ( username.empty() )
+	username = toEnv->second;
+      options.erase( toEnv );
+    }
+    toEnv = options.find("user"); // actually cifs specific
+    if ( toEnv != options.end() ) {
+      if ( username.empty() )
+	username = toEnv->second;
+      options.erase( toEnv );
+    }
 
-    ret = mount.mount(path,mountpoint,filesystem,options);
+    // extract 'password', do not overwrite any _url.password
+    toEnv = options.find("password");
+    if ( toEnv != options.end() ) {
+      if ( password.empty() )
+	password = toEnv->second;
+      options.erase( toEnv );
+    }
+    toEnv = options.find("pass"); // actually cifs specific
+    if ( toEnv != options.end() ) {
+      if ( password.empty() )
+	password = toEnv->second;
+      options.erase( toEnv );
+    }
+
+    // pass 'username' and 'password' via environment
+    Mount::Environment environment;
+    environment["USER"] = username;
+    environment["PASSWD"] = password;
+
+    ret = mount.mount( path, mountpoint, filesystem,
+		       options.asString(), environment );
     if(ret != Error::E_ok)
     {
 	return ret;
