@@ -30,8 +30,8 @@
 
 #include <y2pm/PMObject.h>
 
-class PkgDu;
 class PkgDuMaster;
+class PkgDuSlave;
 class YStringTree;
 
 ///////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ class PMPackage : virtual public Rep, public PMObject {
 
   private:
 
-    PkgDu & _pkgdu;
+    PkgDuSlave & _pkgdu;
 
   public:
 
@@ -105,7 +105,7 @@ class PMPackage : virtual public Rep, public PMObject {
     std::list<std::string> keywords()     const;
 
     // from packages.DU
-    std::list<std::string> du()		  const;
+    void du( PkgDu & dudata_r )		  const;
 
     // YOU attributes
     std::string            externalUrl()  const;

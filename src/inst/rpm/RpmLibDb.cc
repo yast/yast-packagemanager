@@ -270,7 +270,6 @@ PMError RpmLibDb::dbOpen()
     return _dbOpenError;
   }
 
-  M__ << *this << " dbOpen " << _dbOpenError << endl;
   return _dbOpenError; // is Error::E_ok
 }
 
@@ -289,7 +288,6 @@ PMError RpmLibDb::dbClose()
     _db = 0;
     if ( !_dbOpenError )
       _dbOpenError = Error::E_RpmLib_db_not_open;
-    M__ << *this << " dbClose " << Error::E_ok << endl;
   }
   return Error::E_ok;
 }

@@ -161,7 +161,6 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual std::string            location    ( const PMPackage & pkg_r ) const;
 	virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const;
 	virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const;
-	virtual std::list<std::string> du	   ( const PMPackage & pkg_r ) const;
 
 	virtual bool			isRemote   ( const PMPackage & pkg_r ) const;
 	// physical access to the rpm file.
@@ -169,6 +168,9 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual PMError provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const;
 	// source pointer
 	virtual constInstSrcPtr		source ( const PMPackage & pkg_r ) const { return _source; }
+
+        // dudata is special
+        virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const;
 };
 
 ///////////////////////////////////////////////////////////////////

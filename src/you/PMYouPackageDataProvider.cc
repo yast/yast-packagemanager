@@ -182,26 +182,9 @@ void PMYouPackageDataProvider::setPatchRpmSize( const PMPackagePtr &pkg, const F
   _patchRpmSizes[ pkg ] = size;
 }
 
-list<string> PMYouPackageDataProvider::du ( const PMPackage & pkg_r ) const
-{
-  FSize size = pkg_r.archivesize();
-
-  long long kbyte = size( FSize::K );
-
-  D__ << "Package: " << pkg_r.summary() << " KByte: " << kbyte << endl;
-
-  string kbyteStr = stringutil::numstring( kbyte );
-
-  D__ << "kbyteStr: " << kbyteStr << endl;
-
-  list<string> du;
-
-  du.push_back( "/ 0 " + kbyteStr + " 0 1" );
-  du.push_back( "var/ 0 " + kbyteStr + " 0 1" );
-  du.push_back( "var/lib/ 0 " + kbyteStr + " 0 1" );
-  du.push_back( "var/lib/YaST2/ 0 " + kbyteStr + " 0 1" );
-  du.push_back( "var/lib/YaST2/you/ 0 " + kbyteStr + " 0 1" );
-  du.push_back( "var/lib/YaST2/you/mnt/ " + kbyteStr + " 0 1 0" );
-
-  return du;
+void PMYouPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) const {
+  dudata_r.clear();
+  dudata_r.add( "/var/lib/YaST2/you/mnt/", pkg_r.archivesize().fullBlock(), 1 );
+  D__ << "Package: " << pkg_r.summary() << dudata_r << endl;
 }
+

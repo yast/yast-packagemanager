@@ -23,6 +23,7 @@
 
 #include <y2pm/PMPackageDataProvider.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/PkgDu.h>
 
 using namespace std;
 
@@ -57,3 +58,17 @@ PMPackageDataProvider::PMPackageDataProvider()
 PMPackageDataProvider::~PMPackageDataProvider()
 {
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageDataProvider::du
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMPackageDataProvider::du( PkgDu & dudata_r )
+{
+  dudata_r.clear();
+}
+

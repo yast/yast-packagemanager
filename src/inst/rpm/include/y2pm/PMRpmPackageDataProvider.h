@@ -113,8 +113,8 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
     virtual std::list<std::string> postun      ( const PMPackage & pkg_r ) const;
     virtual std::list<std::string> filenames   ( const PMPackage & pkg_r ) const;
 
-    // suse packages values
-    virtual std::list<std::string> du          ( const PMPackage & pkg_r ) const;
+    // dudata is special
+    virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const;
 };
 
 #endif // PMRpmPackageDataProvider_h

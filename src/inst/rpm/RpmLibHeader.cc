@@ -22,10 +22,14 @@
 #include "RpmLib.h"
 
 #include <iostream>
+#include <map>
+#include <set>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/PathInfo.h>
 
 #include <y2pm/RpmLibHeader.h>
+#include <y2pm/PkgDu.h>
 
 using namespace std;
 
@@ -119,35 +123,6 @@ class RpmLibHeader::intList {
 };
 
 ///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : RpmLibHeader::Changelog
-//
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibHeader::Changelog::asStringList
-//	METHOD TYPE : list<string>
-//
-//	DESCRIPTION :
-//
-list<string> RpmLibHeader::Changelog::asStringList() const
-{
-  list<string> ret;
-  for ( const_iterator i = begin(); i != end(); ++i ) {
-    ret.push_back( stringutil::form( "* %s - %s",
-				     i->_date.form( "%a %b %d %Y" ).c_str(),
-				     i->_name.c_str() ) );
-    ret.push_back( string() );
-    list<string> dummy( stringutil::splitToLines( i->_text ) );
-    ret.splice( ret.end(), dummy );
-    ret.push_back( string() );
-  }
-  return ret;
-}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -404,15 +379,12 @@ PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( tag tag_r, FileDeps::F
 
   PkgName self( string_val( RPMTAG_NAME ) );
 
-  if ( flags.size() != count || versions.size() != count )
-    SEC << "Suspicious sizes" << endl;
-
   for ( unsigned i = 0; i < count; ++i ) {
 
     PkgName n( names[i] );
 
     if ( n == self ) {
-      _I__("DEPCHECK") << self << " has dependency on it self" << endl;
+      //_I__("DEPCHECK") << self << " has dependency on it self" << endl;
       continue;
     }
 
@@ -818,32 +790,6 @@ std::string RpmLibHeader::tag_sourcerpm() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_changelog
-//	METHOD TYPE : RpmLibHeader::Changelog
-//
-//	DESCRIPTION :
-//
-RpmLibHeader::Changelog RpmLibHeader::tag_changelog() const
-{
-  Changelog ret;
-
-  intList times;
-  if ( int_list( RPMTAG_CHANGELOGTIME, times ) ) {
-    stringList names;
-    string_list( RPMTAG_CHANGELOGNAME, names );
-    stringList texts;
-    string_list( RPMTAG_CHANGELOGTEXT, texts );
-    for ( unsigned i = 0; i < times.size(); ++ i ) {
-      ret.push_back( Changelog::Entry( times[i], names[i], texts[i] ) );
-    }
-  }
-
-  return ret;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : RpmLibHeader::tag_filenames
 //	METHOD TYPE : std::list<std::string>
 //
@@ -865,5 +811,93 @@ std::list<std::string> RpmLibHeader::tag_filenames() const
   }
 
   return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibHeader::tag_changelog
+//	METHOD TYPE : PkgChangelog
+//
+//	DESCRIPTION :
+//
+PkgChangelog RpmLibHeader::tag_changelog() const
+{
+  PkgChangelog ret;
+
+  intList times;
+  if ( int_list( RPMTAG_CHANGELOGTIME, times ) ) {
+    stringList names;
+    string_list( RPMTAG_CHANGELOGNAME, names );
+    stringList texts;
+    string_list( RPMTAG_CHANGELOGTEXT, texts );
+    for ( unsigned i = 0; i < times.size(); ++ i ) {
+      ret.push_back( PkgChangelog::Entry( times[i], names[i], texts[i] ) );
+    }
+  }
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibHeader::tag_du
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void RpmLibHeader::tag_du( PkgDu & dudata_r ) const
+{
+  dudata_r.clear();
+  stringList basenames;
+  if ( string_list( RPMTAG_BASENAMES, basenames ) ) {
+    stringList dirnames;
+    string_list( RPMTAG_DIRNAMES, dirnames );
+    intList dirindexes;
+    int_list( RPMTAG_DIRINDEXES, dirindexes );
+
+    intList filedevices;
+    int_list( RPMTAG_FILEDEVICES, filedevices );
+    intList fileinodes;
+    int_list( RPMTAG_FILEINODES, fileinodes );
+    intList filesizes;
+    int_list( RPMTAG_FILESIZES, filesizes );
+    intList filemodes;
+    int_list( RPMTAG_FILEMODES, filemodes );
+
+    ///////////////////////////////////////////////////////////////////
+    // Create and collect Entries by index. devino_cache is used to
+    // filter out hardliks ( different name but same device and inode ).
+    ///////////////////////////////////////////////////////////////////
+    PathInfo::devino_cache trace;
+    vector<PkgDu::Entry> entries;
+    entries.resize( dirnames.size() );
+    for ( unsigned i = 0; i < dirnames.size(); ++i ) {
+      entries[i] = dirnames[i];
+    }
+
+    for ( unsigned i = 0; i < basenames.size(); ++ i ) {
+      PathInfo::stat_mode mode( filemodes[i] );
+      if ( mode.isFile() ) {
+	if ( trace.insert( filedevices[i], fileinodes[i] ) ) {
+	  // Count full 1K blocks
+	  entries[dirindexes[i]]._size += FSize( filesizes[i] ).fullBlock();
+	  ++(entries[dirindexes[i]]._files);
+	}
+	// else: hardlink; already counted this device/inode
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Crreate and collect by index Entries. DevInoTrace is used to
+    // filter out hardliks ( different name but same device and inode ).
+    ///////////////////////////////////////////////////////////////////
+    for ( unsigned i = 0; i < entries.size(); ++i ) {
+      if ( entries[i]._size ) {
+	dudata_r.add( entries[i] );
+      }
+    }
+  }
 }
 

@@ -27,6 +27,9 @@
 #include <y2pm/RpmLibHeaderPtr.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/FileDeps.h>
+#include <y2pm/PkgChangelog.h>
+
+class PkgDu;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -50,6 +53,8 @@ class RpmLibHeader : virtual public Rep {
 
     typedef int tag;
     typedef struct headerToken * Header;
+
+    class filemode;
 
   private:
 
@@ -85,50 +90,6 @@ class RpmLibHeader : virtual public Rep {
     RpmLibHeader( Header h );
 
     virtual ~RpmLibHeader();
-
-  public:
-
-    /**
-     * @short Changelog returned by <code>RpmLibHeader::tag_changelog()</code>.
-     *
-     * <code>Changelog</code> contains a <code>std::list&lt;Changelog::Entry></code>.
-     * Each <code>Entry</code> consists of date, author and text, as derived from the
-     * header.
-     *
-     * A conversion <code>std::list&lt;std::string> asStringList()</code> is provided.
-     * The list returned contains the changelog line by line, fromated the same way
-     * <code>'rpm -q --changelog'</code> would do.
-     *
-     * @see #Changelog
-     **/
-    class Changelog {
-      public:
-	struct Entry {
-	  Date        _date;
-	  std::string _name;
-	  std::string _text;
-	  Entry( const Date & d, const std::string & n, const std::string & t )
-	    : _date( d ), _name( n ), _text( t )
-	  {}
-	};
-      private:
-	std::list<Entry> _entries;
-      public:
-	Changelog() {}
-	~Changelog() {}
-	void push_back( const Entry & e_r ) { _entries.push_back( e_r ); }
-	void push_front( const Entry & e_r ) { _entries.push_front( e_r ); }
-	unsigned size() const { return _entries.size(); }
-      public:
-	typedef std::list<Entry>::const_iterator         const_iterator;
-	typedef std::list<Entry>::const_reverse_iterator const_reverse_iterator;
-	const_iterator         begin()  const { return _entries.begin(); }
-	const_iterator         end()    const { return _entries.end(); }
-	const_reverse_iterator rbegin() const { return _entries.rbegin(); }
-	const_reverse_iterator rend()   const { return _entries.rend(); }
-      public:
-	std::list<std::string> asStringList() const;
-    };
 
   public:
 
@@ -176,11 +137,11 @@ class RpmLibHeader : virtual public Rep {
     std::string tag_postun()       const;
     std::string tag_sourcerpm()    const;
 
-    /**
-     * @see #Changelog
-     **/
-    Changelog   tag_changelog()    const;
     std::list<std::string> tag_filenames() const;
+
+    PkgChangelog tag_changelog() const;
+
+    void tag_du( PkgDu & dudata_r ) const;
 
   public:
 
