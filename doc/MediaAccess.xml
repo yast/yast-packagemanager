@@ -137,8 +137,8 @@ common. It's value is passed with the -o parameter to mount
   <title>URL for SMB access</title>
   <para>
   SMB access via smbfs. username and password must be present or the
-  mountoption guest has to be specified. password may <em>not</em> contain
-  comas.
+  mountoption guest has to be specified. password may
+  <emphasis>not</emphasis> contain commas.
   <screen width="60">
     smb://haegar:5ch3ck1ich@kiste/some/share
   </screen>
