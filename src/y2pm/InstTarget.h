@@ -398,7 +398,8 @@ class InstTarget: public CountedRep, public InstData {
 
     /**
      * Install Product. That's nothing but copying the InstSrcDescr
-     * into the local ProductDB.
+     * into the local ProductDB, and remove entries with the same
+     * product name but different version than isd_r.
      **/
     PMError installProduct( const constInstSrcDescrPtr & isd_r );
 

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Sun Apr  4 23:30:34 CEST 2004 - ma@suse.de
+
+- Product db: Obsolete already existing entries
+  for a product upon install. (#37069)
+- 2.9.33
+
+-------------------------------------------------------------------
 Sun Apr  4 14:58:14 CEST 2004 - kkaempf@suse.de
 
 - add "cifs" support to media access (#37871)
