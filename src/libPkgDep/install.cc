@@ -52,9 +52,9 @@ bool PkgDep::install( PkgSet& in_candidates,
 				 << cand->edition() << " -- dropping it\n";
 		}
 		else {
-			bool pushfront=false;
 			numtocheck++;
 #if 0
+			bool pushfront=false;
 			// ensure that packages that obsolete something
 			// installed are checked first
 			for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
