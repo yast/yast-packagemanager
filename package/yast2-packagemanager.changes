@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec  2 11:44:18 CET 2004 - ma@suse.de
+
+- Fixed possible overflow in version comparison (#48165)
+
+-------------------------------------------------------------------
 Thu Dec  2 11:37:55 CET 2004 - ma@suse.de
 
 - Update list of vendors whose packages shall not be protected

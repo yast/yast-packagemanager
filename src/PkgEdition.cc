@@ -176,76 +176,94 @@ bool PkgEdition::edition_lt( const PkgEdition& e2 ) const
  **/
 int PkgEdition::rpmvercmp( const std::string & lhs, const std::string & rhs ) const
 {
-  int num1, num2;
+  int  num1, num2;
   char oldch1, oldch2;
   char * str1, * str2;
   char * one, * two;
-  int rc;
-  int isnum;
+  int  rc;
+  int  isnum;
 
-  //    D__ << lhs << " - " << rhs << endl;
-
+  // equal?
   if ( lhs == rhs )  return 0;
+
   // empty is less than anything else:
   if ( lhs.empty() ) return -1;
   if ( rhs.empty() ) return  1;
 
-  str1 = (char *)alloca(lhs.size() + 1);
-  str2 = (char *)alloca(rhs.size() + 1);
+  str1 = (char*)alloca( lhs.size() + 1 );
+  str2 = (char*)alloca( rhs.size() + 1 );
 
-  strcpy(str1, lhs.c_str());
-  strcpy(str2, rhs.c_str());
+  strcpy( str1, lhs.c_str() );
+  strcpy( str2, rhs.c_str() );
 
   one = str1;
   two = str2;
 
-  while (*one && *two) {
-    while (*one && !isalnum(*one)) one++;
-    while (*two && !isalnum(*two)) two++;
+  // split strings into segments of alpha or digit
+  // sequences and compare them accordingly.
+  while ( *one && *two ) {
 
+    // skip non alphanumerical chars
+    while ( *one && ! isalnum( *one ) ) ++one;
+    while ( *two && ! isalnum( *two ) ) ++two;
+    if ( ! ( *one && *two ) )
+      break; // reached end of string
+
+    // remember segment start
     str1 = one;
     str2 = two;
 
-    if (isdigit(*str1)) {
-      while (*str1 && isdigit(*str1)) str1++;
-      while (*str2 && isdigit(*str2)) str2++;
+    // jump over segment, type determined by str1
+    if ( isdigit( *str1 ) ) {
+      while ( isdigit( *str1 ) ) ++str1;
+      while ( isdigit( *str2 ) ) ++str2;
       isnum = 1;
     } else {
-      while (*str1 && isalpha(*str1)) str1++;
-      while (*str2 && isalpha(*str2)) str2++;
+      while ( isalpha( *str1 ) ) ++str1;
+      while ( isalpha( *str2 ) ) ++str2;
       isnum = 0;
     }
 
+    // one == str1 -> can't be as strings are not empty
+    // two == str2 -> mixed segment types
+    if ( two == str2 ) return( isnum ? 1 : -1 );
+
+    // compare according to segment type
+    if ( isnum ) {
+      // atoi() may overflow on long segments
+      // skip leading zeros
+      while ( *one == '0' ) ++one;
+      while ( *two == '0' ) ++two;
+      // compare number of digits
+      num1 = str1 - one;
+      num2 = str2 - two;
+      if ( num1 != num2 ) return( num1 < num2 ? -1 : 1 );
+    }
+
+    // strcmp() compares alpha AND equal sized number segments
+    // temp. \0-terminate segment
     oldch1 = *str1;
     *str1 = '\0';
     oldch2 = *str2;
     *str2 = '\0';
 
-    if (one == str1) return -1;	/* arbitrary */
-    if (two == str2) return -1;
+    rc = strcmp( one, two );
+    if ( rc ) return rc;
 
-    if (isnum) {
-      num1 = atoi(one);
-      num2 = atoi(two);
-
-      if (num1 < num2)
-	return -1;
-      else if (num1 > num2)
-	return 1;
-    } else {
-      rc = strcmp(one, two);
-      if (rc) return rc;
-    }
-
+    // restore original strings
     *str1 = oldch1;
-    one = str1;
     *str2 = oldch2;
+
+    // prepare for next cycle
+    one = str1;
     two = str2;
   }
 
-  if ((!*one) && (!*two)) return 0;
-
-  if (!*one) return -1; else return 1;
+  // check which strings are now empty
+  if ( !*one ) {
+    return( !*two ? 0 : -1 );
+  }
+  return 1;
 }
 
 
