@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src
 #
 
-SUBDIRS = include
+SUBDIRS = include instsrc
 
 INCLUDES = -I$(QTDIR)/include -I$(top_srcdir)/src/include -I$(includedir)
 
@@ -14,30 +14,19 @@ liby2pm_la_SOURCES = \
 	\
 	PMSolvable.cc	\
 		PMObject.cc	\
-			PMPackage.cc	\
 	\
 	PMManager.cc	\
-		PMPackageManager.cc	\
 	\
 	PMSelectable.cc	\
-		PMPackageSelectable.cc	\
-	\
-	InstSrcManager.cc	\
-	\
-	InstSrc.cc	\
-		InstSrcSuSE.cc	\
-	InstSrcData.cc	\
-		InstSrcDataCommonPkd.cc	\
-	InstSrcDescr.cc	\
 	\
 	PMDataProvider.cc	\
-		PMPackageDataProvider.cc	\
 	\
 	MediaInfo.cc	\
 		FAKEMediaInfo.cc
 
 liby2pm_la_LDFLAGS = -version-info 2:0
 
-liby2pm_la_LIBADD = -ly2util
+liby2pm_la_LIBADD = -ly2util instsrc/liby2pminstsrc.la
+#liby2pmMedia.la
 #liby2pm_la_LIBADD = PMSolver/libPMSolver.la PMMgr/libPMMgr.la -ly2util
 

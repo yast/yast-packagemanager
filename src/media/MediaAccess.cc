@@ -19,17 +19,19 @@
 
 /-*/
 
-#include <string.h>
+#include <string>
 
-#include <MediaAccess.h>
+#include <y2pm/MediaAccess.h>
 
-#include <MediaCD.h>
-#include <MediaDIR.h>
-#include <MediaDISK.h>
-#include <MediaNFS.h>
-#include <MediaSMB.h>
-#include <MediaFTP.h>
-#include <MediaHTTP.h>
+#include <y2pm/MediaCD.h>
+#include <y2pm/MediaDIR.h>
+#include <y2pm/MediaDISK.h>
+#include <y2pm/MediaNFS.h>
+#include <y2pm/MediaSMB.h>
+#include <y2pm/MediaFTP.h>
+#include <y2pm/MediaHTTP.h>
+
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
