@@ -31,6 +31,7 @@
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/RpmLibDb.h>
+#include <y2pm/Timecount.h>
 
 #include <Y2PM.h>
 
@@ -97,6 +98,7 @@ InstSrcDataPLAIN::InstSrcDataPLAIN( const Pathname & cachefile_r )
     ERR << "Failed to open cache " << cachefile_r << endl;
     return;
   }
+  MIL << "Scan cachefile " << cachefile_r << endl;
 
   set<PkgArch> compatArch( archCompat( Y2PM::baseArch() ) );
 
@@ -105,7 +107,7 @@ InstSrcDataPLAIN::InstSrcDataPLAIN( const Pathname & cachefile_r )
   int      isSource;
   for ( constRpmLibHeaderPtr iter = _cache.getFirst( pkgfile, isSource, hpos );
 	iter; iter = _cache.getNext( pkgfile, isSource, hpos ) ) {
-    DBG << "At " << hpos << (isSource?" src ":" bin ") << iter << " for " << pkgfile << endl;
+    //DBG << "At " << hpos << (isSource?" src ":" bin ") << iter << " for " << pkgfile << endl;
 
     if ( isSource ) {
       INT << "No yet able to handle .src.rpm." << endl;
@@ -150,6 +152,8 @@ InstSrcDataPLAIN::InstSrcDataPLAIN( const Pathname & cachefile_r )
 
     _packages.push_back( nptr );
   }
+
+  DBG << "Found " << _packages.size() << " packages" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -269,46 +273,49 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   // Check local cache
   ///////////////////////////////////////////////////////////////////
 
-  PathInfo cpath( source_r->cache_data_dir() );
+  Pathname cdir( source_r->cache_data_dir() );
 
+  PathInfo cpath( cdir );
   if ( !cpath.isDir() ) {
     WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
     return Error::E_src_cache_disabled;
   }
 
-  cpath( cpath.path() + "IS_PLAINcache" ); // cachefile in local cache
+  cpath( cdir + "IS_PLAINcache.gz" ); // cachefile in local cache
+  if ( !cpath.isFile() ) {
+    cpath( cdir + "IS_PLAINcache" ); // cachefile in local cache
+  }
 
   ///////////////////////////////////////////////////////////////////
-  // Get IS_PLAINcache from media_r.
+  // If no local cache, get IS_PLAINcache from media_r.
   // NOTE: descrdir and datadir equal product_dir_r
   ///////////////////////////////////////////////////////////////////
 
-  Pathname s_cachefile = product_dir_r + "IS_PLAINcache";
   MediaAccessPtr media = source_r->media();
 
   if ( !cpath.isFile() ) {
-    MediaAccess::FileProvider cachefile( media, s_cachefile.extend( ".gz" ) );
+    Pathname m_file( product_dir_r + "IS_PLAINcache.gz" );
+    MediaAccess::FileProvider cachefile( media, m_file );
     if ( cachefile.error() ) {
-      WAR << "Media can't provide '" << s_cachefile.extend( ".gz" ) << "' " << cachefile.error() << endl;
+      WAR << "Media can't provide '" << m_file << "' " << cachefile.error() << endl;
     } else {
-      MIL << "Found cache '" << s_cachefile.extend( ".gz" ) << "'" << endl;
-      system( stringutil::form( "zcat '%s' > %s",
-				cachefile().asString().c_str(),
-				cpath.path().asString().c_str() ).c_str() );
-      cpath(); // restat
+      MIL << "Found cache '" << m_file << "'" << endl;
+      PathInfo::copy_file2dir( cachefile(), cdir );
+
+      cpath( cdir + "IS_PLAINcache.gz" ); // restat
     }
   }
 
   if ( !cpath.isFile() ) {
-    MediaAccess::FileProvider cachefile( media, s_cachefile );
+    Pathname m_file( product_dir_r + "IS_PLAINcache" );
+    MediaAccess::FileProvider cachefile( media, m_file );
     if ( cachefile.error() ) {
-      WAR << "Media can't provide '" << s_cachefile << "' " << cachefile.error() << endl;
+      WAR << "Media can't provide '" << m_file << "' " << cachefile.error() << endl;
     } else {
-      MIL << "Found cache '" << s_cachefile << "'" << endl;
-      system( stringutil::form( "cat '%s' > %s",
-				cachefile().asString().c_str(),
-				cpath.path().asString().c_str() ).c_str() );
-      cpath(); // restat
+      MIL << "Found cache '" << m_file << "'" << endl;
+      PathInfo::copy_file2dir( cachefile(), cdir );
+
+      cpath( cdir + "IS_PLAINcache" ); // restat
     }
   }
 
@@ -327,16 +334,18 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     Pathname pkgroot( media->localPath( product_dir_r ) );
     MIL << "Start package scan in " << pkgroot << endl;
 
+    Pathname c_file( cdir + "IS_PLAINcache" );
 
-    int res = PkgHeaderCache::buildPkgHeaderCache( cpath.path(), pkgroot );
+    int res = PkgHeaderCache::buildPkgHeaderCache( c_file, pkgroot );
     if ( res < 0 ) {
-      ERR << "Failed to create cache " << cpath.path() << " (" << res << ")" << endl;
-      PathInfo::unlink( cpath.path() );
+      ERR << "Failed to create cache " << c_file << " (" << res << ")" << endl;
+      PathInfo::unlink( c_file );
       return Error::E_isrc_cache_invalid;
     }
 
+#warning GZIP cache per default?
+    cpath( c_file ); // restat
     MIL << "Created cache for " << res << " packages found." << endl;
-
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -384,16 +393,26 @@ PMError InstSrcDataPLAIN::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr
   // Check local cache
   ///////////////////////////////////////////////////////////////////
 
-  PathInfo cpath( source_r->cache_data_dir() );
+  Pathname cdir( source_r->cache_data_dir() );
 
+  PathInfo cpath( cdir );
   if ( !cpath.isDir() ) {
     WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
     return Error::E_src_cache_disabled;
   }
 
-  cpath( cpath.path() + "IS_PLAINcache" ); // cachefile in local cache
+  cpath( cdir + "IS_PLAINcache.gz" ); // cachefile in local cache
   if ( !cpath.isFile() ) {
-    ERR << "No cachefile found: " << cpath << endl;
+    WAR << "No cachefile " << cpath << endl;
+
+    cpath( cdir + "IS_PLAINcache" ); // cachefile in local cache
+    if ( !cpath.isFile() ) {
+      WAR << "No cachefile " << cpath << endl;
+    }
+  }
+
+  if ( !cpath.isFile() ) {
+    ERR << "No cachefile found in " << cdir << endl;
     return Error::E_isrc_cache_invalid;
   }
 

@@ -543,8 +543,68 @@ constRpmLibHeaderPtr RpmLibDb::getData( const Pathname & path )
 #undef Y2LOG
 #define Y2LOG "PkgHeaderCache"
 
+extern "C" {
+#include <netinet/in.h>
+// from rpm: lib/header.c
+struct entryInfo {
+    int_32 tag;
+    int_32 type;
+    int_32 offset;              /* Offset from beginning of data segment,
+                                   only defined on disk */
+    int_32 count;
+};
+}
+
 static const unsigned PHC_MAGIC_SZE = 64; // dont change!
 static const string   PHC_MAGIC( "YaST-PHC-1.0-0" );
+
+static const int_32 rpm_header_magic = 0x01e8ad8e;
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : gzipped
+**	FUNCTION TYPE : bool
+*/
+bool gzipped( const Pathname & file )
+{
+  bool ret = false;
+  int fd = open( file.asString().c_str(), O_RDONLY );
+  if ( fd != -1 ) {
+    const int magicSize = 2;
+    unsigned char magic[magicSize];
+    if ( read( fd, magic, magicSize ) == magicSize ) {
+      if ( magic[0] == 0037 && magic[1] == 0213 ) {
+	ret = true;
+      }
+    }
+    close( fd );
+  }
+  return ret;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : Ftell
+**	FUNCTION TYPE : int
+*/
+int Ftell( FD_t fd )
+{
+  FILE * fd_fp = (FILE *)fdGetFp( fd );
+  if ( fd_fp ) {
+    int rc = ftell( fd_fp );
+    return rc;
+  }
+  int fd_fd = Fileno( fd );
+  if ( fd_fd >= 0 ) {
+    int rc = lseek( fd_fd, 0, SEEK_CUR );
+    return rc;
+  }
+  WAR << "Can't Ftell:" << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
+  return -1;
+}
+
 
 /******************************************************************
 **
@@ -572,13 +632,16 @@ int phcReadMagic( FD_t fd, time_t & date_r )
 {
   char magic[PHC_MAGIC_SZE+1];
   memset( magic, 0, PHC_MAGIC_SZE+1 );
+
   size_t got = ::Fread( magic, sizeof(char), PHC_MAGIC_SZE, fd );
   if ( got != PHC_MAGIC_SZE ) {
     return -1;
   }
+
   if ( strcmp( magic, PHC_MAGIC.c_str() ) ) {
     return -2;
   }
+
   date_r = strtoul( magic+PHC_MAGIC.size()+1, 0, 10 );
   return 0;
 }
@@ -608,11 +671,66 @@ unsigned phcAddHeader( FD_t fd, Header h, const Pathname & citem_r, int isSource
 */
 Header phcReadHeader( FD_t fd, unsigned & at_r )
 {
-  at_r = ::Fseek( fd, 0, SEEK_CUR );
+  at_r = ::Ftell( fd );
+
+#if 0
+  // ::headerRead uses timedRead, not working with gziped streams
   Header h = ::headerRead( fd, HEADER_MAGIC_YES );
   if ( !h ) {
     ERR << "Error reading header (" << ::Fstrerror(fd) << ")" << endl;
   }
+#else
+  bool magicp = true; // HEADER_MAGIC_YES
+  int_32 block[4];
+  int_32 il, dl;
+  unsigned totalSize = 0;
+
+  unsigned count = (magicp ? 4 : 2) * sizeof(int_32);
+  if ( ::Fread( block, sizeof(char), count, fd ) != count ) {
+    ERR << "Error reading header info (" << ::Fstrerror(fd) << ")" << endl;
+    return 0;
+  }
+
+  count = 0;
+
+  if ( magicp ) {
+    if ( block[count] != rpm_header_magic ) {
+      ERR << "Error bad header magic " << stringutil::hexstring( block[count] )
+	<< " (" << stringutil::hexstring( rpm_header_magic ) << ")" << endl;
+      return 0;
+    }
+    count += 2;
+  }
+
+  il = ntohl( block[count++] );
+  dl = ntohl( block[count++] );
+
+  totalSize = (2*sizeof(int_32)) + (il * sizeof(struct entryInfo)) + dl;
+  if (totalSize > (32*1024*1024)) {
+    ERR << "Error header ecxeeds 32Mb limit (" << totalSize << ")" << endl;
+    return NULL;
+  }
+
+  char * data = new char[totalSize];
+  int_32 * p = (int_32 *)data;
+  Header h = 0;
+
+  *p++ = htonl(il);
+  *p++ = htonl(dl);
+  totalSize -= (2*sizeof(int_32));
+
+  if ( ::Fread( (char *)p, sizeof(char), totalSize, fd ) != totalSize ) {
+    ERR << "Error reading header data (" << ::Fstrerror(fd) << ")" << endl;
+  } else {
+    h = ::headerLoad( data );
+    if ( !h ) {
+      ERR << "Error loading header data" << endl;
+    }
+  }
+
+  delete [] data;
+#endif
+
   return h;
 }
 
@@ -798,17 +916,24 @@ struct PkgHeaderCache::Cache {
 
   bool open( const Pathname & file_r ) {
     close();
-    fd = ::Fopen( file_r.asString().c_str(), "r"  );
+    if ( gzipped( file_r ) ) {
+      FD_t fd1 = ::Fopen( file_r.asString().c_str(), "r.ufdio"  );
+      fd = ::Fdopen( fd1, "r.gzdio"  );
+    } else {
+      fd = ::Fopen( file_r.asString().c_str(), "r"  );
+    }
     if ( fd == 0 || ::Ferror(fd) ) {
       ERR << "Can't open cache for reading: " << file_r << " (" << ::Fstrerror(fd) << ")" << endl;
       close();
       return false;
     }
+
     if ( phcReadMagic( fd, _cdate ) < 0 ) {
       ERR << "Not a cache file. (" << ::Fstrerror(fd) << ")" << endl;
       close();
       return false;
     }
+
     return true;
   }
 

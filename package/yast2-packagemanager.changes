@@ -1,12 +1,19 @@
 -------------------------------------------------------------------
+Tue Apr 22 16:45:54 CEST 2003 - ma@suse.de
+
+- Plain RPM InstSources are now able to work on gzipped cachefiles
+  (IS_PLAINcache.gz; no bzip2).
+- 2.8.0
+
+-------------------------------------------------------------------
 Tue Apr 15 13:13:56 CEST 2003 - cschum@suse.de
 
-- Fixed MediaCurl download on x86_64 (#25817). 
+- Fixed MediaCurl download on x86_64 (#25817).
 
 -------------------------------------------------------------------
 Thu Apr 10 17:11:43 CEST 2003 - sh@suse.de
 
-- Fixed bug #25804: FTP download shows pkg build no. 
+- Fixed bug #25804: FTP download shows pkg build no.
 
 -------------------------------------------------------------------
 Tue Mar 18 13:34:21 CET 2003 - ma@suse.de
