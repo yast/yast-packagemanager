@@ -130,7 +130,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 	else
 	{
 	    bool foundinstalled = false;
-	    RevRel_for(_installed.provided()[requirement->name()], iprov)
+	    RevRel_for(PkgSet::getRevRelforPkg(_installed.provided(),requirement->name()), iprov)
 	    {
 		if(requirement->matches(iprov->relation()))
 		{
@@ -140,7 +140,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 	    }
 	    if(!foundinstalled)
 	    {
-		RevRel_for(_toinstall.provided()[requirement->name()], prov)
+		RevRel_for(PkgSet::getRevRelforPkg(_toinstall.provided(),requirement->name()), prov)
 		{
 		    if(requirement->matches(prov->relation()))
 		    {
@@ -205,24 +205,24 @@ void InstallOrder::startrdfs()
     _numrun++;
     MIL << "run " << _numrun << endl;
 
-    // it->key is PkgName
-    // it->value is PMSolvablePtr
+    // it->first is PkgName
+    // it->second is PMSolvablePtr
 
     // initialize all nodes
     for(PkgSet::iterator it = _toinstall.begin(); it != _toinstall.end(); ++it)
     {
-	_nodes[it->value]=NodeInfo(it->value);
-	_rgraph[it->value]=SolvableList();
-	_graph[it->value]=SolvableList();
+	_nodes[it->second]=NodeInfo(it->second);
+	_rgraph[it->second]=SolvableList();
+	_graph[it->second]=SolvableList();
     }
 
     // visit all nodes
     for(PkgSet::iterator it = _toinstall.begin(); it != _toinstall.end(); ++it)
     {
-	if(_nodes[it->value].visited == false)
+	if(_nodes[it->second].visited == false)
 	{
-	    M__ << "start recursion on " << it->value->name() << endl;
-	    rdfsvisit(it->value);
+	    M__ << "start recursion on " << it->second->name() << endl;
+	    rdfsvisit(it->second);
 	}
     }
 

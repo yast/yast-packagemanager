@@ -303,13 +303,13 @@ bool PkgDep::solvesystemnoauto(
 	    ci_for( PkgSet::,, it, installed., )
 	    {
 		bool obsolete = false;
-		PkgName iname = it->key;
-		PMSolvablePtr instd = it->value;
+		PkgName iname = it->first;
+		PMSolvablePtr instd = it->second;
 		// ignore if installed is already a candidate
 		if(!candidates.empty() && candidates.includes(iname))
 		    continue;
 
-		RevRel_for( candidates.obsoleted()[iname], obs ) {
+		RevRel_for( PkgSet::getRevRelforPkg(candidates.obsoleted(),iname), obs ) {
 			if (obs->relation().matches( instd->self_provides() )) {
 				WAR << "installed " << iname << " is obsoleted by candidate "
 					 << obs->pkg()->name() << " -- not checking consistency"
@@ -334,13 +334,13 @@ bool PkgDep::solvesystemnoauto(
 	    D__ << "moving inconsistent from installed to candidates: ";
 	    i_for( PkgSet::,, bit, brokeninstalled., )
 	    {
-		if(installed.includes(bit->value->name()))
+		if(installed.includes(bit->second->name()))
 		{
-		    D__ << (bit->value->name());
-		    if(!candidates.includes( bit->value->name()))
+		    D__ << (bit->second->name());
+		    if(!candidates.includes( bit->second->name()))
 		    {
-			installed.remove( bit->value );
-			candidates.add( bit->value );
+			installed.remove( bit->second );
+			candidates.add( bit->second );
 			D__ << " ";
 		    }
 		    else
@@ -349,7 +349,7 @@ bool PkgDep::solvesystemnoauto(
 		    }
 		}
 		else
-		    INT << bit->value->name() << " not in installed" << endl;
+		    INT << bit->second->name() << " not in installed" << endl;
 	    }
 	    D__ << endl;
 	}

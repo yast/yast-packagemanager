@@ -45,6 +45,9 @@
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
 
+#include <asm/msr.h>
+#include <stdint.h>
+
 #include "show_pm.h"
 
 #undef Y2SLOG
@@ -1412,18 +1415,22 @@ int main( int argc, char *argv[] )
 	    if(func[i].func)
 	    {
 		TimeClass t;
+		uint64_t s,e;
+		rdtscll(s);
 		if(func[i].need_init && !_initialized && func[i].func != init)
 		{
 		    if(_showtimes) t.startTimer();
 		    init(nullvector);
 		    if(_showtimes) t.stopTimer();
-		    if(_showtimes) cout << "time: " << t.getTimer() << endl;
+		    if(_showtimes) cout << "time: " << t << endl;
 		}
 
 		if(_showtimes) t.startTimer();
 		func[i].func(argv);
+		rdtscll(e);
+		if(_showtimes) cout << "cycles: " << e-s << endl;
 		if(_showtimes) t.stopTimer();
-		if(_showtimes) cout << "time: " << t.getTimer() << endl;
+		if(_showtimes) cout << "time: " << t << endl;
 	    }
 	    else
 	    {

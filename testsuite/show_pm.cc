@@ -61,12 +61,12 @@ pkglist2string (const std::list<PMPackagePtr>& plist, const char *sep)
 
 
 std::string
-slclist2string (const std::list<PMSelectablePtr>& slist, const char *sep)
+slclist2string (const std::set<PMSelectablePtr>& slist, const char *sep)
 {
    std::string ret;
    if (slist.empty())
 	return ret;
-   for (std::list<PMSelectablePtr>::const_iterator pos = slist.begin();
+   for (std::set<PMSelectablePtr>::const_iterator pos = slist.begin();
 	pos != slist.end(); ++pos)
    {
 	if (!ret.empty())

@@ -57,6 +57,11 @@ class PMManager {
     PMSelectablePool _itemPool;
     PMSelectableVec _items;
 
+    PkgSet* installed;
+    PkgSet* available;
+    PkgSet* toinstall;
+    PkgSet* nowinstalled;
+
   private:
 
     typedef std::list<PMSelectable::SavedState> SavedList;

@@ -17,6 +17,8 @@
 
 /-*/
 
+#define KEEPSETS
+
 #include <malloc.h>
 
 #include <y2util/Y2SLog.h>
@@ -27,6 +29,23 @@
 #include <y2pm/PkgSet.h>
 
 using namespace std;
+
+static inline void addpkgtosetifnotalreadyin(PkgSet& set, PMSolvablePtr newp)
+{
+	PMSolvablePtr oldp;
+	if(!newp) return;
+	oldp = set.lookup(newp->name());
+	if(oldp == NULL) // new is not already in set
+	{
+		set.add(newp);
+	}
+	else if ( oldp != newp ) // a package with this name is in the set, but it's not the same
+	{
+		set.remove(oldp);
+		set.add(newp);
+	}
+	// otherwise package is already in set
+}
 
 /**
  * Build a PkgSet that consists of installed packages and packages that are
@@ -49,11 +68,26 @@ static void buildinstalledonly(PMManager& manager, PkgSet& installed)
 
 	    if(sp != NULL)
 	    {
+#ifndef KEEPSETS
 		installed.add(sp);
+#else
+		addpkgtosetifnotalreadyin(installed,sp);
+#endif
 	    }
 	    else
+	    {
 		ERR << "oops, got NULL despite Selectable said it has installed obj" << endl;
+#ifdef KEEPSETS
+		installed.remove((*it)->name());
+#endif
+	    }
 	}
+#ifdef KEEPSETS
+	else
+	{
+	    installed.remove((*it)->name());
+	}
+#endif
     }
 }
 
@@ -74,29 +108,62 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
 	    PMSolvablePtr sp = (*it)->installedObj();
 	    if(sp != NULL)
 	    {
+#ifndef KEEPSETS
 		installed.add(sp);
+#else
+		addpkgtosetifnotalreadyin(installed,sp);
+#endif
 		ni++;
 	    }
 	    else
+	    {
 		ERR << "oops, got NULL despite Selectable said it has installed obj" << endl;
+		installed.remove((*it)->name());
+	    }
 	}
+	else
+	{
+	    installed.remove((*it)->name());
+	}
+
 	// candidates to available, and those with marked for install also to toinstall
 	if((*it)->has_candidate())
 	{
 	    PMSolvablePtr sp = (*it)->candidateObj();
 	    if(sp != NULL)
 	    {
+#ifndef KEEPSETS
 		available.add(sp);
+#else
+		addpkgtosetifnotalreadyin(available,sp);
+#endif
 		na++;
 
 		if((*it)->to_install())
 		{
+#ifndef KEEPSETS
 		    toinstall.add(sp);
+#else
+		    addpkgtosetifnotalreadyin(toinstall,sp);
+#endif
 		    nt++;
+		}
+		else
+		{
+		    toinstall.remove((*it)->name());
 		}
 	    }
 	    else
+	    {
 		ERR << "oops, got NULL despite Selectable said it has candidateObj obj" << endl;
+		available.remove((*it)->name());
+		toinstall.remove((*it)->name());
+	    }
+	}
+	else
+	{
+	    available.remove((*it)->name());
+	    toinstall.remove((*it)->name());
 	}
     }
 
@@ -177,7 +244,10 @@ bad, PkgDep::ErrorResultList& obsolete)
     {
     	if(!it->referers.empty())
 	{
-	    PkgSet fakei = installed;
+	    PkgSet fakei;
+	    DBG << "before assign" << endl;
+	    fakei = installed;
+	    DBG << "after assign" << endl;
 	    for(PkgDep::RelInfoList::iterator rit = it->referers.begin()
 		; rit != it->referers.end(); ++rit)
 	    {
@@ -188,7 +258,7 @@ bad, PkgDep::ErrorResultList& obsolete)
 		if(p == it->solvable) continue; // do not remove the package that has the conflict
 
 		if(!fakei.includes(p->name())) continue;
-		//DBG << "remove " <<  p->name() << endl;
+		DBG << "remove " <<  p->name() << endl;
 		PkgDep::remove_package(&fakei, p, it->remove_to_solve_conflict);
 	    }
 	}
@@ -235,10 +305,17 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 
     do
     {
+#ifndef KEEPSETS
 	PkgSet* installed = new PkgSet(); // already installed
 	PkgSet* available = new PkgSet(); // available for installation
 	PkgSet* toinstall = new PkgSet(); // user selected for installion
 	PkgSet* nowinstalled = new PkgSet(); // assumed state after operation
+#else
+	if(!installed) installed = new PkgSet(); // already installed
+	if(!available) available = new PkgSet(); // available for installation
+	if(!toinstall) toinstall = new PkgSet(); // user selected for installion
+	if(!nowinstalled) nowinstalled = new PkgSet(); // assumed state after operation
+#endif
 	if(!installed || !available || !toinstall || !nowinstalled )
 	{
 	    INT << "memory exhausted" << endl;
@@ -260,17 +337,20 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 	MIL  << mallinfo() << " (after engine construction)" << endl;
 	success = engine->solvesystemnoauto( *toinstall, good, bad, obsolete);
 	MIL << mallinfo() << " (after solver run)" << endl;
-	delete engine;
+#ifndef KEEPSETS
 	delete installed;
 	delete available;
 	delete toinstall;
-	engine = NULL;
 	installed = available = toinstall = NULL;
+#endif
+	delete engine;
+	engine = NULL;
 	MIL << mallinfo() << endl;
 
 	buildinstalledonly(*this,*nowinstalled);
 	MIL << mallinfo() << endl;
 	
+	// revert install request set by appl if it introduces a conflict
 	if(!success && filter_conflicts_with_installed)
 	{
 	    // iterate through error list
@@ -314,8 +394,10 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 	    setAutoState(*nowinstalled, good, bad, obsolete);
 	}
 
+#ifndef KEEPSETS
 	delete nowinstalled;
 	nowinstalled = NULL;
+#endif
 
 	count--;
     } while(repeat && count > 0);

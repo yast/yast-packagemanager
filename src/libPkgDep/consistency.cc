@@ -10,7 +10,7 @@ bool PkgDep::consistent( ErrorResultList& failures )
 
 	// for all installed packages...
 	ci_for( PkgSet::,, _pkg, installed., ) {
-		PMSolvablePtr pkg = _pkg->value;
+		PMSolvablePtr pkg = _pkg->second;
 		ErrorResult err(*this,pkg);
 		if (!pkg_consistent( pkg, &err ))
 			failures.push_back( err );
@@ -39,7 +39,7 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 		    continue;
 */
 
-		RevRel_for( installed.provided()[req->name()], prov ) {
+		RevRel_for( PkgSet::getRevRelforPkg(installed.provided(),req->name()), prov ) {
 			if (req->matches( prov->relation() )) {
 				match_found = true;
 				break;
@@ -67,7 +67,7 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 
 	// for all conflicts of the current package
 	ci_for( PMSolvable::,PkgRelList_, confl, pkg->,conflicts_ ) {
-		RevRel_for( installed.provided()[confl->name()], prov ) {
+		RevRel_for( PkgSet::getRevRelforPkg(installed.provided(),confl->name()), prov ) {
 			if (confl->matches( prov->relation() ) && prov->pkg() != pkg) {
 				if (err)
 					err->add_conflict( pkg, *confl, *this,  prov->pkg(), NULL );

@@ -38,6 +38,7 @@ using namespace std;
 //	DESCRIPTION :
 //
 PMManager::PMManager()
+    : installed(NULL), available(NULL), toinstall(NULL), nowinstalled(NULL)
 {
 
 }
