@@ -1110,7 +1110,7 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
 	parsePackagesLang (ndata->_packages, media_r, descr_dir_r);
     }
 
-    // parse <DESCRDIR>/selections and <DESCRDIR>/*.sel
+    // parse <DESCRDIR>/selections and <DESCRDIR>/ *.sel
     parseSelections (ndata->_selections, media_r, descr_dir_r);
 
     // fill selections with caching data
@@ -1146,22 +1146,6 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
 }
 
 //---------------------------------------------------------------------...
-// protected
-
-/**
- * write media content data to cache file
- * @param pathname of corresponding InstSrcDescr cache file
- * @return pathname of written cache
- * writes content cache data to an ascii file
- */
-
-const Pathname
-InstSrcDataUL::writeCache (const Pathname &descrpathname)
-{
-    return InstSrcData::writeCache (descrpathname);
-}
-
-//---------------------------------------------------------------------...
 // public
 
 /**
@@ -1171,7 +1155,7 @@ InstSrcDataUL::writeCache (const Pathname &descrpathname)
 const std::list<PMSelectionPtr>&
 InstSrcDataUL::getSelections() const
 {
-    return _selections;
+  return _selections;
 }
 
 /**
@@ -1181,30 +1165,19 @@ InstSrcDataUL::getSelections() const
 const std::list<PMPackagePtr>&
 InstSrcDataUL::getPackages() const
 {
-    MIL << "InstSrcDataUL::getPackages(" << _packages.size() << ")" << endl;
-    return _packages;
+  return _packages;
 }
 
 /**
- * generate PMSolvable objects for each patch on the target
- * @return list of PMSolvablePtr on this target
+ * generate PMYouPatch objects for each patch on the target
+ * @return list of PMYouPatchPtr on this target
  */
 const std::list<PMYouPatchPtr>&
 InstSrcDataUL::getPatches (void) const
 {
-    MIL << "InstSrcDataUL::getPatches()" << endl;
-    return _patches;
+  // Return empty list as we do not hold Patches
+  return InstSrcData::getPatches();
 }
-
-
-std::ostream &
-InstSrcDataUL::dumpOn( std::ostream & str ) const
-{
-    Rep::dumpOn( str );
-    return str;
-}
-
-
 
 
 InstSrcDataULSelTags::InstSrcDataULSelTags( )

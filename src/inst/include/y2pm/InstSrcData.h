@@ -31,9 +31,6 @@
 #include <y2pm/InstSrcDataPtr.h>
 #include <y2pm/InstSrcError.h>
 
-#include <y2pm/PMPackagePtr.h>
-#include <y2pm/PMSolvablePtr.h>
-
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescrPtr.h>
 #include <y2pm/MediaAccessPtr.h>
@@ -122,6 +119,15 @@ class InstSrcData: virtual public Rep, public InstData {
      * this.
      **/
     virtual void withdrawObjects();
+
+    /**
+     * Write data to cache, if necessary
+     **/
+    virtual PMError writeCache( const Pathname & cache_dir_r ) const;
+
+  public:
+
+    std::ostream & dumpOn( std::ostream & str ) const;
 
   public:
 

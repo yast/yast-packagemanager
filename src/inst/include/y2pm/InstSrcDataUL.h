@@ -47,25 +47,12 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	 * actual data for this InstSrc
 	 */
 	std::list<PMSelectionPtr> _selections;
-	std::list<PMPackagePtr> _packages;
-	std::list<PMYouPatchPtr> _patches;
-
-	//--------------------------------------------------------------------
-	// InstData interface  
-
-    protected:
-	//-----------------------------
-	// cache file handling
-	/**
-	 * write media content data to cache file
-	 * @param pathname of corresponding InstSrcDescr cache file
-	 * @return pathname of written cache
-	 * writes content cache data to an ascii file
-	 */
-	const Pathname writeCache (const Pathname &descrpathname);
+	std::list<PMPackagePtr>   _packages;
 
     public:
 
+	//--------------------------------------------------------------------
+	// InstData interface
 	/**
 	 * generate PMSelection objects for each selection on the source
 	 * @return list of PMSelectionPtr on this source
@@ -79,12 +66,10 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	const std::list<PMPackagePtr>& getPackages (void) const;
 
 	/**
-	 * generate PMSolvable objects for each patch on the source
-	 * @return list of PMSolvablePtr on this source
+	 * generate PMYouPatch objects for each patch on the source
+	 * @return list of PMYouPatchPtr on this source
 	 */
 	const std::list<PMYouPatchPtr>& getPatches (void) const;
-
-	std::ostream & dumpOn( std::ostream & str ) const;
 
     private:
 

@@ -109,7 +109,7 @@ MediaHandler::MediaHandler ( const Url &      url_r,
       _localRoot += _url.getPath();
   }
 
-  dumpOn( MIL );
+  dumpOn( MIL ) << endl;;
 }
 
 ///////////////////////////////////////////////////////////////////

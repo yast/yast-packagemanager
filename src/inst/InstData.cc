@@ -60,24 +60,9 @@ InstData::~InstData()
 }
 
 /**
- * write media content data to cache file
- * @param pathname of corresponding InstSrcDescr cache file
- * @return pathname of written cache
- * writes content cache data to an ascii file
- */
-const Pathname
-InstData::writeCache (const Pathname &descrpathname)
-{
-    Pathname datacachename = descrpathname.dirname() + "content.cache";
-    ERR << "Dummy InstData::writeCache()" << endl;
-    return datacachename;
-}
-
-//-----------------------------
-// content access
-
-/**
  * generate PMSelection objects for each selection on the source
+ *
+ * Default implementation provided returning an empty list.
  * @return list of PMSelectionPtr on this source
  */
 const std::list<PMSelectionPtr>&
@@ -90,9 +75,11 @@ InstData::getSelections (void) const
 
 /**
  * generate PMPackage objects for each Item on the source
+ *
+ * Default implementation provided returning an empty list.
  * @return list of PMPackagePtr on this source
  */
-const std::list<PMPackagePtr>& 
+const std::list<PMPackagePtr>&
 InstData::getPackages (void) const
 {
     static std::list<PMPackagePtr> packages;
@@ -101,6 +88,8 @@ InstData::getPackages (void) const
 
 /**
  * generate PMSolvable objects for each patch on the source
+ *
+ * Default implementation provided returning an empty list.
  * @return list of PMSolvablePtr on this source
  */
 const std::list<PMYouPatchPtr>&
@@ -183,19 +172,3 @@ InstData::findSelections (const std::list<PMSelectionPtr>& selections, const str
 //    MIL << "returning " << hits.size() << " selections" << endl;
     return hits;
 }
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstData::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & InstData::dumpOn( ostream & str ) const
-{
-//  Rep::dumpOn( str );
-  return str;
-}
-

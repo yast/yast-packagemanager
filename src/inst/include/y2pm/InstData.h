@@ -10,14 +10,14 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstData.h
+  File:       InstData.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
 
-    Purpose:	Keeps information about installation descriptions.
+  Purpose:    Interface class for InstSrcData and InstTarget and other
+              classes that may provide Packages/Selections/YouPatches.
 
-		Used for source and target sides.
 /-*/
 #ifndef InstData_h
 #define InstData_h
@@ -37,9 +37,11 @@
 //
 //	CLASS NAME : InstData
 //
-// 	Interface class for InstSrc and InstTarget
-
+/**
+ * @short Interface class for InstSrcData and InstTarget and other classes that may provide Packages/Selections/YouPatches.
+ **/
 class InstData {
+
   protected:
 
     InstData();
@@ -48,38 +50,35 @@ class InstData {
 
   public:
 
-    //-----------------------------
-    // cache file handling
-    /**
-     * write media content data to cache file
-     * @param pathname of corresponding InstSrcDescr cache file
-     * @return pathname of written cache
-     * writes content cache data to an ascii file
-     */
-    virtual const Pathname writeCache (const Pathname &descrpathname) = 0;
-
-    //-----------------------------
-    // source content access
-
     /**
      * generate PMSelection objects for each selection on the source
+     *
+     * Default implementation provided returning an empty list.
      * @return list of PMSelectionPtr on this source
      */
     virtual const std::list<PMSelectionPtr>& getSelections (void) const = 0;
 
+    unsigned numSelections() const { return getSelections().size(); }
+
     /**
      * generate PMPackage objects for each Item on the source/target
+     *
+     * Default implementation provided returning empty list.
      * @return list of PMPackagePtr on this source
      * */
     virtual const std::list<PMPackagePtr>& getPackages (void) const = 0;
 
+    unsigned numPackages() const { return getPackages().size(); }
+
     /**
      * generate PMSolvable objects for each patch on the source
+     *
+     * Default implementation provided returning empty list.
      * @return list of PMSolvablePtr on this source
      */
     virtual const std::list<PMYouPatchPtr>& getPatches (void) const = 0;
 
-    virtual std::ostream & dumpOn( std::ostream & str ) const = 0;
+    unsigned numPatches() const { return getPatches().size(); }
 
     /**
      * find list of packages

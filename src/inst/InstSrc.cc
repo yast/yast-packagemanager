@@ -29,6 +29,8 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
 
+#include <Y2PM.h>
+
 #include <y2pm/InstSrc.h>
 
 #include <y2pm/MediaAccess.h>
@@ -80,8 +82,8 @@ InstSrc::~InstSrc()
 {
 #warning ****************************************
 #warning ** FORCE _cache_deleteOnExit until InstSrcMgr ready
-  INT << "FORCE _cache_deleteOnExit until InstSrcMgr ready" << endl;
-  _cache_deleteOnExit = true;
+  //INT << "FORCE _cache_deleteOnExit until InstSrcMgr ready" << endl;
+  //_cache_deleteOnExit = true;
 #warning ****************************************
 
   MIL << "Delete InstSrc " << *this << "(" << (_cache_deleteOnExit ? "delete " : "keep " ) << _cache << ")" << endl;
@@ -92,6 +94,20 @@ InstSrc::~InstSrc()
   if ( _cache_deleteOnExit ) {
     PathInfo::recursive_rmdir( _cache );
   }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrc::_mgr_attach
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrc::_mgr_attach()
+{
+  _cache_deleteOnExit = false;
+  writeCache();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -161,6 +177,8 @@ PMError InstSrc::enableSource()
     _data = ndata;
     _data->_instSrc_attach( this ); // adjust backreferences to InstSrc.
     _data->_instSrc_propagate();    // propagate Objects to Manager classes.
+
+    writeCache();
   }
 
   return err;
@@ -200,70 +218,34 @@ PMError InstSrc::disableSource()
   return err;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrc::writeCache
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrc::writeCache()
+{
+#warning errorchecks
+  if ( ! Y2PM::runningFromSystem() ) {
+    MIL << "Not running from system: writeCache disabled" << endl;
+    return Error::E_src_cache_disabled;
+  }
+
+  if ( _descr ) {
+    _descr->writeCache( cache_descr_dir() );
+  }
+
+  if ( _data ) {
+    _descr->writeCache( cache_data_dir() );
+  }
+
+  return Error::E_ok;
+}
+
 #if 0
-/-----------------------------
-// general functions
-
-/**
- * clean up, e.g. remove all caches
- */
-bool
-InstSrc::Erase()
-{
-    D__ << __FUNCTION__ << std::endl;
-    return false;
-}
-
-/**
- * @return description of Installation source
- * This is needed by the InstSrcMgr
- */
-const InstSrcDescr *
-InstSrc::getDescription() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr;
-}
-
-/**
- * register this source (store cache files etc)
- * return pathname of saved content file
- */
-const Pathname
-InstSrc::registerSource (void) const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr->writeCache ();
-}
-
-//-----------------------------
-// activation status
-
-/**
- * return activation status
- */
-bool
-InstSrc::getActivation() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr->getActivation();
-}
-
-
-/**
- * temporary (de)activate source
- */
-void
-InstSrc::setActivation (bool yesno)
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr->setActivation (yesno);
-}
-#endif
-
-//-----------------------------
-// source content access
-
 /**
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
@@ -314,6 +296,7 @@ InstSrc::getPackages() const
     }
     return _data->getPackages();
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -437,7 +420,7 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
   }
 
   _cache = cachedir_r;
-  _cache_deleteOnExit = true; // preliminarily
+  _cache_deleteOnExit = true; // preliminarily; will be unset if InstSrcManager accepts this.
 
   ///////////////////////////////////////////////////////////////////
   // create descr/data/media_dir
@@ -570,8 +553,9 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
 //
 ostream & InstSrc::dumpOn( ostream & str ) const
 {
-    Rep::dumpOn( str );
-    return str;
+    Rep::dumpOn( str ) << "(";
+    str << _descr << "|" << _data ;
+    return str << ")";
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -718,7 +702,6 @@ PMError InstSrc::vconstruct( InstSrcPtr & nsrc_r, const Pathname & cachedir_r,
   // done
   ///////////////////////////////////////////////////////////////////
   if ( !err ) {
-    nsrc->_cache_deleteOnExit = false;
     nsrc_r = nsrc;
   }
   return err;

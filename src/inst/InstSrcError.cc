@@ -76,8 +76,11 @@ std::string InstSrcError::errtext( const unsigned e )
     ENUM_OUT( E_src_no_description );
     ENUM_OUT( E_src_already_enabled );
     ENUM_OUT( E_src_not_enabled );
+    ENUM_OUT( E_src_cache_disabled );
     //
     ENUM_OUT( E_bad_id );
+    ENUM_OUT( E_isrc_cache_invalid );
+    ENUM_OUT( E_isrc_cache_duplicate );
 
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////
