@@ -232,8 +232,7 @@ Proposal:<BR>
 Mandatory key strings
 <TABLE border>
 <tr><th>prio</th><th>key</th><th>allowed value</th></tr>
-<tr><td>M</td><td><tt>PRODUCT</tt></td><td>product name<br>
-For SuSE products: path as used on YOU maintenance web</td></tr>
+<tr><td>M</td><td><tt>PRODUCT</tt></td><td>product name</td></tr>
 <tr><td>M</td><td><tt>VERSION</tt></td><td>product version and release as in RPM<BR><tt>&lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</tt></td></tr>
 <tr><td>M</td><td><tt>DISTPRODUCT</tt></td><td>distribution id (vendor specific)</td></tr>
 <tr><td>M</td><td><tt>DISTVERSION</tt></td><td>distribution version (vendor specific)</tt></td></tr>
@@ -261,7 +260,8 @@ be determined.</td></tr>
 (relative to product directory)</td></tr>
 <tr><td>O</td><td><tt>LANGUAGE</tt></td><td>default language code</td></tr>
 <tr><td>O</td><td><tt>TIMEZONE</tt></td><td>default timezone</td></tr>
-<tr><td>O</td><td><tt>YOU</tt></td><td><tt>business</tt> for SuSE business products<br>
+<tr><td>O</td><td><tt>YOUTYPE</tt></td><td><tt>business</tt> for SuSE business products<br>
+<tr><td>O</td><td><tt>YOUPATH</tt></td><td>path to patches on the server<br>
 (triggers YOU to look at the maintenance web server for updates.</td></tr>
 </table>
 <smaller>prio 'M' == mandatory, 'O' == optional</smaller><br>
@@ -298,9 +298,10 @@ VERSION 8.0-0
 BASEPRODUCT UnitedLinux
 BASEVERSION 1.0-0
 VENDOR SuSE Linux AG
-ARCH.x86_64 x86-64 i686 i586 i486 noarch
-ARCH.i586 i586 i486 noarch
-DEFAULTBASE i586
+ARCH.x86_64 x86-64 i686 i586 i486 i386 noarch
+ARCH.i686 i686 i586 i486 i386 noarch
+ARCH.i586 i586 i486 i386 noarch
+DEFAULTBASE i386
 LINGUAS en de_DE
 LABEL.en SuSE Linux Enterprise Sever based on UnitedLinux
 LABEL.de_DE SuSE Linux Enterprise Sever basierend auf UnitedLinux
@@ -308,6 +309,8 @@ DESCRDIR suse/setup/descr
 DATADIR suse
 LANGUAGE de_DE
 TIMEZONE Europe/Berlin
+YOUTYPE business
+YOUPATH i386/update/SuSE-SLES/8
 linux#
 </pre>
 <br>
