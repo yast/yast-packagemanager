@@ -15,8 +15,8 @@
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
-    Purpose:	Works on a MediaInfoPtr, has access to physical package
-		descriptions, creates PMSolvable objects from descriptions.
+    Purpose: Base class for all concrete InstSrcData classes.
+
 /-*/
 #ifndef InstSrcData_h
 #define InstSrcData_h
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstSrcData
+/**
+ * @short Base class for all concrete InstSrcData classes.
+ **/
 class InstSrcData: virtual public Rep {
   REP_BODY(InstSrcData);
 
@@ -127,12 +130,13 @@ class InstSrcData: virtual public Rep {
 
     /**
      * Any concrete InstSrcData must realize this, as it knows the expected
-     * layout on the media. Expect MediaAccessPtr in source_r already opened
-     * the URL denoting the medias root dir. Return the InstSrcDescr retrieved
-     * from the media via ndescr_r, or NULL and PMError set.
+     * layout on the media. Expect MediaAccessPtr to be open and attached.
+     *
+     * Return the InstSrcDescr retrieved from the media via ndescr_r,
+     * or NULL and PMError set.
      **/
     static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
-				InstSrcPtr source_r, const Pathname & produduct_dir_r );
+				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
 };
 
 ///////////////////////////////////////////////////////////////////

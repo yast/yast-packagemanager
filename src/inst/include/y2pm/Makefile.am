@@ -9,8 +9,9 @@ pkgincludedir = $(includedir)/y2pm
 pkginclude_HEADERS =	\
 	InstSrcError.h	\
 	InstSrc.h	InstSrcPtr.h		\
-	InstSrcData.h	InstSrcDataPtr.h	\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
+	InstSrcData.h	InstSrcDataPtr.h	\
+		InstSrcData_UL.h	InstSrcData_ULPtr.h	\
 	\
 	InstTargetError.h	\
 	InstTarget.h	InstTargetPtr.h		\
