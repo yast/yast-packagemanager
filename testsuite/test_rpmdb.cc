@@ -86,8 +86,8 @@ int main(int argc, char* argv[])
 	    command = "";
     }
 
-    RpmDbPtr rpmdb = new RpmDb(root);
-    PMError stat = rpmdb->initDatabase(true);
+    RpmDbPtr rpmdb = new RpmDb();
+    PMError stat = rpmdb->initDatabase(root, true);
     if( stat != RpmDb::Error::E_ok )
     {
 	cout << "error initializing rpmdb: " << stat << endl;
