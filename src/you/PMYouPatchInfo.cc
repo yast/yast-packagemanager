@@ -337,22 +337,22 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                                  list<PMYouPatchPtr> &patches, bool checkSig )
 {
-  int err = PathInfo::assert_dir( _paths->localDir() );
-  if ( err ) {
-    E__ << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
-        << endl;
-    return PMError( InstSrcError::E_error );
-  }
+    int err = PathInfo::assert_dir( _paths->localDir() );
+    if ( err ) {
+      ERR << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
+          << endl;
+      return PMError( InstSrcError::E_error );
+    }
 
-   PMError error = _media.open( baseUrl, _paths->localDir() );
+    PMError error = _media.open( baseUrl, _paths->localDir() );
     if ( error != PMError::E_ok ) {
-      E__ << "MediaAccess::open() failed." << endl;
+      ERR << "MediaAccess::open() failed." << endl;
       return error;
     }
 
     error = _media.attach( );
     if ( error != PMError::E_ok ) {
-      E__ << "MediaAccess::attach() failed." << endl;
+      ERR << "MediaAccess::attach() failed." << endl;
       return error;
     }
 
@@ -362,7 +362,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     error = _media.provideFile( patchPath + _paths->directoryFileName() );
     if ( error ) {
-      W__ << "no directory file found." << endl;
+      WAR << "no directory file found." << endl;
       if ( error == MediaError::E_login_failed ||
            error == MediaError::E_proxyauth_failed ) {
           _media.release();
@@ -372,7 +372,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       error = _media.dirInfo( patchFiles, patchPath );
       if ( error ) {
         if ( error == MediaError::E_not_supported_by_media ) {
-	  E__ << "dirInfo not supported on " << _media << ": " << error << endl;
+	  ERR << "dirInfo not supported on " << _media << ": " << error << endl;
         }
         _media.release();
         return error;
@@ -390,13 +390,18 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     GPGCheck gpg;
 
+    int total = patchFiles.size();
+    int current = 0;
     list<string>::const_iterator it;
     for( it = patchFiles.begin(); it != patchFiles.end(); ++it ) {
+        error = Y2PM::youPatchManager().instYou().progress( current++ * 100 /
+                                                            total );
+        if ( error ) return error;
         if ( *it == "." || *it == ".." ||
              (*it).substr( 0, 9 ) == "directory" ) continue;
         error = _media.provideFile( patchPath + *it );
         if ( error != PMError::E_ok ) {
-            E__ << "ERR: " << error << patchPath + *it << endl;
+            ERR << "ERR: " << error << patchPath + *it << endl;
         } else {
             Pathname path = _media.localRoot() + patchPath;
 
@@ -404,7 +409,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                 string filePath = ( path + *it ).asString();
                 D__ << "Check signature of '" << filePath << "'" << endl;
                 if ( !gpg.check_file( filePath ) ) {
-                    E__ << "Signature check for '" << filePath << "' failed."
+                    ERR << "Signature check for '" << filePath << "' failed."
                         << endl;
                     _media.release();
                     return PMError( YouError::E_bad_sig_file );
@@ -415,15 +420,18 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
             D__ << "read patch: file: " << *it << endl;
             error = readFile( path, *it, patches );
             if ( error != PMError::E_ok ) {
+                ERR << "Error reading patch " << *it << endl;
                 _media.release();
                 return error;
             }
         }
+        DBG << "Successfully read " << *it << endl;
     }
+    Y2PM::youPatchManager().instYou().progress( 100 );
 
     error = _media.release();
     if ( error ) {
-        E__ << "Error releasing media." << endl;
+        ERR << "Error releasing media." << endl;
         return error;
     }
 
