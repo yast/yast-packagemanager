@@ -158,6 +158,9 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
                                    _packageDataProvider ) );
   patch->addPackage( pkg );
 
+  value = tagValue( YOUPackageTagSet::LABEL );
+  _packageDataProvider->setSummary( pkg, value );
+
   value = tagValue( YOUPackageTagSet::SIZE );
   _packageDataProvider->setSize( pkg, FSize( atoll( value.c_str() ) ) );
 

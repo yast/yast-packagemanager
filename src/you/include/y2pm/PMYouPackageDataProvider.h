@@ -41,6 +41,16 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 
     public:
         /**
+          Set label describing the package.
+        */
+        void setSummary( const PMPackagePtr &pkg, const std::string &label );
+
+        /**
+          Get label of package.
+        */
+        std::string summary( const PMPackage & pkg_r ) const;
+
+        /**
           Set label describing the package source.
         */
         void setSrcLabel( const PMPackagePtr &pkg, const std::string &label );
@@ -107,6 +117,7 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         std::list<PkgEdition> patchRpmBaseVersions( const PMPackage & ) const;
 
     private:
+        std::map<PMPackagePtr,std::string> _summaries;
         std::map<PMPackagePtr,std::string> _srcLabels;
         std::map<PMPackagePtr,FSize> _sizes;
         std::map<PMPackagePtr,std::string> _locations;
