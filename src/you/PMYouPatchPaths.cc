@@ -246,6 +246,8 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
       url += "&basearch=" + string( baseArch() );
     }
 
+    url = encodeUrl( url );
+
     D__ << "url: '" << url << endl;
 
     MediaAccess media;
@@ -293,4 +295,21 @@ Url PMYouPatchPaths::defaultServer()
   } else {
     return *_servers.begin();
   }
+}
+
+string PMYouPatchPaths::encodeUrl( const string &url )
+{
+  D__ << url << endl;
+
+  string result;
+  
+  string::const_iterator it;
+  for( it = url.begin(); it != url.end(); ++it ) {
+    if ( *it == ' ' ) result += "%20";
+    else result += *it;
+  }
+
+  D__ << result << endl;
+
+  return result;
 }

@@ -96,6 +96,8 @@ class PMYouPatchPaths : virtual public Rep {
   protected:
     void init( const std::string &path );
 
+    std::string encodeUrl( const std::string &url );
+
   private:
     Pathname _patchPath;
     Pathname _rpmPath;
