@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep 15 19:28:29 CEST 2003 - msvec@suse.cz
+
+- 2.8.18
+
+-------------------------------------------------------------------
 Fri Sep 12 22:20:10 CEST 2003 - ma@suse.de
 
 - Added ability to import ascii armored public key to rpmdatabase.
