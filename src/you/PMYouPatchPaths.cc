@@ -250,7 +250,7 @@ list<PkgArch> PMYouPatchPaths::archs()
   return _archs;
 }
 
-PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
+PMError PMYouPatchPaths::requestServers( const string &u )
 {
   D__ << "url: '" << u << endl;
 
@@ -258,14 +258,6 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
   
   if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
     string url = u;
-
-    if ( addFile ) {
-      if ( businessProduct() ) {
-        url += "suseservers_http.txt";
-      } else {
-        url += "suseservers.txt";
-      }
-    }
 
     if ( url.empty() ) {
       if ( _youUrl.empty() ) url = "http://www.suse.de/cgi-bin/suseservers.cgi";
