@@ -24,6 +24,9 @@
 #include <y2pm/InstallOrder.h>
 #include <y2pm/InstSrc.h>
 
+// needed for sdl test
+#include <y2pm/PMPackage.h>
+
 #undef Y2SLOG
 #define Y2SLOG "testinstall" 
 
@@ -95,19 +98,52 @@ int main( int argc, char *argv[] )
 	it != pacs->end();
 	++it, count++)
     {
-	candidates.add(*it);
+//	if(string((*it)->name()).find("SDL") != string::npos)
+	    candidates.add(*it);
     }
 
     InstallOrder order(candidates);
     cout << "computing installation order" << endl;
+//    Y2SLog::dbg_enabled_bm = true;
     order.startrdfs();
 
-    cout << "Installation order:" << endl;
+    cout << "Deps:" << endl;
+    cout << "------------------------" << endl;
+    order.printAdj(cout);
+    cout << "------------------------" << endl;
+
+    cout << "rDeps:" << endl;
+    cout << "------------------------" << endl;
+    order.printAdj(cout,true);
+    cout << "------------------------" << endl;
+
+    cout << "Installation order (topsort):" << endl;
+    cout << "------------------------" << endl;
     for(InstallOrder::SolvableList::const_iterator cit = order.getTopSorted().begin();
 	cit != order.getTopSorted().end(); ++cit)
     {
 	cout << (*cit)->name() << " ";
     }
     cout << endl;
+    cout << "------------------------" << endl;
+    cout << "Installation order (sets):" << endl;
+    cout << "------------------------" << endl;
+    InstallOrder::SolvableList pkgs = order.computeNextSet();
+    int nr = 0;
+    while(!pkgs.empty())
+    {
+	cout << nr++ << ": ";
+	for(InstallOrder::SolvableList::const_iterator cit = pkgs.begin();
+	    cit != pkgs.end(); ++cit)
+	{
+	    cout << (*cit)->name() << " ";
+	    order.setInstalled(*cit);
+	}
 
+	cout << endl;
+
+	pkgs = order.computeNextSet();
+    }
+    cout << endl;
+    cout << "------------------------" << endl;
 }

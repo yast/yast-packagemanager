@@ -27,6 +27,8 @@ class PkgSet {
 
 	typedef PMSolvable::PkgRelList_type& (*getAdditionalProvides_callback)( constPMSolvablePtr& ptr );
 
+	typedef std::list<constPMSolvablePtr> SolvableList;
+
   private:
 	// list of pointers to package contained in this set (the pointers go into
 	// the pool)
@@ -117,7 +119,6 @@ class PkgSet {
 	{
 	    return _additionalprovides_callback;
 	}
-
 };
 
 #endif  /* _PkgSet_h */

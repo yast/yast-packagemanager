@@ -26,24 +26,67 @@
 
 using namespace std;
 
-InstallOrder::InstallOrder(const PkgSet& toinstall) : _toinstall(toinstall)
+InstallOrder::InstallOrder(const PkgSet& toinstall) : _toinstall(toinstall), _dirty(true)
 {
 }
 
+// yea, that stuff is suboptimal. there should be a heap sorted by order
 InstallOrder::SolvableList InstallOrder::computeNextSet()
 {
-    return SolvableList();
+    SolvableList newlist;
+
+    for(Nodes::iterator it = _nodes.begin();
+	it != _nodes.end(); ++it)
+    {
+	if(it->second.order == 0)
+	{
+	    D__ << "found " << it->second.solvable->name() <<  endl;
+
+	    newlist.push_back(it->second.solvable);
+	}
+    }
+
+    return newlist;
 }
 
+// decrease order of every adjacent node
 void InstallOrder::setInstalled( constPMSolvablePtr ptr )
 {
+    _dirty = true;
+
+    SolvableList& adj = _rgraph[ptr];
+
+    D__ << ptr->name() << endl;
+    
+    // order will be < 0
+    _nodes[ptr].order--;
+
+    for(SolvableList::iterator it = adj.begin();
+	it != adj.end(); ++it)
+    {
+	NodeInfo& info = _nodes[*it];
+	info.order--;
+	if(info.order < 0)
+	{
+	    ERR << "order of node " << (*it)->name() << " is < 0" << endl;
+	}
+    }
+}
+
+void InstallOrder::setInstalled( const InstallOrder::SolvableList& list )
+{
+    for(SolvableList::const_iterator it=list.begin();
+	it != list.end(); ++it)
+    {
+	setInstalled(*it);
+    }
 }
 
 void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 {
     PMSolvable::PkgRelList_type reqnprereq;
 
-    DBG << "visiting " << node->name() << endl;
+    D__ << "visiting " << node->name() << endl;
 
     NodeInfo& info = _nodes[node];
 //    SolvableList& reverseedges = _rgraph[node];
@@ -77,19 +120,30 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 		{
 		    info.order++;
 		    _rgraph[prov->pkg()].push_back(node);
+		    _graph[node].push_back(prov->pkg());
 		    rdfsvisit(prov->pkg());
 		}
 		else if(_nodes[prov->pkg()].endtime == 0)
 		{
 		    if(prov->pkg() != node)
 		    {
-			DBG  << "backward edge " << node->name() << " -> " << prov->pkg()->name() << endl;
+			WAR  << "backward edge " << node->name() << " -> " << prov->pkg()->name() << endl;
 		    }
 		}
 		else
 		{
-		    info.order++;
-		    _rgraph[prov->pkg()].push_back(node);
+		    // filter multiple depends on same node (cosmetic)
+		    SolvableList& lrg = _rgraph[prov->pkg()];
+		    if(find(lrg.begin(),lrg.end(),node) == lrg.end())
+		    {
+			info.order++;
+			lrg.push_back(node);
+
+			SolvableList& lg = _graph[prov->pkg()];
+			if(find(lg.begin(),lg.end(),node) == lg.end())
+			    lg.push_back(node);
+		    }
+
 		}
 	    }
 	}
@@ -102,6 +156,8 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 void InstallOrder::startrdfs()
 {
     _nodes.erase(_nodes.begin(),_nodes.end());
+    _rgraph.erase(_rgraph.begin(),_rgraph.end());
+    _graph.erase(_graph.begin(),_graph.end());
 
     _rdfstime = 1;
     
@@ -113,8 +169,9 @@ void InstallOrder::startrdfs()
     // initialize all nodes
     for(PkgSet::iterator it = _toinstall.begin(); it != _toinstall.end(); ++it)
     {
-	_nodes[it->value]=NodeInfo();
+	_nodes[it->value]=NodeInfo(it->value);
 	_rgraph[it->value]=SolvableList();
+	_graph[it->value]=SolvableList();
     }
 
     // visit all nodes
@@ -122,7 +179,7 @@ void InstallOrder::startrdfs()
     {
 	if(_nodes[it->value].visited == false)
 	{
-	    DBG << "start recursion on " << it->value->name() << endl;
+	    WAR << "start recursion on " << it->value->name() << endl;
 	    rdfsvisit(it->value);
 	}
     }
@@ -131,4 +188,22 @@ void InstallOrder::startrdfs()
 const InstallOrder::SolvableList& InstallOrder::getTopSorted() const
 {
     return _topsorted;
+}
+
+const void InstallOrder::printAdj(std::ostream& os, bool reversed) const
+{
+    const Graph& g = (reversed?_rgraph:_graph);
+    for (Graph::const_iterator gcit = g.begin();
+	gcit != g.end(); ++gcit)
+    {
+	Nodes::const_iterator niit = _nodes.find(gcit->first);
+	int order = niit->second.order;
+	os << gcit->first->name() << "(" << order << "): ";
+	for (SolvableList::const_iterator scit = gcit->second.begin();
+	    scit != gcit->second.end(); ++scit)
+	{
+	    os << (*scit)->name() << " ";
+	}
+	os << endl;
+    }
 }
