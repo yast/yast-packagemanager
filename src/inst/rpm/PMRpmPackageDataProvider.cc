@@ -50,8 +50,9 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
 string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
     PMObject::PMObjectAttribute attr)
 {
-    D__ << pkg->name() << pkg->edition().as_string() << endl;
+//    D__ << pkg->name() << pkg->edition().as_string() << endl;
     const char* queryformat = NULL;
+    string ret;
 
     switch(attr)
     {
@@ -69,14 +70,42 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	    return "invalid query";
     }
 
-    return _rpmdb->queryPackage(queryformat,string(pkg->name())+"-"+pkg->edition().as_string());
+    // check if cached
+    AttrVecPosition pos = pkgattr2pos(attr);
+    if(pos != AV_POS_INVALID)
+    {
+	PkgMap::iterator it = _pkgmap.find(pkg);
+
+	// is package in cache?
+	if(it != _pkgmap.end())
+	{
+//	    D__ << "found " << pkg->name() << " in cache" << endl;
+	    
+	    AttrVec& vec = it->second;
+	    ret = vec[pos];
+	    if(!ret.empty())
+		return ret;
+	}
+    }
+
+    ret = _rpmdb->queryPackage(queryformat,string(pkg->name())+"-"+pkg->edition().as_string());
+
+    // if attribute is to be cached but not stored yet, do it now
+    if(pos != AV_POS_INVALID)
+    {
+//	D__ << "insert attribute " << pkg->getAttributeName(attr) << " to cache" << endl;
+	setAttributeValue(pkg,attr,ret);
+    }
+
+    return ret;
 }
 
 string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
     PMPackage::PMPackageAttribute attr)
 {
-    D__ << pkg->name() << pkg->edition().as_string() << endl;
+//    D__ << pkg->name() << pkg->edition().as_string() << endl;
     const char* queryformat = NULL;
+    string ret;
 
     switch(attr)
     {
@@ -143,7 +172,92 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	    return "invalid query";
     }
 
-    return _rpmdb->queryPackage(queryformat,string(pkg->name())+"-"+pkg->edition().as_string());
+    // check if cached
+    AttrVecPosition pos = pkgattr2pos(attr);
+    if(pos != AV_POS_INVALID)
+    {
+	PkgMap::iterator it = _pkgmap.find(pkg);
+
+	// is package in cache?
+	if(it != _pkgmap.end())
+	{
+//	    D__ << "found " << pkg->name() << " in cache" << endl;
+	    
+	    AttrVec& vec = it->second;
+	    ret = vec[pos];
+	    if(!ret.empty())
+		return ret;
+	}
+    }
+
+    ret = _rpmdb->queryPackage(queryformat,string(pkg->name())+"-"+pkg->edition().as_string());
+    
+    // if attribute is to be cached but not stored yet, do it now
+    if(pos != AV_POS_INVALID)
+    {
+//	D__ << "insert attribute " << pkg->getAttributeName(attr) << " to cache" << endl;
+	setAttributeValue(pkg,attr,ret);
+    }
+
+    return ret;
+}
+
+/** compute vector position from attribute
+ *
+ * @return position or AV_POS_INVALID if this item is not to be cached
+ * */
+PMRpmPackageDataProvider::AttrVecPosition PMRpmPackageDataProvider::pkgattr2pos(unsigned attr)
+{
+    switch(attr)
+    {
+	case PMObject::ATTR_SIZE:
+	    return AV_SIZE;
+	case PMObject::ATTR_SUMMARY:
+	    return AV_SUMMARY;
+	case PMPackage::ATTR_GROUP:
+	    return AV_GROUP;
+	default:
+	    return AV_POS_INVALID;
+    };
+}
+
+/** inject attibute to cache */
+void PMRpmPackageDataProvider::setAttributeValue(
+    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr, const string& value)
+{
+    _setAttributeValue(pkg,attr,value);
+}
+
+/** inject attibute to cache */
+void PMRpmPackageDataProvider::setAttributeValue(
+    PMPackagePtr pkg, PMObject::PMObjectAttribute attr, const string& value)
+{
+    _setAttributeValue(pkg,attr,value);
+}
+
+/** inject attibute to cache */
+void PMRpmPackageDataProvider::_setAttributeValue(
+    PMPackagePtr pkg, unsigned attr, const string& value)
+{
+    AttrVecPosition pos = pkgattr2pos(attr);
+    if(pos == AV_POS_INVALID)
+	return;
+
+    PkgMap::iterator it = _pkgmap.find(pkg);
+
+    AttrVec vec;
+    
+    // package not known yet
+    if(it == _pkgmap.end())
+    {
+	vec = AttrVec(AV_NUM_ITEMS,string());
+    }
+    else
+	vec = it->second;
+
+    vec[pos]=value;
+
+    _pkgmap[pkg]=vec;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@
 #define PMPackageDataProvider_h
 
 #include <iosfwd>
+#include <string>
 
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
@@ -47,6 +48,20 @@ class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
     /** see PMObject */
     virtual std::string getAttributeValue(
 	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr) = 0;
+
+    /** inject some object attribute. The actual implementation may or may not
+     * choose to store the value in a cache for faster access.
+     * */
+    virtual void setAttributeValue(
+	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
+	const std::string& value) = 0;
+
+    /** inject some package attribute. The actual implementation may or may not
+     * choose to store the value in a cache for faster access.
+     * */
+    virtual void setAttributeValue(
+	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
+	const std::string& value) = 0;
 
   public:
 
