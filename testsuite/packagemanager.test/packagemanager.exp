@@ -1,0 +1,17 @@
+# Test suite for packagemanager stand-alone unit tests
+
+# execute filterarchs
+
+set testname filterarchs
+
+set errorCode "NONE"
+
+catch {
+  set result [ exec ./test_filterarchs ]
+}
+
+if { $errorCode == "NONE" } {
+  pass $testname
+} else {
+  fail $testname
+}

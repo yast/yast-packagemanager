@@ -8,3 +8,4 @@ tmp.log*
 .libs
 *.log
 *.sum
+test_filterarchs

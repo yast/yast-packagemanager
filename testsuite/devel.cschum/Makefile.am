@@ -13,8 +13,6 @@ EXTRA_PROGRAMS = \
         products \
         test_media
 
-check_PROGRAMS = test_filterarchs
-
 cschum_test_SOURCES = cschum_test.cc
 cschum_test_LDADD = $(top_builddir)/src/liby2pm.la
 cschum_test_LDFLAGS = -static
@@ -38,10 +36,6 @@ callback_test_LDFLAGS = -static
 test_patchinfo_SOURCES = test_patchinfo.cc
 test_patchinfo_LDADD = $(top_builddir)/src/liby2pm.la
 test_patchinfo_LDFLAGS = -static
-
-test_filterarchs_SOURCES = test_filterarchs.cc
-test_filterarchs_LDADD = $(top_builddir)/src/liby2pm.la
-test_filterarchs_LDFLAGS = -static
 
 products_SOURCES = products.cc
 products_LDADD = $(top_builddir)/src/liby2pm.la
