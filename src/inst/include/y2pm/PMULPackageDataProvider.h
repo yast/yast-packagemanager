@@ -49,7 +49,7 @@
 class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
 
-    friend class InstSrcDataUL;
+    friend class ULPackagesParser;
 
     protected:
 
@@ -89,21 +89,20 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// retrieval pointer for packages data
 	TagCacheRetrievalPtr _package_retrieval;
 
-	// retrieval pointer for packages.<lang> data
-	TagCacheRetrievalPtr _language_retrieval;
+	// retrieval pointer for packages.<locale> data
+	TagCacheRetrievalPtr _locale_retrieval;
 
 	// fallback provider (Share entry in packages)
 	PMULPackageDataProviderPtr _fallback_provider;
 
     public:
 
-	PMULPackageDataProvider (TagCacheRetrievalPtr package_retrieval);
+	PMULPackageDataProvider (TagCacheRetrievalPtr package_retrieval, TagCacheRetrievalPtr locale_retrieval);
 	virtual ~PMULPackageDataProvider();
 
     public:
 
-	void setLangCache ( TagCacheRetrievalPtr language_retrieval ) { _language_retrieval = language_retrieval; }
-	void setShared ( PMULPackageDataProviderPtr provider_r ) { _fallback_provider = provider_r; }
+	void setShared ( PMULPackageDataProviderPtr provider ) { _fallback_provider = provider; }
 
     public:
 

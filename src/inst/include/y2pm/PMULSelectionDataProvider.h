@@ -27,6 +27,7 @@
 #include <map>
 
 #include <y2util/FSize.h>
+#include <y2util/LangCode.h>
 #include <y2util/Pathname.h>
 #include <y2util/TaggedFile.h>
 #include <y2util/TagCacheRetrieval.h>
@@ -35,6 +36,7 @@
 #include <y2pm/PMSelectionDataProvider.h>
 
 #include <y2pm/PMSelection.h>
+#include <y2pm/PMSelectable.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -51,12 +53,55 @@
 class PMULSelectionDataProvider : public PMSelectionDataProvider {
     REP_BODY(PMULSelectionDataProvider);
 
-    friend class InstSrcDataUL;
+    friend class ULSelectionParser;
 
     private:
 
-	std::string posmapSLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const;
-	std::list<std::string> posmapLLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const;
+	// the list of inspacks and delpacs are cached in two variants
+	// the first (and initial) is the map of <locale, retrieval position>
+	// (posmaptype)
+	// This map is used when the inspacks/delpacks are needed as a string list
+	//
+	// But when the inspacks/delpacks are needed as a PMSelectablePtr list,
+	// this list is created on demand and stored in the _ptrs* attribute.
+	//
+	// All further requests for string or pointer list are then fulfilled
+	// from the pointer list (which is converted back to a string list on demand,
+	// which is faster than a file retrieval anyway)
+	//
+
+	// map of <locale, retrieval position>
+	typedef TaggedFile::Tag::posmaptype::const_iterator posmapIT;
+
+	// map of <locale, selectable list>
+	typedef map <LangCode,std::list<PMSelectablePtr> > slcmaptype;
+	typedef slcmaptype::const_iterator slcmapIT;
+
+	// find retrieval position by locale
+	posmapIT posmapFind (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const;
+
+	// find PMSelectable list by locale
+	slcmapIT slcmapFind (const slcmaptype& theMap, const LangCode& locale) const;
+
+	// find string position by locale
+	std::string posmapSLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const;
+
+	// find string list position by locale
+	std::list<std::string> posmapLLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const;
+
+	// convert selection list to string list
+	std::list<std::string> sellist2strlist (const std::list<PMSelectionPtr>& sellist) const;
+
+	// convert selectable list to string list
+	std::list<std::string> slclist2strlist (const std::list<PMSelectablePtr>& slclist) const;
+
+	// lookup inspacks/delpacks for locale as string list
+	std::list<std::string> pkgsList (const LangCode& locale, bool is_delpacks) const;
+
+	// lookup inspacks/delpacks for locale as selectable list
+	//   this needs a non-const data provider in order to store the selectable list in this
+	//   provider if it didn't exits before.
+	std::list<PMSelectablePtr> pkgsPointers (PMULSelectionDataProviderPtr prv, const LangCode & locale, bool is_delpacks) const;
 
     protected:
 
@@ -71,19 +116,22 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 	bool 						_attr_ISBASE;
 
 	bool 						_attr_VISIBLE;
-	TagRetrievalPos 				_attr_RECOMMENDS;
-	std::list<PMSelectionPtr> 			_ptrs_attr_RECOMMENDS;
-	TagRetrievalPos 				_attr_SUGGESTS;
-	std::list<PMSelectionPtr> 			_ptrs_attr_SUGGESTS;
+
+	// see ULSelectionParser. The recommends and suggests fields are filled
+	// during parsing to prevent cross-source pointers
+	std::list<std::string>			_attr_RECOMMENDS;	// temporary
+	std::list<PMSelectionPtr> 		_ptrs_attr_RECOMMENDS;	// final
+	std::list<std::string>			_attr_SUGGESTS;		// temporary
+	std::list<PMSelectionPtr> 		_ptrs_attr_SUGGESTS;	// final
 
 	// map over locales
-	TaggedFile::Tag::posmaptype 			_attr_INSPACKS;
-	map <std::string,std::list<PMPackagePtr> > 	_ptrs_attr_INSPACKS;
-	TaggedFile::Tag::posmaptype 			_attr_DELPACKS;
-	map <std::string,std::list<PMPackagePtr> > 	_ptrs_attr_DELPACKS;
+	TaggedFile::Tag::posmaptype 		_attr_INSPACKS;
+	slcmaptype 				_ptrs_attr_INSPACKS;
+	TaggedFile::Tag::posmaptype 		_attr_DELPACKS;
+	slcmaptype				_ptrs_attr_DELPACKS;
 
-	FSize 						_attr_ARCHIVESIZE;
-	std::string 					_attr_ORDER;
+	FSize 					_attr_ARCHIVESIZE;
+	std::string 				_attr_ORDER;
 
 	// retrieval pointer for *.sel data
 	TagCacheRetrievalPtr _selection_retrieval;
@@ -98,32 +146,34 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
     public:
 
 	/**
-	 * Selection attributes InstSrcDataUL is able to provide.
-	 * @see PMSelectionDataProvider
-	 **/
+	* Selection attributes InstSrcDataUL is able to provide.
+	* @see PMSelectionDataProvider
+	**/
 
          // PMObject attributes
-         virtual std::string               summary        ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual std::list<std::string>    description    ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual std::list<std::string>    insnotify      ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual std::list<std::string>    delnotify      ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual FSize                     size           ( const PMSelection & sel_r ) const;
+	virtual std::string               summary        ( const PMSelection & sel_r, const LangCode& locale = LangCode("") ) const;
+	virtual std::list<std::string>    description    ( const PMSelection & sel_r, const LangCode& locale = LangCode("") ) const;
+	virtual std::list<std::string>    insnotify      ( const PMSelection & sel_r, const LangCode& locale = LangCode("") ) const;
+	virtual std::list<std::string>    delnotify      ( const PMSelection & sel_r, const LangCode& locale = LangCode("") ) const;
+	virtual FSize                     size           ( const PMSelection & sel_r ) const;
 
-	 // PMSelection attributes
-	 virtual std::string               category       ( const PMSelection & sel_r ) const;
-	 virtual bool                      visible        ( const PMSelection & sel_r ) const;
-	 virtual std::list<std::string>    suggests       ( const PMSelection & sel_r ) const;
-	 virtual std::list<PMSelectionPtr> suggests_ptrs  ( const PMSelection & sel_r ) const;
-	 virtual std::list<std::string>    recommends     ( const PMSelection & sel_r ) const;
-	 virtual std::list<PMSelectionPtr> recommends_ptrs( const PMSelection & sel_r ) const;
-	 virtual std::list<std::string>    inspacks       ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual std::list<PMPackagePtr>   inspacks_ptrs  ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual std::list<PMPackagePtr>   delpacks_ptrs  ( const PMSelection & sel_r, const std::string & lang = "" ) const;
-	 virtual FSize                     archivesize    ( const PMSelection & sel_r ) const;
-	 virtual std::string               order          ( const PMSelection & sel_r ) const;
+	// PMSelection attributes
+	virtual std::string               category       ( const PMSelection & sel_r ) const;
+	virtual bool                      visible        ( const PMSelection & sel_r ) const;
+	// selection dependencies
+	virtual std::list<std::string>    suggests       ( const PMSelection & sel_r ) const;
+	virtual std::list<PMSelectionPtr> suggests_ptrs  ( const PMSelection & sel_r ) const;
+	virtual std::list<std::string>    recommends     ( const PMSelection & sel_r ) const;
+	virtual std::list<PMSelectionPtr> recommends_ptrs( const PMSelection & sel_r ) const;
+	// package dependencies
+	virtual std::list<std::string>    inspacks       ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
+	virtual std::list<PMSelectablePtr>inspacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
+	virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
+	virtual std::list<PMSelectablePtr>delpacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
+	virtual FSize                     archivesize    ( const PMSelection & sel_r ) const;
+	virtual std::string               order          ( const PMSelection & sel_r ) const;
 
-	 virtual bool                      isBase         ( const PMSelection & sel_r ) const;
+	virtual bool                      isBase         ( const PMSelection & sel_r ) const;
 
 };
 

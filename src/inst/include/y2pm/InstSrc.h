@@ -289,16 +289,6 @@ class InstSrc: virtual public Rep {
 
   private:
 
-	/**
-	 * list of allowed subdirs below _descr->datadir() for package installation
-	 *
-	 * set when enabling source
-	 * used in provideLocation
-	 *
-	 * (see ARCH.x line in content file for further information)
-	 */
-	std::list<Pathname> _datasubdirs;
-
 	/** media change callback
 	    - error type
 		1 = no media found

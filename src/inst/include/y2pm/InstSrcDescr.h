@@ -61,7 +61,7 @@ class InstSrcDescr : virtual public Rep {
      **/
     typedef InstSrcError Error;
 
-    typedef std::map<std::string,std::list<Pathname> >  ArchMap;
+    typedef std::map<std::string,std::list<PkgArch> >   ArchMap;
     typedef std::map<LangCode,std::string>              LabelMap;
     typedef std::list<LangCode>                         LinguasList;
 

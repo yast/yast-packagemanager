@@ -198,6 +198,22 @@ class RpmDb: virtual public Rep
 	 */
 	bool queryCache (constPMPackagePtr package, struct rpmCache *theCache);
 
+	/**
+	 * query system for provided tag (rpm -q --whatprovides)
+	 */
+	bool isProvided (const std::string& tag);
+
+	/**
+	 * query system for installed package (rpm -q)
+	 */
+	bool isInstalled (const std::string& name);
+
+	/**
+	 * query system for package the given file belongs to
+	 * (rpm -qf)
+	 */
+	std::string belongsTo (const Pathname& name);
+
 	/** install rpm package
 	 *
 	 * @param filename file to install
@@ -347,8 +363,8 @@ class RpmDb: virtual public Rep
 
 	/** helper for queryPackage
 	 * */
-	bool queryPackage (const std::string& package, const char *qparam, const char *format, std::string& result_r);
-	bool queryPackage (const std::string& package, const char *qparam, const char *format, std::list<std::string>& result_r);
+	bool queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::string& result_r);
+	bool queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::list<std::string>& result_r);
 
 	/**
 	 * handle rpm messages like "/etc/testrc saved as /etc/testrc.rpmorig"

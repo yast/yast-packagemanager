@@ -43,9 +43,11 @@ IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMPackageData
 //	DESCRIPTION : open packages stream and keep pointer to tag parser
 //		      for later value retrieval on-demand
 //
-PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrievalPtr package_retrieval)
+PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrievalPtr package_retrieval,
+			TagCacheRetrievalPtr locale_retrieval)
     : _attr_GROUP(0)
     , _package_retrieval (package_retrieval)
+    , _locale_retrieval (locale_retrieval)
 {
 }
 
@@ -59,13 +61,14 @@ PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrievalPtr package_re
 //
 PMULPackageDataProvider::~PMULPackageDataProvider()
 {
+
 }
 
 // NOTE:
 // The 'const PMPackage & pkg_r' argument is passed to the _fallback_provider->func.
-// This is ok, as InstSrcDataUL uses a per Package DataProvider. The pkg_r argument
+// This is ok, as InstSrcDataUL uses a per package DataProvider. The pkg_r argument
 // is not actually evaluated. (and if it would be, it would point to the Package that
-// initiated the request, wich is in fact what we want).
+// initiated the request, which is in fact what we want).
 
 #define FALLBACK(attr,func) \
   do { if (attr.empty() && (_fallback_provider != 0)) return _fallback_provider->func(pkg_r); } while (0);
@@ -75,7 +78,7 @@ PMULPackageDataProvider::summary ( const PMPackage & pkg_r ) const
 {
     FALLBACK(_attr_SUMMARY,summary);
     std::string value;
-    _language_retrieval->retrieveData (_attr_SUMMARY, value);
+    _locale_retrieval->retrieveData (_attr_SUMMARY, value);
     return value;
 }
 
@@ -84,7 +87,7 @@ PMULPackageDataProvider::description ( const PMPackage & pkg_r ) const
 {
     FALLBACK(_attr_DESCRIPTION,description);
     std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_DESCRIPTION, value);
+    _locale_retrieval->retrieveData (_attr_DESCRIPTION, value);
     return value;
 }
 
@@ -93,7 +96,7 @@ PMULPackageDataProvider::insnotify ( const PMPackage & pkg_r ) const
 {
     FALLBACK(_attr_INSNOTIFY,insnotify);
     std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_INSNOTIFY, value);
+    _locale_retrieval->retrieveData (_attr_INSNOTIFY, value);
     return value;
 }
 
@@ -102,7 +105,7 @@ PMULPackageDataProvider::delnotify ( const PMPackage & pkg_r ) const
 {
     FALLBACK(_attr_DELNOTIFY,delnotify);
     std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_DELNOTIFY, value);
+    _locale_retrieval->retrieveData (_attr_DELNOTIFY, value);
     return value;
 }
 

@@ -155,6 +155,7 @@ PMError InstSrc::enableSource()
   }
 
 
+  //-----------------------------------------------------------------
   // Determine search path for providePackage
 
   //std::map<std::string,std::list<Pathname> >
@@ -163,7 +164,7 @@ PMError InstSrc::enableSource()
   InstSrcDescr::ArchMap::const_iterator archIt = archmap.find ((const std::string &)(Y2PM::baseArch()));
   if (archIt == archmap.end())
   {
-    WAR << "No 'ARCH." << Y2PM::baseArch() << "' line" << endl;
+    WAR << "No 'ARCH." << Y2PM::baseArch() << "' line, using ARCH." << _descr->content_defaultbase() << endl;
     archIt = archmap.find (_descr->content_defaultbase());
   }
   if (archIt == archmap.end())
@@ -171,16 +172,14 @@ PMError InstSrc::enableSource()
     ERR << "Unable to determine ARCH. line" << endl;
     return Error::E_src_no_description;
   }
-  _datasubdirs = archIt->second;
 
   ///////////////////////////////////////////////////////////////////
   // create InstSrcData according to Type stored in InstSrcDescr
   // and let it load it's data.
   ///////////////////////////////////////////////////////////////////
+
   PMError err;
   InstSrcDataPtr ndata;
-
-
 
   switch ( _descr->type() ) {
 
@@ -210,7 +209,7 @@ PMError InstSrc::enableSource()
 	}
 	MIL << "(F)Use cache " << cpath << endl;
       }
-      err = InstSrcDataUL::tryGetData( ndata, f_media, f_descrdir );
+      err = InstSrcDataUL::tryGetData( ndata, f_media, f_descrdir, archIt->second, Y2PM::getPreferredLocale() );
     }
     // EKAF
     // err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
@@ -238,6 +237,9 @@ PMError InstSrc::enableSource()
   // done
   ///////////////////////////////////////////////////////////////////
   if ( !err ) {
+#warning TBD which is the correct list of allowed architectures if multiple products are installed ?
+    if (Y2PM::allowedArchs().empty())
+	Y2PM::setAllowedArchs (archIt->second);
     _data = ndata;
     _data->_instSrc_attach( this );
     _data->_instSrc_propagate();    // propagate Objects to Manager classes.
