@@ -42,12 +42,12 @@ using namespace std;
 IMPL_BASE_POINTER(PMYouPatchPaths);
 
 PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
-                                  const string &arch )
-  : _arch( arch )
+                                  const string &baseArch )
+  : _product( product ), _version( version ), _baseArch( baseArch )
 {
   _businessProduct = ( product != "SuSE-Linux" );
 
-  string path = arch + "/update/";
+  string path = baseArch + "/update/";
   if ( _businessProduct  ) {
     path += product + "/";
     _patchUrl = Url( "http://support.suse.de/" );
@@ -78,7 +78,7 @@ Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg )
   rpmName += "-";
   rpmName += pkg->release();
   rpmName += ".";
-  rpmName += arch();
+  rpmName += baseArch();
   rpmName += ".rpm";
   return _rpmPath + rpmName;
 }
@@ -98,9 +98,19 @@ Pathname PMYouPatchPaths::localDir()
   return "/var/lib/YaST2/you/";
 }
 
-PkgArch PMYouPatchPaths::arch()
+string PMYouPatchPaths::product()
 {
-  return _arch;
+  return _product;
+}
+
+string PMYouPatchPaths::version()
+{
+  return _version;
+}
+
+PkgArch PMYouPatchPaths::baseArch()
+{
+  return _baseArch;
 }
 
 bool PMYouPatchPaths::businessProduct()

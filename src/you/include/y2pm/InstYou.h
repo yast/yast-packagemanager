@@ -82,7 +82,6 @@ class InstYou {
      */
     PMError installPatches( bool dryrun = false );
 
-  public:
     /**
      * Select Patches. If there are YaST2 patches, only the newest YaST2 patch
      * will be selected.
@@ -97,6 +96,11 @@ class InstYou {
      * installed.
      */
     void filterPatchSelection();
+
+    /**
+     * Get object holding path information.
+     */
+    PMYouPatchPathsPtr paths() const { return _paths; }
 
   private:
     PMYouPatchInfoPtr _info;

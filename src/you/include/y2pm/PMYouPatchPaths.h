@@ -45,7 +45,7 @@ class PMYouPatchPaths : virtual public Rep {
   public:
     PMYouPatchPaths() {}
     PMYouPatchPaths( const std::string &product, const std::string &version,
-                     const std::string &arch );
+                     const std::string &baseArch );
 
     void setPatchPath( const Pathname & );
     Pathname patchPath();
@@ -57,7 +57,11 @@ class PMYouPatchPaths : virtual public Rep {
 
     Pathname localDir();
 
-    PkgArch arch();
+    std::string product();
+    
+    std::string version();
+    
+    PkgArch baseArch();
 
     bool businessProduct();
 
@@ -73,7 +77,9 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname _rpmPath;
     Url _patchUrl;
     
-    PkgArch _arch;
+    std::string _product;
+    std::string _version;
+    PkgArch _baseArch;
     
     std::list<Url> _servers;
 
