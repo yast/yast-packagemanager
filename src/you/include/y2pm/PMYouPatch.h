@@ -200,6 +200,9 @@ class PMYouPatch : virtual public Rep, public PMObject {
 
     virtual ~PMYouPatch();
 
+    void startRetrieval() const;
+    void stopRetrieval() const;
+
   public:
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;

@@ -53,6 +53,17 @@ PMSelection::PMSelection( const PkgName &    name_r,
 {
 }
 
+void
+PMSelection::startRetrieval () const
+{
+    _dataProvider->startRetrieval ();
+}
+
+void
+PMSelection::stopRetrieval () const
+{
+    _dataProvider->stopRetrieval ();
+}
 
 // overlay virtual PMObject functions
 

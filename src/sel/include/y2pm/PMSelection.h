@@ -119,6 +119,9 @@ class PMSelection : virtual public Rep, public PMObject {
 
     virtual ~PMSelection();
 
+    void startRetrieval() const;
+    void stopRetrieval() const;
+
   public:
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
