@@ -137,8 +137,10 @@ class PkgDep {
 
 	typedef std::list<PMSolvablePtr> SolvableList;
 
+  private:
 	struct Notes;
 
+  public:
 	/** This is the basic return type for packages that could be
 	 * processed without problems. It contains further
 	 * information about the package
