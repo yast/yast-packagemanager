@@ -274,50 +274,11 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  set<string> allpks;
-  //allpks.insert( "aaa_base" );
-  allpks.insert( "test" );
-  //allpks.insert( "test1" );
-  //allpks.insert( "test2" );
-  //allpks.insert( "test3" );
-  //allpks.insert( "test11" );
-  //allpks.insert( "test22" );
-  //allpks.insert( "test33" );
-  //allpks.insert( "test111" );
-  //allpks.insert( "test222" );
-  //allpks.insert( "test333" );
-#define forall for ( set<string>::const_iterator it = allpks.begin(); it != allpks.end(); ++it )
+  //Y2PM::instSrcManager();
+  //Y2PM::instTargetUpdate();
 
-  Y2PM::instSrcManager();
-  forall {
-    DBG << "  " << PMGR[*it]->user_set_install() << endl;
-    DBG << "  " << PMGR[*it]->providesSources() << endl;
-    DBG << "  " << PMGR[*it]->set_source_install( true ) << endl;
-    SEC << PMGR[*it] << endl;
-  }
-
-  Y2PM::instTargetUpdate();
-  forall {
-    DBG << "  " << PMGR[*it]->user_set_install() << endl;
-    SEC << PMGR[*it] << endl;
-  }
-
-
-
-#if 0
-  Y2PMCallbacks::commitProvideReport.redirectTo( commitProvideReceive );
-  InstSrcManagerCallbacks::mediaChangeReport.redirectTo( mediaChangeReceive );
-
-  forall {
-    SEC << PMGR[*it] << endl;
-  }
-#endif
-
-  list<string> errors;
-  list<string> remaining;
-  list<string> srcremaining;
-  Y2PM::commitPackages( 0, errors, remaining, srcremaining );
-
+  ISM.enableSource( newSrc( "/mounts/machcd4/CDs/SuSE-9.0-Pers-i386-RC1/CD1" ) );
+  sleep( 10 );
   SEC << "STOP -> " << ret << endl;
   return ret;
 }
