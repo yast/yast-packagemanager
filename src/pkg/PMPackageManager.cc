@@ -257,14 +257,16 @@ int
 PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r)
 {
     int count = 0;
+    int i = 1;
     noinstall_r.clear();
     nodelete_r.clear();
 
-    DBG << "doUpdate..." << endl;
+    DBG << "doUpdate..." << size() << " selectables" << endl;
 
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
     {
-	DBG << (*it)->name() << ": ";
+	DBG << i << ". " << (*it)->name() << ": ";
+	i++;
 
 	//-----------------------------------------------------------------
 	// pre check: candidate ? taboo ? user ? non-suse ?
@@ -316,6 +318,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
 	    string name = (*splitit).substr (0, colonpos);
 	    string rpmname = Y2PM::instTarget().belongsTo (Pathname ((*splitit).substr (colonpos+1)));
+	    DBG << "'" << name << "' matches '" << rpmname << "' ?" << endl;
 	    if ((name.compare (0, name.size(), rpmname) == 0)		// name matches
 		&& (rpmname[name.size()] == '-'))			// up to edition separator
 	    {
