@@ -270,8 +270,8 @@ class PMSolvable : virtual public Rep {
     const PkgRelList_type& obsoletes() const { return _obsoletes; }
 
 
-    PkgAttributeValue PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const;
-    std::list<std::string> PkgRelList2StringList ( const PkgRelList_type & rellist_r ) const;
+    static PkgAttributeValue PkgRelList2AttributeValue( const PkgRelList_type & rellist_r );
+    static std::list<std::string> PkgRelList2StringList ( const PkgRelList_type & rellist_r );
 
     // for convenience: directly return an iterator for relation lists
 #define decl_PkgRelList_iterators(name)					\

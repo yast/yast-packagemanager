@@ -34,7 +34,7 @@ using namespace std;
 **	DESCRIPTION : AttributeValue
 */
 PkgAttributeValue
-PMSolvable::PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const
+PMSolvable::PkgRelList2AttributeValue( const PkgRelList_type & rellist_r )
 {
   PkgAttributeValue ret;
   for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
@@ -52,7 +52,7 @@ PMSolvable::PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const
 **	DESCRIPTION : converts PkgRelList to list<string>
 */
 std::list<std::string>
-PMSolvable::PkgRelList2StringList ( const PkgRelList_type & rellist_r ) const
+PMSolvable::PkgRelList2StringList ( const PkgRelList_type & rellist_r )
 {
   std::list<std::string> ret;
   for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
