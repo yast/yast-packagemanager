@@ -34,16 +34,18 @@ int main( int argc, char **argv )
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
 
-  PMYouPatchPtr patch = new PMYouPatch( PkgName( "mypatch" ),
-                                        PkgEdition( "1.0" ),
-                                        PkgArch( "i386" ),
-                                        PMYouPatchDataProviderPtr() );
-  
-  list<PMYouPatchPtr> patches;
-  
-  patches.push_back( patch );
-  
-  Y2PM::youPatchManager().poolAddCandidates( patches );
+  cout << PMYouPatchInfo::translateLangCode( LangCode( "de" ) ) << endl;
+  cout << PMYouPatchInfo::translateLangCode( LangCode( "argl" ) ) << endl;
+
+#if 1
+  list<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
+
+  list<PMYouPatchPtr>::const_iterator it;
+  for( it = patches.begin(); it != patches.end(); ++it ) {
+    cout << "PATCH: " << (*it)->name() << " (" << (*it)->shortDescription()
+         << ")" << endl;
+  }
+#endif
 
   MIL << "END" << endl;
   return 0;

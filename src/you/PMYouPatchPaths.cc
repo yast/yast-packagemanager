@@ -112,6 +112,11 @@ Pathname PMYouPatchPaths::localDir()
   return "/var/lib/YaST2/you/";
 }
 
+Pathname PMYouPatchPaths::installDir()
+{
+  return localDir() + "installed/";
+}
+
 string PMYouPatchPaths::product()
 {
   return _product;
