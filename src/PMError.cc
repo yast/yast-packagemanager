@@ -28,6 +28,7 @@
 #include <y2pm/InstTargetError.h>
 #include <y2pm/QueryError.h>
 #include <y2pm/YouError.h>
+#include <y2pm/ModulePkgError.h>
 
 using namespace std;
 
@@ -63,6 +64,7 @@ PMError::ErrClass PMError::errClass( const unsigned e )
   ENUM_OUT( InstTargetError );
   ENUM_OUT( QueryError );
   ENUM_OUT( YouError );
+  ENUM_OUT( ModulePkgError );
 
 #undef ENUM_OUT
 
@@ -98,6 +100,7 @@ std::string PMError::errstr( const unsigned e )
     ENUM_OUT( InstTargetError );
     ENUM_OUT( QueryError );
     ENUM_OUT( YouError );
+    ENUM_OUT( ModulePkgError );
 
 #undef ENUM_OUT
 
@@ -124,6 +127,19 @@ std::string PMError::defaulterrstr( const std::string & cl, const std::string & 
   return stringutil::form( "%s(%s:%s)", errstrPrefix.c_str(), cl.c_str(), txt.c_str() );
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMError::asString
+//	METHOD TYPE : string
+//
+string PMError::asString() const
+{
+  if ( details().empty() )
+    return errstr();
+  // has details:
+  return stringutil::form( "%s[%s]", errstr().c_str(), details().c_str() );
+}
 
 /******************************************************************
 **
@@ -135,7 +151,5 @@ std::string PMError::defaulterrstr( const std::string & cl, const std::string & 
 */
 std::ostream & operator<<( std::ostream & str, const PMError & obj )
 {
-  str << obj.errstr();
-  if ( !obj.details().empty() ) str << ": " << obj.details();
-  return str;
+  return str << obj.asString();
 }

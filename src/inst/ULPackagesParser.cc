@@ -556,7 +556,7 @@ ULPackagesParser::fromPath (const Pathname& path, const Pathname& localepath, co
 	{
 	    PMError err = fromCache (pkgcache, localecache, ducache);
 	    if (err)
-		ERR << path << ":" << _parser.lineNumber() << ":" << err.errstr() << endl;
+		ERR << path << ":" << _parser.lineNumber() << ":" << err << endl;
 	}
 	else
 	{
@@ -627,7 +627,7 @@ ULPackagesParser::fromPathLocale (const Pathname& path)
 	{
 	    err = fromLocale ();
 	    if (err)
-		ERR << path << ":" << _parser.lineNumber() << ":" << err.errstr() << endl;
+		ERR << path << ":" << _parser.lineNumber() << ":" << err << endl;
 	}
 	else
 	{
@@ -696,7 +696,7 @@ ULPackagesParser::fromPathDU (const Pathname& path)
 	{
 	    err = fromDU ();
 	    if (err)
-		ERR << path << ":" << _parser.lineNumber() << ":" << err.errstr() << endl;
+		ERR << path << ":" << _parser.lineNumber() << ":" << err << endl;
 	}
 	else
 	{
@@ -741,7 +741,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
     err = media_r->provideFile ( filename );
     if ( err )
     {
-	ERR << "Media can't provide '" << filename << "' : " << err.errstr() << endl;
+	ERR << "Media can't provide '" << filename << "' : " << err << endl;
 	return err;
     }
 
@@ -762,7 +762,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
     {
 	if (localestr == "en")				// already english locale
 	{
-	    WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;
+	    WAR << "Media can't provide '" << localename << "' : " << err << endl;
 	    have_locale = false;			// dont check packages.en
 	    break;
 	}
@@ -780,7 +780,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 	if (err)
 	{
 	    have_locale = false;
-	    WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;
+	    WAR << "Media can't provide '" << localename << "' : " << err << endl;
 	    err = PMError::E_ok;
 	}
 	break;
@@ -802,7 +802,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 	err = media_r->provideFile ( duname );
 	if (err)
 	{
-	    WAR << "Media can't provide " << duname << ":" << err.errstr() << endl;
+	    WAR << "Media can't provide " << duname << ":" << err << endl;
 	    err = PMError::E_ok;
 	}
 	else

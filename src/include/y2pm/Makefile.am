@@ -13,6 +13,7 @@ pkginclude_HEADERS = Y2PMCallbacks.h \
 	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h PkgDu.h PkgChangelog.h	\
 	\
 	PMError.h			\
+	ModulePkgError.h		\
 	PMCallbacks.h			\
 	\
 	PMSolvable.h PMSolvablePtr.h	\

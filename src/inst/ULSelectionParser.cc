@@ -350,7 +350,7 @@ ULSelectionParser::fromMediaDir (std::list<PMSelectionPtr>& selections,
 	err = media_r->dirInfo (all_names, descr_dir_r, false);		// get all names not starting with '.'
 	if (err)
 	{
-	    ERR << "dirInfo failed for '" << descr_dir_r << "' " << err.errstr() << endl;
+	    ERR << "dirInfo failed for '" << descr_dir_r << "' " << err << endl;
 	    return err;
 	}
 	for (std::list<std::string>::iterator fileIt = all_names.begin();
