@@ -56,7 +56,7 @@ using namespace std;
 IMPL_BASE_POINTER(PMYouPatchInfo);
 
 PMYouPatchInfo::PMYouPatchInfo( PMYouSettingsPtr settings )
-  : _doneMediaDir( false ), _doneDirectory( false )
+  : _mediaDirLastVisited( "" ), _doneDirectory( false )
 {
     _packageTagSet.setAllowMultipleSets( true );
     _packageTagSet.setAllowUnknownTags( true );
@@ -525,7 +525,8 @@ PMError PMYouPatchInfo::readDir( vector<PMYouPatchPtr> &patches,
         error = media.provideFile( filePath, !_settings->reloadPatches() );
         if ( error ) {
           ERR << "ERR: " << error << ": " << filePath << endl;
-          if ( error == MediaError::E_login_failed ) return error;
+          #warning no release? (mir)
+          if ( error == MediaError::E_login_failed ) return error;  
         } else {
           if ( _settings->checkSignatures() ) {
               DBG << "Check signature of '" << localPath << "'" << endl;
@@ -570,7 +571,7 @@ PMError PMYouPatchInfo::readDir( vector<PMYouPatchPtr> &patches,
 
 PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
 {
-  if ( useMediaDir && !_doneMediaDir ) {
+  if ( useMediaDir ) {
     PMError error = processMediaDir();
     if ( error ) return error;
   }
@@ -674,7 +675,7 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
     }
   }
 
-#warning Shouldnt MediaAccess::release() be called in ~MediaAccess()?
+  #warning Shouldnt MediaAccess::release() be called in ~MediaAccess()?
   media.release();
 
   _doneDirectory = true;
@@ -724,16 +725,23 @@ PMError PMYouPatchInfo::getPatches( vector<PMYouPatchPtr> &patches )
     cfg->writeEntry( "LastServerType", server.typeAsString() );
     cfg->save();
 
-    if ( !_doneMediaDir ) {
-      PMError error = processMediaDir();
-      if ( error ) return error;
-    }
+    PMError error = processMediaDir();
+    if ( error ) return error;
 
     return readDir( patches );
 }
 
+
 PMError PMYouPatchInfo::processMediaDir()
 {
+    // have we visited this directory just before?
+    Url url = _settings->patchUrl();
+    if (url == _mediaDirLastVisited)
+        return PMError();   // yes, nothing to do
+
+    // reset this in case of error
+    _mediaDirLastVisited = Url();
+
     MediaAccess media;
 
     PMError error = media.open( _settings->patchUrl(), _settings->attachPoint() );
@@ -764,6 +772,8 @@ PMError PMYouPatchInfo::processMediaDir()
     Pathname path = _settings->mediaPatchesFile();
     error = media.provideFile( path );
     if ( error ) {
+        // tried  to fetch mediamap, which is required only for patches
+        // that stretch multiple CDs. Not a problem.
         string errMsg = "Unable to get file '" + _settings->patchUrl().asString() +
                         "/" + path.asString() + "'";
         error.setDetails( errMsg );
@@ -796,7 +806,8 @@ PMError PMYouPatchInfo::processMediaDir()
     
     media.release();
 
-    _doneMediaDir = true;
+    // been there, read completely
+    _mediaDirLastVisited = url;
 
     return PMError();
 }

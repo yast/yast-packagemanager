@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Tue Feb 22 15:36:14 CET 2005 - mir@suse.de
+
+- Bugfix: Sometimes under obscure circumstances YOU used the
+          wrong paths (#63166). This was caused by caching the
+          some information even when the server url was changed.
+  - PMYouPatchInfo: replaced private attribute bool _doneMediaDir
+          with Url _mediaDirLastVisited. Replaced various checks
+          for _doneMediaDir in the callers of processMediaDir
+          with a check for _mediaDirLastVisited in processMediaDir.
+          Also added documentation in header.
+- 2.11.22
+
+-------------------------------------------------------------------
 Tue Feb 22 14:07:54 CET 2005 - ma@suse.de
 
 - Added smb/cifs workgroup/domainname handling. (#53423)
