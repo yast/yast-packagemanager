@@ -553,7 +553,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		// show deletion result to user, if err is set, pops up a window with buttons
 		std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
 
-		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+		// check for "" (ignore), "R" retry, "C" cancel/abort all, "S" skip remaining
 		if (done_result == "C")
 		{
 		    return 0;				// cancel all
@@ -653,7 +653,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	    {
 		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), (*it)->name(), _callbacks._provide_done_data);
 
-		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+		// check for "" (ignore), "R" retry, "C" cancel/abort all, "S" skip remaining
 		if (done_result == "C")
 		{
 		    err = InstSrcError::E_cancel_media;		// cancel it all
