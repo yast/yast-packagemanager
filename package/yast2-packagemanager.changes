@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 31 12:37:13 CEST 2004 - lnussel@suse.de
+
+- merge proofread texts
+
+-------------------------------------------------------------------
 Mon Aug 30 13:26:21 CEST 2004 - lnussel@suse.de
 
 - disable deltas directly at initialization if applydeltarpm is not installed
