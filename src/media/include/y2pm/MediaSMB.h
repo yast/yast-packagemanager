@@ -21,6 +21,8 @@
 #ifndef MediaSMB_h
 #define MediaSMB_h
 
+#include <string>
+
 #include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////

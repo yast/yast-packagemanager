@@ -84,7 +84,7 @@ class REP_CLASS(MediaAccess) {
 
 	// find file denoted by pattern
 	// filename is interpreted relative to the attached url
-	virtual const Pathname * findFile (const Pathname & dirname, const string & pattern) const = 0;
+	virtual const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const = 0;
 
 	// get file information
 	const std::list<std::string> * dirInfo (const Pathname & filename) const;
