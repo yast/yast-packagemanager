@@ -54,6 +54,7 @@ class PMYouPatchDataProvider : virtual public Rep, public PMDataProvider  {
 	const std::list<std::string> description() const;
 	const std::list<std::string> insnotify() const;
 	const std::list<std::string> delnotify() const;
+	const FSize size() const;
 
     /**
      * YouPatch attribute retrieval.

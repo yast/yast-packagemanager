@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/FSize.h>
 
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMYouPatchDataProvider.h>
@@ -74,6 +75,8 @@ const std::list<std::string>
 PMYouPatch::insnotify() const { return _dataProvider->insnotify(); }
 const std::list<std::string>
 PMYouPatch::delnotify() const { return _dataProvider->delnotify(); }
+const FSize
+PMYouPatch::size() const { return _dataProvider->size(); }
 
 ///////////////////////////////////////////////////////////////////
 //

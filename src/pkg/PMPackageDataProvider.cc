@@ -81,8 +81,14 @@ PMPackageDataProvider::delnotify() const
     return std::list<std::string>();
 }
 
+const FSize
+PMPackageDataProvider::size() const
+{
+    return FSize(0);
+}
 
-const long
+
+const Date
 PMPackageDataProvider::buildtime() const
 {
     return 0;
@@ -94,7 +100,7 @@ PMPackageDataProvider::buildhost() const
     return "";
 }
 
-const long
+const Date
 PMPackageDataProvider::installtime() const
 {
     return 0;
@@ -178,7 +184,7 @@ PMPackageDataProvider::sourcerpm() const
     return "";
 }
 
-const long
+const FSize
 PMPackageDataProvider::archivesize() const
 {
   return 0;

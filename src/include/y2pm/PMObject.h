@@ -22,6 +22,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <y2util/FSize.h>
+
 #include <y2pm/PMObjectPtr.h>
 #include <y2pm/PMSolvable.h>
 
@@ -74,6 +76,7 @@ class PMObject : virtual public Rep, public PMSolvable {
     virtual const std::list<std::string> description() const = 0;
     virtual const std::list<std::string> insnotify() const = 0;
     virtual const std::list<std::string> delnotify() const = 0;
+    virtual const FSize size() const = 0;
 
     /**
      * Get PMObject attribute name as string.

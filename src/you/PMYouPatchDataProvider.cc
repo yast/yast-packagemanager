@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include <y2util/FSize.h>
 #include <y2pm/PMYouPatchDataProvider.h>
 
 using namespace std;
@@ -66,5 +67,7 @@ const std::list<std::string>
 PMYouPatchDataProvider::insnotify() const { return std::list<std::string>(); }
 const std::list<std::string>
 PMYouPatchDataProvider::delnotify() const { return std::list<std::string>(); }
+const FSize
+PMYouPatchDataProvider::size() const { return FSize(0); }
 
 
