@@ -220,7 +220,7 @@ InstTarget::getPatches (void) const
         PMYouSettingsPtr settings( new PMYouSettings );
         PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo( settings ) );
 
-        string u = "dir://" + ( rootdir() + settings->installDir() ).asString();
+        string u = ( rootdir() + settings->installDir() ).asString();
         settings->setPatchServer( PMYouServer( u ) );
         settings->primaryProduct()->setPatchPath( "" );
         settings->setReloadPatches( false );

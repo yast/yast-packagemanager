@@ -333,6 +333,7 @@ int main( int argc, char **argv )
         exit( -1 );
       }
       server.setUrl( urlStr );
+      server.setType( PMYouServer::Custom );
     } else {
       PMYouServers youServers( you.settings() );
       error = youServers.requestServers( checkUpdates || quickCheckUpdates );
