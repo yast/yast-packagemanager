@@ -70,7 +70,7 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 	// which is faster than a file retrieval anyway)
 	//
 
-	// map of <locale, retrieval position>
+	// map of <string locale, TagRetrievalPos retrieval position>
 	typedef TaggedFile::Tag::posmaptype::const_iterator posmapIT;
 
 	// map of <locale, selectable list>
@@ -78,16 +78,16 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 	typedef slcmaptype::const_iterator slcmapIT;
 
 	// find retrieval position by locale
-	posmapIT posmapFind (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const;
+	posmapIT posmapFind (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale, bool with_empty) const;
 
 	// find PMSelectable list by locale
-	slcmapIT slcmapFind (const slcmaptype& theMap, const LangCode& locale) const;
+	slcmapIT slcmapFind (const slcmaptype& theMap, const LangCode& locale, bool with_empty) const;
 
 	// find string position by locale
-	std::string posmapSLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const;
+	std::string posmapSLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale, bool with_empty) const;
 
 	// find string list position by locale
-	std::list<std::string> posmapLLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const;
+	std::list<std::string> posmapLLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale, bool with_empty) const;
 
 	// convert selection list to string list
 	std::list<std::string> sellist2strlist (const std::list<PMSelectionPtr>& sellist) const;
