@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep 19 17:22:28 CEST 2003 - cschum@suse.de
+
+- InstYou: Reset MediaCurl callbacks in case of error or user
+  abort during patch download. Fixes crash (#31415).
+
+-------------------------------------------------------------------
 Fri Sep 19 13:24:52 CEST 2003 - ma@suse.de
 
 - No longer report enabling an enabled, or disabling a disabled
