@@ -62,6 +62,9 @@ Requires:	rpm-devel >= 4.1.1
 
 @INSTALL@
 install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
+mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2
+mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2/you
+mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2/you/mnt
 
 @CLEAN@
 
@@ -73,6 +76,9 @@ install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
 /usr/bin/genIS_PLAINcache
 %config(noreplace) /etc/youservers
 /var/adm/fillup-templates/sysconfig.onlineupdate
+/var/lib/YaST2
+/var/lib/YaST2/you
+/var/lib/YaST2/you/mnt
 
 %files devel
 %defattr(-,root,root)
