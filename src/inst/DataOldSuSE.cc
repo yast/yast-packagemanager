@@ -225,12 +225,15 @@ asDependList( const string & data_tr )
 }
 
 
-// *** comment missing
+/** take the data from tagset and create a PMPackage class from it
+ *
+ * @return PMPackagePtr to the newly created PMPackage
+ * */
 
 static inline PMPackagePtr
 createPMPackageFromTagset( CommonPkdParser::TagSet* t)
 {
-  //FIXME error checking
+  //TODO error checking?
   PkgName name = t->getTagByIndex(CommonPkdTagSet::RPMNAME)->Data();
   string verandrelstr = t->getTagByIndex(CommonPkdTagSet::VERSION)->Data();
   string arch = t->getTagByIndex(CommonPkdTagSet::ARCH)->Data();
@@ -252,6 +255,8 @@ createPMPackageFromTagset( CommonPkdParser::TagSet* t)
 	asDependList(t->getTagByIndex(CommonPkdTagSet::REQUIRES)->Data());
 
   p->setRequires(requires);
+
+  // FIXME obsoletes, conflicts and all other tags ...
 
   return p;
 }
