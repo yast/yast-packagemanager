@@ -71,17 +71,6 @@ Url PMYouPatchPaths::patchUrl()
   return _patchUrl;
 }
 
-void PMYouPatchPaths::setAttachPoint( const Pathname &path )
-{
-  _attachPoint = path;
-}
-
-Pathname PMYouPatchPaths::attachPoint()
-{
-  return _attachPoint;
-}
-
-
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMYouPatchInfo
@@ -212,7 +201,6 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 //	DESCRIPTION :
 //
 PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
-                                 const Pathname &attachPath,
                                  list<PMYouPatchPtr> &patches )
 {
     MediaAccessPtr media( new MediaAccess );
@@ -220,8 +208,8 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
     PMError error = media->open( baseUrl );
     if ( error != PMError::E_ok ) return error;
 
-    error = media->attachTo( attachPath );
-    if ( error != PMError::E_ok && error != MediaError::E_attachpoint_fixed ) {
+    error = media->attach( );
+    if ( error != PMError::E_ok ) {
       return error;
     }
 
@@ -277,16 +265,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 PMError PMYouPatchInfo::getPatches( PMYouPatchPaths *paths,
                                     list<PMYouPatchPtr> &patches )
 {
-    Pathname attachPoint;
-
-    Url url = paths->patchUrl();
-    if ( url.getProtocol() == "dir" ) {
-        attachPoint = "/";
-    } else {
-        attachPoint = paths->attachPoint();
-    }
-    return readDir( paths->patchUrl(), paths->patchPath(), attachPoint,
-                    patches );
+    return readDir( paths->patchUrl(), paths->patchPath(), patches );
 }
 
 string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex )

@@ -115,13 +115,9 @@ class PMYouPatchPaths {
     void setPatchUrl( const Url & );
     Url patchUrl();
 
-    void setAttachPoint( const Pathname & );
-    Pathname attachPoint();
-
   private:
     Pathname _patchPath;
     Url _patchUrl;
-    Pathname _attachPoint;
 };
 
 
@@ -160,11 +156,9 @@ class PMYouPatchInfo {
      *
      * @param baseUrl    Base of URL where patches are located.
      * @param patchPath  Path of patch directory relative to baseUrl.
-     * @param attachPath Path where media is to be attached.
      * @param patches    List of patch objects where the results are stored.
      **/
     PMError readDir( const Url &baseUrl, const Pathname &patchPath,
-                     const Pathname &attachPath,
                      std::list<PMYouPatchPtr> &patches );
 
     /**
