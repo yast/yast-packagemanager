@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov 20 11:50:17 CET 2003 - ma@suse.de
+
+- MediaCD: Missed to close device if CDROMEJECT/CDROMCLOSETRAY failed.
+
+-------------------------------------------------------------------
 Thu Nov 13 22:59:57 CET 2003 - ma@suse.de
 
 - InstSrcManager: Now able to handle an install order.
