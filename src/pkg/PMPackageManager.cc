@@ -94,6 +94,25 @@ ostream & operator<<( ostream & str, const PMPackageManager & obj )
 }
 
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::anythingByUser
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :are there currently any "by_user" selectables ?
+//
+bool
+PMPackageManager::anythingByUser(void)
+{
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
+    {
+	if ((*it)->by_user())
+	    return true;
+    }
+    return false;
+}
+
 
 ///////////////////////////////////////////////////////////////////
 //
