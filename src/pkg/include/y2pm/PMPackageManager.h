@@ -161,11 +161,29 @@ class PMPackageManager : public PMManager {
 
     typedef PkgDuMaster::MountPoint MountPoint;
 
+    /**
+     * Provide 'df' info for disk usage calculation
+     **/
     void setMountPoints( const std::set<MountPoint> & mountpoints_r ) {
       _du_master.setMountPoints( mountpoints_r );
     }
 
+    /**
+     * Calculate disk usage based on previously provided 'df' info.
+     *
+     * Quite weak calculations, due to missing info about intalled
+     * packages.
+     **/
     const std::set<MountPoint> & currentDu();
+
+    /**
+     * Calculate disk usage based on previously provided 'df' info.
+     *
+     * Same as currentDu() but returns PkgDuMaster, that contains not
+     * just the mountpoints set, but overall disk usage info (not spillted
+     * to partitions).
+     **/
+    const PkgDuMaster & updateDu() { currentDu(); return _du_master; }
 
 };
 

@@ -286,9 +286,10 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 //
 const set<PMPackageManager::MountPoint> & PMPackageManager::currentDu()
 {
-  if ( !_du_master.resetStats() ) {
-    DBG << "No MountPoints set" << endl;
-    return _du_master.mountpoints();
+  bool count_mp = _du_master.resetStats();
+
+  if ( ! count_mp ) {
+    DBG << "No MountPoints set; count totals only" << endl;
   }
 
   // currently installed packages do not have du info ;(
@@ -300,12 +301,33 @@ const set<PMPackageManager::MountPoint> & PMPackageManager::currentDu()
     const constPMSelectablePtr & sel( *it );
     if ( sel->to_modify() ) {
 
-      if ( sel->to_install() && sel->has_candidate_only() ) {
-	PMPackagePtr( sel->candidateObj() )->du_add( _du_master );
-      } else if ( sel->to_delete() && sel->has_candidate() ) {
-	PMPackagePtr( sel->candidateObj() )->du_sub( _du_master );
+      if ( sel->to_install() ) {
+
+	_du_master.add( sel->candidateObj()->size() );
+	if ( sel->has_installed() ) {
+	  _du_master.sub( sel->installedObj()->size() );
+	  // replace:     ---
+	} else {
+	  // new install: add candidate
+	  if ( count_mp )
+	    PMPackagePtr( sel->candidateObj() )->du_add( _du_master );
+	}
+
+      } else {
+
+	// to delete
+	_du_master.sub( sel->installedObj()->size() );
+	// delete:      sub candiadte (if one)
+	if ( count_mp && sel->has_candidate() ) {
+	  PMPackagePtr( sel->candidateObj() )->du_sub( _du_master );
+	}
+
       }
 
+      //SEC << sel->name() << (sel->to_install()?" INSTALL ":" DELETE ")
+      //<< " i: " << (sel->has_installed()?sel->installedObj()->size():FSize())
+      //<< " c: " << (sel->has_candidate()?sel->candidateObj()->size():FSize()) << endl;
+      //DBG << _du_master << endl;
     }
   }
 

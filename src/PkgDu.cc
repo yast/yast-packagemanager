@@ -120,9 +120,7 @@ PkgDuMaster::~PkgDuMaster()
 void PkgDuMaster::add( FSize * data_r )
 {
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it, ++data_r ) {
-    SEC << it->_mountpoint << ":\t" << it->_pkgusage << " + " << *data_r << " = ";
     it->_pkgusage += *data_r;
-    SEC << it->_pkgusage << endl;
   }
 }
 
@@ -138,9 +136,7 @@ void PkgDuMaster::add( FSize * data_r )
 void PkgDuMaster::sub( FSize * data_r )
 {
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it, ++data_r ) {
-    SEC << it->_mountpoint << ":\t" << it->_pkgusage << " - " << *data_r << " = ";
     it->_pkgusage -= *data_r;
-    SEC << it->_pkgusage << endl;
   }
 }
 
@@ -154,6 +150,8 @@ void PkgDuMaster::sub( FSize * data_r )
 //
 unsigned PkgDuMaster::resetStats()
 {
+  _total = 0;
+
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it ) {
     it->_pkgusage = 0;
   }
@@ -215,7 +213,7 @@ ostream & operator<<( ostream & str, const set<PkgDuMaster::MountPoint> & obj )
 */
 ostream & operator<<( ostream & str, const PkgDuMaster & obj )
 {
-  str << "--[" << obj._count <<  "]----------------------------" << endl;
+  str << "--[" << obj._total <<  "]----------------------------" << endl;
   str << obj._mountpoints;
   str << "---------------------------------" << endl;
   return str;
@@ -307,10 +305,16 @@ PkgDu::~PkgDu()
 
 struct Tentry {
   unsigned _idx;
-  unsigned _fcnt;
-  FSize    _fsze;
+  unsigned _fcnt; // file count
+  FSize    _bsze; // blocksize
+  FSize    _fsze; // pure file sizes
   Tentry() {/*empty - used by std::map only*/}
-  Tentry( unsigned idx_r ) { _idx = idx_r; _fcnt = 0; _fsze = 0; }
+  Tentry( unsigned idx_r, const FSize & bsze_r ) { _idx = idx_r; _fcnt = 0; _bsze = bsze_r; _fsze = 0; }
+  FSize total() const { return _fsze + ( _bsze * _fcnt / 2 ); }
+  void  sub( const Tentry & rhs ) {
+    _fcnt -= rhs._fcnt;
+    _fsze -= rhs._fsze;
+  }
 };
 
 bool PkgDu::sync( const PMPackage & pkg_r, PkgDuMaster & master_r ) const
@@ -319,7 +323,7 @@ bool PkgDu::sync( const PMPackage & pkg_r, PkgDuMaster & master_r ) const
     delete [] _data;
     _data  = 0;
     _count = master_r.sync_count();
-#if 0
+
     // now see if there are actual data to contribute
     if ( master_r.mountpoints().size() ) {
       list<string> dudata( pkg_r.du() );
@@ -327,7 +331,6 @@ bool PkgDu::sync( const PMPackage & pkg_r, PkgDuMaster & master_r ) const
 	///////////////////////////////////////////////////////////////////
 	// so we've got mountpoints and a list of du data.
 	///////////////////////////////////////////////////////////////////
-	DBG << "TBD evaluate " << dudata.size() << " entries for " << pkg_r << endl;
 
 	///////////////////////////////////////////////////////////////////
 	// tokmap maps mountpoints to _data array indices, according to
@@ -339,7 +342,8 @@ bool PkgDu::sync( const PMPackage & pkg_r, PkgDuMaster & master_r ) const
 	unsigned tmidx = 0;
 	for ( set<MountPoint>::const_iterator mp = master_r.mountpoints().begin();
 	      mp != master_r.mountpoints().end(); ++mp, ++tmidx ) {
-	  tokmap[mp->_mountpoint] = Tentry( tmidx );
+	  tokmap[mp->_mountpoint] = Tentry( tmidx, mp->_blocksize );
+
 	}
 
 	///////////////////////////////////////////////////////////////////
@@ -363,14 +367,12 @@ bool PkgDu::sync( const PMPackage & pkg_r, PkgDuMaster & master_r ) const
 
 	  TokMap::iterator found = tokmap.find( tok );
 	  if ( found != tokmap.end() ) {
-	    SEC << "Found mp: " << tok << " " << found->second._idx << endl;
 	    vector<string> tdata;
 	    if ( stringutil::split( *it, tdata ) == 4 ) {
 	      found->second._fsze = FSize( atoi( tdata[0].c_str() ) + atoi( tdata[1].c_str() ),
 					   FSize::K );
 	      found->second._fcnt = atoi( tdata[2].c_str() ) + atoi( tdata[3].c_str() );
 	      --tofind;
-	      SEC << "    Data: " << found->second._fsze << " in " << found->second._fcnt << endl;
 	    } else {
 	      WAR << "Illegal DU entry: " << tok << ' ' << *it << endl;
 	    }
@@ -382,15 +384,29 @@ bool PkgDu::sync( const PMPackage & pkg_r, PkgDuMaster & master_r ) const
 	// The rest looks more complicated, than it is. ;)
 	// TokMap is sorted by mountpoints, and holds the duinfo for each
 	// mountpoint. In fact mountpoints are a tree and we have to subtract
-	//
+	// each points data from its parents.
 	///////////////////////////////////////////////////////////////////
 
-      } else {
-	DBG << "no dudata for " << pkg_r << endl;
-      }
+	_data = new FSize[master_r.mountpoints().size()]; // initial values == 0
 
+	for ( TokMap::reverse_iterator it = tokmap.rbegin(); it != tokmap.rend(); ++it ) {
+	  if ( ! it->second._fsze )
+	    continue; // nothing to do
+
+	  // mount points has size, remove it from parents
+	  TokMap::reverse_iterator up = it;
+	  for ( ++up; up != tokmap.rend(); ++up ) {
+	    if ( it->first.find( up->first ) == 0 ) {
+	      up->second.sub( it->second );
+	    }
+	  }
+
+	  // insert in _data
+	  _data[it->second._idx] = it->second.total();
+	}
+
+      }
     }
-#endif
   }
   return _data;
 }
