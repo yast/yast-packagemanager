@@ -179,7 +179,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     PkgName name (splitted[0].c_str());
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
 
-    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, localecache, ducache));
+    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (_source, pkgcache, localecache, ducache));
 #warning STORE InstSrcPtr in DataProvider
     PMPackagePtr package (new PMPackage (name, edition, arch, dataprovider));
 

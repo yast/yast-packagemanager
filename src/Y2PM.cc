@@ -232,7 +232,6 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 
     instTarget().removePackages (dellist);			// delete first
 
-
     for (std::list<PMPackagePtr>::iterator it = inslist.begin();
 	 it != inslist.end(); ++it)
     {
@@ -244,39 +243,6 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    remaining.push_back ((*it)->name());
 	    continue;
 	}
-#warning commitPackages NEEDS REVIEW
-#if 0
-	if ((*it)->source() == 0)
-	{
-	    ERR << "No source for " << *it << endl;
-	    remaining.push_back ((*it)->name());
-	    ret = false;
-	    continue;
-	}
-	// determine directory and rpm name
-	Pathname name = (*it)->location();
-	Pathname dir;
-	string::size_type dirpos = name.asString().find_first_of (" ");
-	if (dirpos == string::npos)
-	{
-	    // directory == architecture
-	    dir = Pathname ((const std::string &)((*it)->arch()));
-	}
-	else
-	{
-	    // directory in location
-	    dir = Pathname (name.asString().substr (dirpos+1));
-	    name = Pathname (name.asString().substr (0, dirpos));
-	}
-	Pathname path = (*it)->source()->providePackage (pkgmedianr, name, dir);
-	if (path.asString().empty())
-	{
-	    ERR << "Media can't provide " << pkgmedianr << ":" << dir << "/" << name << endl;
-	    remaining.push_back ((*it)->name());
-	    ret = false;
-	    continue;
-	}
-#else
 	Pathname path = (*it)->providePkgToInstall();
 	if (path.empty())
 	{
@@ -285,7 +251,6 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    ret = false;
 	    continue;
 	}
-#endif
 	PMError err = instTarget().installPackage (path);
 	if (err)
 	{
