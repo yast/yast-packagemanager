@@ -64,7 +64,7 @@ bool PkgRelation::matches( const PkgRelation& rel2 ) const
 }
 
 ostream& operator<<( ostream& os, const PkgRelation& rel ) {
-	os << (const char *)rel._name;
+	os << rel._name;
 	switch( rel._op ) {
 	  case LT: os << " < "; break;
 	  case LE: os << " <= "; break;

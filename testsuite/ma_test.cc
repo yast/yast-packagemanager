@@ -1,5 +1,3 @@
-#include <cstdio>
-
 #include <iomanip>
 #include <list>
 #include <string>
@@ -42,15 +40,15 @@ int main()
 
   for ( unsigned i = 0; i < 10; ++i ) {
     string si( ::dec(i) );
-    plist.push_back( new PMPackage( n+si, PkgEdition( (v+si).c_str(), (r+si).c_str() ), "i386") );
+    plist.push_back( new PMPackage( PkgName(n+si), PkgEdition( (v+si).c_str(), (r+si).c_str() ), PkgArch("i386")) );
     SEC << *plist.rbegin() << endl;
   }
 
   plist.push_back( 0 );
   plist.push_back( *plist.begin() );
   string si( ::dec(5) );
-  plist.push_back( new PMPackage( n+si, PkgEdition( (v+si).c_str(), (r+si).c_str() ), "i686") );
-  plist.push_back( new PMPackage( n+si, PkgEdition( (v+si+".1").c_str(), (r+si).c_str() ), "i686") );
+  plist.push_back( new PMPackage( PkgName(n+si), PkgEdition( (v+si).c_str(), (r+si).c_str() ), PkgArch("i686")) );
+  plist.push_back( new PMPackage( PkgName(n+si), PkgEdition( (v+si+".1").c_str(), (r+si).c_str() ), PkgArch("i686")) );
 
 
   PMPackageManager::PM().poolAddCandidates( plist );

@@ -227,7 +227,7 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
    number[0] = 0;
 
    rpmPath = rootfs + RPMPATH + "rpm.new";
-   for ( counter = 0; 
+   for ( counter = 0;
 	counter < 1000 && stat( rpmPath.c_str(), &dummyStat ) != -1;
 	counter++)
    {
@@ -449,7 +449,7 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 	DLE = LT|EQ,
 	DPREREQ = 64
     };
-    struct 
+    struct
     {
 	string name;
 	rel_op compare;
@@ -469,9 +469,9 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 
     vector<string> depvec;
     tokenize(depstr, ',', depvec);
-    
+
 //    D__ << "split " << depstr << " into " << depvec.size() << " pieces" << endl;
-    
+
     if(depvec.size()<3) return;
 
     for(vector<string>::size_type i = 0; i <= depvec.size()-3; i+=3 )
@@ -524,8 +524,8 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 	    }
 
 	}
-	
-	PkgRelation dep(cdep_Ci.name,cdep_Ci.compare,cdep_Ci.version.c_str());
+
+	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,cdep_Ci.version.c_str());
 //	D__ << dep << endl;
 	if(cdep_Ci.isprereq && !ignore_prereqs)
 	{
@@ -557,7 +557,7 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	RPM_OBSOLETES,
 	RPM_CONFLICTS,
 
-	NUM_RPMTAGS	
+	NUM_RPMTAGS
     };
 
     rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};";
@@ -589,14 +589,14 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	string::size_type         ret;
 
 	// extract \n
-	ret = output.find_first_of ( "\n" ); 
+	ret = output.find_first_of ( "\n" );
 	if ( ret != string::npos )
 	{
 	    value.assign ( output, 0, ret );
 	}
-	else    
+	else
 	{
-	    value = output; 
+	    value = output;
 	}
 
 //	D__ << "stdout: " << value << endl;
@@ -622,9 +622,9 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 			    pkgattribs[RPM_RELEASE].c_str()
 			);
 	    PMPackagePtr p = new PMPackage(
-				pkgattribs[RPM_NAME],
+				PkgName(pkgattribs[RPM_NAME]),
 				edi,
-				pkgattribs[RPM_ARCH]);
+				PkgArch(pkgattribs[RPM_ARCH]));
 
 	    p->setDataProvider(_dataprovider);
 
@@ -633,7 +633,7 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	    PMSolvable::PkgRelList_type provides;
 	    PMSolvable::PkgRelList_type obsoletes;
 	    PMSolvable::PkgRelList_type conflicts;
-	    
+
 	    PMSolvable::PkgRelList_type dummy;
 
 	    rpmdeps2rellist(pkgattribs[RPM_REQUIRES],requires,prerequires);
@@ -651,7 +651,7 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
 	    D__ << p << endl;
 	}
-	
+
 	output = process->receiveLine();
     }
 
@@ -958,14 +958,14 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
 	string::size_type         ret;
 
 	// extract \n
-	ret = output.find_first_of ( "\n" ); 
+	ret = output.find_first_of ( "\n" );
 	if ( ret != string::npos )
 	{
 	    value.assign ( output, 0, ret );
 	}
-	else    
+	else
 	{
-	    value = output; 
+	    value = output;
 	}
 
 	D__ << "stdout: " << value << endl;
@@ -1152,7 +1152,7 @@ void RpmDb::run_rpm(const RpmArgVec& options,
     const char* argv[args.size()+options.size()+2];
     unsigned argc = 0;
 
-    D__ << "rpm command: "; 
+    D__ << "rpm command: ";
 
     for(RpmArgVec::iterator it=args.begin();it<args.end();++it)
     {

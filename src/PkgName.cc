@@ -2,13 +2,11 @@
 
 using namespace std;
 
-UniqStr PkgName::PkgNameHash;
+///////////////////////////////////////////////////////////////////
 
-ostream& operator<<( ostream& os, const PkgName& n )
-{
-	os << (const char *)n;
-	return os;
-}
+UstringHash PkgName::_nameHash;
+
+///////////////////////////////////////////////////////////////////
 
 ostream& operator<<( ostream& os, const PkgNameEd& ne )
 {

@@ -21,7 +21,7 @@
 
 #include <iosfwd>
 
-#include <y2util/UniqStr.h>
+#include <y2util/Ustring.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -29,24 +29,15 @@
 /*
  *
  **/
-class PkgArch {
+class PkgArch : public Ustring {
 
   private:
 
-    static UniqStr nameHash;
-    const char *   name;
+    static UstringHash _nameHash;
 
   public:
 
-    PkgArch( const char * n = "" )   { name = nameHash.add( n ); }
-    PkgArch( const std::string & s ) { name = nameHash.add( s.c_str() ); }
-
-    bool operator==( const PkgArch & n2 ) const { return name == n2.name; }
-    bool operator!=( const PkgArch & n2 ) const { return name != n2.name; }
-
-    operator const char * () const { return name; }
-
-    friend std::ostream & operator<<( std::ostream & str, const PkgArch & obj );
+    explicit PkgArch( const std::string & n = "" ) : Ustring( _nameHash, n ) {}
 };
 
 ///////////////////////////////////////////////////////////////////

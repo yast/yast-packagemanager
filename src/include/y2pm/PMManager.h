@@ -73,6 +73,15 @@ class PMManager {
     void poolSetInstalled( PMObjectContainerIter iter_r );
     void poolAddCandidates( PMObjectContainerIter iter_r );
     void poolRemoveCandidates( PMObjectContainerIter iter_r );
+
+  public:
+
+    PMSelectablePtr get( const unsigned idx_t ) const;
+    PMSelectablePtr get( const std::string & name_t ) const;
+
+    PMSelectablePtr operator [] ( const unsigned idx_r ) const { return get( idx_r ); }
+    PMSelectablePtr operator [] ( const std::string & name_r ) const { return get( name_r ); }
+
 };
 
 ///////////////////////////////////////////////////////////////////
