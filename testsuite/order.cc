@@ -25,6 +25,7 @@
 #include <y2util/ExternalProgram.h>
 #include <y2pm/InstallOrder.h>
 #include <y2pm/InstSrc.h>
+#include <y2pm/InstSrcData.h>
 
 // needed for sdl test
 #include <y2pm/PMPackage.h>
@@ -95,7 +96,7 @@ int main( int argc, char *argv[] )
 
     PkgSet candidates;
 
-    const std::list<PMPackagePtr>& packages = nsrc->getPackages();
+    const std::list<PMPackagePtr>& packages = nsrc->data()->getPackages();
 
     std::set<std::string> tocompute;
 

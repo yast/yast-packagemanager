@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 	for(; argpos < argnum; argpos++)
 	{
 	    cout << "querying " << args[argpos] << endl;
-	    const std::list<PMSelectionPtr>& selections = InstData::findSelections (nsrc->getSelections (), args[argpos], selection_version, selection_release, selection_arch);
+	    const std::list<PMSelectionPtr>& selections = InstData::findSelections (nsrc->data()->getSelections (), args[argpos], selection_version, selection_release, selection_arch);
 	    if (selections.empty())
 	    {
 		cout << args[argpos] << " is not available" << endl;
