@@ -68,7 +68,7 @@ void PkgEdition::xconstruct( type_enum xtype,
     if ( _epoch ) {
       INT << "Explicit epoch overrides epoch coded in version: v '" << v << "' e '" << epoch << "'" << endl;
     } else {
-      int e = atoi( _version.substr( sep ).c_str() );
+      int e = atoi( _version.substr( 0, sep ).c_str() );
       if ( e ) {
 	_epoch = e;
       }
