@@ -29,16 +29,23 @@ int main()
     InstSrcDescr * descr = new InstSrcDescr();
 
     PkgArch arch( "i586" );
-    string t ("T_TEST_DIST" );
+    string t ("TEST_DIST" );
     InstSrc::Type type( InstSrc::fromString(t) );
+    Url url( "http://www.suse.de/" );
+    Pathname dir( "/aa/bb" );
     
     descr->set_base_arch( arch );
     descr->set_type( type );
-
+    descr->set_media_vendor( string( "SuSE" ) );
+    descr->set_media_id( string( "12432" ) );
+    descr->set_media_count( string( "7" ) );
+    descr->set_url( url ); 
+    MIL << "URL: " << url << endl;
+    MIL << "TYPE: " << descr->type() << endl;
+    descr->set_product_dir ( dir );
+    
     // write
     PMError err = descr->writeCache( "/tmp/mediafile" );
-
-    MIL << "before READ" << endl; 
 
     if ( err == PMError::E_ok )
     {
