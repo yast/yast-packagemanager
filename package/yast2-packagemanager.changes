@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul  1 15:48:53 CEST 2004 - lnussel@suse.de
+
+- use boolean YOU_USE_DELTAS sysconfig variable
+- sort deltas by installation source before requesting the base packages
+- pass rpm error messages to upper layer if rpm fails to install a package
+
+-------------------------------------------------------------------
 Thu Jun 24 17:23:41 CEST 2004 - lnussel@suse.de
 
 - preliminary support for delta packages

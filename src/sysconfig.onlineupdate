@@ -44,3 +44,10 @@ YOU_MANUAL_SELECTION="yes"
 # them to the system.
 #
 YOU_REMOVE_SOURCE_PACKAGES="no"
+
+## Type: yesno
+## Default: yes
+#
+# If set to "yes" YOU will try to use delta packages if possible. You need your
+# installation media for this to work.
+YOU_USE_DELTAS="yes"
