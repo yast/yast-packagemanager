@@ -71,6 +71,7 @@ int main( int argc, char **argv )
   if ( showSources && addSource ) usage();
   if ( !showSources && !addSource ) usage();
 
+  Y2PM::noAutoInstSrcManager();
   InstSrcManager &instSrcMgr = Y2PM::instSrcManager();
 
   InstSrcManager::ISrcIdList sourceIds;
