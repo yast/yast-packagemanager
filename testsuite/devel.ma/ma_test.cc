@@ -275,7 +275,7 @@ int main()
   wfm.init();
   INT << "START" << endl;
 
-  wfm.SourceStartCache( true );
+  //wfm.SourceStartCache( true );
 
   wfm.SourceStartManager( false );
   wfm.SourceStartCache( false );
