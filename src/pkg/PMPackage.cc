@@ -49,6 +49,7 @@ std::list<std::string> PMPackage::insnotify()    const { DP_GET( insnotify ); }
 std::list<std::string> PMPackage::delnotify()    const { DP_GET( delnotify ); }
 FSize                  PMPackage::size()         const { DP_GET( size ); }
 // PMPackage attributes
+std::list<std::string> PMPackage::splitprovides()const { DP_GET( splitprovides ); }
 Date                   PMPackage::buildtime()    const { DP_GET( buildtime ); }
 std::string            PMPackage::buildhost()    const { DP_GET( buildhost ); }
 Date                   PMPackage::installtime()  const { DP_GET( installtime ); }

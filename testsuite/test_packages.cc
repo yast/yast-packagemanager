@@ -217,9 +217,6 @@ int main(int argc, char* argv[])
 		    cout << "++++" << endl;
 		    show_pmpackage (*p_it, short_output);
 		    cout << "----" << endl;
-		    cout << "++++" << endl;
-		    show_pmpackage (*p_it, short_output);
-		    cout << "----" << endl;
 		}
 	    }
 	}

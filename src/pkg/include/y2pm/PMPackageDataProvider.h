@@ -62,6 +62,7 @@ class PMPackageDataProvider : virtual public Rep {
     static FSize                  size()        { return FSize(0); }
 
     // PMPackage attributes
+    static std::list<std::string> splitprovides() { return std::list<std::string>(); }
     static Date                   buildtime()   { return Date(0); }
     static std::string            buildhost()   { return std::string(); }
     static Date                   installtime() { return Date(0); }
@@ -116,6 +117,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual FSize                  size        ( const PMPackage & pkg_r ) const { return size(); }
 
     // PMPackage attributes
+    virtual std::list<std::string> splitprovides( const PMPackage & pkg_r ) const { return splitprovides(); }
     virtual Date                   buildtime   ( const PMPackage & pkg_r ) const { return buildtime(); }
     virtual std::string            buildhost   ( const PMPackage & pkg_r ) const { return buildhost(); }
     virtual Date                   installtime ( const PMPackage & pkg_r ) const { return installtime(); }

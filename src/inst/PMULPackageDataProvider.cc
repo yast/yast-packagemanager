@@ -118,6 +118,14 @@ PMULPackageDataProvider::size ( const PMPackage & pkg_r ) const
 }
 
 
+std::list<std::string>
+PMULPackageDataProvider::splitprovides ( const PMPackage & pkg_r ) const
+{
+    FALLBACK(_attr_SPLITPROVIDES,authors);
+    return _attr_SPLITPROVIDES;
+}
+
+
 Date
 PMULPackageDataProvider::buildtime ( const PMPackage & pkg_r ) const
 {
