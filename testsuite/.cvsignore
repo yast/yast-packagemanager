@@ -8,6 +8,9 @@ tmp.log*
 .libs
 *.log
 *.sum
+*.test
 test_rpmdb
 testinstall
 test_patchinfo
+test_content
+

@@ -3,7 +3,7 @@
 #
 
 AUTOMAKE_OPTIONS = dejagnu
-
+PACKAGE = packagemanager
 INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
 		pkg/include	\
@@ -15,7 +15,12 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		libPkgDep/include \
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-noinst_PROGRAMS = test_rpmdb ma_test.exe testinstall test_patchinfo
+noinst_PROGRAMS = \
+	test_rpmdb	\
+	ma_test.exe	\
+	testinstall	\
+	test_patchinfo	\
+	test_content
 
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
@@ -32,4 +37,9 @@ testinstall_LDFLAGS = -static
 test_patchinfo_SOURCES = test_patchinfo.cc
 test_patchinfo_LDADD = $(top_srcdir)/src/liby2pm.la
 test_patchinfo_LDFLAGS = -static
+
+test_content_SOURCES = test_content.cc
+test_content_LDADD = $(top_srcdir)/src/liby2pm.la
+test_content_LDFLAGS = -static
+
 
