@@ -200,6 +200,13 @@ class Y2PM {
     static InstSrcManager & instSrcManager();
 
     /**
+     * Triggered by InstSrcManager whenever InstSrc ranks were changed.
+     * We have to adjust e.g. package candidate lists as the InstSrc rank
+     * is a criteria for candidate selection.
+     **/
+    static void ISM_RanksCanged();
+
+    /**
      * Access to the Package manager
      **/
     static PMPackageManager & packageManager();

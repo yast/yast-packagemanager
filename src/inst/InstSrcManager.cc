@@ -30,8 +30,6 @@
 #include <y2pm/InstSrcData.h>
 
 #include <y2pm/MediaAccess.h>
-#include <y2pm/PMPackageManager.h>
-#include <y2pm/PMSelectionManager.h>
 
 using namespace std;
 
@@ -774,9 +772,10 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
   }
   todel.clear();
 
-  // adjust _knownSources settings
+  // adjust _knownSources
   _knownSources = known;
 
+  // write new settings
   if ( new_states ) {
     idx = 0;
     for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it, ++idx ) {
@@ -786,10 +785,9 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
     }
   }
 
+  // notify Y2PM
   if ( new_ranks ) {
-    Y2PM::packageManager().poolSortCandidates();
-    Y2PM::selectionManager().poolSortCandidates();
-#warning Further actions on new Src ranks, except sorting candidate lists?
+    Y2PM::ISM_RanksCanged();
   }
 
   // see what else to adjust...
