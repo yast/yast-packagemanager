@@ -230,8 +230,10 @@ class InstSrcManager {
 
     /**
      * Delete InstSrc. Erase it together with all cached info.
+     *
+     * <B>Note:</B> the ISrcId passed will be set to NULL.
      **/
-    PMError deleteSource( const ISrcId & isrc_r );
+    PMError deleteSource( ISrcId & isrc_r );
 
     /**
      * Set new Url for InstSrc.

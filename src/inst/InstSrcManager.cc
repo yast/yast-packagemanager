@@ -626,9 +626,29 @@ PMError InstSrcManager::setNewRanks()
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::deleteSource( const ISrcId & isrc_r )
+PMError InstSrcManager::deleteSource( ISrcId & isrc_r )
 {
-  return Error::E_TBD;
+  InstSrcPtr delsrc;
+  {
+    ISrcPool::iterator it( poolHandle( isrc_r ) );
+    if ( it == _knownSources.end() ) {
+      WAR << "bad ISrcId " << isrc_r << endl;
+      isrc_r = 0;
+      return Error::E_bad_id;
+    }
+    isrc_r = 0;
+    delsrc = *it;
+    _knownSources.erase( it );
+  }
+
+  delsrc->_cache_deleteOnExit = true;
+  MIL << "set to delete " << delsrc << " (RefCnt " << delsrc->rep_cnt()  << ")" << endl;
+  if ( delsrc->rep_cnt() > 1 ) {
+    WAR << (delsrc->rep_cnt()-1) << " more references exist for " << delsrc << endl;
+  }
+  delsrc = 0;
+
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
