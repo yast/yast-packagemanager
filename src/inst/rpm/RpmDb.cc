@@ -260,7 +260,6 @@ PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
     FAILIFNOTINITIALIZED
 
     return Error::E_ok;
-#warning "createTmpDatabase yet implemented"
 #if 0
    // searching a non-existing rpm-path
    int counter = 0;
@@ -373,7 +372,6 @@ PMError RpmDb::installTmpDatabase( void )
     FAILIFNOTINITIALIZED
 
     return Error::E_ok;
-#warning "installTmpDatabase not yet implemented"
 #if 0
    DbStatus err = RPMDB_OK;
    Pathname oldPath;
@@ -534,6 +532,7 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 	cdep_Ci.version = depvec[i+2];
 
 	int op = atoi(depvec[i+1].c_str());
+	op = op & 127; // prereq is 64, all senses above are ignored
 	if(op&DPREREQ)
 	{
 	    cdep_Ci.isprereq=true;
@@ -573,13 +572,13 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 	    }
 	    else
 	    {
-		ERR << "operator " << op << " invalid" << endl;
+		ERR << "operator " << op << " invalid for package " << cdep_Ci.name << "version " << cdep_Ci.version << endl;
 		cdep_Ci.compare = NONE;
 	    }
 
 	}
 
-	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,cdep_Ci.version);
+	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,PkgEdition::fromString(cdep_Ci.version));
 #warning SUSPICIOUS usage of version to create PkgEdition
 	// ma: IMHO version part of depend. query may be [epoch:]version-release
 	// maybe 'PkgEdition::fromString( cdep_Ci.version )' creates the Edition
