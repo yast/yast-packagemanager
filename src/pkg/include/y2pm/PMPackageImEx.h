@@ -24,6 +24,9 @@
 #include <iosfwd>
 #include <set>
 
+#include <y2util/Pathname.h>
+#include <y2util/LangCode.h>
+
 #include <y2pm/PMPackageImExPtr.h>
 #include <y2pm/PMSelectablePtr.h>
 #include <y2pm/PkgName.h>
@@ -39,6 +42,23 @@ class PMPackageImEx : virtual public Rep {
 
   private:
 
+    struct Magic {
+      static const std::string _magic;
+      PkgEdition               _version;
+      Magic( const PkgEdition & vers_r = PkgEdition::UNSPEC ) : _version( vers_r ) {}
+      std::istream & readFrom( std::istream & str );
+      std::ostream & writeOn( std::ostream & str ) const;
+    };
+
+    static const Magic _ImExMagic;
+
+  private:
+
+    std::list<LangCode> _requestedLocales;
+
+    std::set<PkgNameEd> _onSystemSel;
+    std::set<PkgName>   _offSystemSel;
+
     std::set<PkgNameEd> _onSystemPkg;
     std::set<PkgNameEd> _onSystemTabooPkg;
     std::set<PkgName>   _offSystemPkg;
@@ -46,6 +66,7 @@ class PMPackageImEx : virtual public Rep {
 
     void reset();
 
+    bool collect_Sel( const constPMSelectablePtr & sel_r );
     bool collect_Pkg( const constPMSelectablePtr & sel_r );
 
   public:
@@ -56,11 +77,16 @@ class PMPackageImEx : virtual public Rep {
 
   public:
 
+    void getPMState();
+    void setPMState();
+
+  public:
+
     std::istream & doImport( std::istream & str );
     std::ostream & doExport( std::ostream & str ) const;
 
-    void getPMState();
-    void setPMState();
+    bool doImport( const Pathname & path_r );
+    bool doExport( const Pathname & path_r ) const;
 
   public:
 
