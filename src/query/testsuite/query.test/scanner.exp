@@ -1,0 +1,20 @@
+#
+# scanner.exp
+# 'main' file for scanner
+#
+
+set program "scanner"
+set result ""
+set oops [catch { set result [exec ./$program] } catched]
+if {$oops != 0} {
+  fail "test case failed for $program: $catched"
+  return -1
+}
+
+if {$result != ""} {
+  warning "Run of $program results in '$result'"
+  return -1
+}
+
+pass $program
+return 0
