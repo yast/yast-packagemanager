@@ -17,6 +17,9 @@
    
 /*
  * $Log$
+ * Revision 1.4  2002/09/04 09:22:42  cschum
+ * Implemented user/password authentification.
+ *
  * Revision 1.3  2002/07/05 12:05:13  lnussel
  * catch more wget errors
  *
@@ -50,6 +53,8 @@
 #include <string>
 
 #include <y2util/ExternalProgram.h>
+#include <y2util/Url.h>
+#include <y2util/Pathname.h>
 
 /**
  * @short Interface to the wget program
@@ -59,7 +64,8 @@ enum WgetStatus { WGET_OK, WGET_ERROR_FILE,
 		  WGET_ERROR_LOGIN, WGET_ERROR_CONNECT,
 		  WGET_ERROR_PROXY_AUTH,
 		  WGET_ERROR_SERVER,
-		  WGET_ERROR_UNEXPECTED };
+		  WGET_ERROR_UNEXPECTED,
+                  WGET_ERROR_INVALID_URL };
 
 
 class Wget
@@ -79,20 +85,16 @@ public:
   /**
    * Retrieving a file 
    */
-   
   WgetStatus getFile ( const std::string url, const std::string destFilename );
-   
+
   /**
-   * Set password and user
-   * <p><b>obsolete, encode user and password into url when calling getFile</b>
-   */
-/*    
-  void setUser( const std::string username, const std::string passwd);
-*/
+    Get a file. Uses username and password, if included in given url.
+  */
+  WgetStatus getFile( const Url &url, const Pathname &destination );
+   
   /**
    * Set password and user of the proxy
    */
-    
   void setProxyUser( const std::string username, const std::string passwd);
     
   /**
@@ -101,13 +103,6 @@ public:
   std::string error_string ( WgetStatus status );
     
 private:
-
-   
-  /** 
-   * user
-   */
-//    std::string user;
-//    std::string password;
 
   /** 
    * proxy user 
