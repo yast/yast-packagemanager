@@ -7,38 +7,41 @@
 |                        |_|\__,_|____/ |_| |_____|                    |
 |                                                                      |
 |                               core system                            |
-|                                                        (C) SuSE GmbH |
+|                                                    (C) SuSE Linux AG |
 \----------------------------------------------------------------------/
 
-  File:       PMRcValues.h
+  File:       PMVendorAttr.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Manage vendor attributes
 
 /-*/
-#ifndef PMRcValues_h
-#define PMRcValues_h
+#ifndef PMVendorAttr_h
+#define PMVendorAttr_h
 
 #include <iosfwd>
 
-#include <y2pm/PMTypes.h>
+#include <y2util/Vendor.h>
 
 ///////////////////////////////////////////////////////////////////
-namespace PM {
+namespace PMVendorAttr {
 ;//////////////////////////////////////////////////////////////////
 
-struct RcValues {
-  PM::LocaleSet         requestedLocales;
-  PM::CandidateOrder    candidateOrder;
-  std::set<std::string> trustedVendors;
-};
+/**
+ * Return whether it's a known vendor
+ **/
+extern bool isKnown( const Vendor & vendor_r );
 
-extern RcValues & rcValues(); // Y2PM.rcvalue.cc
+/**
+ * Return whether this vendors packages should be protected by
+ * default.
+ **/
+extern bool autoProtect( const Vendor & vendor_r );
 
 ///////////////////////////////////////////////////////////////////
-} // namespace PM
+} // namespace PMVendorAttr
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMRcValues_h
+#endif // PMVendorAttr_h

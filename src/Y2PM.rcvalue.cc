@@ -128,6 +128,7 @@ struct Y2pmRc : public RcValues, public TextParser {
     // data
     REQUESTEDLOCALES,
     CANDIDATEORDER,
+    TRUSTEDVENDORS,
     // last entry:
     NUM_TAGS
   };
@@ -147,6 +148,7 @@ struct Y2pmRc : public RcValues, public TextParser {
     // data
     _tagset.addTag( "requestedLocales",	REQUESTEDLOCALES,	TaggedFile::MULTI );
     _tagset.addTag( "candidateOrder",	CANDIDATEORDER,		TaggedFile::SINGLE );
+    _tagset.addTag( "trustedVendorsa",	TRUSTEDVENDORS,	        TaggedFile::MULTI );
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -188,6 +190,10 @@ struct Y2pmRc : public RcValues, public TextParser {
 
       case CANDIDATEORDER:
 	assignValue( cache, *tg, rcValues_r.candidateOrder );
+	break;
+
+      case TRUSTEDVENDORS:
+	assignValue( cache, *tg, rcValues_r.trustedVendors );
 	break;
 
       // last entry:
@@ -237,6 +243,10 @@ struct Y2pmRc : public RcValues, public TextParser {
 
       case CANDIDATEORDER:
 	writeValue( rcstream_r, *tg, rcValues_r.candidateOrder );
+	break;
+
+      case TRUSTEDVENDORS:
+	writeValue( rcstream_r, *tg, rcValues_r.trustedVendors );
 	break;
 
       // last entry:
@@ -423,7 +433,17 @@ PMError Y2PM::rcInit()
     ERR << "Initialize returned " << err << endl;
   }
 
+  ///////////////////////////////////////////////////////////////////
   // postprocess
+  ///////////////////////////////////////////////////////////////////
+
+  // assert at least these vendor are present
+  _yp2pmrc.trustedVendors.insert( "suse" );
+  _yp2pmrc.trustedVendors.insert( "unitedlinux" );
+  _yp2pmrc.trustedVendors.insert( "sgi" );
+  _yp2pmrc.trustedVendors.insert( "silicon graphics" );
+  _yp2pmrc.trustedVendors.insert( "novell" );
+
   if ( runningFromSystem() ) {
 
     if ( rcfile.empty() ) {
