@@ -25,20 +25,6 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 
-UniqStr PkgArch::nameHash;
+UstringHash PkgArch::_nameHash;
 
 ///////////////////////////////////////////////////////////////////
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : operator<<
-**	FUNCTION TYPE : ostream &
-**
-**	DESCRIPTION :
-*/
-ostream & operator<<( ostream & str, const PkgArch & obj )
-{
-  return str << (const char *)obj;
-}
-

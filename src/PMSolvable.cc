@@ -79,7 +79,7 @@ ostream & PMSolvable::dumpOn( ostream & os ) const
 {
   Rep::dumpOn( os );
   os << endl;
-  os << "Name: " << (const char *)_name << endl;
+  os << "Name: " << _name << endl;
   os << "Version: " << _edition.version() << endl;
   if (_edition.has_release())
     os << "Release: " << _edition.release() << endl;
