@@ -286,17 +286,12 @@ bool PkgDep::upgrade(
 }
 #endif
 
-bool PkgDep::solvesystemnoauto(
-	PkgSet &candidates,
-	ResultList& out_good,
-	ErrorResultList& out_bad,
-	ErrorResultList& out_obsoleted)
+void PkgDep::inconsistent_to_candidates(PkgSet& candidates)
 {
 	unsigned numinconsistent = 0;
-	set<PMSolvablePtr> noinstcandidates;
 	PkgSet brokeninstalled;
 
-	D__ << "Starting solver\n";
+	D__ << "check inconsistent" << endl;
 
 //	go through all installed, put all inconsistent into candidates and remove them from installed
 	{
@@ -327,7 +322,6 @@ bool PkgDep::solvesystemnoauto(
 		{
 		    numinconsistent++;
 		    brokeninstalled.add(instd);
-    //		notes[instd->name()].inconsistent = true;
 		}
 	    }
 
@@ -344,12 +338,14 @@ bool PkgDep::solvesystemnoauto(
 			    D__ << "adding inconsistent " << (bit->second->name())
 				<< " from available to candidates" << endl;
 			    candidates.add( available[bit->second->name()] );
+			    notes[bit->second->name()].was_inconsistent = true;
 			}
 			else
 			{
 			    D__ << "adding inconsistent " << (bit->second->name())
 				<< " from installed to candidates" << endl;
 			    candidates.add( bit->second );
+			    notes[bit->second->name()].was_inconsistent = true;
 			}
 		    }
 		    else
@@ -362,13 +358,18 @@ bool PkgDep::solvesystemnoauto(
 		    INT << bit->second->name() << " not in installed!?" << endl;
 	    }
 	}
+}
 
+bool PkgDep::solvesystemnoauto(
+	PkgSet &candidates,
+	ResultList& out_good,
+	ErrorResultList& out_bad,
+	ErrorResultList& out_obsoleted)
+{
 	// try installation of the candidates
 	DBG << "-------------------- install run --------------------\n";
-	install( candidates, out_good, out_bad, out_obsoleted, true );
+	install( candidates, out_good, out_bad, out_obsoleted, true, true );
 	DBG << "-------------------- install end --------------------\n";
-
-	out_good.remove_if( fromBrokeninstalled(brokeninstalled) );
 
 	return out_bad.empty();
 }

@@ -197,6 +197,12 @@ class PkgDep {
 		bool install_to_avoid_break : 1;
 
 		/**
+		 * this package has been (re)installed because it had
+		 * unsatisfied dependencies
+		 * */
+		bool was_inconsistent : 1;
+
+		/**
 		 * construct Result.
 		 * is_upgrade_from and is_downgrade_from will be calculated
 		 * */
@@ -381,12 +387,14 @@ class PkgDep {
 		bool upgrade_to_solve_conflict : 1;
 		bool install_to_avoid_break : 1;
 		bool not_available : 1;
+		bool was_inconsistent : 1;
 		IRelInfoList referers;
 		NeededEditionRange not_avail_range;
 
 		Notes() : from_input(false), upgrade_to_solve_conflict(false),
 			install_to_avoid_break(false),
-			not_available(false)
+			not_available(false),
+			was_inconsistent(false)
 			{}
 	};
 
@@ -486,6 +494,11 @@ class PkgDep {
 	 * */
 	static WhatToDoWithUnresolvable default_unresolvable_callback(
 	    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p);
+
+
+	/** check consistency of installed packages, mark inconsistent ones for
+	 * reinstallation */
+	void inconsistent_to_candidates(PkgSet& candidates);
 	
 public:
 	PkgDep( PkgSet& instd, const PkgSet& avail,
@@ -505,7 +518,8 @@ public:
 			  ResultList& good,
 			  ErrorResultList& bad,
 			  ErrorResultList& out_obsoleted,
-			  bool commit_to_installed = true);
+			  bool commit_to_installed = true,
+			  bool check_inconsistent = false);
 	/** remove a list of packages; the 'pkgs' list will be extended by all
 	 * packages that have to be removed, too, to make the installed set
 	 * consistent again */
