@@ -19,4 +19,5 @@ noinst_LTLIBRARIES = liby2pmyou.la
 liby2pmyou_la_SOURCES = \
 	PMYouPatch.cc \
 	PMYouPatchDataProvider.cc \
-	PMYouPatchManager.cc
+	PMYouPatchManager.cc \
+        PMYouPatchInfo.cc
