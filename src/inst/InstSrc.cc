@@ -157,11 +157,40 @@ PMError InstSrc::enableSource()
   PMError err;
   InstSrcDataPtr ndata;
 
+
+
   switch ( _descr->type() ) {
 
   case T_UnitedLinux:
     ndata = new InstSrcDataUL;
-    err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
+    // FAKE
+    {
+      MediaAccessPtr f_media    = _media;
+      Pathname       f_descrdir = _descr->descrdir();
+
+      PathInfo cpath( cache_data_dir() + "descr/packages" );
+      if ( cpath.isFile() ) {
+	f_media    = new MediaAccess();
+	f_descrdir = "/descr";
+
+	string f_url( "dir:///" );
+	f_url += cache_data_dir().asString();
+
+	if ( (err = f_media->open( f_url, cache_media_dir() )) ) {
+	  ERR << "(F)Failed to open " << f_url << " " << err << endl;
+	  return err;
+	}
+
+	if ( (err = f_media->attach()) ) {
+	  ERR << "(F)Failed to attach media: " << err << endl;
+	  return err;
+	}
+	MIL << "(F)Use cache " << cpath << endl;
+      }
+      err = InstSrcDataUL::tryGetData( ndata, f_media, f_descrdir );
+    }
+    // EKAF
+    // err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
     break;
 
     ///////////////////////////////////////////////////////////////////
@@ -177,7 +206,6 @@ PMError InstSrc::enableSource()
     return Error::E_no_instsrc_on_media;
   }
 
-  err = ndata->_instSrc_attach( this );
   if ( err ) {
     ERR << "Error retrieving InstSrcData: " << err << endl;
     return err;
@@ -188,6 +216,7 @@ PMError InstSrc::enableSource()
   ///////////////////////////////////////////////////////////////////
   if ( !err ) {
     _data = ndata;
+    _data->_instSrc_attach( this );
     _data->_instSrc_propagate();    // propagate Objects to Manager classes.
     writeCache();
   }

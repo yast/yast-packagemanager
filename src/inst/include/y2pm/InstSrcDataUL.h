@@ -23,6 +23,7 @@
 
 #include <iosfwd>
 #include <fstream>
+#include <y2util/LangCode.h>
 #include <y2util/TaggedFile.h>
 #include <y2util/TagCacheRetrieval.h>
 
@@ -134,50 +135,68 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	 * */
 	static PMError readMediaFile(const Pathname& product_dir, MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count);
 
-    public:
+  public:
 
-	/**
-	 * default error class
-	 **/
-	typedef InstSrcError Error;
+    /**
+     * default error class
+     **/
+    typedef InstSrcError Error;
 
-    public:
+  public:
 
-	InstSrcDataUL();
-	~InstSrcDataUL();
+    InstSrcDataUL();
+    ~InstSrcDataUL();
 
-    protected:
+  private:
 
-      /**
-       * @see InstSrcData#loadObjects
-       **/
-      virtual PMError loadObjects();
+    Pathname _descr_dir; // provided by media or cache
+    Pathname _data_dir;
 
-    public:
+    static const LangCode _fallback_langcode; // fix en
+    LangCode              _default_langcode;  // the one we're encouraged to use
+    LangCode              _langcode;          // the one we actually use
 
-	/**
-	 * Any concrete InstSrcData must realize this, as it knows the expected
-	 * layout on the media. Expect MediaAccessPtr to be open and attached.
-	 *
-	 * try to find product/content information on the media
-	 *
-	 * Return the InstSrcDescr retrieved from the media via ndescr_r,
-	 * or NULL and PMError set.
-	 **/
-	static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
+    std::list<std::string> _selection_files;
+
+    Pathname packagesFile()     const { return _descr_dir + "packages"; }
+    Pathname packagesLangFile() const { return (_descr_dir + "packages.").extend(_langcode); }
+    Pathname packagesDuFile()   const { return _descr_dir + "packages.DU"; };
+
+    Pathname selectionsFile()   const { return _descr_dir + "selections"; }
+    Pathname selectionFile( const std::string & name_r ) const { return _descr_dir + name_r; }
+
+  protected:
+
+    /**
+     * @see InstSrcData#loadObjects
+     **/
+    virtual PMError loadObjects();
+
+  public:
+
+    /**
+     * Any concrete InstSrcData must realize this, as it knows the expected
+     * layout on the media. Expect MediaAccessPtr to be open and attached.
+     *
+     * try to find product/content information on the media
+     *
+     * Return the InstSrcDescr retrieved from the media via ndescr_r,
+     * or NULL and PMError set.
+     **/
+    static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
 
-	/**
-	 * Any concrete InstSrcData must realize this, as it knows the expected
-	 * layout on the media. Expect MediaAccessPtr to be open and attached.
-	 *
-	 * try to find selection/package/patch information on the media
-	 *
-	 * Return the InstSrcData retrieved from the media via ndata_r,
-	 * or NULL and PMError set.
-	 **/
-	static PMError tryGetData( InstSrcDataPtr & ndata_r,
-				MediaAccessPtr media_r, const Pathname & descr_dir_r );
+    /**
+     * Any concrete InstSrcData must realize this, as it knows the expected
+     * layout on the media. Expect MediaAccessPtr to be open and attached.
+     *
+     * try to find selection/package/patch information on the media
+     *
+     * Return the InstSrcData retrieved from the media via ndata_r,
+     * or NULL and PMError set.
+     **/
+    static PMError tryGetData( InstSrcDataPtr & ndata_r,
+			       MediaAccessPtr media_r, const Pathname & descr_dir_r );
 
 };
 
