@@ -100,11 +100,11 @@ int main( int argc, char **argv )
     instSrcMgr.getSources( sourceIds );
   }
 
+  cout << "Installation Sources:" << endl;
   InstSrcManager::ISrcIdList::const_iterator it;
   for( it = sourceIds.begin(); it != sourceIds.end(); ++it ) {
-    cout << "InstSrc:" << endl;
     constInstSrcDescrPtr descr = (*it)->descr();
-    cout << "  PRODUCT: " << descr->content_product().name << endl;
+    cout << descr->content_label() << " (" << descr->url() << ")" << endl;
   }
 
   MIL << "END" << endl;
