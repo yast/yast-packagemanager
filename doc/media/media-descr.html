@@ -269,6 +269,7 @@ be determined.</td></tr>
 (relative to product directory)</td></tr>
 <tr><td>O</td><td><tt>LANGUAGE</tt></td><td>default language code</td></tr>
 <tr><td>O</td><td><tt>TIMEZONE</tt></td><td>default timezone</td></tr>
+<tr><td>O</td><td><tt>RELNOTESURL</tt></td><td>url of release notes, see below</td></tr>
 <tr><td>O</td><td><tt>FLAGS</tt></td><td>product specific capabilities, see below</td></tr>
 <tr><td>O</td><td><tt>YOUURL</tt></td><td>URL of text file containing list of online update servers</td></tr>
 <tr><td>O</td><td><tt>YOUTYPE</tt></td><td><tt>business</tt> for SuSE business products</td></tr>
@@ -295,6 +296,11 @@ Packages with architectures not in this list are discarded and do not appear
 for selection. Packages with 'lower' architectures are still available for selection,
 so the user can manually choose such a package.<br>
 <br>
+
+<p>The <tt>RELNOTESURL</tt> line is used to define the location of the release
+notes rpm. Currently only http is supported. The rpm is installed with
+<tt>rpm -U --replacepkgs 'basename of url'</tt>.</p>
+
 The <tt>FLAGS</tt> line is used to describe the (installation) capabilities of
 the product. It's value is a list of space separated keywords.<br>
 The following keywords are currently defined:<br>
@@ -330,6 +336,7 @@ DESCRDIR suse/setup/descr
 DATADIR suse
 LANGUAGE de_DE
 TIMEZONE Europe/Berlin
+RELNOTESURL http://www.suse.com/relnotes/sl_82/release-notes.rpm
 FLAGS update
 YOUURL http://www.suse.de/cgi-bin/suseservers.cgi
 YOUTYPE business
@@ -397,7 +404,7 @@ This is basically a cache file for package data needed for
 package selection and dependency resolution.<br>
 See current <A HREF="package-descr.html">here</A> for the syntax.<br>
 <hr>
-The <tt>packages</tt> file <b>must exist</b> in order to enable a media. 
+The <tt>packages</tt> file <b>must exist</b> in order to enable a media.
 <hr>
 <br>
 The package file contains pure package / rpm data and no user
