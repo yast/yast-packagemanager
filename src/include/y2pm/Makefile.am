@@ -7,6 +7,7 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
+	Timecount.h	\
 	Alternatives.h	\
 	PkgSet.h	\
 	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h PkgDu.h	\

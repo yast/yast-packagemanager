@@ -44,6 +44,9 @@
 #include <y2util/diff.h>
 
 #include <y2pm/RpmDb.h>
+#include <y2pm/RpmLibDb.h>
+#include <y2pm/Timecount.h>
+
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PMPackage.h>
@@ -71,6 +74,29 @@ IMPL_BASE_POINTER(RpmDb);
 #define FILEFORBACKUPFILES "YaSTBackupModifiedFiles"
 
 /****************************************************************/
+/* struct RpmDb::Packages					*/
+/****************************************************************/
+
+void RpmDb::Packages::buildList()
+{
+  _list.clear();
+  for ( map<PkgName,PMPackagePtr>::iterator iter = _index.begin();
+	iter != _index.end(); ++iter ) {
+    if ( iter->second )
+      _list.push_back( iter->second );
+  }
+  _valid = true;
+}
+
+PMPackagePtr RpmDb::Packages::lookup( const PkgName & name_r ) const
+{
+  std::map<PkgName,PMPackagePtr>::const_iterator got = _index.find( name_r );
+  if ( got != _index.end() )
+    return got->second;
+  return PMPackagePtr();
+}
+
+/****************************************************************/
 /* public member-functions					*/
 /****************************************************************/
 
@@ -78,7 +104,6 @@ IMPL_BASE_POINTER(RpmDb);
 /* creates a RpmDb					       */
 /*-------------------------------------------------------------*/
 RpmDb::RpmDb() :
-    _packages_valid(false),
     _progressfunc(NULL),
     _progressdata(NULL),
     _rootdir(""),
@@ -589,525 +614,194 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
     return count;
 }
 
-
-// parse string of the form "name,number,version" into rellist.
-// number is the rpm number representing the operator <, <=, = etc.
-// See output of rpm -q --queryformat [%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},] <package>
+///////////////////////////////////////////////////////////////////
 //
-void
-RpmDb::rpmdeps2rellist ( const string& depstr,
-		PMSolvable::PkgRelList_type& deps,
-		PkgName who, bool dropselfdep,
-		FileDeps::FileNames& files,
-		bool fill_files)
-{
-    enum rpmdep
-    {
-	DNONE = 0,
-	DLT = 2,
-	DGT = 4,
-	DEQ = 8,
-	DGE = GT|EQ,
-	DLE = LT|EQ,
-	DPREREQ = 64
-    };
-    struct
-    {
-	string name;
-	rel_op compare;
-	string version;
-	bool isprereq;
-	void clear()
-	{
-	    name = version.erase();
-	    compare=NONE;
-	    isprereq = false;
-	}
-    } cdep_Ci;
-
-    deps.clear();
-
-    vector<string> depvec;
-    tokenize(depstr, ',', 0, depvec);
-
-//    D__ << "split " << depstr << " into " << depvec.size() << " pieces" << endl;
-
-    if(depvec.size()<3) return;
-
-    for(vector<string>::size_type i = 0; i <= depvec.size()-3; i+=3 )
-    {
-	cdep_Ci.name = depvec[i];
-	cdep_Ci.version = depvec[i+2];
-
-	int op = atoi(depvec[i+1].c_str());
-	op = op & 127; // prereq is 64, all senses above are ignored
-	if(op&DPREREQ)
-	{
-	    cdep_Ci.isprereq=true;
-	    op^=DPREREQ;
-//	    D__ << "inversion " << op << endl;
-	}
-	else
-	{
-	    cdep_Ci.isprereq=false;
-	}
-
-	if(op == 0)
-	{
-	    cdep_Ci.compare = NONE;
-	}
-	else
-	{
-	    if(op&DLE)
-	    {
-		cdep_Ci.compare = LE;
-	    }
-	    else if(op&DGE)
-	    {
-		cdep_Ci.compare = GE;
-	    }
-	    else if(op&DGT)
-	    {
-		cdep_Ci.compare = GT;
-	    }
-	    else if(op&DLT)
-	    {
-		cdep_Ci.compare = LT;
-	    }
-	    else if(op&DEQ)
-	    {
-		cdep_Ci.compare = EQ;
-	    }
-	    else
-	    {
-		ERR << "operator " << op << " invalid for package " << cdep_Ci.name << "version " << cdep_Ci.version << endl;
-		cdep_Ci.compare = NONE;
-	    }
-
-	}
-
-	{
-	    PkgName name(cdep_Ci.name);
-
-	    if(cdep_Ci.name.substr(0,1) == "/")
-	    {
-		files.insert(name);
-	    }
-
-	    if(dropselfdep && name == who)
-	    {
-		_I__("DEPCHECK") << name << " has dependency on it self" << endl;
-	    }
-	    else
-	    {
-		PkgRelation dep(name,cdep_Ci.compare,PkgEdition::fromString(cdep_Ci.version));
-		dep.setPreReq(cdep_Ci.isprereq);
-		deps.push_back(dep);
-	    }
-	}
-
-	cdep_Ci.clear();
-    }
-}
-
-//-------------------------------------------
-// return pkglist with installed packages
 //
-// refreshes _packages
+//	METHOD NAME : RpmDb::getPackages
+//	METHOD TYPE : const std::list<PMPackagePtr> &
 //
-const std::list<PMPackagePtr>&
-RpmDb::getPackages (void)
+//	DESCRIPTION :
+//
+const std::list<PMPackagePtr> & RpmDb::getPackages()
 {
-    if (_packages_valid
-	|| _old_present
-	|| !_initialized)
-    {
-	return _packages;
+  if ( _packages._valid || _old_present || !_initialized ) {
+    return _packages._list;
+  }
+
+  Timecount _t( "RpmDb::getPackages" );
+
+  _packages.clear();
+
+  ///////////////////////////////////////////////////////////////////
+  // Access to rpmdb
+  ///////////////////////////////////////////////////////////////////
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  if ( rpmdb.dbOpen() ) {
+    return _packages._list;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Collect package data. A map is used to check whethere there are
+  // multiple entries for the same PkgName. If so we consider the last
+  // one installed to be the one we're interesed in.
+  ///////////////////////////////////////////////////////////////////
+
+  map<PkgName,PMPackagePtr> pkgdata;
+
+  for ( RpmLibDb::const_iterator iter = rpmdb.begin(); iter != rpmdb.end(); ++iter ) {
+
+    if ( !*iter ) {
+#warning How to handle bad record number in RpmLibDb?
+      break;
     }
 
-    string rpmquery;
-    _packages.clear();
+    PkgName name        = iter->tag_name();
+    Date    installtime = iter->tag_installtime();
+    PMPackagePtr & nptr = _packages._index[name]; // be shure to get a reference!
 
-    // this enum tells the position in rpmquery string
-    //
-    // see pkgattribs[] below
-    //
-    enum {
-	// PMSolvable
-	RPM_NAME = 0,
-	RPM_VERSION,
-	RPM_RELEASE,
-	RPM_ARCH,
-	RPM_REQUIRES,
-	RPM_PROVIDES,
-	RPM_OBSOLETES,
-	RPM_CONFLICTS,
-	RPM_BUILDTIME,		// passed to PkgEdition()
-	RPM_SIZE,		// cached in dataprovider
-	RPM_GROUP,		// cached in dataprovider
-	RPM_VENDOR,
-	RPM_SUMMARY,      // summary MUST be last, could contain ';'
-	NUM_RPMTAGS
-    };
-
-    //
-    // Start RPM process
-    //
-
-    // build up query for all relevant data (for a PMObject)
-    // all other data is read on-demand by the dataprovider
-    //
-    // !! the query order must match the enum !!
-    // The query must end with "\\n" in order to separate
-    // the package data
-    //
-    // Values except summary must neither contain ',' nor ';'
-    //
-    rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};%{RPMTAG_ARCH};";
-    rpmquery += "[%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},];";
-    rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
-    rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
-    rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},];";
-    rpmquery += "%{BUILDTIME};%{SIZE};%{GROUP};%{VENDOR};%{SUMMARY}";
-    rpmquery += "\\n";
-
-    RpmArgVec opts(4);
-    opts[0] = "-q";
-    opts[1] = "-a";
-    opts[2] = "--queryformat";
-    opts[3] = rpmquery.c_str();
-    run_rpm (opts, ExternalProgram::Discard_Stderr);
-
-    if (!process)
-    {
-	ERR << "RpmDB subprocess start failed" << endl;
-	return _packages;
+    if ( nptr ) {
+      WAR << "Multiple entries for package '" << name << "' in rpmdb" << endl;
+      if ( nptr->installtime() > installtime )
+	continue;
+      // else overwrite previous entry
     }
 
-    string value;
-    string output;
+    // create dataprovider and package
+    PMRpmPackageDataProviderPtr ndp = new PMRpmPackageDataProvider( this );
+    nptr = new PMPackage( name, iter->tag_edition(), iter->tag_arch(), ndp );
 
-    PkgSet              mypackages;
+    // add PMSolvable data to package, collect filerequires on the fly
+    nptr->setProvides ( iter->tag_provides ( &_filerequires ) );
+    nptr->setRequires ( iter->tag_requires ( &_filerequires ) );
+    nptr->setConflicts( iter->tag_conflicts( &_filerequires ) );
+    nptr->setObsoletes( iter->tag_obsoletes( &_filerequires ) );
 
-    output = process->receiveLine();
+    // let dataprovider collect static data
+    ndp->loadStaticData( *iter );
+  }
 
-    //
-    // now loop over all packages reported by the rpm process
-    // and create (properly filled) PMPackage instances
-    //
+  ///////////////////////////////////////////////////////////////////
+  // Evaluate filerequires collected so far
+  ///////////////////////////////////////////////////////////////////
+  for( FileDeps::FileNames::iterator it = _filerequires.begin(); it != _filerequires.end(); ++it ) {
 
-    while ( output.length() > 0)
-    {
-	string::size_type         ret;
-
-	// extract \n
-	// the queryformat specified "\n" as the package separator
-
-	ret = output.find_first_of ( "\n" );
-	if ( ret != string::npos )
-	{
-	    value.assign ( output, 0, ret );
-	}
-	else
-	{
-	    value = output;
-	}
-
-//	D__ << "stdout: " << value << endl;
-
-	//
-	// parse output to pkgattribs
-	// the queryformat specified ";" as the value separator
-	//
-
-	vector<string> pkgattribs;
-
-	tokenize (value, ';', NUM_RPMTAGS, pkgattribs);
-
-	if( pkgattribs.size() != NUM_RPMTAGS )
-	{
-	    ERR << "invalid rpm output:" << value << " size is "<< pkgattribs.size()<< endl;
-	}
-	else
-	{
-	    int buildtime = 0;
-	    if(!pkgattribs[RPM_BUILDTIME].empty())
-	    {
-		// XXX: use strtol instead?
-		buildtime = atoi (pkgattribs[RPM_BUILDTIME].c_str());
-	    }
-	    PkgEdition edi( pkgattribs[RPM_VERSION],
-			    pkgattribs[RPM_RELEASE],
-			    buildtime );
-
-	    PMRpmPackageDataProviderPtr dataprovider = new PMRpmPackageDataProvider (this);
-	    PkgName name(pkgattribs[RPM_NAME]);
-	    PMPackagePtr p = new PMPackage(
-				name,
-				edi,
-				PkgArch(pkgattribs[RPM_ARCH]),
-			        dataprovider);
-
-	    mypackages.add(p);
-
-	    PMSolvable::PkgRelList_type requires;
-	    PMSolvable::PkgRelList_type provides;
-	    PMSolvable::PkgRelList_type obsoletes;
-	    PMSolvable::PkgRelList_type conflicts;
-
-	    PMSolvable::PkgRelList_type dummy;
-
-	    rpmdeps2rellist (pkgattribs[RPM_REQUIRES], requires, name, false, _filerequires, true);
-	    rpmdeps2rellist (pkgattribs[RPM_PROVIDES], provides, name, false, _filerequires);
-	    rpmdeps2rellist (pkgattribs[RPM_OBSOLETES], obsoletes, name, true, _filerequires);
-	    rpmdeps2rellist (pkgattribs[RPM_CONFLICTS], conflicts, name, true, _filerequires, true);
-
-	    p->setRequires (requires);
-	    p->setProvides (provides);
-	    p->setObsoletes (obsoletes);
-	    p->setConflicts (conflicts);
-
-	    dataprovider->_attr_SUMMARY = pkgattribs[RPM_SUMMARY];
-	    dataprovider->_attr_SIZE = FSize (atoll(pkgattribs[RPM_SIZE].c_str()));
-	    dataprovider->_attr_GROUP = Y2PM::packageManager().addRpmGroup(pkgattribs[RPM_GROUP]);
-	    dataprovider->_attr_VENDOR = Vendor (pkgattribs[RPM_VENDOR]);
-
-	    _packages.push_back (p);
-	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
-	    // D__ << p << endl;
-	}
-
-	output = process->receiveLine();
+    RpmLibDb::const_header_set result( rpmdb.findByFile( *it ) );
+    for ( unsigned i = 0; i < result.size(); ++i ) {
+      PMPackagePtr pptr = _packages.lookup( result[i]->tag_name() );
+      if ( !pptr ) {
+	WAR << "rpmdb.findByFile returned unpknown package " << result[i] << endl;
+	continue;
+      }
+      pptr->addProvides( *it );
     }
+  }
 
-    if (systemStatus() != 0)
-    {
-	ERR << "RpmDB subprocess stop failed" << endl;
-    }
-
-    // for all files
-    for(FileDeps::FileNames::iterator fileit = _filerequires.begin();
-	fileit != _filerequires.end(); ++fileit)
-    {
-	// query rpm, returns name-version-edition
-	string str = belongsTo(string(*fileit));
-
-	if( str.empty() ) {
-	  _DBG("FileRel") << *fileit << " not provided" << endl;
-	  continue;
-	}
-	_DBG("FileRel") << *fileit << " by " << str << endl;
-
-	PkgNameEd nameed = PkgNameEd::fromString(str);
-	PkgName name = nameed.name;
-	PkgEdition edi = nameed.edition;
-
-	PMSolvablePtr ptr = mypackages.lookup(name);
-
-	if(ptr == NULL)
-	    { INT << "ptr can not be NULL" << endl; continue; }
-
-	ptr->addProvides(*fileit);
-    }
-
-    _packages_valid = true;
-    return _packages;
+  ///////////////////////////////////////////////////////////////////
+  // Build final packages list
+  ///////////////////////////////////////////////////////////////////
+  rpmdb.dbClose();
+  _packages.buildList();
+  DBG << "Found installed packages: " << _packages._list.size() << endl;
+  return _packages._list;
 }
 
-#if 0
-/*--------------------------------------------------------------*/
-/* Check package, if it is correctly installed.			*/
-/* Returns false, if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-bool
-RpmDb::checkPackage ( string packageName, FileList &fileList )
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::traceFileRel
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void RpmDb::traceFileRel( const PkgRelation & rel_r )
 {
-   bool ok = true;
-   struct stat  dummyStat;
+  if ( ! rel_r.isFileRel() )
+    return;
 
+  if ( ! _filerequires.insert( rel_r.name() ).second )
+    return; // already got it in _filerequires
 
-   const char *const opts[] = {
-      "-ql", packageName.c_str()
-     };
+  if ( ! _packages._valid )
+    return; // collect only. Evaluated in first call to getPackages()
 
-   run_rpm(sizeof(opts) / sizeof(*opts), opts,
-	   ExternalProgram::Discard_Stderr);
+  //
+  // packages already initialized. Must check and insert here
+  //
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  if ( rpmdb.dbOpen() ) {
+    return;
+  }
 
-   if ( process == NULL )
-      return false;
-
-   string value;
-   fileList.clear();
-
-   string output = process->receiveLine();
-
-   while ( output.length() > 0)
-   {
-      string::size_type 	ret;
-
-      // extract \n
-      ret = output.find_first_of ( "\n" );
-      if ( ret != string::npos )
-      {
-	 value.assign ( output, 0, ret );
-      }
-      else
-      {
-	 value = output;
-      }
-
-      // checking, if file exists
-      if (  lstat( (rootfs+value).c_str(), &dummyStat ) == -1 )
-      {
-	 // file not found
-	 ok = false;
-	 fileList.insert ( value );
-      }
-      output = process->receiveLine();
-   }
-
-   if ( systemStatus() != 0 )
-   {
-      ok = false;
-   }
-   return ( ok );
+  RpmLibDb::const_header_set result( rpmdb.findByFile( rel_r.name() ) );
+  for ( unsigned i = 0; i < result.size(); ++i ) {
+    PMPackagePtr pptr = _packages.lookup( result[i]->tag_name() );
+    if ( !pptr ) {
+      WAR << "rpmdb.findByFile returned unpknown package " << result[i] << endl;
+      continue;
+    }
+    pptr->addProvides( rel_r.name() );
+  }
 }
 
-/*--------------------------------------------------------------*/
-/* Evaluate all files of a package which have to be installed.  */
-/* ( are listed in the rpm-DB )					*/
-/*--------------------------------------------------------------*/
-bool
-RpmDb::queryInstalledFiles ( FileList &fileList, string packageName )
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::getData
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError RpmDb::getData( const PkgName & name_r,
+			constRpmLibHeaderPtr & result_r ) const
 {
-   bool ok = true;
-   const char *const opts[] = {
-      "-ql", packageName.c_str()
-     };
-
-   run_rpm(sizeof(opts) / sizeof(*opts), opts,
-	   ExternalProgram::Discard_Stderr);
-
-   if ( process == NULL )
-      return false;
-
-   string value;
-   fileList.clear();
-
-   string output = process->receiveLine();
-
-   while ( output.length() > 0)
-   {
-      string::size_type 	ret;
-
-      // extract \n
-      ret = output.find_first_of ( "\n" );
-      if ( ret != string::npos )
-      {
-	 value.assign ( output, 0, ret );
-      }
-      else
-      {
-	 value = output;
-      }
-
-      fileList.insert ( value );
-
-      output = process->receiveLine();
-   }
-
-   if ( systemStatus() != 0 )
-   {
-      ok = false;
-   }
-
-   return ( ok );
+  result_r = 0;
+  FAILIFNOTINITIALIZED;
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  PMError err = rpmdb.dbOpen();
+  if ( err ) {
+    return err;
+  }
+  result_r = rpmdb.findPackage( name_r );
+  return Error::E_ok;
 }
 
-
-/*------------------------------------------------------------------*/
-/* Evaluate all directories of a package which have been installed. */
-/* ( are listed in the rpm-DB )					    */
-/*------------------------------------------------------------------*/
-bool
-RpmDb::queryDirectories ( FileList &fileList, string packageName )
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::getData
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError RpmDb::getData( const PkgName & name_r, const PkgEdition & ed_r,
+			constRpmLibHeaderPtr & result_r ) const
 {
-   bool ok = true;
-   const char *const opts[] = {
-      "-qlv", packageName.c_str()
-     };
-
-   run_rpm(sizeof(opts) / sizeof(*opts), opts,
-	   ExternalProgram::Discard_Stderr);
-
-   if ( process == NULL )
-      return false;
-
-   string value;
-   char buffer[15000];
-   size_t nread;
-   fileList.clear();
-
-   while (  nread = process->receive(buffer, sizeof(buffer)), nread != 0)
-   {
-      string output(buffer);
-      string::size_type 	begin, end;
-
-      begin = output.find_first_not_of ( "\n" );
-      while ( begin != string::npos )
-      {
-	 // splitt the output in package-names
-	 string value ="";
-	 end = output.find_first_of ( "\n", begin );
-
-	 // line-end ?
-	 if ( end == string::npos )
-	 {
-	    end= output.length();
-	 }
-
-	 value.assign ( output, begin, end-begin );
-	 begin = output.find_first_not_of ( "\n", end );
-
-	 string::size_type fileBegin, fileEnd;
-	 string dirname = "";
-	 fileBegin = value.find_first_of ( '/' );
-	 if ( fileBegin != string::npos )
-	 {
-	    fileEnd = value.find_first_of ( " ", fileBegin );
-
-	    if ( fileEnd == string::npos )
-	    {
-	       // end reached
-	       dirname.assign (value, fileBegin, string::npos);
-	    }
-	    else
-	    {
-	       dirname.assign ( value, fileBegin, fileEnd-fileBegin );
-	    }
-
-	    if ( value[0] != 'd' )
-	    {
-	       // is not a directory --> filename extract
-	       fileEnd = dirname.find_last_of ( "/" );
-	       dirname.assign ( dirname, 0, fileEnd );
-	    }
-
-	    fileList.insert ( dirname );
-	 }
-      }
-   }
-
-   if ( systemStatus() != 0 )
-   {
-      ok = false;
-   }
-
-   return ( ok );
+  result_r = 0;
+  FAILIFNOTINITIALIZED;
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  PMError err = rpmdb.dbOpen();
+  if ( err ) {
+    return err;
+  }
+  result_r = rpmdb.findPackage( name_r, ed_r );
+  return Error::E_ok;
 }
 
-#endif
-
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::getData
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError RpmDb::getData( const Pathname & path,
+			constRpmLibHeaderPtr & result_r ) const
+{
+  result_r = 0;
+  INT << "NOT YET IMPLEMENTED: getData by Pathname" << endl;
+  return Error::E_error;
+}
 
 /*--------------------------------------------------------------*/
 /* Checking the source rpm <rpmpath> with rpm --chcksig and     */
@@ -1502,47 +1196,6 @@ RpmDb::belongsTo (const Pathname& name, bool full_name)
     return result;
 }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmDb::traceFileRel
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :
-//
-void RpmDb::traceFileRel( const PkgRelation & rel_r )
-{
-  if ( ! rel_r.isFileRel() )
-    return;
-
-  if ( ! _filerequires.insert( rel_r.name() ).second )
-    return; // already got it in _filerequires
-
-  if ( ! _packages_valid )
-    return; // collect only. Evaluated in first call to getPackages()
-
-  //
-  // packages already initialized. Must check and insert here
-  //
-  string str = belongsTo( rel_r.name().asString() );
-
-  if ( str.size() ) {
-    _DBG("FileRel") << rel_r << " by " << str << endl;
-    PkgNameEd nameed = PkgNameEd::fromString( str );
-
-    for ( list<PMPackagePtr>::iterator it = _packages.begin(); it != _packages.end(); ++it ) {
-      if ( (*it)->name() == nameed.name ) {
-	(*it)->addProvides( rel_r.name() );
-	return;
-      }
-    }
-    _INT("FileRel") << "Missed " << rel_r << " <-- " << str << endl;
-
-  } else {
-    _DBG("FileRel") << rel_r << " is not provided" << endl;
-  }
-}
-
 // determine changed files of installed package
 bool
 RpmDb::queryChangedFiles(FileList & fileList, const string& packageName)
@@ -1812,7 +1465,7 @@ MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
 	}
     }
 
-    _packages_valid = false;
+    _packages._valid = false;
 
     opts.push_back ("-U");
     opts.push_back ("--percent");
@@ -1913,7 +1566,7 @@ RpmDb::removePackage(const string& label, unsigned flags)
 	}
     }
 
-    _packages_valid = false;
+    _packages._valid = false;
 
     opts.push_back("-e");
 

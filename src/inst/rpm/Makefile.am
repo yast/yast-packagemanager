@@ -1,11 +1,10 @@
 #
-# Makefile.am for packagemanager/src/instsrc
+# Makefile.am for packagemanager/src/inst/rpm
 #
 
 SUBDIRS = include
 
-AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
-
+AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall -imacros Make.defines
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
@@ -16,12 +15,14 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		inst/rpm/include	\
 		media/include	\
 		libPkgDep/include	\
-	   ) -I$(includedir)
+	   ) -I$(includedir) -I/usr/include/rpm
 
 noinst_LTLIBRARIES = liby2pminstrpmsrc.la
 
 liby2pminstrpmsrc_la_SOURCES = 	\
 	RpmDb.cc \
+	RpmLibDb.cc \
+	RpmLibHeader.cc \
 	PMRpmPackageDataProvider.cc
 
-liby2pminstrpmsrc_la_LIBADD = -ly2util
+liby2pminstrpmsrc_la_LIBADD = -ly2util -lrpm -lpopt

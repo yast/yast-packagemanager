@@ -39,7 +39,7 @@
 #include <y2pm/PMPackagePtr.h>
 
 #include <y2pm/InstTargetError.h>
-
+#include <y2pm/RpmLibHeaderPtr.h>
 #include <y2pm/FileDeps.h>
 
 /**
@@ -51,19 +51,20 @@ class RpmDb: virtual public Rep
     REP_BODY(RpmDb);
 
     private:
-	// list of packages on the target
-	// must be updated for each install/remove
-	//
-	// call getPackages() to refresh this list
-	//
-	std::list<PMPackagePtr> _packages;
 
-	// if the _packages list is valid.
-	// any package installation or deletion invalidates the
-	// list
-	bool _packages_valid;
+      struct Packages {
+	std::list<PMPackagePtr>        _list;
+	std::map<PkgName,PMPackagePtr> _index;
+	bool                           _valid;
+	Packages() : _valid( false ) {}
+	void clear() { _list.clear(); _index.clear(); _valid = false; }
+	void buildList();
+	PMPackagePtr lookup( const PkgName & name ) const;
+      };
 
-	FileDeps::FileNames _filerequires;
+      Packages _packages;
+
+      FileDeps::FileNames _filerequires;
 
     public:
 
@@ -119,14 +120,6 @@ class RpmDb: virtual public Rep
 	~RpmDb();
 
 	/**
-	 * Check package, if it is correctly installed.
-	 * Returns false, if an error has been occured.
-	 * "filelist" is a list of missing files
-	 */
-
-//	bool checkPackage ( std::string packageName, FileList &fileList );
-
-	/**
 	 * Initialize the rpm database
 	 *
 	 * @param name_of_root The name of the install root
@@ -164,6 +157,24 @@ class RpmDb: virtual public Rep
 	const std::list<PMPackagePtr>& getPackages ();
 
 	/**
+	 * Get an installed packages data from rpmdb
+	 **/
+	PMError getData( const PkgName & name_r,
+			 constRpmLibHeaderPtr & result_r ) const;
+
+	/**
+	 * Get an installed packages data from rpmdb
+	 **/
+	PMError getData( const PkgName & name_r, const PkgEdition & ed_r,
+			 constRpmLibHeaderPtr & result_r ) const;
+
+	/**
+	 * Get an accessible packages data from disk
+	 **/
+	PMError getData( const Pathname & path,
+			 constRpmLibHeaderPtr & result_r ) const;
+
+	/**
 	 * Check rpm with rpm --checksig
 	 *
 	 * @param filename which file to check
@@ -174,33 +185,10 @@ class RpmDb: virtual public Rep
 	 */
 	unsigned checkPackage (const Pathname& filename, std::string version = "", std::string md5 = "" );
 
-
 	/**
 	 * Returns the current-path of the rpm-DB
 	 * */
 	std::string queryCurrentDBPath ( void ) { return dbPath.asString(); };
-
-	/**
-	 * general query of an installed package
-	 *
-	 * @param package constPMPackagePtr to package
-	 * @param format query format as rpm understands it
-	 * @param result_r std::string& for single-line values
-	 *	  or std::list<std::string>& for multi-line values
-	 */
-	bool queryPackage (constPMPackagePtr package, const char *format, std::string& result_r);
-	bool queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r);
-
-	/**
-	 * general query of an available package file
-	 *
-	 * @param path full path to an rpm file
-	 * @param format query format as rpm understands it
-	 * @param result_r std::string& for single-line values
-	 *	  or std::list<std::string>& for multi-line values
-	 */
-	bool queryPackage (const Pathname& path, const char *format, std::string& result_r);
-	bool queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r);
 
 	/**
 	 * query all cache values
@@ -444,22 +432,6 @@ class RpmDb: virtual public Rep
 	/** progress of installation will be logged here */
 	std::ofstream _progresslogstream;
 
-	/* parse string of the form name/number/version into rellist. number is
-	 * the rpm number representing the operator <, <=, = etc. number&64
-	 * means prerequires
-	 *
-	 * @param depstr string to evaluate
-	 * @param deps reference to a list which will be cleared and filled with dependencies
-	 * @param who name of package for which deps are generated, used to filter self provides/obsolete etc
-	 * @param dropselfdep if true, deps that match param name are dropped with a warning
-	 * @param files reference to a FileNames set where to store found file relations
-	 * @param fill_files whether to actually use the files parameter
-	 * */
-	void rpmdeps2rellist ( const std::string& depstr,
-			PMSolvable::PkgRelList_type& deps,
-			PkgName who, bool dropselfdep,
-			FileDeps::FileNames& files, bool fill_files = false);
-
 	/**
 	 * wrapper for _progressfunc, does nothing if it's unset
 	 * */
@@ -518,12 +490,30 @@ class RpmDb: virtual public Rep
 	 * checkPackageResult
 	 * */
 	static std::string checkPackageResult2string(unsigned code);
+
+    private: // to cleanup
+	/**
+	 * general query of an installed package
+	 *
+	 * @param package constPMPackagePtr to package
+	 * @param format query format as rpm understands it
+	 * @param result_r std::string& for single-line values
+	 *	  or std::list<std::string>& for multi-line values
+	 */
+	bool queryPackage (constPMPackagePtr package, const char *format, std::string& result_r);
+	bool queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r);
+
+	/**
+	 * general query of an available package file
+	 *
+	 * @param path full path to an rpm file
+	 * @param format query format as rpm understands it
+	 * @param result_r std::string& for single-line values
+	 *	  or std::list<std::string>& for multi-line values
+	 */
+	bool queryPackage (const Pathname& path, const char *format, std::string& result_r);
+	bool queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r);
+
 };
 
-
-/**
- * Write enum value as string
- **/
-//extern std::ostream & operator<<( std::ostream & str, const RpmDb::DbStatus & obj );
-
-#endif
+#endif // RpmDb_h

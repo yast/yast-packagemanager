@@ -22,6 +22,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 lib_LTLIBRARIES = liby2pm.la
 
 liby2pm_la_SOURCES = Y2PM.cc \
+	Timecount.cc	\
 	PkgName.cc	\
 	PkgEdition.cc	\
 	PkgRelation.cc	\
@@ -43,7 +44,7 @@ liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			media/liby2pmMedia.la	\
 			query/src/liby2pmquery.la\
 			libPkgDep/libPkgDep.la	\
-			-ly2util
+			-ly2util -lrpm -lpopt
 
 bin_PROGRAMS = online_update installation_sources
 
