@@ -106,25 +106,36 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool checkSig )
 
 void InstYou::selectPatches( int kinds )
 {
-  bool yastPatch = false;
+  PMSelectablePtr yastPatch;
 
-  const PMYouPatchManager &mgr = Y2PM::youPatchManager();
-  PMManager::PMSelectableVec::const_iterator it;
-  for ( it = mgr.begin(); it != mgr.end(); ++it ) {
-    PMSelectablePtr selectable = *it;
-    PMYouPatchPtr candidate = selectable->candidateObj();
-    if ( candidate && ( candidate->kind() == PMYouPatch::kind_yast ) ) {
-      selectable->user_set_install();
-      yastPatch = true;
+  list<PMYouPatchPtr>::const_iterator it;
+  for( it = _patches.begin(); it != _patches.end(); ++it ) {
+    if ( ( (*it)->kind() == PMYouPatch::kind_yast )
+         && hasNewPackages( *it, false ) ) {
+      PMSelectablePtr selectable = (*it)->getSelectable();
+      if ( !selectable ) {
+        I__ << "Patch has no selectable." << endl;
+        return;
+      }
+      yastPatch = selectable;
     }
   }
 
-  if ( !yastPatch ) {
-    for ( it = mgr.begin(); it != mgr.end(); ++it ) {
-      PMSelectablePtr selectable = *it;
-      PMYouPatchPtr candidate = selectable->candidateObj();
-      if ( candidate && ( candidate->kind() & kinds ) ) {
-        selectable->user_set_install();
+  if ( yastPatch ) {
+    yastPatch->user_set_install();
+  } else {
+    for ( it = _patches.begin(); it != _patches.end(); ++it ) {
+      if ( ( (*it)->kind() & kinds ) && hasNewPackages( *it, true ) ) {
+        PMSelectablePtr selectable = (*it)->getSelectable();
+        if ( !selectable ) {
+          I__ << "Patch has no selectable." << endl;
+          return;
+        }
+      
+        PMYouPatchPtr candidate = selectable->candidateObj();
+        if ( candidate && ( candidate->kind() & kinds ) ) {
+          selectable->user_set_install();
+        }
       }
     }
   }
@@ -348,43 +359,6 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
   return PMError();
 }
 
-void InstYou::filterPatchSelection()
-{
-  PMYouPatchPtr patch;
-  for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    D__ << "PATCH: " << patch->name() << endl;
-
-    list<PMPackagePtr> packages = patch->packages();
-    list<PMPackagePtr>::const_iterator itPkg;
-
-    bool install = false;
-    
-    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      D__ << "  PKG: " << (*itPkg)->name() << "-" << (*itPkg)->edition() << endl;
-      if ( (*itPkg)->hasInstalledObj() ) {
-        if ( (*itPkg)->getInstalledObj()->edition() >= (*itPkg)->edition() ) {
-          D__ << "    is older than installed" << endl;
-          install = false;
-          break;
-        } else {
-          D__ << "    is newer than installed" << endl;
-          install = true;
-        }
-      } else {
-        D__ << "    not installed" << endl;
-      }
-    }
-    
-    PMSelectablePtr selectable = patch->getSelectable();
-    if ( !selectable ) {
-      E__ << "Patch " << patch->name() << " has no Selectable." << endl;
-    } else {
-      if ( install ) selectable->user_set_install();
-      else selectable->user_unset();
-    }
-  }
-}
-
 PMError InstYou::removePackages()
 {
   PMYouPatchPtr patch;
@@ -417,4 +391,79 @@ PMError InstYou::removePackages()
   }
 
   return PMError();
+}
+
+void InstYou::showPatches( bool verbose )
+{
+  list<PMYouPatchPtr>::const_iterator it;
+  for( it = _patches.begin(); it != _patches.end(); ++it ) {
+    PMSelectablePtr sel = (*it)->getSelectable();
+    if ( sel ) {
+      if ( sel->has_installed() ) cout << "I";
+      else cout << " ";
+      if ( sel->to_install() ) cout << "S";
+      else cout << " ";
+      cout << " ";
+    }
+    cout << (*it)->name() << " (" << (*it)->kindLabel( (*it)->kind() ) << "): "
+         << (*it)->shortDescription() << endl;
+    if ( verbose ) {
+    list<PMPackagePtr> packages = (*it)->packages();
+    list<PMPackagePtr>::const_iterator itPkg;
+      for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+        cout << "     RPM: " << (*itPkg)->name() << " " << (*itPkg)->edition()
+             << " (";
+        if ( (*itPkg)->hasInstalledObj() ) {
+          PkgEdition instEd = (*itPkg)->getInstalledObj()->edition();
+          cout << "installed: " << instEd << " ";
+          if ( instEd < (*itPkg)->edition() ) cout << "[older]";
+          else if ( instEd > (*itPkg)->edition() ) cout << "[newer]";
+          else cout << "[same]";
+        } else {
+          cout << "not installed";
+        }
+        cout << ")" << endl;
+      }
+    }
+  }
+}
+
+bool InstYou::hasNewPackages( const PMYouPatchPtr &patch,
+                              bool requireInstalled )
+{
+  bool install = false;
+
+  // Check, if patch contains at least one package which is newer than the
+  // correpsonding package on the system. If yes, trigger install.
+  // If a package from the patch is older than the installed package. don't
+  // trigger install.
+  list<PMPackagePtr> packages = patch->packages();
+  list<PMPackagePtr>::const_iterator itPkg;
+  for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+    PkgEdition candEd = (*itPkg)->edition();
+    D__ << "  PKG: " << (*itPkg)->name() << "-" << candEd << endl;
+    if ( (*itPkg)->hasInstalledObj() ) {
+      PkgEdition instEd = (*itPkg)->getInstalledObj()->edition();
+      if ( instEd > candEd ) {
+        install = false;
+        break;
+      } else if ( instEd < candEd ) {
+        install = true;
+      }
+    } else if ( !requireInstalled ) {
+      install = true;
+    }
+  }
+
+  return install;
+}
+
+bool InstYou::firesPackageTrigger( const PMYouPatchPtr &patch )
+{
+  return false;
+}
+
+bool InstYou::firesScriptTrigger( const PMYouPatchPtr &patch )
+{
+  return false;
 }

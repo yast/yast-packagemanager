@@ -116,19 +116,21 @@ class InstYou {
     PMError installPatches( bool dryrun = false );
 
     /**
-     * Select Patches. If there are YaST2 patches, only the newest YaST2 patch
+     * Select Patches.
+     *
+     * If there are YaST2 patches, only the newest YaST2 patch
      * will be selected.
+     * 
+     * If there are no YaST2 patches, all patches will be selected which
+     * match the given kind and contain packages which have an older version
+     * already installed.
+     *
+     * Patches which contain packages which are older than the corresponding
+     * installed version will not be selected.
      *
      * @param kinds Ored list of kinds to be installed.
      */
     void selectPatches( int kinds );
-
-    /**
-     * Deselect all patches which only contain packages which aren't installed
-     * or which contain packages which are older than the packages that are
-     * installed.
-     */
-    void filterPatchSelection();
 
     /**
      * Get object holding path information.
@@ -140,12 +142,30 @@ class InstYou {
      */
     PMError removePackages();
 
+    /**
+     * Print list of patches to stdout.
+     *
+     * @param verbose show more detailed information.
+     */
+    void showPatches( bool verbose = false );
+
   private:
     void init();
 
   protected:
     PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
     PMError retrievePatch( const PMYouPatchPtr &, bool checkSig = true );
+
+    /**
+     * check, if patch has new packages.
+     *
+     * @param requireInstalled if true, it is required that at least one
+     *                         package from the patch is already installed
+     *                         in an older version.
+     */
+    bool hasNewPackages( const PMYouPatchPtr &patch, bool requireInstalled );
+    bool firesPackageTrigger( const PMYouPatchPtr &patch );
+    bool firesScriptTrigger( const PMYouPatchPtr &patch );
 
   private:
     PMYouPatchPtr nextSelectedPatch();
