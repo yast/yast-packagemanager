@@ -108,10 +108,12 @@ PMError InstYou::readUserPassword()
   _username = cfg.readEntry( "USERNAME" );
   _password = cfg.readEntry( "PASSWORD" );
 
-  Url url = _paths->patchUrl();
+  PMYouServer server = _paths->patchServer();
+  Url url = server.url();
   url.setUsername( _username );
   url.setPassword( _password );
-  _paths->setPatchUrl( url );
+  server.setUrl( url );
+  _paths->setPatchServer( server );
 
   return PMError();
 }
@@ -139,33 +141,35 @@ PMError InstYou::setUserPassword( const string &username,
   return PMError();
 }
 
-PMError InstYou::retrievePatchDirectory( const PMYouServer &server )
+PMError InstYou::retrievePatchDirectory( PMYouServer server )
 {
-  Url u( server.url );
+  Url u = server.url();
   if ( !_username.empty() && !_password.empty() ) {
     u.setUsername( _username );
     u.setPassword( _password );
   }
-  _paths->setPatchUrl( u );
+  server.setUrl( u );
+  _paths->setPatchServer( server );
 
   PMError error = _info->getDirectory( true );
 
   return error;
 }
 
-PMError InstYou::retrievePatchInfo( const PMYouServer &server, bool reload,
+PMError InstYou::retrievePatchInfo( PMYouServer server, bool reload,
                                     bool checkSig )
 {
   D__ << "retrievePatchInfo()" << endl;
 
   _patches.clear();
 
-  Url u( server.url );
+  Url u = server.url();
   if ( !_username.empty() && !_password.empty() ) {
     u.setUsername( _username );
     u.setPassword( _password );
-  }
-  _paths->setPatchUrl( u );
+  }  
+  server.setUrl( u );
+  _paths->setPatchServer( server );
 
   PMError error = _info->getPatches( _patches, reload, checkSig );
   if ( error ) {
@@ -1095,11 +1099,14 @@ PMError InstYou::writeLastUpdate()
 
 int InstYou::quickCheckUpdates( const PMYouServer &server )
 {
-  Url url = Url( server.url );
+  Url url = server.url();
 
   D__ << "InstYou::quickCheckUpdates(): " << url << endl;
 
-  _paths->setPatchUrl( url );
+  PMYouServer s = _paths->patchServer();
+  s.setUrl( url );
+  _paths->setPatchServer( s );
+
   _info->processMediaDir();
   
   Pathname path = url.getPath();

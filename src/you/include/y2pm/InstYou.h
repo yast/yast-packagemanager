@@ -91,7 +91,7 @@ class InstYou {
 
       @param url  URL of patch server
     */
-    PMError retrievePatchDirectory( const PMYouServer &server );
+    PMError retrievePatchDirectory( PMYouServer server );
 
     /**
      * Read patch information files.
@@ -100,7 +100,7 @@ class InstYou {
      * @param reload    If true reload all patches from server.
      * @param checkSig  If true check signatures of patch info files.
      */
-    PMError retrievePatchInfo( const PMYouServer &server, bool reload = true,
+    PMError retrievePatchInfo( PMYouServer server, bool reload = true,
                                bool checkSig = true );
     
     /**

@@ -31,6 +31,8 @@
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PkgArch.h>
 
+#include <y2pm/PMYouServers.h>
+
 #include <y2pm/PMYouPatchPathsPtr.h>
 
 class SysConfig;
@@ -111,10 +113,14 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname patchPath();
 
     /**
-      Set base URL where patches are read from. This doesn't include the product
-      dependent path.
+      Set patch server where patches are read from.
     */
-    void setPatchUrl( const Url & );
+    void setPatchServer( const PMYouServer & );
+    /**
+      Return patch server where patches are read from.
+    */  
+    PMYouServer patchServer();
+
     /**
       Return base URL to patches. This doesn't include the product dependent
       path.
@@ -280,8 +286,8 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname _patchPath;
     Pathname _rpmPath;
     Pathname _scriptPath;
-    
-    Url _patchUrl;
+
+    PMYouServer _patchServer;
     
     std::string _product;
     std::string _version;

@@ -236,14 +236,14 @@ int main( int argc, char **argv )
   PMYouServer server;
 
   if ( autoInstall ) {
-    server.url = "dir://" + you.paths()->attachPoint().asString();
+    server.setUrl( "dir://" + you.paths()->attachPoint().asString() );
   } else {
     if ( urlStr ) {
       if ( !Url( urlStr ).isValid() ) {
         cerr << "Error: URL '" << urlStr << "' is not valid." << endl;
         exit( -1 );
       }
-      server.url = urlStr;
+      server.setUrl( urlStr );
     } else {
       PMYouServers youServers( you.paths() );
       error = youServers.requestServers( checkUpdates || quickCheckUpdates );
@@ -255,10 +255,12 @@ int main( int argc, char **argv )
     }
   }
 
-  patchPaths->setPatchUrl( server.url );
+  patchPaths->setPatchServer( server );
 
   if ( verbose ) {
-    cout << "URL: " << server.url << endl;
+    cout << "Server URL: " << server.url() << endl;
+    cout << "Server Name: " << server.name() << endl;
+    cout << "Directory File: " << server.directory() << endl;
     cout << "Path: " << you.paths()->patchPath() << endl;
   }
 

@@ -201,8 +201,8 @@ InstTarget::getPatches (void) const
         PMYouPatchPathsPtr paths( new PMYouPatchPaths );
         PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo( paths ) );
 
-        Url u( "dir://" + ( getRoot() + paths->installDir() ).asString() );
-        paths->setPatchUrl( u );
+        string u = "dir://" + ( getRoot() + paths->installDir() ).asString();
+        paths->setPatchServer( PMYouServer( u ) );
         paths->setPatchPath( "" );
         PMError error = patchInfo->readDir( _patches, false, false, false );
         if ( error ) {
