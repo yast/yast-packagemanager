@@ -166,6 +166,20 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
     Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
   }
 
+  for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
+    D__ << "Patch: " << (*itPatch)->summary() << endl;
+    list<PMPackagePtr> packages = (*itPatch)->packages();
+    list<PMPackagePtr>::const_iterator itPkg;
+    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+      D__ << "  Package: " << (*itPkg)->summary() << endl;
+      if ( hasPatchRpm( *itPkg ) ) {
+        _info->packageDataProvider()->setArchiveSize( *itPkg, (*itPkg)->patchRpmSize() );
+        D__ << "    Using patch RPM" << endl;
+      }
+      D__ << "    ArchiveSize: " << (*itPkg)->archivesize() << endl;
+    }
+  }
+
   return PMError();
 }
 
@@ -630,29 +644,15 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
     archs.push_front( pkg->getInstalledObj()->arch() );
   }
 
+  bool patchRpm = hasPatchRpm( pkg );
+
   PMError error( YouError::E_error );
   Pathname rpmPath;
   list<PkgArch>::const_iterator it;
   for( it = archs.begin(); it != archs.end(); ++it ) {
     D__ << "ARCH: " << *it << endl;
-    
+
     // If the package has a version installed, try to get patch RPM first.
-    bool pkgHasInstalledObj = pkg->hasInstalledObj();
-
-    bool patchRpm = false;
-    if ( pkgHasInstalledObj ) {
-      PkgEdition installedVersion = pkg->getInstalledObj()->edition();
-      D__ << "Installed: " << installedVersion.asString() << endl;
-      list<PkgEdition> baseVersions = pkg->patchRpmBaseVersions();
-      list<PkgEdition>::const_iterator it2;
-      for( it2 = baseVersions.begin(); it2 != baseVersions.end(); ++it2 ) {
-        if ( *it2 == installedVersion ) {
-          patchRpm = true;
-          break;
-        }
-      }
-    }
-
     rpmPath = _paths->rpmPath( pkg, *it, patchRpm );
     D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
         << "'" << endl;
@@ -808,6 +808,28 @@ bool InstYou::firesPackageTrigger( const PMYouPatchPtr &patch )
 
 bool InstYou::firesScriptTrigger( const PMYouPatchPtr &patch )
 {
+  return false;
+}
+
+bool InstYou::hasPatchRpm( const PMPackagePtr &pkg )
+{
+  bool pkgHasInstalledObj = pkg->hasInstalledObj();
+
+  if ( pkgHasInstalledObj ) {
+    PkgEdition installedVersion = pkg->getInstalledObj()->edition();
+    D__ << "Installed: " << installedVersion.asString() << endl;
+    list<PkgEdition> baseVersions = pkg->patchRpmBaseVersions();
+    list<PkgEdition>::const_iterator it2;
+    for( it2 = baseVersions.begin(); it2 != baseVersions.end(); ++it2 ) {
+      D__ << " Base version: " << (*it2).asString() << endl;
+      if ( *it2 == installedVersion ) {
+        D__ << "return true" << endl;
+        return true;
+      }
+    }
+  }
+
+  D__ << "return false" << endl;
   return false;
 }
 

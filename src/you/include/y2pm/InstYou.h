@@ -240,6 +240,8 @@ class InstYou {
     bool firesPackageTrigger( const PMYouPatchPtr &patch );
     bool firesScriptTrigger( const PMYouPatchPtr &patch );
 
+    bool hasPatchRpm( const PMPackagePtr &pkg );
+
   private:
     PMYouPatchPtr nextSelectedPatch();
 
