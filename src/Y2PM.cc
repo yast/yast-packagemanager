@@ -98,13 +98,31 @@ Y2PM::baseArch(void)
 //
 //	DESCRIPTION :
 //
-InstTarget & Y2PM::instTarget()
+InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
 {
-    if ( !_instTarget ) {
+    if ( !_instTarget )
+    {
 	MIL << "Launch InstTarget... ()" << endl;
 	_instTarget = new InstTarget ();
 	MIL << "Created InstTarget" << endl;
     }
+
+    if (do_start)
+    {
+	WAR << "Fake InstTarget and load installed Packages..." << endl;
+	_instTarget_rootdir = root;
+	PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
+	if( dbstat != InstTargetError::E_ok )
+	{
+	    ERR << "error initializing target: " << dbstat << endl;
+	}
+	else
+	{
+	    // this will start the package manager
+	    Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
+	}
+    }
+
     return *_instTarget;
 }
 
@@ -134,7 +152,7 @@ InstSrcManager & Y2PM::instSrcManager()
 //
 //	DESCRIPTION :
 //
-PMPackageManager & Y2PM::packageManager(bool with_target)
+PMPackageManager & Y2PM::packageManager()
 {
   if ( !_packageManager )
   {
@@ -142,19 +160,6 @@ PMPackageManager & Y2PM::packageManager(bool with_target)
     _packageManager = new PMPackageManager;
     MIL << "Created PackageManager @" << _packageManager << endl;
 
-    if (with_target)
-    {
-	WAR << "Fake InstTarget and load installed Packages..." << endl;
-	PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
-	if( dbstat != InstTargetError::E_ok )
-	{
-	    ERR << "error initializing target: " << dbstat << endl;
-	}
-	else
-	{
-	    Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
-	}
-    }
   }
   return *_packageManager;
 }
@@ -223,7 +228,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
     std::list<PMPackagePtr> dellist;
     std::list<PMPackagePtr> inslist;
 
-    packageManager(true).getPackagesToInsDel (dellist, inslist);			// compute order
+    packageManager().getPackagesToInsDel (dellist, inslist);	// compute order
 
     instTarget().removePackages (dellist);			// delete first
 

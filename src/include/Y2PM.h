@@ -95,7 +95,7 @@ class Y2PM {
      **/
     static std::list<LangCode> & getRequestedLocales () { return _requested_locales; }
     static void setRequestedLocales (std::list<LangCode> & requested_locales) { _requested_locales = requested_locales; }
-
+ 
     /**
      * Access to the (target) base architecture
      **/
@@ -137,8 +137,10 @@ class Y2PM {
 
     /**
      * Access to the installation target
+     * if do_start == true, start the target at root
+     * and also !!START THE packageManager!!
      **/
-    static InstTarget & instTarget();
+    static InstTarget & instTarget(bool do_start = false, Pathname root = Pathname("/"));
 
     /**
      * Access to the installation source manager
@@ -147,12 +149,8 @@ class Y2PM {
 
     /**
      * Access to the Package manager
-     * if with_target == true ( the default)
-     * also start up InstTarget at "/"
-     * if with_target == false, we're running in the inst-sys
-     * and there is no target yet.
      **/
-    static PMPackageManager & packageManager(bool with_target = true);
+    static PMPackageManager & packageManager();
 
     /**
      * Access to the Selection manager
