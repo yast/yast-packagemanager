@@ -13,6 +13,7 @@ pkginclude_HEADERS =	\
 	PMYouPackageDataProvider.h \
 	PMYouPackageDataProviderPtr.h \
 	PMYouPatchInfo.h \
+	PMYouPatchTags.h \
 	PMYouPatchManager.h \
 	PMYouPatchPtr.h
 
