@@ -22,6 +22,8 @@
 
 /-*/
 
+#include <cstdlib> // for atoi
+
 #include <iostream>
 #include <fstream>
 
@@ -276,7 +278,8 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 	    //  only check if ( !(*multi_pos).empty() ) if an empty string is an error
 	    ndescr->set_media_vendor( *multi_pos++ );
 	    ndescr->set_media_id( *multi_pos++ );
-	    ndescr->set_media_count( *multi_pos++ );
+	    ndescr->set_media_count( atoi(multi_pos->c_str()) );
+	    multi_pos++;
 	}
 	else
 	{

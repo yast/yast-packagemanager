@@ -139,6 +139,18 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	 */
 	static PMError fillSelections (std::list<PMSelectionPtr>& all_selections, std::list<PMPackagePtr>& all_packages);
 
+	/**
+	 * read media.X/media file
+	 *
+	 * @param product_dir base directory
+	 * @param media_r MediaAccessPtr
+	 * @param number the X in media.X
+	 * @param vendor where to store vendor
+	 * @param id where to store id
+	 * @param count where to store count
+	 * */
+	static PMError readMediaFile(const Pathname& product_dir, MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count);
+
     public:
 
 	/**

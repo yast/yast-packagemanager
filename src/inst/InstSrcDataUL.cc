@@ -21,8 +21,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
+#include <cstdlib>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
@@ -833,6 +834,63 @@ InstSrcDataUL::~InstSrcDataUL()
 {
 }
 
+PMError InstSrcDataUL::readMediaFile(const Pathname& product_dir, MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count)
+{
+    vendor = id = string();
+    count = 0;
+
+    Pathname filename = product_dir + stringutil::form("/media.%d/media", number);
+
+    MediaAccess::FileProvider contentfile( media_r, filename );
+    if ( contentfile.error() ) {
+	ERR << "Media can't provide '" << filename << "' " << contentfile.error() << endl;
+	return contentfile.error();
+    }
+
+    std::ifstream content( contentfile().asString().c_str());
+    if( ! content ) {
+	ERR << "Can't open '" << filename << "' for reading." << endl;
+	return InstSrcError::E_open_file;
+    }
+
+    enum MF_state { MF_VENDOR = 0, MF_ID, MF_COUNT, MF_NUM_STATES } state = MF_VENDOR;
+
+    string value;
+    // If not reading trimmed, at least rtrim value
+    for ( value = stringutil::getline( content, true );
+	content.good() && state < MF_NUM_STATES;
+	value = stringutil::getline( content, true ),
+	    state = MF_state(state+1))
+    {
+	switch (state)
+	{
+	    case MF_VENDOR:
+		    vendor = value;
+		    DBG << "vendor " << value << endl;
+		break;
+	    case MF_ID:
+		    id = value;
+		    DBG << "id " << value << endl;
+		break;
+	    case MF_COUNT:
+		    count = atoi(value.c_str());
+		    DBG << "count " << count << endl;
+		break;
+	    case MF_NUM_STATES:
+		break;
+	}
+
+    }
+
+    if ( content.bad() )
+    {
+	ERR << "Error parsing " << contentfile() << endl;
+	return InstSrcError::E_no_instsrc_on_media;
+    }
+
+    return InstSrcError::E_ok;
+}
+
 //////////////////////////////////////////////////////////////////
 // static
 //
@@ -856,7 +914,31 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     // parse InstSrcDescr from media_r and fill ndescr
     ///////////////////////////////////////////////////////////////////
 
-#warning TBD must parse media.1/media too
+    {
+	// read media.1/media
+	string vendor;
+	string id;
+	unsigned count,
+	err = readMediaFile(product_dir_r, media_r, 1, vendor, id, count);
+	if(err != PMError::E_ok )
+	    return err;
+
+	if(vendor.empty() || id.empty())
+	{
+	    ERR << "media must have vendor and id" << endl;
+	    return InstSrcError::E_no_instsrc_on_media;
+	}
+
+	if(count == 0)
+	{
+	    ERR << "Number of media may not be zero" << endl;
+	    return InstSrcError::E_no_instsrc_on_media;
+	}
+
+	ndescr->set_media_vendor(vendor);
+	ndescr->set_media_id(id);
+	ndescr->set_media_count(count);
+    }
 
     Pathname filename = product_dir_r + "/content";
 
@@ -880,7 +962,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     MIL << "Parsing " << contentfile() << endl;
     while (content.good())
     {
-	// If not reding trimed, at least rtrim value
+	// If not reading trimmed, at least rtrim value
 	string value = stringutil::getline( content, true );
 
 	if ( ! (content.fail() || content.bad()) ) {

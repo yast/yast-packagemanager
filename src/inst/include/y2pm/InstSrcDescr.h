@@ -124,7 +124,7 @@ class InstSrcDescr : virtual public Rep {
 
     std::string _media_vendor;		//
     std::string _media_id;		// ID code for media match
-    std::string _media_count;		//
+    unsigned    _media_count;		//
 
     ///////////////////////////////////////////////////////////////////
     // content file ( _url / _product_dir / content )
@@ -181,7 +181,7 @@ public:
 
     const std::string &  media_vendor()        const { return _media_vendor; }
     const std::string &  media_id()            const { return _media_id; }
-    const std::string &  media_count()         const { return _media_count; }
+    const unsigned &     media_count()         const { return _media_count; }
 
     const PkgNameEd &    content_product()     const { return _content_product; }
     const PkgNameEd &    content_baseproduct() const { return _content_baseproduct; }
@@ -225,7 +225,7 @@ public:
 
     void set_media_vendor( const std::string & val_r )      { _media_vendor = val_r; }
     void set_media_id( const std::string & val_r )          { _media_id = val_r; }
-    void set_media_count( const std::string & val_r )       { _media_count = val_r; }
+    void set_media_count( unsigned val_r )                  { _media_count = val_r; }
 
     void set_content_product( const PkgNameEd & val_r )     { _content_product = val_r; }
     void set_content_baseproduct( const PkgNameEd & val_r ) { _content_baseproduct = val_r; }
