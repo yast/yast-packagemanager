@@ -198,6 +198,18 @@ class InstSrc: virtual public Rep {
     PMError _init_newMedia( const Url & mediaurl_r, const Pathname & produduct_dir_r,
 			    Type type_r );
 
+    /**
+     * Sync InstSrcDescr and InstSrcData to cache. descr_only_r is
+     * mainly used by InstSrcManager if data stored in InstSrcDescr
+     * were changed (e.g. default_activate).
+     **/
+    PMError writeCache( const bool descr_only_r = false );
+
+    /**
+     * Short for writeCache( true ). Sync InstSrcDescr to cache.
+     **/
+    PMError writeDescrCache() { return writeCache( /*descr_only*/true ); }
+
   protected:
 
     /**
@@ -281,11 +293,6 @@ class InstSrc: virtual public Rep {
      * True if enabled (i.e. providing data to Manager classes ).
      **/
     bool enabled() const { return _data; }
-
-    /**
-     * Sync InstSrcDescr and InstSrcData to cache
-     **/
-    PMError writeCache();
 
   private:
 

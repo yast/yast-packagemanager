@@ -125,7 +125,7 @@ bool InstSrc::mayUseCache() const
 void InstSrc::_mgr_attach()
 {
   _cache_deleteOnExit = false;
-  writeCache();
+  writeDescrCache(); // data are written on enable
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -276,8 +276,6 @@ PMError InstSrc::disableSource()
   ///////////////////////////////////////////////////////////////////
   PMError err;
 
-  writeCache();
-
   if (_media)
   {
     if (_media->isAttached())
@@ -300,7 +298,7 @@ PMError InstSrc::disableSource()
 //
 //	DESCRIPTION :
 //
-PMError InstSrc::writeCache()
+PMError InstSrc::writeCache( const bool descr_only_r )
 {
 #warning errorchecks
   if ( ! mayUseCache() ) {
@@ -312,7 +310,7 @@ PMError InstSrc::writeCache()
     _descr->writeCache( cache_descr_dir() );
   }
 
-  if ( _data ) {
+  if ( _data && ! descr_only_r ) {
     _data->writeCache( cache_data_dir() );
   }
 
@@ -727,41 +725,31 @@ InstSrc::provideMedia (int medianr) const
 		    //---------------------------------------------------------
 		    // wrong media ID number callback
 
-		    _media->release();
-
-		    string changereply;
-		    for (;;)
-		    {
-			changereply = (*_mediachangefunc) (error, url.asString(), product, -1, medianr, _mediachangedata);
-
-			if (changereply != "E")		// eject
-			    break;
-			_media->attach();
-			_media->release(true);
-		    }					// re-prompt after eject
+		    string changereply = (*_mediachangefunc) (error, url.asString(), product, _medianr, medianr, _mediachangedata);
 
 		    if (changereply == "S")			// skip
 		    {
+			_media->release();
 			MIL << "skip media" << endl;
 			return InstSrcError::E_skip_media;
 		    }
+		    else if (changereply == "E")		// eject
+		    {
+			_media->release(true);
+		    }
 		    else if (changereply == "I")		// ignore
 		    {
-			_media->attach();
 			MIL << "ignore bad media id" << endl;
 			reply = "";
 			break;
 		    }
 		    else if (changereply == "C")		// cancel installation
 		    {
+			_media->release();
 			MIL << "cancel media" << endl;
 			return InstSrcError::E_skip_media;
 		    }
-		    else if (changereply.empty())
-		    {
-			continue;
-		    }
-		    else					// new url
+		    else if (!changereply.empty())		// new url
 		    {
 			url = Url(changereply);
 			if (url.isValid())
@@ -779,12 +767,12 @@ InstSrc::provideMedia (int medianr) const
 	    MIL << "provideFile failed: " << err.errstr() << endl;
 	}
 
-	_media->release();
-
 	std::string path = url.getPath();
 	if (!triedReOpen
 	    && isdigit(path[path.size()-1]))
 	{
+	    _media->release();
+
 	    triedReOpen = true;				// don't come here again
 	    MIL << "Closing path '" << path << "'" << endl;
 	    _media->close();				// close medium
@@ -807,34 +795,33 @@ InstSrc::provideMedia (int medianr) const
 	}
 
 	// wrong media number callback
+
 	//---------------------------------------------------------
-
-	string changereply;
-	for (;;)
-	{
-	    changereply = (*_mediachangefunc) (err.errstr(), url.asString(), product, _medianr, medianr, _mediachangedata);
-
-	    if (changereply != "E")		// eject
-		break;
-	    _media->attach();
-	    _media->release(true);
-	}					// re-prompt after eject
+	string changereply = (*_mediachangefunc) (err.errstr(), url.asString(), product, _medianr, medianr, _mediachangedata);
 
 	if (changereply == "S")			// skip
 	{
+	    _media->release();
 	    MIL << "skip media" << endl;
 	    return InstSrcError::E_skip_media;
 	}
+	else if (changereply == "E")		// eject
+	{
+	    reply = "";
+	    _media->release(true);
+	}
+	else if (changereply == "I")		// ignore, same as ok/retry (user must skip)
+	{
+	    MIL << "ignore bad media id" << endl;
+	    reply = "";
+	}
 	else if (changereply == "C")		// cancel installation
 	{
+	    _media->release();
 	    MIL << "cancel media" << endl;
 	    return InstSrcError::E_skip_media;
 	}
-	else if (changereply.empty())
-	{
-	    _media->attach();
-	}
-	else					// new url
+	else if (!changereply.empty())		// new url
 	{
 	    url = Url(changereply);
 	}

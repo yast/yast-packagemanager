@@ -373,6 +373,29 @@ PMError InstSrcManager::disableSource( const ISrcId & isrc_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::setAutoenable
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::setAutoenable( const ISrcId isrc_r, const bool yesno )
+{
+  InstSrcPtr it( lookupId( isrc_r ) );
+  if ( it ) {
+    if ( it->descr()->default_activate() != yesno ) {
+      it->descr()->set_default_activate( yesno );
+      it->writeDescrCache();
+    }
+    return Error::E_ok;
+  }
+
+  E__ << "bad ISrcId " << isrc_r << endl;
+  return Error::E_bad_id;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::getSources
 //	METHOD TYPE : void
 //

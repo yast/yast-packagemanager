@@ -28,6 +28,7 @@
 #include <fstream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/PathInfo.h>
 #include <y2util/ExternalProgram.h>
 
 #include <y2pm/InstSrcDescr.h>
@@ -331,9 +332,8 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
 //
 PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
 {
-#warning TBD writeCache: protect existing cache against write errors
-
-    Pathname fileName = cache_dir_r + _cache_file;
+    Pathname destFileName = cache_dir_r + _cache_file;
+    Pathname fileName     = destFileName.extend( ".new" );
 
     ofstream file( fileName.asString().c_str() );
     if ( !file ) {
@@ -345,6 +345,14 @@ PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
 
     if ( !file ) {
       ERR << *this << " writeCache " << fileName << " " << Error::E_write_file << endl;
+      PathInfo::unlink( fileName );
+      return Error::E_write_file;
+    }
+
+    int res = PathInfo::rename( fileName, destFileName );
+    if ( res ) {
+      ERR << *this << " writeCache rename " << fileName << " failed (errno " << res << ")" << endl;
+      PathInfo::unlink( fileName );
       return Error::E_write_file;
     }
 

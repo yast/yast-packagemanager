@@ -172,13 +172,23 @@ class InstSrcManager {
      * Delete InstSrc. Erase it together with all cached info.
      **/
     PMError deleteSource( const ISrcId & isrc_r );
-
+#endif
     /**
-     * Set whether this source should be automaticaly enabled on startup
+     * Set whether this source should be automaticaly enabled on startup.
+     *
+     * Note that this is something different, than calling enableSource/disableSource.
+     * setAutoenable determines the desired state of an InstSrc when the InstSrcManager
+     * is started (auto enable it or not). enableSource/disableSource actually
+     * enabale/disable an InstSrc (i.e. let it provide/withdraw Objects).
      **/
     PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
-#endif
+
   public:
+
+    /**
+     * Return the number of known InstSrc'es.
+     **/
+    unsigned knownSources() const { return _knownSources.size(); }
 
     /**
      * PRELIMINARILY: Return via idlist_r the ISrcId's of all known
@@ -188,6 +198,11 @@ class InstSrcManager {
      **/
     void getSources( ISrcIdList & idlist_r, const bool enabled_only = false ) const;
 
+    /**
+     * Used during installation/Upadte (where caching is disabled)
+     * to install the caches on the system. So InstSrc'es will be
+     * available in the running system after boot.
+     **/
     PMError cacheCopyTo( const Pathname & newRoot_r );
 };
 
