@@ -160,10 +160,10 @@ PMError InstSrc::enableSource()
   //std::map<std::string,std::list<Pathname> >
   InstSrcDescr::ArchMap archmap = _descr->content_archmap();
 
-  InstSrcDescr::ArchMap::const_iterator archIt = archmap.find ((const std::string &)(_descr->base_arch()));
+  InstSrcDescr::ArchMap::const_iterator archIt = archmap.find ((const std::string &)(Y2PM::baseArch()));
   if (archIt == archmap.end())
   {
-    WAR << "No 'ARCH." << _descr->base_arch() << "' line" << endl;
+    WAR << "No 'ARCH." << Y2PM::baseArch() << "' line" << endl;
     archIt = archmap.find (_descr->content_defaultbase());
   }
   if (archIt == archmap.end())
