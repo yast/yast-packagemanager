@@ -323,6 +323,7 @@ PMError PMSelectionManager::installOnTarget()
   }
 
   if ( must_reload ) {
+    MIL << "Installed Selections have canged. Reloading from InstTarget" << endl;
     // reload from InstTarget and reset all active selections
     _last_active.clear();
     poolSetInstalled( Y2PM::instTarget().getSelections() );
