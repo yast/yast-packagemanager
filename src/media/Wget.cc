@@ -18,6 +18,9 @@
 
 /*
  * $Log$
+ * Revision 1.7  2002/09/04 10:03:18  cschum
+ * Don't truncate destination file in case of a download error.
+ *
  * Revision 1.6  2002/09/04 09:22:42  cschum
  * Implemented user/password authentification.
  *
@@ -186,7 +189,8 @@ WgetStatus Wget::getFile( const Url &url, const Pathname &destination )
         string netrcStr = "machine " + host + " login " + username +
                           " password " + password;
         string netrcFile = home + "/.netrc";
-        string netrcBackup = home + "/.netrc.orig.yast";
+        // Create name for backup file
+        string netrcBackup = home + "/.netrc.orig.yast.76545";
 
         bool netrcExists = PathInfo( netrcFile ).isExist();
         if ( netrcExists ) rename( netrcFile.c_str(), netrcBackup.c_str() );
@@ -212,17 +216,22 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
 {
    WgetStatus ok = WGET_OK;
 
-   const char *const opts[] = {
-       "-O", destFilename.c_str(), url.c_str()
-     };
+   // Create name for temporary file used as original download detination.
+   string dest = destFilename + ".new.yast.65675";
 
-   create_directories( destFilename );
+   const char *const opts[] = {
+       "-O", dest.c_str(), url.c_str()
+   };
+
+   create_directories( dest );
 
    run_wget(sizeof(opts) / sizeof(*opts), opts,
 	    ExternalProgram::Stderr_To_Stdout);
 
-   if ( process == NULL )
+   if ( process == NULL ) {
+       unlink( dest.c_str() );
        return WGET_ERROR_UNEXPECTED;
+   }
 
    string value;
    string output = process->receiveLine();
@@ -301,6 +310,12 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
 	&& ok == WGET_OK )
    {
        ok = WGET_ERROR_UNEXPECTED;
+   }
+
+   if ( ok == WGET_OK ) {
+       rename( dest.c_str(), destFilename.c_str() );
+   } else {
+       unlink( dest.c_str() );
    }
 
    return ( ok );
