@@ -73,23 +73,19 @@ PMULSelectionDataProvider::~PMULSelectionDataProvider()
 //	DESCRIPTION : lookup locale in locale retrieval map
 //
 PMULSelectionDataProvider::posmapIT
-PMULSelectionDataProvider::posmapFind (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const
+PMULSelectionDataProvider::posmapFind (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale, bool with_empty) const
 {
-    posmapIT it = theMap.find (locale);				// try full locale
+    posmapIT it = theMap.find (locale.asString());	// try full locale
     if (it == theMap.end())
     {
-	const std::string lang = locale;
-	if (lang.size() > 2)
+	it = theMap.find (locale.languageOnly().asString());	// try 2-char locale
+	if (it == theMap.end())
 	{
-	    it = theMap.find (LangCode (lang.substr (0, 2)));	// try 2-char locale
-	    if (it == theMap.end())
-	    {
-		it = theMap.find (LangCode ("default"));	// try "default" locale
-	    }
-	    if (it == theMap.end())
-	    {
-		it = theMap.find (LangCode (""));		// try empty locale
-	    }
+	    it = theMap.find ("default");	// try "default" locale
+	}
+	if (it == theMap.end() && with_empty)
+	{
+	    it = theMap.find ("");		// try empty locale
 	}
     }
     return it;
@@ -104,23 +100,19 @@ PMULSelectionDataProvider::posmapFind (const TaggedFile::Tag::posmaptype& theMap
 //	DESCRIPTION : lookup locale in locale selection list map
 //
 PMULSelectionDataProvider::slcmapIT
-PMULSelectionDataProvider::slcmapFind (const slcmaptype& theMap, const LangCode& locale) const
+PMULSelectionDataProvider::slcmapFind (const slcmaptype& theMap, const LangCode& locale, bool with_empty) const
 {
     slcmapIT it = theMap.find (locale);
     if (it == theMap.end())
     {
-	const std::string lang = locale;
-	if (lang.size() > 2)
+	it = theMap.find (locale.languageOnly());
+	if (it == theMap.end())
 	{
-	    it = theMap.find (LangCode (lang.substr (0, 2)));
-	    if (it == theMap.end())
-	    {
-		it = theMap.find (LangCode ("default"));	// try "default" locale
-	    }
-	    if (it == theMap.end())
-	    {
-		it = theMap.find (LangCode (""));		// try empty locale
-	    }
+	    it = theMap.find (LangCode ("default"));	// try "default" locale
+	}
+	if (it == theMap.end() && with_empty)
+	{
+	    it = theMap.find (LangCode (""));		// try empty locale
 	}
     }
     return it;
@@ -135,10 +127,10 @@ PMULSelectionDataProvider::slcmapFind (const slcmaptype& theMap, const LangCode&
 //	DESCRIPTION : lookup string in locale retrieval map
 //
 std::string
-PMULSelectionDataProvider::posmapSLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const
+PMULSelectionDataProvider::posmapSLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale, bool with_empty) const
 {
     std::string value;
-    posmapIT it = posmapFind (theMap, locale);
+    posmapIT it = posmapFind (theMap, locale, with_empty);
     if (it != theMap.end())
     {
 	_selection_retrieval->retrieveData (it->second, value);
@@ -155,10 +147,10 @@ PMULSelectionDataProvider::posmapSLookup (const TaggedFile::Tag::posmaptype& the
 //	DESCRIPTION : lookup string list in locale retrieval map
 //
 std::list<std::string>
-PMULSelectionDataProvider::posmapLLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale) const
+PMULSelectionDataProvider::posmapLLookup (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale, bool with_empty) const
 {
     std::list<std::string> value;
-    posmapIT it = posmapFind (theMap, locale);
+    posmapIT it = posmapFind (theMap, locale, with_empty);
     if (it != theMap.end())
     {
 	_selection_retrieval->retrieveData (it->second, value);
@@ -229,19 +221,19 @@ PMULSelectionDataProvider::pkgsList (const LangCode& locale, bool is_delpacks) c
 
     if (is_delpacks)
     {
-	slcmapIT it = slcmapFind (_ptrs_attr_DELPACKS, locale);
+	slcmapIT it = slcmapFind (_ptrs_attr_DELPACKS, locale, false);
 	if (it == _ptrs_attr_DELPACKS.end())
 	{
-	    return posmapLLookup (_attr_DELPACKS, locale);
+	    return posmapLLookup (_attr_DELPACKS, locale, false);
 	}
 	slclist = it->second;
     }
     else
     {
-	slcmapIT it = slcmapFind (_ptrs_attr_INSPACKS, locale);
+	slcmapIT it = slcmapFind (_ptrs_attr_INSPACKS, locale, false);
 	if (it == _ptrs_attr_INSPACKS.end())
 	{
-	    return posmapLLookup (_attr_INSPACKS, locale);
+	    return posmapLLookup (_attr_INSPACKS, locale, false);
 	}
 	slclist = it->second;
     }
@@ -270,7 +262,7 @@ PMULSelectionDataProvider::pkgsPointers (PMULSelectionDataProviderPtr prv, const
     else
 	slcmap = prv->_ptrs_attr_INSPACKS;
 
-    slcmapIT slcpos = slcmapFind (slcmap, locale);		// already set ?
+    slcmapIT slcpos = slcmapFind (slcmap, locale, false);		// already set ?
 
     if (slcpos != slcmap.end())			// Yes
     {
@@ -282,7 +274,7 @@ PMULSelectionDataProvider::pkgsPointers (PMULSelectionDataProviderPtr prv, const
     posmapIT it;			// find retrieval pointer
     if (is_delpacks)
     {
-	it = posmapFind (prv->_attr_DELPACKS, locale);
+	it = posmapFind (prv->_attr_DELPACKS, locale, false);
 	if (it == prv->_attr_DELPACKS.end())		// no retrieval pointer
 	{
 	    return std::list<PMSelectablePtr>();
@@ -290,7 +282,7 @@ PMULSelectionDataProvider::pkgsPointers (PMULSelectionDataProviderPtr prv, const
     }
     else
     {
-	it = posmapFind (prv->_attr_INSPACKS, locale);
+	it = posmapFind (prv->_attr_INSPACKS, locale, false);
 	if (it == prv->_attr_INSPACKS.end())		// no retrieval pointer
 	{
 	    return std::list<PMSelectablePtr>();
@@ -307,6 +299,35 @@ PMULSelectionDataProvider::pkgsPointers (PMULSelectionDataProviderPtr prv, const
 	 strpos != strlist.end(); ++strpos)
     {
 	PMSelectablePtr selectable = Y2PM::packageManager().getItem (*strpos);
+	while (!selectable)
+	{
+	    string::size_type altbeg = strpos->find (" ");
+	    if (altbeg == string::npos)
+		break;
+
+	    selectable = Y2PM::packageManager().getItem (strpos->substr (0, altbeg));
+	    if (selectable)
+		break;
+
+	    altbeg = strpos->find ("(", altbeg);
+	    string::size_type altend = strpos->find (")");
+	    if ((altbeg != string::npos)
+		&& (altend != string::npos))
+	    {
+		while (++altbeg < altend)
+		{
+		    while ((*strpos)[altbeg] == ' ') ++altbeg;
+		    string::size_type comma = strpos->find(",", altbeg);
+		    if (comma == string::npos)
+			comma = altend;
+		    selectable = Y2PM::packageManager().getItem (strpos->substr(altbeg, (comma-altbeg)));
+		    if (selectable)
+			break;
+		    altbeg = comma;
+		}
+	    }
+	    break;
+	}
 	if (selectable)
 	    slclist.push_back (selectable);
     }
@@ -333,25 +354,25 @@ PMULSelectionDataProvider::pkgsPointers (PMULSelectionDataProviderPtr prv, const
 std::string
 PMULSelectionDataProvider::summary(const PMSelection & sel_r, const LangCode& locale) const
 {
-    return posmapSLookup (_attr_SUMMARY, locale);
+    return posmapSLookup (_attr_SUMMARY, locale, true);
 }
 
 std::list<std::string>
 PMULSelectionDataProvider::description(const PMSelection & sel_r, const LangCode& locale) const
 {
-    return posmapLLookup (_attr_DESCRIPTION, locale);
+    return posmapLLookup (_attr_DESCRIPTION, locale, true);
 }
 
 std::list<std::string>
 PMULSelectionDataProvider::insnotify(const PMSelection & sel_r, const LangCode& locale) const
 {
-    return posmapLLookup (_attr_INSNOTIFY, locale);
+    return posmapLLookup (_attr_INSNOTIFY, locale, true);
 }
 
 std::list<std::string>
 PMULSelectionDataProvider::delnotify(const PMSelection & sel_r, const LangCode& locale) const
 {
-    return posmapLLookup (_attr_DELNOTIFY, locale);
+    return posmapLLookup (_attr_DELNOTIFY, locale, true);
 }
 
 FSize
@@ -439,138 +460,3 @@ PMULSelectionDataProvider::isBase ( const PMSelection & sel_r ) const
 {
     return _attr_ISBASE;
 }
-
-#if 0
-
-//-------------------------------------------------------------------
-// fill selections with caching data
-// set up lists of PMSelectionPtr and PMPackagePtr
-// for suggests, inspacks, delpacks
-
-PMError
-ULSelectionParser::fillSelections (std::list<PMSelectionPtr>& all_selections, std::list<PMPackagePtr>& all_packages)
-{
-    PMError err;
-
-    for (std::list<PMSelectionPtr>::iterator selIt = all_selections.begin();
-	 selIt != all_selections.end(); ++selIt)
-    {
-//	MIL << "fillSelection (" << (*selIt)->name() << ")" << endl;
-        PMULSelectionDataProviderPtr selDp = getDataProvider( *selIt );
-	if ( !selDp ) {
-	  INT << "SUSPICIOUS: got NULL SelectionDataProviderPtr to fill" << endl;
-	  continue;
-	}
-	selDp->_ptrs_attr_SUGGESTS = lookupSelections (all_selections, (*selIt)->suggests());
-	selDp->_ptrs_attr_RECOMMENDS = lookupSelections (all_selections, (*selIt)->recommends());
-
-	for (TaggedFile::Tag::posmaptype::iterator tagIt = selDp->_attr_INSPACKS.begin();
-	     tagIt != selDp->_attr_INSPACKS.end(); ++tagIt)
-	{
-	    // get language packages
-	    std::list<std::string> inspackages = (*selIt)->inspacks (tagIt->first);
-	    if (!inspackages.empty())
-	    {
-		selDp->_ptrs_attr_INSPACKS[tagIt->first] = lookupPackages (all_packages, inspackages);
-	    }
-	}
-	for (TaggedFile::Tag::posmaptype::iterator tagIt = selDp->_attr_DELPACKS.begin();
-	     tagIt != selDp->_attr_DELPACKS.end(); ++tagIt)
-	{
-	    // get language packages
-	    std::list<std::string> delpackages = (*selIt)->delpacks (tagIt->first);
-	    if (!delpackages.empty())
-	    {
-		selDp->_ptrs_attr_DELPACKS[tagIt->first] = lookupPackages (all_packages, delpackages);
-	    }
-	}
-    }
-    return err;
-}
-
-
-
-///////////////////////////////////////////////////////////////////
-// private
-//
-//	METHOD NAME : lookupSelectionPtrs
-//	METHOD TYPE : std::list<PMPackagePtr>
-//
-//	DESCRIPTION : lookup selection names to PMSelectionPtr
-//
-std::list<PMSelectionPtr>
-PMULSelectionDataProvider::lookupSelectionPtrs (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections)
-{
-    std::list<PMSelectionPtr> selection_ptrs;
-
-    for (std::list<std::string>::const_iterator selIt = selections.begin();
-	 selIt != selections.end(); ++selIt)
-    {
-	std::list<PMSelectionPtr> matches = InstData::findSelections (all_selections, *selIt);
-	// silently ignore selections not found
-	if (matches.size() > 0)
-	{
-	    selection_ptrs.push_back (matches.front());
-	}
-    }
-
-    return selection_ptrs;
-}
-
-
-///////////////////////////////////////////////////////////////////
-// private
-//
-//	METHOD NAME : PMULSelectionDataProvider::lookupPackagePtrs
-//	METHOD TYPE : std::list<PMPackagePtr>
-//
-//	DESCRIPTION : lookup package names to PMPackagePtr
-//
-std::list<PMPackagePtr>
-PMULSelectionDataProvider::lookupPackagePtrs (const std::list<std::string>& packages)
-{
-    std::list<PMPackagePtr> package_ptrs;
-
-    for (std::list<std::string>::const_iterator pkgIt = packages.begin();
-	 pkgIt != packages.end(); ++pkgIt)
-    {
-	string name = *pkgIt;
-	std::list<PMPackagePtr> matches;
-
-	// check for alternative package
-	string::size_type spacepos = name.find_first_of (" ");
-	if (spacepos != string::npos)
-	{
-	    string wantedname = name.substr (0, spacepos);
-	    matches = InstData::findPackages (all_packages, wantedname);
-	    if (matches.size() == 0)
-	    {
-		string::size_type startpos = name.find_first_of ("(", spacepos);
-		if (startpos != string::npos)
-		{
-		    string::size_type endpos = name.find_first_of (")", startpos);
-		    if (endpos != string::npos)
-		    {
-			string alternative = name.substr (startpos+1, endpos-startpos-1);
-			matches = InstData::findPackages (all_packages, alternative);
-		    }
-		}
-	    }
-	}
-	else
-	{
-#warning lookup in arch order
-	    matches = InstData::findPackages (all_packages, name);
-	}
-
-	// silently ignore packages not found
-	if (matches.size() > 0)
-	{
-	    package_ptrs.push_back (matches.front());
-	}
-    }
-    return package_ptrs;
-}
-#endif
-
-
