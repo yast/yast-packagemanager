@@ -93,7 +93,7 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         /**
           Get external url for given package.
         */
-        const std::string externalUrl( const PMPackagePtr & ) const;
+        std::string externalUrl( const PMPackage & ) const;
 
         /**
           Set base versions for patch RPM.
@@ -104,7 +104,7 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         /**
           Get base versions for patch RPM.
         */
-        const std::list<PkgEdition> patchRpmBaseVersions( const PMPackagePtr & ) const;
+        std::list<PkgEdition> patchRpmBaseVersions( const PMPackage & ) const;
 
     private:
         std::map<PMPackagePtr,std::string> _srcLabels;

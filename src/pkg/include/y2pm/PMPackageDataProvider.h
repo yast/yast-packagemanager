@@ -100,6 +100,8 @@ class PMPackageDataProvider : virtual public Rep {
     static unsigned int           medianr()     { return 0; }
     static std::list<std::string> keywords()    { return std::list<std::string>(); }
     static std::list<std::string> du()		{ return std::list<std::string>(); }
+    static std::string            externalUrl() { return std::string(); }
+    static std::list<PkgEdition>  patchRpmBaseVersions() { return std::list<PkgEdition>(); }
 
     static bool isRemote()			{ return false; }
     // physical access to the rpm file.
@@ -167,7 +169,8 @@ class PMPackageDataProvider : virtual public Rep {
     virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const { return medianr(); }
     virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const { return keywords(); }
     virtual std::list<std::string> du	       ( const PMPackage & pkg_r ) const { return du(); }
-
+    virtual std::string            externalUrl ( const PMPackage & pkg_r ) const { return externalUrl(); }
+    virtual std::list<PkgEdition>  patchRpmBaseVersions( const PMPackage & pkg_r ) const { return patchRpmBaseVersions(); }
 
     virtual bool		   isRemote    ( const PMPackage & pkg_r ) const { return isRemote(); }
     // physical access to the rpm file.

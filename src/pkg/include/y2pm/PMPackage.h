@@ -107,6 +107,10 @@ class PMPackage : virtual public Rep, public PMObject {
     // from packages.DU
     std::list<std::string> du()		  const;
 
+    // YOU attributes
+    std::string            externalUrl()  const;
+    std::list<PkgEdition>  patchRpmBaseVersions() const;
+
     // if the rpm file comes from remote
     // (-> package provide takes some time, use 'provide' callback
     bool isRemote (void) const;

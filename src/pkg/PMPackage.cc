@@ -83,6 +83,8 @@ std::string            PMPackage::location()     const { DP_GET( location ); }
 unsigned int           PMPackage::medianr()      const { DP_GET( medianr ); }
 std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
 std::list<std::string> PMPackage::du()	         const { DP_GET( du ); }
+std::string            PMPackage::externalUrl()  const { DP_GET( externalUrl ); }
+std::list<PkgEdition>  PMPackage::patchRpmBaseVersions() const { DP_GET( patchRpmBaseVersions ); }
 
 // package file comes from remote
 bool		       PMPackage::isRemote()	 const { DP_GET( isRemote ); }
