@@ -467,10 +467,11 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     InstSrcDescr::LabelMap label;
     for (std::list<std::string>::iterator multi_pos = multi.begin(); multi_pos != multi.end(); ++multi_pos )
     {
-	vector<std::string> line = TaggedParser::split2words (*multi_pos, " ");
-	if ( line.size() >= 2 )
+	// split at first blank or tab, *multi_pos contains "<locale><blank><label_with_blanks>"
+	string::size_type spcpos = (*multi_pos).find_first_of (" \t");
+	if (spcpos != (*multi_pos).npos)
 	{
-	    label[ LangCode(line[0])] = line[1];
+	    label[LangCode ((*multi_pos).substr (0, spcpos))] = (*multi_pos).substr(spcpos+1);
 	}
     }
     ndescr->set_content_labelmap( label );
