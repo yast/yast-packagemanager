@@ -51,10 +51,11 @@ class binHeaderCache::Cache {
   private:
 
     FD_t  fd;
+    pos   _fdpos;    // keep track of filepos for tell()
 
   public:
 
-    Cache() : fd( 0 ) {}
+    Cache() : fd( 0 ), _fdpos( ~0 ) {}
     ~Cache() { close(); }
 
   public:
@@ -117,7 +118,7 @@ bool binHeaderCache::Cache::open( const Pathname & file_r )
     close();
     return false;
   }
-
+  _fdpos = 0;
   return true;
 }
 
@@ -132,6 +133,7 @@ void binHeaderCache::Cache::close()
   if ( fd ) {
     ::Fclose( fd );
     fd = 0;
+    _fdpos = ~0;
   }
 }
 
@@ -170,6 +172,8 @@ binHeaderCache::pos binHeaderCache::Cache::tell() const
     return rc;
   }
 
+  return _fdpos;
+#if 0
   if ( xfd->fps[xfd->nfps].io == fpio ) {
     FILE * fp = (FILE *)xfd->fps[xfd->nfps].fp;
     rc = ftell(fp);
@@ -178,6 +182,7 @@ binHeaderCache::pos binHeaderCache::Cache::tell() const
   if ( rc == npos )
     WAR << "Can't tell:" << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
   return rc;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -192,6 +197,7 @@ binHeaderCache::pos binHeaderCache::Cache::seek( const pos pos_r )
 
   if ( pos_r != npos ) {
     ::Fseek( fd, pos_r, SEEK_SET );
+    _fdpos = pos_r;
     if ( tell() == pos_r )
       rc = pos_r;
   } else {
@@ -220,6 +226,7 @@ unsigned binHeaderCache::Cache::readData( void * buf_r, unsigned count_r )
   }
 
   unsigned got = ::Fread( buf_r, sizeof(char), count_r, fd );
+  _fdpos += got;
   if ( got != count_r ) {
     if ( got || ::Ferror(fd) ) {
       ERR << "Error reading " << count_r << " byte (" << ::Fstrerror(fd) << ")" << endl;
