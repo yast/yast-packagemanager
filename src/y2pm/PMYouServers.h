@@ -136,7 +136,7 @@ class PMYouServers : public CountedRep {
     /**
      * Add the SLP servers to the list of known servers
      */ 
-    void addSLPServers( );
+    bool addSLPServers( );
 
     /**
      * Add a PMYouServer to the list of known servers

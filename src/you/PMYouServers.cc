@@ -43,6 +43,26 @@
 
 using namespace std;
 
+
+//////////////////////////////////////////////////////////////////
+//
+// Callback for SLPFindAttrs
+//
+SLPBoolean MyAttrCallback(SLPHandle hslp,
+			  const char* attrlist,
+			  SLPError errcode,
+			  void* mydata )
+{
+
+    if ( errcode == SLP_OK )
+    {
+	string* data = reinterpret_cast<string *>(mydata);
+	*data = attrlist;
+    }
+
+    return SLP_TRUE;
+}
+
 //////////////////////////////////////////////////////////////////
 //
 // Callback for SLPFindSrvs
@@ -55,16 +75,62 @@ SLPBoolean MySLPSrvURLCallback( SLPHandle hslp,
 {
     if ( errcode == SLP_OK || errcode == SLP_LAST_CALL ) 
     {
-	// service url e.g.:	 service:you.suse:http://sturm.suse.de
 	if ( srvurl )
 	{
+	    y2milestone( "Service found: %s", srvurl );
+
+	    string myattr;
+	    SLPHandle handleslp;
+	    SLPError err;
+
+	    err = SLPOpen( NULL, SLP_FALSE, &handleslp);
+
+	    if ( err == SLP_OK )
+	    {
+		// get attributes for this service
+		err = SLPFindAttrs( handleslp,
+				    srvurl,
+				    "",			// use configured scopes
+				    "basepath,name",	// attributes
+				    MyAttrCallback,
+				    (void *)&myattr );
+	    }
+
+	    string basepath = "/YOU";
+	    string name = "YOU Server";
+	    
+	    if ( err == SLP_OK )
+	    {
+		// attributes e.g.:	(basepath=/YOU),(name=YOU Server Local)
+		vector<string> splitattr;
+		vector<string>::iterator it;
+		stringutil::split(  myattr, splitattr, ",", true );
+
+		for ( it = splitattr.begin(); it != splitattr.end(); *it++ )
+		{
+		    string attr = (*it).substr( 1, (*it).size()-2 );	// remove ( )
+		    if ( attr.find("name=") != string::npos )
+			name = attr.substr( 5 );
+		    else if  ( attr.find("basepath=") != string::npos )
+			basepath = attr.substr( 9 );
+		}
+	    }
+	    else
+	    {
+		y2error ( "ERROR finding attributes - using defaults" );
+	    }
+
+	    SLPClose( handleslp );
+
+	    // service url e.g.:	 service:you.suse:http://sturm.suse.de
 	    vector<string> splitted;
 	    stringutil::split( srvurl, splitted, ":", true );
 
-	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(splitted[2] + ":" + splitted[3] + "/YOU",
-									"YOU Server",
-									"",
-									"slp") );
+	    // add URL of SLP server to the list of servers
+	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(splitted[2] + ":" + splitted[3] + basepath,
+									name,		// name of server
+									"",		// directory
+									"slp") );	// type
 	}
     } 
 
@@ -73,6 +139,8 @@ SLPBoolean MySLPSrvURLCallback( SLPHandle hslp,
 
     return SLP_TRUE; 
 }
+
+
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -275,33 +343,48 @@ PMError PMYouServers::readServers( const Pathname &file )
   return PMError();
 }
 
-void PMYouServers::addSLPServers( )
+bool PMYouServers::addSLPServers( )
 {
     D__ << "Add SLP servers" << endl;
 
     SLPError err; 
-    SLPHandle hslp; 
+    SLPHandle hslp;
     
     err = SLPOpen( NULL, SLP_FALSE, &hslp); 
-    if(err != SLP_OK) 
+    if ( err != SLP_OK ) 
     { 
-        y2error( "Error opening slp handle %i\n", err ); 
+        y2error( "Error opening slp handle %i\n", err );
+	return false;
     } 
-  
-    err = SLPFindSrvs( hslp, 
-                       "you.suse", 
-                       0,                    /* use configured scopes */ 
-                       0,                    /* no attr filter        */ 
-                       MySLPSrvURLCallback, 
-		       this ); 
+
 
     if( err != SLP_OK ) 
     { 
         y2error( "Error registering service with slp" ); 
-    } 
+    }
+    else
+    {
+
+	err = SLPFindSrvs( hslp, 
+			   "you.suse", 
+			   0,                    /* use configured scopes */ 
+			   0,                    /* no attr filter        */ 
+			   MySLPSrvURLCallback, 
+			   this ); 
+
+	if( err != SLP_OK ) 
+	{ 
+	    y2error( "Error registering service with slp" ); 
+	} 
+    }
 
     SLPClose(hslp); 
 
+    if ( err == SLP_OK )
+	return true;
+    else
+	return false;
+    
     D__ << "Add SLP servers done" << endl;    
 }
 
