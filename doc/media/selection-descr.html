@@ -34,7 +34,11 @@ This document describes the format of a selection file.<br>
 <LI><b>Name</b><br>
 A selection has a name.</li>
 <LI><b>Version</b><br>
-A selection has a version.</LI>
+A selection has a version which should denote the product version this
+selection belongs to.</LI>
+<LI><b>Release</b><br>
+A selection has a release, which should be increased for every change
+of the selection.</LI>
 <LI><b>Architecture</b><br>
 A selection might have an architecture which restricts
 it to systems with this architecture.</LI>
@@ -74,8 +78,8 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 <H2>Selection keywords</H2>
 <TABLE border>
 <tr><th>Keyword&nbsp;&nbsp;&nbsp;</th><th>Value</th><th>Comment</th></tr>
-<tr><td valign=top>=Sel</td><td valign=top><i>name</i> <i>version</i> [<i>architecture</i>]</td>
-	<td>These name and version identify a selection unambiguously and are used as a key.<br>
+<tr><td valign=top>=Sel</td><td valign=top><i>name</i> <i>version</i> <i>release</i> [<i>architecture</i>]</td>
+	<td>These name, version, and release identify a selection unambiguously and are used as a key.<br>
 	The architecture is optional and defaults to <i>all architectures</i><br>
 	If it's given, is must match (<b>FIXME:</b> 'uname -a' or DEFAULTBASE ?)</td></tr>
 <tr><td valign=top>=Sum.<i>lang</i></td><td valign=top><i>summary</i></td><td>one line language specific label</td></tr>
