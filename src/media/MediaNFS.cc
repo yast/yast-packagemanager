@@ -82,6 +82,20 @@ PMError MediaNFS::attachTo(bool next)
 	options="ro";
     }
 
+    // Add option "nolock", unless option "lock" or "unlock" is already set.
+    // This should prevent the mount command hanging when the portmapper isn't
+    // running.
+    vector<string> optionList;
+    stringutil::split( options, optionList, "," );
+    vector<string>::const_iterator it;
+    for( it = optionList.begin(); it != optionList.end(); ++it ) {
+        if ( *it == "lock" || *it == "nolock" ) break;
+    }
+    if ( it == optionList.end() ) {
+        optionList.push_back( "nolock" );
+        options = stringutil::join( optionList, "," );
+    }
+
     MIL << "try mount " << path
 	<< " to " << mountpoint
 	<< " filesystem " << filesystem << ": ";

@@ -57,6 +57,35 @@ int main( int argc, char **argv )
 {
   Y2Logging::setLogfileName( "-" );
 
+  MediaAccess media;
+  
+  PMError error = media.open( Url( "nfs://machcd3/machcd3" ) );
+  if ( error ) {
+    ERR << error << endl;
+    return 1;
+  }
+  error = media.attach();
+  if ( error ) {
+    ERR << error << endl;
+    return 1;
+  }
+  
+  string file = "CDs/logs/suse81-patchcd-i386";
+  
+  error = media.provideFile( file );
+  if ( error ) {
+    ERR << error << endl;
+    return 1;
+  }
+  
+  system( ( "ls -l " + media.localPath( file ).asString() ).c_str() );
+  
+#if 0
+  ExternalProgram prg( "bash myscript" );
+  prg.close();
+#endif
+
+#if 0
   class MyCallbacks : public InstTarget::Callbacks
   {
     public:
@@ -69,12 +98,6 @@ int main( int argc, char **argv )
       }
   };
 
-#if 0
-  ExternalProgram prg( "bash myscript" );
-  prg.close();
-#endif
-
-#if 1
   MyCallbacks c;
 
   InstTarget::setCallbacks( &c );
