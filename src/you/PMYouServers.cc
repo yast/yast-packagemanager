@@ -322,6 +322,10 @@ PMError PMYouServers::requestServers( bool check )
     addPackageVersion( "yast2-packagemanager", url );
     addPackageVersion( "liby2util", url );
 
+    SysConfig clock( "clock" );
+    string timezone = clock.readEntry( "TIMEZONE" );
+    url += "&timezone=" + timezone;
+
     url = encodeUrl( url );
 
     DBG << "url: '" << url << "'" << endl;
