@@ -15,7 +15,7 @@
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Package/Selection import and export.
 
 /-*/
 

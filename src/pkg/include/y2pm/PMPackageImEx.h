@@ -15,7 +15,7 @@
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Package/Selection import and export.
 
 /-*/
 #ifndef PMPackageImEx_h
@@ -35,13 +35,26 @@
 //
 //	CLASS NAME : PMPackageImEx
 /**
+ * @short Package/Selection import and export.
  *
+ * <code>PMPackageImEx</code> is able to remember the current systems
+ * packages/selections. This information might be written to and restored
+ * from file.
+ *
+ * Previously remember information may be used to arrange package/selection
+ * managers settings, to restore the systems content as close as possible.
  **/
 class PMPackageImEx : virtual public Rep {
   REP_BODY(PMPackageImEx);
 
   private:
 
+    ///////////////////////////////////////////////////////////////////
+    //
+    //	CLASS NAME : PMPackageImEx::Magic
+    /**
+     * @short Helper to handle PMPackageImEx file magic.
+     **/
     struct Magic {
       static const std::string _magic;
       PkgEdition               _version;
@@ -64,32 +77,76 @@ class PMPackageImEx : virtual public Rep {
     std::set<PkgName>   _offSystemPkg;
     std::set<PkgName>   _offSystemTabooPkg;
 
+    /**
+     * Froget previously remembered data.
+     **/
     void reset();
 
+    /**
+     * Decides whether to remember data for the given selection Selectable.
+     * If so, data are stored.
+     **/
     bool collect_Sel( const constPMSelectablePtr & sel_r );
+    /**
+     * Decides whether to remember data for the given package Selectable.
+     * If so, data are stored.
+     **/
     bool collect_Pkg( const constPMSelectablePtr & sel_r );
 
   public:
 
+    /**
+     * Constructor
+     **/
     PMPackageImEx();
 
+    /**
+     * Destructor
+     **/
     virtual ~PMPackageImEx();
 
   public:
 
+    /**
+     * Remember the current Package/SelectionManagers state.
+     **/
     void getPMState();
+    /**
+     * Restore Package/SelectionManagers state according to the
+     * remembered data..
+     **/
     void setPMState();
 
   public:
 
+    /**
+     * Read back PMPackageImEx data from stream. On any error
+     * (reading or parsing) the streams FAIL and/or BAD bit is set.
+     **/
     std::istream & doImport( std::istream & str );
+    /**
+     * Write currently remembered PMPackageImEx data to stream.
+     * On any error the streams FAIL and/or BAD bit is set.
+     **/
     std::ostream & doExport( std::ostream & str ) const;
 
+    /**
+     * Expect path_r to be a readable PMPackageImEx file, and
+     * read it's data. Return false on any error.
+     **/
     bool doImport( const Pathname & path_r );
+    /**
+     * Expect path_r to denote a writable PMPackageImEx file, and
+     * store currently remembered PMPackageImEx data in it. Return
+     * false on any error. (we do not unlink any files on error!)
+     **/
     bool doExport( const Pathname & path_r ) const;
 
   public:
 
+    /**
+     * Dump some debug lines.
+     **/
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 };
 
