@@ -35,9 +35,9 @@ int main()
     Pathname dir( "/aa/bb" );
     
     descr->set_type( type );
-    descr->set_media_vendor( string( "SuSE" ) );
+    descr->set_media_vendor( Vendor( "SuSE" ) );
     descr->set_media_id( string( "12432" ) );
-    descr->set_content_vendor( string("Caldera" ) );
+    descr->set_content_vendor( Vendor("Caldera" ) );
     descr->set_content_product( PkgNameEd::fromString("firewall") );
     descr->set_default_activate( false );
     descr->set_url( url ); 
