@@ -363,7 +363,8 @@ PMError InstTarget::installPatch( const Pathname &filename )
 
 PMError InstTarget::executeScript( const Pathname &scriptname )
 {
-    ExternalProgram prg( ( "/bin/bash " + scriptname.asString() ).c_str() );
+    ExternalProgram prg( ( "/bin/bash >/dev/null 2>/dev/null " +
+                           scriptname.asString() ).c_str() );
     int result = prg.close();
     if ( result != 0 ) {
         E__ << "Script failed. Exit code " << result << endl;
