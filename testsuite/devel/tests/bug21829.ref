@@ -57,6 +57,6 @@ From-Input-List: yes
 Name: /usr/bin/lpr(*)
 Edition: EDITION-UNSPEC
 Referers: lsb-1.0-1 requires /usr/bin/lpr
-Alternatives: lprng(S), cups-client(S)
+Alternatives: cups-client(S), lprng(S)
 Remove-Referers: lsb
 

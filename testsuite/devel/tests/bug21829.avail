@@ -1,12 +1,12 @@
-Name: lprng
-Edition: 1.0-1
-Provides: /usr/bin/lpr
-Conflicts: cups-client
-
 Name: cups-client
 Edition: 1.0-1
 Provides: /usr/bin/lpr
 Conflicts: lprng
+
+Name: lprng
+Edition: 1.0-1
+Provides: /usr/bin/lpr
+Conflicts: cups-client
 
 Name: cups
 Edition: 1.0-1
