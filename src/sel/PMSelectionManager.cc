@@ -304,7 +304,6 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
 PMError PMSelectionManager::requestedLocalesChanged( const PM::LocaleSet & addLocales_r,
 						     const PM::LocaleSet & delLocales_r )
 {
-#warning TBI PMSelectionManager::requestedLocalesChanged
   PkgFates fates;
   // !!! Adjust changes in language specific packages according to lastState
   // (that's what's been synced to the PMPackageManager).

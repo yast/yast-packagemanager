@@ -373,7 +373,7 @@ PMError Y2PM::instTargetUpdate()
   if ( instTarget().needsUpdate() ) {
     // getPackages() will reread data:
     packageManager().poolSetInstalled( instTarget().getPackages() );
-
+    packageManager().setMountPoints( instTarget().getMountPoints() );
     // Currently selections need not to be handled here, they are
     // are handled in CommitPackages and the Selection manager keeps
     // data uptodate.
@@ -1021,7 +1021,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
   // selection DB reflects what the user wanted. In case of trouble it
   // should be easier to check and manualy repair.
   //
-  // But we could thing about moving it to instTargetUpdate().
+  // But we could think about moving it to instTargetUpdate().
   //
   ///////////////////////////////////////////////////////////////////
   {

@@ -169,6 +169,8 @@ class Y2PM {
       return setRequestedLocales( tmpset );
     }
 
+  private:
+    friend class PMLanguageManager;
     /**
      * Add locales to requested locales.
      **/

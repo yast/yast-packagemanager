@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Feb  7 11:12:45 CET 2005 - ma@suse.de
+
+- Update disk usage information after commitPackages (#50065).
+
+-------------------------------------------------------------------
 Fri Feb  4 12:26:11 CET 2005 - ma@suse.de
 
 - In commitPackages, do not delete packages in advance which will
