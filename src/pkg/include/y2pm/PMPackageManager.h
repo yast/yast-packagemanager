@@ -69,6 +69,14 @@ class PMPackageManager : public PMManager {
 			      std::list<PMPackagePtr> & instlist_r );
 
     /**
+     * prepare for update
+     * go through all installed packages and update them
+     *
+     * return noupdate (no newer candidate) and unknown (non SuSE) packages
+     **/
+    void doUpdate (std::list<PMPackagePtr>& noupdate, std::list<PMPackagePtr>& unknowns);
+
+    /**
      * Retrieve the internal RPM groups tree (for cloning tree items in the UI etc.).
      **/
     YRpmGroupsTree * rpmGroupsTree() const { return _rpmGroupsTree; }
