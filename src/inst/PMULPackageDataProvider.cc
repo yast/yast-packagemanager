@@ -260,8 +260,6 @@ PMULPackageDataProvider::du ( const PMPackage & pkg_r ) const
 //
 Pathname PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r ) const
 {
-MIL << "PMULPackageDataProvider::providePkgToInstall(" << pkg_r.name() << ")" << endl;
-
     // determine directory and rpm name
     Pathname rpmname = pkg_r.location();
     Pathname dir;

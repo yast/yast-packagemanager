@@ -176,16 +176,32 @@ class Y2PM {
 	    CallBacks();
 
 	    /**
+	     * called right before package 'name' is provided
+	     * */
+	    void (*_installation_provide_start_func)(const std::string& server,
+						       const FSize& size, void* data);
+	    void* _installation_provide_start_data;
+
+	    /**
+	     * called multiple times during package providal, 'progress' is the
+	     * already provided percentage
+	     * */
+	    void (*_installation_provide_progress_func)(int progress, void* data);
+	    void* _installation_provide_progress_data;
+
+	    /**
 	     * called right before package 'name' is installed
 	     * */
-	    void (*_installation_package_start_func)(const std::string& name, void* data);
+	    void (*_installation_package_start_func)(const std::string& name,
+						     const std::string& summary,
+						     const FSize& size, bool is_delete, void* data);
 	    void* _installation_package_start_data;
 
 	    /**
 	     * called multiple times during package installation, 'progress' is the
 	     * already installed percentage
 	     * */
-	    void (*_installation_package_progress_func)(const std::string& name, int progress, void* data);
+	    void (*_installation_package_progress_func)(int progress, void* data);
 	    void* _installation_package_progress_data;
 
 	    /**
@@ -201,20 +217,30 @@ class Y2PM {
     public:
 
 	/**
+	 * called right before package 'name' is provided
+	 * */
+	static void setProvideStartCallback(void (*func)(const std::string& name, const FSize&, void*), void* data);
+
+	/**
+	 * called while package providal is in progress
+	 * */
+	static void setProvideProgressCallback(void (*func)(int percent, void*), void* data);
+
+	/**
 	 * called right before package 'name' is installed
 	 * */
-	static void setInstallationPackageStartCallback(void (*func)(const std::string& name), void* data);
+	static void setInstallationPackageStartCallback(void (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data);
 
 	/**
 	 * called multiple times during package installation, 'progress' is the
 	 * already installed percentage
 	 * */
-	static void setInstallationPackageProgressCallback(void (*func)(const std::string& name, int progress), void* data);
+	static void setInstallationPackageProgressCallback(void (*func)(int percent, void*), void* data);
 
 	/**
 	 * called after package 'name' got installed
 	 * */
-	static void setInstallationPackageDoneCallback(void (*func)(const std::string& name), void* data);
+	static void setInstallationPackageDoneCallback(void (*func)(const std::string& name, void*), void* data);
 
 	/**
 	 * package deletion/installation main loop
