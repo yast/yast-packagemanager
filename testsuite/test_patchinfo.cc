@@ -88,6 +88,12 @@ int main( int argc, char **argv )
       list<PMPackagePtr>::const_iterator it2;
       for( it2 = packages.begin(); it2 != packages.end(); ++it2 ) {
         cout << "  PKG: " << (*it2)->name() << endl;
+        cout << "    REQUIRES:" << endl;
+        list<PkgRelation> relations = (*it2)->requires();
+        list<PkgRelation>::const_iterator it3;
+        for( it3 = relations.begin(); it3 != relations.end(); ++it3 ) {
+          cout << "      " << (*it3).asString() << endl;          
+        }
       }
     }
   }
