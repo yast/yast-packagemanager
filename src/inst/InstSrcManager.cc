@@ -172,7 +172,7 @@ PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r )
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::writeNewRanks( const bool autoEnable_r )
+PMError InstSrcManager::writeNewRanks()
 {
   unsigned rank = 0;
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it, ++rank ) {
@@ -218,6 +218,26 @@ PMError InstSrcManager::scanProductsFile( const Pathname & file_r, ProductSet & 
 #warning TBD Actually scan products file.
   pset_r.insert( ProductEntry() );
   return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::poolHandle
+//	METHOD TYPE : InstSrcManager::ISrcPool::iterator
+//
+//	DESCRIPTION :
+//
+InstSrcManager::ISrcPool::iterator InstSrcManager::poolHandle( const ISrcId & isrc_r )
+{
+  if ( isrc_r ) {
+    InstSrcPtr item = InstSrcPtr::cast_away_const( isrc_r );
+    for ( ISrcPool::iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+      if ( *it == item )
+	return it;
+    }
+  }
+  return _knownSources.end();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -475,14 +495,25 @@ PMError InstSrcManager::setAutoenable( const ISrcId isrc_r, const bool yesno )
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::Up
+//	METHOD NAME : InstSrcManager::rankUp
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
+//	DESCRIPTION : Highest priority is beginning of list!
 //
 PMError InstSrcManager::rankUp( const ISrcId isrc_r )
 {
-  return Error::E_TBD;
+  ISrcPool::iterator it( poolHandle( isrc_r ) );
+  if ( it == _knownSources.end() ) {
+    WAR << "bad ISrcId " << isrc_r << endl;
+    return Error::E_bad_id;
+  }
+
+  ISrcPool::iterator prev( it );
+  if ( --prev != _knownSources.end() ) {
+    _knownSources.splice( prev, _knownSources, it );
+  }
+
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -491,11 +522,21 @@ PMError InstSrcManager::rankUp( const ISrcId isrc_r )
 //	METHOD NAME : InstSrcManager::rankDown
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
+//	DESCRIPTION : Highest priority is beginning of list!
 //
 PMError InstSrcManager::rankDown( const ISrcId isrc_r )
 {
-  return Error::E_TBD;
+  ISrcPool::iterator it( poolHandle( isrc_r ) );
+  if ( it == _knownSources.end() ) {
+    WAR << "bad ISrcId " << isrc_r << endl;
+    return Error::E_bad_id;
+  }
+
+  ISrcPool::iterator next( it );
+  if ( ++next != _knownSources.end() ) {
+    _knownSources.splice( ++next, _knownSources, it );
+  }
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -508,7 +549,27 @@ PMError InstSrcManager::rankDown( const ISrcId isrc_r )
 //
 PMError InstSrcManager::rankBehind( const ISrcId isrc_r, const ISrcId point_r )
 {
-  return Error::E_TBD;
+  ISrcPool::iterator it( poolHandle( isrc_r ) );
+  if ( it == _knownSources.end() ) {
+    WAR << "bad ISrcId " << isrc_r << endl;
+    return Error::E_bad_id;
+  }
+
+  if ( !point_r ) {
+    // to end of list
+    _knownSources.splice( _knownSources.end(), _knownSources, it );
+    return Error::E_ok;
+  }
+
+  ISrcPool::iterator next( poolHandle( point_r ) );
+  if ( next == _knownSources.end() ) {
+    WAR << "bad ISrcId " << point_r << endl;
+    return Error::E_bad_id;
+  }
+
+  _knownSources.splice( ++next, _knownSources, it );
+
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -521,7 +582,27 @@ PMError InstSrcManager::rankBehind( const ISrcId isrc_r, const ISrcId point_r )
 //
 PMError InstSrcManager::rankBefore( const ISrcId isrc_r, const ISrcId point_r )
 {
-  return Error::E_TBD;
+  ISrcPool::iterator it( poolHandle( isrc_r ) );
+  if ( it == _knownSources.end() ) {
+    WAR << "bad ISrcId " << isrc_r << endl;
+    return Error::E_bad_id;
+  }
+
+  if ( !point_r ) {
+    // to beginning of list
+    _knownSources.splice( _knownSources.begin(), _knownSources, it );
+    return Error::E_ok;
+  }
+
+  ISrcPool::iterator prev( poolHandle( point_r ) );
+  if ( prev == _knownSources.end() ) {
+    WAR << "bad ISrcId " << point_r << endl;
+    return Error::E_bad_id;
+  }
+
+  _knownSources.splice( prev, _knownSources, it );
+
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -534,7 +615,7 @@ PMError InstSrcManager::rankBefore( const ISrcId isrc_r, const ISrcId point_r )
 //
 PMError InstSrcManager::setNewRanks()
 {
-  return Error::E_TBD;
+  return writeNewRanks();
 }
 
 ///////////////////////////////////////////////////////////////////
