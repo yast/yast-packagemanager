@@ -74,7 +74,7 @@ RpmDb::RpmDb() :
     _backuppath ("/var/adm/backup"),
     _progressfunc(NULL),
     _progressdata(NULL),
-    _rootdir("/"),
+    _rootdir(""),
     _varlibrpm("/var/lib/rpm"),
     _varlib("/var/lib"),
     _rpmdbname("packages.rpm"),
@@ -1139,8 +1139,11 @@ RpmDb::queryRPM (const std::string& package, const char *qparam, const char *for
 {
     RpmArgVec opts(4);
 
-    if(_old_present) return false;
-    if(!_initialized) return false;
+    if (_old_present)
+    {
+	ERR << "Old rpmdb !" << endl;
+	return false;
+    }
 
     int argc = 0;
     opts[argc++] = qparam;
@@ -1480,19 +1483,32 @@ RpmDb::run_rpm(const RpmArgVec& options,
     exit_code = -1;
 
     RpmArgVec args(5);
-    args[0] = "rpm";
-    args[1] = "--root";
-    args[2] = _rootdir.asString().c_str();
-    args[3] = "--dbpath";
-    args[4] = dbPath.asString().c_str();
-
-    const char* argv[args.size()+options.size()+2];
     unsigned argc = 0;
+
+    args[argc++] = "rpm";
+    if (!_rootdir.asString().empty()
+	&& (_rootdir.asString() != "/"))
+    {
+	args[argc++] = "--root";
+	args[argc++] = _rootdir.asString().c_str();
+    }
+    if (!dbPath.asString().empty())
+    {
+	args[argc++] = "--dbpath";
+	args[argc++] = dbPath.asString().c_str();
+    }
+    if (argc < 4)
+	args[argc++] = 0;
+
+    const char* argv[argc+options.size()+2];
+    argc = 0;
 
 //    D__ << "rpm command: ";
 
-    for(RpmArgVec::iterator it=args.begin();it<args.end();++it)
+    for (RpmArgVec::iterator it=args.begin();it<args.end();++it)
     {
+	if (*it == 0)
+	    break;
 	argv[argc++]=*it;
 //	D__ << *it << " ";
     }
