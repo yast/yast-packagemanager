@@ -1,3 +1,23 @@
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                     (C) 2002 SuSE AG |
+\----------------------------------------------------------------------/
+
+   File:       output.cc
+   Purpose:    various << operators for PkgDep classes
+   Author:     Roman Hodek
+   Maintainer: Ludwig Nussel <lnussel@suse.de>
+
+/-*/
+
+#include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PkgDep_int.h>
 #include <iostream>
@@ -6,7 +26,9 @@ using namespace std;
 
 ostream& operator<<( ostream& os, const PkgDep::Result& res )
 {
-	os << "Name: " << res.name << endl;
+	os << "Name: " << res.name;
+	if(res.solvable == NULL) os << "(*)";
+	os << endl;
 	os << "Edition: " << res.edition << endl;
 	if (res.from_input_list)
 		os << "From-Input-List: yes\n";
@@ -62,7 +84,20 @@ ostream& operator<<( ostream& os, const PkgDep::RelInfoList& rl )
 		 p != rl.end(); ++p ) {
 		if (p != rl.begin())
 			os << ", ";
-		os << p->name << (p->is_conflict ? " conflicts " : " requires ")
+
+		if(p->solvable == NULL)
+		{
+		    os << p->name << "(*)";
+		}
+		else
+		{
+		    if(p->name != p->solvable->name())
+		    {
+			INT << "names dont match" << endl;
+		    }
+		    os << p->name;
+		}
+		os << (p->is_conflict ? " conflicts " : " requires ")
 		   << p->rel;
 	}
 	return os;
@@ -86,7 +121,7 @@ ostream& operator<<( ostream& os, const list<PkgName>& nl )
 	for( list<PkgName>::const_iterator p = nl.begin();
 		 p != nl.end(); ++p ) {
 		if (p != nl.begin())
-			os << ", ";
+			os << "/";
 		os << *p;
 	}
 	return os;
