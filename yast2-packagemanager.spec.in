@@ -78,9 +78,7 @@ install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
 %defattr(-,root,root)
 %{_libdir}/liby2pm.so
 %{_libdir}/liby2pm.la
-@includedir@/Y2PM.h
-%dir @includedir@/y2pm
-@includedir@/y2pm/*.h
+@includedir@
 %doc @docdir@
 
 %post
