@@ -57,13 +57,14 @@ class InstSrcError {
       E_bad_cache_descr,
       E_open_file,
       E_create_file,
+      E_write_file,
       // InstSrc creation
       E_bad_url,
       E_no_instsrc_on_media,
       E_no_instsrcdata_on_media,
+      E_src_no_description,
       E_src_already_enabled,
       E_src_not_enabled,
-      E_src_no_description,
       // InstSrcMgr
       E_bad_id
     };

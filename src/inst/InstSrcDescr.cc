@@ -22,13 +22,12 @@
 
 /-*/
 
-#include <y2util/Y2SLog.h>
-
 #include <iostream>
 #include <fstream>
 
-#include <y2pm/InstSrcDescr.h>
+#include <y2util/Y2SLog.h>
 
+#include <y2pm/InstSrcDescr.h>
 
 using namespace std;
 
@@ -42,7 +41,7 @@ IMPL_BASE_POINTER(InstSrcDescr);
 
 ///////////////////////////////////////////////////////////////////
 
-const std::string InstSrcDescr::_cache_file( "description" );
+const Pathname InstSrcDescr::_cache_file( "description" );
 
 ///////////////////////////////////////////////////////////////////
 
@@ -60,6 +59,7 @@ InstSrcDescr::InstSrcDescr()
     , _content_baseproduct( PkgName(), PkgEdition() )
     , _content_requires   ( PkgName(), NONE, PkgEdition() )
 {
+#warning must init _base_arch (from hwinfo?)
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ ostream & InstSrcDescr::dumpOn( ostream & str ) const
   {
       str << (*it).first << ": ";
       paths = (*it).second;
-      str << paths.front() << " " << paths.back() << " "; 
+      str << paths.front() << " " << paths.back() << " ";
   }
   str << "labelmap: ";
   LabelMap::const_iterator labelIt;
@@ -251,18 +251,18 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
     ndescr_r = 0;
     PMError err = Error::E_ok;
 
-    string fileName = cache_dir_r.asString() + "/" + _cache_file;
-  
     InstSrcDescrPtr ndescr( new InstSrcDescr );
 
     ///////////////////////////////////////////////////////////////////
     // parse _cache_file and fill into ndescr
     ///////////////////////////////////////////////////////////////////
 
+    Pathname fileName = cache_dir_r + _cache_file;
+
     TagParser parser;
     std::string tagstr;
 
-    std::ifstream mediaCacheStream( fileName.c_str() );
+    std::ifstream mediaCacheStream( fileName.asString().c_str() );
 
     if( !mediaCacheStream )
     {
@@ -271,10 +271,10 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 
     CommonPkdParser::TagSet* tagset;
     tagset = new InstSrcMediaTags();
-    
+
     bool repeatassign = false;
     bool parse = true;
-    
+
     while( parse && parser.lookupTag( mediaCacheStream ) )
     {
 	tagstr = parser.startTag();
@@ -309,7 +309,7 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 	bool ok = fillInstSrcDescr( ndescr, tagset );
 
 	MIL << "Parsing data from " <<  fileName << ", result: " << (ok?"true":"false") << std::endl;
-	
+
 	if ( !ok )
 	{
 	    err = Error::E_error;
@@ -320,7 +320,7 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 
     tagset->clear();
 
-    
+
     ///////////////////////////////////////////////////////////////////
     // done
     ///////////////////////////////////////////////////////////////////
@@ -345,12 +345,12 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 {
     bool ok = true;
     CommonPkdParser::Tag* t = 0;
-    
+
     if ( !tagset )
 	return false;
 
     // TODO: set ok=false if the result string is empty (are all values required ???)
-    
+
     // default activate
     t = tagset->getTagByIndex(InstSrcMediaTags::ACTIVATE);
     if ( t )
@@ -361,14 +361,14 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 	}
 	else
 	{
-	    ndescr->set_default_activate( false );	
+	    ndescr->set_default_activate( false );
 	}
     }
     else
     {
 	ok = false;
     }
-    
+
     // type
     t = tagset->getTagByIndex(InstSrcMediaTags::TYPE);
     if ( t )
@@ -380,7 +380,7 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     {
 	ok = false;
     }
-    
+
     // media data
     t = tagset->getTagByIndex(InstSrcMediaTags::MEDIA);
     if ( t )
@@ -404,7 +404,7 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     {
 	ok = false;
     }
-    
+
     // URL
     t = tagset->getTagByIndex(InstSrcMediaTags::URL);
     if ( t )
@@ -416,7 +416,7 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     {
 	ok = false;
     }
-    
+
     // product dir
     t = tagset->getTagByIndex(InstSrcMediaTags::PRODUCTDIR);
     if ( t )
@@ -448,7 +448,7 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 	else
 	{
 	    ok = false;
-	}	
+	}
     }
     else
     {
@@ -465,7 +465,7 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     {
 	ok = false;
     }
-    
+
     // archmap
     t = tagset->getTagByIndex(InstSrcMediaTags::ARCH);
     if ( t )
@@ -480,7 +480,7 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 	    unsigned int i;
 	    for ( i = 1; i < line.size(); i++ )
 	    {
-		paths.push_back( Pathname(line[i]) ); 
+		paths.push_back( Pathname(line[i]) );
 	    }
 	    arch[line[0]] = paths;
 	}
@@ -501,7 +501,7 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     {
 	ok = false;
     }
-    
+
     // labelmap
     t = tagset->getTagByIndex(InstSrcMediaTags::LABELMAP);
     if ( t )
@@ -529,9 +529,9 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     if ( t )
     {
 	std::list<std::string> multi = t->MultiData();
-	std::list<std::string>::iterator multi_pos;	
+	std::list<std::string>::iterator multi_pos;
 	LinguasList linguas;
-	
+
 	for ( multi_pos = multi.begin(); multi_pos != multi.end(); ++multi_pos )
 	{
 	    linguas.push_back( LangCode(*multi_pos) );
@@ -588,91 +588,110 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 //
 PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
 {
-#warning TBD InstSrcDescr cache write
+#warning TBD writeCache: protect existing cache against write errors
 
-    string fileName = cache_dir_r.asString() + "/" + _cache_file;
+    Pathname fileName = cache_dir_r + _cache_file;
 
-    ofstream file( fileName.c_str() );
-
-    if ( !file )
-    {
-	return Error::E_create_file;
+    ofstream file( fileName.asString().c_str() );
+    if ( !file ) {
+      ERR << "writeCache " << fileName << " " << Error::E_create_file << endl;
+      return Error::E_create_file;
     }
 
-    file << TypeTag << ": " << InstSrc::toString(_type) << endl;
-    file << UrlTag << ": " << _url << endl;
-    file << ProdDirTag << ": " << _product_dir << endl;
-    file << DefActTag << ": " << (_default_activate?"1":"0") << endl;
-    // data from media file
-    file << MediaBTag << ":" << endl;
-    file << _media_vendor << endl;
-    file << _media_id << endl;
-    file << _media_count << endl;
-    file << MediaETag << ":" << endl;
+    writeStream( file );
 
-    // product data from content file
-    file << ContentBTag << ":" << endl;
-    file << PkgNameEd::toString(_content_product) << endl;
-    file << PkgNameEd::toString(_content_baseproduct) << endl;
-    file << _content_vendor << endl;
-    file << ContentETag << ":" << endl;
-
-    file << DefBaseTag << ":" << _content_defaultbase << endl;
-
-    // content file archmap
-    file << ArchBTag << ":" << endl;
-    ArchMap::const_iterator arch_pos;
-    std::list<Pathname>::iterator pos;
-    
-    for ( arch_pos = _content_archmap.begin(); arch_pos != _content_archmap.end(); ++arch_pos )
-    {
- 	file << (*arch_pos).first << " ";
-	std::list<Pathname> paths =  (*arch_pos).second;
-	
-	for ( pos = paths.begin(); pos != paths.end(); ++pos  )
-	{
-	    file  << (*pos) << " ";
-	}
-	file << endl;
+    if ( !file ) {
+      ERR << "writeCache " << fileName << " " << Error::E_write_file << endl;
+      return Error::E_write_file;
     }
-    file << ArchETag << ":" << endl;
-
-    // TODO: write _content_requires
-    // content file language
-    file << LangTag << ": " << _content_language << endl;
-
-    // content file linguas list
-    file << LinguasBTag << ":" << endl;
-    std::list<LangCode>::const_iterator ling_pos;
-
-    for ( ling_pos = _content_linguas.begin(); ling_pos !=  _content_linguas.end(); ++ling_pos )
-    {
-	file << (*ling_pos) << endl;
-    }
-    file << LinguasETag << ":" << endl;
-
-    // content label
-    file << LabelTag << ":" << _content_label << endl;
- 
-    // content file labelmap
-    file << LabelMapBTag << ": " << endl;
-    LabelMap::const_iterator label_pos;
- 
-    for ( label_pos = _content_labelmap.begin(); label_pos != _content_labelmap.end(); ++label_pos )
-    {
- 	file << (*label_pos).first << " " << (*label_pos).second << endl;
-    }
-    file << LabelMapETag << ":" << endl;
-
-    // timezone
-    file << TimeTag << ": " << _content_timezone << endl;
-
-    // descrdir
-    file << DescrDirTag << ": " << _content_descrdir << endl;
-
-    // datadir
-    file << DataDirTag << ": " << _content_datadir << endl;
 
     return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDescr::writeStream
+//	METHOD TYPE : std::ostream & str
+//
+//	DESCRIPTION :
+//
+std::ostream & InstSrcDescr::writeStream( std::ostream & str ) const
+{
+  str << TypeTag << ": " << InstSrc::toString(_type) << endl;
+  str << UrlTag << ": " << _url << endl;
+  str << ProdDirTag << ": " << _product_dir << endl;
+  str << DefActTag << ": " << (_default_activate?"1":"0") << endl;
+  // data from media file
+  str << MediaBTag << ":" << endl;
+  str << _media_vendor << endl;
+  str << _media_id << endl;
+  str << _media_count << endl;
+  str << MediaETag << ":" << endl;
+
+  // product data from content file
+  str << ContentBTag << ":" << endl;
+  str << PkgNameEd::toString(_content_product) << endl;
+  str << PkgNameEd::toString(_content_baseproduct) << endl;
+  str << _content_vendor << endl;
+  str << ContentETag << ":" << endl;
+
+  str << DefBaseTag << ":" << _content_defaultbase << endl;
+
+  // content file archmap
+  str << ArchBTag << ":" << endl;
+  ArchMap::const_iterator arch_pos;
+  std::list<Pathname>::iterator pos;
+
+  for ( arch_pos = _content_archmap.begin(); arch_pos != _content_archmap.end(); ++arch_pos )
+  {
+    str << (*arch_pos).first << " ";
+    std::list<Pathname> paths =  (*arch_pos).second;
+
+    for ( pos = paths.begin(); pos != paths.end(); ++pos  )
+    {
+      str  << (*pos) << " ";
+    }
+    str << endl;
+  }
+  str << ArchETag << ":" << endl;
+
+#warning TODO: write _content_requires
+  // content file language
+  str << LangTag << ": " << _content_language << endl;
+
+  // content file linguas list
+  str << LinguasBTag << ":" << endl;
+  std::list<LangCode>::const_iterator ling_pos;
+
+  for ( ling_pos = _content_linguas.begin(); ling_pos !=  _content_linguas.end(); ++ling_pos )
+  {
+    str << (*ling_pos) << endl;
+  }
+  str << LinguasETag << ":" << endl;
+
+  // content label
+  str << LabelTag << ":" << _content_label << endl;
+
+  // content file labelmap
+  str << LabelMapBTag << ": " << endl;
+  LabelMap::const_iterator label_pos;
+
+  for ( label_pos = _content_labelmap.begin(); label_pos != _content_labelmap.end(); ++label_pos )
+  {
+    str << (*label_pos).first << " " << (*label_pos).second << endl;
+  }
+  str << LabelMapETag << ":" << endl;
+
+  // timezone
+  str << TimeTag << ": " << _content_timezone << endl;
+
+  // descrdir
+  str << DescrDirTag << ": " << _content_descrdir << endl;
+
+  // datadir
+  str << DataDirTag << ": " << _content_datadir << endl;
+
+  return str;
 }
 
