@@ -219,7 +219,7 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   str << "=" << LangTag << ": " << _content_language << endl;
 
   // content file linguas list
-  str << "=" << LinguasTag << ":" << endl;
+  str << "+" << LinguasTag << ":" << endl;
   std::list<LangCode>::const_iterator ling_pos;
 
   for ( ling_pos = _content_linguas.begin(); ling_pos !=  _content_linguas.end(); ++ling_pos )
