@@ -13,4 +13,4 @@ test_rpmdb
 testinstall
 test_patchinfo
 test_content
-
+gs_test
