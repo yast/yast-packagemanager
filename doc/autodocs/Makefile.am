@@ -13,7 +13,7 @@ SRC_INCLUDEDIRS =	$(addprefix $(top_srcdir)/src/,	\
 				include			\
 				pkg/include		\
 				inst/include		\
-				inst/pkg/include	\
+				inst/rpm/include	\
 				media/include		\
 			)
 
