@@ -763,17 +763,17 @@ InstSrc::provideMedia (int medianr) const
 **
 **
 **	FUNCTION NAME : providePackage
-**	FUNCTION TYPE : std::string
+**	FUNCTION TYPE : PMError
 **
 **	DESCRIPTION : provide package file by medianr and directory
-**
+**		return local path in path_r
 */
-Pathname
-InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir) const
+PMError
+InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir, Pathname& path_r) const
 {
     PMError err = provideMedia (medianr);
     if (err != PMError::E_ok)
-	return Pathname();
+	return err;
 
     Pathname filename = _descr->content_datadir() + dir + name;
     err = _media->provideFile (filename);
@@ -781,9 +781,10 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir)
     if (err != PMError::E_ok)
     {
 	ERR << "Media can't provide '" << dir+name << "': " << err.errstr() << endl;
-	return Pathname();
+	return err;
     }
-    return _media->localPath (filename);
+    path_r = _media->localPath (filename);
+    return PMError::E_ok;
 }
 
 
@@ -791,24 +792,26 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir)
 **
 **
 **	FUNCTION NAME : provideFile
-**	FUNCTION TYPE : std::string
+**	FUNCTION TYPE : PMError
 **
 **	DESCRIPTION : provide file by medianr and relative path
+**		return local path in file_r
 */
-Pathname
-InstSrc::provideFile (int medianr, const Pathname& path) const
+PMError
+InstSrc::provideFile (int medianr, const Pathname& path, Pathname& file_r) const
 {
     PMError err = provideMedia (medianr);
     if (err != InstSrcError::E_ok)
-	return Pathname();
+	return err;
 
     err = _media->provideFile (path);
     if (err != PMError::E_ok)
     {
 	ERR << "Media can't provide '" << path << "': " << err.errstr() << endl;
-	return Pathname();
+	return err;
     }
-    return _media->localPath (path);
+    file_r = _media->localPath (path);
+    return PMError::E_ok;
 }
 
 

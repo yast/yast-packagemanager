@@ -254,11 +254,11 @@ PMULPackageDataProvider::du ( const PMPackage & pkg_r ) const
 //
 //
 //	METHOD NAME : PMULPackageDataProvider::providePkgToInstall
-//	METHOD TYPE : Pathname
+//	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
+//	DESCRIPTION : call InstSrc to provide package, return local path to package in path_r
 //
-Pathname PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r ) const
+PMError PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const
 {
     // determine directory and rpm name
     Pathname rpmname = pkg_r.location();
@@ -279,9 +279,10 @@ Pathname PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r )
     if (!_source)
     {
 	ERR << "No source for '" << dir << "/" << rpmname << "'" << endl;
-	return Pathname();
+	path_r = Pathname();
+	return InstSrcError::E_no_source;
     }
 
-    return _source->providePackage (pkg_r.medianr(), rpmname, dir);
+    return _source->providePackage (pkg_r.medianr(), rpmname, dir, path_r);
 }
 

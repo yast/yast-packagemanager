@@ -178,37 +178,43 @@ class Y2PM {
 	    /**
 	     * called right before package 'name' is provided
 	     * */
-	    void (*_installation_provide_start_func)(const std::string& server,
-						       const FSize& size, void* data);
-	    void* _installation_provide_start_data;
+	    void (*_provide_start_func)(const std::string& server,
+					const FSize& size, bool remote, void* data);
+	    void* _provide_start_data;
 
 	    /**
 	     * called multiple times during package providal, 'progress' is the
 	     * already provided percentage
 	     * */
-	    void (*_installation_provide_progress_func)(int progress, void* data);
-	    void* _installation_provide_progress_data;
+	    void (*_provide_progress_func)(int progress, void* data);
+	    void* _provide_progress_data;
 
 	    /**
-	     * called right before package 'name' is installed
+	     * called after package 'name' was provided
 	     * */
-	    void (*_installation_package_start_func)(const std::string& name,
+	    void (*_provide_done_func)(PMError err, const std::string& errdata, void* data);
+	    void* _provide_done_data;
+
+	    /**
+	     * called right before package 'name' is installed or deleted
+	     * */
+	    void (*_package_start_func)(const std::string& name,
 						     const std::string& summary,
 						     const FSize& size, bool is_delete, void* data);
-	    void* _installation_package_start_data;
+	    void* _package_start_data;
 
 	    /**
 	     * called multiple times during package installation, 'progress' is the
 	     * already installed percentage
 	     * */
-	    void (*_installation_package_progress_func)(int progress, void* data);
-	    void* _installation_package_progress_data;
+	    void (*_package_progress_func)(int progress, void* data);
+	    void* _package_progress_data;
 
 	    /**
-	     * called after package 'name' got installed
+	     * called after package 'name' got installed or deleted
 	     * */
-	    void (*_installation_package_done_func)(const std::string& name, void* data);
-	    void* _installation_package_done_data;
+	    void (*_package_done_func)(PMError err, const std::string& errdata, void* data);
+	    void* _package_done_data;
 
 	};
 
@@ -219,7 +225,7 @@ class Y2PM {
 	/**
 	 * called right before package 'name' is provided
 	 * */
-	static void setProvideStartCallback(void (*func)(const std::string& name, const FSize&, void*), void* data);
+	static void setProvideStartCallback(void (*func)(const std::string& name, const FSize&, bool, void*), void* data);
 
 	/**
 	 * called while package providal is in progress
@@ -227,20 +233,25 @@ class Y2PM {
 	static void setProvideProgressCallback(void (*func)(int percent, void*), void* data);
 
 	/**
-	 * called right before package 'name' is installed
+	 * called right after package 'name' was provided
 	 * */
-	static void setInstallationPackageStartCallback(void (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data);
+	static void setProvideDoneCallback(void (*func)(PMError error, const std::string& reason, void*), void* data);
+
+	/**
+	 * called right before package 'name' is installed or deleted
+	 * */
+	static void setPackageStartCallback(void (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data);
 
 	/**
 	 * called multiple times during package installation, 'progress' is the
 	 * already installed percentage
 	 * */
-	static void setInstallationPackageProgressCallback(void (*func)(int percent, void*), void* data);
+	static void setPackageProgressCallback(void (*func)(int percent, void*), void* data);
 
 	/**
-	 * called after package 'name' got installed
+	 * called after package 'name' got installed or deleted
 	 * */
-	static void setInstallationPackageDoneCallback(void (*func)(const std::string& name, void*), void* data);
+	static void setPackageDoneCallback(void (*func)(PMError err, const std::string& reason, void*), void* data);
 
 	/**
 	 * package deletion/installation main loop

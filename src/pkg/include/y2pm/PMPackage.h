@@ -90,7 +90,7 @@ class PMPackage : virtual public Rep, public PMObject {
     std::list<std::string> du()		  const;
 
     // physical access to the rpm file.
-    Pathname providePkgToInstall()        const;
+    PMError providePkgToInstall(Pathname&) const;
 
   protected:
 

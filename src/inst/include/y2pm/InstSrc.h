@@ -349,17 +349,18 @@ class InstSrc: virtual public Rep {
 	 * returns local path or empty on error
 	 * uses media change callback
 	 */
-	Pathname providePackage (int medianr, const Pathname& name, const Pathname& dir) const;
+	PMError providePackage (int medianr, const Pathname& name, const Pathname& dir, Pathname& path_r) const;
 
 	/**
 	 * provide file via medianr and path
 	 *
 	 * path is relavite to the media root
 	 *
-	 * returns local path or empty on error
+	 * returns error code
+	 * return local path in file_r
 	 * uses media change callback
 	 */
-	Pathname provideFile (int medianr, const Pathname& path) const;
+	PMError provideFile (int medianr, const Pathname& path, Pathname& file_r) const;
 
   public:
 
