@@ -203,7 +203,7 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 	}
     }
 
-    DBG << "num packages: delete " << dellist_r.size() << ", install " << instlist_r.size() << endl;
+    DBG << "num packages: delete " << dellist_r.size() << ", install " << instlist_r.size() << ", srcinstall " << srclist_r.size() << endl;
 
     ///////////////////////////////////////////////////////////////////
     // sort installed list...
