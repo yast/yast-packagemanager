@@ -49,8 +49,42 @@ PMManager::PMManager()
 //
 PMManager::~PMManager()
 {
-
+  clearAll();
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::REINIT
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMManager::REINIT()
+{
+  clearAll();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::clearAll
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMManager::clearAll()
+{
+  for ( unsigned i = 0; i < _items.size(); ++i ) {
+    _items[i]->clearAll();
+  }
+  _items.clear();
+  _itemPool.clear();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -68,19 +102,69 @@ PMSelectablePtr PMManager::newSelectable( const PkgName & name_r ) const
 
 ///////////////////////////////////////////////////////////////////
 //
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : PMManager::poolLookup
 //	METHOD TYPE : PMSelectablePtr
 //
 //	DESCRIPTION :
 //
-PMSelectablePtr PMManager::poolLookup( const PkgName & name_r ) const
+PMSelectablePtr PMManager::poolLookup( unsigned idx_r ) const
+{
+  if ( idx_r < _items.size() )
+    return _items[idx_r];
+  return 0;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::poolLookup
+//	METHOD TYPE : PMSelectablePtr
+//
+//	DESCRIPTION :
+//
+PMSelectablePtr PMManager::poolLookup( const std::string & name_r ) const
 {
   PMSelectablePool::const_iterator iter = _itemPool.find( name_r );
   if ( iter != _itemPool.end() )
     return iter->second;
   return 0;
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::poolProvide
+//	METHOD TYPE : PMSelectablePtr
+//
+//	DESCRIPTION :
+//
+PMSelectablePtr PMManager::poolProvide( const std::string & name_r )
+{
+  PMSelectablePtr item = poolLookup( name_r );
+  if ( !item ) {
+    // create a new one
+    item = newSelectable( PkgName( name_r ) );
+    item->_manager = this;
+    item->_mgr_idx = _items.size();
+
+    _itemPool.insert( PMSelectablePool::value_type( item->name(), item ) );
+    _items.push_back( item );
+
+    M__ << "    new Selectable " << item << endl;
+  } else {
+    M__ << "    lookup found " << item << endl;
+  }
+  return item;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -92,7 +176,40 @@ PMSelectablePtr PMManager::poolLookup( const PkgName & name_r ) const
 //
 void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
 {
-#warning TBD set installed items
+  MIL << "Going to set " << iter_r.size() << " installed objects..." << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // set nothing installed
+  ///////////////////////////////////////////////////////////////////
+  for ( unsigned i = 0; i < _items.size(); ++ i ) {
+    _items[i]->delInstalledObj();
+  }
+
+  for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
+    M__ << "  set installed object " << *iter_r << endl;
+    ///////////////////////////////////////////////////////////////////
+    // check the Object.
+    ///////////////////////////////////////////////////////////////////
+    if ( ! *iter_r ) {
+      ERR << "Refuse to set NULL object" << endl;
+      continue;
+    }
+    if ( iter_r->_selectable ) {
+      ERR << "Refuse to set object owned by " << iter_r->_selectable << endl;
+      continue;
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // assert there's a Selectable in the pool that gets the Object.
+    // place the Object inside its Selectable.
+    ///////////////////////////////////////////////////////////////////
+    PMSelectablePtr pitem = poolProvide( iter_r->name() );
+    if ( pitem->setInstalledObj( *iter_r ) ) {
+      INT << "setInstalledObj failed" << endl;
+    }
+  }
+  M__ << "installed objects set!" << endl;
+  checkPool();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -109,11 +226,10 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
     MIL << "Request to add zero objects ignored." << endl;
     return;
   }
-
   MIL << "Going to add " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    DBG << "  add object " << *iter_r << endl;
+    M__ << "  add object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -128,33 +244,15 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
 
     ///////////////////////////////////////////////////////////////////
     // assert there's a Selectable in the pool that gets the Object.
-    ///////////////////////////////////////////////////////////////////
-    PMSelectablePtr pitem = poolLookup( iter_r->name() );
-    DBG << "    lookup found " << pitem << endl;
-    if ( !pitem ) {
-      // provide a new selectable and add it to the pool
-      pitem = newSelectable( iter_r->name() );
-      DBG << "    newSelectable " << pitem << endl;
-#warning must save pools state on adding new items
-      _itemPool.insert( PMSelectablePool::value_type( pitem->name(), pitem ) );
-      pitem->_manager = this;
-      DBG << "    add new selectable " << pitem << endl;
-    }
-
-    ///////////////////////////////////////////////////////////////////
     // place the Object inside its Selectable.
     ///////////////////////////////////////////////////////////////////
-#warning TBD duplicate check and ranking for new object
-    iter_r->_selectable = pitem;
-    pitem->_candidateList.push_back( *iter_r );
-    DBG << "    add object " << pitem << "; candidateList size " << pitem->_candidateList.size() << endl;
-    if ( !pitem->_candidateObj ) {
-      pitem->_candidateObj = *iter_r;
-      DBG << "    select object as new candidate" << endl;
+    PMSelectablePtr pitem = poolProvide( iter_r->name() );
+    if ( pitem->clistAdd( *iter_r ) ) {
+      INT << "clistAdd failed" << endl;
     }
   }
-
-  DBG << "objects added!" << endl;
+  M__ << "objects added!" << endl;
+  checkPool();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -175,7 +273,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
   MIL << "Going to remove " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    DBG << "  remove object " << *iter_r << endl;
+    M__ << "  remove object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -196,37 +294,60 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
     // remove object from it's selectable.
     ///////////////////////////////////////////////////////////////////
     PMSelectablePtr pitem = iter_r->_selectable;
-    iter_r->_selectable = 0;
-    unsigned oclsize = pitem->_candidateList.size();
-    pitem->_candidateList.remove( *iter_r );
-    if ( pitem->_candidateList.size() + 1 != oclsize ) {
-      ERR << "Suspicious remove from candidateList: size " << oclsize << " -> " << pitem->_candidateList.size() << endl;
-    }
-    DBG << "    remove object " << pitem << "; candidateList size " << pitem->_candidateList.size() << endl;
-    if ( pitem->_candidateObj == *iter_r ) {
-#warning TBD ranking after dropped object
-      if ( pitem->_candidateList.size() ) {
-	pitem->_candidateObj = *pitem->_candidateList.begin();
-	DBG << "    select new candidate " << pitem->_candidateObj << endl;
-      } else {
-	pitem->_candidateObj = 0;
-	DBG << "    drop candidate" << endl;
-      }
-    }
+    pitem->clistDel( *iter_r );
 
+#if 0
     ///////////////////////////////////////////////////////////////////
     // check whether to drop the selectable.
     // ASSUMES _candidateList is empty if no _candidateObj.
     ///////////////////////////////////////////////////////////////////
     if ( ! ( pitem->_installedObj || pitem->_candidateObj ) ) {
 #warning must save pools state on dropping items
-	DBG << "    drop selectable" << endl;
+	D__ << "    drop selectable" << endl;
 	_itemPool.erase( pitem->name() );
 	pitem->_manager = 0;
     }
+#endif
   }
+  M__ << "objects removed!" << endl;
+  checkPool();
+}
 
-  DBG << "objects removed!" << endl;
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::checkPool
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMManager::checkPool() const
+{
+  // adjust BitFields of added items
+
+  // test whether to remove empty items
+
+
+  if ( _itemPool.size() == _items.size() )
+    S__ << "Pool size " << _items.size() << endl;
+  else
+    E__ << "Pool size missmatch " << _itemPool.size() << " <-> " << _items.size() << endl;
+
+
+  for ( unsigned i = 0; i < _items.size(); ++i ) {
+    PMSelectablePtr c = _items[i];
+    S__ << "[" << i << "] " << c << endl;
+
+    if ( ! c ) {
+      E__ << "  Null selectable" << endl;
+    } else {
+      if ( c->_manager != this )
+	E__ << "  wrong manager->" << endl;
+      if ( c->_mgr_idx != i )
+	E__ << "  wrong _mgr_idx " << c->_mgr_idx << endl;
+      c->check();
+    }
+  }
 }
 
 /******************************************************************
