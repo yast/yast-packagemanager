@@ -211,8 +211,8 @@ void Mount::run(const char *const *argv,
   }
   // Launch the program
 
-    for(int i=0;argv[i];i++) DBG << argv[i] << " ";
-    DBG<<endl;
+    for (int i=0; argv[i]; i++) MIL << argv[i] << " ";
+    MIL << endl;
   process = new ExternalProgram(argv, disp, false, -1, true);
 }
 
