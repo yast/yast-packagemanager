@@ -34,6 +34,7 @@
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMYouPackageDataProvider.h>
+#include <y2pm/PMYouPatchDataProvider.h>
 #include <y2pm/PMPackage.h>
 
 #include <y2pm/PMYouPatchInfo.h>
@@ -311,11 +312,13 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     string version = "0";    
 #endif
 
-    // ma: NULL PMYouPatchDataProviderPtr provided to be able to compile.
-    // Finaly we should make shure that there is one, or we don't need it at all.
+    PMYouPatchDataProviderPtr dataProvider( new PMYouPatchDataProvider() );
+
     PMYouPatchPtr p( new PMYouPatch( PkgName( name ), PkgEdition( version ),
                                      _paths->baseArch(),
-				     PMYouPatchDataProviderPtr() ) );
+				     dataProvider ) );
+
+    dataProvider->setPatch( p );
 
     p->setLocalFile( path + fileName );
 
