@@ -7,7 +7,7 @@ dvi-local: dstrukt-entwurf.dvi libPkgDb.dvi libPkgDep.dvi
 ps-local: dstrukt-entwurf.ps libPkgDb.ps libPkgDep.ps
 
 clean-local:
-	rm -f *.ps *.dvi *.aux *.log *.eps
+	rm -f *.dvi *.aux *.log
 
 %.ps: %.dvi
 	dvips $< -o
