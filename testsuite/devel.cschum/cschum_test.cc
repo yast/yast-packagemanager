@@ -20,6 +20,7 @@
 #include <y2pm/InstYou.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/Wget.h>
+#include <y2pm/InstTarget.h>
 
 #include <Y2PM.h>
 
@@ -55,10 +56,31 @@ void printEd( PkgEdition ed )
 */
 int main( int argc, char **argv )
 {
-  Y2Logging::setLogfileName( "cschum_test.log" );
-  MIL << "START" << endl;
-  M__ << "START DEBUG" << endl;
+  Y2Logging::setLogfileName( "-" );
+
+#if 0
+  if ( argc != 2 ) {
+    cerr << "Usage: " << argv[ 0 ] << " <url>" << endl;
+    exit( 1 );
+  }
+
+  Url u( argv[ 1 ] );
   
+  Pathname path = u.getPath();
+  
+  DBG << path << endl;
+  
+  DBG << path.dirname() << endl;
+  DBG << path.basename() << endl;
+#endif
+  
+  Url u(
+"http://weber/cgi-bin/suseservers.cgi?product=SuSE%20Linux&version=8.1&basearch=i386&business=0&distproduct=--&yast2-online-update=2.6.12-10&yast2-packagemanager=2.6.26-0&liby2util=2.6.18-4"
+);
+  PMError error = MediaAccess::getFile( u, "/var/lib/YaST2/you/youservers" );
+
+  DBG << error << endl;
+      
   return 0;
   
 #if 0
