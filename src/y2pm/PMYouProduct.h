@@ -67,12 +67,10 @@ class PMYouProduct : public CountedRep
       @param youUrl   URL used to get YOU server list
       @param path     Path on server to directory containing patches, rpms and
                       scripts directories
-      @param business True, if product is a business product, needing
-                      authentification on the server
     */
     void init( const std::string &product, const std::string &version,
                const std::string &baseArch, const std::string &youUrl,
-               const std::string &path, bool business );
+               const std::string &path );
     /**
       Init object with given product, version and baseArch values.
     */
@@ -154,6 +152,11 @@ class PMYouProduct : public CountedRep
     bool businessProduct();
 
     /**
+      Return whether the product should be ignored by YOU or not.
+    */
+    bool noYou();
+
+    /**
       Return base URL where list of YOU servers is read from.
 
       Return default URL, if the information can't be read from the product
@@ -193,6 +196,7 @@ class PMYouProduct : public CountedRep
     
     std::string _youUrl;
     bool _businessProduct;
+    bool _noYou;
     
     std::list<std::string> _patchFiles;
 };
