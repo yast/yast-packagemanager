@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 29 17:08:59 CEST 2003 - ma@suse.de
+
+- Move away any old database before the first package is going to
+  be installed. (#29285)
+
+-------------------------------------------------------------------
 Fri Aug 29 01:15:03 CEST 2003 - ma@suse.de
 
 - Introduced new Callbacks able to provide more data and more
