@@ -5,7 +5,7 @@
 SUBDIRS = inst pkg sel you media libPkgDep y2pm
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -DLOCALEDIR=\"${localedir}\" -Wall
-AM_LDFLAGS = -L$(libdir)
+AM_LDFLAGS = -L$(libdir) -lslp
 
 # first look into source tree, then into $(includedir)
 INCLUDES = -I$(top_srcdir)/src -I$(includedir)
