@@ -304,10 +304,6 @@ const PkgDuMaster & PMPackageManager::updateDu()
 {
   bool count_mp = _du_master.resetStats();
 
-  if ( ! count_mp ) {
-    DBG << "No MountPoints set; count totals only" << endl;
-  }
-
   // currently installed packages do not have du info ;(
   //
   // new install: add candidate
@@ -343,7 +339,6 @@ const PkgDuMaster & PMPackageManager::updateDu()
     }
   }
 
-  DBG << _du_master << endl;
   return _du_master;
 }
 

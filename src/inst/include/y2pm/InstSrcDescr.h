@@ -220,7 +220,7 @@ public:
     void set_content_product( const PkgNameEd & val_r )     { _content_product = val_r; }
     void set_content_baseproduct( const PkgNameEd & val_r ) { _content_baseproduct = val_r; }
     void set_content_vendor( const Vendor & val_r )         { _content_vendor = val_r; }
-    void set_content_defaultbase ( const std::string & val_r ) { _content_defaultbase = val_r; }
+    void set_content_defaultbase( const std::string & val_r ) { _content_defaultbase = val_r; }
     void set_content_archmap( const ArchMap & val_r )       { _content_archmap = val_r; }
     void set_content_requires( const PkgRelation & val_r )  { _content_requires = val_r; }
     void set_content_language(const LangCode & val_r )      { _content_language = val_r; }
