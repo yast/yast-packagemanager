@@ -264,23 +264,31 @@ void InstYou::selectPatches( int kinds )
 
 void InstYou::updatePackageStates()
 {
+//  D__ << "updatePackageStates()" << endl;
+
   _totalDownloadSize = 0;
 
   list<PMYouPatchPtr>::const_iterator it;
   for ( it = _patches.begin(); it != _patches.end(); ++it ) {
+//    D__ << "Patch: " << (*it)->name() << endl;
+
     bool toInstall = false;
     PMSelectablePtr selectable = (*it)->getSelectable();
     if ( selectable && selectable->to_install() &&
          *it == selectable->candidateObj() ) {
+//      D__ << "toInstall: true" << endl;
       toInstall = true;
     }
 
     list<PMPackagePtr> packages = (*it)->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+//      D__ << "  Package: " << (*itPkg)->name() << endl;
+
       bool pkgToInstall = toInstall;
 
       if ( (*it)->updateOnlyInstalled() && !(*itPkg)->hasInstalledObj() ) {
+//        D__ << "pkgToInstall: false" << endl;
         pkgToInstall = false;
       }
 
