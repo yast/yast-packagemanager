@@ -50,3 +50,13 @@ Obsoletes: A, C
 
 Name: C
 Edition: 1.0-1
+
+Name: D
+Edition: 1.0-1
+
+Name: G
+Edition: 1.0-1
+Obsoletes: E, D, F
+
+Name: D2
+Edition: 2.0-1

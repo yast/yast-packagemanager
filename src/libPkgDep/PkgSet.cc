@@ -6,7 +6,7 @@
 
 using namespace std;
 
-PkgSet::PkgSet() : _additionalprovides_callback(NULL)
+PkgSet::PkgSet()
 {
 }
 
@@ -52,16 +52,6 @@ void PkgSet::add( PMSolvablePtr pkg, bool force )
 
 	// every package "provides" its own name
 	_provided[pkg->name()].push_back( PkgRevRelation( NULL, pkg ) );
-
-	if(_additionalprovides_callback)
-	{
-	    PMSolvable::PkgRelList_type addprovides = _additionalprovides_callback(pkg);
-	    for(PMSolvable::PkgRelList_const_iterator p = addprovides.begin();
-		p != addprovides.end(); ++p)
-	    {
-		_provided[p->name()].push_back( PkgRevRelation( &*p, pkg ) );
-	    }
-	}
 }
 
 class RevRel_By {
@@ -75,6 +65,12 @@ class RevRel_By {
 
 void PkgSet::remove( PMSolvablePtr pkg )
 {
+    if(!pkg)
+    {
+	INT << "got NULL" << endl;
+	return;
+    }
+
 	if (!contents.erase( pkg->name() ))
 		return; // wasn't contained
 
@@ -92,16 +88,6 @@ void PkgSet::remove( PMSolvablePtr pkg )
 		_obsoleted[p->name()].remove_if( pred );
 	}
 	_provided[pkg->name()].remove_if( pred );
-
-	if(_additionalprovides_callback)
-	{
-	    PMSolvable::PkgRelList_type addprovides = _additionalprovides_callback(pkg);
-	    for(PMSolvable::PkgRelList_const_iterator p = addprovides.begin();
-		p != addprovides.end(); ++p)
-	    {
-		_provided[p->name()].remove_if( pred );
-	    }
-	}
 }
 
 
@@ -129,7 +115,8 @@ void PkgSet::remove( PkgName name )
 {
     PMSolvablePtr pkg = lookup(name);
 
-    if (pkg) remove( pkg );
+    if (pkg)
+	remove( pkg );
 }
 
 PMSolvablePtr PkgSet::lookup( const PkgName& name ) const

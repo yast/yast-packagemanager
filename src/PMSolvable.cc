@@ -208,16 +208,25 @@ bool PMSolvable::doesProvide(const PkgRelation& rel) const
 //
 //	DESCRIPTION :
 //
-bool PMSolvable::doesObsolete( const constPMSolvablePtr & item_r ) const
+bool PMSolvable::doesObsolete( const constPMSolvablePtr & p ) const
 {
-  if ( item_r ) {
-    for ( PkgRelList_const_iterator it = obsoletes_begin(); it != obsoletes_end(); ++it ) {
-      if ( it->matches( item_r ) ) {
-	return true;
-      }
+    if ( !p )
+	return false;
+
+    // XXX bad: O(n^2)
+    // obsoletes first in the hope that there aren't that many
+    for ( PkgRelList_const_iterator obs = obsoletes_begin(); obs != obsoletes_end(); ++obs )
+    {
+	for ( PkgRelList_const_iterator prov = p->provides_begin(); prov != p->provides_end(); ++prov )
+	{
+	    if ( obs->matches( *prov ) )
+	    {
+		return true;
+	    }
+	}
     }
-  }
-  return false;
+
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////

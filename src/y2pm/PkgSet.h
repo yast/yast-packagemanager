@@ -7,10 +7,6 @@
 #include <y2pm/PMSolvablePtr.h>
 #include <y2pm/PkgRevRel.h>
 
-inline size_t hashfun( const PkgName & ustr_r ) {
-    return hashfun( (const Ustring &)ustr_r );
-}
-
 /** A PkgSet represents an unordered collection of packages. This
 may be e.g. a set of currently installed packages, to be installed packages, or
 ones that are available for installation. A package name must be unique in a
@@ -39,8 +35,6 @@ class PkgSet {
 	typedef InvRel_type::iterator InvRel_iterator;
 	typedef InvRel_type::const_iterator InvRel_const_iterator;
 
-	typedef PMSolvable::PkgRelList_type& (*getAdditionalProvides_callback)( constPMSolvablePtr ptr );
-
 	typedef std::list<constPMSolvablePtr> SolvableList;
 
   private:
@@ -52,8 +46,6 @@ class PkgSet {
 	InvRel_type _conflicted;
 	InvRel_type _provided;
 	InvRel_type _obsoleted;
-
-	getAdditionalProvides_callback _additionalprovides_callback;
 
   public:
 	// default copy constructor and assigment are ok
@@ -146,22 +138,6 @@ class PkgSet {
 	decl_InvRel_iterators(conflicted)
 	decl_InvRel_iterators(provided)
 	decl_InvRel_iterators(obsoleted)
-
-	/**
-	 * set callback function which is called when Packages are added to this set
-	 * */
-	void setAdditionalProvidesCallback( getAdditionalProvides_callback callback )
-	{
-	    _additionalprovides_callback = callback;
-	}
-
-	/**
-	 * return current callback
-	 * */
-	getAdditionalProvides_callback AdditionalProvidesCallback() const
-	{
-	    return _additionalprovides_callback;
-	}
 
 	std::ostream& dumpOn(std::ostream& os);
 };

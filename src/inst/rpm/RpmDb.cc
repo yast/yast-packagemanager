@@ -775,6 +775,7 @@ PMError RpmDb::rebuildDatabase()
   if ( rpm_status != 0 ) {
     ERR << "rpm failed, message was:" << endl << errmsg; // has trailing NL
     err =  Error::E_RpmDB_subprocess_failed;
+    err.setDetails(errmsg);
   } else {
     report->progress( pd.toMax() ); // 100%
   }

@@ -1,5 +1,7 @@
 --- Test 1
 
+Install: p2,
+
 Name: p2
 Edition: 1.0-1
 From-Input-List: yes
@@ -7,6 +9,8 @@ Conflicts-With: p1-1.0-1 conflicts with p2
 Remove-To-Solve-Conflict: p1
 
 --- Test 2
+
+Install: sendmail,
 
 Name: sendmail
 Edition: 2.0-1
@@ -16,6 +20,8 @@ Remove-To-Solve-Conflict: smail
 
 --- Test 3
 
+Install: bar,
+
 Name: bar
 Edition: 2.0-1
 From-Input-List: yes
@@ -23,6 +29,8 @@ Conflicts-With: bar-2.0-1 conflicts with foo
 Remove-To-Solve-Conflict: foo
 
 --- Test 4
+
+Install: libident-dev,
 
 Name: libident-dev
 Edition: 2.0-1
@@ -38,6 +46,8 @@ Remove-Referers: libident-dev
 
 --- Test 5
 
+Install: libc6,
+
 Name: libc6
 Edition: 2.1.0-1
 From-Input-List: yes
@@ -47,6 +57,8 @@ Remove-To-Solve-Conflict: smail
 
 --- Test 6
 
+Install: test3,
+
 Name: test3
 Edition: 1.0-1
 From-Input-List: yes
@@ -55,6 +67,8 @@ Remove-To-Solve-Conflict: test1, test2
 
 --- Test 7
 
+Install: test4,
+
 Name: test4
 Edition: 1.0-1
 From-Input-List: yes
@@ -62,6 +76,8 @@ Conflicts-With: test4-1.0-1 conflicts with test2
 Remove-To-Solve-Conflict: test2
 
 --- Test 8
+
+Install: foo,baz,
 
 Name: baz
 Edition: 1.0-1
@@ -74,6 +90,8 @@ Upgrade-To-Remove-Conflict: yes
 
 --- Test 9
 
+Install: foo2,baz2,
+
 Name: baz2
 Edition: 1.0-1
 From-Input-List: yes
@@ -85,6 +103,8 @@ Upgrade-To-Remove-Conflict: yes
 
 --- Test 10
 
+Install: baz3,
+
 Name: baz3
 Edition: 1.0-1
 From-Input-List: yes
@@ -92,6 +112,8 @@ Conflicts-With: foo3-1.0-1 conflicts with baz31
 Remove-To-Solve-Conflict: foo3
 
 --- Test 11
+
+Install: requirerer,required,
 
 Name: required
 Edition: 2.0-1
@@ -104,6 +126,8 @@ Is-Upgrade-From: 1.0-1
 Upgrade-To-Remove-Conflict: yes
 
 --- Test 12
+
+Install: required2,
 
 Name: required2
 Edition: 2.0-1
@@ -124,6 +148,8 @@ Unresolvable: requirerer2-2.0-1 requires required2a
 
 --- Test 13
 
+Install: required3,
+
 Name: required3
 Edition: 2.0-1
 From-Input-List: yes
@@ -136,6 +162,8 @@ Upgrade-To-Remove-Conflict: yes
 State-Change-Not-Possible: yes
 
 --- Test 14
+
+Install: libfoo,libfoo-dev,foouser,libfoog,
 
 Name: foouser
 Edition: 1.0-2

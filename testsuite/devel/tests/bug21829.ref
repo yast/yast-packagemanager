@@ -1,8 +1,11 @@
 --- Test 1
 
+Install: cups-client,lprng,lsb,
+
 Name: cups-client
 Edition: 1.0-1
 From-Input-List: yes
+Referers: lsb-1.0-1 requires /usr/bin/lpr
 
 Name: lsb
 Edition: 1.0-1
@@ -18,6 +21,8 @@ Remove-Referers: lsb
 
 --- Test 2
 
+Install: cups-client,lsb,
+
 Name: cups-client
 Edition: 1.0-1
 From-Input-List: yes
@@ -29,6 +34,8 @@ From-Input-List: yes
 
 --- Test 3
 
+Install: lprng,lsb,
+
 Name: lprng
 Edition: 1.0-1
 From-Input-List: yes
@@ -39,6 +46,8 @@ Edition: 1.0-1
 From-Input-List: yes
 
 --- Test 4
+
+Install: cups-client,cups,lsb,
 
 Name: cups
 Edition: 1.0-1
@@ -53,6 +62,8 @@ Edition: 1.0-1
 From-Input-List: yes
 
 --- Test 5
+
+Install: lsb,
 
 Name: /usr/bin/lpr(*)
 Edition: EDITION-UNSPEC

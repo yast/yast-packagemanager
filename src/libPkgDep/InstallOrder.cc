@@ -169,7 +169,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 	    {
 		if(*it != node)
 		{
-		    W__  << "backward edge " << node->name() << " -> " << (*it)->name() << endl;
+		    WAR  << "dependency loop: " << node->name() << " -> " << (*it)->name() << endl;
 		}
 	    }
 	    else

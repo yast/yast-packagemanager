@@ -25,8 +25,6 @@
 #include <list>
 #include <deque>
 
-#include <y2util/hash.h>
-
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRevRel.h>
@@ -198,9 +196,9 @@ class PkgDep {
 
 		/**
 		 * this package has been (re)installed because it had
-		 * unsatisfied dependencies
+		 * the following unsatisfied dependencies
 		 * */
-		bool was_inconsistent : 1;
+		RelInfoList was_inconsistent;
 
 		/**
 		 * construct Result.
@@ -301,12 +299,9 @@ class PkgDep {
 		 * */
 		SolvableList remove_referers;
 
-		ErrorResult(const PkgDep& pkgdep, PMSolvablePtr pkg)
-			: Result(pkgdep,pkg), not_available(false), state_change_not_possible(false) {}
-		ErrorResult(const PkgDep& pkgdep, const PkgName& name)
-			: Result(pkgdep,name), not_available(false), state_change_not_possible(false) {}
-		ErrorResult(const Result& res)
-			: Result(res), not_available(false), state_change_not_possible(false) {}
+		ErrorResult(const PkgDep& pkgdep, PMSolvablePtr pkg);
+		ErrorResult(const PkgDep& pkgdep, const PkgName& name);
+		ErrorResult(const Result& res);
 
 		void add_unresolvable( PMSolvablePtr s, const PkgRelation& rel );
 		void add_conflict( const PkgRevRelation& rrel,
@@ -332,6 +327,14 @@ class PkgDep {
 		 * user's decission prevented that
 		 * */
 		bool state_change_not_possible;
+
+		/**
+		 * internal flag, don't use
+		 *
+		 * \internal indicates whethere this can be converted into
+		 * Result
+		 * */
+		bool _error;
 	};
 
 	friend class Result;
@@ -339,30 +342,15 @@ class PkgDep {
 	typedef std::list<Result> ResultList;
 	typedef std::list<ErrorResult> ErrorResultList;
 	
-	enum WhatToDoWithUnresolvable {
-	    UNRES_IGNORE = 0, // just ignore this dependence
-	    UNRES_TAKETHIS,   // use suggested PMSolvable (has to be returned/filled by function)
-	    UNRES_FAIL        // Relation is indeed unresolvable
-	};
-	
-	/**
-	 * function to call when an unresolvable dependence is found
-	 * <br> yes, the non const PkgDep* is ugly
-	 *
-	 * @param solver pointer to current solver
-	 * @param rel unresolvable dependence
-	 * @param PMSolvablePtr PMSolvable which should be assumed to provide this dependence
-	 *
-	 * @return tells caller what to do with dependence. If return value is
-	 * UNRES_TAKETHIS, this function has to point ptr to something useful
-	 * */
-	typedef WhatToDoWithUnresolvable(*DealWithUnresolvable_callback)(
-	    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& ptr);
-	//FIXME make PkgDep* const, requires lots of constPMSolvablePtr everywhere
-
-	DealWithUnresolvable_callback _unresolvable_callback;
-
   private:
+
+	class P;
+	P* _dp;
+	friend class P;
+
+	// disallow copy and assign for now
+	PkgDep(const PkgDep&);
+	PkgDep& operator=(const PkgDep&);
 
 	typedef std::list<PkgRevRelation> RevRelList;
 	typedef RevRelList::iterator RevRelList_iterator;
@@ -387,18 +375,21 @@ class PkgDep {
 		bool upgrade_to_solve_conflict : 1;
 		bool install_to_avoid_break : 1;
 		bool not_available : 1;
-		bool was_inconsistent : 1;
+
+		// the inconsistent package was not available
+		bool inconsistent_notavailable : 1;
+		RelInfoList was_inconsistent;
+
 		IRelInfoList referers;
 		NeededEditionRange not_avail_range;
 
 		Notes() : from_input(false), upgrade_to_solve_conflict(false),
 			install_to_avoid_break(false),
-			not_available(false),
-			was_inconsistent(false)
+			not_available(false)
 			{}
 	};
 
-	typedef hash<PkgName,Notes> Notes_type;
+	typedef std::map<PkgName,Notes> Notes_type;
 	typedef Notes_type::iterator Notes_iterator;
 	typedef Notes_type::const_iterator Notes_const_iterator;
 
@@ -425,7 +416,6 @@ class PkgDep {
 	static unsigned default_max_remove;
 
 	// --------------------------- instance vars ---------------------------
-	alternatives_mode alt_mode;
 	PkgSet installed;
 	const PkgSet& available;
 
@@ -436,8 +426,6 @@ class PkgDep {
 	PkgSet *candidates;
 	Notes_type notes;
 	std::deque<PMSolvablePtr > to_check;
-	AltInfoList alts_to_check;
-	noval_hash<PkgName> alts_handled;
 	ErrorResultList* i_obsoleted; // obsolete packages
 	ResultList *good;
 	ErrorResultList *bad;
@@ -454,10 +442,6 @@ class PkgDep {
 								ErrorResult &res );
 	bool req_ok_after_upgrade( const PkgRelation& rel, PMSolvablePtr oldpkg,
 							   PMSolvablePtr newpkg );
-	// alternatives.cc
-	void handle_alternative( const AltInfo& alt_info );
-	// consistency.cc
-	bool pkg_consistent( PMSolvablePtr pkg, ErrorResult *err );
 	// remove.cc
 	void virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
 								 PMSolvablePtr assume_instd = NULL ) const;
@@ -489,21 +473,11 @@ class PkgDep {
 		return Alternatives::AltDefaultList();
 	}
 
-	/**
-	 * default unresolvable callback, ignores deps that name begins with rpmlib(
-	 * */
-	static WhatToDoWithUnresolvable default_unresolvable_callback(
-	    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p);
-
-
-	/** check consistency of installed packages, mark inconsistent ones for
-	 * reinstallation */
-	void inconsistent_to_candidates(PkgSet& candidates);
-	
 public:
 	PkgDep( PkgSet& instd, const PkgSet& avail,
 			AlternativesCallback alternatives_callback = default_alternatives_callback,
 			alternatives_mode m = default_alternatives_mode );
+	~PkgDep();
 		
 //	PkgDep(  const PkgSet& instd, alternatives_mode m=default_alternatives_mode)
 //		: alt_mode(m), installed(instd), available(*default_avail), _pool(pool) {}
@@ -569,24 +543,11 @@ public:
 		default_avail = &av;
 	}
 */
-	void set_alternatives_mode(alternatives_mode mode)
-	{
-		alt_mode = mode;
-	}
+	void set_alternatives_mode(alternatives_mode mode);
 	
 	void set_alternatives_callback(Alternatives::AltDefaultList (*alternatives_callback)( PkgName name ))
 	{
 		_alternatives_callback = alternatives_callback;
-	}
-
-	/**
-	 * set function to call when an unresolvable dependence is found
-	 *
-	 * @see DealWithUnresolvable_callback
-	 * */
-	void set_unresolvable_callback(DealWithUnresolvable_callback callback)
-	{
-	    _unresolvable_callback = callback;
 	}
 
 	/**

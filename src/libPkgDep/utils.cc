@@ -1,6 +1,7 @@
 #include <cassert>
 #include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
+#include <y2pm/PkgDep_private.h>
 #include "PkgDep_int.h"
 
 using namespace std;
@@ -15,13 +16,19 @@ PkgDep::PkgDep ( PkgSet& instd,
 	 AlternativesCallback alternatives_callback,
 	 alternatives_mode m
 	)
-    : alt_mode(m),
+    :
 	installed(instd),
 	available(avail),
 	_alternatives_callback(alternatives_callback),
 	_install_installed(true)
 {
-    _unresolvable_callback = default_unresolvable_callback;
+	_dp = new P(*this);
+	_dp->alt_mode = m;
+}
+
+PkgDep::~PkgDep()
+{
+	delete _dp;
 }
 
 bool PkgDep::also_provided_by_installed( const PkgRelation& req )
@@ -165,7 +172,9 @@ PMSolvablePtr PkgDep::available_upgrade( PMSolvablePtr pkg )
 
 void PkgDep::do_upgrade_for_conflict( PMSolvablePtr upgrade )
 {
-	assert( upgrade != NULL );
+	if( !upgrade )
+	    { INT << "got NULL"; return; }
+
 	PkgName name = upgrade->name();
 
 	if (candidates->includes(name) && ((*candidates)[name] == upgrade)) {
@@ -214,15 +223,6 @@ void PkgDep::add_not_available(PMSolvablePtr referer, const PkgRelation& rel )
 	add_referer( name, referer, rel );
 	notes[name].not_available = true;
 	notes[name].not_avail_range.merge( rel );
-}
-
-PkgDep::WhatToDoWithUnresolvable PkgDep::default_unresolvable_callback(
-    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p)
-{
-    if(rel.name()->find("rpmlib(") != std::string::npos)
-	return UNRES_IGNORE;
-
-    return UNRES_FAIL;
 }
 
 // Local Variables:

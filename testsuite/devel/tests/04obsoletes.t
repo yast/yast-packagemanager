@@ -21,3 +21,9 @@ libbaz2
 A B
 # should also work in different order
 B C
+# G obsoletes multiple provides of libD. Thats only one problem
+G
+# libD provides D. now D is going to be installed so libD has to go with rpm4
+D
+# libD2 gets uninstalled but is still required by some packages
+D2

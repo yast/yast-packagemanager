@@ -64,6 +64,8 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	PMULSelectionDataProvider.h PMULSelectionDataProviderPtr.h \
         \
         PkgDep.h InstallOrder.h \
+	PkgDep_private.h \
+	IgnoredRelations.h \
         \
        	MediaAccess.h \
 	MediaAccessPtr.h \
@@ -107,7 +109,10 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	PMYouProductPtr.h		\
         PMYouMedia.h                    \
         PMYouMediaPtr.h                 \
-	YouError.h
+	YouError.h			\
+	DbHeader.h			\
+	PMInserter.h			\
+	PMDequeInserter.h
 
 #<INSTALL-HEADER-TARGET>
 
