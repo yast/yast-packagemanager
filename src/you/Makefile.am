@@ -14,9 +14,9 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		media/include	\
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-noinst_LTLIBRARIES = liby2pmpkg.la
+noinst_LTLIBRARIES = liby2pmyou.la
 
-liby2pmpkg_la_SOURCES = \
+liby2pmyou_la_SOURCES = \
 	PMYouPatch.cc \
 	PMYouPatchDataProvider.cc \
 	PMYouPatchManager.cc

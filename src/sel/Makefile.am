@@ -14,9 +14,9 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		media/include	\
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-noinst_LTLIBRARIES = liby2pmpkg.la
+noinst_LTLIBRARIES = liby2pmsel.la
 
-liby2pmpkg_la_SOURCES = \
+liby2pmsel_la_SOURCES = \
 	PMSelection.cc \
 	PMSelectionDataProvider.cc \
 	PMSelectionManager.cc
