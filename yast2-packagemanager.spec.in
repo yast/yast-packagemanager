@@ -2,8 +2,6 @@
 
 # neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr curl curl-devel openssl openssl-devel
 
-Requires:	wget
-
 Provides:	libpkg
 Obsoletes:	libpkg
 Provides:	yast2-agent-package
@@ -58,6 +56,7 @@ Obsoletes:	yast2-agent-http-devel
 @BUILD@
 
 @INSTALL@
+install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
 
 @CLEAN@
 
@@ -66,6 +65,7 @@ Obsoletes:	yast2-agent-http-devel
 %{_libdir}/liby2pm.so.*
 /usr/bin/online_update
 /usr/bin/installation_sources
+%config(noreplace) /etc/youservers
 
 %files devel
 %defattr(-,root,root)
