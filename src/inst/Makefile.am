@@ -15,7 +15,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		inst/include	\
 		inst/rpm/include\
 		media/include	\
-		libPkgDep/include	\
+		libPkgDep/include\
 	   ) -I$(includedir)
 
 noinst_LTLIBRARIES = liby2pminstsrc.la
@@ -37,6 +37,7 @@ liby2pminstsrc_la_SOURCES = \
 	InstTarget.cc			\
 	InstTargetError.cc		\
 	InstTargetSelDB.cc		\
-	InstTargetProdDB.cc
+	InstTargetProdDB.cc		\
+	UpdateInfParser.cc
 
 liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la
