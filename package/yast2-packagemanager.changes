@@ -2,6 +2,8 @@
 Sat Sep  7 16:05:34 CEST 2002 - kkaempf@suse.de
 
 - add "-C" parameter to tar during package backup
+- break out without checking media contents
+- 2.6.10
 
 -------------------------------------------------------------------
 Sat Sep  7 14:02:45 CEST 2002 - kkaempf@suse.de
