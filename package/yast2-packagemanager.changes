@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Mar  4 16:44:32 CET 2003 - ma@suse.de
+
+- Y2PM interface to save and restore package selection state (package and
+  selection manager) and to detect if there were changes since last save.
+  (needed to fix #23616)
+- 2.7.20
+
+-------------------------------------------------------------------
 Mon Mar  3 17:23:57 CET 2003 - ma@suse.de
 
 - When deleting a selection, prevent packages included in other active

@@ -451,6 +451,38 @@ bool PMManager::RestoreState()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMManager::DiffState
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMManager::DiffState() const
+{
+  if ( _savedList.size() != size() ) {
+    INT << "size check failed: saved " << _savedList.size() << ", current " << size() << endl;
+    return true;
+  }
+
+  if ( !size() )
+    return false; // nothing to do
+
+  // check
+  for ( SavedList::const_iterator it = _savedList.begin(); it != _savedList.end(); ++it ) {
+    if ( ! it->mayReplay() ) {
+      INT << "mayReplay failed on " << it->_item << endl;
+      return true;
+    }
+    if ( it->diff() ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMManager::ClearSaveState
 //	METHOD TYPE : void
 //

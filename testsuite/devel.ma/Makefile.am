@@ -24,6 +24,7 @@ EXTRA_PROGRAMS = \
 	rpmtest.exe
 
 ma_test_exe_SOURCES = ma_test.cc
+ma_test_exe_LDADD = $(LDADD)
 
 rpmtest_exe_SOURCES = rpmtest.cc
 rpmtest_exe_LDADD = $(LDADD)

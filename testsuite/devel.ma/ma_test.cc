@@ -1,8 +1,7 @@
 #include <iomanip>
-#include <list>
+#include <fstream>
 #include <string>
-
-#include <y2util/Y2SLog.h>
+#include <list>
 
 #include <Y2PM.h>
 #include <y2pm/RpmDb.h>
@@ -14,56 +13,104 @@
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/Timecount.h>
+#include <y2pm/PMPackageImEx.h>
+
+#include <y2util/Y2SLog.h>
+#include <y2util/Date.h>
+#include <y2util/stringutil.h>
+#include <y2util/ExternalProgram.h>
 
 using namespace std;
 
-#undef  Y2LOG
-#define Y2LOG "PM_ma_test"
+#define TMGR Y2PM::instTarget()
+#define PMGR Y2PM::packageManager()
+#define SMGR Y2PM::selectionManager()
+#define ISM  Y2PM::instSrcManager()
 
-std::ostream & operator<<( std::ostream & str, const PkgDep::ResultList & lst ) {
-  str << "+++ResultList+++" << endl;
-  for ( PkgDep::ResultList::const_iterator it = lst.begin(); it != lst.end(); ++it ) {
-    str << *it << endl;
-  }
-  str << "---ResultList---" << endl;
+ostream & operator <<( ostream & str, const list<string> & t ) {
+  stringutil::dumpOn( str, t, true );
   return str;
 }
 
-std::ostream & operator<<( std::ostream & str, const PkgDep::ErrorResultList & lst ) {
-  str << "+++ErrorResultList+++" << endl;
-  for ( PkgDep::ErrorResultList::const_iterator it = lst.begin(); it != lst.end(); ++it ) {
-    str << *it << endl;
+void dataDump( ostream & str, constPMPackagePtr p ) {
+  str << p << endl;
+  str << "SUMMARY:       " << p->summary() << endl;
+  str << "DESCRIPTION:   " << p->description() << endl;
+  str << "INSNOTIFY:     " << p->insnotify() << endl;
+  str << "DELNOTIFY:     " << p->delnotify() << endl;
+  str << "SIZE:          " << p->size() << endl;
+  str << "INSTSRCLABEL:  " << p->instSrcLabel() << endl;
+  str << "INSTSRCVENDOR: " << p->instSrcVendor() << endl;
+  str << "INSTSRCRANK:   " << p->instSrcRank() << endl;
+  str << "BUILDTIME:     " << p->buildtime() << endl;
+  str << "BUILDHOST:     " << p->buildhost() << endl;
+  str << "INSTALLTIME:   " << p->installtime() << endl;
+  str << "DISTRIBUTION:  " << p->distribution() << endl;
+  str << "VENDOR:        " << p->vendor() << endl;
+  str << "LICENSE:       " << p->license() << endl;
+  str << "PACKAGER:      " << p->packager() << endl;
+  str << "GROUP:         " << p->group() << endl;
+  str << "CHANGELOG:     " << p->changelog() << endl;
+  str << "URL:           " << p->url() << endl;
+  str << "OS:            " << p->os() << endl;
+  str << "PREIN:         " << p->prein() << endl;
+  str << "POSTIN:        " << p->postin() << endl;
+  str << "PREUN:         " << p->preun() << endl;
+  str << "POSTUN:        " << p->postun() << endl;
+  str << "SOURCELOC:     " << p->sourceloc() << endl;
+  str << "SOURCESIZE:    " << p->sourcesize() << endl;
+  str << "ARCHIVESIZE:   " << p->archivesize() << endl;
+  str << "AUTHORS:       " << p->authors() << endl;
+  str << "FILENAMES:     " << p->filenames() << endl;
+  str << "RECOMMENDS:    " << p->recommends() << endl;
+  str << "SUGGESTS:      " << p->suggests() << endl;
+  str << "LOCATION:      " << p->location() << endl;
+  str << "MEDIANR:       " << p->medianr() << endl;
+  str << "KEYWORDS:      " << p->keywords() << endl;
+}
+
+void dummyDU()
+{
+  std::set<PkgDuMaster::MountPoint> mountpoints;
+  mountpoints.insert( PkgDuMaster::MountPoint( "/",          FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/boot",      FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/bin",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/etc",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/lib",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/opt",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/sbin",      FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/usr",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/usr/local", FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/var",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  MIL << mountpoints;
+  PMGR.setMountPoints( mountpoints );
+}
+
+ostream & dumpPkgWhatIf( ostream & str, bool all = false )
+{
+  str << "+++[dumpPkgWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
+    if ( all || (*it)->to_modify() || (*it)->is_taboo() ) {
+      (*it)->dumpStateOn( str ) << endl;
+    }
   }
-  str << "---ErrorResultList---" << endl;
+  str << "---[dumpPkgWhatIf]---------------------------------------------------" << endl;
   return str;
 }
 
-/*****************************************************************
- *****************************************************************/
-
-inline string dec( unsigned i ) {
-  static char b[5];
-  sprintf( b, "%u", i );
-  return b;
-}
-
-inline void On( string n ) {
-  PMSelectablePtr s( Y2PM::packageManager()[n] );
-  if ( s && s->user_set_install() ) {
-    SEC << "ins: " << n << endl;
+ostream & dumpSelWhatIf( ostream & str, bool all = false  )
+{
+  str << "+++[dumpSelWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); it != SMGR.end(); ++it ) {
+    if ( all || (*it)->to_modify() ) {
+      (*it)->dumpStateOn( str ) << endl;
+    }
   }
+  str << "---[dumpSelWhatIf]---------------------------------------------------" << endl;
+  return str;
 }
-inline void Off( string n ) {
-  PMSelectablePtr s( Y2PM::packageManager()[n] );
-  if ( s && s->user_set_delete() ) {
-    SEC << "del: " << n << endl;
-  }
-}
-inline PMError addSrc( const string & url_r ) {
-  InstSrcManager::ISrcIdList idlist;
-  PMError err = Y2PM::instSrcManager().scanMedia( idlist, url_r );
-  return err;
-}
+
 
 /******************************************************************
 **
@@ -73,23 +120,34 @@ inline PMError addSrc( const string & url_r ) {
 **
 **	DESCRIPTION :
 */
-int main( int argc, char * argv[] )
+int main()
 {
   Y2Logging::setLogfileName("-");
-  M__ << "Y2SLOG_DEBUG IS ON" << endl;
   MIL << "START" << endl;
-
-  Y2PM::noAutoInstSrcManager();
-  PMPackageManager &   PMGR( Y2PM::packageManager() );
-  PMSelectionManager & SMGR( Y2PM::selectionManager() );
-  InstSrcManager &     MGR( Y2PM::instSrcManager() );
-  InstTarget &         TMGR( Y2PM::instTarget(true,"/") );
+  //Y2PM::noAutoInstSrcManager();
+  Timecount _t( "Launch InstTarget" );
+  Y2PM::instTarget(true,"/");
+  _t.start( "Launch PMPackageManager" );
+  Y2PM::packageManager();
+  _t.start( "Launch PMSelectionManager" );
+  Y2PM::selectionManager();
+  _t.start( "Launch InstSrcManager" );
+  Y2PM::instSrcManager();
+  _t.stop();
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
-  SEC << "===============================================================" << endl;
+
+  Y2PM::packageSelectionSaveState();
+  SEC << Y2PM::packageSelectionDiffState() << endl;
+  PMGR["rpm"]->user_set_delete();
+  SEC << Y2PM::packageSelectionDiffState() << endl;
+  PMGR["rpm"]->user_set_install();
+  SEC << Y2PM::packageSelectionDiffState() << endl;
+  PMGR["rpm"]->user_unset();
+  SEC << Y2PM::packageSelectionDiffState() << endl;
 
 
-  SEC << "END " << endl;
-  MGR.disableAllSources();
+  SEC << "STOP" << endl;
   return 0;
 }
+

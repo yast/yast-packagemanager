@@ -820,7 +820,7 @@ PMSelectable::SavedState::SavedState( const PMSelectablePtr & item_r )
 //
 //	DESCRIPTION :
 //
-bool PMSelectable::SavedState::mayReplay()
+bool PMSelectable::SavedState::mayReplay() const
 {
   if ( ! ( _item && _item->_manager ) )
     return false;
@@ -853,3 +853,15 @@ bool PMSelectable::SavedState::replay()
   return true;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::SavedState::diff
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::SavedState::diff() const
+{
+  return( _state != _item->_state || _userCandidateObj != _item->_userCandidateObj );
+}
