@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep  5 14:18:27 CEST 2002 - kkaempf@suse.de
+
+- dont changes maps while iterating
+- 2.6.5 + diff
+
+-------------------------------------------------------------------
 Tue Sep  3 22:30:46 CEST 2002 - kkaempf@suse.de
 
 - initial version for update
