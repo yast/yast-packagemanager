@@ -38,10 +38,10 @@ public:
     enum Tags {
 	ARCH,		// architecture
 	TYPE,		// type found on medium
-	URL,
+	URL,		// URL
 	PRODUCTDIR,	// product dir below _url
 	ACTIVATE,	// 1 = true (default activated), 0 = false
-	MEDIA,		// media_vendor, media_id, media_count
+	MEDIA,		// _media_vendor, _media_id, _media_count
 	NUM_TAGS
     };
 
@@ -53,7 +53,7 @@ public:
 	createTag( "=Arch", ARCH );
 	createTag( "=Type", TYPE );
 	createTag( "=URL", URL );
-	createTag( "=Productdir", PRODUCTDIR );
+	createTag( "=ProductDir", PRODUCTDIR );
 	createTag( "=Default_activate", ACTIVATE );
 	t = createTag( "+Media", MEDIA );
 	t->setEndTag("-Media");
