@@ -26,15 +26,15 @@ noinst_PROGRAMS = \
 	test_packages	\
 	test_selections	\
 	order	\
+	ma_test.exe	\
 	gs_test \
         test_you \
         cschum_test
 
-#	ma_test.exe
-#
-#ma_test_exe_SOURCES = ma_test.cc
-#ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
-#ma_test_exe_LDFLAGS = -static
+
+ma_test_exe_SOURCES = ma_test.cc
+ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
+ma_test_exe_LDFLAGS = -static
 
 gs_test_SOURCES = gs_test.cc
 gs_test_LDADD =  $(top_builddir)/src/liby2pm.la		\
