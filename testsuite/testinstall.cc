@@ -21,12 +21,15 @@
 
 #include <cstdlib> //atoi
 
+//getpw*
+#include <pwd.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 // readline
 #include <cstdio>
 #include <readline/readline.h>
 #include <readline/history.h>
-
-#include <unistd.h>
 
 #include <y2util/timeclass.h>
 #include <y2util/stringutil.h>
@@ -47,6 +50,7 @@ using namespace std;
 static int _verbose = 0;
 static int _maxremove = -1;
 static bool _showtimes = false;
+static bool _createbackups = false;
 
 static string _instlog;
 static string _rootdir = "/";
@@ -76,6 +80,7 @@ void setmaxremove(vector<string>& argv);
 void solveinstall(vector<string>& argv);
 void solve(vector<string>& argv);
 void showtimes(vector<string>& argv);
+void createbackups(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -105,6 +110,7 @@ static struct Funcs func[] = {
     { "setmaxremove",	setmaxremove,	1,	"set maximum number of packages that will be removed on upgrade" },
     { "solve",		solve,		1,	"solve" },
     { "showtimes",	showtimes,	0,	"showtimes" },
+    { "createbackups",	createbackups,	0,	"createbackups" },
     { NULL,		NULL,		0,	NULL }
 };
 
@@ -189,6 +195,16 @@ void showtimes(vector<string>& argv)
 
     cout << "show times " << (_showtimes?"enabled":"disabled") << endl;
 }
+
+void createbackups(vector<string>& argv)
+{
+    _createbackups = _createbackups?false:true;
+    if(_initialized)
+	Y2PM::instTarget().createPackageBackups(_createbackups);
+
+    cout << "create backups " << (_createbackups?"enabled":"disabled") << endl;
+}
+
 
 void setmaxremove(vector<string>& argv)
 {
@@ -351,6 +367,7 @@ void init(vector<string>& argv)
     }
     else
     {
+	Y2PM::instTarget().createPackageBackups(_createbackups);
 	Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
     }
 }
@@ -792,7 +809,7 @@ void deselect(vector<string>& argv)
 
 void progresscallback(int p, void* nix)
 {
-    cout << p << endl;
+    cout << p << "%" << endl;
 }
 
 void rpminstall(vector<string>& argv)
@@ -971,8 +988,26 @@ int main( int argc, char *argv[] )
 
     char* buf = NULL;
     string inputstr;
+    string historyfile;
 
     cout << "type help for help, ^D to exit" << endl << endl;
+
+
+    {
+	struct passwd* pwd = getpwuid(getuid());
+	if(pwd)
+	{
+	    char* home = pwd->pw_dir;
+	    if(home)
+	    {
+		::using_history();
+		historyfile=home;
+		historyfile+="/";
+		historyfile+=".y2pmshell_history";
+		::read_history(historyfile.c_str());
+	    }
+	}
+    }
 
     buf = readline(prompt);
     while(buf)
@@ -1034,6 +1069,19 @@ int main( int argc, char *argv[] )
 	add_history(inputstr.c_str());
     readnext:
 	buf = readline(prompt);
+    }
+
+    cout << endl;
+
+    if(!historyfile.empty())
+    {
+	int ret = 0;
+	if((ret = ::write_history(historyfile.c_str())))
+	{
+	    cout << "writing " << historyfile  << " failed: "<<
+		strerror(ret) << endl;
+	}
+	history_truncate_file(historyfile.c_str(),500);
     }
 
     return 0;

@@ -65,6 +65,8 @@ IMPL_BASE_POINTER(RpmDb);
 
 #define WARNINGMAILPATH "/var/adm/notify/warnings"
 
+#define FILEFORBACKUPFILES "YaSTBackupModifiedFiles"
+
 /****************************************************************/
 /* public member-functions					*/
 /****************************************************************/
@@ -74,13 +76,14 @@ IMPL_BASE_POINTER(RpmDb);
 /*-------------------------------------------------------------*/
 RpmDb::RpmDb() :
     _packages_valid(false),
-    _backuppath ("/var/adm/backup"),
     _progressfunc(NULL),
     _progressdata(NULL),
     _rootdir(""),
     _varlibrpm("/var/lib/rpm"),
     _varlib("/var/lib"),
     _rpmdbname("packages.rpm"),
+    _backuppath ("/var/adm/backup"),
+    _packagebackups(false),
     _creatednew(false),
     _old_present(false),
     _initialized(false),
@@ -1446,71 +1449,64 @@ RpmDb::belongsTo (const Pathname& name, bool full_name)
     return result;
 }
 
-#if 0
-/*--------------------------------------------------------------*/
-/* Evaluate all files of a package which have been changed	*/
-/* since last installation or update.				*/
-/*--------------------------------------------------------------*/
+
+// determine changed files of installed package
 bool
-RpmDb::queryChangedFiles ( FileList &fileList, string packageName )
+RpmDb::queryChangedFiles(FileList & fileList, const string& packageName)
 {
-   bool ok = true;
+    bool ok = true;
 
-   fileList.clear();
+    fileList.clear();
 
+    if(_old_present) return false;
+    if(!_initialized) return false;
 
-   const char *const opts[] = {
-      "-V", packageName.c_str(),
-      "--nodeps",
-      "--noscripts",
-      "--nomd5" };
+    int argc = 0;
+    RpmArgVec opts(5);
 
-   run_rpm(sizeof(opts) / sizeof(*opts), opts,
-       ExternalProgram::Discard_Stderr);
+    opts[argc++] = "-V";
+    opts[argc++] = "--nodeps";
+    opts[argc++] = "--noscripts";
+    opts[argc++] = "--nomd5";
+    opts[argc++] = packageName.c_str();
 
-   if ( process == NULL )
-      return false;
+    run_rpm (opts, ExternalProgram::Discard_Stderr);
 
-   string value;
-   fileList.clear();
+    if ( process == NULL )
+	return false;
 
-   string output = process->receiveLine();
+    /* from rpm manpage
+       5      MD5 sum
+       S      File size
+       L      Symlink
+       T      Mtime
+       D      Device
+       U      User
+       G      Group
+       M      Mode (includes permissions and file type)
+    */
 
-   while ( output.length() > 0)
-   {
-      string::size_type 	ret;
+    string line;
+    while (systemReadLine(line))
+    {
+	if (line.length() > 12 &&
+	    (line[0] == 'S' || line[0] == 's' ||
+	     (line[0] == '.' && line[7] == 'T')))
+	{
+	    // file has been changed
+	    string filename;
 
-      // extract \n
-      ret = output.find_first_of ( "\n" );
-      if ( ret != string::npos )
-      {
-	 value.assign ( output, 0, ret );
-      }
-      else
-      {
-	 value = output;
-      }
+	    filename.assign(line, 11, line.length() - 11);
+	    fileList.insert(filename);
+	}
+    }
 
-      if ( value.length() > 12 &&
-	   ( value[0] == 'S' || value[0] == 's' ||
-	     ( value[0] == '.' &&
-	       value[7] == 'T' )))
-      {
-	 // file has been changed
-	 string filename;
+    systemStatus();
+    // exit code ignored, rpm returns 1 no matter if package is installed or
+    // not
 
-	 filename.assign ( value, 11, value.length() - 11 );
-	 filename = rootfs + filename;
-	 fileList.insert ( filename );
-      }
-
-      output = process->receiveLine();
-   }
-   systemStatus();
-
-   return ( ok );
+    return ok;
 }
-#endif
 
 
 
@@ -1715,6 +1711,14 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 
     FAILIFNOTINITIALIZED
 
+    if(_packagebackups)
+    {
+	if(!backupPackage(filename))
+	{
+	    ERR << "backup of " << filename.asString() << " failed" << endl;
+	}
+    }
+
     _packages_valid = false;
 
     opts.push_back("-U");
@@ -1808,6 +1812,14 @@ RpmDb::removePackage(const string& label, unsigned flags)
     RpmArgVec opts;
 
     FAILIFNOTINITIALIZED
+
+    if(_packagebackups)
+    {
+	if(!backupPackage(label))
+	{
+	    ERR << "backup of " << label << " failed" << endl;
+	}
+    }
 
     _packages_valid = false;
 
@@ -1957,3 +1969,144 @@ RpmDb::DbStatus & obj )
 #undef ENUM_OUT
 }
 #endif
+
+bool
+RpmDb::backupPackage(const Pathname& filename)
+{
+    string package;
+    if(!queryPackage(filename,"%{NAME}",package))
+    {
+	ERR << "querying "
+	    << filename.asString()
+	    << " for its name failed, no backup possible" << endl;
+	return false;
+    }
+    else
+    {
+	return backupPackage(package);
+    }
+}
+
+bool
+RpmDb::backupPackage(const string& packageName)
+{
+    bool ret = true;
+    Pathname backupFilename;
+    Pathname filestobackupfile = _backuppath+FILEFORBACKUPFILES;
+
+    DBG << packageName << endl;
+
+    if (_backuppath.empty())
+    {
+	INT << "_backuppath empty" << endl;
+	return false;
+    }
+
+    FileList fileList;
+
+    if (!queryChangedFiles(fileList, packageName))
+    {
+	ERR << "Error while getting changed files for package " <<
+	    packageName << endl;
+	return false;
+    }
+
+    if (fileList.size() <= 0)
+    {
+	DBG <<  "package " <<  packageName << " not changed -> no backup" << endl;
+	return true;
+    }
+
+    if (PathInfo::assert_dir(_backuppath) != 0)
+    {
+	return false;
+    }
+    
+
+    {
+	// build up archive name
+	time_t currentTime = time(0);
+	struct tm *currentLocalTime = localtime(&currentTime);
+
+	int date = (currentLocalTime->tm_year + 1900) * 10000
+	    + (currentLocalTime->tm_mon + 1) * 100
+	    + currentLocalTime->tm_mday;
+
+	int num = 0;
+	do
+	{
+	    backupFilename = _backuppath
+		+ stringutil::form("%s-%d-%d.tar.gz",packageName.c_str(), date, num);
+
+	}
+	while ( PathInfo(backupFilename).isExist() && num++ < 1000);
+
+	PathInfo pi(filestobackupfile);
+	if(pi.isExist() && !pi.isFile())
+	{
+	    ERR << filestobackupfile.asString() << " already exists and is no file" << endl;
+	    return false;
+	}
+
+	std::ofstream fp ( filestobackupfile.asString().c_str() );
+
+	if(!fp)
+	{
+	    ERR << "could not open " << filestobackupfile.asString() << endl;
+	    return false;
+	}
+
+	for (FileList::const_iterator cit = fileList.begin();
+	    cit != fileList.end(); ++cit)
+	{
+	    DBG << "saving file "<< *cit << endl;
+	    fp << *cit << endl;
+	}
+
+	const char* const argv[] =
+	{
+	    "tar",
+	    "-czhP",
+	    "--ignore-failed-read",
+	    "-f",
+	    backupFilename.asString().c_str(),
+	    "-T",
+	    filestobackupfile.asString().c_str(),
+	    NULL
+	};
+
+	// execute tar in chroot
+	ExternalProgram tar(argv, ExternalProgram::Stderr_To_Stdout, false, -1, true, _rootdir);
+
+	string tarmsg;
+	
+	// TODO: its probably possible to start tar with -v and watch it adding
+	// files to report progress
+	for (string output = tar.receiveLine(); output.length() ;output = tar.receiveLine())
+	{
+	    tarmsg+=output;
+	}
+
+	int ret = tar.close();
+
+	if ( ret != 0)
+	{
+	    ERR << "tar failed: " << tarmsg << endl;
+	    ret = false;
+	}
+	else
+	{
+	    MIL << "tar backup ok" << endl;
+	}
+
+	fp.close();
+	PathInfo::unlink(filestobackupfile);
+    }
+
+    return ret;
+}
+
+void RpmDb::setBackupPath(const Pathname& path)
+{
+    _backuppath = path;
+}

@@ -186,6 +186,11 @@ InstTarget::getBackupPath ()
     return _rpmdb->getBackupPath ();
 }
 
+void
+InstTarget::createPackageBackups(bool yes)
+{
+    _rpmdb->createPackageBackups(yes);
+}
 
 void InstTarget::setPkgInstFlags(unsigned flags)
 {

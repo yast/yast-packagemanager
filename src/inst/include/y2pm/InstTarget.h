@@ -199,6 +199,14 @@ class InstTarget: virtual public Rep, public InstData {
 	void setBackupPath (const Pathname& path);
 
 	/**
+	 * whether to create package backups during install or
+	 * removal
+	 *
+	 * @param yes true or false
+	 * */
+	void createPackageBackups(bool yes);
+
+	/**
 	 * get backup dir for rpm config files
 	 *
 	 * */
