@@ -1,0 +1,50 @@
+xsl_html := /usr/share/xml/docbook/custom/susedtd/0.2.3/stylesheet/suse-html.xsl
+xsl_html_chunk := /usr/share/xml/docbook/custom/susedtd/0.2.3/stylesheet/suse-html-chunk.xsl
+allhtml := $(patsubst %.xml,%.html,$(wildcard *.xml))
+
+main := PackageManagement.xml
+
+DESTDIR := ./
+
+admongfx := /usr/share/doc/manual/suselinux-adminguide_de/html/admon/
+naviggfx := /usr/share/doc/manual/suselinux-adminguide_de/html/navig/
+stylesheet := /usr/share/xml/docbook/custom/susedtd/0.2.3/stylesheet/susebooks.css
+stylesheet_out := susebooks.css
+
+all:
+	@echo "+++"
+	@echo "+++ specify '$(patsubst %.xml,%.html,$(main))' or 'html' as target"
+	@echo "+++"
+
+all-single: $(DESTDIR)$(stylesheet_out) $(allhtml)
+
+html: $(DESTDIR)$(stylesheet_out) $(main)
+	if ! test -d $(DESTDIR)/html/$(basename $(admongfx)); then \
+		mkdir -p $(DESTDIR)/html; \
+		cp -a $(admongfx) $(DESTDIR)/html; \
+	fi
+	if ! test -d $(DESTDIR)/html/$(basename $(naviggfx)); then \
+		mkdir -p $(DESTDIR)/html; \
+		cp -a $(naviggfx) $(DESTDIR)/html; \
+	fi
+	xsltproc --nonet \
+		--stringparam graphics.path ../ \
+		--output $(DESTDIR) $(xsl_html_chunk) $(main)
+	test $(DESTDIR)$(stylesheet_out) -nt $(DESTDIR)html/$(stylesheet_out) && \
+		cp -a $(DESTDIR)$(stylesheet_out) $(DESTDIR)html || true
+
+$(DESTDIR)$(stylesheet_out): $(stylesheet)
+	cat < $< > $@
+	#sed "s/sect1/section/g" < $< > $@
+
+
+$(DESTDIR)%.html: %.xml $(DESTDIR)$(stylesheet_out)
+	xsltproc --nonet \
+		--stringparam admon.graphics.path $(admongfx) \
+		--stringparam graphics.path ./ \
+	       	--output $@ $(xsl_html) $<
+
+clean:
+	rm -rf $(allhtml) $(DESTDIR)html $(DESTDIR)$(stylesheet_out)
+
+.PHONY: clean html

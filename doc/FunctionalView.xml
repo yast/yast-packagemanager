@@ -31,7 +31,7 @@ callbacks/return codes to handle resolving dependencies
 	  <mediaobject>
 	    <imageobject>
 	      <!-- Formate OK: PNG -->
-	      <imagedata fileref="./block_diagram.png" depth="30" scalefit="1"/>
+	      <imagedata fileref="./block_diagram.png" scalefit="1"/>
 	    </imageobject>
 	    <caption>
 	      <para>
