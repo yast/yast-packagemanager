@@ -492,7 +492,7 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
     set<PMPackagePtr> & gset( it->second );
     for ( set<PMPackagePtr>::iterator git = gset.begin(); git != gset.end(); ++git ) {
       if ( (*git)->getSelectable()->to_install() ) {
-	DBG << " ==> (meanwhile set to instll): " << (*git) << endl;
+	DBG << " ==> (meanwhile set to install): " << (*git) << endl;
 	guess = 0;
 	break;
       } else {

@@ -216,6 +216,12 @@ class Y2PM {
 	    void (*_package_done_func)(PMError err, const std::string& errdata, void* data);
 	    void* _package_done_data;
 
+	    /**
+	     * called multiple times during rpm rebuilddb, 'progress' is the progress 0..100
+	     * */
+	    void (*_rebuilddb_progress_func)(int progress, void* data);
+	    void* _rebuilddb_progress_data;
+
 	};
 
 	static CallBacks _callbacks;
@@ -252,6 +258,12 @@ class Y2PM {
 	 * called after package 'name' got installed or deleted
 	 * */
 	static void setPackageDoneCallback(void (*func)(PMError err, const std::string& reason, void*), void* data);
+
+	/**
+	 * called multiple times during rpm rebuilddb, 'progress' is the
+	 * rebuild progress
+	 * */
+	static void setRebuildDBProgressCallback(void (*func)(int percent, void*), void* data);
 
 	/**
 	 * package deletion/installation main loop

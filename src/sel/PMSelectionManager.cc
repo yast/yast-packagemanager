@@ -232,20 +232,15 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
 {
     if (!selection)
 	return;
-
-    // get list of requested locales
-    Y2PM y2pm;
-    std::list<LangCode> requested_locales = y2pm.getRequestedLocales();
-    LangCode locale = y2pm.getPreferredLocale();
-
+MIL << "setSelection " << selection->name() << "." << _currently_preferred_locale << endl;
     // first, the delpacks
     setSelectionPackages (selection->delpacks(), true, package_mgr);
-    if (!((const std::string &)locale).empty())
+    if (!((const std::string &)_currently_preferred_locale).empty())
     {
-	setSelectionPackages (selection->delpacks(locale), true, package_mgr);
+	setSelectionPackages (selection->delpacks(_currently_preferred_locale), true, package_mgr);
     }
-    for (std::list<LangCode>::iterator it = requested_locales.begin();
-	 it != requested_locales.end(); ++it)
+    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
+	 it != _currently_requested_locales.end(); ++it)
     {
 	setSelectionPackages (selection->delpacks(*it),
 			true,		// these_are_delpacks
@@ -254,10 +249,12 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
 
     // then, the inspacks
     setSelectionPackages (selection->inspacks(), false, package_mgr);
-    if (!((const std::string &)locale).empty())
-	setSelectionPackages (selection->inspacks(locale), false, package_mgr);
-    for (std::list<LangCode>::iterator it = requested_locales.begin();
-	 it != requested_locales.end(); ++it)
+    if (!((const std::string &)_currently_preferred_locale).empty())
+    {
+	setSelectionPackages (selection->inspacks(_currently_preferred_locale), false, package_mgr);
+    }
+    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
+	 it != _currently_requested_locales.end(); ++it)
     {
 	setSelectionPackages (selection->inspacks(*it),
 			false,		// !these_are_delpacks
@@ -282,17 +279,18 @@ PMSelectionManager::resetSelection (PMSelectionPtr selection, PMPackageManager &
     if (!selection)
 	return;
 
+MIL << "resetSelection " << selection->name() << "." << _currently_preferred_locale << endl;
+
     // get list of requested locales
-    Y2PM y2pm;
-    std::list<LangCode> requested_locales = y2pm.getRequestedLocales();
-    LangCode locale = y2pm.getPreferredLocale();
 
     // first, the inspacks
     resetSelectionPackages (selection->delpacks(), true, package_mgr);
-    if (!((const std::string &)locale).empty())
-	resetSelectionPackages (selection->delpacks(locale), true, package_mgr);
-    for (std::list<LangCode>::iterator it = requested_locales.begin();
-	 it != requested_locales.end(); ++it)
+    if (!((const std::string &)_currently_preferred_locale).empty())
+    {
+	resetSelectionPackages (selection->delpacks(_currently_preferred_locale), true, package_mgr);
+    }
+    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
+	 it != _currently_requested_locales.end(); ++it)
     {
 	resetSelectionPackages (selection->delpacks(*it),
 			true,		// these_are_inspacks
@@ -301,10 +299,12 @@ PMSelectionManager::resetSelection (PMSelectionPtr selection, PMPackageManager &
 
     // then, the inspacks
     resetSelectionPackages (selection->inspacks(), false, package_mgr);
-    if (!((const std::string &)locale).empty())
-	resetSelectionPackages (selection->inspacks(locale), false, package_mgr);
-    for (std::list<LangCode>::iterator it = requested_locales.begin();
-	 it != requested_locales.end(); ++it)
+    if (!((const std::string &)_currently_preferred_locale).empty())
+    {
+	resetSelectionPackages (selection->inspacks(_currently_preferred_locale), false, package_mgr);
+    }
+    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
+	 it != _currently_requested_locales.end(); ++it)
     {
 	resetSelectionPackages (selection->inspacks(*it),
 			false,		// !these_are_delpacks
@@ -349,6 +349,9 @@ PMSelectionManager::activate (PMPackageManager & package_mgr)
     }
 
     // now activate the new set of selections
+
+    _currently_preferred_locale = Y2PM::getPreferredLocale();
+    _currently_requested_locales = Y2PM::getRequestedLocales();
 
     for (PMSelectableVec::const_iterator it = begin();
 	 it != end(); ++it)
