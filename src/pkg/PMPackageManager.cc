@@ -23,11 +23,11 @@
 #include <y2util/Pathname.h>
 
 #include <y2pm/PMPackageManager.h>
-#include <y2pm/InstSrcDescr.h>
-#include <y2pm/InstallOrder.h>
 
 #include <Y2PM.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstSrcDescr.h>
+#include <y2pm/InstallOrder.h>
 
 using namespace std;
 
@@ -79,6 +79,41 @@ PMObjectPtr PMPackageManager::assertObjectType( const PMObjectPtr & object_r ) c
     ERR << "Object is not a Package: " << object_r << endl;
   }
   return p;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::prePSI
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMPackageManager::prePSI()
+{
+
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::postPSI
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMPackageManager::postPSI()
+{
+#warning must improve taboo handling in pre/postPSI
+
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    const PMSelectablePtr & sel( *it );
+
+    if ( sel->has_installed() && !PMPackagePtr( sel->installedObj() )->vendor().isSuSE() ) {
+      sel->user_set_taboo();
+      MIL << "Protect non SuSE package " << sel->installedObj() << endl;
+    }
+  }
 }
 
 /******************************************************************

@@ -392,6 +392,16 @@ class PMSelectable : virtual public Rep {
      **/
     bool user_set_install() { return _state.user_set_install( true ); }
 
+    /**
+     * No modification allowed by user.
+     **/
+    bool user_set_taboo() { return _state.user_set_taboo( true ); }
+
+    /**
+     * Clear taboo flag.
+     **/
+    bool user_clr_taboo() { return _state.user_clr_taboo( true ); }
+
   public:
 
     /**

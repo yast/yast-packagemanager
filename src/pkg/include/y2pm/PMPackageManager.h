@@ -59,6 +59,17 @@ class PMPackageManager : public PMManager {
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
     /**
+     * Pre poolSetInstalled hook
+     **/
+    virtual void prePSI();
+    /**
+     * Post poolSetInstalled hook
+     **/
+    virtual void postPSI();
+
+  private:
+
+    /**
      * problematic update items, filled by doUpdate, used by UI
      */
     PMManager::PMSelectableVec _update_items;

@@ -62,6 +62,9 @@ void SelState::set_has_installed( bool b )
 {
   if ( has_installed() == b )
     return;
+
+  user_clr_taboo( true );
+
   if ( b ) {
     set( B_IS_I );
   } else {
