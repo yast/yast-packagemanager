@@ -1,11 +1,62 @@
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                     (C) 2002 SuSE AG |
+\----------------------------------------------------------------------/
+
+   File:       testinstall.cc
+   Purpose:    test dependency solver
+   Author:     Ludwig Nussel <lnussel@suse.de>
+   Maintainer: Ludwig Nussel <lnussel@suse.de>
+
+   !THIS CODE IS GPL AS READLINE IS USED!
+
+/-*/
+
+
+// readline
+#include <cstdio>
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #include <unistd.h>
+
 #include <y2util/timeclass.h>
 #include <y2util/Y2SLog.h>
 #include <Y2PM.h>
+#include <y2pm/RpmDb.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PMPackage.h>
 
+#undef Y2SLOG
+#define Y2SLOG "testinstall" 
+
 using namespace std;
+
+void install(vector<string>& argv);
+void consistent(vector<string>& argv);
+void help(vector<string>& argv);
+
+struct Funcs {
+    const char* name;
+    void (*func)(vector<string>&);
+    const char* helptext;
+};
+
+static struct Funcs func[] = {
+    { "install", install, "install a package" },
+    { "consistent", consistent, "check consistency" },
+    { "help", help, "this screen" },
+    { NULL, NULL }
+};
+
+static int verbose = 0;
 
 void usage(char **argv) {
 	cerr <<
@@ -25,6 +76,14 @@ void usage(char **argv) {
 }
 
 
+void help(vector<string>& argv)
+{
+    for(unsigned i=0; func[i].name; i++)
+    {
+	cout << func[i].name << ": " << func[i].helptext << endl;
+    }
+}
+
 // example
 Alternatives::AltDefaultList alternative_default( PkgName name )
 {
@@ -36,50 +95,72 @@ Alternatives::AltDefaultList alternative_default( PkgName name )
     return list;
 }
 
-int main( int argc, char *argv[] )
+static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
+    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p)
 {
-    // add packages to the pool
-    int verbose = 1;
-//    PkgPool.add_installed_packages();
+
+    if(rel.name()->find("rpmlib(") != std::string::npos)
+	return PkgDep::UNRES_IGNORE;
+    
+    if(rel.name() == "/bin/bash" || rel.name() == "/bin/sh")
+    {
+	const PkgSet inst = solver->current_installed();
+	p = inst.lookup(PkgName("bash"));
+	return PkgDep::UNRES_TAKETHIS;
+    }
+    if(rel.name() == "/usr/bin/perl")
+    {
+	const PkgSet inst = solver->current_installed();
+	p = inst.lookup(PkgName("perl"));
+	return PkgDep::UNRES_TAKETHIS;
+    }
 
 
-    // build sets
-    PkgSet installed; //( DTagListI0() );
-    PkgSet empty;
-    PkgSet candidates;
-    PkgSet *available = NULL;
-
-    available = new PkgSet();
-
-/*
-    packa = new Package();
-    PkgRelation rel(PkgName("aaa_skel"),EQ,PkgEdition(PkgEdition::UNSPEC));
-    PkgName *name = new PkgName("blubb");
-    packa->setName(*name);
-    packa->add_requires(rel);
-    candidates.add(packa);
-    delete name;
-    name=NULL;
-*/    
-//    candidates.add(PkgPool.get(PkgName("kdebase3"),PkgEdition("3.0-5")));
-//    candidates.add(available->lookup("dialog"));
+    return PkgDep::UNRES_FAIL;
+}
 
 
+PkgSet* getInstalled()
+{
+    PkgSet* set = new PkgSet();
+    
+    MIL << "initialize manager" << endl;
     PMPackageManager& manager = Y2PM::packageManager();
-
-    INT << manager.size() << endl;
+    MIL << "got " << manager.size() << endl;
 
     for(PMManager::PMSelectableVec::const_iterator it = manager.begin();
 	it != manager.end(); ++it )
     {
 	// create set of all packages
-	available->add( (*it)->installedObj() );
+	set->add( (*it)->installedObj() );
     }
 
-    for (int i=1; i < argc ; i++) {
+    return set;
+}
+
+/** not implemented yet */
+PkgSet* getAvailable()
+{
+    return new PkgSet();
+}
+
+void install(vector<string>& argv)
+{
+    // build sets
+    PkgSet empty;
+    PkgSet candidates;
+    
+    PkgSet *installed = NULL;
+    PkgSet *available = NULL;
+
+    // swapped since available is not yet implemented
+    installed = getAvailable();
+    available = getInstalled();
+
+    for (unsigned i=1; i < argv.size() ; i++) {
 	if (available->lookup(PkgName(argv[i])) == NULL) {
 		std::cerr << "package " << argv[i] << " is not available.\n";
-		return 1;
+		return;
 	}
 	candidates.add(available->lookup(PkgName(argv[i])));
     }
@@ -97,7 +178,7 @@ int main( int argc, char *argv[] )
 */
     // construct PkgDep object
 //    PkgDep::set_default_alternatives_mode(PkgDep::AUTO_IF_NO_DEFAULT);
-    PkgDep engine( installed, *available, alternative_default );
+    PkgDep engine( *installed, *available, alternative_default );
 
     // call upgrade
     PkgDep::ResultList good;
@@ -147,6 +228,78 @@ int main( int argc, char *argv[] )
     cout << "***" << endl;
     cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
     cout << "Time consumed: " << t.getTimer() << endl;
+
+    delete installed;
+    delete available;
+}
+
+void consistent(vector<string>& argv)
+{
+    PkgSet *installed = NULL;
+    PkgSet *available = NULL;
+
+    installed = getInstalled();
+    available = getAvailable();
+
+    PkgDep engine( *installed, *available, alternative_default );
+    engine.set_unresolvable_callback(unresolvable_callback);
+    
+    PkgDep::ErrorResultList bad;
+
+    bool success = engine.consistent(bad);
+    if(!success)
+    {
+	int numbad = 0;
+	cout << " *** system inconsistent: " << endl << endl;
+	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
+	     p != bad.end(); ++p ) {
+	    cerr << *p << endl;
+	    numbad++;
+	}
+	cout << endl << " *** "<< numbad << " errors" << endl;
+    }
+    else
+    {
+	cout << "everything allright" << endl;
+    }
+}
+
+int main( int argc, char *argv[] )
+{
+    char prompt[]="> ";
+
+    char* buf = NULL;
+    string inputstr;
+
+    cout << "type help for help, ^D to exit" << endl << endl;
+
+    buf = readline(prompt);
+    while(buf)
+    {
+	vector<string> argv;
+	unsigned i;
+	if(RpmDb::tokenize(buf, ' ', argv) < 1)
+	{
+	    free(buf);
+	    break;
+	}
+	for(i=0; func[i].name; i++)
+	{
+	    if(argv[0] == func[i].name)
+		break;
+	}
+	if(func[i].func)
+	{
+	    func[i].func(argv);
+	}
+	else
+	{
+	    cout << "unknown function " << argv[0] << endl;
+	}
+	add_history(buf);
+	free(buf);
+	buf = readline(prompt);
+    }
 
     return 0;
 }

@@ -51,6 +51,8 @@ class PkgDep {
 			: name(n), kind(k) {}
 	};
 
+	typedef Alternatives::AltDefaultList (*AlternativesCallback)( PkgName name );
+
 	// For unresolvable packages, the edition requirements are merged in this
 	// structure and returned. If either 'greater' or 'less' are UNSPEC,
 	// there's no requirement in this direction. If both are UNSPEC, any
@@ -154,6 +156,30 @@ class PkgDep {
 	friend class ErrorResult;
 	typedef std::list<Result> ResultList;
 	typedef std::list<ErrorResult> ErrorResultList;
+	
+	enum WhatToDoWithUnresolvable {
+	    UNRES_IGNORE = 0, // just ignore this dependence
+	    UNRES_TAKETHIS,   // use suggested PMSolvable (has to be returned/filled by function)
+	    UNRES_FAIL        // Relation is indeed unresolvable
+	};
+	
+	/**
+	 * function to call when an unresolvable dependence is found
+	 * <br> yes, the non const PkgDep* is ugly
+	 *
+	 * @param solver pointer to current solver
+	 * @param rel unresolvable dependence
+	 * @param PMSolvablePtr PMSolvable which should be assumed to provide this dependence
+	 *
+	 * @return tells caller what to do with dependence. If return value is
+	 * UNRES_TAKETHIS, this function has to point ptr to something useful
+	 * */
+	typedef WhatToDoWithUnresolvable(*DealWithUnresolvable_callback)(
+	    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& ptr);
+	//FIXME make PkgDep* const, requires lots of constPMSolvablePtr everywhere
+
+
+	DealWithUnresolvable_callback _unresolvable_callback;
 
   private:
 
@@ -218,7 +244,7 @@ class PkgDep {
 	PkgSet installed;
 	const PkgSet& available;
 
-	Alternatives::AltDefaultList (*_alternatives_callback)( PkgName name );
+	AlternativesCallback _alternatives_callback;
 
 	// --------------------- used during an install run --------------------
 	PkgSet vinstalled;
@@ -279,12 +305,22 @@ class PkgDep {
 	{
 		return Alternatives::AltDefaultList();
 	}
+
+	/**
+	 * default unresolvable callback, ignores deps that name begins with rpmlib(
+	 * */
+	static WhatToDoWithUnresolvable default_unresolvable_callback(
+	    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p);
 	
 public:
 	PkgDep( PkgSet& instd, const PkgSet& avail,
-			Alternatives::AltDefaultList (*alternatives_callback)( PkgName name ) = default_alternatives_callback,
+			AlternativesCallback alternatives_callback = default_alternatives_callback,
 			alternatives_mode m = default_alternatives_mode )
-		: alt_mode(m), installed(instd), available(avail), _alternatives_callback(alternatives_callback) {}
+		: alt_mode(m), installed(instd), available(avail),
+		_alternatives_callback(alternatives_callback)
+		{
+		    _unresolvable_callback = default_unresolvable_callback;
+		}
 
 //	PkgDep(  const PkgSet& instd, alternatives_mode m=default_alternatives_mode)
 //		: alt_mode(m), installed(instd), available(*default_avail), _pool(pool) {}
@@ -324,6 +360,16 @@ public:
 	void set_alternatives_callback(Alternatives::AltDefaultList (*alternatives_callback)( PkgName name ))
 	{
 		_alternatives_callback = alternatives_callback;
+	}
+
+	/**
+	 * set function to call when an unresolvable dependence is found
+	 *
+	 * @see DealWithUnresolvable_callback
+	 * */
+	void set_unresolvable_callback(DealWithUnresolvable_callback callback)
+	{
+	    _unresolvable_callback = callback;
 	}
 
 	static void set_default_alternatives_mode( alternatives_mode m ) {

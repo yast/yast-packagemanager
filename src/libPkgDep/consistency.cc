@@ -33,11 +33,11 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 		if (!strncmp(req->name(),"rpmlib(",strlen("rpmlib(")))
 			continue;
 */
-		
+/*		
 		// ignore rpmlib requirements
 		if(req->name()->find("rpmlib(") != string::npos)
 		    continue;
-
+*/
 
 		RevRel_for( installed.provided()[req->name()], prov ) {
 			if (req->matches( prov->relation() )) {
@@ -45,12 +45,26 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 				break;
 			}
 		}
+		if(!match_found)
+		{
+		    PMSolvablePtr ptr = NULL;
+		    WhatToDoWithUnresolvable what = _unresolvable_callback(this, *req, ptr);
+		    switch(what)
+		    {
+			case UNRES_IGNORE:
+			case UNRES_TAKETHIS:
+			    continue; 
+			case UNRES_FAIL:
+			    break;
+		    }
+		}
 		if (!match_found) {
 			if (err)
 				err->add_unresolvable( pkg->name(), *req );
 			error = true;
 		}
-	}
+	} // /requirements
+
 	// for all conflicts of the current package
 	ci_for( PMSolvable::PkgRelList_, confl, pkg->conflicts_ ) {
 		RevRel_for( installed.provided()[confl->name()], prov ) {
