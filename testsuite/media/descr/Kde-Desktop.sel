@@ -1,12 +1,11 @@
 # SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
-# generated on Sat Aug 10 17:55:42 UTC 2002
+# generated on Thu Aug 22 08:22:32 UTC 2002
 
 =Ver: 3.0
 
-=Sel: Kde-Desktop 8.1 1
-=Ord: 042
-=Siz: 123456 1234567
+=Sel:  Kde-Desktop
 
+=Sum: KDE Desktop Environment
 =Sum.cs: Prostředí KDE
 =Sum.de: KDE Desktop-Umgebung
 =Sum.en: KDE Desktop Environment
@@ -16,17 +15,25 @@
 =Sum.hu: KDE grafikus munkakörnyezet
 =Sum.it: Ambiente Desktop KDE
 =Sum.ja: KDE デスクトップ環境
-=Sum.lt: KDE Desktop Environment
 =Sum.nl: KDE Desktop omgeving
 =Sum.pt: KDE Desktop Environment
 =Sum.sv: KDE Desktop Environment
 =Sum.tr: KDE Desktop Environment
 
-=Req: X11 Basis-Sound 
-=Con: Minimal 
++Req:
+X11
+Basis-Sound
+-Req:
+
++Con:
+Minimal
+-Con:
+
 =Cat: addon
 
 =Vis: true
+
+=Ord: 11
 
 +Ins:
 SDL
@@ -108,6 +115,7 @@ release-notes
 sensors
 slang
 smpppd
+susewm-kcmyast
 unixODBC
 wvdial
 -Ins:
@@ -123,4 +131,64 @@ kde3-i18n-da
 +Ins.de:
 kde3-i18n-de
 -Ins.de:
+
++Ins.el:
+kde3-i18n-el
+-Ins.el:
+
++Ins.es:
+kde3-i18n-es
+-Ins.es:
+
++Ins.fr:
+kde3-i18n-fr
+-Ins.fr:
+
++Ins.hu:
+kde3-i18n-hu
+-Ins.hu:
+
++Ins.it:
+kde3-i18n-it
+-Ins.it:
+
++Ins.ja:
+kde3-i18n-ja
+-Ins.ja:
+
++Ins.lt:
+kde3-i18n-lt
+-Ins.lt:
+
++Ins.nl:
+kde3-i18n-nl
+-Ins.nl:
+
++Ins.pl:
+kde3-i18n-pl
+-Ins.pl:
+
++Ins.pt:
+kde3-i18n-pt
+-Ins.pt:
+
++Ins.ru:
+kde3-i18n-ru
+-Ins.ru:
+
++Ins.sk:
+kde3-i18n-sk
+-Ins.sk:
+
++Ins.sl:
+kde3-i18n-sl
+-Ins.sl:
+
++Ins.sv:
+kde3-i18n-sv
+-Ins.sv:
+
++Ins.tr:
+kde3-i18n-tr
+-Ins.tr:
 

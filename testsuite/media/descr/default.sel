@@ -1,9 +1,9 @@
-# SuSE-Linux-Package-Selection 2.1 -- (c) 1994-2001 SuSE GmbH
-# generated on Sat Aug 10 03:12:18 UTC 2002
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:38 UTC 2002
 
 =Ver: 3.0
-=Ord: 007
-=Sel: default 8.1 1 i586
+
+=Sel:  default
 
 =Sum: Default system
 =Sum.cs: Standardní systém
@@ -15,26 +15,29 @@
 =Sum.hu: Alapértelmezett rendszer
 =Sum.it: Sistema preimpostato
 =Sum.ja: 標準システム
-=Sum.lt: Default system
 =Sum.nl: Standaard systeem
 =Sum.pt: Default system
 =Sum.sv: Default system
 =Sum.tr: Default system
 
-+Sug:
++Rec:
 SuSE-Documentation
 Kde-Desktop
 Office
 X11
-UnitedLinux
--Sug:
+-Rec:
+
 +Con:
 Minimal+X11
 Minimal
-Alles 
+Alles
 -Con:
+
 =Cat: baseconf
+
 =Vis: true
+
+=Ord: 03
 
 +Ins:
 RealPlayer
@@ -56,6 +59,8 @@ baselibs-32bit
 bash
 bc
 bind9-utils
+bootsplash
+bootsplash-theme-SuSE
 bzip2
 capi4linux
 compat
@@ -86,6 +91,7 @@ fetchmail
 file
 filesystem
 fileutils
+fillup
 findutils
 finger
 freetype2
@@ -133,6 +139,7 @@ kbd
 ksymoops
 lcs
 less
+libcap
 libgcc
 libgimpprint
 libjpeg
@@ -144,8 +151,10 @@ libstdc++
 libtiff
 libxcrypt
 libxml2
+liby2util
 lilo
 linux-atm
+linux32
 logrotate
 lsof
 lukemftp
@@ -154,6 +163,7 @@ m4
 mailx
 man
 man-pages
+mdadm
 mhash
 mips32
 mktemp
@@ -165,6 +175,7 @@ net-tools
 netcat
 netcfg
 nfs-utils
+ngpt
 openldap2-client
 openssh
 openssl
@@ -195,7 +206,6 @@ reiserfs
 rpm
 rsh
 s390-tools
-s390utils
 sash
 scpm
 screen
@@ -208,7 +218,6 @@ silo
 sitar
 smpppd
 sparc32
-splashanim
 strace
 strace-32bit
 sudo
@@ -222,6 +231,7 @@ tcpdump
 tcsh
 telnet
 terminfo
+texinfo
 textutils
 timezone
 unitedlinux-release
@@ -230,6 +240,7 @@ unzip
 usbutils
 utempter
 util-linux
+vacation
 vim
 w3m
 wget
@@ -247,6 +258,7 @@ yast2-bootloader
 yast2-core
 yast2-country
 yast2-firewall
+yast2-inetd
 yast2-installation
 yast2-ldap-client
 yast2-mail
@@ -259,10 +271,12 @@ yast2-nis-client
 yast2-nis-server
 yast2-nisplus-client
 yast2-online-update
+yast2-packagemanager
 yast2-packager
 yast2-pam
 yast2-printer
 yast2-printerdb
+yast2-profile-manager
 yast2-restore
 yast2-runlevel
 yast2-scanner
@@ -285,6 +299,10 @@ zlib
 zsh
 -Ins:
 
++Ins.bs:
+yast2-trans-bs
+-Ins.bs:
+
 +Ins.cs:
 ispell-czech
 vlna
@@ -299,14 +317,17 @@ yast2-trans-de
 
 +Ins.el:
 ispell-greek
+yast2-trans-el_GR
 -Ins.el:
 
 +Ins.es:
 ispell-spanish
+yast2-trans-es
 -Ins.es:
 
 +Ins.fr:
 ispell-french
+yast2-trans-fr
 -Ins.fr:
 
 +Ins.hu:
@@ -320,6 +341,7 @@ yast2-trans-it
 
 +Ins.ja:
 canna
+canna-libs
 cannadic
 ghostscript-fonts-kanji
 jfbterm
@@ -334,8 +356,13 @@ termcap
 yast2-trans-ja
 -Ins.ja:
 
++Ins.lt:
+yast2-trans-lt
+-Ins.lt:
+
 +Ins.nl:
 ispell-dutch
+yast2-trans-nl
 -Ins.nl:
 
 +Ins.pl:
@@ -344,6 +371,7 @@ ispell-polish
 
 +Ins.pt:
 ispell-portuguese
+yast2-trans-pt_BR
 -Ins.pt:
 
 +Ins.ru:
@@ -351,7 +379,24 @@ ghostscript-fonts-rus
 ispell-russian
 -Ins.ru:
 
++Ins.sk:
+yast2-trans-sk
+-Ins.sk:
+
++Ins.sl:
+yast2-trans-sl_SI
+-Ins.sl:
+
 +Ins.sv:
 ispell-swedish
+yast2-trans-sv
 -Ins.sv:
+
++Ins.tr:
+yast2-trans-tr
+-Ins.tr:
+
++Ins.zh_CN:
+yast2-trans-zh_CN
+-Ins.zh_CN:
 

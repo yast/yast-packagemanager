@@ -1,0 +1,66 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:31 UTC 2002
+
+=Ver: 3.0
+
+=Sel:  Basis-Devel
+
+=Sum: C/C++ Compiler and Tools
+=Sum.cs: C/C++ Compiler and Tools
+=Sum.de: C/C++ Compiler and Tools
+=Sum.en: C/C++ Compiler and Tools
+=Sum.es: C/C++ Compiler and Tools
+=Sum.fr: C/C++ Compiler and Tools
+=Sum.gl: C/C++ Compiler and Tools
+=Sum.hu: C/C++ Compiler and Tools
+=Sum.it: C/C++ Compiler and Tools
+=Sum.ja: C/C++ Compiler and Tools
+=Sum.nl: C/C++ Compiler and Tools
+=Sum.pt: C/C++ Compiler and Tools
+=Sum.sv: C/C++ Compiler and Tools
+=Sum.tr: C/C++ Compiler and Tools
+
++Con:
+Minimal
+-Con:
+
+=Cat: addon
+
+=Vis: true
+
+=Ord: 60
+
++Ins:
+autoconf
+automake
+bin86
+binutils
+bison
+ctags
+cvs
+egcs64
+elf2aout
+emacs
+emacs-info
+emacs-x11
+flex
+gcc
+gcc-c++
+gdb
+gdb-32bit
+gettext
+glibc-devel
+glibc-devel-32bit
+gperf
+libstdc++-devel
+libtool
+make
+ncurses-devel
+strace
+strace-32bit
+xdevel
+yacc
+zile
+zlib-devel
+-Ins:
+
