@@ -9,3 +9,5 @@ err_test
 test_patchinfo
 callback_test
 test_media
+test_filterarchs
+
