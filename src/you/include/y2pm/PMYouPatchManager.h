@@ -25,6 +25,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
 #include <y2pm/PMYouPatch.h>
+#include <y2pm/InstYou.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -55,6 +56,13 @@ class PMYouPatchManager : public PMManager {
 
   public:
 
+    /**
+     * Access to the you source.
+     **/
+    InstYou &instYou();
+
+  private:
+    InstYou _instYou;
 };
 
 ///////////////////////////////////////////////////////////////////

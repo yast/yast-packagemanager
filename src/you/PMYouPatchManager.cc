@@ -34,6 +34,7 @@ using namespace std;
 //
 PMYouPatchManager::PMYouPatchManager()
 {
+  
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -79,3 +80,15 @@ ostream & operator<<( ostream & str, const PMYouPatchManager & obj )
   return str;
 }
 
+/******************************************************************
+**
+**
+**	FUNCTION NAME : instYou
+**	FUNCTION TYPE : InstYou
+**
+**	DESCRIPTION :
+*/
+InstYou &PMYouPatchManager::instYou()
+{
+  return _instYou;
+}
