@@ -97,12 +97,11 @@ int main(int argc, char* argv[])
     if(command == "query")
     {
 
-	list<PMPackagePtr> pkglist;
-	rpmdb->getPackages (pkglist);
+	const list<PMPackagePtr>& pkglist = rpmdb->getPackages ();
 	for (; argpos < argnum; argpos++)
 	{
 	    cout << "querying " << args[argpos] << endl;
-	    typedef list<PMPackagePtr>::iterator PkgLI;
+	    typedef list<PMPackagePtr>::const_iterator PkgLI;
 	    PkgLI p = find_if (pkglist.begin(), pkglist.end(), PMPkg_eq(args[argpos]));
 	    if (p == pkglist.end())
 	    {

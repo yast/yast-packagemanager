@@ -45,7 +45,8 @@
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
 
-#include <y2pm/RpmDb.h> // InstTarget is tied to RpmDb atm
+#include <y2pm/InstData.h>	// InstTarget implements InstData
+#include <y2pm/RpmDb.h>		// InstTarget is tied to RpmDb atm
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -53,7 +54,8 @@
 /**
  *
  **/
-class InstTarget {
+class InstTarget: virtual public Rep, public InstData {
+    REP_BODY(InstTarget);
 
     public:
 
@@ -119,49 +121,31 @@ class InstTarget {
 	 */
 	bool Erase();
 
-	/**
-	 * @return description of Installation target
-	 */
-    //    const InstDescr **getDescriptions() const;
-
 	//-----------------------------
+	// InstData interface
 	// target content access
 
+	virtual const Pathname writeCache (const Pathname &descrpathname) { return InstData::writeCache (descrpathname); }
+
 	/**
-	 * return the number of selections on this source
+	 * generate PMSelection objects for each selection on the source
+	 * @return list of PMSelectionPtr on this source
 	 */
-	int numSelections() const;
+	virtual const std::list<PMSelectionPtr>& getSelections (void) const;
 
 	/**
-	 * return the number of packages on this source
+	 * generate PMPackage objects for each Item on the source/target
+	 * @return list of PMPackagePtr on this source
+	 * */
+	virtual const std::list<PMPackagePtr>& getPackages (void) const;
+
+	/**
+	 * generate PMSolvable objects for each patch on the source
+	 * @return list of PMSolvablePtr on this source
 	 */
-	int numPackages() const;
+	virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
 
-	/**
-	 * return the number of patches on this source
-	 */
-	int numPatches() const;
-
-	/**
-	 * generate PMPackage objects for each Item on the source
-	 *
-	 * @param pkglist where to store newly created PMPackages
-	 * */
-	PMError getPackages (std::list<PMPackagePtr>& pkglist);
-
-	/**
-	 * generate PMSelection objects for each Item on the source
-	 *
-	 * @param sellist where to store newly created PMSelections
-	 * */
-	PMError getSelections (std::list<PMSelectionPtr>& sellist);
-
-	/**
-	 * generate PMYouPatch objects for each Item on the source
-	 *
-	 * @param youpatchlist where to store newly created PMYouPatches
-	 * */
-	PMError getYOUPatches (std::list<PMYouPatchPtr>& youpatchlist);
+	virtual std::ostream & dumpOn( std::ostream & str ) const;
 
 	//-----------------------------
 	// package install / remove

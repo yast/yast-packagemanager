@@ -28,6 +28,7 @@
 #include <y2util/Pathname.h>
 #include <y2util/TagParser.h>
 #include <y2util/TagCacheRetrieval.h>
+#include <y2util/TagCacheRetrievalPtr.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
 
@@ -43,7 +44,7 @@
 class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
 
-    friend class InstSrcData_UL;
+    friend class ParseDataUL;
     protected:
 
 	// the data belongs to this package
@@ -83,10 +84,10 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	TagCacheRetrievalPos _attr_KEYWORDS;
 
 	// retrieval pointer for packages data
-	TagCacheRetrieval *_package_retrieval;
+	TagCacheRetrievalPtr _package_retrieval;
 
 	// retrieval pointer for packages.<lang> data
-	TagCacheRetrieval *_language_retrieval;
+	TagCacheRetrievalPtr _language_retrieval;
 
 	// fallback provider (Share entry in packages)
 	PMULPackageDataProviderPtr _fallback_provider;
@@ -97,10 +98,11 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 
     public:
 
-	PMULPackageDataProvider (TagCacheRetrieval *package_retrieval = 0, TagCacheRetrieval *language_retrieval = 0);
+	PMULPackageDataProvider (TagCacheRetrievalPtr package_retrieval);
 	virtual ~PMULPackageDataProvider();
 
 	void setPackage ( PMPackagePtr package ) { _package = package; }
+	void setLangCache ( TagCacheRetrievalPtr language_retrieval ) { _language_retrieval = language_retrieval; }
 	void setShared ( PMULPackageDataProviderPtr provider_r ) { _fallback_provider = provider_r; }
 
 	void startRetrieval() const;

@@ -35,8 +35,6 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-//IMPL_HANDLES(InstSrcData);
-
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -46,9 +44,6 @@ using namespace std;
 //	DESCRIPTION :
 //
 InstData::InstData()
-    : _selections( 0 )
-    , _packages( 0 )
-    , _patches( 0 )
 {
 }
 
@@ -62,10 +57,6 @@ InstData::InstData()
 //
 InstData::~InstData()
 {
-#warning CHECKIT must detach packages to get empty refcounts
-  delete _selections;
-  delete _packages;
-  delete _patches;
 }
 
 /**
@@ -78,50 +69,23 @@ const Pathname
 InstData::writeCache (const Pathname &descrpathname)
 {
     Pathname datacachename = descrpathname.dirname() + "content.cache";
+    ERR << "Dummy InstData::writeCache()" << endl;
     return datacachename;
 }
 
 //-----------------------------
-// source content access
-
-/**
- * return the number of selections on this source
- */
-int
-InstData::numSelections() const
-{
-    return _selections->size();
-}
-
-
-/**
- * return the number of packages on this source
- */
-int
-InstData::numPackages() const
-{
-    return _packages->size();
-}
-
-
-/**
- * return the number of patches on this source
- */
-int
-InstData::numPatches() const
-{
-    return _patches->size();
-}
-
+// content access
 
 /**
  * generate PMSelection objects for each selection on the source
  * @return list of PMSelectionPtr on this source
  */
-const std::list<PMSelectionPtr> *
-InstData::getSelections() const
+const std::list<PMSelectionPtr>&
+InstData::getSelections (void) const
 {
-    return _selections;
+    static std::list<PMSelectionPtr> selections;
+    ERR << "InstData::getSelections()" << endl;
+    return selections;
 }
 
 
@@ -129,64 +93,62 @@ InstData::getSelections() const
  * generate PMPackage objects for each Item on the source
  * @return list of PMPackagePtr on this source
  */
-const std::list<PMPackagePtr> *
-InstData::getPackages() const
+const std::list<PMPackagePtr>& 
+InstData::getPackages (void) const
 {
-    return _packages;
-}
-
-/**
- * find list of packages
- * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
- */
-const std::list<PMPackagePtr>
-InstData::findPackages (const std::list<PMPackagePtr> *packagelist, const string& name, const string& version, const string& release, const string& arch)
-{
-    std::list<PMPackagePtr> hits;
-    if (packagelist == 0)
-    {
-	ERR << "InstData::findPackages (NULL, ...)" << endl;
-	return hits;
-    }
-
-    typedef std::list<PMPackagePtr>::const_iterator PkgLI;
-    for (PkgLI pkg = packagelist->begin(); pkg != packagelist->end(); ++pkg)
-    {
-	if (!name.empty()
-	    && ((*pkg)->name() != name))
-	{
-	    continue;
-	}
-	if (!version.empty()
-	    && ((*pkg)->edition().version() != version))
-	{
-	    continue;
-	}
-	if (!release.empty()
-	    && ((*pkg)->edition().release() != release))
-	{
-	    continue;
-	}
-	if (!arch.empty()
-	    && ((*pkg)->arch() != arch))
-	{
-	    continue;
-	}
-	hits.push_back (*pkg);
-    }
-    return hits;
+    static std::list<PMPackagePtr> packages;
+    ERR << "InstData::getPackages()" << endl;
+    return packages;
 }
 
 /**
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
  */
-const std::list<PMYouPatchPtr> *
-InstData::getPatches() const
+const std::list<PMYouPatchPtr>&
+InstData::getPatches (void) const
 {
-    return _patches;
+    static std::list<PMYouPatchPtr> patches;
+    ERR << "InstData::getPatches()" << endl;
+    return patches;
 }
 
+
+const std::list<PMPackagePtr>
+InstData::findPackages (const std::list<PMPackagePtr>& packages, const string& name, const string& version, const string& release, const string& arch)
+{
+    std::list<PMPackagePtr> hits;
+//    MIL << "InstData::findPackages (" << packages << ", " << name << ", " << version << ", " << release << ", " << arch << ")" << endl;
+//    MIL << "checking " << packagelist->size() << " packages" << endl;
+    typedef std::list<PMPackagePtr>::const_iterator SolvLI;
+    for (SolvLI package = packages.begin(); package != packages.end(); ++package)
+    {
+//    MIL << "?: " << (*package)->name() << "-" << (*package)->version() << "-" << (*package)->release() << "-" << (*package)->arch() << endl;
+	if (!name.empty()
+	    && ((*package)->name() != name))
+	{
+	    continue;
+	}
+	if (!version.empty()
+	    && ((*package)->edition().version() != version))
+	{
+	    continue;
+	}
+	if (!release.empty()
+	    && ((*package)->edition().release() != release))
+	{
+	    continue;
+	}
+	if (!arch.empty()
+	    && ((*package)->arch() != arch))
+	{
+	    continue;
+	}
+	hits.push_back (*package);
+    }
+//    MIL << "returning " << hits.size() << " packages" << endl;
+    return hits;
+}
 
 ///////////////////////////////////////////////////////////////////
 //

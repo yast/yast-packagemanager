@@ -13,7 +13,7 @@ pkginclude_HEADERS =	\
 	InstSrc.h	InstSrcPtr.h		\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
 	InstSrcData.h	InstSrcDataPtr.h	\
-	InstSrcData_UL.h InstSrcData_ULPtr.h	\
+	ParseDataUL.h	ParseDataULPtr.h	\
 	InstData.h				\
 	\
 	InstTargetError.h	\

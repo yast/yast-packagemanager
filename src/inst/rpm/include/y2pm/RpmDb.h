@@ -48,6 +48,14 @@ class RpmDb: virtual public Rep
 {
     REP_BODY(RpmDb);
 
+    private:
+	// list of packages on the target
+	// must be updated for each install/remove
+	//
+	// call getPackages() to refresh this list
+	//
+	std::list<PMPackagePtr> _packages;
+
     public:
 
         /**
@@ -142,7 +150,7 @@ class RpmDb: virtual public Rep
 	 *
 	 * @param pkglist where to store newly created PMPackages
 	 * */
-	PMError getPackages (std::list<PMPackagePtr>& pkglist);
+	const std::list<PMPackagePtr>& getPackages ();
 
 	/**
 	 * Check rpm with rpm --checksig

@@ -49,7 +49,6 @@ IMPL_BASE_POINTER(InstSrcData);
 //
 InstSrcData::InstSrcData()
     : _propagating( false )
-    , _data( new InstData )
 {
   MIL << "New InstSrcData " << *this << endl;
 }
@@ -64,7 +63,6 @@ InstSrcData::InstSrcData()
 //
 InstSrcData::~InstSrcData()
 {
-  delete _data;
   MIL << "Delete InstSrcData " << *this << endl;
 }
 
@@ -150,8 +148,8 @@ void InstSrcData::_instSrc_withdraw()
 //
 void InstSrcData::propagateObjects()
 {
-  if ( getPackages() )
-    Y2PM::packageManager().poolAddCandidates( *getPackages() );
+    const std::list<PMPackagePtr>& packages = getPackages();
+    Y2PM::packageManager().poolAddCandidates( packages );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -245,51 +243,42 @@ PMError InstSrcData::tryGetData( InstSrcDataPtr & ndata_r,
   return err;
 }
 
+const Pathname
+InstSrcData::writeCache (const Pathname &descrpathname)
+{
+    return InstData::writeCache (descrpathname);
+}
+
 /**
  * generate PMSelection objects for each Item on the source
  * @return list of PMSelectionPtr on this source
  * */
-const std::list<PMSelectionPtr> *
+const std::list<PMSelectionPtr>&
 InstSrcData::getSelections() const
 {
-    D__ << __FUNCTION__ << std::endl;
-    if (!_data)
-    {
-	cerr << "InstSrcData::getSelections() no _data" << endl;
-	return 0;
-    }
-    return _data->getSelections();
+    MIL << "InstSrcData::getSelections()" << endl;
+    return _selections;
 }
 
 /**
  * generate PMPackage objects for each Item on the source
  * @return list of PMPackagePtr on this source
  * */
-const std::list<PMPackagePtr> *
+const std::list<PMPackagePtr>&
 InstSrcData::getPackages() const
 {
-    D__ << __FUNCTION__ << std::endl;
-    if (!_data)
-    {
-	cerr << "InstSrcData::getPackages() no _data" << endl;
-	return 0;
-    }
-    return _data->getPackages();
+    MIL << "InstSrcData::getPackages()" << endl;
+    return _packages;
 }
 
 /**
- * find list of packages
- * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
+ * generate PMSolvable objects for each patch on the target
+ * @return list of PMSolvablePtr on this target
  */
-const std::list<PMPackagePtr>
-InstSrcData::findPackages (const std::list<PMPackagePtr> *packages, const string& name, const string& version, const string& release, const string& arch) const
+const std::list<PMYouPatchPtr>&
+InstSrcData::getPatches (void) const
 {
-    D__ << __FUNCTION__ << std::endl;
-    if (!_data)
-    {
-	cerr << "InstSrcData::findPackages() no _data" << endl;
-	return std::list<PMPackagePtr>();
-    }
-cerr << "calling InstData::findPackages ()" << endl;
-    return InstData::findPackages (packages, name, version, release, arch);
+    MIL << "InstSrcData::getPatches()" << endl;
+    return _patches;
 }
+

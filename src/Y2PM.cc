@@ -124,13 +124,11 @@ PMPackageManager & Y2PM::packageManager()
     MIL << "Created PackageManager" << endl;
 
     WAR << "Fake InstTarget and load installed Packages..." << endl;
-    list<PMPackagePtr> plist;
     PMError dbstat = Y2PM::instTarget().init();
     if( dbstat != InstTargetError::E_ok ) {
       ERR << "error initializing target: " << dbstat << endl;
     } else {
-      dbstat = Y2PM::instTarget().getPackages(plist);
-      Y2PM::packageManager().poolSetInstalled( plist );
+      Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
     }
   }
   return *_packageManager;

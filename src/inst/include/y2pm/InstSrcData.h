@@ -44,7 +44,7 @@
 /**
  * @short Base class for all concrete InstSrcData classes.
  **/
-class InstSrcData: virtual public Rep {
+class InstSrcData: virtual public Rep, public InstData {
   REP_BODY(InstSrcData);
 
   public:
@@ -60,6 +60,11 @@ class InstSrcData: virtual public Rep {
      * InstSrc triggers certain actions to perfom
      **/
     friend class InstSrc;
+
+    /**
+     * ParseDataUL fills the data
+     */
+    friend class ParseDataUL;    
 
     /**
      * Backreference to InstSrc
@@ -100,6 +105,13 @@ class InstSrcData: virtual public Rep {
   protected:
 
     /**
+     * actual data for this InstSrc
+     */
+    std::list<PMSelectionPtr> _selections;
+    std::list<PMPackagePtr> _packages;
+    std::list<PMYouPatchPtr> _patches;
+
+    /**
      * Call concrete InstSrcData to propagate Objects to Manager classes.
      **/
     virtual void propagateObjects();
@@ -109,12 +121,8 @@ class InstSrcData: virtual public Rep {
      **/
     virtual void withdrawObjects();
 
-#if 1
-  private:
-
-    InstData *_data;
-
-  public:
+    //--------------------------------------------------------------------
+    // InstData interface  
 
     //-----------------------------
     // cache file handling
@@ -124,68 +132,29 @@ class InstSrcData: virtual public Rep {
      * @return pathname of written cache
      * writes content cache data to an ascii file
      */
-    const Pathname writeCache (const Pathname &descrpathname);
+    virtual const Pathname writeCache (const Pathname &descrpathname);
 
-    //-----------------------------
-    // source content access
-
-    /**
-     * return the number of selections on this source
-     */
-    int numSelections() const;
-
-    /**
-     * return the number of packages on this source
-     */
-    int numPackages() const;
-
-    /**
-     * return the number of patches on this source
-     */
-    int numPatches() const;
-
-    /**
-     * generate PMPackage objects for each Item on the source
-     * @return list of PMPackagePtr on this source
-     * */
-    void setPackages(std::list<PMPackagePtr> *pacs) { _data->setPackages(pacs); }
-
-    /**
-     * generate PMPackage objects for each Item on the source
-     * @return list of PMPackagePtr on this source
-     * */
-    const std::list<PMPackagePtr> *getPackages (void) const;
-
-    /**
-     * find list of packages
-     * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
-     */
-    const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr> *packages, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "") const;
-
-    /**
-     * generate PMSelection objects for each Item on the source
-     * @return list of PMSelection Ptr on this source
-     * */
-    void setSelections (std::list<PMSelectionPtr> *sels) { _data->setSelections(sels); }
+  public:
 
     /**
      * generate PMSelection objects for each selection on the source
      * @return list of PMSelectionPtr on this source
      */
-    const std::list<PMSelectionPtr> *getSelections (void) const;
+    virtual const std::list<PMSelectionPtr>& getSelections (void) const;
+
+    /**
+     * generate PMPackage objects for each Item on the source/target
+     * @return list of PMPackagePtr on this source
+     * */
+    virtual const std::list<PMPackagePtr>& getPackages (void) const;
 
     /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source
      */
-    const std::list<PMSolvablePtr> *getPatches (void) const;
-#endif
-
-  public:
+    virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
-
-  public:
 
     /**
      * Any concrete InstSrcData must realize this, as it knows the expected

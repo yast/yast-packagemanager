@@ -29,6 +29,7 @@
 #include <y2util/Pathname.h>
 #include <y2util/TagParser.h>
 #include <y2util/TagCacheRetrieval.h>
+#include <y2util/TagCacheRetrievalPtr.h>
 #include <y2pm/PMULSelectionDataProviderPtr.h>
 #include <y2pm/PMSelectionDataProvider.h>
 
@@ -44,7 +45,7 @@
 class PMULSelectionDataProvider : public PMSelectionDataProvider  {
     REP_BODY(PMULSelectionDataProvider);
 
-    friend class InstSrcData_UL;
+    friend class ParseDataUL;
     protected:
 
 	// the data belongs to this selection
@@ -67,7 +68,7 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	std::string _attr_ORDER;
 
 	// retrieval pointer for *.sel data
-	TagCacheRetrieval *_selection_retrieval;
+	TagCacheRetrievalPtr _selection_retrieval;
 
     public:
 

@@ -35,7 +35,7 @@
 #include <y2pm/InstSrcDescr.h>
 
 #include <y2pm/InstSrcData.h>
-#include <y2pm/InstSrcData_UL.h>
+#include <y2pm/ParseDataUL.h>
 
 using namespace std;
 
@@ -128,7 +128,10 @@ PMError InstSrc::enableSource()
   switch ( _descr->type() ) {
 
     case T_UnitedLinux:
-      err = InstSrcData_UL::tryGetData( ndata, _media, _descr->descrdir() );
+	{
+	    ParseDataULPtr parser ( new ParseDataUL() );
+	    err = parser->tryGetData( ndata, _media, _descr->descrdir() );
+	}
 
       break;
 
@@ -259,63 +262,42 @@ InstSrc::setActivation (bool yesno)
     D__ << __FUNCTION__ << std::endl;
     return _descr->setActivation (yesno);
 }
+#endif
 
 //-----------------------------
 // source content access
 
 /**
- * return the number of selections on this source
- */
-int
-InstSrc::numSelections() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _data->numSelections();
-}
-
-
-/**
- * return the number of packages on this source
- */
-int
-InstSrc::numPackages() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _data->numPackages();
-}
-
-
-/**
- * return the number of patches on this source
- */
-int
-InstSrc::numPatches() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _data->numPatches();
-}
-
-
-/**
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
  */
-const std::list<PMSolvablePtr> *
+const std::list<PMYouPatchPtr>&
 InstSrc::getPatches() const
 {
     D__ << __FUNCTION__ << std::endl;
+    if (!_data)
+    {
+	static std::list<PMYouPatchPtr> patches;
+	ERR << "InstSrc::getPatches() no _data" << endl;
+	return patches;
+    }
     return _data->getPatches();
 }
-#endif
 
 /**
  * generate PMSelection objects for each selection on the source
  * @return list of PMSelectionPtr on this source
  */
-const std::list<PMSelectionPtr> *
+const std::list<PMSelectionPtr>&
 InstSrc::getSelections() const
 {
-    D__ << __FUNCTION__ << std::endl;
+    MIL << __FUNCTION__ << std::endl;
+    if (!_data)
+    {
+	static std::list<PMSelectionPtr> selections;
+	ERR << "InstSrc::getSelections() no _data" << endl;
+	return selections;
+    }
     return _data->getSelections();
 }
 
@@ -323,33 +305,17 @@ InstSrc::getSelections() const
  * generate PMPackage objects for each Item on the source
  * @return list of PMPackagePtr on this source
  * */
-const std::list<PMPackagePtr> *
+const std::list<PMPackagePtr>&
 InstSrc::getPackages() const
 {
-    D__ << __FUNCTION__ << std::endl;
+    MIL << __FUNCTION__ << std::endl;
     if (!_data)
     {
-	cerr << "InstSrc::getPackages() no _data" << endl;
-	return 0;
+	static std::list<PMPackagePtr> packages;
+	ERR << "InstSrc::getPackages() no _data" << endl;
+	return packages;
     }
     return _data->getPackages();
-}
-
-/**
- * find list of packages
- * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
- */
-const std::list<PMPackagePtr>
-InstSrc::findPackages (const std::list<PMPackagePtr> *packages, const string& name, const string& version, const string& release, const string& arch) const
-{
-    D__ << __FUNCTION__ << std::endl;
-    if (!_data)
-    {
-	cerr << "InstSrc::findPackages() no _data" << endl;
-	return std::list<PMPackagePtr>();
-    }
-cerr << _data << "->findPackages()" << endl;
-    return _data->findPackages (packages, name, version, release, arch);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -521,7 +487,10 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
     switch ( ctype ) {
 
     case T_UnitedLinux:
-      err = InstSrcData_UL::tryGetDescr( ndescr, _media, product_dir_r );
+	{
+	    ParseDataULPtr parser ( new ParseDataUL );
+	    err = parser->tryGetDescr( ndescr, _media, product_dir_r );
+	}
       break;
 
     case T_TEST_DIST:

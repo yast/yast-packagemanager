@@ -95,7 +95,7 @@ int main( int argc, char *argv[] )
 
     PkgSet candidates;
 
-    const std::list<PMPackagePtr> *pacs = nsrc->getPackages();
+    const std::list<PMPackagePtr>& packages = nsrc->getPackages();
 
     std::set<std::string> tocompute;
 
@@ -109,8 +109,8 @@ int main( int argc, char *argv[] )
     }
 
     unsigned count = 0;
-    for(std::list<PMPackagePtr>::const_iterator it = pacs->begin();
-	it != pacs->end();
+    for(std::list<PMPackagePtr>::const_iterator it = packages.begin();
+	it != packages.end();
 	++it, count++)
     {
 //	if(string((*it)->name()).find("glide") != string::npos)
