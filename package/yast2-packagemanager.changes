@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 10 11:12:15 CET 2004 - ma@suse.de
+
+- Removed patch for uncached plain sources. It breaks installation
+  because necessary mount points are not created.
+- 2.9.23
+
+-------------------------------------------------------------------
 Tue Mar  9 17:52:20 CET 2004 - ma@suse.de
 
 - Reparse packages.<lang> on locale change
