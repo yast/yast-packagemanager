@@ -49,8 +49,12 @@ class PMYouPatchPaths {
     void setPatchPath( const Pathname & );
     Pathname patchPath();
 
+    Pathname rpmPath( const PMPackagePtr &pkg );
+
     void setPatchUrl( const Url & );
     Url patchUrl();
+
+    Pathname localDir();
 
     PkgArch arch();
 
@@ -65,6 +69,7 @@ class PMYouPatchPaths {
 
   private:
     Pathname _patchPath;
+    Pathname _rpmPath;
     Url _patchUrl;
     
     PkgArch _arch;
