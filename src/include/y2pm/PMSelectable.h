@@ -78,6 +78,7 @@ class PMSelectable : virtual public Rep {
     static bool clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & rhs );
     void clistAdd( PMObjectPtr obj_r );
     void clistDel( PMObjectPtr obj_r );
+    void clistSort();
     void clistClearAll();
 
     void clearAll();

@@ -16,7 +16,6 @@
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-
 #include <iostream>
 #include <fstream>
 
@@ -32,6 +31,7 @@
 
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMPackageManager.h>
+#include <y2pm/PMSelectionManager.h>
 
 using namespace std;
 
@@ -787,7 +787,9 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
   }
 
   if ( new_ranks ) {
-#warning Must rerank PMGR!
+    Y2PM::packageManager().poolSortCandidates();
+    Y2PM::selectionManager().poolSortCandidates();
+#warning Further actions on new Src ranks, except sorting candidate lists?
   }
 
   // see what else to adjust...

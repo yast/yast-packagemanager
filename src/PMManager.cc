@@ -323,6 +323,24 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMManager::poolSortCandidates
+//	METHOD TYPE : void
+//
+void PMManager::poolSortCandidates()
+{
+  if ( !_items.size() ) {
+    return;
+  }
+  MIL << "Going to sort " << _items.size() << " candidate lists..." << endl;
+  for( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
+    (*it)->clistSort();
+  }
+  DBG << "candidate lists sorted!" << endl;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMManager::poolAdjust
 //	METHOD TYPE : void
 //
