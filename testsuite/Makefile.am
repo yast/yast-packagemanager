@@ -31,7 +31,8 @@ noinst_PROGRAMS = \
 	gs_test		\
         test_you	\
 	media_test	\
-	test_updateinf
+	test_updateinf  \
+        checkpatch
 
 test_updateinf_SOURCES = test_updateinf.cc
 test_updateinf_LDADD = $(top_builddir)/src/liby2pm.la
@@ -84,3 +85,7 @@ test_you_LDFLAGS = -static
 media_test_SOURCES = media_test.cc
 media_test_LDADD = $(top_builddir)/src/liby2pm.la
 media_test_LDFLAGS = -static
+
+checkpatch_SOURCES = checkpatch.cc
+checkpatch_LDADD = $(top_builddir)/src/liby2pm.la
+checkpatch_LDFLAGS = -static

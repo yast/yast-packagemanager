@@ -34,7 +34,7 @@ Packages:
 ##
 ## -----> w3m <-----
 ##
-Filename: w3m.rpm
+Filename: w3m
 Label: Text based WWW browser
 Series: n
 InstPath: n1/w3m-0.2.5-145.i386.patch.rpm
