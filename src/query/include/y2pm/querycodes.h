@@ -51,6 +51,8 @@
 #define QCODE_AVERSION		121
 #define QCODE_CVERSION		122
 #define QCODE_EMPTY		123
+#define QCODE_RELEASE		124
+#define QCODE_EDITION		125
 
 #endif //QUERYCODES_H
 

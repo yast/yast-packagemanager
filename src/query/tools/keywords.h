@@ -63,6 +63,8 @@ static struct keyword {
     { "aVersion",	QCODE_AVERSION },	// available version
     { "cVersion",	QCODE_CVERSION },	// candidate version
     { "Empty",		QCODE_EMPTY },
+    { "Release",	QCODE_RELEASE },
+    { "Edition",	QCODE_EDITION },
     { 0, 0 }
 };
 
