@@ -67,7 +67,7 @@ const MediaAccess::ProtocolTypes MediaAccess::protocolTypes( _init_protocolTypes
 
 const Pathname MediaAccess::_noPath; // empty path
 
-inline MediaAccess::MediaType MediaAccess::typeOf( const Url & url_r )
+MediaAccess::MediaType MediaAccess::typeOf( const Url & url_r )
 {
   ProtocolTypes::const_iterator t = protocolTypes.find( stringutil::toLower( url_r.getProtocol() ) );
   if ( t == protocolTypes.end() )
@@ -393,22 +393,22 @@ PMError MediaAccess::getFile( const Url &from, const Pathname &to )
   u.setPath( dir.asString() );
 
   MediaAccess media;
-  
+
   PMError error = media.open( u );
   if ( error ) return error;
-  
+
   error = media.attach();
   if ( error ) return error;
-  
+
   error = media.provideFile( base );
   if ( error ) return error;
 
   if ( PathInfo::copy( media.localPath( base ), to ) != 0 ) {
     return MediaError::E_write_error;
   }
-  
+
   error = media.release();
-  
+
   return error;
 }
 
