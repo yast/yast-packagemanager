@@ -78,6 +78,7 @@ PMSolvable::~PMSolvable()
 ostream & PMSolvable::dumpOn( ostream & os ) const
 {
   Rep::dumpOn( os );
+  os << endl;
   os << "Name: " << (const char *)_name << endl;
   os << "Version: " << _edition.version() << endl;
   if (_edition.has_release())
@@ -87,6 +88,8 @@ ostream & PMSolvable::dumpOn( ostream & os ) const
 
   if (_requires.size())
     os << "Requires: " << _requires << endl;
+  if (_prerequires.size())
+    os << "PreRequires: " << _prerequires << endl;
   if (_conflicts.size())
     os << "Conflicts: " << _conflicts << endl;
   if (_provides.size())

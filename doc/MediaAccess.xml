@@ -131,6 +131,8 @@ common. It's value is passed with the -o parameter to mount
   </screen>
   </para>
 </example>
+</section>
+<section><title>SMB access</title>
 <example>
   <title>URL for SMB access</title>
   <para>

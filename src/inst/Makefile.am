@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src/instsrc
 #
 
-SUBDIRS = include
+SUBDIRS = include rpm
 
 CPPFLAGS = -DY2LOG=__FILE__
 
@@ -13,9 +13,11 @@ INCLUDES = -I$(QTDIR)/include -I$(includedir) -I$(top_srcdir)/src/include \
 
 noinst_LTLIBRARIES = liby2pminstsrc.la
 
-liby2pminstsrc_la_SOURCES = 	\
-	InstSrc.cc \
-	InstSrcData.cc \
-	DataOldSuSE.cc \
-	InstSrcDescr.cc \
-	InstSrcManager.cc
+liby2pminstsrc_la_SOURCES =
+#	\
+#	InstSrc.cc \
+#	InstSrcData.cc \
+#	DataOldSuSE.cc \
+#	InstSrcDescr.cc \
+#	InstSrcManager.cc
+liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la

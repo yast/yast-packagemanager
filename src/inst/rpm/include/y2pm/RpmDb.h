@@ -19,56 +19,6 @@
 
 /-*/
 
-/*
- * $Log$
- * Revision 1.1  2002/07/10 12:50:36  lnussel
- * first version of package provider for installed system
- *
- * Revision 1.1.1.1  2002/07/03 11:04:49  arvin
- * -m imported
- *
- * Revision 1.1  2001/11/30 11:00:49  schubi
- * RPM agent added
- *
- * Revision 1.1  2001/11/12 16:57:25  schubi
- * agent for handling you
- *
- * Revision 1.9  2001/07/10 10:18:22  schubi
- * do not fetch rpm if it is already a valid version on the client
- *
- * Revision 1.8  2001/04/23 13:47:41  schubi
- * no more conficts with YaST1 defines
- *
- * Revision 1.7  2001/04/10 15:42:33  schubi
- * Reading dependencies from installed packages via RPM
- *
- * Revision 1.6  2000/08/09 15:50:30  schubi
- * new call: queryCurrentDBPath
- *
- * Revision 1.5  2000/08/04 13:29:38  schubi
- * Changes from 7.0 to 7.1; Sorry Klaus, I do not know anymore
- *
- * Revision 1.4  2000/05/30 15:43:43  kkaempf
- * fix include paths
- *
- * Revision 1.3  2000/05/18 14:01:21  schubi
- * removing liive-CD links and touch the directories
- *
- * Revision 1.2  2000/05/17 14:32:04  schubi
- * update Modus added after new cvs
- *
- * Revision 1.3  2000/05/11 11:47:55  schubi
- * update modus added
- *
- * Revision 1.2  2000/05/08 13:43:10  schubi
- * tested version
- *
- * Revision 1.1  2000/05/04 11:18:36  schubi
- * class to handle the rpm-DB; not testest
- *
- *
- */
-
 // -*- C++ -*-
 
 #ifndef RpmDb_h
@@ -77,8 +27,10 @@
 #include <set>
 #include <string>
 #include <list>
+#include <vector>
 
 #include <y2util/ExternalProgram.h>
+#include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
 
 /**
@@ -135,21 +87,9 @@ class RpmDb
 
 	/** acquire data about installed packages
 	 *
-	 * @return list of PMPackagePtr
+	 * @param pkglist where to store newly created PMPackages
 	 * */
-	const std::list<PMPackagePtr>* getPackages (void);
-
-	/**
-	 * Evaluate all installed packages WITH all Information
-	 * Returns false, if an error has been occured.	
-	 **/
-//XXX	bool getInstalledPackagesInfo ( InstalledPackageMap &packageMap );
-
-	/**  
-	 * Evaluate all installed packages
-	 * Returns false, if an error has been occured.
-	 */
-//XXX	bool getInstalledPackages ( PackList &packageList );
+	bool getPackages (std::list<PMPackagePtr>& pkglist);
 
 	/**
 	 * Check rpm with rpm --checksig
@@ -157,72 +97,22 @@ class RpmDb
 	 */
 	bool checkPackage( std::string packagePath, std::string version = "" );
 
-#if 0
-	/**
-	 * Query Version of a package.
-	 * Returns "" if an error has been occured.
-	 */
-	std::string queryPackageVersion( std::string packageName );
 
-	/**
-	 * Query Release of a package.
-	 * Returns "" if an error has been occured.
-	 */
-	std::string queryPackageRelease( std::string packageName );
-
-	/**
-	 * Query installation-time of a package.
-	 * Returns 0 if an error has been occured.
-	 */
-	long queryPackageInstallTime( std::string packageName );
-
-	/**
-	 * Query build-time of a package.
-	 * Returns 0 if an error has been occured.
-	 */
-	long queryPackageBuildTime( std::string packageName );
-
-	/**
-	 * Query summary of a package.
-	 * Returns "" if an error has been occured.
-	 */
-	std::string queryPackageSummary( std::string packageName );
-
-
-	/**
-	 * general query of a package
-	 * param: format The query format to use.
-	 *        package-name
-	 */
-	string queryPackage(const char *format, string packageName);
-
-
-	/**
-	 * Evaluate all files of a package which have been changed
-	 * since last installation or update.
-	 */
-	bool queryChangedFiles ( FileList &fileList, string packageName );
-
-	/**
-	 * Evaluate all files of a package which have been installed.
-	 * ( are listed in the rpm-DB )
-	 */
-	bool queryInstalledFiles ( FileList &fileList, string packageName );
-
-	/**
-	 * Evaluate all directories of a package which have been installed.
-	 * ( are listed in the rpm-DB )
-	 */
-	bool queryDirectories ( FileList &fileList, string packageName );
-#endif
 	/**
 	 * Returns the current-path of the rpm-DB
 	 * */
 	const std::string& queryCurrentDBPath ( void ) { return dbPath; };
 
-
     private:
-    
+
+	/**
+	 * general query of a package
+	 *
+	 * @param format query format as rpm understands it
+	 * @param packagelabel full label (name-version-relase) of the package to query
+	 */
+	std::string queryPackage(const char *format, std::string packagelabel);
+
 	/** 
 	 * The name of the install root.
 	 */
@@ -276,6 +166,34 @@ class RpmDb
 	 * The exit code of the rpm process, or -1 if not yet known.
 	 */
 	int exit_code;
+
+	/* parse string of the form name/number/version into rellist. number is
+	 * the rpm number representing the operator <, <=, = etc. number&64
+	 * means prerequires
+	 *
+	 * @param depstr string to evaluate
+	 * @param deps reference to a list which will be cleared and filled with dependencies
+	 * @param prereq reference to a list which holds prerequire
+	 * dependencies
+	 * @param ignore_prereqs if set to true, prereq will not be touched and
+	 * all dependencies will be added to deps. Just pass a dummy list for
+	 * prereq in this case
+	 * */
+	void rpmdeps2rellist ( const std::string& depstr,
+			PMSolvable::PkgRelList_type& deps,
+			PMSolvable::PkgRelList_type& prereq,
+			bool ignore_prereqs = false);
+    public:
+	/** split string into tokens delimited by a one character
+	 * seperator, empty fields will not be removed
+	 *
+	 * @param in string to tokenize
+	 * @param sep separator character
+	 * @out out vector of tokens
+	 *
+	 * @return number of tokens found
+	 **/
+	static unsigned tokenize(const std::string& in, char sep, std::vector<std::string>& out);
 };
 
 #endif

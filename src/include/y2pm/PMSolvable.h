@@ -107,8 +107,7 @@ class REP_CLASS(PMSolvable) {
     PkgEdition _edition;
 
     // relations of the package
-    //TODO
-    PkgRelList_type _requires, _conflicts, _provides, _obsoletes;
+    PkgRelList_type _requires, _conflicts, _provides, _obsoletes, _prerequires;
 
   public:
 
@@ -143,6 +142,21 @@ class REP_CLASS(PMSolvable) {
       _requires = requires;
       return _requires;
     }
+    const PkgRelList_type& setPreRequires(PkgRelList_type& prerequires)
+    {
+      _prerequires = prerequires;
+      return _prerequires;
+    }
+    const PkgRelList_type& setObsoletes(PkgRelList_type& obsoletes)
+    {
+      _obsoletes = obsoletes;
+      return _obsoletes;
+    }
+    const PkgRelList_type& setConflicts(PkgRelList_type& conflicts)
+    {
+      _conflicts = conflicts;
+      return _conflicts;
+    }
 
     const PkgRelation& addRequires(PkgRelation& r) {
       _requires.push_front(r);
@@ -165,6 +179,7 @@ class REP_CLASS(PMSolvable) {
     const PkgName& name() const { return _name; }
     const PkgEdition& edition() const { return _edition; }
     const PkgRelList_type& requires() const { return _requires; }
+    const PkgRelList_type& prerequires() const { return _prerequires; }
     const PkgRelList_type& conflicts() const { return _conflicts; }
     const PkgRelList_type& provides() const { return _provides; }
     const PkgRelList_type& obsoletes() const { return _obsoletes; }
@@ -183,6 +198,7 @@ class REP_CLASS(PMSolvable) {
 		return _##name.end(); }
 
     decl_PkgRelList_iterators(requires)
+    decl_PkgRelList_iterators(prerequires)
     decl_PkgRelList_iterators(conflicts)
     decl_PkgRelList_iterators(provides)
     decl_PkgRelList_iterators(obsoletes)

@@ -93,7 +93,8 @@ string PMPackage::Summary() const
 //
 ostream & PMPackage::dumpOn( ostream & str ) const
 {
-  PMObject::dumpOn( str ) << '(' << _arch << ')';
+  PMObject::dumpOn( str );
+  str << "Architecture: " << _arch << endl;
   return str;
 }
 
