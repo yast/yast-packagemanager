@@ -10,10 +10,10 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMPackageManager.h
+  File:       PMPackageManager.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
 #ifndef PMPackageManager_h
@@ -22,10 +22,9 @@
 #include <iosfwd>
 #include <list>
 
-#include <y2pm/PMPackagePtr.h>
-
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
+#include <y2pm/PMPackage.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -42,24 +41,12 @@ class PMPackageManager : public PMManager {
 
   private:
 
-    static PMPackageManager * _PM;
-
+    friend class Y2PM;
     PMPackageManager();
     virtual ~PMPackageManager();
 
   public:
 
-    static PMPackageManager & PM();
-
-    typedef std::list<PMPackagePtr>     PackageList;
-    typedef PackageList::iterator       PackageList_iterator;
-    typedef PackageList::const_iterator PackageList_const_iterator;
-
-  protected:
-
-  public:
-
-    void addPackages( const PackageList & pkglist_r );
 };
 
 ///////////////////////////////////////////////////////////////////

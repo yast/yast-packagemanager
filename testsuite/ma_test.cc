@@ -2,14 +2,13 @@
 #include <list>
 #include <string>
 
-#undef  Y2LOG
-#define Y2LOG "PM_ma_test"
 #include <y2util/Y2SLog.h>
 
-#include <y2pm/PMPackageManager.h>
-#include <y2pm/PMPackage.h>
+#include <Y2PM.h>
 
 using namespace std;
+#undef  Y2LOG
+#define Y2LOG "PM_ma_test"
 
 inline string dec( unsigned i ) {
   static char b[5];
@@ -29,7 +28,6 @@ int main()
 {
   Y2SLog::setLogfileName("-");
   MIL << "START" << endl;
-  PMPackageManager::PM();
 
   list<PMPackagePtr> plist;
 
@@ -51,11 +49,19 @@ int main()
   plist.push_back( new PMPackage( PkgName(n+si), PkgEdition( (v+si+".1").c_str(), (r+si).c_str() ), PkgArch("i686")) );
 
 
-  PMPackageManager::PM().poolAddCandidates( plist );
+  Y2PM::packageManager().poolAddCandidates( plist );
   SEC << "=================================" << endl;
-  PMPackageManager::PM().poolRemoveCandidates( plist );
+
+  INT << Y2PM::packageManager().size() << endl;
+  PMSelectablePtr p = Y2PM::packageManager()["name_"];
+  INT << p << endl;
+  p = Y2PM::packageManager()["name_0"];
+  INT << p << endl;
+
+  SEC << "=================================" << endl;
+  Y2PM::packageManager().poolRemoveCandidates( plist );
 
   MIL << "END" << endl;
-  PMPackageManager::PM().REINIT();
+  Y2PM::packageManager().REINIT();
   return 0;
 }

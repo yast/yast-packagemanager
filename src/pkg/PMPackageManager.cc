@@ -25,28 +25,6 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-
-PMPackageManager * PMPackageManager::_PM = 0;
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMPackageManager::PM
-//	METHOD TYPE : PMPackageManager &
-//
-//	DESCRIPTION :
-//
-PMPackageManager & PMPackageManager::PM()
-{
-  if ( !_PM )
-    _PM = new PMPackageManager;
-  return *_PM;
-}
-
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMPackageManager::PMPackageManager
@@ -56,8 +34,6 @@ PMPackageManager & PMPackageManager::PM()
 //
 PMPackageManager::PMPackageManager()
 {
-  MIL << "Launch PM..." << endl;
-  MIL << "Created PM" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -70,27 +46,6 @@ PMPackageManager::PMPackageManager()
 //
 PMPackageManager::~PMPackageManager()
 {
-  MIL << "Shtudown PM..." << endl;
-  MIL << "Deleted PM" << endl;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMPackageManager::addPackages
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :
-//
-void PMPackageManager::addPackages( const PackageList & pkglist_r )
-{
-  MIL << "Going to add " << pkglist_r.size() << " packages ..." << endl;
-
-  for ( PackageList_const_iterator i = pkglist_r.begin(); i != pkglist_r.end(); ++i ) {
-    DBG << "  " << *i << endl;
-  }
-
-  MIL << "DONE" << endl;
 }
 
 /******************************************************************

@@ -16,7 +16,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 
 lib_LTLIBRARIES = liby2pm.la
 
-liby2pm_la_SOURCES = \
+liby2pm_la_SOURCES = Y2PM.cc \
 	PkgName.cc	\
 	PkgEdition.cc	\
 	PkgRelation.cc	\
