@@ -25,6 +25,7 @@
 
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaError.h>
+#include <y2pm/InstTargetError.h>
 
 using namespace std;
 
@@ -55,6 +56,7 @@ PMError::ErrClass PMError::errClass( const unsigned e )
 
   ENUM_OUT( InstSrcError );
   ENUM_OUT( MediaError );
+  ENUM_OUT( InstTargetError );
 
 #undef ENUM_OUT
 
@@ -87,6 +89,7 @@ std::string PMError::errstr( const unsigned e )
 
     ENUM_OUT( InstSrcError );
     ENUM_OUT( MediaError );
+    ENUM_OUT( InstTargetError );
 
 #undef ENUM_OUT
 

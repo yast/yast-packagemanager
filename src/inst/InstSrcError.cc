@@ -66,7 +66,7 @@ std::string InstSrcError::errtext( const unsigned e )
     ENUM_OUT( E_bad_cache_descr );
     //
     ENUM_OUT( E_bad_url );
-    ENUM_OUT( E_no_media );
+    ENUM_OUT( E_no_instsrc_on_media );
 
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////

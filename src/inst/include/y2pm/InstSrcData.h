@@ -16,7 +16,7 @@
    Maintainer: Michael Andres <ma@suse.de>
 
     Purpose:	Works on a MediaInfoPtr, has access to physical package
-		descriptions, creates PMSolvable objects from descriptions
+		descriptions, creates PMSolvable objects from descriptions.
 /-*/
 #ifndef InstSrcData_h
 #define InstSrcData_h
@@ -26,12 +26,12 @@
 
 #include <y2util/Pathname.h>
 
-#include <y2pm/MediaAccess.h>
-
 #include <y2pm/InstSrcDataPtr.h>
-#include <y2pm/InstData.h>
-#include <y2pm/PMPackagePtr.h>
-#include <y2pm/PMSolvablePtr.h>
+#include <y2pm/InstSrcError.h>
+
+#include <y2pm/InstSrcPtr.h>
+#include <y2pm/InstSrcDescrPtr.h>
+#include <y2pm/MediaAccessPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -39,6 +39,20 @@
 class InstSrcData: virtual public Rep {
   REP_BODY(InstSrcData);
 
+  public:
+
+    /**
+     * default error class
+     **/
+    typedef InstSrcError Error;
+
+
+  public:
+
+    InstSrcData();
+
+    virtual ~InstSrcData();
+#if 0
   private:
     InstData *_data;
 
@@ -105,8 +119,20 @@ class InstSrcData: virtual public Rep {
      * @return list of PMSolvablePtr on this source
      */
     const std::list<PMSolvablePtr> *getPatches (void) const;
+#endif
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
+
+  public:
+
+    /**
+     * Any concrete InstSrcData must realize this, as it knows the expected
+     * layout on the media. Expect MediaAccessPtr in source_r already opened
+     * the URL denoting the medias root dir. Return the InstSrcDescr retrieved
+     * from the media via ndescr_r, or NULL and PMError set.
+     **/
+    static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
+				InstSrcPtr source_r, const Pathname & produduct_dir_r );
 };
 
 ///////////////////////////////////////////////////////////////////

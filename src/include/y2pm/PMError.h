@@ -154,8 +154,8 @@ class PMError {
       C_Error        = 0,
       // ADD/DEL ENTRIES:
       // adjust switches in errClass() and errstr()
-      C_InstSrcError = 10*_valrange,
-      C_MediaError   = 11*_valrange,
+      C_InstSrcError      = 10*_valrange,
+      C_MediaError        = 11*_valrange,
       C_InstTargetError   = 12*_valrange
     };
 
@@ -240,7 +240,7 @@ class PMError
 	PMError(
 	    const std::string& reporter,
 	    enum Severity s = None,
-	    int errnoval, 
+	    int errnoval,
 	    unsigned possibleAction = Continue,
 	    enum SuggestedAction a = Continue
 	    );
@@ -263,7 +263,7 @@ class PMError
 	 * @return what the user decided to do
 	 * */
 	enum SuggestedAction askUser();
-	
+
 
 	enum Severity getSeverity() const;
 
@@ -282,7 +282,7 @@ class PMError
     private:
 
 	std::string _reporter;
-	
+
 	enum Severity _severity;
 
 	std::string _message;

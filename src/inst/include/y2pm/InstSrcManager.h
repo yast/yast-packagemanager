@@ -24,7 +24,7 @@
 #include <list>
 
 #include <y2pm/InstSrcPtr.h>
-#include <y2pm/MediaInfoPtr.h>
+#include <y2pm/MediaAccessPtr.h>
 
 #include <y2pm/PMError.h>
 
@@ -57,7 +57,7 @@ class InstSrcManager {
 
   public:
 
-    typedef unsigned               ISrcId;
+    typedef constInstSrcPtr        ISrcId;
     typedef std::set<InstSrcPtr>   ISrcPool;
     typedef std::list<InstSrcPtr>  ISrcList;
 
@@ -78,15 +78,15 @@ class InstSrcManager {
      * Access media. Detect kind of InstSrc available on media( if type == T_UKNOWN ).
      * Add InstSrc to the list of known sources and return the InstSrcPtr.
      **/
-    PMError scanMedia( constInstSrcPtr & isrc_r, MediaInfoPtr media_r, const ISrcType type_r = T_UNKNOWN );
+    PMError scanMedia( ISrcId & isrc_r, const Url & mediaurl_r, const ISrcType type_r = T_UNKNOWN );
 
-    PMError enableSource( InstSrcPtr & isrc_r );
+    PMError enableSource( const ISrcId & isrc_r );
 
-    PMError disableSource( InstSrcPtr & isrc_r );
+    PMError disableSource( const ISrcId & isrc_r );
 
-    PMError deleteSource( InstSrcPtr isrc_r );
+    PMError deleteSource( const ISrcId & isrc_r );
 
-    PMError setAutoenable( InstSrcPtr isrc_r, const bool yesno );
+    PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
 
 };
 
