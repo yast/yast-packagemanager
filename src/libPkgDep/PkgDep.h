@@ -11,8 +11,9 @@
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRevRel.h>
 #include <y2pm/PkgSet.h>
-#include <y2pm/PkgDb.h>
+#include <y2pm/Alternatives.h>
 
+// solver
 class PkgDep {
 
 	// ------------------------------ types ------------------------------
@@ -206,7 +207,9 @@ class PkgDep {
 	typedef AltInfoList::const_iterator AltInfo_const_iterator;
 	
 	// ---------------------------- static vars ----------------------------
-	static const PkgSet *default_avail;
+//	static const PkgSet *default_avail;
+
+	// initialisation in utils.cc
 	static alternatives_mode default_alternatives_mode;
 	static unsigned default_max_remove;
 
@@ -215,7 +218,7 @@ class PkgDep {
 	PkgSet installed;
 	const PkgSet& available;
 
-	PkgDb _pool;
+	Alternatives::AltDefaultList (*_alternatives_callback)( PkgName name );
 
 	// --------------------- used during an install run --------------------
 	PkgSet vinstalled;
@@ -270,19 +273,27 @@ class PkgDep {
 		add_referer( pkg->name(), referer, rel );
 	}
 	void add_not_available( const Solvable *referer, const PkgRelation& rel );
+
+	// return empty list
+	static Alternatives::AltDefaultList default_alternatives_callback( PkgName name )
+	{
+		return Alternatives::AltDefaultList();
+	}
 	
 public:
-	PkgDep( PkgDb pool, PkgSet& instd, const PkgSet& avail,
+	PkgDep( PkgSet& instd, const PkgSet& avail,
+			Alternatives::AltDefaultList (*alternatives_callback)( PkgName name ) = default_alternatives_callback,
 			alternatives_mode m = default_alternatives_mode )
-		: alt_mode(m), installed(instd), available(avail), _pool(pool) {}
-	PkgDep( PkgDb pool, const PkgSet& instd, alternatives_mode m=default_alternatives_mode)
-		: alt_mode(m), installed(instd), available(*default_avail), _pool(pool) {}
+		: alt_mode(m), installed(instd), available(avail), _alternatives_callback(alternatives_callback) {}
+
+//	PkgDep(  const PkgSet& instd, alternatives_mode m=default_alternatives_mode)
+//		: alt_mode(m), installed(instd), available(*default_avail), _pool(pool) {}
 /*	PkgDep( alternatives_mode m = default_alternatives_mode )
 		: alt_mode(m), installed(PkgSet(DTagListI0())),
 		  available(*default_avail) {}
 */
 	// install packages (if good result, add candidates to installed set)
-	// does not throw
+	// does not throw -- ln
 	bool install( PkgSet& candidates,
 				  ResultList& good, ErrorResultList& bad,
 				  bool commit_to_installed = true );
@@ -300,17 +311,31 @@ public:
 	const PkgSet& current_installed() { return installed; }
 
 	// set defaults
+/*
 	static void set_default_available( const PkgSet& av ) {
 		default_avail = &av;
 	}
+*/
+	void set_alternatives_mode(alternatives_mode mode)
+	{
+		alt_mode = mode;
+	}
+	
+	void set_alternatives_callback(Alternatives::AltDefaultList (*alternatives_callback)( PkgName name ))
+	{
+		_alternatives_callback = alternatives_callback;
+	}
+
 	static void set_default_alternatives_mode( alternatives_mode m ) {
 		default_alternatives_mode = m;
 	}
+
 	static void set_default_max_remove( unsigned mr ) {
 		default_max_remove = mr;
 	}
 };
 
+// output.cc
 std::ostream& operator<<( std::ostream& os, const PkgDep::Result& res );
 std::ostream& operator<<( std::ostream& os, const PkgDep::ErrorResult& res );
 std::ostream& operator<<( std::ostream& os, const PkgDep::RelInfoList& rl );

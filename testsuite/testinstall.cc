@@ -25,6 +25,18 @@ void usage(char **argv) {
 	exit(1);
 }
 
+
+// example
+Alternatives::AltDefaultList alternative_default( PkgName name )
+{
+    Alternatives::AltDefaultList list;
+    if(name==PkgName("spell"))
+	list.push_front(PkgName("aspell"));
+    else if(name==PkgName("libGL.so.1") || name==PkgName("libgl"))
+	list.push_front(PkgName("mesasoft"));
+    return list;
+}
+
 int main( int argc, char *argv[] )
 {
     // add packages to the pool
@@ -38,7 +50,7 @@ int main( int argc, char *argv[] )
     PackageDataProvider::Ref source;
     try
     {
-	source = new SuSEClassicDataProvider(pkgpool,Url("file:///mounts/dist/full/full-i386"));
+	source = new SuSEClassicDataProvider(pkgpool,Url("file:///mounts/machcd3/dists/full-i386/"));
 	source->addAllPackages();
 //	PackageDataProvider* inst = new SuSEClassicDataProvider(Url("file:///suse/lnussel/prog/phi/test"));
 //	inst->addAllPackages();
@@ -105,8 +117,8 @@ int main( int argc, char *argv[] )
     }
 */
     // construct PkgDep object
-    PkgDep::set_default_alternatives_mode(PkgDep::AUTO_IF_NO_DEFAULT);
-    PkgDep engine( pkgpool, installed, *available );
+//    PkgDep::set_default_alternatives_mode(PkgDep::AUTO_IF_NO_DEFAULT);
+    PkgDep engine( installed, *available, alternative_default );
 
     // call upgrade
     PkgDep::ResultList good;

@@ -18,6 +18,8 @@ bool PkgDep::install( PkgSet& in_candidates,
 	notes = Notes_type();
 	i_obsoleted = NameList();
 	
+	// sort out candidates that are already installed, mark others as
+	// coming from input
 	ci_for( PkgSet::, c, candidates-> ) {
 		PkgName candname = c->key;
 		const Solvable *cand = c->value;

@@ -7,6 +7,7 @@
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgSet.h>
 #include <y2pm/PackageSource.h>
+#include <y2pm/Alternatives.h>
 
 class Package;
 class PackageDataProvider;
@@ -27,11 +28,10 @@ class PkgDbRep {
 	typedef ReqFiles_type::iterator ReqFiles_iterator;
 	typedef ReqFiles_type::const_iterator ReqFiles_const_iterator;
 
-	typedef std::list<PkgName> AltDefaultList;
-	typedef AltDefaultList::iterator AltDefaultList_iterator;
-	typedef AltDefaultList::const_iterator AltDefaultList_const_iterator;
-	typedef hash<PkgName,AltDefaultList> AltDefault_type;
-	
+	typedef Alternatives::AltDefaultList::iterator AltDefaultList_iterator;
+	typedef Alternatives::AltDefaultList::const_iterator AltDefaultList_const_iterator;
+	typedef hash<PkgName,Alternatives::AltDefaultList> AltDefault_type;
+
   private:
 	// the package pool itself
 	PkgPool_type Pool;
@@ -105,17 +105,17 @@ class PkgDbRep {
 	}
 */
 	// look up an alternative default
-	AltDefaultList alternative_default( PkgName name ) {
+	Alternatives::AltDefaultList alternative_default( PkgName name ) {
 		if (alt_defaults.exists(name))
 			return alt_defaults[name];
 		else
-			return AltDefaultList();
+			return Alternatives::AltDefaultList();
 	}
 
 	// maintain alternative defaults list
 	void clear_alternative_defaults() { alt_defaults = AltDefault_type(); }
 	void add_alternative_defaults( const PkgName& name,
-								   const AltDefaultList& defaults ) {
+								   const Alternatives::AltDefaultList& defaults ) {
 		alt_defaults[name] = defaults;
 	}
 	

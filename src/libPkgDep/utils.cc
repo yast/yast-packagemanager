@@ -3,7 +3,7 @@
 #include <PkgDep_int.h>
 
 // initialization of static class vars
-const PkgSet* PkgDep::default_avail = new PkgSet();
+//const PkgSet* PkgDep::default_avail = new PkgSet();
 PkgDep::alternatives_mode PkgDep::default_alternatives_mode =ASK_IF_NO_DEFAULT;
 unsigned PkgDep::default_max_remove = 10;
 
