@@ -51,6 +51,7 @@ class YouError {
       E_bad_sig_file,
       E_bad_sig_rpm,
       E_get_suseservers_failed,
+      E_write_suseservers_failed,
       E_read_suseservers_failed,
       E_auth_failed
     };
