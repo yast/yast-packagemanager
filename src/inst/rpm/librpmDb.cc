@@ -284,7 +284,6 @@ PMError librpmDb::dbAccess( constlibrpmDbPtr & ptr_r )
 unsigned librpmDb::dbRelease( bool force_r )
 {
   if ( !_defaultDb ) {
-    DBG << "dbRelease: no access" << endl;
     return 0;
   }
 

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug  7 15:02:57 CEST 2003 - ma@suse.de
+
+- Close rpmdatabase when installing/deleting packages via rpm to
+  make shure subsequent queries reopen the database and see the
+  changes made.
+
+-------------------------------------------------------------------
 Tue Aug  5 13:32:16 CEST 2003 - ma@suse.de
 
 - Added new content file entry 'RELNOTESURL'

@@ -1300,6 +1300,10 @@ RpmDb::run_rpm(const RpmArgVec& options,
 
   argv[argc] = 0;
 
+  // Invalidate all outstanding database handles in case
+  // the database gets modified.
+  librpmDb::dbRelease( true );
+
   // Launch the program with default locale
   process = new ExternalProgram(argv, disp, false, -1, true);
   return;
