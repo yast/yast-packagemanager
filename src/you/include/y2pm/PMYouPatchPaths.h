@@ -45,32 +45,103 @@ class PMYouPatchPaths : virtual public Rep {
   REP_BODY(PMYouPatchPaths);
 
   public:
+    /**
+      Constructor.
+    */
     PMYouPatchPaths();
+    /**
+      Constructor. Initialise object with values based on the given product,
+      version and baseArch.
+    */
     PMYouPatchPaths( const std::string &product, const std::string &version,
                      const std::string &baseArch );
 
+    /**
+      Destructor
+    */
     ~PMYouPatchPaths();
 
+    /**
+      Init object.
+      
+      @param product  Product name
+      @param version  Product version
+      @param baseArch Base architecture of product
+      @param youUrl   URL used to get YOU server list
+      @param path     Path on server to directory containing patches, rpms and
+                      scripts directories
+      @param business True, if product is a business product, needing
+                      authentification on the server
+    */
     void init( const std::string &product, const std::string &version,
                const std::string &baseArch, const std::string &youUrl,
                const std::string &path, bool business );
+    /**
+      Init object with given product, version and baseArch values.
+    */
     void init( const std::string &product, const std::string &version,
                const std::string &baseArch );
 
+    /**
+      Read information about product (name, version, architecture, YOU URL,
+      if the product is a business product, path on server and name of
+      distproduct) and initialize object accordingly.
+    */
     PMError initProduct();
 
+    /**
+      Set path on server to directory containing the "patches", "rpms" and
+      "scripts" directories. This path depends on the product.
+    */
     void setPatchPath( const Pathname & );
+    /**
+      Return path to patches on server.
+    */
     Pathname patchPath();
 
+    /**
+      Set base URL where patches are read from. This doesn't include the product
+      dependent path.
+    */
     void setPatchUrl( const Url & );
+    /**
+      Return base URL to patches. This doesn't include the product dependent
+      path.
+    */
     Url patchUrl();
 
+    /**
+      Return path to RPM for base architecture.
+      
+      @param pkg      Pointer to package
+      @param patchRpm If true, return path to patch RPM, if false, return path
+                      to full RPM.
+    */
     Pathname rpmPath( const PMPackagePtr &pkg, bool patchRpm = false );
+    /**
+      Return path to RPM.
+      
+      @param pkg      Pointer to package
+      @param arch     Architecture of RPM.
+      @param patchRpm If true, return path to patch RPM, if false, return path
+                      to full RPM.
+    */
     Pathname rpmPath( const PMPackagePtr &pkg, const std::string & arch,
                       bool patchRpm = false );
 
+    /**
+      Return path of script.
+      
+      @param scriptName Name of script
+    */
     Pathname scriptPath( const std::string &scriptName );
 
+    /**
+      Return path of script at download location.
+      
+      @param scriptName Name of script
+    */
+    
     Pathname localScriptPath( const std::string &scriptName );
 
     /**
@@ -89,44 +160,109 @@ class PMYouPatchPaths : virtual public Rep {
     */
     Pathname installDir();
 
+    /**
+      Return path to directory where external RPMs are stored.
+    */
     Pathname externalRpmDir();
 
+    /**
+      Return path to local server list (suseservers). This file is obsolete, use
+      localYouServers() instead.
+    */
     Pathname localSuseServers();
 
+    /**
+      Return path to local server list configuration file.
+    */
     Pathname localYouServers();
 
+    /**
+      Return path to file where the server list is downloaded to from the
+      server.
+    */
     Pathname cachedYouServers();
 
+    /**
+      Return name of file holding the list of patches in the "patches"
+      directory.
+    */
     std::string directoryFileName();
 
+    /**
+      Return name of product.
+    */
     std::string product();
     
+    /**
+      Return name of distribution.
+    */
     std::string distProduct();
     
+    /**
+      Return version of product.
+    */
     std::string version();
     
+    /**
+      Return base architecture.
+    */
     PkgArch baseArch();
 
+    /**
+      Return list of compatible architectures.
+    */
     std::list<PkgArch> archs();
 
+    /**
+      Return whether the product is a business product or not. Business products
+      require authentification on the server.
+    */
     bool businessProduct();
 
+    /**
+      Get list of YOU servers from CGI script on the master server.
+    */
     PMError requestServers( const std::string &url = std::string() );
 
+    /**
+      Return list of known servers.
+    */
     std::list<Url> servers();
     
+    /**
+      Return default server, when no server list can be read at all.
+    */
     Url defaultServer();
 
+    /**
+      Return server which is currently used for getting updates.
+    */
     Url currentServer();
 
+    /**
+      Return URL where list of YOU servers is read from.
+    */
     std::string mirrorList();
 
+    /**
+      Return default URL where list of YOU servers is read from, if the
+      information can't be read from the product information.
+    */
     std::string defaultMirrorList();
 
+    /**
+      Return path to file used for storing cookies.
+    */
     Pathname cookiesFile();
     
+    /**
+      Return path to file used for storing configuration information.
+    */
     Pathname configFile();
 
+    /**
+      Return configuration object for file at configFile().
+    */
     SysConfig *config();
 
   protected:

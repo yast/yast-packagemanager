@@ -142,7 +142,7 @@ PMError PMYouPatchPaths::initProduct()
   DBG << "BaseArch: " << baseArch << endl;
   DBG << "YouUrl: " << youUrl << endl;
   DBG << "YouType: " << youType << endl;
-  DBG << "YouPatch: " << youPath << endl;
+  DBG << "YouPath: " << youPath << endl;
   DBG << "DistProduct: " << _distProduct << endl;
 
   if ( youPath.empty() ) {
