@@ -38,11 +38,14 @@ using namespace std;
 class Callbacks : public InstYou::Callbacks
 {
     private:
-	int total_percent;
-	string _str;
+        bool _skipPre;   // skip packages with pre install messages
+        bool _verbose;
 
     public:
-	Callbacks() : InstYou::Callbacks()
+        Callbacks(bool verbose, bool skipPre) 
+            : InstYou::Callbacks(), 
+              _skipPre( skipPre ),
+              _verbose( verbose )
 	{
 	}
 	virtual ~Callbacks()
@@ -53,6 +56,7 @@ class Callbacks : public InstYou::Callbacks
 	{
 	    return true;
 	}
+
 	virtual bool patchProgress( int percent, const std::string &str )
 	{
 	    return true;
@@ -62,43 +66,59 @@ class Callbacks : public InstYou::Callbacks
 		const std::string &text,
 		const std::string &details )
 	{
-	    cout << stringutil::form(_("Error (type: %s): %s"), type.c_str(), text.c_str()) << endl;
-	    if(!details.empty())
-		cout << stringutil::form(_("Details: %s"), details.c_str()) << endl;
+            if (_verbose) {
+                cout << stringutil::form(_("Error (type: %s): %s"), type.c_str(), text.c_str()) << endl;
+                if(!details.empty())
+                    cout << stringutil::form(_("Details: %s"), details.c_str()) << endl;
+            }
 	    return PMError();
 	}
+
 	virtual PMError showMessage( const std::string &strtype,
 		const std::list<PMYouPatchPtr> & patches)
 	{
 	    bool pre = (strtype == "preinfo"?true:false);
-	    for(std::list<PMYouPatchPtr>::const_iterator it = patches.begin();
-		    it != patches.end(); ++it)
-	    {
-		cout << "#####" << (*it)->fullName() << "#####" << endl;
-		if(pre)
-		    cout << (*it)->preInformation() << endl;
-		else
-		    cout << (*it)->postInformation() << endl;
-	    }
+            for(std::list<PMYouPatchPtr>::const_iterator it = patches.begin();
+                it != patches.end(); ++it)
+            {
+                if(pre) {
+                    if (_verbose) {
+                        cout << "#####" << (*it)->fullName() << "#####" << endl;
+                        if (_skipPre)
+                            cout << _("NOTE: THIS PATCH HAS BEEN SKIPPED\n      (option --skip-pre and patch contains pre-install information)")
+                                 << endl;
+                        cout << (*it)->preInformation() << endl;
+                    }
+                    else if (_skipPre) {
+                        cout << "SKIPPED: "
+                             << (*it)->fullName()
+                             << endl;
+                    }
+                }
+                else 
+                    if (_verbose)
+                        cout << (*it)->postInformation() << endl;
+            }
 		
-#if other_tools_that_depend_on_9_1_behavior_are_fixed
-	    if( pre && !confirm_yes )
-	    {
+            if( pre && _skipPre ) {
 		return PMError(YouError::E_user_skip);
 	    }
-#endif
+
 	    return PMError();
 	}
+
 	virtual void log( const std::string &text )
 	{
-	    cout << text << flush;
+          if (_verbose)
+	      cout << text << flush;
 	}
 
 	virtual bool executeYcpScript( const std::string &script )
 	{
-	    cout << stringutil::form(_("patch wants to execute ycp script %s but that"
+          if (_verbose)
+              cout << stringutil::form(_("patch wants to execute ycp script %s but that"
 		" is not supported with this tool"), script.c_str()) << endl;
-	    return false;
+          return false;
 	}
 };
 
@@ -110,10 +130,11 @@ class setYouCallbacks
 	Callbacks callbacks;
 
     public:
-	setYouCallbacks(InstYou& you, bool enable) : _you(you)
+    setYouCallbacks(InstYou& you, bool verbose, bool skipPre) 
+          : _you(you), 
+            callbacks(verbose, skipPre)
 	{
-	    if(enable)
-		_you.setCallbacks(&callbacks);
+            _you.setCallbacks(&callbacks);
 	}
 	~setYouCallbacks()
 	{
@@ -166,6 +187,9 @@ void usage()
 "                         can be selected (this behavior is overriden by the --force option)."
 	) << endl
        << _("-f, --force              Force installation of a selected patch.") << endl
+       << _("-P, --skip-pre           Skip patches with pre-install information (e.g. kernel updates).\n"
+            "                         Instead, a message will be generated.\n"
+            "                         (Do not use together with -s)") << endl
        << endl
        << "security | recommended | patchlevel | document | optional   "
        << _("Types of patches to install.") << endl;
@@ -210,6 +234,7 @@ int main( int argc, char **argv )
   bool quickCheckUpdates = false;
   bool getAll = false;
   bool force = false;
+  bool skipPre = false;
   
   int c;
   while( 1 ) {
@@ -235,12 +260,13 @@ int main( int argc, char **argv )
       { "get-all", no_argument, 0, 'G' },
       { "select-patches", required_argument, 0, 'S' },
       { "force", no_argument, 0, 'f' },
+      { "skip-pre", no_argument, 0, 'P' },
       { 0, 0, 0, 0 }
     };
 
     int option_index = 0;
 
-    c = getopt_long( argc, argv, "qkrcgihdnsIVDu:p:v:a:l:GS:f", long_options,
+    c = getopt_long( argc, argv, "qkrcgihdnsIVDu:p:v:a:l:GS:fP", long_options,
                      &option_index );
     if ( c < 0 ) break;
 
@@ -310,6 +336,9 @@ int main( int argc, char **argv )
         break;
       case 'f':
         force = true;
+        break;
+      case 'P':
+        skipPre = true;
         break;
       default:
         cerr << _("Error parsing command line.") << endl;
@@ -398,7 +427,7 @@ int main( int argc, char **argv )
 
   InstYou you( patchInfo, settings );
 
-  setYouCallbacks callbacks(you, verbose);
+  setYouCallbacks callbacks(you, verbose, skipPre);
 
   if ( !productStr && !versionStr && !archStr ) {
     you.initProduct();
