@@ -1,12 +1,12 @@
 #ifndef _PkgDep_int_h
 #define _PkgDep_int_h
-
+/*
 #ifdef PKGDEP_DEBUG
 #define DBG(expr)	do { std::cout << expr; } while(0)
 #else
 #define DBG(expr)
 #endif
-
+*/
 #define i_for(iter_type,iter,base)					\
 	for( iter_type##iterator iter = base##begin();	\
 	     iter != base##end();						\

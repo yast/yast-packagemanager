@@ -1,4 +1,5 @@
 #include <cassert>
+#include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PkgDep_int.h>
 
@@ -27,12 +28,12 @@ unsigned PkgDep::count_providers_for(
 	
 	RevRel_for( set->provided()[req.name()], prov ) {
 		if (prov->relation().matches( req )) {
-			DBG( "    satisfied by " << prov->pkg()->name()
-				 << " with Provides: " << prov->relation() << std::endl );
+			DBG << "    satisfied by " << prov->pkg()->name()
+				 << " with Provides: " << prov->relation() << std::endl;
 			++providers;
 		}
 	}
-	DBG( "    total " << providers << " providers\n" );
+	DBG << "    total " << providers << " providers\n";
 	return providers;
 }
 
@@ -41,8 +42,8 @@ PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg,
 {
 	PkgName name = pkg->name();
 
-	DBG( "Trying to upgrade conflictor " << name << "-" << pkg->edition()
-		 << " to solve confl source provides " << provides << std::endl );
+	DBG << "Trying to upgrade conflictor " << name << "-" << pkg->edition()
+		 << " to solve confl source provides " << provides << std::endl;
 	// if no different version is available, we can't upgrade
 	PMSolvablePtr upgrade = available_upgrade(pkg);
 	if (!upgrade)
@@ -63,8 +64,8 @@ PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
 {
 	PkgName name = pkg->name();
 
-	DBG( "Trying to upgrade provider " << name << "-" << pkg->edition()
-		 << " to solve conflict " << confl << "\n" );
+	DBG << "Trying to upgrade provider " << name << "-" << pkg->edition()
+		 << " to solve conflict " << confl << "\n";
 	// if no different version is available, we can't upgrade
 	PMSolvablePtr upgrade = available_upgrade(pkg);
 	if (!upgrade)
@@ -88,12 +89,12 @@ PMSolvablePtr PkgDep::try_upgrade_requirerer(
 ) {
 	PkgName name = pkg->name();
 
-	DBG( "Trying to upgrade requirerer " << name << "-" << pkg->edition()
-		 << " to solve broken requirement\n" );
+	DBG << "Trying to upgrade requirerer " << name << "-" << pkg->edition()
+		 << " to solve broken requirement\n";
 	// if no different version is available, we can't upgrade
 	PMSolvablePtr upgrade = available_upgrade(pkg);
 	if (!upgrade) {
-		DBG( "no upgrade available for " << pkg->name() << "\n");
+		DBG << "no upgrade available for " << pkg->name() << "\n";
 		return NULL;
 	}
 
@@ -117,7 +118,7 @@ PMSolvablePtr PkgDep::available_upgrade( PMSolvablePtr pkg )
 	// if no different version is available, we can't upgrade
 	if (!available.includes(pkg->name()) ||
 		(upgrade = available[pkg->name()])->edition() == pkg->edition()) {
-		DBG( "  not possible, no different edition available\n" );
+		DBG << "  not possible, no different edition available\n";
 		return NULL;
 	}
 	return upgrade;
@@ -129,12 +130,12 @@ void PkgDep::do_upgrade_for_conflict( PMSolvablePtr upgrade )
 	PkgName name = upgrade->name();
 	
 	if (candidates->includes(name) && ((*candidates)[name] == upgrade)) {
-		DBG( "Would upgrade " << name << " for solving conflict, but it's "
-			 "already a candidate\n" );
+		DBG << "Would upgrade " << name << " for solving conflict, but it's "
+			 "already a candidate\n";
 	}
 	else {
-		DBG( "Upgrading " << name << " to " << upgrade->edition()
-			 << " to solve conflict\n" );
+		DBG << "Upgrading " << name << " to " << upgrade->edition()
+			 << " to solve conflict\n";
 		candidates->add( upgrade );
 		to_check.push_back( upgrade );
 		notes[name].upgrade_to_solve_conflict = true;

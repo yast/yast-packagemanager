@@ -1,3 +1,4 @@
+#include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PkgDep_int.h>
 #include <y2util/hash.h>
@@ -34,7 +35,7 @@ bool PkgDep::upgrade(
 	noval_hash<PkgName> avoid_break_installs;
 	to_remove = NameList();
 	
-	DBG( "Starting upgrade\n" );
+	DBG << "Starting upgrade\n";
 	
 	if (candidates.empty()) {
 		// for all installed packages...
@@ -47,8 +48,8 @@ bool PkgDep::upgrade(
 			PMSolvablePtr upgrade;
 			if (available.includes(iname) &&
 				(upgrade = available[iname])->edition() > ipkg->edition()) {
-				DBG( iname << ": upgrade from " << ipkg->edition()
-					 << " to " << upgrade->edition() << endl );
+				DBG << iname << ": upgrade from " << ipkg->edition()
+					 << " to " << upgrade->edition() << endl;
 				candidates.add( upgrade );
 				real_from_input_list.insert( upgrade->name() );
 				added = true;
@@ -58,9 +59,9 @@ bool PkgDep::upgrade(
 			if (!added) {
 				RevRel_for( available.obsoleted()[iname], obs ) {
 					if (obs->relation().matches( ipkg->self_provides() )) {
-						DBG( iname << ": obsoleted by available "
+						DBG << iname << ": obsoleted by available "
 							 << obs->pkg()->name() << "; installing "
-							 << obs->pkg()->name() << endl );
+							 << obs->pkg()->name() << endl;
 						candidates.add( obs->pkg() );
 						real_from_input_list.insert( obs->pkg()->name() );
 						added = true;
@@ -69,7 +70,7 @@ bool PkgDep::upgrade(
 			}
 
 			if (!added)
-				DBG( iname << ": no upgrade\n" );
+				DBG << iname << ": no upgrade\n";
 		}
 	}
 
@@ -78,9 +79,9 @@ bool PkgDep::upgrade(
 	while (--endless_protect > 0) {
 
 		// try installation of the candidates
-		DBG( "-------------------- install run --------------------\n" );
+		DBG << "-------------------- install run --------------------\n";
 		install( candidates, out_good, out_bad, false );
-		DBG( "-------------------- install end --------------------\n" );
+		DBG << "-------------------- install end --------------------\n";
 
 		if (out_bad.empty())
 			// no problems...
@@ -96,15 +97,15 @@ bool PkgDep::upgrade(
 			// if some pkg needs something that's not available, don't upgrade
 			// it
 			if (p->not_available) {
-				DBG(p->name <<" is not available, deselecting its referers\n");
+				DBG << p->name <<" is not available, deselecting its referers\n";
 				deselect_referers( PkgName("<none>"), candidates, p->referers, out_good, out_bad);
 			}
 
 			// alternatives possible: simply choose first one
 			if (!p->alternatives.empty()) {
 				PkgName alt = p->alternatives.front().name;
-				DBG( "Choosing " << alt << " as alternative for "
-					 << p->name << endl );
+				DBG << "Choosing " << alt << " as alternative for "
+					 << p->name << endl;
 				assert( available.includes(alt) );
 				candidates.add( available[alt] );
 				if (p->install_to_avoid_break)
@@ -115,22 +116,22 @@ bool PkgDep::upgrade(
 			// remove
 			if (!p->conflicts_with.empty()) {
 				if (p->remove_to_solve_conflict.size() > max_remove) {
-					DBG( "too many packages ("
+					DBG << "too many packages ("
 						 << p->remove_to_solve_conflict.size()
 						 << ") to remove for conflict(s) of " << p->name
-						 << " -- aborting upgrade\n" );
+						 << " -- aborting upgrade\n";
 					all_ok = false;
 					goto out;
 				}
 				ci_for( NameList::, q, p->remove_to_solve_conflict. ) {
 					if (candidates.includes(*q)) {
-						DBG( "removing candidate " << *q
-							 << " due to conflict with " << p->name << endl );
+						DBG << "removing candidate " << *q
+							 << " due to conflict with " << p->name << endl;
 						candidates.remove( *q );
 					}
 					else {
-						DBG( "removing installed " << *q
-							 << " due to conflict with " << p->name << endl );
+						DBG << "removing installed " << *q
+							 << " due to conflict with " << p->name << endl;
 						to_remove.push_back( *q );
 					}
 				}
@@ -145,7 +146,7 @@ bool PkgDep::upgrade(
 		}
 
 		// ok, everything fixed, remove to_remove pkgs from installed
-		DBG( "Ok, removing " << to_remove << endl );
+		DBG << "Ok, removing " << to_remove << endl;
 		ci_for( NameList::, p, to_remove. )
 			installed.remove( *p );
 	}
