@@ -26,6 +26,7 @@
 #include <y2pm/PMManager.h>
 #include <y2pm/PMPackage.h>
 #include <y2util/YRpmGroupsTree.h>
+#include <y2pm/PMPackageManager_update.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -86,15 +87,13 @@ class PMPackageManager : public PMManager {
 			      std::list<PMPackagePtr> & instlist_r );
 
     /**
-     * prepare for update
-     * go through all installed packages and update them
+     * go through all installed packages and update them.
      *
-     * return number of packages affected
-     * return non-suse packages for which an update candidate exists in noinstall_r
-     * return non-suse packages for which an obsolete exists in nodelete_r
-     *
+     * Any options for update are passed down via opt_stats_r.
+     * Remaining fields (statistics and returned lists) will be
+     * filled by doUpdate.
      **/
-    int doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r);
+    void doUpdate( PMUpdateStats & opt_stats_r );
 
     /**
      * Retrieve the internal RPM groups tree (for cloning tree items in the UI etc.).

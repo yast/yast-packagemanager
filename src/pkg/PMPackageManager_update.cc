@@ -47,13 +47,8 @@ using namespace std;
 //		return non-suse packages for which an update candidate exists in noinstall_r
 //		return non-suse packages for which an obsolete exists in nodelete_r
 //
-int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackagePtr> & nodelete_r )
+void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 {
-  noinstall_r.clear();
-  nodelete_r.clear();
-
-  PMUpdateStats ustats;
-
   typedef set<PMPackagePtr>            PackageSet;
   typedef map<PkgSplit,PackageSet>     SplitMap;
   typedef map<PMPackagePtr,PackageSet> TodoMap;
@@ -67,8 +62,9 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
   MIL << "doUpdate start..." << endl;
 
   ///////////////////////////////////////////////////////////////////
-  // Reset all auto states and build PkgSet of available candidates.
-  // On the fly rememeber splitprovides and afterward check, which
+  // Reset all auto states and build PkgSet of available candidates
+  // (those that do not belong to Selectables set to delete).
+  // On the fly rememeber splitprovides and afterwards check, which
   // of them do apply.
   ///////////////////////////////////////////////////////////////////
   PkgSet available; // candidates available for install (no matter if selected for install or not)
@@ -78,18 +74,18 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
 
     if ( (*it)->to_delete() ) {
       D__ << "doUpdate available: SKIP to delete " << (*it) << endl;
-      ++ustats.pre_todel;
+      ++opt_stats_r.pre_todel;
       continue;
     }
 
     if ( ! (*it)->has_candidate() ) {
       D__ << "doUpdate available: SKIP no candidate " << (*it) << endl;
-      ++ustats.pre_nocand;
+      ++opt_stats_r.pre_nocand;
       continue;
     }
 
     PMPackagePtr candidate( (*it)->candidateObj() );
-    ++ustats.pre_avcand;
+    ++opt_stats_r.pre_avcand;
 
     // if installed not SuSE -> not available ???
     available.add( candidate );
@@ -103,9 +99,9 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
       }
     }
   }
-  MIL << "doUpdate: " << ustats.pre_todel  << " packages tagged to delete" << endl;
-  MIL << "doUpdate: " << ustats.pre_nocand << " packages without candidate (foreign, renamed or droped)" << endl;
-  MIL << "doUpdate: " << ustats.pre_avcand << " packages available for update" << endl;
+  MIL << "doUpdate: " << opt_stats_r.pre_todel  << " packages tagged to delete" << endl;
+  MIL << "doUpdate: " << opt_stats_r.pre_nocand << " packages without candidate (foreign, renamed or droped)" << endl;
+  MIL << "doUpdate: " << opt_stats_r.pre_avcand << " packages available for update" << endl;
 
   MIL << "doUpdate: going to check " << splitmap.size() << " probabely splitted packages" << endl;
   {
@@ -160,11 +156,11 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
     if ( ! (*it)->has_installed() ) {
       continue;
     }
-    ++ustats.chk_installed_total;
+    ++opt_stats_r.chk_installed_total;
 
     if ( (*it)->to_delete() ) {
       DBG << "SKIP to delete: " << (*it)->installedObj() << endl;
-      ++ustats.chk_already_todel;
+      ++opt_stats_r.chk_already_todel;
       continue;
     }
 
@@ -189,7 +185,7 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
 	  // new version
 	  state->appl_set_install();
 	  DBG << " ==> INSTALL (new version): " << candidate << endl;
-	  ++ustats.chk_to_update;
+	  ++opt_stats_r.chk_to_update;
 	} else {
 	  // check whether to downgrade:
 	  // both must have vendor 'SuSE' and candidates buildtime must be
@@ -199,22 +195,22 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
 	       && installed->buildtime() < candidate->buildtime() ) {
 	    state->appl_set_install();
 	    DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
-	    ++ustats.chk_to_downgrade;
+	    ++opt_stats_r.chk_to_downgrade;
 	  } else {
 	    DBG << " ==> (candidate older)" << candidate << endl;
-	    ++ustats.chk_to_keep_old;
+	    ++opt_stats_r.chk_to_keep_old;
 	  }
 	}
       } else {
 	DBG << " ==> INSTALL (preselected): " << candidate << endl;
-	++ustats.chk_already_toins;
+	++opt_stats_r.chk_already_toins;
       }
 
     } else {
 
       if ( ! installed->vendor().isSuSE() ) {
 	DBG << " ==> (keep non SuSE package)" << endl;
-	++ustats.chk_keep_foreign;
+	++opt_stats_r.chk_keep_foreign;
 	continue; // no check for splits
       }
 
@@ -243,13 +239,13 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
       switch ( mpkg.size() ) {
       case 0:
 	DBG << " ==> (dropped)" << endl;
-	++ustats.chk_dropped;
+	++opt_stats_r.chk_dropped;
 	break;
       case 1:
         addProvided[installed] = mpkg;
 	// must check obsoletes ?
 	DBG << " ==> RENAMED to: " << (*mpkg.begin()) << endl;
-	++ustats.chk_renamed;
+	++opt_stats_r.chk_renamed;
 	break;
       default:
 	addMultiProvided[installed] = mpkg;
@@ -297,7 +293,7 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
     for ( PackageSet::iterator sit = tset.begin(); sit != tset.end(); ++sit ) {
       if ( ! (*sit)->getSelectable()->to_install() ) {
 	(*sit)->getSelectable()->appl_set_install();
-	++ustats.chk_add_split;
+	++opt_stats_r.chk_add_split;
       }
     }
   }
@@ -328,15 +324,14 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
     if ( guess ) {
       guess->getSelectable()->appl_set_install();
       DBG << " ==> RENAMED to: (pass 2: guessed): " << guess << endl;
-      ++ustats.chk_renamed_guessed;
+      ++opt_stats_r.chk_renamed_guessed;
     }
   }
 
   ///////////////////////////////////////////////////////////////////
   // done
   ///////////////////////////////////////////////////////////////////
-  MIL << ustats << endl;
-  return 0;
+  MIL << opt_stats_r << endl;
 }
 
 /******************************************************************

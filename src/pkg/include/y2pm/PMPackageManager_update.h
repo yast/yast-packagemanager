@@ -27,6 +27,8 @@
 //
 //	CLASS NAME : PMUpdateStats
 /**
+ * @short Struct for update options, statistics, and result lists.
+ *
  *
  **/
 class PMUpdateStats {
@@ -38,47 +40,122 @@ class PMUpdateStats {
 
   public:
 
-    // initial status:      either:
-    unsigned pre_todel;  // packages tagged to delete
-    unsigned pre_nocand; // packages without candidate (foreign, renamed or droped)
-    unsigned pre_avcand; // packages available for update (could be installed)
+    ///////////////////////////////////////////////////////////////////
+    // OPTIONS
+    ///////////////////////////////////////////////////////////////////
 
-    // update checks
-    unsigned chk_installed_total; // total installed packages checked
+
+  public:
+
+    ///////////////////////////////////////////////////////////////////
+    // STATISTICS
+    ///////////////////////////////////////////////////////////////////
+
+    /**
+     * initial status: packages already tagged to delete
+     **/
+    unsigned pre_todel;
+    /**
+     * initial status: packages without candidate (foreign, renamed or droped)
+     **/
+    unsigned pre_nocand;
+    /**
+     * initial status: packages with candidate (available for update)
+     **/
+    unsigned pre_avcand;
+
+
+    /**
+     * update checks: total number of packages checked (should be number of installed packages)
+     **/
+    unsigned chk_installed_total;
+
+    /**
+     * update checks: packages already tagged to delete (should be pre_todel)
+     **/
     unsigned chk_already_todel;
+
+    /**
+     * update checks: with candidate: packages already tagged to install
+     **/
     unsigned chk_already_toins;
-    // packages with candidate
+    /**
+     * update checks: with candidate: packages updated to new version
+     **/
     unsigned chk_to_update;
+    /**
+     * update checks: with candidate: packages downgraded
+     *
+     * Installed and candidate package have vendor SuSE and candidates buildtime
+     * is newer.
+     **/
     unsigned chk_to_downgrade;
+    /**
+     * update checks: with candidate: packages untouched
+     **/
     unsigned chk_to_keep_old;
-    // packages without candidate
+
+
+    /**
+     * update checks: without candidate: installed package has not vendor SuSE
+     *
+     * Remains untouched.
+     **/
     unsigned chk_keep_foreign;
+    /**
+     * update checks: without candidate: packages dropped (or SuSE internal)
+     *
+     * There's no available candidate providing it.
+     **/
     unsigned chk_dropped;
+    /**
+     * update checks: without candidate: packages renamed
+     *
+     * There's exactly one available candidate providing it.
+     **/
     unsigned chk_renamed;
-    unsigned chk_renamed_guessed;
+    /**
+     * update checks: without candidate: packages added by splitprovides
+     *
+     * Only packages not selected by one of the above checks are counted.
+     **/
     unsigned chk_add_split;
+    /**
+     * update checks: without candidate: package renamed (but not uniqe, thus guessed)
+     *
+     * There are multiple available candidates providing it. If at the end
+     * at least one out of these candidates was set to install by one of the
+     * above checks, it's ok. Otherwise we have to guess one.
+     **/
+    unsigned chk_renamed_guessed;
+
+  public:
+
+    ///////////////////////////////////////////////////////////////////
+    // RESULTLISTS
+    ///////////////////////////////////////////////////////////////////
 
   public:
 
     PMUpdateStats() {
       // initial status
-      pre_todel  = 0;
-      pre_nocand = 0;
-      pre_avcand = 0;
+      pre_todel			= 0;
+      pre_nocand		= 0;
+      pre_avcand		= 0;
       // update checks
-      chk_installed_total = 0;
-      chk_already_todel   = 0;
-      chk_already_toins   = 0;
+      chk_installed_total	= 0;
+      chk_already_todel		= 0;
       // packages with candidate
-      chk_to_update    = 0;
-      chk_to_downgrade = 0;
-      chk_to_keep_old  = 0;
+      chk_already_toins		= 0;
+      chk_to_update		= 0;
+      chk_to_downgrade		= 0;
+      chk_to_keep_old		= 0;
       // packages without candidate
-      chk_keep_foreign    = 0;
-      chk_dropped         = 0;
-      chk_renamed         = 0;
-      chk_renamed_guessed = 0;
-      chk_add_split       = 0;
+      chk_keep_foreign		= 0;
+      chk_dropped		= 0;
+      chk_renamed		= 0;
+      chk_renamed_guessed	= 0;
+      chk_add_split		= 0;
     }
     ~PMUpdateStats() {}
 };
