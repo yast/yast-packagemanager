@@ -24,13 +24,13 @@ noinst_PROGRAMS = test_rpmdb ma_test.exe testinstall
 # testinstall_LDADD = -ly2util
 
 ma_test_exe_SOURCES = ma_test.cc
-ma_test_exe_LDADD = $(top_srcdir)/src/liby2pm.la
+ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
 ma_test_exe_LDFLAGS = -static
 
 test_rpmdb_SOURCES = test_rpmdb.cc
-test_rpmdb_LDADD = $(top_srcdir)/src/liby2pm.la
+test_rpmdb_LDADD = $(top_builddir)/src/liby2pm.la
 test_rpmdb_LDFLAGS = -static
 
 testinstall_SOURCES = testinstall.cc
-testinstall_LDADD = $(top_srcdir)/src/liby2pm.la
+testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline
 testinstall_LDFLAGS = -static

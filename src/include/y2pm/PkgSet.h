@@ -62,7 +62,7 @@ class PkgSet {
 	// look up a package by name
 	PMSolvablePtr lookup( const PkgName& name ) const {
 		const HashElt<PkgName,PMSolvablePtr > *p = contents.find(name);
-		return p ? p->value : (PMSolvablePtr)0;
+		return p ? p->value : NULL;
 	}
 	PMSolvablePtr operator[] ( const PkgName& name ) const { return lookup(name); }
 	// package contained in this set?

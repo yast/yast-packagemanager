@@ -176,6 +176,15 @@ void PkgDep::add_not_available(PMSolvablePtr referer, const PkgRelation& rel )
 	notes[name].not_avail_range.merge( rel );
 }
 
+PkgDep::WhatToDoWithUnresolvable PkgDep::default_unresolvable_callback(
+    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p)
+{
+    if(rel.name()->find("rpmlib(") != std::string::npos)
+	return UNRES_IGNORE;
+
+    return UNRES_FAIL;
+}
+
 // Local Variables:
 // tab-width: 4
 // End:
