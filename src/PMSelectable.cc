@@ -25,6 +25,8 @@
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMObject.h>
 
+#include <Y2PM.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -156,6 +158,68 @@ PMSelectable::PMObjectList::iterator PMSelectable::clistLookup( PMObjectPtr obj_
   }
   return it;
 }
+
+
+///////////////////////////////////////////////////////////////////
+// private
+//
+//	METHOD NAME : PMSelectable::archCandidate
+//	METHOD TYPE : PMObjectPtr
+//
+//	DESCRIPTION : find candidate by arch
+//		May be NULL, if no candidate matching the given arch is available.
+//
+
+PMObjectPtr
+PMSelectable::archCandidate (const PkgArch& arch) const
+{
+    for (PMObjectList::const_iterator objpos = _candidateList.begin();
+	 objpos != _candidateList.end(); ++objpos)
+    {
+	if (arch == (*objpos)->arch())
+	    return *objpos;
+    }
+    return PMObjectPtr();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::autoCandidate
+//	METHOD TYPE : PMObjectPtr
+//
+//	DESCRIPTION : Best among the availableObjs() Determined by ranking.
+//			May be NULL, if no available is better than the installed.
+//
+
+PMObjectPtr
+PMSelectable::autoCandidate() const
+{
+#warning TBD auto candidate by source priority
+    PMObjectPtr object;
+    if ( !_candidateList.empty() )
+    {
+	// if we have an installed object, it determines the architecture
+	if (_installedObj)
+	{
+	    object = archCandidate (_installedObj->arch());
+	    if (object)
+		return object;
+	}
+
+	// find best candidate by architecture
+	for (std::list<PkgArch>::const_iterator archpos = Y2PM::allowedArchs().begin();
+	     archpos != Y2PM::allowedArchs().end(); ++archpos)
+	{
+	    object = archCandidate(*archpos);
+	    if (object)
+		return object;
+	}
+	return _candidateList.front();
+    }
+    return object;
+}
+
 
 ///////////////////////////////////////////////////////////////////
 //
