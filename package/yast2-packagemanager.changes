@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Sep  6 12:49:53 CEST 2004 - ma@suse.de
+
+- On update replace the old distributions packages regardless of
+  version and buildtimes. (#26329)
+- 2.10.11
+
+-------------------------------------------------------------------
 Sat Sep  4 00:23:19 CEST 2004 - ma@suse.de
 
 - Per default download slideshow data on FTP/HTTP installation. (#44578)
