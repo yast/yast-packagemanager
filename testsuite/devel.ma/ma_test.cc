@@ -180,8 +180,8 @@ int main()
   //Y2PM::setNotRunningFromSystem();
   //Y2PM::setCacheToRamdisk( false );
 
-  if ( 0 ) {
-    Y2PM::noAutoInstSrcManager();
+  if ( 1 ) {
+    //Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
     Y2PM::instTargetInit("/");
@@ -196,11 +196,15 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  //Y2PM::noAutoInstSrcManager();
-  //InstSrcManager::ISrcId nid = newSrc( "/tmp/isrc" );
-  //ISM.deleteSource( nid );
-    Y2PM::instSrcManager();
+  PM::ISrcIdList isrc( ISM.getSources( true ) );
+  SEC << isrc << endl;
 
+  const list<constInstSrcDescrPtr> & iprods( TMGR.getProducts() );
+  INT << iprods << endl;
+
+  MIL << TMGR.installProduct( isrc.front()->descr() ) << endl;
+
+  INT << TMGR.getProducts() << endl;
 
 #if 0
   MIL << "=========================" << endl;

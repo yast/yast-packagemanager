@@ -28,6 +28,8 @@
 
 using namespace std;
 
+#undef Y2LOG
+#define Y2LOG "Y2CB"
 #define XXX "****CALLBACK: "
 #define YYY " @ "
 
@@ -212,4 +214,6 @@ struct DownloadProgressCallback : public MediaCallbacks::DownloadProgressCallbac
 
 DownloadProgressCallback downloadProgressCallback;
 
+#undef Y2LOG
+#define Y2LOG "DEFINE_Y2LOG"
 #endif // PMCB_h
