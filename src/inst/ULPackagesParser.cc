@@ -316,14 +316,33 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 
     string sharewith ((_tagset.getTagByIndex (SHAREWITH))->Data());
     if (!sharewith.empty())
-    {
-	pkgpos = _pkgmap.find (sharewith);
+    {	pkgpos = _pkgmap.find (sharewith);
 	if (pkgpos == _pkgmap.end())
 	{
 	    WAR << "Share package '" << sharewith << "' not found" << endl;
 	}
 	else
 	{
+	    // Pass PMSolvable data to current package since these values
+	    // are *not* covered by the dataprovider fallback mechanism
+	    // for shared packages
+
+	    // *it == 	<std::string, std::pair<PMPackagePtr, PMULPackageDataProviderPtr> >
+
+	    PMPackagePtr share_target = pkgpos->second.first;
+
+	    if (package->requires().size() == 0)		// not own requires
+		package->setRequires (share_target->requires());
+	    if (package->prerequires().size() == 0)
+		package->addPreRequires (share_target->prerequires());
+	    if (package->provides().size() == 0)
+		package->setProvides (share_target->provides());
+	    if (package->conflicts().size() == 0)
+		package->setConflicts (share_target->conflicts());
+	    if (package->obsoletes().size() == 0)
+		package->setObsoletes (share_target->obsoletes());
+
+	    // rellist is modified after that
 	    // tell my dataprovider to share data with another dataprovider
 	    // all data not present in my dataprovider will be taken
 	    // from this dataprovider
