@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar  1 16:27:31 CET 2004 - cschum@suse.de
+
+- Show patch pre-information messages before download and
+  post-information messages after installation.
+- 2.9.18
+
+-------------------------------------------------------------------
 Mon Mar  1 13:59:03 CET 2004 - lnussel@suse.de
 
 - always try to fix inconsistent packages by reinstalling them
@@ -14,6 +21,7 @@ Mon Mar  1 12:33:13 CET 2004 - cschum@suse.de
 Fri Feb 27 10:55:35 CET 2004 - cschum@suse.de
 
 - Added YOU callbacks for error and log messages.
+- 2.9.17
 
 -------------------------------------------------------------------
 Thu Feb 26 15:39:18 CET 2004 - cschum@suse.de
