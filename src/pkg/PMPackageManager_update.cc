@@ -61,6 +61,11 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     << endl;
 
   _update_items.clear();
+  {
+    PMUpdateOpts opts( opt_stats_r );
+    opt_stats_r = PMUpdateStats();
+    (PMUpdateOpts&)opt_stats_r = opts;
+  }
 
   ///////////////////////////////////////////////////////////////////
   // Reset all auto states and build PkgSet of available candidates
