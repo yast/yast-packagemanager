@@ -15,6 +15,11 @@
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
+   Purpose:	Class for installation sources
+		Defines (provides access to)
+		- media access (a pointer to MediaAccess)
+		- source description (product, version, vendor, ...)
+		- contents (list of package, list of selections, ...)
 /-*/
 #ifndef InstSrc_h
 #define InstSrc_h
@@ -23,13 +28,10 @@
 #include <list>
 #include <string>
 
-#include <y2pm/InstSrcManager.h>
-
-#include <y2pm/InstSrcPtr.h>
-#include <y2pm/MediaInfoPtr.h>
-#include <y2pm/InstSrcDescrPtr.h>
-#include <y2pm/InstSrcDataPtr.h>
-#include <y2pm/PMPackagePtr.h>
+#include <y2pm/InstSrcPtr.h>		// pointer to self
+#include <y2pm/MediaAccessPtr.h>	// physical media access class
+#include <y2pm/InstSrcDescrPtr.h>	// source description
+#include <y2pm/InstSrcDataPtr.h>	// source content
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -42,60 +44,117 @@ class InstSrc: virtual public Rep {
 
   protected:
 
-    InstSrcManager::ISrcType _type;
+    /**
+     * direct media access
+     */
+    MediaAccessPtr	_media;
 
-    MediaInfoPtr        _media;
+    /**
+     * description of media
+     */
     InstSrcDescrPtr     _descr;
+
+    /**
+     * content of media
+     */
     InstSrcDataPtr      _data;
-    std::list<PMPackagePtr> _pkglist;
 
-    bool _activated;
+  public:
+    /**
+     * constructor
+     *   used for access to new/unknown media
+     * @param: URL specification for media access
+     *
+     * keeps the media open 
+     */
+    InstSrc ( const std::string & mediaurl );
+
+    /**
+     * constructor
+     *   used for access to known media
+     * @param: Pathname specification of content file
+     *
+     * does not open the media
+     */
+    InstSrc ( const Pathname & contentfile );
+
+    /**
+     * destructor
+     */
+    ~InstSrc();
 
   public:
 
-    InstSrc( MediaInfoPtr media_r );
+    //-----------------------------
+    // general functions
 
-    virtual ~InstSrc();
+    /**
+     * clean up, e.g. remove all caches
+     */
+    bool Erase();
 
-  public:
-
-
-    /** return the number of Items on this source */
-    virtual int numItems()=0;
-
-    /** do some initialisation */
-    // TODO: return some error condition, enum?
-    virtual bool Activate()=0;
-
-    /** temporary deactivate source */
-    virtual bool Deactivate()=0;
-
-    /** clean up, e.g. remove all caches */
-    virtual bool Erase()=0;
-
-
-    /** &nbsp;
+    /**
      * @return description of Installation source
-     * */
-    virtual const InstSrcDescrPtr getDescription() { return _descr; }
+     * This is needed by the InstSrcMgr
+     */
+    const InstSrcDescrPtr getDescription() const;
 
+    /**
+     * register this source (store cache files etc)
+     * return pathname of saved content file
+     */
+    const Pathname & registerSource (void) const;
 
-    /** generate PMPackage objects for each Item on the source
+    //-----------------------------
+    // activation status
+
+    /**
+     * return activation status
+     */
+    bool getActivation() const;
+
+    /**
+     * temporary (de)activate source
+     */
+    void setActivation (bool yesno);
+
+    //-----------------------------
+    // source content access
+
+    /**
+     * return the number of selections on this source
+     */
+    int numSelections() const;
+
+    /**
+     * return the number of packages on this source
+     */
+    int numPackages() const;
+
+    /**
+     * return the number of patches on this source
+     */
+    int numPatches() const;
+
+    /**
+     * generate PMSolvable objects for each selection on the source
+     * @return list of PMSolvablePtr on this source
+     */
+    std::list<PMSolvablePtr> getSelections();
+    
+    /**
+     * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source
      * */
-    virtual std::list<PMPackagePtr> getPackages()=0;
-    
-    /** determine which Items are immediately accessible, e.g.
-     * don't require CD change or download
-     *
-     * @param l list of items which should be checked for
-     * availability, if empty all known items are checked
-     * 
-     * @return list of immediately available items
-     * */
-    virtual std::list<PMPackagePtr> Immediate(const std::list<PMPackagePtr>& l)=0;
+    std::list<PMPackagePtr> getPackages();
 
-    virtual std::ostream & dumpOn( std::ostream & str ) const;
+    /**
+     * generate PMSolvable objects for each patch on the source
+     * @return list of PMSolvablePtr on this source
+     */
+    std::list<PMSolvablePtr> getPatches();
+
+    std::ostream & dumpOn( std::ostream & str ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
