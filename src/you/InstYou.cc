@@ -221,7 +221,7 @@ PMError InstYou::attachSource()
   return error;
 }
 
-PMError InstYou::retrievePatches( bool checkSig )
+PMError InstYou::retrievePatches( bool checkSig, bool noExternal )
 {
   D__ << "Retrieve patches." << endl;
 
@@ -230,7 +230,7 @@ PMError InstYou::retrievePatches( bool checkSig )
 
   PMYouPatchPtr patch;
   for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    error = retrievePatch( patch, checkSig );
+    error = retrievePatch( patch, checkSig, noExternal );
     if ( error ) return error;
   }
 
@@ -255,7 +255,8 @@ PMYouPatchPtr InstYou::nextSelectedPatch()
 {
   while ( _selectedPatchesIt != _patches.end() ) {
     PMSelectablePtr selectable = (*_selectedPatchesIt)->getSelectable();
-    if ( selectable && selectable->to_install() ) {
+    if ( selectable && selectable->to_install() &&
+         *_selectedPatchesIt == selectable->candidateObj() ) {
       return *_selectedPatchesIt;
     }
     ++_selectedPatchesIt;
@@ -305,7 +306,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
-    scriptPath = _media.localPath( _paths->scriptPath( patch->preScript() ) );
+    scriptPath = _paths->localScriptPath( patch->preScript() );
     if ( dryrun ) {
       cout << "PRESCRIPT: " << scriptPath << endl;
     } else {
@@ -316,7 +317,20 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   list<PMPackagePtr> packages = patch->packages();
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-    Pathname fileName = _media.localPath( (*itPkg)->location() );
+    if ( patch->updateOnlyInstalled() ) {
+      if ( !(*itPkg)->hasInstalledObj() ) {
+        D__ << "Don't install '" << (*itPkg)->name()
+            << "', no installed obj and UpdateOnlyInstalled=true." << endl;
+        continue;
+      }
+    }
+
+    Pathname fileName;
+    if ( _info->externalUrl( *itPkg ).empty() ) {
+      fileName = _media.localPath( (*itPkg)->location() );
+    } else {
+      fileName = (*itPkg)->location();
+    }
     D__ << "INSTALL PKG " << fileName << endl;  
     if ( dryrun ) {
       cout << "INSTALL: " << fileName << endl;
@@ -339,7 +353,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   }
 
   if ( !patch->postScript().empty() ) {
-    scriptPath = _media.localPath( _paths->scriptPath( patch->postScript() ) );
+    scriptPath = _paths->localScriptPath( patch->postScript() );
     if ( dryrun ) {
       cout << "POSTSCRIPT: " << scriptPath << endl;
     } else {
@@ -350,7 +364,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   return error;
 }
 
-PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
+PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
+                                bool noExternal )
 {
   D__ << "PATCH: " << patch->name() << endl;
 
@@ -359,10 +374,24 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
   list<PMPackagePtr> packages = patch->packages();
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-    PMError error = retrievePackage( *itPkg );
+    if ( patch->updateOnlyInstalled() ) {
+      if ( !(*itPkg)->hasInstalledObj() ) {
+        D__ << "Don't download '" << (*itPkg)->name()
+            << "', no installed obj and UpdateOnlyInstalled=true." << endl;
+        continue;
+      }
+    }
+
+    PMError error = retrievePackage( *itPkg, noExternal );
     if ( error ) return error;
     if ( checkSig ) {
-      string localRpm = _media.localPath( (*itPkg)->location() ).asString();
+      string localRpm;
+      string externalUrl = _info->externalUrl( *itPkg );
+      if ( externalUrl.empty() ) {
+        localRpm = _media.localPath( (*itPkg)->location() ).asString();
+      } else {
+        localRpm = (*itPkg)->location();
+      }
       unsigned result = rpm.checkPackage( localRpm );
       if ( result != 0 ) {
         E__ << "Signature check failed for " << localRpm << endl;
@@ -371,55 +400,116 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
     }
   }
 
-  GPGCheck gpg;
-
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
-    scriptPath = _paths->scriptPath( patch->preScript() );
-    PMError error = _media.provideFile( scriptPath );
+    PMError error = retrieveScript( patch->preScript(), checkSig );
     if ( error ) {
-      E__ << "Error downloading pre script from '"
-          << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
+      ERR << "Error retrieving preScript." << endl;
       return error;
-    }
-    if ( checkSig ) {
-      string localScript = _media.localPath( scriptPath ).asString();
-      if ( !gpg.check_file( localScript ) ) {
-        E__ << "Signature check failed for script " << localScript << endl;
-        return PMError( YouError::E_bad_sig_file );
-      }
     }
   }
   
   if ( !patch->postScript().empty() ) {
-    scriptPath = _paths->scriptPath( patch->postScript() );
-    PMError error = _media.provideFile( scriptPath );
+    PMError error = retrieveScript( patch->postScript(), checkSig );
     if ( error ) {
-      E__ << "Error downloading post script from '"
-          << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
+      ERR << "Error retrieving postScript." << endl;
       return error;
-    }
-    if ( checkSig ) {
-      string localScript = _media.localPath( scriptPath ).asString();
-      if ( !gpg.check_file( localScript ) ) {
-        E__ << "Signature check failed for script " << localScript << endl;
-        return PMError( YouError::E_bad_sig_file );
-      }
     }
   }
   
   return PMError();
 }
 
-PMError InstYou::retrievePackage( const PMPackagePtr &pkg )
+PMError InstYou::retrieveScript( const string &script, bool checkSig )
 {
+  Pathname scriptPath = _paths->scriptPath( script );
+  PMError error = _media.provideFile( scriptPath );
+  if ( error ) {
+    E__ << "Error downloading script from '"
+        << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
+    return error;
+  }
+
+  int e = PathInfo::assert_dir( _paths->localScriptPath( "" ) );
+  if ( e ) {
+    E__ << "Can't create " << _paths->localScriptPath( "" ) << " (errno: "
+        << e << ")" << endl;
+    return PMError( InstSrcError::E_error );
+  }
+
+  string sourceScript = _media.localPath( scriptPath ).asString();
+  string destScript = _paths->localScriptPath( script ).asString();
+
+  // TODO: use GPGCheck
+
+  PathInfo::unlink( destScript );
+
+  string cmd = "/usr/bin/gpg --no-default-keyring";
+  cmd += " --keyring /usr/lib/rpm/gnupg/pubring.gpg";
+  cmd += " -o " + destScript;
+  cmd += " " + sourceScript;
+  cmd += " 2>/dev/null >/dev/null";
+
+  int ret = system( cmd.c_str() );
+
+  if ( checkSig ) {
+    if ( ret != 0 ) {
+      E__ << "Signature check failed for script " << sourceScript << endl;
+      return PMError( YouError::E_bad_sig_file );
+    }
+  }
+  
+  return PMError();
+}
+
+PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
+{
+  D__ << "InstYou::retrievePackage: '" << pkg->name() << "'" << endl;
+
+  string externalUrl = _info->externalUrl( pkg );
+
+  if ( !externalUrl.empty() ) {
+    Url url( externalUrl );
+    if ( !url.isValid() ) {
+      ERR << "Invalid URL: '" << url.asString() << "'" << endl;
+      return InstSrcError::E_bad_url;
+    }
+
+    int e = PathInfo::assert_dir( _paths->externalRpmDir() );
+    if ( e ) {
+      E__ << "Can't create " << _paths->externalRpmDir() << " (errno: "
+          << e << ")" << endl;
+      return PMError( InstSrcError::E_error );
+    }
+
+    Pathname path = url.getPath();
+    url.setPath( "" );
+
+    MediaAccess media;
+
+    PMError err = media.open( url, _paths->externalRpmDir() );
+    if ( err ) return err;
+
+    if ( !noExternal ) {
+      err = media.attach();
+      if ( err ) return err;
+
+      err = media.provideFile( path );
+      if ( err ) return err;
+    }
+
+    _info->setLocation( pkg, media.localPath( path ).asString() );
+
+    return PMError();
+  }
+
   list<PkgArch> archs = _paths->archs();
 
   if ( pkg->hasInstalledObj() ) {
     archs.push_front( pkg->getInstalledObj()->arch() );
   }
 
-  PMError error;
+  PMError error( YouError::E_error );
   Pathname rpmPath;
   list<PkgArch>::const_iterator it;
   for( it = archs.begin(); it != archs.end(); ++it ) {
@@ -427,7 +517,22 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg )
     
     // If the package has a version installed, try to get patch RPM first.
     bool pkgHasInstalledObj = pkg->hasInstalledObj();
-    rpmPath = _paths->rpmPath( pkg, *it, pkgHasInstalledObj );
+
+    bool patchRpm = false;
+    if ( pkgHasInstalledObj ) {
+      PkgEdition installedVersion = pkg->getInstalledObj()->edition();
+      D__ << "Installed: " << installedVersion.asString() << endl;
+      list<PkgEdition> baseVersions = _info->patchRpmBaseVersions( pkg );
+      list<PkgEdition>::const_iterator it2;
+      for( it2 = baseVersions.begin(); it2 != baseVersions.end(); ++it2 ) {
+        if ( *it2 == installedVersion ) {
+          patchRpm = true;
+          break;
+        }
+      }
+    }
+
+    rpmPath = _paths->rpmPath( pkg, *it, patchRpm );
     D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
         << "'" << endl;
     error = _media.provideFile( rpmPath );
@@ -436,7 +541,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg )
           << endl;
           
       // If patch RPM was requested first, try to get full RPM now.
-      if ( pkgHasInstalledObj ) {
+      if ( patchRpm ) {
         rpmPath = _paths->rpmPath( pkg, *it, false );
         D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
             << "'" << endl;
@@ -466,10 +571,15 @@ PMError InstYou::removePackages()
     list<PMPackagePtr> packages = patch->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      PMError error = _media.releaseFile( (*itPkg)->location() );
-      if ( error ) {
-        E__ << "Can't release " << (*itPkg)->location() << endl;
-        return error;
+      string externalUrl = _info->externalUrl( *itPkg );
+      if ( externalUrl.empty() ) {
+        PMError error = _media.releaseFile( (*itPkg)->location() );
+        if ( error ) {
+          E__ << "Can't release " << (*itPkg)->location() << endl;
+          return error;
+        }
+      } else {
+        PathInfo::unlink( (*itPkg)->location() );
       }
     }
     if ( !patch->preScript().empty() ) {
@@ -479,6 +589,7 @@ PMError InstYou::removePackages()
         E__ << "Can't release " << scriptPath.asString() << endl;
         return error;
       }
+      PathInfo::unlink( _paths->localScriptPath( patch->preScript() ) );
     }
     if ( !patch->postScript().empty() ) {
       Pathname scriptPath = _paths->scriptPath( patch->postScript() );
@@ -487,6 +598,7 @@ PMError InstYou::removePackages()
         E__ << "Can't release " << scriptPath.asString() << endl;
         return error;
       }
+      PathInfo::unlink( _paths->localScriptPath( patch->postScript() ) );
     }
   }
 

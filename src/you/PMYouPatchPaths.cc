@@ -189,6 +189,11 @@ Pathname PMYouPatchPaths::scriptPath( const string &scriptName )
   return _scriptPath + scriptName;
 }
 
+Pathname PMYouPatchPaths::localScriptPath( const std::string &scriptName )
+{
+  return "/var/lib/YaST2/you-scripts/" + scriptName;
+}
+
 Pathname PMYouPatchPaths::localDir()
 {
   return "/var/lib/YaST2/you/";
@@ -199,9 +204,19 @@ Pathname PMYouPatchPaths::installDir()
   return "/var/lib/YaST2/you-installed/";
 }
 
+Pathname PMYouPatchPaths::externalRpmDir()
+{
+  return "/var/lib/YaST2/you-external/";
+}
+
 Pathname PMYouPatchPaths::localSuseServers()
 {
   return "/etc/suseservers";
+}
+
+string PMYouPatchPaths::directoryFileName()
+{
+  return "directory.3";
 }
 
 Pathname PMYouPatchPaths::cookiesFile()

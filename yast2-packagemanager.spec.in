@@ -2,6 +2,8 @@
 
 # neededforbuild  autoconf automake gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr
 
+Requires:	wget
+
 Provides:	libpkg
 Obsoletes:	libpkg
 Provides:	yast2-agent-package

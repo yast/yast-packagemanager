@@ -52,6 +52,8 @@ class Y2PM {
 
     static Pathname _system_rootdir;
 
+    static bool _cache_to_ramdisk;
+
     // preferred locale (i.e. user interface and default system locale)
     // used in retrieval of locale-dependant data
     static LangCode _preferred_locale;
@@ -128,10 +130,15 @@ class Y2PM {
      * wheter to write a chache on 'enable' or to wait until system to be installed
      * is available below _system_rootdir.
      **/
-    static bool runningFromSystem() { return( _system_rootdir == "/" ); }
-    static void setNotRunningFromSystem() {
-      _system_rootdir = Pathname();
-    }
+    static bool runningFromSystem()       { return( _system_rootdir == "/" ); }
+    static void setNotRunningFromSystem() {_system_rootdir = Pathname(); }
+
+    /**
+     * If false, InstSrc will not create a data cache in ramdisk, if not
+     * running from system.
+     **/
+    static bool cacheToRamdisk()                      { return _cache_to_ramdisk; }
+    static void setCacheToRamdisk( const bool val_r ) { _cache_to_ramdisk = val_r; }
 
   public:
 
@@ -234,6 +241,13 @@ class Y2PM {
 	    void (*_rebuilddb_progress_func)(int progress, void* data);
 	    void* _rebuilddb_progress_data;
 
+	    /**
+	     * called when switching the source or media number during package commit (install loop)
+	     * informal callback for user interface, no user interaction necessary
+	     * */
+	    void (*_source_change_func)(InstSrcManager::ISrcId srcid, int medianr, void* data);
+	    void* _source_change_data;
+
 	};
 
 	static CallBacks _callbacks;
@@ -278,6 +292,12 @@ class Y2PM {
 	static void setRebuildDBProgressCallback(void (*func)(int percent, void*), void* data);
 
 	/**
+	 * called when switching sources during package commit (install loop)
+	 * informal callback for user interface, no user interaction necessary
+	 * */
+	static void setSourceChangeCallback(void (*func)(InstSrcManager::ISrcId srcid, int medianr, void*), void* data);
+
+	/**
 	 * package deletion/installation main loop
 	 * deletes/installs all packages currently marked in packageManager()
 	 * if media_nr == 0, install everything regardless of media nr
@@ -288,7 +308,8 @@ class Y2PM {
 	 * return number of sucessfully installed packages
 	 * */
 	static int commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
-		std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r);
+		std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r,
+		InstSrcManager::ISrcIdList installrank = InstSrcManager::ISrcIdList());
 
 	/**
 	 * install a single rpm file

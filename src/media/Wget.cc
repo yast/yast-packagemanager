@@ -16,52 +16,6 @@
  *
  *************************************************************/
 
-/*
- * $Log$
- * Revision 1.9  2002/09/09 13:56:12  lnussel
- * - remove proxy settings from wget class, works automatically through ~/.wgetrc
- * - make wget function that only accepts strings private, adapt PMYouPatchPaths.cc
- * - use saveAsString in InstSrcDescr
- *
- * Revision 1.8  2002/09/05 12:57:04  cschum
- * Add optional Cookie support to Wget class.
- * Support Cookies when getting the server list from www.suse.de.
- *
- * Revision 1.7  2002/09/04 10:03:18  cschum
- * Don't truncate destination file in case of a download error.
- *
- * Revision 1.6  2002/09/04 09:22:42  cschum
- * Implemented user/password authentification.
- *
- * Revision 1.5  2002/08/12 13:26:27  cschum
- * Return ok, when the http server sent an ok.
- *
- * Revision 1.4  2002/08/02 11:11:27  ma
- * Malplaced 'N_()' macro removed.
- *
- * Revision 1.3  2002/07/05 12:05:13  lnussel
- * catch more wget errors
- *
- * Revision 1.2  2002/07/02 15:32:45  lnussel
- * added testprogram for ftp method, can already retreive files
- *
- * Revision 1.1  2002/07/02 09:27:25  lnussel
- * fix namespaces to make it compile
- *
- * Revision 1.2  2001/12/06 15:15:38  schubi
- * proxy support added
- *
- * Revision 1.1  2001/10/31 09:07:30  schubi
- * agent for http transfer
- *
- * Revision 1.1.2.2  2001/10/16 15:17:23  schubi
- * new call error_string
- *
- * Revision 1.1.2.1  2001/10/12 13:13:04  schubi
- * new class for http transfer( tested )
- *
- *
- */
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -187,35 +141,38 @@ WgetStatus Wget::getFile( const Url &url_i, const Pathname &destination )
     // users home dir on the ftp server for non-anonymous connections
     url.setPath(string("/") + url.getPath());
     
-    if ( !username.empty() && !password.empty() ) {
-        string host = url.getHost();
+    if ( !username.empty() && !password.empty() )
+    {
+	string host = url.getHost();
 
 	// clear username and password to make them not appear in command line
 	url.setUsername(string());
 	url.setPassword(string());
 
-        string home = getenv( "HOME" );
+	string home = getenv( "HOME" );
 
-        string netrcStr = "machine " + host + " login " + username +
-                          " password " + password;
-        string netrcFile = home + "/.netrc";
-        // Create name for backup file
-        string netrcBackup = home + "/.netrc.orig.yast.76545";
+	string netrcStr = "machine " + host + " login " + username +
+		          " password " + password;
+	string netrcFile = home + "/.netrc";
+	// Create name for backup file
+	string netrcBackup = home + "/.netrc.orig.yast.76545";
 
-        bool netrcExists = PathInfo( netrcFile ).isExist();
-        if ( netrcExists ) rename( netrcFile.c_str(), netrcBackup.c_str() );
+	bool netrcExists = PathInfo( netrcFile ).isExist();
+	if ( netrcExists ) rename( netrcFile.c_str(), netrcBackup.c_str() );
 
-        ofstream out( netrcFile.c_str() );
-        out << netrcStr << endl;
+	ofstream out( netrcFile.c_str() );
+	out << netrcStr << endl;
 
-        WgetStatus status = getFile( url.asString(), destination.asString() );
+	WgetStatus status = getFile( url.asString (true, false, false), destination.asString() );
 
-        unlink( netrcFile.c_str() );
-        if ( netrcExists ) rename( netrcBackup.c_str(), netrcFile.c_str() );
+	unlink( netrcFile.c_str() );
+	if ( netrcExists ) rename( netrcBackup.c_str(), netrcFile.c_str() );
 
-        return status;
-    } else {
-        return getFile( url.asString(), destination.asString() );
+	return status;
+    }
+    else
+    {
+	return getFile( url.asString (true, false, false), destination.asString() );
     }
 }
 
@@ -238,7 +195,8 @@ WgetStatus Wget::getFile ( const string& url, const string& destFilename )
    run_wget(sizeof(opts) / sizeof(*opts), opts,
 	    ExternalProgram::Stderr_To_Stdout);
 
-   if ( process == NULL ) {
+   if ( process == NULL )
+   {
        unlink( dest.c_str() );
        return WGET_ERROR_UNEXPECTED;
    }
@@ -345,7 +303,8 @@ void Wget::run_wget(int n_opts, const char *const *options,
 		       ExternalProgram::Stderr_Disposition disp)
 {
   exit_code = -1;
-  int argc = n_opts + 1 /** wget */ + 2  /* tries, waitretry */ + 1 /** 0 */;
+  int argc = n_opts + 1 /** wget */ + 2  /* tries, waitretry */
+		    + 1 /** passive-ftp **/ + 1 /** 0 */;
 
   if ( !_cookiesFile.empty() ) {
       argc += 2;
@@ -361,6 +320,8 @@ void Wget::run_wget(int n_opts, const char *const *options,
 
   argv[i++] = "--tries=3";
   argv[i++] = "--waitretry=2";
+
+  argv[i++] = "--passive-ftp";
 
   if ( !_cookiesFile.empty() ) {
       loadCookies = "--load-cookies=" + _cookiesFile;

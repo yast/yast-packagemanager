@@ -114,9 +114,9 @@ Proposal: Encode Vendor and Timestamp information in a file<BR>
 <tr><td>File:</td><td><tt>media</tt></td></tr>
 <tr><td>Location</td><td> <tt>/media.<i>N</i>/</tt> directory on media</td></tr>
 <tr><td valign="top">Content</td><td>three lines of ASCII as follows<BR>
-  <i><tt>&lt;vendor&gt;</tt><i><br>
+  <i><tt>&lt;vendor&gt;</tt></i><br>
   <i><tt>&lt;YYYYMMDDHHMMSS&gt;</tt></i><br>
-  <i>[<tt>&lt;media count&gt;</tt>]<i><br>
+  <i>[<tt>&lt;media count&gt;</tt>]</i><br>
 </td></tr>
 </TABLE>
 <br>
@@ -216,7 +216,6 @@ The <tt>content</tt> file might be missing if the media does not contain
 a product (but just a set of packages).<br>
 In this case, the user has to 'blindly accept' the media.<br>
 <hr>
-</UL>
 <BR>
 Proposal:<BR>
 <TABLE border>
@@ -235,7 +234,7 @@ Mandatory key strings
 <tr><td>M</td><td><tt>PRODUCT</tt></td><td>product name</td></tr>
 <tr><td>M</td><td><tt>VERSION</tt></td><td>product version and release as in RPM<BR><tt>&lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</tt></td></tr>
 <tr><td>M</td><td><tt>DISTPRODUCT</tt></td><td>distribution id (vendor specific)</td></tr>
-<tr><td>M</td><td><tt>DISTVERSION</tt></td><td>distribution version (vendor specific)</tt></td></tr>
+<tr><td>M</td><td><tt>DISTVERSION</tt></td><td>distribution version (vendor specific)</td></tr>
 <tr><td>O</td><td><tt>BASEPRODUCT</tt></td><td>name of base product if different from PRODUCT</td></tr>
 <tr><td>O</td><td><tt>BASEVERSION</tt></td><td>version of BASEPRODUCT, mandatory if BASEPRODUCT is defined<BR><tt>&lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</tt></td></tr>
 <tr><td>M</td><td><tt>VENDOR</tt></td><td>vendor name (free form)</td></tr>
@@ -265,7 +264,7 @@ be determined.</td></tr>
 <tr><td>O</td><td><tt>YOUPATH</tt></td><td>path to patches on the server<br>
 (triggers YOU to look at the maintenance web server for updates.</td></tr>
 </table>
-<smaller>prio 'M' == mandatory, 'O' == optional</smaller><br>
+<small>prio 'M' == mandatory, 'O' == optional</small><br>
 Either <tt>LABEL</tt> or <tt>LABEL&lt;lang&gt;</tt> must be present.
 <p></p>
 The <tt>ARCH.&lt;base&gt;</tt> line needs a bit more explanation:<br>
@@ -356,7 +355,7 @@ The <tt>packages.<i>LANG</i></tt> file might be ommitted. The package summary
 defaults to <tt>name-version-release.architecture</tt> in this case.
 <hr>
 <br>
-See <A HREF=lang-descr.html">here</A> for a format definition of such a file.<br>
+See <A HREF="lang-descr.html">here</A> for a format definition of such a file.<br>
 <br>
 
 <H2>The <tt>packages.DU</tt> file</H2>
@@ -402,13 +401,13 @@ linux#
 <H2>The <tt>selections</tt> file</H2>
 This file contains a list of selections file names (one per line,
 possibly with directory pathes,
-relative to the <tt>DESCRDIR/<tt> directory).<br>
+relative to the <tt>DESCRDIR</tt> directory).<br>
 
 See current <tt>*.sel</tt> for the syntax. (To be defined).<br>
 
 <hr>
 The <tt>selections</tt> file might be ommitted. YaST tries to access
-<tt>*.sel</tt> files in the <tt>DESCRDIR/<tt> directory in this case.
+<tt>*.sel</tt> files in the <tt>DESCRDIR</tt> directory in this case.
 <hr>
 
 <H3>Example</H3>

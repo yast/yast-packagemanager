@@ -81,7 +81,6 @@ ostream & operator<<( ostream & str, const PMSelectionManager & obj )
     return str;
 }
 
-
 /******************************************************************
 **
 **
@@ -168,7 +167,11 @@ PMSelectionManager::setSelectionPackages (const std::list<std::string> packages,
 	    }
 	    else
 	    {
+	      if ( !selectable->has_both_objects()
+		   || selectable->installedObj()->edition() != selectable->candidateObj()->edition() )
+	      {
 		selectable->appl_set_install();
+	      }
 	    }
 	}
     }

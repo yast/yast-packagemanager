@@ -167,6 +167,8 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// physical access to the rpm file.
 	virtual PMError providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const;
 	virtual PMError provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const;
+	// source pointer
+	virtual constInstSrcPtr		source ( const PMPackage & pkg_r ) const { return _source; }
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -22,10 +22,10 @@ int main(int argc, char* argv[])
 	Url url(argv[1]);
 	result = m->open(url);
 	DBG << result << endl;
-	result = m->attachTo(argv[2]);
+	result = m->attach(argv[2]);
 	DBG << result << endl;
 	//result = m->provideFile("/apt/SuSE/STABLE-i386/examples/sources.list.FTP");
-	result = m->provideFile(argv[3]);
+	result = m->provideDir(argv[3]);
 	DBG << result << endl;
 	m->release(true);
 }

@@ -24,6 +24,7 @@
 #include <iosfwd>
 #include <string>
 
+#include <y2pm/InstSrcPtr.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMPackageDataProvider.h> // should introduce all attribute data types.
 
@@ -114,6 +115,8 @@ class PMPackage : virtual public Rep, public PMObject {
     PMError providePkgToInstall(Pathname&) const;
     // physical access to the src.rpm file.
     PMError provideSrcPkgToInstall(Pathname&) const;
+    // who's providing this package ?
+    constInstSrcPtr source () const;
 
   protected:
 

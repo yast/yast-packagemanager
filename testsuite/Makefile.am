@@ -47,6 +47,7 @@ noinst_PROGRAMS = \
 	gs_test		\
         test_you	\
         cschum_test	\
+	media_test	\
 	test_updateinf
 
 test_updateinf_SOURCES = test_updateinf.cc
@@ -104,3 +105,8 @@ test_you_LDFLAGS = -static
 cschum_test_SOURCES = cschum_test.cc
 cschum_test_LDADD = $(top_builddir)/src/liby2pm.la
 cschum_test_LDFLAGS = -static
+
+media_test_SOURCES = media_test.cc
+media_test_LDADD = $(top_builddir)/src/liby2pm.la
+media_test_LDFLAGS = -static
+

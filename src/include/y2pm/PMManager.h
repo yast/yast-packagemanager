@@ -198,6 +198,39 @@ class PMManager {
     void setNothingSelected();
 
   public:
+
+    /**
+     * General test whether fnc_r returns true for at least one Selectable.
+     *
+     * @param fnc_r pointer to a boolean PMSelectable const method
+     * (e.g. PMSelectable::by_user).
+     **/
+    bool anyMatch( PMSelectable::Test_method fnc_r ) const;
+
+    /**
+     * General test whether fnc_r returns true for at least one Selectable.
+     *
+     * @param fnc_r pointer to boolean test function taking a constPMSelectablePtr
+     * as argument.
+     **/
+    bool anyMatch( PMSelectable::Test_fnc fnc_r ) const;
+
+    /**
+     * are there currently any "by_user" selectables ?
+     **/
+    bool anythingByUser() const { return anyMatch( &PMSelectable::by_user ); }
+
+    /**
+     * are there currently any selectables for deletion ?
+     **/
+    bool anythingToDelete() const { return anyMatch( &PMSelectable::to_delete ); }
+
+    /**
+     * are there currently any selectables for installation ?
+     **/
+    bool anythingToInstall() const { return anyMatch( &PMSelectable::to_install ); }
+
+  public:
     // solver Part
 
     /**

@@ -64,6 +64,7 @@ InstSrcDescr::InstSrcDescr()
     , _default_activate   ( true )
     , _default_rank       ( NO_RANK )
     , _content_product    ( PkgName(), PkgEdition() )
+    , _content_distproduct( PkgName(), PkgEdition() )
     , _content_baseproduct( PkgName(), PkgEdition() )
     , _content_requires   ( PkgName(), NONE, PkgEdition() )
 {
@@ -116,7 +117,7 @@ bool InstSrcDescr::sameContentProduct( const constInstSrcDescrPtr & rhs,
     return true;
   if ( ! ( rhs && lhs ) )
     return false;
-  return( rhs->content_product().edition == lhs->content_product().edition );
+  return( rhs->content_product() == lhs->content_product() );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -148,7 +149,7 @@ static const std::string ProdDirTag   = "ProductDir";
 static const std::string DefActTag    = "Default_activate";
 static const std::string DefRankTag   = "Default_rank";
 static const std::string MediaTag     = "Media";
-static const std::string ContentTag   = "Product";
+static const std::string ProductTag   = "Product";
 static const std::string ArchTag      = "Arch";
 static const std::string RequiresTag  = "Requires";
 static const std::string DefBaseTag   = "DefaultBase";
@@ -174,7 +175,7 @@ static const std::string YouPathTag   = "YouPath";
 PMError InstSrcDescr::writeStream( std::ostream & str ) const
 {
   str << "=" << TypeTag << ": " << InstSrc::toString(_type) << endl;
-  str << "=" << UrlTag << ": " << _url << endl;
+  str << "=" << UrlTag << ": " << _url.asString (true, true, true) << endl;
   str << "=" << ProdDirTag << ": " << _product_dir << endl;
   str << "=" << DefActTag << ": " << (_default_activate?"1":"0") << endl;
   str << "=" << DefRankTag << ": " << _default_rank << endl;
@@ -186,11 +187,12 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   str << "-" << MediaTag << ":" << endl;
 
   // product data from content file
-  str << "+" << ContentTag << ":" << endl;
+  str << "+" << ProductTag << ":" << endl;
   str << PkgNameEd::toString(_content_product) << endl;
+  str << PkgNameEd::toString(_content_distproduct) << endl;
   str << PkgNameEd::toString(_content_baseproduct) << endl;
   str << _content_vendor << endl;
-  str << "-" << ContentTag << ":" << endl;
+  str << "-" << ProductTag << ":" << endl;
 
   str << "=" << DefBaseTag << ":" << _content_defaultbase << endl;
 
@@ -335,7 +337,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 		REQUIRES, LANGUAGE, LABEL, LABELMAP, LINGUAS, TIMEZONE, DESCRDIR, DATADIR,
 		YOUURL, YOUTYPE, YOUPATH };
 
-    // for the 'packages' file
+    // for the 'description' file
 
     tagset.addTag (TypeTag,	TYPE,	    TaggedFile::SINGLE, TaggedFile::START);
     tagset.addTag (UrlTag,	URL,	    TaggedFile::SINGLE);
@@ -343,7 +345,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     tagset.addTag (DefActTag,	ACTIVATE,   TaggedFile::SINGLE);	// 1 = true (default activated), 0 = false
     tagset.addTag (DefRankTag,	RANK,       TaggedFile::SINGLE);	// RankValue, if provided
     tagset.addTag (MediaTag,	MEDIA,	    TaggedFile::MULTI);		// _media_vendor, _media_id, _media_count
-    tagset.addTag (ContentTag,	PRODUCT,    TaggedFile::MULTI);		// _content_product, _content_baseproduct, _content_vendor
+    tagset.addTag (ProductTag,	PRODUCT,    TaggedFile::MULTI);		// _content_product, _content_distproduct, _content_baseproduct, _content_vendor
     tagset.addTag (DefBaseTag,	DEFBASE,    TaggedFile::SINGLE);	// _content_defaultbase
     tagset.addTag (ArchTag,	ARCH,	    TaggedFile::MULTI);		// _content_archmap
     tagset.addTag (RequiresTag, REQUIRES,   TaggedFile::SINGLE);	// _content_requires
@@ -398,7 +400,19 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     ndescr->set_product_dir( Pathname (GET_STRING(PRODUCTDIR)));
 
     GET_POS(PRODUCT).retrieveData (descrstream, multi);
-    if ( multi.size() >= 3 )
+    if ( multi.size() >= 4 )					// includes distproduct
+    {
+	std::list<std::string>::iterator multi_pos = multi.begin();
+	//  only check if ( !(*multi_pos).empty() ) if an empty string is an error
+	ndescr->set_content_product( PkgNameEd::fromString(*multi_pos) );
+	++multi_pos;
+	ndescr->set_content_distproduct( PkgNameEd::fromString(*multi_pos));
+	++multi_pos;
+	ndescr->set_content_baseproduct( PkgNameEd::fromString(*multi_pos));
+	++multi_pos;
+	ndescr->set_content_vendor( Vendor(*multi_pos) );
+    }
+    else if ( multi.size() == 3 )				// without distproduct
     {
 	std::list<std::string>::iterator multi_pos = multi.begin();
 	//  only check if ( !(*multi_pos).empty() ) if an empty string is an error

@@ -80,6 +80,8 @@ static const char *langmap[] = {
         0               , 0
 };
 
+const std::string PMYouPatchInfo::_defaultLocale = "english";
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMYouPatchInfo
@@ -93,18 +95,16 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
     _lang = LangCode( lang );
     if ( lang.empty() ) _lang = Y2PM::getPreferredLocale();
 
-    _patchtagset = new YOUPatchTagSet( translateLangCode( _lang ) );
-    _patchtagset->setEncoding(CommonPkdParser::Tag::UTF8);
+    _locale = translateLangCode( _lang );
 
-    _packagetagset = new YOUPackageTagSet();
+    _packageTagSet.setAllowMultipleSets( true );
+    _packageTagSet.setAllowUnknownTags( true );
 
     _paths = new PMYouPatchPaths("noproduct","noversion","noarch");
 }
 
 PMYouPatchInfo::~PMYouPatchInfo()
 {
-    delete _packagetagset;
-    delete _patchtagset;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -118,6 +118,12 @@ PMYouPatchInfo::~PMYouPatchInfo()
 PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
 {
   string value = tagValue( YOUPackageTagSet::FILENAME );
+
+  if ( value.empty() ) {
+    D__ << "No Filename. Skipping this package." << endl;
+    return PMError();
+  }
+
   unsigned int pos = value.find( ".rpm" );
   if ( pos < 0 ) {
     E__ << "No '.rpm' in '" << value << "'" << endl;
@@ -167,7 +173,19 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   pkg->setConflicts( relations );
 
   value = tagValue( YOUPackageTagSet::PATCHRPMBASEVERSIONS );
-  setPatchRpmBaseVersions( pkg, value );
+  vector<string> versions;
+  stringutil::split( value, versions, " \t" );
+  list<PkgEdition> editions;
+  vector<string>::const_iterator it;
+  for( it = versions.begin(); it != versions.end(); ++it ) {
+    editions.push_back( PkgEdition( *it ) );
+  }
+  setPatchRpmBaseVersions( pkg, editions );
+
+  value = tagValue( YOUPackageTagSet::INSTPATH );
+  if ( !value.empty() ) {
+    setExternalUrl( pkg, value );
+  }
 
   return PMError();
 }
@@ -183,56 +201,30 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
 PMError PMYouPatchInfo::parsePackages( const string &packages,
                                        const PMYouPatchPtr &patch  )
 {
-    TagParser parser;
-    string tagstr;
+  TaggedParser parser;
+  parser.asOldstyle (true);
 
-    _packagetagset->clear();
+  std::stringstream pkgstream;
+  pkgstream << packages;
 
-    std::stringstream commonpkdstream;
-    commonpkdstream << packages;
+  while ( !pkgstream.eof() ) {
+    TaggedFile::assignstatus status = _packageTagSet.assignSet( parser, pkgstream );
 
-    bool repeatassign = false;
-    bool parse = true;
-    while( parse && parser.lookupTag(commonpkdstream))
-    {
-	tagstr = parser.startTag();
-
-	do
-	{
-	    switch(_packagetagset->assign(tagstr.c_str(),parser,commonpkdstream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    if( tagstr != "Filename" )
-		    {
-			E__ << "syntax error" << std::endl;
-			parse = false;
-		    }
-                    createPackage( patch );
-		    _packagetagset->clear();
-		    repeatassign = true;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
+    if ( status == TaggedFile::REJECTED_EOF ) {
+      D__ << "EOF" << endl;
+      break;
+    } else if ( status == TaggedFile::ACCEPTED_FULL ) {
+      D__ << "parse complete" << endl;
+      createPackage( patch );
+    } else {
+      D__ << parser.lineNumber() << ": " << "Status " << (int)status << endl;
+      D__ << "Last tag read: " << parser.currentTag();
+      if (!parser.currentLocale().empty()) D__ << "." << parser.currentLocale();
+      D__ << endl;
     }
+  }
 
-    if ( !parse ) {
-        E__ << "Parse Error" << endl;
-        return PMError( InstSrcError::E_error );
-    }
-
-    createPackage( patch );
-
-    return PMError();
+  return PMError();
 }
 
 
@@ -251,58 +243,28 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     string filePath = ( path + fileName ).asString();
 
-    TagParser parser;
-    string tagstr;
+    TaggedParser parser;
+    parser.asOldstyle (true);
 
-    _patchtagset->clear();
-
-    std::ifstream commonpkdstream( filePath.c_str() );
-    if(!commonpkdstream)
-    {
+    ifstream patchstream( filePath.c_str() );
+    if( !patchstream ) {
 	E__ << "file not found" << endl;
 	return PMError( InstSrcError::E_bad_url );
     }
 
-    bool repeatassign = false;
-    bool parse = true;
-    while( parse && parser.lookupTag(commonpkdstream))
-    {
-	tagstr = parser.startTag();
+    TaggedFile::assignstatus status;
+    
+    status = _patchTagSet.assignSet( parser, patchstream );
 
-	do
-	{
-	    switch(_patchtagset->assign(tagstr.c_str(),parser,commonpkdstream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    if( tagstr != "Filename" )
-		    {
-			E__ << "syntax error" << std::endl;
-			parse = false;
-		    }
-		    _patchtagset->clear();
-		    repeatassign = true;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
-    }
+    D__ << "assignstatus: " << status << endl;
 
-    if ( !parse ) {
+    if ( status != TaggedFile::ACCEPTED_FULL ) {
         E__ << "Parse Error" << endl;
         return PMError( InstSrcError::E_error );
     }
 
-    string name = tagValue( YOUPatchTagSet::PATCHNAME );
-    string version = tagValue( YOUPatchTagSet::PATCHVERSION );
+    string name = tagValue( YOUPatchTagSet::PATCHNAME, patchstream );
+    string version = tagValue( YOUPatchTagSet::PATCHVERSION, patchstream );
 
     D__ << "Name: " << name << endl;
     D__ << "Version: " << version << endl;
@@ -315,15 +277,15 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     p->setLocalFile( path + fileName );
 
-    string value = tagValue( YOUPatchTagSet::REQUIRES );
+    string value = tagValue( YOUPatchTagSet::REQUIRES, patchstream );
     list<PkgRelation> relations = PkgRelation::parseRelations( value );
     p->setRequires( relations );
 
-    value = tagValue( YOUPatchTagSet::PROVIDES );
+    value = tagValue( YOUPatchTagSet::PROVIDES, patchstream );
     relations = PkgRelation::parseRelations( value );
     p->setProvides( relations );
 
-    value = tagValue( YOUPatchTagSet::KIND );
+    value = tagValue( YOUPatchTagSet::KIND, patchstream );
     PMYouPatch::Kind kind = PMYouPatch::kind_invalid;
     if ( value == "security" ) { kind = PMYouPatch::kind_security; }
     else if ( value == "recommended" ) { kind = PMYouPatch::kind_recommended; }
@@ -332,22 +294,22 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     else if ( value == "YaST2" ) { kind = PMYouPatch::kind_yast; }
     p->setKind( kind );
 
-    p->setShortDescription( tagValue( YOUPatchTagSet::SHORTDESCRIPTION ) );
-    p->setLongDescription( tagValue( YOUPatchTagSet::LONGDESCRIPTION ) );
-    p->setPreInformation( tagValue( YOUPatchTagSet::PREINFORMATION ) );
-    p->setPostInformation( tagValue( YOUPatchTagSet::POSTINFORMATION ) );
-    p->setMinYastVersion( tagValue( YOUPatchTagSet::MINYAST2VERSION ) );
-    p->setPreScript( tagValue( YOUPatchTagSet::PRESCRIPT ) );
-    p->setPostScript( tagValue( YOUPatchTagSet::POSTSCRIPT ) );
+    p->setShortDescription( tagValueLocale( YOUPatchTagSet::SHORTDESCRIPTION, patchstream ) );
+    p->setLongDescription( tagValueLocale( YOUPatchTagSet::LONGDESCRIPTION, patchstream ) );
+    p->setPreInformation( tagValueLocale( YOUPatchTagSet::PREINFORMATION, patchstream ) );
+    p->setPostInformation( tagValueLocale( YOUPatchTagSet::POSTINFORMATION, patchstream ) );
+    p->setMinYastVersion( tagValue( YOUPatchTagSet::MINYAST2VERSION, patchstream ) );
+    p->setPreScript( tagValue( YOUPatchTagSet::PRESCRIPT, patchstream ) );
+    p->setPostScript( tagValue( YOUPatchTagSet::POSTSCRIPT, patchstream ) );
 
-    value = tagValue( YOUPatchTagSet::UPDATEONLYINSTALLED );
+    value = tagValue( YOUPatchTagSet::UPDATEONLYINSTALLED, patchstream );
     if ( value == "true" ) { p->setUpdateOnlyInstalled( true ); }
     else { p->setUpdateOnlyInstalled( false ); }
 
-    value = tagValue( YOUPatchTagSet::SIZE );
+    value = tagValue( YOUPatchTagSet::SIZE, patchstream );
     p->setPatchSize( atoll( value.c_str() ) * 1024 );
 
-    value = tagValue( YOUPatchTagSet::PACKAGES );
+    value = tagMultiValue( YOUPatchTagSet::PACKAGES, patchstream );
     PMError error = parsePackages( value, p );
     if ( error != PMError::E_ok ) {
       return error;
@@ -392,7 +354,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     list<string> patchFiles;
 
-    error = _media.provideFile( patchPath + "directory" );
+    error = _media.provideFile( patchPath + _paths->directoryFileName() );
     if ( error ) {
       W__ << "no directory file found." << endl;
       if ( error == MediaError::E_login_failed ||
@@ -410,7 +372,8 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
         return error;
       }
     } else {
-      Pathname dirFile = _media.localRoot() + patchPath + "directory";
+      Pathname dirFile = _media.localRoot() + patchPath +
+                         _paths->directoryFileName();
 
       string buffer;
       ifstream in( dirFile.asString().c_str() );
@@ -423,11 +386,11 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     list<string>::const_iterator it;
     for( it = patchFiles.begin(); it != patchFiles.end(); ++it ) {
-        if ( *it == "." || *it == ".." || *it == "directory" ) continue;
+        if ( *it == "." || *it == ".." ||
+             (*it).substr( 0, 9 ) == "directory" ) continue;
         error = _media.provideFile( patchPath + *it );
         if ( error != PMError::E_ok ) {
-            E__ << error << patchPath + *it << endl;
-            cerr << "ERR: " << *it << endl;
+            E__ << "ERR: " << error << patchPath + *it << endl;
         } else {
             Pathname path = _media.localRoot() + patchPath;
 
@@ -477,16 +440,20 @@ PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
     return readDir( paths->patchUrl(), paths->patchPath(), patches, checkSig );
 }
 
-string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex )
+string PMYouPatchInfo::tagMultiValue( YOUPatchTagSet::Tags tagIndex,
+                                      istream& input )
 {
-    CommonPkdParser::Tag *tag = _patchtagset->getTagByIndex( tagIndex );
+    TaggedFile::Tag *tag = _patchTagSet.getTagByIndex( tagIndex );
     if ( !tag ) {
-        return "";
+      return "";
     }
 
-    list<string> data = tag->MultiData();
-
-    if ( data.size() <= 1 ) return tag->Data();
+    list<string> data;
+    bool success = tag->Pos().retrieveData( input, data );
+    if ( !success ) {
+      E__ << "Can't retrieve data." << endl;
+      return "";
+    }
 
     string result;
     list<string>::const_iterator it;
@@ -497,14 +464,43 @@ string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex )
     return result;
 }
 
-string PMYouPatchInfo::tagValue( YOUPackageTagSet::Tags tagIndex )
+string PMYouPatchInfo::tagValueLocale( YOUPatchTagSet::Tags tagIndex,
+                                       std::istream &input )
 {
-    CommonPkdParser::Tag *tag = _packagetagset->getTagByIndex( tagIndex );
+    string result = tagValue( tagIndex, input, _locale );
+    if ( result.empty() ) result = tagValue( tagIndex, input, _defaultLocale );
+    
+    return result;
+}
+
+string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex,
+                                 std::istream &input, const string &locale )
+{
+    TaggedFile::Tag *tag = _patchTagSet.getTagByIndex( tagIndex );
     if ( !tag ) {
-        return "";
+      return "";
     }
 
-    return tag->Data();
+    string result;
+    bool success = tag->Pos( locale ).retrieveData( input, result );
+    if ( !success ) {
+      E__ << "Can't retrieve data." << endl;
+      return "";
+    }
+    
+    return result;
+}
+
+string PMYouPatchInfo::tagValue( YOUPackageTagSet::Tags tagIndex )
+{
+    TaggedFile::Tag *tag = _packageTagSet.getTagByIndex( tagIndex );
+    if ( !tag ) {
+      return "";
+    }
+
+    string result = tag->Data();
+    
+    return result;
 }
 
 string PMYouPatchInfo::translateLangCode( const LangCode &lang )
@@ -551,14 +547,27 @@ void PMYouPatchInfo::setLocation( const PMPackagePtr &pkg, const string &str )
   _locations[ pkg ] = str;
 }
 
-const string PMYouPatchInfo::patchRpmBaseVersions( const PMPackagePtr &pkg ) const
+const string PMYouPatchInfo::externalUrl( const PMPackagePtr &pkg ) const
 {
-  map<PMPackagePtr,string>::const_iterator it = _patchRpmBaseVersions.find( pkg );
-  if ( it == _patchRpmBaseVersions.end() ) return "";
+  map<PMPackagePtr,string>::const_iterator it = _externalUrls.find( pkg );
+  if ( it == _externalUrls.end() ) return "";
   else return it->second;
 }
 
-void PMYouPatchInfo::setPatchRpmBaseVersions( const PMPackagePtr &pkg, const string &str )
+void PMYouPatchInfo::setExternalUrl( const PMPackagePtr &pkg, const string &str )
 {
-  _patchRpmBaseVersions[ pkg ] = str;
+  _externalUrls[ pkg ] = str;
+}
+
+const list<PkgEdition> PMYouPatchInfo::patchRpmBaseVersions( const PMPackagePtr &pkg ) const
+{
+  map<PMPackagePtr,list<PkgEdition> >::const_iterator it = _patchRpmBaseVersions.find( pkg );
+  if ( it == _patchRpmBaseVersions.end() ) return list<PkgEdition>();
+  else return it->second;
+}
+
+void PMYouPatchInfo::setPatchRpmBaseVersions( const PMPackagePtr &pkg,
+                                              const list<PkgEdition> &editions )
+{
+  _patchRpmBaseVersions[ pkg ] = editions;
 }

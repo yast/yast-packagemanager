@@ -70,16 +70,6 @@ class ULSelectionParser : virtual public Rep {
 	// pass data from current tagset to data provider
 	PMSelectionPtr toProvider (PMULSelectionDataProviderPtr dataprovider);
 
-	typedef std::map<std::string, std::pair<PMSelectionPtr, PMULSelectionDataProviderPtr> > selmaptype;
-	selmaptype _selmap;
-
-	// convert list of selection names to list of selection pointers
-	// by using _selmap
-	std::list<PMSelectionPtr> strlist2sellist (const std::list<std::string>& strlist);
-
-	// fill pointers (*_prts attributes in data provider) from _selmap
-	void fillPointers (void);
-
     public:
 	ULSelectionParser (const InstSrcPtr source);
 	~ULSelectionParser();

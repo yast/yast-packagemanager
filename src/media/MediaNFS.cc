@@ -16,7 +16,7 @@
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
    Purpose:	Implementation class for MediaHandler
-		This class handles access to CD or DVD media
+		This class handles access to NFS media
 /-*/
 
 #include <iostream>
@@ -118,11 +118,11 @@ PMError MediaNFS::releaseFrom( bool eject )
 
     if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
     {
-	MIL << "failed: " <<  ret << endl;
+	MIL << " failed: " <<  ret << endl;
 	return ret;
     }
 
-    MIL << "succeded" << endl;
+    MIL << " succeded" << endl;
 
     return ret;
 }

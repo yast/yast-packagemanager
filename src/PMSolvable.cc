@@ -21,7 +21,9 @@
 #include <sstream>
 
 #include <y2util/Y2SLog.h>
+
 #include <y2pm/PMSolvable.h>
+#include <Y2PM.h>
 
 using namespace std;
 
@@ -213,6 +215,21 @@ bool PMSolvable::doesObsolete( const constPMSolvablePtr & item_r ) const
     }
   }
   return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSolvable::traceFileRel
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSolvable::traceFileRel( const PkgRelation & rel_r ) const
+{
+  if ( ! rel_r.isFileRel() )
+    return;
+  Y2PM::instTarget().traceFileRel( rel_r );
 }
 
 ///////////////////////////////////////////////////////////////////

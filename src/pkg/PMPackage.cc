@@ -90,6 +90,9 @@ bool		       PMPackage::isRemote()	 const { DP_GET( isRemote ); }
 PMError                PMPackage::providePkgToInstall(Pathname& path) const { DP_ARG_GET( providePkgToInstall, path ); }
 // physical access to the src.rpm file.
 PMError                PMPackage::provideSrcPkgToInstall(Pathname& path) const { DP_ARG_GET( provideSrcPkgToInstall, path ); }
+// who's providing this package
+constInstSrcPtr  PMPackage::source()		 const { DP_GET ( source ); }
+
 #undef DP_GET
 ///////////////////////////////////////////////////////////////////
 

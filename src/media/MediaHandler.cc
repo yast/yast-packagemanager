@@ -225,6 +225,50 @@ PMError MediaHandler::releaseFile( const Pathname & filename ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : MediaHandler::provideDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError MediaHandler::provideDir( const Pathname & dirname ) const
+{
+    D__ << dirname << endl;
+    if ( !_isAttached )
+	return Error::E_not_attached;
+
+    D__ << dirname.absolutename() << endl;
+    std::list<std::string> filelist;
+    PMError err = getDirInfo( filelist, dirname.absolutename(), false );
+    if (err == PMError::E_ok)
+    {
+	for (std::list<std::string>::iterator it = filelist.begin();
+	     it != filelist.end(); ++it)
+	{
+	    Pathname filename = dirname + *it;
+	    err = getFile ( filename.absolutename() ); // pass to concrete handler
+	    if (err != PMError::E_ok)
+		break;
+	}
+    }
+    return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::releaseDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError MediaHandler::releaseDir( const Pathname & dirname ) const
+{
+  return releasePath (dirname);
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : MediaHandler::releasePath
 //	METHOD TYPE : PMError
 //
@@ -277,7 +321,7 @@ PMError MediaHandler::dirInfo( std::list<std::string> & retlist,
 ostream &
 MediaHandler::dumpOn( ostream & str ) const
 {
-  str << _url << ( _isAttached ? "not" : "" ) << " attached; localRoot \""
+  str << _url << ( _isAttached ? "" : " not" ) << " attached; localRoot \""
     << _localRoot << "\"";
   return str;
 }

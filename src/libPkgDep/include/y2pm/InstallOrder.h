@@ -39,6 +39,7 @@ class InstallOrder
 
     private:
 	PkgSet _toinstall;
+	PkgSet _installed;
 
 	/** adjacency list type */
 	typedef std::map<constPMSolvablePtr,SolvableList> Graph;
@@ -72,6 +73,8 @@ class InstallOrder
 
 	bool _dirty;
 
+	unsigned _numrun;
+
     private:
 	void rdfsvisit(constPMSolvablePtr node);
 
@@ -81,8 +84,9 @@ class InstallOrder
 	 * Constructor
 	 *
 	 * @param toinstall Set of Solvables that have to be installed
+	 * @param installed Set of Solvables that are already installed
 	 * */
-	InstallOrder(const PkgSet& toinstall);
+	InstallOrder(const PkgSet& toinstall, const PkgSet& installed);
 
 	/**
 	 * Compute a list of Solvables which have no requirements and can be

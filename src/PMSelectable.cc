@@ -267,7 +267,7 @@ PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
       if ( acmp > 0 ) // worse arch
 	continue;
       if ( acmp == 0 ) {
-	if ( obj_r->edition() > (*it)->edition() )
+	if ( obj_r->edition() < (*it)->edition() )
 	  continue;
 	// ran out of sort criteria
       }

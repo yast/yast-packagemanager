@@ -264,6 +264,11 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		// also ok if a matching version is provided by an installed package
 		{
 			RevRel_for( installed.provided()[reqname], prov ) {
+				if(prov->pkg()->name()==candname)
+				{
+					W__ << "ignoring old version of " << candname << " for provides check" << endl;
+					continue;
+				}
 				if (req->matches( prov->relation() )) {
 					D__ << "Installed " << prov->pkg()->name() << " provides "
 						 << prov->relation() << " which is needed by "

@@ -310,6 +310,10 @@ class InstTarget: virtual public Rep, public InstData {
 	 */
 	std::string belongsTo (const Pathname& name, bool full_name = true) { return _rpmdb->belongsTo (name, full_name); }
 
+	/**
+	 * Hack to let InstTarget lookup required and conflicting file relations.
+	 **/
+	void traceFileRel( const PkgRelation & rel_r ) { _rpmdb->traceFileRel( rel_r ); }
 
       ///////////////////////////////////////////////////////////////////
       // Patch related interface

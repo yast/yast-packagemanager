@@ -18,10 +18,49 @@ using namespace std;
 #undef  Y2LOG
 #define Y2LOG "PM_ma_test"
 
+std::ostream & operator<<( std::ostream & str, const PkgDep::ResultList & lst ) {
+  str << "+++ResultList+++" << endl;
+  for ( PkgDep::ResultList::const_iterator it = lst.begin(); it != lst.end(); ++it ) {
+    str << *it << endl;
+  }
+  str << "---ResultList---" << endl;
+  return str;
+}
+
+std::ostream & operator<<( std::ostream & str, const PkgDep::ErrorResultList & lst ) {
+  str << "+++ErrorResultList+++" << endl;
+  for ( PkgDep::ErrorResultList::const_iterator it = lst.begin(); it != lst.end(); ++it ) {
+    str << *it << endl;
+  }
+  str << "---ErrorResultList---" << endl;
+  return str;
+}
+
+/*****************************************************************
+ *****************************************************************/
+
 inline string dec( unsigned i ) {
   static char b[5];
   sprintf( b, "%u", i );
   return b;
+}
+
+inline void On( string n ) {
+  PMSelectablePtr s( Y2PM::packageManager()[n] );
+  if ( s && s->user_set_install() ) {
+    SEC << "ins: " << n << endl;
+  }
+}
+inline void Off( string n ) {
+  PMSelectablePtr s( Y2PM::packageManager()[n] );
+  if ( s && s->user_set_delete() ) {
+    SEC << "del: " << n << endl;
+  }
+}
+inline PMError addSrc( const string & url_r ) {
+  InstSrcManager::ISrcIdList idlist;
+  PMError err = Y2PM::instSrcManager().scanMedia( idlist, url_r );
+  return err;
 }
 
 /******************************************************************
@@ -38,32 +77,31 @@ int main()
   M__ << "Y2SLOG_DEBUG IS ON" << endl;
   MIL << "START" << endl;
 
-  InstSrcManager & MGR( Y2PM::instSrcManager() );
+  //Y2PM::noAutoInstSrcManager();
+  PMPackageManager &   PMGR( Y2PM::packageManager() );
+  PMSelectionManager & SMGR( Y2PM::selectionManager() );
+  InstSrcManager &     MGR( Y2PM::instSrcManager() );
+  InstTarget &         TMGR( Y2PM::instTarget(true,"/") );
+  INT << "Total Packages "   << PMGR.size() << endl;
+  INT << "Total Selections " << SMGR.size() << endl;
+  SEC << "===============================================================" << endl;
 
-  Url url( "dir:////Local/tmp/UL_test" );
-
-  InstSrcManager::ISrcIdList nids;
-  PMError err = MGR.scanMedia( nids, url );
-  SEC << "scanMedia: " << nids.size() << "(" << err << ")" << endl;
-
-  if ( ! nids.size() ) {
-    MGR.getSources( nids );
-    SEC << "getSources " << nids.size() << endl;
-    if ( ! nids.size() ) {
-      SEC << "NO sources" << endl;
-    }
+  PMSelectablePtr tp = PMGR["3ddiag"];
+  if ( !tp ) {
+    ERR << "No testpkg " << tp << endl;
+    return 0;
   }
+  MIL << tp->user_set_install() << endl;
+  MIL << tp<< endl;
 
-  if ( nids.size() ) {
-    err = MGR.enableSource( *nids.begin() );
-    SEC << "enable source " << *nids.begin() << "(" << err << ")" << endl;
+  PkgDep::ResultList      good;
+  PkgDep::ErrorResultList bad;
+  INT << "Solve: " << PMGR.solveInstall( good, bad ) << endl;
 
-    Y2PM::packageManager().setNothingSelected();
+  MIL << "Good: " << good << endl;
+  MIL << "Bad: " << bad << endl;
 
-    err = MGR.disableSource( *nids.begin() );
-    SEC << "disable source " << *nids.begin() << "(" << err << ")" << endl;
-  }
-
-  MIL << "END " << endl;
+  SEC << "END " << endl;
+  MGR.disableAllSources();
   return 0;
 }

@@ -16,7 +16,7 @@
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
    Purpose:	Implementation class for MediaHandler
-		This class handles access to CD or DVD media
+		This class handles access to disk
 /-*/
 
 #include <iostream>
@@ -56,6 +56,8 @@ MediaDISK::MediaDISK( const Url &      url_r,
 {
 	_device = _url.getOption("device");
 	_filesystem = _url.getOption("filesystem");
+	if(_filesystem.empty())
+		_filesystem="auto";
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -107,16 +107,6 @@ class MediaHandler {
 	const Pathname & attachPoint() const { return _attachPoint; }
 
     protected:
-#if 0
-	/** scan directory 'dirname' for first file matching pattern
-	 * */
-	const Pathname *scanDirectory (const Pathname & dirname, const std::string & pattern) const;
-
-	/** read directory 'dirname' completely to string list
-	 * */
-	const std::list<std::string> * readDirectory (const Pathname & dirname) const;
-#endif
-    protected:
 
 	/**
 	 * Call concrete handler to attach the media.
@@ -248,6 +238,20 @@ class MediaHandler {
 	PMError releaseFile( const Pathname & filename ) const;
 
 	/**
+	 * Use concrete handler to provide directory tree denoted
+	 * by path below 'localRoot'.
+	 * dirname is interpreted relative to the
+	 * attached url and a path prefix is preserved.
+	 **/
+	PMError provideDir( const Pathname & dirname ) const;
+
+	/**
+	 * Remove directory tree below localRoot IFF handler downloads files
+	 * to the local filesystem. Never remove anything from media.
+	 **/
+	PMError releaseDir( const Pathname & dirname ) const;
+
+	/**
 	 * Remove pathname below localRoot IFF handler downloads files
 	 * to the local filesystem. Never remove anything from media.
 	 *
@@ -268,18 +272,6 @@ class MediaHandler {
 	 **/
         PMError dirInfo( std::list<std::string> & retlist,
 			 const Pathname & dirname, bool dots = true ) const;
-
-
-#if 0
-	/** find file denoted by pattern
-	 * filename is interpreted relative to the attached url
-	 * */
-	const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const = 0;
-
-	/** get file information
-	 * */
-	const PathInfo * fileInfo (const Pathname & filename) const = 0;
-#endif
 
     public:
 

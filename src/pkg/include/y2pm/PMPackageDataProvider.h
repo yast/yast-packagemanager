@@ -35,6 +35,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/InstSrcPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -105,6 +106,8 @@ class PMPackageDataProvider : virtual public Rep {
     static PMError providePkgToInstall(Pathname& path_r) { path_r = Pathname(); return 1; }
     // physical access to the src.rpm file.
     static PMError provideSrcPkgToInstall(Pathname& path_r) { path_r = Pathname(); return 1; }
+    // source for this package, needed for callbacks
+    static constInstSrcPtr source()		{ return (constInstSrcPtr)0; }
 
   protected:
 
@@ -171,9 +174,10 @@ class PMPackageDataProvider : virtual public Rep {
     virtual PMError providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return providePkgToInstall(path_r); }
     // physical access to the src.rpm file.
     virtual PMError provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return provideSrcPkgToInstall(path_r); }
+    // source for this package, needed for callbacks
+    virtual constInstSrcPtr source 		(const PMPackage & pkg_r ) const { return source (pkg_r); }
 };
 
 ///////////////////////////////////////////////////////////////////
 
 #endif // PMPackageDataProvider_h
-

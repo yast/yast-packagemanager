@@ -261,11 +261,7 @@ ULSelectionParser::fromPath (const Pathname& path, PMSelectionPtr& selection)
     }
 
     selection = toProvider (dataprovider);
-    if (selection)
-    {
-	_selmap[(const std::string &)(selection->name())] = pair<PMSelectionPtr, PMULSelectionDataProviderPtr>(selection, dataprovider);
-    }
-    else
+    if (!selection)
     {
 	ERR << path << ":" << _parser.lineNumber() << endl;
 	ERR << "Status " << (int)status << ", Last tag read: " << _parser.currentTag();
@@ -275,57 +271,6 @@ ULSelectionParser::fromPath (const Pathname& path, PMSelectionPtr& selection)
     }
 
     return PMError::E_ok;
-}
-
-
-///////////////////////////////////////////////////////////////////
-// private
-//
-//	METHOD NAME : strlist2sellist
-//	METHOD TYPE : std::list<PMSelectionPtr>
-//
-//	DESCRIPTION : convert list of selection names to list of selection pointers
-//		by using _selmap
-//
-std::list<PMSelectionPtr>
-ULSelectionParser::strlist2sellist (const std::list<std::string>& strlist)
-{
-    std::list<PMSelectionPtr> sellist;
-    for (std::list<std::string>::const_iterator it = strlist.begin(); it != strlist.end(); ++it)
-    {
-	selmaptype::const_iterator selpos = _selmap.find (*it);
-	if (selpos != _selmap.end())
-	{
-	    sellist.push_back (selpos->second.first);
-	}
-    }
-    return sellist;
-}
-
-///////////////////////////////////////////////////////////////////
-// private
-//
-//	METHOD NAME : fillPointers
-//	METHOD TYPE : void
-//
-//	DESCRIPTION : for each selection in _selmap,
-//		fill selection based *_ptrs attributes
-//		(requires, conflicts, suggests)
-//
-void
-ULSelectionParser::fillPointers()
-{
-    for (selmaptype::iterator it = _selmap.begin(); it != _selmap.end(); ++it)
-    {
-	PMULSelectionDataProviderPtr dataprovider = it->second.second;
-
-	dataprovider->_ptrs_attr_RECOMMENDS = strlist2sellist (dataprovider->_attr_RECOMMENDS);
-	dataprovider->_attr_RECOMMENDS.clear();
-	dataprovider->_ptrs_attr_SUGGESTS = strlist2sellist (dataprovider->_attr_SUGGESTS);
-	dataprovider->_attr_SUGGESTS.clear();
-    }
-
-    return;
 }
 
 
@@ -434,21 +379,15 @@ ULSelectionParser::fromMediaDir (std::list<PMSelectionPtr>& selections,
 
 	PMSelectionPtr selection;
 
-	// fill _selmap
+	// fill selection
 	err = fromPath (fullpath, selection);
+
+	if (!err)
+	    selections.push_back (selection);
 
     } // for ()
 
-    MIL << "*** parsed " << _selmap.size() << " selections ***" << std::endl;
+    MIL << "*** parsed " << selections.size() << " selections ***" << std::endl;
 
-    fillPointers ();
-
-    // convert selmap to list
-
-    for (selmaptype::iterator it = _selmap.begin(); it != _selmap.end(); it++)
-    {
-	selections.push_back (it->second.first);
-    }
-    _selmap.clear ();
     return PMError::E_ok;
 }

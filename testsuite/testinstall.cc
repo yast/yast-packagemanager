@@ -85,6 +85,7 @@ void rebuilddb(vector<string>& argv);
 void du(vector<string>& argv);
 void showselection(vector<string>& argv);
 void setsel(vector<string>& argv);
+void delsel(vector<string>& argv);
 void solvesel(vector<string>& argv);
 void setappl(vector<string>& argv);
 void order(vector<string>& argv);
@@ -134,6 +135,7 @@ static struct Funcs func[] = {
     { "upgrade",	upgrade,	1,	"compute upgrade" },
     { "commit",		commit,		1,	"commit changes to and actually perform installation" },
     { "setsel",		setsel,		1,	"mark selection for installation, need to call solvesel" },
+    { "delsel",		delsel,		1,	"delete selection from installation, need to call solvesel" },
     { "solvesel",	solvesel,	1,	"solve selection dependencies" },
     { "cdattach",	cdattach,	0,	"cdattach" },
 
@@ -695,6 +697,25 @@ void setsel(vector<string>& argv)
     install_internal(Y2PM::selectionManager(), argv);
 }
 
+void delsel(vector<string>& argv)
+{
+    for (unsigned i=1; i < argv.size() ; i++)
+    {
+	string sel = stringutil::trim(argv[i]);
+
+	if(sel.empty()) continue;
+	
+	PMSelectablePtr selp = Y2PM::selectionManager().getItem(sel);
+	if(!selp)
+	{
+	    std::cout << "selection " << sel << " is not available.\n";
+	    continue;
+	}
+
+	selp->setNothingSelected();
+    }
+}
+
 
 static bool solve_internal(PMManager& manager, vector<string>& argv)
 {
@@ -744,31 +765,80 @@ void solvesel(vector<string>& argv)
 void order(vector<string>& argv)
 {
     PkgSet toinstall;
+    PkgSet installed;
     for (PMManager::PMSelectableVec::iterator it = Y2PM::packageManager().begin();
 	it != Y2PM::packageManager().end(); ++it )
     {
+	if((*it)->has_installed())
+	{
+	    installed.add((*it)->installedObj());
+	}
 	if((*it)->to_install())
 	{
 	    toinstall.add((*it)->candidateObj());
 	}
     }
 
-    InstallOrder order(toinstall);
-    order.startrdfs();
+    InstallOrder order(toinstall,installed);
+
+    InstallOrder::SolvableList nowinstall;
+
+    unsigned count=0;
 
     cout << "Installation order:" << endl;
-    for(InstallOrder::SolvableList::const_iterator cit = order.getTopSorted().begin();
-	cit != order.getTopSorted().end(); ++cit)
+    for(nowinstall = order.computeNextSet(); !nowinstall.empty(); nowinstall = order.computeNextSet())
     {
-	cout << (*cit)->name() << " ";
+	count++;
+	for(InstallOrder::SolvableList::const_iterator cit = nowinstall.begin();
+	    cit != nowinstall.end(); ++cit)
+	{
+	    cout << (*cit)->name() << " ";
+	}
+	cout << endl;
+	{
+	    string filename=stringutil::form("/tmp/graph.run%d",count);
+	    ofstream fs(filename.c_str());
+	    if(fs)
+	    {
+		order.printAdj(fs,false);
+		fs.close();
+	    }
+	    else
+	    {
+		cout << "unable to open " << filename << endl;
+	    }
+	}
+	{
+	    string filename=stringutil::form("/tmp/rgraph.run%d",count);
+	    ofstream fs(filename.c_str());
+	    if(fs)
+	    {
+		order.printAdj(fs,true);
+		fs.close();
+	    }
+	    else
+	    {
+		cout << "unable to open " << filename << endl;
+	    }
+	}
+	order.setInstalled(nowinstall);
     }
-    cout << endl;
 
 }
 
 void upgrade(vector<string>& argv)
 {
     PMUpdateStats stats;
+
+    for(vector<string>::iterator it= argv.begin(); it != argv.end();++it)
+    {
+	if(*it == "-u")
+	{
+	    stats.delete_unmaintained = true;
+	    cout << "delete unmaintained" << endl;
+	}
+    }
+
     Y2PM::packageManager().doUpdate(stats);
     cout << stats << endl;
 }

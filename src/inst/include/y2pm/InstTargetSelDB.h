@@ -64,6 +64,8 @@ class InstTargetSelDB : virtual public Rep {
 
     Pathname db_file( const Pathname & selfile_r ) const;
 
+    PMError rescan();
+
   public:
 
     InstTargetSelDB();

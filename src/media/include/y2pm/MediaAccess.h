@@ -164,6 +164,20 @@ class MediaAccess : virtual public Rep {
 	PMError releaseFile( const Pathname & filename ) const;
 
 	/**
+	 * Use concrete handler to provide a complete directory tree
+	 * denoted by path below 'attach point'.
+	 * 'dirname' is interpreted relative to the
+	 * attached url and a path prefix is preserved.
+	 **/
+	PMError provideDir( const Pathname & dirname ) const;
+
+	/**
+	 * Remove directory tree below attach point IFF handler downloads files
+	 * to the local filesystem. Never remove anything from media.
+	 **/
+	PMError releaseDir( const Pathname & dirname ) const;
+
+	/**
 	 * Remove pathname below attach point IFF handler downloads files
 	 * to the local filesystem. Never remove anything from media.
 	 *
@@ -184,27 +198,6 @@ class MediaAccess : virtual public Rep {
 	 **/
         PMError dirInfo( std::list<std::string> & retlist,
 			 const Pathname & dirname, bool dots = true ) const;
-
-#if 0
-	// not that way
-
-	/**
-	 * find file denoted by pattern
-	 * filename is interpreted relative to the attached url
-	 **/
-	virtual const Pathname * findFile( const Pathname & dirname, const std::string & pattern ) const;
-
-	/**
-	 * get file information
-	 **/
-	const PathInfo * fileInfo (const Pathname & filename) const;
-
-	/**
-	 * clean up a file from destination
-	 * if filename == "", the whole destination is cleared
-	 **/
-	PMError cleanUp (const Pathname & filename) const;
-#endif
 
 	virtual ~MediaAccess();
 

@@ -26,17 +26,12 @@
 #include <fstream>
 #include <map>
 
-#include <y2util/FSize.h>
-#include <y2util/LangCode.h>
-#include <y2util/Pathname.h>
 #include <y2util/TaggedFile.h>
 #include <y2util/TagCacheRetrieval.h>
 #include <y2util/TagCacheRetrievalPtr.h>
+
 #include <y2pm/PMULSelectionDataProviderPtr.h>
 #include <y2pm/PMSelectionDataProvider.h>
-
-#include <y2pm/PMSelection.h>
-#include <y2pm/PMSelectable.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -175,6 +170,8 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 
 	virtual bool                      isBase         ( const PMSelection & sel_r ) const;
 
+	// physical access to the sel file.
+	virtual PMError provideSelToInstall( const PMSelection & sel_r, Pathname & path_r ) const;
 };
 
 ///////////////////////////////////////////////////////////////////

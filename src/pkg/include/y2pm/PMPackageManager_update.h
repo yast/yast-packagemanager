@@ -112,9 +112,13 @@ class PMUpdateStats : public PMUpdateOpts {
      **/
     unsigned chk_to_downgrade;
     /**
-     * update checks: with candidate: packages untouched
+     * update checks: with candidate: packages untouched (foreign package downgrade)
      **/
-    unsigned chk_to_keep_old;
+    unsigned chk_to_keep_downgrade;
+    /**
+     * update checks: with candidate: packages untouched (uptodate)
+     **/
+    unsigned chk_to_keep_installed;
 
     /**
      * update checks: without candidate: installed package has not vendor SuSE
@@ -174,7 +178,8 @@ class PMUpdateStats : public PMUpdateOpts {
       chk_already_toins		= 0;
       chk_to_update		= 0;
       chk_to_downgrade		= 0;
-      chk_to_keep_old		= 0;
+      chk_to_keep_downgrade	= 0;
+      chk_to_keep_installed	= 0;
       // packages without candidate
       chk_keep_foreign		= 0;
       chk_dropped		= 0;
@@ -211,7 +216,7 @@ class PMUpdateStats : public PMUpdateOpts {
      **/
     unsigned totalToKeep() const
     {
-      unsigned ret = chk_to_keep_old + chk_keep_foreign;
+      unsigned ret = chk_to_keep_downgrade + chk_to_keep_installed + chk_keep_foreign;
       if ( !delete_unmaintained )
 	ret += chk_dropped;
       return ret;

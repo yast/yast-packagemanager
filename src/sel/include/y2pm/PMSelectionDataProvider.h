@@ -27,9 +27,13 @@
 #include <y2util/FSize.h>
 #include <y2util/Vendor.h>
 #include <y2util/LangCode.h>
-#include <y2pm/PMSelectionDataProviderPtr.h>
+#include <y2util/Pathname.h>
 
-#include <y2pm/PMSelection.h>
+#include <y2pm/PMSelectablePtr.h>
+
+#include <y2pm/PMError.h>
+#include <y2pm/PMSelectionDataProviderPtr.h>
+#include <y2pm/PMSelectionPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -80,6 +84,9 @@ class PMSelectionDataProvider : virtual public Rep {
 
     static bool                      isBase()          { return false; }
 
+    // physical access to the sel file.
+    static PMError provideSelToInstall( Pathname & path_r ) { path_r = Pathname(); return 1; }
+
   protected:
 
     PMSelectionDataProvider();
@@ -123,6 +130,9 @@ class PMSelectionDataProvider : virtual public Rep {
     virtual std::string               order          ( const PMSelection & sel_r ) const { return order(); }
 
     virtual bool                      isBase         ( const PMSelection & sel_r ) const { return isBase(); }
+
+    // physical access to the sel file.
+    virtual PMError provideSelToInstall( const PMSelection & sel_r, Pathname & path_r ) const { return provideSelToInstall( path_r ); }
 };
 
 ///////////////////////////////////////////////////////////////////

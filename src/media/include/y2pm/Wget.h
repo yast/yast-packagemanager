@@ -15,45 +15,6 @@
  *
  *************************************************************/
    
-/*
- * $Log$
- * Revision 1.6  2002/09/09 13:56:12  lnussel
- * - remove proxy settings from wget class, works automatically through ~/.wgetrc
- * - make wget function that only accepts strings private, adapt PMYouPatchPaths.cc
- * - use saveAsString in InstSrcDescr
- *
- * Revision 1.5  2002/09/05 12:57:06  cschum
- * Add optional Cookie support to Wget class.
- * Support Cookies when getting the server list from www.suse.de.
- *
- * Revision 1.4  2002/09/04 09:22:42  cschum
- * Implemented user/password authentification.
- *
- * Revision 1.3  2002/07/05 12:05:13  lnussel
- * catch more wget errors
- *
- * Revision 1.2  2002/07/02 15:32:45  lnussel
- * added testprogram for ftp method, can already retreive files
- *
- * Revision 1.1  2002/07/02 09:27:25  lnussel
- * fix namespaces to make it compile
- *
- * Revision 1.2  2001/12/06 15:15:38  schubi
- * proxy support added
- *
- * Revision 1.1  2001/10/31 09:07:30  schubi
- * agent for http transfer
- *
- * Revision 1.1.2.2  2001/10/16 15:17:23  schubi
- * new call error_string
- *
- * Revision 1.1.2.1  2001/10/12 13:13:04  schubi
- * new class for http transfer( tested )
- *
- *
- *
- */
-
 // -*- C++ -*-
 
 #ifndef wget_h

@@ -468,6 +468,43 @@ void PMManager::setNothingSelected()
   }
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::anyMatch
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMManager::anyMatch( PMSelectable::Test_method fnc_r ) const
+{
+  if ( !fnc_r )
+    return false;
+  for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
+    if ( PMSelectable::test( *it, fnc_r ) )
+      return true;
+  }
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::anyMatch
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMManager::anyMatch( PMSelectable::Test_fnc fnc_r ) const
+{
+  if ( !fnc_r )
+    return false;
+  for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
+    if ( (*fnc_r)( *it ) )
+      return true;
+  }
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -482,6 +519,7 @@ void PMManager::setNothingSelected()
 unsigned int
 PMManager::updateAllInstalled (bool only_newer)
 {
+#warning Whats it good for?
     unsigned int count = 0;
 
     for (PMSelectableVec::iterator it = _items.begin();
@@ -533,6 +571,7 @@ PMManager::updateAllInstalled (bool only_newer)
 
 FSize PMManager::SpaceDifference()
 {
+#warning Whats it good for?
     FSize size = 0;
     for ( PMManager::PMSelectableVec::iterator it = this->begin(); it != this->end(); ++it )
     {

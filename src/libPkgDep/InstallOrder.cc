@@ -26,7 +26,11 @@
 
 using namespace std;
 
-InstallOrder::InstallOrder(const PkgSet& toinstall) : _toinstall(toinstall), _dirty(true)
+InstallOrder::InstallOrder(const PkgSet& toinstall, const PkgSet& installed) :
+	_toinstall(toinstall),
+	_installed(installed),
+	_dirty(true),
+	_numrun(0)
 {
 }
 
@@ -34,6 +38,8 @@ InstallOrder::InstallOrder(const PkgSet& toinstall) : _toinstall(toinstall), _di
 InstallOrder::SolvableList InstallOrder::computeNextSet()
 {
     SolvableList newlist;
+
+    if(_dirty) startrdfs();
 
     for(Nodes::iterator it = _nodes.begin();
 	it != _nodes.end(); ++it)
@@ -60,6 +66,8 @@ void InstallOrder::setInstalled( constPMSolvablePtr ptr )
     
     // order will be < 0
     _nodes[ptr].order--;
+    _installed.add(PMSolvablePtr::cast_away_const(ptr));
+    _toinstall.remove(ptr->name());
 
     for(SolvableList::iterator it = adj.begin();
 	it != adj.end(); ++it)
@@ -86,7 +94,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 {
     PMSolvable::PkgRelList_type reqnprereq;
 
-    D__ << "visiting " << node->name() << endl;
+    M__ << "visiting " << node->name() << endl;
 
     NodeInfo& info = _nodes[node];
 //    SolvableList& reverseedges = _rgraph[node];
@@ -110,7 +118,7 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
     for(PMSolvable::PkgRelList_const_iterator requirement = reqnprereq.begin();
 	requirement != reqnprereq.end(); ++requirement)
     {
-	D__ << "check requirement " << *requirement << endl;
+	D__ << "check requirement " << *requirement << " of " << node->name() << endl;
 	SolvableList tovisit;
 
 	// package could provide its own requirement
@@ -121,12 +129,24 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 	}
 	else
 	{
-	    RevRel_for(_toinstall.provided()[requirement->name()], prov)
+	    bool foundinstalled = false;
+	    RevRel_for(_installed.provided()[requirement->name()], iprov)
 	    {
-		if(requirement->matches(prov->relation()))
+		if(requirement->matches(iprov->relation()))
 		{
-		    D__ << "provided by " << prov->pkg()->name() << endl;
-		    tovisit.push_back(prov->pkg());
+		    M__ << "provided by installed " << iprov->pkg()->name() << endl;
+		    foundinstalled = true;
+		}
+	    }
+	    if(!foundinstalled)
+	    {
+		RevRel_for(_toinstall.provided()[requirement->name()], prov)
+		{
+		    if(requirement->matches(prov->relation()))
+		    {
+			M__ << "provided by " << prov->pkg()->name() << endl;
+			tovisit.push_back(prov->pkg());
+		    }
 		}
 	    }
 	}
@@ -157,9 +177,9 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 		    info.order++;
 		    lrg.push_back(node);
 
-		    SolvableList& lg = _graph[*it];
-		    if(find(lg.begin(),lg.end(),node) == lg.end())
-			lg.push_back(node);
+		    SolvableList& lg = _graph[node];
+		    if(find(lg.begin(),lg.end(),*it) == lg.end())
+			lg.push_back(*it);
 		}
 
 	    }
@@ -168,6 +188,8 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
     _topsorted.push_back(node);
     _nodes[node].endtime = _rdfstime;
     _rdfstime++;
+    
+    M__ << node->name() << " done" << endl;
 }
 
 void InstallOrder::startrdfs()
@@ -179,6 +201,9 @@ void InstallOrder::startrdfs()
     _rdfstime = 1;
     
     _topsorted.erase(_topsorted.begin(),_topsorted.end());
+
+    _numrun++;
+    MIL << "run " << _numrun << endl;
 
     // it->key is PkgName
     // it->value is PMSolvablePtr
@@ -200,6 +225,8 @@ void InstallOrder::startrdfs()
 	    rdfsvisit(it->value);
 	}
     }
+
+    _dirty = false;
 }
 
 const InstallOrder::SolvableList& InstallOrder::getTopSorted() const
@@ -210,17 +237,21 @@ const InstallOrder::SolvableList& InstallOrder::getTopSorted() const
 const void InstallOrder::printAdj(std::ostream& os, bool reversed) const
 {
     const Graph& g = (reversed?_rgraph:_graph);
+    os << "digraph pkgdeps {" << endl;
     for (Graph::const_iterator gcit = g.begin();
 	gcit != g.end(); ++gcit)
     {
 	Nodes::const_iterator niit = _nodes.find(gcit->first);
 	int order = niit->second.order;
-	os << gcit->first->name() << "(" << order << "): ";
+	PkgName name = gcit->first->name();
+	os << "\"" << name << "\""
+		<< "[label=\"" << name << "\\n"
+		<< order << "\"] " << endl;
 	for (SolvableList::const_iterator scit = gcit->second.begin();
 	    scit != gcit->second.end(); ++scit)
 	{
-	    os << (*scit)->name() << " ";
+	    os << "\"" << name << "\" -> \"" << (*scit)->name() << "\"" << endl;
 	}
-	os << endl;
     }
+    os << "}" << endl;
 }

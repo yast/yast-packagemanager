@@ -191,6 +191,20 @@ bad, PkgDep::SolvableList& to_remove)
 		good.erase(it2);
 		continue;
 	    }
+	else
+	{
+	    if(selp->has_installed())
+	    {
+#warning hack for unknown file dependencies
+		PMSolvablePtr i = selp->installedObj();
+		PMSolvablePtr c = selp->candidateObj();
+		if( i != NULL && c != NULL && i->edition() == c->edition())
+		{
+		    WAR << "reverting auto state of " << i->name() << " as same version is already installed" << endl;
+		    selp->auto_unset();
+		}
+	    }
+	}
     }
 
 

@@ -225,6 +225,11 @@ class RpmDb: virtual public Rep
 	 */
 	std::string belongsTo (const Pathname& name, bool full_name = true);
 
+	/**
+	 * Hack to lookup required and conflicting file relations.
+	 **/
+	void traceFileRel( const PkgRelation & rel_r );
+
 	/** install rpm package
 	 *
 	 * @param filename file to install
@@ -328,7 +333,7 @@ class RpmDb: virtual public Rep
 	 * @param yes true or false
 	 * */
 	void createPackageBackups(bool yes) { _packagebackups = yes; }
-	
+
 	/**
 	 * determine which files of an installed package have been
 	 * modified.
@@ -445,11 +450,14 @@ class RpmDb: virtual public Rep
 	 *
 	 * @param depstr string to evaluate
 	 * @param deps reference to a list which will be cleared and filled with dependencies
+	 * @param who name of package for which deps are generated, used to filter self provides/obsolete etc
+	 * @param dropselfdep if true, deps that match param name are dropped with a warning
 	 * @param files reference to a FileNames set where to store found file relations
 	 * @param fill_files whether to actually use the files parameter
 	 * */
 	void rpmdeps2rellist ( const std::string& depstr,
 			PMSolvable::PkgRelList_type& deps,
+			PkgName who, bool dropselfdep,
 			FileDeps::FileNames& files, bool fill_files = false);
 
 	/**

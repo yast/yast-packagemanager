@@ -25,7 +25,6 @@
 #include <string>
 #include <map>
 
-#include <y2util/CommonPkdParser.h>
 #include <y2util/Url.h>
 #include <y2util/Pathname.h>
 #include <y2util/LangCode.h>
@@ -136,35 +135,55 @@ class PMYouPatchInfo : virtual public Rep {
     const std::string location( const PMPackagePtr & ) const;
 
     /**
+     * Set external url for given package.
+     */
+    void setExternalUrl( const PMPackagePtr &pkg, const std::string &str );
+
+    /**
+      Get external url for given package.
+    */
+    const std::string externalUrl( const PMPackagePtr & ) const;
+
+    /**
      * Set base versions for patch RPM.
      */
     void setPatchRpmBaseVersions( const PMPackagePtr &pkg,
-                                  const std::string &str );
+                                  const std::list<PkgEdition> &editions );
 
     /**
       Get base versions for patch RPM.
     */
-    const std::string patchRpmBaseVersions( const PMPackagePtr & ) const;
+    const std::list<PkgEdition> patchRpmBaseVersions( const PMPackagePtr & ) const;
 
   protected:
-    std::string tagValue( YOUPatchTagSet::Tags tag );
+    std::string tagValueLocale ( YOUPatchTagSet::Tags tagIndex,
+                                 std::istream &input );
+
+    std::string tagValue( YOUPatchTagSet::Tags tagIndex, std::istream &input,
+                          const std::string &locale = "" );
+    std::string tagMultiValue( YOUPatchTagSet::Tags tagIndex, 
+                               std::istream& input );
+
     std::string tagValue( YOUPackageTagSet::Tags tag );
 
     PMError createPackage( const PMYouPatchPtr &patch );
 
   private:
-    CommonPkdParser::TagSet *_patchtagset;
-    CommonPkdParser::TagSet *_packagetagset;
+    YOUPatchTagSet _patchTagSet;
+    YOUPackageTagSet _packageTagSet;
     
     PMYouPatchPathsPtr _paths;
 
     LangCode _lang;
+    std::string _locale;
+    static const std::string _defaultLocale;
 
     MediaAccess _media;
 
     std::map<PMPackagePtr,FSize> _sizes;
     std::map<PMPackagePtr,std::string> _locations;
-    std::map<PMPackagePtr,std::string> _patchRpmBaseVersions;
+    std::map<PMPackagePtr,std::string> _externalUrls;
+    std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;
 };
 
 ///////////////////////////////////////////////////////////////////
