@@ -178,6 +178,15 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
         case CURLE_URL_MALFORMAT_USER:
           return Error::E_bad_url;
         case CURLE_HTTP_NOT_FOUND:
+          {
+            long httpReturnCode;
+            CURLcode infoRet = curl_easy_getinfo( _curl, CURLINFO_HTTP_CODE,
+                                                  &httpReturnCode );
+            if ( infoRet == CURLE_OK ) {
+              ERR << "HTTP return code: " << httpReturnCode << endl;
+              if ( httpReturnCode == 401 ) return Error::E_login_failed;
+            }
+          }
         case CURLE_FTP_COULDNT_RETR_FILE:
           return Error::E_file_not_found;
         case CURLE_BAD_PASSWORD_ENTERED:
@@ -189,7 +198,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
         case CURLE_COULDNT_CONNECT:
         case CURLE_FTP_CANT_GET_HOST:
           return Error::E_connection_failed;
-        CURLE_WRITE_ERROR:
+        case CURLE_WRITE_ERROR:
           ERR << "Couldn't write file." << endl;
           return Error::E_error;
         case CURLE_SSL_PEER_CERTIFICATE:
