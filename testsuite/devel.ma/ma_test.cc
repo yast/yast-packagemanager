@@ -1,5 +1,3 @@
-
-
 #include <iomanip>
 #include <list>
 #include <string>
@@ -13,8 +11,12 @@
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
+#include <y2pm/PMPackageManager.h>
+#include <y2pm/PMSelectionManager.h>
+#include <y2pm/InstTarget.h>
 
 using namespace std;
+
 #undef  Y2LOG
 #define Y2LOG "PM_ma_test"
 
@@ -71,13 +73,13 @@ inline PMError addSrc( const string & url_r ) {
 **
 **	DESCRIPTION :
 */
-int main()
+int main( int argc, char * argv[] )
 {
   Y2Logging::setLogfileName("-");
   M__ << "Y2SLOG_DEBUG IS ON" << endl;
   MIL << "START" << endl;
 
-  //Y2PM::noAutoInstSrcManager();
+  Y2PM::noAutoInstSrcManager();
   PMPackageManager &   PMGR( Y2PM::packageManager() );
   PMSelectionManager & SMGR( Y2PM::selectionManager() );
   InstSrcManager &     MGR( Y2PM::instSrcManager() );
@@ -86,20 +88,6 @@ int main()
   INT << "Total Selections " << SMGR.size() << endl;
   SEC << "===============================================================" << endl;
 
-  PMSelectablePtr tp = PMGR["3ddiag"];
-  if ( !tp ) {
-    ERR << "No testpkg " << tp << endl;
-    return 0;
-  }
-  MIL << tp->user_set_install() << endl;
-  MIL << tp<< endl;
-
-  PkgDep::ResultList      good;
-  PkgDep::ErrorResultList bad;
-  INT << "Solve: " << PMGR.solveInstall( good, bad ) << endl;
-
-  MIL << "Good: " << good << endl;
-  MIL << "Bad: " << bad << endl;
 
   SEC << "END " << endl;
   MGR.disableAllSources();

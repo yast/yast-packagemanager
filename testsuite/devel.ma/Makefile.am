@@ -11,7 +11,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		media/include	\
 		query/include	\
 		libPkgDep/include \
-	   ) -I$(includedir)
+	   ) -I$(includedir) -I/usr/include/rpm
 
 LDADD = $(top_builddir)/src/liby2pm.la
 
@@ -24,11 +24,8 @@ EXTRA_PROGRAMS = \
 	rpmtest.exe
 
 ma_test_exe_SOURCES = ma_test.cc
-#ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
-#ma_test_exe_LDFLAGS = -static
 
 rpmtest_exe_SOURCES = rpmtest.cc
-#rpmtest_exe_LDADD = $(top_builddir)/src/liby2pm.la
-#rpmtest_exe_LDFLAGS = -static
+rpmtest_exe_LDADD = $(LDADD)
 
 ALL: $(EXTRA_PROGRAMS)
