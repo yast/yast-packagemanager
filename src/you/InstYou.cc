@@ -402,7 +402,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
       cout << "PRESCRIPT: " << scriptPath << endl;
     } else {
       error = Y2PM::instTarget().executeScript( scriptPath );
-      if ( error ) return YouError::E_prescript_failed;
+      if ( error ) return PMError( YouError::E_prescript_failed,
+                                   scriptPath.asString() );
     }
   }
 
@@ -435,7 +436,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
       if ( error ) {
         E__ << "Installation of RPM " << fileName << " of patch "
             << patch->name() << "failed" << endl;
-        return YouError::E_rpm_failed;
+        return PMError( YouError::E_rpm_failed, fileName.asString() );
       }
     }
   }
@@ -447,7 +448,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     error = Y2PM::instTarget().installPatch( patch->localFile() );
     if ( error ) {
       E__ << "Error installing patch info." << endl;
-      return YouError::E_install_failed;
+      return PMError( YouError::E_install_failed,
+                      patch->localFile().asString() );
     }
   }
 
@@ -458,7 +460,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     } else {
       error = Y2PM::instTarget().executeScript( scriptPath );
       if ( error ) {
-        return YouError::E_postscript_failed;
+        return PMError( YouError::E_postscript_failed, scriptPath.asString() );
       }
     }
   }
