@@ -261,8 +261,13 @@ PMError PMYouServers::readServers( const Pathname &file )
     }
   }
 
-  addSLPServers( );
-  
+  SysConfig cfg( "onlineupdate" );
+  if ( cfg.readBoolEntry( "SLP_ENABLED", true ) )
+  {
+      y2milestone ("Cecking for SLP severs" );
+      addSLPServers( );
+  }
+
   return PMError();
 }
 
