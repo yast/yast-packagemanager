@@ -67,19 +67,31 @@ class Callbacks : public InstYou::Callbacks
 		cout << stringutil::form(_("Details: %s"), details.c_str()) << endl;
 	    return PMError();
 	}
-	virtual PMError showMessage( const std::string &type,
-		const std::list<PMYouPatchPtr> & )
+	virtual PMError showMessage( const std::string &strtype,
+		const std::list<PMYouPatchPtr> & patches)
 	{
-	    cout << "Message: ???" << endl;
+	    bool pre = (strtype == "preinfo"?true:false);
+	    for(std::list<PMYouPatchPtr>::const_iterator it = patches.begin();
+		    it != patches.end(); ++it)
+	    {
+		cout << "#####" << (*it)->fullName() << "#####" << endl;
+		if(pre)
+		    cout << (*it)->preInformation() << endl;
+		else
+		    cout << (*it)->postInformation() << endl;
+	    }
+		
+#if other_tools_that_depend_on_9_1_behavior_are_fixed
+	    if( pre && !confirm_yes )
+	    {
+		return PMError(YouError::E_user_skip);
+	    }
+#endif
 	    return PMError();
 	}
 	virtual void log( const std::string &text )
 	{
-	    cout << text;
-	    if(text[text.length()-1] != '\n')
-		cout << endl;
-	    else
-		cout << flush;
+	    cout << text << flush;
 	}
 
 	virtual bool executeYcpScript( const std::string &script )
@@ -98,9 +110,10 @@ class setYouCallbacks
 	Callbacks callbacks;
 
     public:
-	setYouCallbacks(InstYou& you) : _you(you)
+	setYouCallbacks(InstYou& you, bool enable) : _you(you)
 	{
-	    _you.setCallbacks(&callbacks);
+	    if(enable)
+		_you.setCallbacks(&callbacks);
 	}
 	~setYouCallbacks()
 	{
@@ -384,7 +397,7 @@ int main( int argc, char **argv )
 
   InstYou you( patchInfo, settings );
 
-  setYouCallbacks callbacks(you);
+  setYouCallbacks callbacks(you, verbose);
 
   if ( !productStr && !versionStr && !archStr ) {
     you.initProduct();
@@ -554,6 +567,7 @@ int main( int argc, char **argv )
 
   bool installedPatches = you.installedPatches();
   if ( verbose ) {
+    cout << '\n';
     if ( !installedPatches ) {
       cout << _("No patches have been installed.") << endl;
     } else {
