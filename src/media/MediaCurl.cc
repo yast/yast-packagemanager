@@ -197,7 +197,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     FILE *file = fopen( destNew.c_str(), "w" );
     if ( !file ) {
       ERR << "fopen failed" << endl;
-      return Error::E_error;
+      return Error::E_write_error;
     }
 
     ret = curl_easy_setopt( _curl, CURLOPT_WRITEDATA, file );
@@ -260,7 +260,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 
     if ( PathInfo::rename( destNew, dest ) != 0 ) {
       ERR << "Rename failed" << endl;
-      return Error::E_system;
+      return Error::E_write_error;
     }
 
     return Error::E_ok;

@@ -338,7 +338,11 @@ PMError PMYouPatchPaths::requestServers( const string &u )
 
     PMError error = MediaAccess::getFile( Url( url ), cachedYouServers() );
     if ( error ) {
-      return PMError( YouError::E_get_suseservers_failed );
+      if ( error == MediaError::E_write_error ) {
+        return PMError( YouError::E_write_youservers_failed );
+      } else {
+        return PMError( YouError::E_get_youservers_failed );
+      }
     }
 
     // Remove obsolete file.
@@ -370,7 +374,7 @@ PMError PMYouPatchPaths::readServers( const Pathname &file )
   ifstream in( file.asString().c_str() );
   if ( in.fail() ) {
     ERR << "Error reading " << file << endl;
-    return PMError( YouError::E_read_suseservers_failed, file.asString() );
+    return PMError( YouError::E_read_youservers_failed, file.asString() );
   }
   while( getline( in, line ) ) {
     if ( !line.empty() && *line.begin() != '#' ) {
