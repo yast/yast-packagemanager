@@ -31,7 +31,6 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/YouError.h>
 #include <y2pm/InstSrcDescr.h>
-#include <y2pm/Wget.h>
 #include <y2pm/PMYouPackageDataProvider.h>
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/PMPackageManager.h>
@@ -123,20 +122,16 @@ PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
 
   Pathname dummyFile = _paths->localDir() + "dummy";
 
-  D__ << dummyFile << endl;
-  D__ << u << endl;
+  PMError error = MediaAccess::getFile( u, dummyFile );
 
-  Wget wget;
-  WgetStatus status = wget.getFile( u, dummyFile );
-
-  if ( status == WGET_OK ) {
+  if ( !error ) {
     _regcode = regcode;
     _password = password;
     PathInfo::unlink( dummyFile );
     return PMError();
   } else {
-    if ( status == WGET_ERROR_LOGIN ) return YouError::E_auth_failed;
-    else WAR << wget.error_string( status ) << endl;
+    if ( error == MediaError::E_login_failed ) return YouError::E_auth_failed;
+    else WAR << error << endl;
   }
 
   return YouError::E_error;
