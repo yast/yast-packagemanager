@@ -128,6 +128,11 @@ class InstYou {
      */
     PMYouPatchPathsPtr paths() const { return _paths; }
 
+    /**
+     * Remove downloaded packages.
+     */
+    PMError removePackages();
+
   private:
     void init();
 

@@ -317,3 +317,22 @@ void InstYou::filterPatchSelection()
 
   _selectedPatchesIt = _selectedPatches.begin();
 }
+
+PMError InstYou::removePackages()
+{
+  list<PMYouPatchPtr>::const_iterator itPatch;
+  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
+       ++itPatch ) {
+    list<PMPackagePtr> packages = (*itPatch)->packages();
+    list<PMPackagePtr>::const_iterator itPkg;
+    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+      PMError error = _media.releaseFile( _paths->rpmPath( *itPkg ) );
+      if ( error ) {
+        E__ << "Can't release " << _paths->rpmPath( *itPkg ).asString() << endl;
+        return error;
+      }
+    }
+  }
+
+  return PMError();
+}
