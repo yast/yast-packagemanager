@@ -137,15 +137,9 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  Y2PM::packageSelectionSaveState();
-  SEC << Y2PM::packageSelectionDiffState() << endl;
-  PMGR["rpm"]->user_set_delete();
-  SEC << Y2PM::packageSelectionDiffState() << endl;
-  PMGR["rpm"]->user_set_install();
-  SEC << Y2PM::packageSelectionDiffState() << endl;
-  PMGR["rpm"]->user_unset();
-  SEC << Y2PM::packageSelectionDiffState() << endl;
-
+  InstSrcManager::ISrcIdList idlist;
+  ISM.getSources( idlist );
+  SEC << ">>" << (*idlist.begin())->descr()->content_flags() << "<<" << endl;
 
   SEC << "STOP" << endl;
   return 0;
