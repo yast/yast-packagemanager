@@ -170,7 +170,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 
     bool probabely_dropped = false;
 
-    DBG << "REPLACEMENT FOR " << installed << endl;
+    D__ << "REPLACEMENT FOR " << installed << endl;
 
     // if installed not SuSE -> no action ???
 
@@ -186,7 +186,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	if ( installed->edition() < candidate->edition() ) {
 	  // new version
 	  state->appl_set_install();
-	  DBG << " ==> INSTALL (new version): " << candidate << endl;
+	  D__ << " ==> INSTALL (new version): " << candidate << endl;
 	  ++opt_stats_r.chk_to_update;
 	} else {
 	  // check whether to downgrade:
