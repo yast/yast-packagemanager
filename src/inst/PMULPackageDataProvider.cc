@@ -322,7 +322,8 @@ void PMULPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) co
 //
 bool PMULPackageDataProvider::isRemote (const PMPackage & pkg_r) const
 {
-    if (_source) return _source->isRemote();
+    if ( _source )
+      return _source->isRemote();
     return false;
 }
 
