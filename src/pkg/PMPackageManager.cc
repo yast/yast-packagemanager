@@ -448,7 +448,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 			if ((*obsit) != (*prvit))
 			    continue;
 
-		        DBG << "matching provides";
+		        DBG << "matching provides <" << obsit->asString() << ">";
 
 			if (suse_vendor (installed))
 			{
@@ -465,7 +465,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
 		if ((*it)->to_install())		// if selected for installion
 		{					// remove obsoletes
-		    DBG << "delete!";
+		    DBG << "obsoletes <" << obsslc->name() << ">";
 		    if (suse_vendor (installed))
 		    {
 			obsslc->appl_set_delete();
