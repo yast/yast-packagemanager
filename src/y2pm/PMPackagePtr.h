@@ -28,21 +28,6 @@
 /**
  *
  **/
-DEFINE_DERIVED_POINTER( PMPackage, PMObject, PMSolvable );
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMPackage *></code>
- *
- * <b>See:</> @ref PMPackage
- **/
-class PMPackagePtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMPackage *></code>
- *
- * <b>See:</> @ref PMPackage
- **/
-class constPMPackagePtr {};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER( PMPackage, PMSolvable );
 
 #endif // PMPackagePtr_h

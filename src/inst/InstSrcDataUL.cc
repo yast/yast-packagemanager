@@ -53,7 +53,7 @@ using namespace std;
 //	CLASS NAME : InstSrcDataULPtr
 //	CLASS NAME : constInstSrcDataULPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
+IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData);
 
 
 #warning Put MediaFile parsing and data into some class or struct!

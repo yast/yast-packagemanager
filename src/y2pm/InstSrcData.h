@@ -44,7 +44,7 @@
 /**
  * @short Base class for all concrete InstSrcData classes.
  **/
-class InstSrcData: virtual public Rep, public InstData {
+class InstSrcData: public CountedRep, public InstData {
   REP_BODY(InstSrcData);
 
   public:

@@ -36,7 +36,7 @@
 /**
  *
  **/
-class InstTargetSelDB : virtual public Rep {
+class InstTargetSelDB : public CountedRep {
   REP_BODY(InstTargetSelDB);
 
   public:

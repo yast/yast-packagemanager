@@ -33,7 +33,7 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_DERIVED_POINTER(PMYouPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
+IMPL_DERIVED_POINTER(PMYouPackageDataProvider, PMPackageDataProvider );
 
 ///////////////////////////////////////////////////////////////////
 //

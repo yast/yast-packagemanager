@@ -28,19 +28,4 @@
  **/
 DEFINE_BASE_POINTER(PMYouProduct);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMYouProduct *></code>
- *
- * <b>See:</> @ref PMYouProduct
- **/
-class PMYouProductPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMYouProduct *></code>
- *
- * <b>See:</> @ref PMYouProduct
- **/
-class constPMYouProductPtr {};
-#endif // just for kdoc
-
 #endif

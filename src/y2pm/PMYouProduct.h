@@ -40,7 +40,7 @@ class SysConfig;
 /**
   This class provides product-specific information for the online update.
 */
-class PMYouProduct : virtual public Rep
+class PMYouProduct : public CountedRep
 {
   REP_BODY( PMYouProduct );
 

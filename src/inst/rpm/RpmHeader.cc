@@ -39,7 +39,7 @@ using namespace std;
 //	CLASS NAME : RpmHeaderPtr
 //	CLASS NAME : constRpmHeaderPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(RpmHeader,binHeader,binHeader);
+IMPL_DERIVED_POINTER(RpmHeader,binHeader);
 
 ///////////////////////////////////////////////////////////////////
 

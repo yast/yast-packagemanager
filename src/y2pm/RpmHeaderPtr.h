@@ -27,24 +27,7 @@
 //	CLASS NAME : RpmHeaderPtr
 //	CLASS NAME : constRpmHeaderPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(RpmHeader,binHeader,binHeader);
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref RpmHeader *></code>
- *
- * <b>See:</> @ref RpmHeader
- **/
-class RpmHeaderPtr {
-};
-/**
- * @short Refcounting <code>&lt;const @ref RpmHeader *></code>
- *
- * <b>See:</> @ref RpmHeader
- **/
-class constRpmHeaderPtr {
-};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER(RpmHeader,binHeader);
 
 #endif // RpmHeaderPtr_h
 

@@ -48,7 +48,7 @@
 /**
  * @short An InstSrc
  **/
-class InstSrc: virtual public Rep {
+class InstSrc: public CountedRep {
   REP_BODY(InstSrc);
 
   private:

@@ -52,7 +52,7 @@ class PkgDu;
  *
  * @see DataProvider
  **/
-class PMPackageDataProvider : virtual public Rep {
+class PMPackageDataProvider : public CountedRep {
   REP_BODY(PMPackageDataProvider);
 
   public:

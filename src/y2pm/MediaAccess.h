@@ -47,7 +47,7 @@ class MediaHandler;
  * The inteface here basically checks whether the handler exists,
  * then forwards the request to @ref MediaHandler.
  **/
-class MediaAccess : virtual public Rep {
+class MediaAccess : public CountedRep {
 	REP_BODY(MediaAccess);
 
     public:

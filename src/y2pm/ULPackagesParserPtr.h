@@ -29,20 +29,5 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(ULPackagesParser);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref ULPackagesParser *></code>
- *
- * <b>See:</> @ref ULPackagesParser
- **/
-class ULPackagesParserPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref ULPackagesParser *></code>
- *
- * <b>See:</> @ref ULPackagesParser
- **/
-class constULPackagesParserPtr {};
-#endif // just for kdoc
-
 #endif // ULPackagesParserPtr_h
 

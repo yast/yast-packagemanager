@@ -40,7 +40,7 @@ class YStringTree;
 /**
  * The Package.
  **/
-class PMPackage : virtual public Rep, public PMObject {
+class PMPackage : public PMObject {
   REP_BODY(PMPackage);
 
   private:

@@ -45,7 +45,7 @@
  * Previously remember information may be used to arrange package/selection
  * managers settings, to restore the systems content as close as possible.
  **/
-class PMPackageImEx : virtual public Rep {
+class PMPackageImEx : public CountedRep {
   REP_BODY(PMPackageImEx);
 
   private:

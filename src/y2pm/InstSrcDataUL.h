@@ -41,7 +41,7 @@
 /**
  * @short Concrete InstSrcData able to handle UnitedLinux style layout.
  **/
-class InstSrcDataUL : virtual public Rep, public InstSrcData {
+class InstSrcDataUL : public InstSrcData {
     REP_BODY(InstSrcDataUL);
 
     private:

@@ -44,7 +44,7 @@
 
 #include <y2pm/ULPackagesParserPtr.h>
 
-class ULPackagesParser : virtual public Rep {
+class ULPackagesParser : public CountedRep {
     private:
 	// the source
 	const InstSrcPtr _source;

@@ -29,20 +29,5 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(InstTargetProdDB);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref InstTargetProdDB *></code>
- *
- * <b>See:</> @ref InstTargetProdDB
- **/
-class InstTargetProdDBPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref InstTargetProdDB *></code>
- *
- * <b>See:</> @ref InstTargetProdDB
- **/
-class constInstTargetProdDBPtr {};
-#endif // just for kdoc
-
 #endif // InstTargetProdDBPtr_h
 

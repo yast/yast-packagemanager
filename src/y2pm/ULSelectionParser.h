@@ -38,7 +38,7 @@
 
 #include <y2pm/ULSelectionParserPtr.h>
 
-class ULSelectionParser : virtual public Rep {
+class ULSelectionParser : public CountedRep {
     private:
 	// the source
 	const InstSrcPtr _source;

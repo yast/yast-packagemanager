@@ -46,7 +46,7 @@
 /**
  * Patch information.
  **/
-class PMYouPatchInfo : virtual public Rep {
+class PMYouPatchInfo : public CountedRep {
   REP_BODY(PMYouPatchInfo);
 
   public:

@@ -29,20 +29,5 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(InstSrcData);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref InstSrcData *></code>
- *
- * <b>See:</> @ref InstSrcData
- **/
-class InstSrcDataPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref InstSrcData *></code>
- *
- * <b>See:</> @ref InstSrcData
- **/
-class constInstSrcDataPtr {};
-#endif // just for kdoc
-
 #endif // InstSrcDataPtr_h
 

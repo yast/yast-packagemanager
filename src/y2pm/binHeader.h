@@ -37,7 +37,7 @@ extern "C" {
 /**
  *
  **/
-class binHeader : virtual public Rep {
+class binHeader : public CountedRep {
   REP_BODY(binHeader);
 
   public:

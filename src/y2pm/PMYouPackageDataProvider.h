@@ -28,7 +28,7 @@
 
 #include <y2util/YRpmGroupsTree.h>
 
-class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvider {
+class PMYouPackageDataProvider : public PMPackageDataProvider {
 	REP_BODY(PMYouPackageDataProvider);
 
         PMYouPatchInfoPtr _patchInfo;

@@ -30,20 +30,5 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(PMSelectionDataProvider);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMSelectionDataProvider *></code>
- *
- * <b>See:</> @ref PMSelectionDataProvider
- **/
-class PMSelectionDataProviderPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMSelectionDataProvider *></code>
- *
- * <b>See:</> @ref PMSelectionDataProvider
- **/
-class constPMSelectionDataProviderPtr {};
-#endif // just for kdoc
-
 #endif // PMSelectionDataProviderPtr_h
 

@@ -295,7 +295,7 @@ unsigned librpmDb::dbRelease( bool force_r )
     return 0;
   }
 
-  unsigned outstanding = _defaultDb->rep_cnt() - 1; // rep_cnt can't be 0
+  unsigned outstanding = _defaultDb->refCount() - 1; // refCount can't be 0
 
   switch ( outstanding ) {
   default:
@@ -393,9 +393,9 @@ librpmDb::~librpmDb()
 //	METHOD NAME : librpmDb::unref_to
 //	METHOD TYPE : void
 //
-void librpmDb::unref_to( unsigned rep_cnt_r ) const
+void librpmDb::unref_to( unsigned refCount_r ) const
 {
-  if ( rep_cnt_r == 1 ) {
+  if ( refCount_r == 1 ) {
     dbRelease();
   }
 }

@@ -24,20 +24,5 @@
 
 DEFINE_BASE_POINTER(RpmDb);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref RpmDb *></code>
- *
- * <b>See:</> @ref RpmDb
- **/
-class RpmDbPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref RpmDb *></code>
- *
- * <b>See:</> @ref RpmDb
- **/
-class constRpmDbPtr {};
-#endif // just for kdoc
-
 #endif // RpmDbPtr_h
 

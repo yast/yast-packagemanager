@@ -29,20 +29,5 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(librpmDb);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref librpmDb *></code>
- *
- * <b>See:</> @ref librpmDb
- **/
-class librpmDbPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref librpmDb *></code>
- *
- * <b>See:</> @ref librpmDb
- **/
-class constlibrpmDbPtr {};
-#endif // just for kdoc
-
 #endif // librpmDbPtr_h
 

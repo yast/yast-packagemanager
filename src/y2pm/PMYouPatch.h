@@ -54,7 +54,7 @@ class PMYouFile
 /**
   This class represents a patch.
 */
-class PMYouPatch : virtual public Rep, public PMObject
+class PMYouPatch : public PMObject
 {
   REP_BODY(PMYouPatch);
 

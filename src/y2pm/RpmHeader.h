@@ -48,7 +48,7 @@ class PkgDu;
  *
  * <B>NEVER create <code>RpmHeader</code> from a NULL <code>Header</code>! </B>
  **/
-class RpmHeader : virtual public Rep, public binHeader {
+class RpmHeader : public binHeader {
   REP_BODY(RpmHeader); // includes no cpoy, no assign
 
   private:
