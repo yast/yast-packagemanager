@@ -927,6 +927,24 @@ PMError RpmDb::importPubkey( const Pathname & keyring_r, const string & keyname_
   return err;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::pubkeys
+//	METHOD TYPE : set<PkgEdition>
+//
+set<PkgEdition> RpmDb::pubkeys() const
+{
+  set<PkgEdition> ret;
+
+  librpmDb::db_const_iterator it;
+  for ( it.findByName( PkgName( "gpg-pubkey" ) ); *it; ++it ) {
+    ret.insert( it->tag_edition() );
+  }
+
+  return ret;
+}
+
 
 // helper function
 // converting PMPackagePtr to "name-version-release" string
@@ -1011,8 +1029,13 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
 
   for ( ; *iter; ++iter ) {
 
-    PkgName name        = iter->tag_name();
-    Date    installtime = iter->tag_installtime();
+    PkgName name = iter->tag_name();
+    if ( name == PkgName( "gpg-pubkey" ) ) {
+      // pseudo package filtered, as we can't handle multiple instances
+      // of 'gpg-pubkey-VERS-REL'.
+      continue;
+    }
+    Date installtime = iter->tag_installtime();
     PMPackagePtr & nptr = _packages._index[name]; // be shure to get a reference!
 
     if ( nptr ) {
