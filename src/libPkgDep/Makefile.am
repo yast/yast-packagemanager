@@ -11,7 +11,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(includedir)
 
 libPkgDep_la_SOURCES = install.cc remove.cc consistency.cc alternatives.cc \
 		       upgrade.cc results.cc output.cc utils.cc \
-		       PkgSet.cc InstallOrder.cc
+		       PkgSet.cc InstallOrder.cc PkgDep_int.h
 
 # Local Variables:
 # tab-width: 4
