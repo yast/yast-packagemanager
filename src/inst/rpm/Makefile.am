@@ -26,3 +26,5 @@ liby2pminstrpmsrc_la_SOURCES = 	\
 	PMRpmPackageDataProvider.cc
 
 liby2pminstrpmsrc_la_LIBADD = -ly2util -lrpm -lpopt
+
+EXTRA_DIST = Make.defines
