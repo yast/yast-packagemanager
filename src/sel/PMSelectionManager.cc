@@ -157,16 +157,11 @@ PMSelectionManager::setSelectionPackages (const std::list<std::string> packages,
 	    {
 		// de-activate delpacks
 		// only 'to_delete' packages not 'by_user'
-		selectable->auto_set_delete();
+		selectable->appl_set_delete();
 	    }
 	    else
 	    {
-		// these are inspacks
-		if (!selectable->to_install()	// not already set
-		    && !selectable->by_user())	// status not set by user
-		{
-		    selectable->auto_set_install();
-		}
+		selectable->appl_set_install();
 	    }
 	}
     }
@@ -207,21 +202,7 @@ PMSelectionManager::resetSelectionPackages (const std::list<std::string> package
 
 	if (selectable)
 	{
-	    if (these_are_inspacks)
-	    {
-		// de-activate inspacks
-		// only 'to_install' packages not 'by_user'
-		if (selectable->to_install()
-		    && !selectable->by_user())
-		{
-		    selectable->setNothingSelected();
-		}
-	    }
-	    else
-	    {
-		// these are delpacks
-		selectable->auto_set_delete ();
-	    }
+	    selectable->appl_unset();
 	}
     }
     return;
