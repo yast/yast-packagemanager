@@ -47,7 +47,13 @@ class PMSelectable : virtual public Rep {
     PMManager * _manager;
     unsigned    _mgr_idx;
 
+    void _mgr_attach( PMManager * mgr_r, const unsigned idx_r );
+    void _mgr_detach();
+
+  private:
+
     PkgName _name;
+
     PMObjectPtr _installedObj;
     PMObjectPtr _candidateObj;
     PMObjectList _candidateList;
@@ -102,17 +108,16 @@ class PMSelectable : virtual public Rep {
     PMObjectPtr installedObj() const { return _installedObj; }
 
     /**
-     * If not NULL, Among all available Objects with this name (from any enabled
-     * InstSrc), this is considered to be the best choice for an installation.
+     * One among all available Objects with this name (from any enabled InstSrc),
+     * considered to be the best choice for an installation.
      *
-     * Otherwise there is no Object with this name available on any (enabled)
-     * InstSrc. The list of availableObjs is empty.
+     * Might NULL, if no available Object is appropriate.
      **/
     PMObjectPtr candidateObj() const { return _candidateObj; }
 
     /**
      * Number of Objects with this name availavle on any enabled InstSrc. If the list
-     * is not empty, one among these is choosen as candidate for an installation.
+     * is not empty, one among these might be choosen as candidate for an installation.
      **/
     unsigned availableObjs() const { return _candidateList.size(); }
 
@@ -135,6 +140,25 @@ class PMSelectable : virtual public Rep {
      * Iterator for the list of available Objects.
      **/
     PMObjectList::const_reverse_iterator av_rend() const { return _candidateList.rend(); }
+
+  public:
+
+    /**
+     * UI likes to have one among the Objects refered to here, whichs data are
+     * shown per default.
+     *
+     * Reurns installedObj(). If not available candidateObj(). If not available
+     * one out of availableObjs().
+     **/
+    PMObjectPtr theObject() const {
+      if ( _installedObj )
+	return _installedObj;
+      if ( _candidateObj )
+	return _candidateObj;
+      if ( availableObjs() )
+	return *av_begin();
+      return PMObjectPtr();
+    }
 
   public:
 

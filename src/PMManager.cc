@@ -149,8 +149,7 @@ PMSelectablePtr PMManager::poolProvide( const std::string & name_r )
   if ( !item ) {
     // create a new one
     item = newSelectable( PkgName( name_r ) );
-    item->_manager = this;
-    item->_mgr_idx = _items.size();
+    item->_mgr_attach( this, _items.size() );
 
     _itemPool.insert( PMSelectablePool::value_type( item->name(), item ) );
     _items.push_back( item );
@@ -317,7 +316,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
 #warning must save pools state on dropping items
 	D__ << "    drop selectable" << endl;
 	_itemPool.erase( pitem->name() );
-	pitem->_manager = 0;
+	pitem->_mgr_detach = 0;
     }
 #endif
   }
