@@ -302,8 +302,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
 //
 void PMManager::poolAdjust()
 {
-  DBG << "START Pool size " << _items.size() << endl;
-  Rep::dumpRepStats( DBG ) << endl;
+  MIL << "START " << _items.size() << " Selectables" << endl;
 
   ///////////////////////////////////////////////////////////////////
   // Clear any saved state!
@@ -323,7 +322,7 @@ void PMManager::poolAdjust()
 
       // delete tdel
       if ( (*tdel)->rep_cnt() != 2 )
-	DBG << "(OUTSIDE REFERENCED) delete " << *tdel << endl;;
+	D__ << "(OUTSIDE REFERENCED) delete " << *tdel << endl;;
 
       // pool first
       PMSelectablePool::iterator iter = _itemPool.find( (*tdel)->name() );
@@ -340,10 +339,9 @@ void PMManager::poolAdjust()
     }
   }
 
-  Rep::dumpRepStats( DBG ) << endl;
-  DBG << "END Pool size " << _items.size() << endl;
-
   checkPool(); // for sanity
+
+  MIL << "END " << _items.size() << " Selectables" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -357,10 +355,9 @@ void PMManager::poolAdjust()
 void PMManager::checkPool() const
 {
   if ( _itemPool.size() == _items.size() )
-    DBG << "Pool size " << _items.size() << endl;
+    D__ << "Pool size " << _items.size() << endl;
   else
     INT << "Pool size missmatch " << _itemPool.size() << " <-> " << _items.size() << endl;
-  Rep::dumpRepStats( DBG ) << endl;
 
   for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
     const PMSelectablePtr & c = *it;
