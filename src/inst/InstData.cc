@@ -84,7 +84,6 @@ const std::list<PMSelectionPtr>&
 InstData::getSelections (void) const
 {
     static std::list<PMSelectionPtr> selections;
-    ERR << "InstData::getSelections()" << endl;
     return selections;
 }
 
@@ -97,7 +96,6 @@ const std::list<PMPackagePtr>&
 InstData::getPackages (void) const
 {
     static std::list<PMPackagePtr> packages;
-    ERR << "InstData::getPackages()" << endl;
     return packages;
 }
 
@@ -109,7 +107,6 @@ const std::list<PMYouPatchPtr>&
 InstData::getPatches (void) const
 {
     static std::list<PMYouPatchPtr> patches;
-    ERR << "InstData::getPatches()" << endl;
     return patches;
 }
 
