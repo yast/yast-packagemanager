@@ -75,11 +75,13 @@ static MediaChangeReceive mediaChangeReceive ;
  ******************************************************************/
 struct CommitProvideReceive : public Y2PMCallbacks::CommitProvideCallback
 {
+  unsigned _attempt;
   string _name;
   bool   _isRemote;
 
   virtual void reportbegin() {
     SEC << "+++" << endl;
+    _attempt = 0;
   }
   virtual void reportend()   {
     SEC << "---" << endl;
@@ -94,12 +96,15 @@ struct CommitProvideReceive : public Y2PMCallbacks::CommitProvideCallback
     }
   }
   virtual CBSuggest attempt( unsigned cnt ) {
+    _attempt = cnt;
     CBSuggest ret = CommitProvideCallback::attempt( cnt );
     INT << "CommitProvide attempt " << _name << "(" << cnt << ") retrun " << ret << endl;
     return ret;
   }
   virtual CBSuggest result( PMError error, const Pathname & localpath ) {
     CBSuggest ret = CommitProvideCallback::result( error, localpath );
+    if ( _attempt == 1 )
+      ret = CBSuggest::RETRY;
     INT << "CommitProvide result " << _name << "(" << error << ") retrun " << ret << endl;
     return ret;
   }
@@ -270,26 +275,43 @@ int main( int argc, const char * argv[] ) {
   }
 
   set<string> allpks;
-  allpks.insert( "test1" );
-  allpks.insert( "test2" );
-  allpks.insert( "test3" );
-  allpks.insert( "test11" );
-  allpks.insert( "test22" );
-  allpks.insert( "test33" );
-  allpks.insert( "test111" );
-  allpks.insert( "test222" );
-  allpks.insert( "test333" );
+  //allpks.insert( "aaa_base" );
+  allpks.insert( "test" );
+  //allpks.insert( "test1" );
+  //allpks.insert( "test2" );
+  //allpks.insert( "test3" );
+  //allpks.insert( "test11" );
+  //allpks.insert( "test22" );
+  //allpks.insert( "test33" );
+  //allpks.insert( "test111" );
+  //allpks.insert( "test222" );
+  //allpks.insert( "test333" );
 #define forall for ( set<string>::const_iterator it = allpks.begin(); it != allpks.end(); ++it )
 
   Y2PM::instSrcManager();
+  forall {
+    DBG << "  " << PMGR[*it]->user_set_install() << endl;
+    DBG << "  " << PMGR[*it]->providesSources() << endl;
+    DBG << "  " << PMGR[*it]->set_source_install( true ) << endl;
+    SEC << PMGR[*it] << endl;
+  }
+
   Y2PM::instTargetUpdate();
+  forall {
+    DBG << "  " << PMGR[*it]->user_set_install() << endl;
+    SEC << PMGR[*it] << endl;
+  }
+
+
+
+#if 0
   Y2PMCallbacks::commitProvideReport.redirectTo( commitProvideReceive );
   InstSrcManagerCallbacks::mediaChangeReport.redirectTo( mediaChangeReceive );
 
   forall {
-    PMGR[*it]->user_set_install();
     SEC << PMGR[*it] << endl;
   }
+#endif
 
   list<string> errors;
   list<string> remaining;
