@@ -27,7 +27,6 @@
 
 #include <Y2PM.h>
 #include <y2pm/InstSrcError.h>
-#include <y2pm/MediaAccess.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/Wget.h>
 #include <y2pm/YouError.h>
@@ -198,6 +197,11 @@ Pathname PMYouPatchPaths::localSuseServers()
   return "/etc/suseservers";
 }
 
+Pathname PMYouPatchPaths::cookiesFile()
+{
+  return localDir() + "cookies";
+}
+
 string PMYouPatchPaths::product()
 {
   return _product;
@@ -250,9 +254,8 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
 
     D__ << "url: '" << url << endl;
 
-    MediaAccess media;
-
     Wget wget;
+    wget.setCookiesFile( cookiesFile().asString() );
 
     WgetStatus status = wget.getFile( url, localSuseServers().asString() );
 

@@ -18,6 +18,10 @@
 
 /*
  * $Log$
+ * Revision 1.8  2002/09/05 12:57:04  cschum
+ * Add optional Cookie support to Wget class.
+ * Support Cookies when getting the server list from www.suse.de.
+ *
  * Revision 1.7  2002/09/04 10:03:18  cschum
  * Don't truncate destination file in case of a download error.
  *
@@ -173,6 +177,10 @@ void Wget::setProxyUser( const string username,
     proxyPassword = passwd;
 }
 
+void Wget::setCookiesFile( const string &filename )
+{
+    _cookiesFile = filename;
+}
 
 WgetStatus Wget::getFile( const Url &url, const Pathname &destination )
 {
@@ -338,11 +346,17 @@ void Wget::run_wget(int n_opts, const char *const *options,
   int argc = n_opts + 5 /*  --proxy-user=user  --porxy-passwd=password */
              + 1 /* NULL */;
 
+  if ( !_cookiesFile.empty() ) {
+      argc += 2;
+  }
+
   // Create the argument array
   const char *argv[argc];
   int i = 0;
   string proxyUsr = "--proxy-user=" + proxyUser;
   string proxyPasswd = "--proxy-passwd=" + proxyPassword;
+  string loadCookies;
+  string saveCookies;
 
   argv[i++] = "wget";
 
@@ -365,6 +379,12 @@ void Wget::run_wget(int n_opts, const char *const *options,
       argv[i++] = "";
   }
 
+  if ( !_cookiesFile.empty() ) {
+      loadCookies = "--load-cookies=" + _cookiesFile;
+      saveCookies = "--save-cookies=" + _cookiesFile;
+      argv[i++] = loadCookies.c_str();
+      argv[i++] = saveCookies.c_str();
+  }
 
   for (int j = 0; j < n_opts; j++)
   {
