@@ -51,6 +51,64 @@ ostream & operator<<( ostream & str, const PkgSplitSet & obj ) {
   return str;
 }
 
+/******************************************************************
+ ******************************************************************/
+struct MediaChangeReceive : public InstSrcManagerCallbacks::MediaChangeCallback
+{
+  virtual bool isSet() {
+    return true;
+  }
+  virtual string changeMedia( constInstSrcPtr instSrc,
+			      const string & error,
+			      const string & url,
+			      const string & product,
+			      int current,
+			      int expected ) {
+    string ret = MediaChangeCallback::changeMedia( instSrc, error, url, product, current, expected );
+    ret = "S";
+    INT << "MediaChange return '" << ret << "' on " << error << " exp " << expected << " (" << current << ")" << endl;
+    return ret;
+  }
+};
+static MediaChangeReceive mediaChangeReceive ;
+/******************************************************************
+ ******************************************************************/
+struct CommitProvideReceive : public Y2PMCallbacks::CommitProvideCallback
+{
+  string _name;
+  bool   _isRemote;
+
+  virtual void reportbegin() {
+    SEC << "+++" << endl;
+  }
+  virtual void reportend()   {
+    SEC << "---" << endl;
+  }
+  virtual void start( constPMPackagePtr pkg, bool sourcepkg ) {
+    // remember values to send on attempt
+    _isRemote = pkg->isRemote();
+    if ( sourcepkg ) {
+      _name = pkg->nameEd() + ".src";
+    } else {
+      _name = pkg->nameEdArch();
+    }
+  }
+  virtual CBSuggest attempt( unsigned cnt ) {
+    CBSuggest ret = CommitProvideCallback::attempt( cnt );
+    INT << "CommitProvide attempt " << _name << "(" << cnt << ") retrun " << ret << endl;
+    return ret;
+  }
+  virtual CBSuggest result( PMError error, const Pathname & localpath ) {
+    CBSuggest ret = CommitProvideCallback::result( error, localpath );
+    INT << "CommitProvide result " << _name << "(" << error << ") retrun " << ret << endl;
+    return ret;
+  }
+  virtual void stop( PMError error, const Pathname & localpath ) {
+  }
+};
+static CommitProvideReceive commitProvideReceive;
+/******************************************************************
+ ******************************************************************/
 void dataDump( ostream & str, constPMPackagePtr p ) {
   str << p << " ++++++++++++++++++++++++++++" << endl;
   str << "SUMMARY:       " << p->summary() << endl;
@@ -211,22 +269,32 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
+  set<string> allpks;
+  allpks.insert( "test1" );
+  allpks.insert( "test2" );
+  allpks.insert( "test3" );
+  allpks.insert( "test11" );
+  allpks.insert( "test22" );
+  allpks.insert( "test33" );
+  allpks.insert( "test111" );
+  allpks.insert( "test222" );
+  allpks.insert( "test333" );
+#define forall for ( set<string>::const_iterator it = allpks.begin(); it != allpks.end(); ++it )
+
   Y2PM::instSrcManager();
-  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
-      DBG << (*it) << endl;
+  Y2PM::instTargetUpdate();
+  Y2PMCallbacks::commitProvideReport.redirectTo( commitProvideReceive );
+  InstSrcManagerCallbacks::mediaChangeReport.redirectTo( mediaChangeReceive );
+
+  forall {
+    PMGR[*it]->user_set_install();
+    SEC << PMGR[*it] << endl;
   }
 
-  Y2PM::instTargetUpdate();
-  librpmDb::dumpState( SEC ) << endl;
-  PMSelectablePtr s( PMGR["test"] );
-  INT << s << endl;
-  if ( s ) {
-    PMPackagePtr p( s->candidateObj() );
-    INT << p << endl;
-    TcommitCkeckMediaGpg( p );
-    TcommitCkeckMediaGpg( p );
-  }
-  librpmDb::dumpState( SEC ) << endl;
+  list<string> errors;
+  list<string> remaining;
+  list<string> srcremaining;
+  Y2PM::commitPackages( 0, errors, remaining, srcremaining );
 
   SEC << "STOP -> " << ret << endl;
   return ret;
