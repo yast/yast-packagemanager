@@ -1,0 +1,146 @@
+<HTML>
+<HEAD>
+<TITLE>
+UnitedLinux selection description
+</TITLE>
+</HEAD>
+<BODY>
+<H1>UnitedLinux selection description</H1>
+<H1>Motivation</H1>
+Selections define package sets by grouping list of package names
+under a common name.<br>
+This abstracts away from the single package selection to a 
+'task' (or 'usage') oriented software setup.<br>
+A similar approach is to use (empty) 'task' packages which require
+a set of other packages in order to accomplish a task. However, this
+approach does not take language specific packages into account, nor
+does it allow for automatic deselection of packages.<br>
+Grouping sets of packages together also allows to compute dependencies
+on a much smaller memory footprint and makes it easier for the unexperienced
+user to choose the right set of software.<br>
+<br>
+By making selections similar to packages (by assigning name, version,
+architecture, dependencies, etc.) similar user interfaces and internal
+dependency handling can be used.<br>
+Ideally, a complete distribution can be put together by using selections
+as building blocks abstracting away from the huge amount of packages.<br>
+<br>
+This document describes the format of a selection file.<br>
+<br>
+<p></p>
+<H1>Requirements</H1>
+<h2>Content requirements</h2>
+<OL>
+<LI><b>Name</b><br>
+A selection has a name.</li>
+<LI><b>Version</b><br>
+A selection has a version.</LI>
+<LI><b>Architecture</b><br>
+A selection might have an architecture which restricts
+it to systems with this architecture.</LI>
+<LI><b>Summary</b><br>
+A short label describing the selection (in multiple languages!)</LI>
+<LI><b>Requires</b><br>
+Other selections required</LI>
+<LI><b>Provides</b><br>
+A selection implicitly provides its name. An additional
+provides is useful on updates if a selection was renamed.</LI>
+<LI><b>Obsoletes</b><br>
+Selections obsoleted by this selection. Useful for update.</LI>
+<LI><b>Conflicts</b><br>
+Selections conflicting with this selection.</LI>
+<LI><b>Size</b><br>
+Sum of all package sizes, Sum of installed packages</LI>
+<LI><b>Package to install (generally)</b><br>
+List of packages installed by this selection</LI>
+<LI><b>Package to install (language specific)</b><br>
+List of packages installed by this selection if the respective language is active</LI>
+<LI><b>Packages to remove (generally)</b><br>
+List of packages removed by this selection</LI>
+<LI><b>Packages to remove (language specific)</b><br>
+List of packages removed by this selection if the respective language is active</LI>
+</OL>
+<br>
+<H1>Implementation</H1>
+<H2>Syntax</H2>
+The syntactic representation of a selection is similar to that of a package
+as describes in the <A HREF="package-descr.html">package description</A> document.
+<br>
+File encoding is UTF-8.<BR>
+File is line based.<BR>
+Lines starting with '<tt>#</tt>' are ignored.<BR>
+<br>
+<p></p>
+<H2>Selection keywords</H2>
+<TABLE border>
+<tr><th>Keyword&nbsp;&nbsp;&nbsp;</th><th>Value</th><th>Comment</th></tr>
+<tr><td valign=top>=Sel</td><td valign=top><i>name</i> <i>version</i> [<i>architecture</i>]</td>
+	<td>These name and version identify a selection unambiguously and are used as a key.<br>
+	The architecture is optional and defaults to <i>all architectures</i><br>
+	If it's given, is must match (<b>FIXME:</b> 'uname -a' or DEFAULTBASE ?)</td></tr>
+<tr><td valign=top>=Sum.<i>lang</i></td><td valign=top><i>summary</i></td><td>one line language specific label</td></tr>
+<tr><td valign=top>=Cat</i></td><td valign=top><i>category</i></td><td>category (aka 'type of') selection<br>
+	can be 'base' (only one base selection can be choosen) or 'addon' (multiple addon selection can be choosen)<br>
+	(<small>On the long run this key will be dropped since only one base selection will be present.<br>
+	The current package dependencies aren't ready for a true building block approach.)</small></td></tr>
+<tr><td valign=top>=Vis</i></td><td valign=top><i>visibility</i></td><td>visibility of selection (for user interface)<br>
+	Selection can be hidden from the user. This is useful e.g. for architecture dependant selections which
+	are handled internally by the system.</td></tr>
+<tr><td valign=top>+Req<br>-Req</td><td valign=top><i>tags</i></td><td>selections required for installation</td></tr>
+<tr><td valign=top>+Prv<br>-Prv</td><td valign=top><i>tags</i></td><td>selections provided</td></tr>
+<tr><td valign=top>+Con<br>-Con</td><td valign=top><i>tags</i></td><td>selections conflicting</td></tr>
+<tr><td valign=top>+Obs<br>-Obs</td><td valign=top><i>tags</i></td><td>selections obsoleted</td></tr>
+<tr><td valign=top>=Siz</td><td valign=top><i>pkgsize</i> <i>instsize</i></td><td>size in bytes</td></tr>
+<tr><td valign=top>+Ins</i><br>-Ins</i></td><td valign=top><i>packages list</i></td><td>list of packages to install</td></tr>
+<tr><td valign=top>+Ins.<i>lang</i><br>-Ins.<i>lang</i></td><td valign=top><i>packages list</i></td><td>list of packages to install if given language is active</td></tr>
+<tr><td valign=top>+Del</i><br>-Del</i></td><td valign=top><i>packages list</i></td><td>list of packages to delete</td></tr>
+<tr><td valign=top>+Del.<i>lang</i><br>-Del.<i>lang</i></td><td valign=top><i>packages list</i></td><td>list of packages to delete if given language is active</td></tr>
+</TABLE>
+<p></p>
+<H2>Example</H2>
+<pre>
+=Pkg: 3ddiag 0.494 16 i586
++Req:
+/bin/cp
+/bin/ln
+/bin/ls
+/bin/mkdir
+/bin/mv
+/bin/rm
+/bin/cat
+aaa_base
+/bin/sh
+/bin/sh
+ld-linux.so.2
+libc.so.6
+libc.so.6(GLIBC_2.0)
+libhd.so.5
+rpmlib(PayloadIsBzip2) <= 3.0.5-1
+-Req:
++Prq:
+/bin/cp
+/bin/ln
+/bin/ls
+/bin/mkdir
+/bin/mv
+/bin/rm
+/bin/cat
+aaa_base
+/bin/sh
+rpmlib(PayloadIsBzip2) <= 3.0.5-1
+-Prq:
++Prv:
+mesa:/etc/mesa.conf
+-Prv:
+=Loc: 1 3ddiag-0.494-16.i586.rpm
+=Siz: 27958 64932
+=Tim: 1028715372
+=Src: 3ddiag 0.494 16 src
+=Grp: System/Base
+=Lic: GPL
++Aut:
+Stefan Dirsch <sndirsch@suse.de>
+-Aut:
+</pre>
+</BODY>
+</HTML>
