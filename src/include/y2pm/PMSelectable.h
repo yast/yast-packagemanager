@@ -351,9 +351,9 @@ class PMSelectable : virtual public Rep {
     /**
      * Auto request to delete the installed object. Fails if no
      * installed object is present, or user requested 'install'.
+     ** FIXME #warning auto_set_delete: Any UI checks needed here ?
      **/
     bool auto_set_delete() {
-#warning auto_set_delete: Any UI checks needed here ?
       return _state.auto_set_delete( true );
     }
 
