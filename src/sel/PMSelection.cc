@@ -46,6 +46,7 @@ IMPL_DERIVED_POINTER( PMSelection, PMObject, PMSolvable );
 //
 PMSelection::PMSelection( const PkgName &    name_r,
 			  const PkgEdition & edition_r,
+			  const PkgArch &    arch_r,
 			  PMSelectionDataProviderPtr dataProvider_r )
     : PMObject( name_r, edition_r )
     , _dataProvider( dataProvider_r )
@@ -77,7 +78,10 @@ string PMSelection::getAttributeName( PMSelectionAttribute attr ) const
   switch ( attr ) {
 
 #define ENUM_OUT(V) case ATTR_##V: return #V; break
-    //ENUM_OUT( WAHTEVER_IS_FIRST );
+    ENUM_OUT( CATEGORY );
+    ENUM_OUT( VISIBLE );
+    ENUM_OUT( INSTALL );
+    ENUM_OUT( DELETE );
 #undef ENUM_OUT
 
   ///////////////////////////////////////////////////////////////////
