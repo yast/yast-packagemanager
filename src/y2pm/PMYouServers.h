@@ -30,7 +30,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PkgArch.h>
-#include <y2pm/PMYouPatchPathsPtr.h>
+#include <y2pm/PMYouSettingsPtr.h>
 
 #include <y2pm/PMYouServersPtr.h>
 
@@ -82,7 +82,7 @@ class PMYouServers : virtual public Rep {
     /**
       Constructor.
     */
-    PMYouServers( const PMYouPatchPathsPtr & );
+    PMYouServers( const PMYouSettingsPtr & );
 
     /**
       Destructor
@@ -137,7 +137,7 @@ class PMYouServers : virtual public Rep {
     void addServer( const PMYouServer & );
 
   private:
-    PMYouPatchPathsPtr _patchPaths;
+    PMYouSettingsPtr _patchPaths;
 
     std::list<PMYouServer> _servers;
 };

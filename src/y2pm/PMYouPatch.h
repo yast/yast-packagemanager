@@ -32,6 +32,7 @@
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMYouProductPtr.h>
 
 /**
   Information about YOU patch extra files.
@@ -50,13 +51,11 @@ class PMYouFile
     FSize _size;
 };
 
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : PMYouPatch
 /**
- * The Package.
- **/
-class PMYouPatch : virtual public Rep, public PMObject {
+  This class represents a patch.
+*/
+class PMYouPatch : virtual public Rep, public PMObject
+{
   REP_BODY(PMYouPatch);
 
   public:
@@ -228,6 +227,14 @@ class PMYouPatch : virtual public Rep, public PMObject {
     */
     std::list<PMYouFile> files() const { return _files; }
 
+    /**
+      Set product this patch applies to.
+    */
+    void setProduct( const PMYouProductPtr & );
+    /**
+      Return product this patch applies to.
+    */
+    PMYouProductPtr product() const;
 
   public:
 
@@ -262,6 +269,8 @@ class PMYouPatch : virtual public Rep, public PMObject {
     bool _packagesInstalled;
 
     std::list<PMYouFile> _files;
+
+    PMYouProductPtr _product;
 
   public:
 

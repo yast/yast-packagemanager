@@ -10,40 +10,37 @@
 |                                                    (C) SuSE Linux AG |
 \----------------------------------------------------------------------/
 
-   File:       PMYouPatchPathsPtr.h
-
    Author:     Cornelius Schumacher <cschum@suse.de>
    Maintainer: Cornelius Schumacher <cschum@suse.de>
 
 /-*/
-#ifndef PMYouPatchPathsPtr_h
-#define PMYouPatchPathsPtr_h
+#ifndef PMYOUPRODUCTPTR_H
+#define PMYOUPRODUCTPTR_H
 
 #include <y2util/RepDef.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMYouPatchPathsPtr
-//	CLASS NAME : constPMYouPatchPathsPtr
+//	CLASS NAME : PMYouProductPtr
+//	CLASS NAME : constPMYouProductPtr
 /**
  *
  **/
-DEFINE_BASE_POINTER(PMYouPatchPaths);
+DEFINE_BASE_POINTER(PMYouProduct);
 
 #if 0 // just for kdoc
 /**
- * @short Refcounting <code>&lt;@ref PMYouPatchPaths *></code>
+ * @short Refcounting <code>&lt;@ref PMYouProduct *></code>
  *
- * <b>See:</> @ref PMYouPatchPaths
+ * <b>See:</> @ref PMYouProduct
  **/
-class PMYouPatchPathsPtr {};
+class PMYouProductPtr {};
 /**
- * @short Refcounting <code>&lt;const @ref PMYouPatchPaths *></code>
+ * @short Refcounting <code>&lt;const @ref PMYouProduct *></code>
  *
- * <b>See:</> @ref PMYouPatchPaths
+ * <b>See:</> @ref PMYouProduct
  **/
-class constPMYouPatchPathsPtr {};
+class constPMYouProductPtr {};
 #endif // just for kdoc
 
-#endif // PMYouPatchPathsPtr_h
-
+#endif

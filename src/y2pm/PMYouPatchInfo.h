@@ -36,7 +36,7 @@
 #include <y2pm/PMYouPatchPtr.h>
 #include <y2pm/PMYouPackageDataProviderPtr.h>
 #include <y2pm/PMYouPatchTags.h>
-#include <y2pm/PMYouPatchPaths.h>
+#include <y2pm/PMYouSettings.h>
 
 #include <y2pm/PMYouPatchInfoPtr.h>
 
@@ -51,11 +51,11 @@ class PMYouPatchInfo : virtual public Rep {
 
   public:
     /**
-     * Constructor
-     *
-     * @param lang  language to be parsed.
-     **/
-    PMYouPatchInfo( PMYouPatchPathsPtr paths );
+      Constructor
+
+      @param settings  Pointer to object representing the YOU settings
+    */
+    PMYouPatchInfo( PMYouSettingsPtr settings );
 
     /**
      * Destructor
@@ -90,14 +90,14 @@ class PMYouPatchInfo : virtual public Rep {
                      bool checkSig = true, bool useMediaDir = true );
 
     /**
-     * Read patch info from file.
-     *
-     * @param path     File path of package info file.
-     * @param fileName Name of patch file.
-     * @param patches  List of patch objects where the results are stored.
-     **/
+      Read patch info from file.
+     
+      @param path     File path of package info file.
+      @param fileName Name of patch file.
+      @param patch    Patch object where the results are stored.
+    */
     PMError readFile( const Pathname &path, const std::string &fileName,
-                      std::list<PMYouPatchPtr> &patches );
+                      PMYouPatchPtr &patch );
 
     /**
      * Parse package info.
@@ -137,16 +137,16 @@ class PMYouPatchInfo : virtual public Rep {
     YOUPatchTagSet _patchTagSet;
     YOUPackageTagSet _packageTagSet;
     
-    PMYouPatchPathsPtr _paths;
+    PMYouSettingsPtr _settings;
 
     MediaAccess _media;
 
     PMYouPackageDataProviderPtr _packageDataProvider;
     
-    std::list<std::string> _patchFiles;
-    
     bool _doneMediaDir;
     bool _doneDirectory;
+
+    int _totalPatchFileCount;
 };
 
 ///////////////////////////////////////////////////////////////////

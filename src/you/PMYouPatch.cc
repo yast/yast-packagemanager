@@ -199,3 +199,13 @@ void PMYouPatch::addFile( const PMYouFile &file )
 {
   _files.push_back( file );
 }
+
+void PMYouPatch::setProduct( const PMYouProductPtr &p )
+{
+  _product = p;
+}
+
+PMYouProductPtr PMYouPatch::product() const
+{
+  return _product;
+}

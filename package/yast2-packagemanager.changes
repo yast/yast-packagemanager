@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb  6 14:24:07 CET 2004 - cschum@suse.de
+
+- YOU: Get patches for all installed products not only the one
+       which was installed last.
+
+-------------------------------------------------------------------
 Tue Jan 27 23:55:27 CET 2004 - lnussel@suse.de
 
 - reduce and fix error results for alternatives

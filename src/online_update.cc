@@ -21,6 +21,7 @@
 #include <y2pm/InstYou.h>
 #include <y2pm/PMYouServers.h>
 #include <y2pm/YouError.h>
+#include <y2pm/PMYouProduct.h>
 
 using namespace std;
 
@@ -186,7 +187,7 @@ int main( int argc, char **argv )
     }
   }
 
-  if ( getuid() != 0 && !checkUpdates && !quickCheckUpdates ) {
+  if ( getuid() != 0 && !checkUpdates && !quickCheckUpdates && !showConfig ) {
     cerr << "You need root permissions to run this command. Use the -q or -k\n"
          << "options to check for the availabilty of updates without needing\n"
          << "root permissions." << endl;
@@ -236,38 +237,52 @@ int main( int argc, char **argv )
 
   string version;
   if ( versionStr ) version = versionStr;
-  else version = "8.1";
+  else version = "9.1";
   
   string arch;
   if ( archStr ) arch = archStr;
   else arch = "i386";
 
-  PMYouPatchPathsPtr patchPaths = new PMYouPatchPaths( product, version, arch );
-  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( patchPaths );
+  PMYouSettingsPtr settings = new PMYouSettings( product, version, arch );
+  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( settings );
 
-  InstYou you( patchInfo, patchPaths );
+  InstYou you( patchInfo, settings );
 
   if ( !productStr && !versionStr && !archStr ) {
     you.initProduct();
   }
 
-  patchPaths->setLangCode( LangCode( lang ) );
+  settings->setLangCode( LangCode( lang ) );
+
+  list<PMYouProductPtr> products = you.paths()->products();
 
   if ( showConfig ) {
-    cout << "Product:      " << you.paths()->product() << endl;
-    cout << "Version:      " << you.paths()->version() << endl;
-    cout << "Architecture: " << you.paths()->baseArch() << endl;
-    if ( verbose || debug ) {
-      cout << "Arch list: ";
-      std::list<PkgArch> archs = patchPaths->archs();
-      std::list<PkgArch>::const_iterator it;
-      for( it = archs.begin(); it != archs.end(); ++it ) {
-        cout << (*it).asString() << " ";
+    int i = 0;
+    list<PMYouProductPtr>::const_iterator itProd;
+    for( itProd = products.begin(); itProd != products.end(); ++itProd ) {
+      PMYouProductPtr prod = *itProd;
+      cout << "Product " << i;
+      if ( ( products.size() > 1 ) &&  ( i == 0 ) ) {
+        cout << " (primary product)";
       }
       cout << endl;
-      cout << "Business Product: "
-           << ( you.paths()->businessProduct() ? "Yes" : "No" ) << endl;
-      cout << "Distribution: " << you.paths()->distProduct() << endl;
+      cout << "  Name:      " << prod->product() << endl;
+      cout << "  Version:      " << prod->version() << endl;
+      cout << "  Architecture: " << prod->baseArch() << endl;
+      if ( verbose || debug ) {
+        cout << "  Arch list: ";
+        std::list<PkgArch> archs = prod->archs();
+        std::list<PkgArch>::const_iterator it;
+        for( it = archs.begin(); it != archs.end(); ++it ) {
+          cout << (*it).asString() << " ";
+        }
+        cout << endl;
+        cout << "  Business Product: "
+             << ( prod->businessProduct() ? "Yes" : "No" ) << endl;
+        cout << "  Distribution: " << prod->distProduct() << endl;
+        cout << "  YOU Path: " << prod->patchPath() << endl;
+      }
+      ++i;
     }
     cout << "Language:     " << you.paths()->langCode() << endl;
     cout << "Directory:    " << you.paths()->directoryFileName() << endl;
@@ -299,13 +314,17 @@ int main( int argc, char **argv )
     }
   }
 
-  patchPaths->setPatchServer( server );
+  settings->setPatchServer( server );
 
   if ( verbose ) {
     cout << "Server URL: " << server.url() << endl;
     cout << "Server Name: " << server.name() << endl;
     cout << "Directory File: " << server.directory() << endl;
-    cout << "Path: " << you.paths()->patchPath() << endl;
+    int i = 0;
+    list<PMYouProductPtr>::const_iterator itProd;
+    for( itProd = products.begin(); itProd != products.end(); ++itProd ) {
+      cout << "Path " << i++ << ": " << (*itProd)->patchPath() << endl;
+    }
   }
 
   if ( quickCheckUpdates ) {

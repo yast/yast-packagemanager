@@ -17,13 +17,13 @@ file and n RPM packages.
 <h2>Description</h2>
 
 <p>YOU uses the information about the name, version and base architecture of the installed
-product to determine the paths for downloading patch descriptions and RPMs from the server
+products to determine the paths for downloading patch descriptions and RPMs from the server
 and for caching these files on the local system.</p>
 
 
 <h3>Box Product OR Business Produkt?</h3>
 
-<p>If the product has not the name "SuSE-Linux" it is considered as a business product and
+<p>If a product has not the name "SuSE-Linux" it is considered as a business product and
 slightly different paths and server URLs apply.</p>
 
 
@@ -60,7 +60,7 @@ to the installed patches.
 <h4>Product dependent paths</h4>
 
 <p>The path to the description files and the other patch data depends on the installed
-product. The base path is <tt>&lt;basearch&gt;/update/&lt;version&gt;</tt> for the box
+products. The base path is <tt>&lt;basearch&gt;/update/&lt;version&gt;</tt> for the box
 product, and <tt>&lt;basearch&gt;/update/&lt;productname&gt;/&lt;version&gt;</tt> for the
 business products. <tt>&lt;version&gt</tt> is the version of the installed product.
 <tt>&lt;productname&gt;</tt> is the name of the installed product.</p>
@@ -125,7 +125,9 @@ processing of download path or file name takes place.</p>
 <tt>directory.3</tt> from the URL constructed from the base URL by adding the product
 specific path and the </tt>patches</tt> directory. The <tt>directory.3</tt> file contains a
 list of filenames which have to be present in the same directory. Patches are downloaded
-and installed in the order of the names in this file.</p>
+and installed in the order of the names in this file. If more than one product is installed
+patches for each product are downloaded and installed. Products are handled in the order of their
+installation which goes from the less specific to the more specific one.</p>
 
 <p>All files downloaded from the server are checked for valid signatures.</p>
 
