@@ -149,20 +149,15 @@ Pathname PMYouProduct::patchPath()
 
 Pathname PMYouProduct::rpmPath( const PMPackagePtr &pkg, bool patchRpm )
 {
-  return rpmPath( pkg, baseArch(), patchRpm );
-}
-
-Pathname PMYouProduct::rpmPath( const PMPackagePtr &pkg, const string &arch,
-                                   bool patchRpm )
-{
-  string rpmName = arch + "/";
+  string rpmName = pkg->arch();
+  rpmName += "/";
   rpmName += pkg->name();
   rpmName += "-";
   rpmName += pkg->version();
   rpmName += "-";
   rpmName += pkg->release();
   rpmName += ".";
-  rpmName += arch;
+  rpmName += pkg->arch();
   if ( patchRpm ) rpmName += ".patch";
   rpmName += ".rpm";
   return _settings.pathPrefix() + _rpmPath + rpmName;
