@@ -19,6 +19,7 @@
 
 #include <map>
 #include <list>
+#include <iosfwd>
 
 #include <y2pm/PMSolvablePtr.h>
 #include <y2pm/PkgSet.h>
@@ -45,9 +46,12 @@ class InstallOrder
 	    unsigned begintime;
 	    unsigned endtime;
 	    bool visited;
-	    unsigned order; // number of incoming edges in reverse graph
+	    int order; // number of incoming edges in reverse graph
 
-	    NodeInfo() : begintime(0), endtime(0), visited(false) {}
+	    PMSolvablePtr solvable;
+
+	    NodeInfo() : begintime(0), endtime(0), visited(false), order(0) {}
+	    NodeInfo(PMSolvablePtr ptr) : begintime(0), endtime(0), visited(false), order(0), solvable(ptr) {}
 	};
 	
 	typedef std::map<constPMSolvablePtr,NodeInfo> Nodes;
@@ -57,6 +61,8 @@ class InstallOrder
 	unsigned _rdfstime;
 
 	SolvableList _topsorted;
+
+	bool _dirty;
 
     private:
 	void rdfsvisit(constPMSolvablePtr node);
@@ -71,17 +77,30 @@ class InstallOrder
 	InstallOrder(const PkgSet& toinstall);
 
 	/**
-	 * Compute a list of Solvables that can be installed in parallel
-	 * without conflicts
+	 * Compute a list of Solvables which have no requirements and can be
+	 * installed in parallel without conflicts
 	 * */
 	SolvableList computeNextSet();
 
 	/**
-	 * set a Solvable as installed (i.e. remove it from toinstall)
+	 * set a Solvable as installed, computeNextSet is able to compute a new
+	 * set then
 	 * */
 	void setInstalled( constPMSolvablePtr ptr );
+	
+	/**
+	 * like above, for convenience
+	 * */
+	void setInstalled( const SolvableList& list );
 
 	void startrdfs();
 
+	/**
+	 * compute topological sorted list
+	 *
+	 * @return list of solvables in an installable order
+	 * */
 	const SolvableList& getTopSorted() const;
+
+	const void printAdj(std::ostream& os, bool reversed = false) const;
 };
