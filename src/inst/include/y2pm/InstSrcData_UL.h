@@ -93,6 +93,7 @@ public:
 	VERSION,	// general file format version
 	PACKAGE,	// name version release arch
 	REQUIRES,	// list of requires tags
+	PREREQUIRES,	// list of pre-requires tags
 	PROVIDES,	// list of provides tags
 	CONFLICTS,	// list of conflicts tags
 	OBSOLETES,	// list of obsoletes tags
@@ -119,6 +120,8 @@ public:
 	createTag( "=Pkg", PACKAGE);		// name version release arch
 	t = createTag( "+Req", REQUIRES);	// list of requires tags
 	t->setEndTag("-Req");
+	t = createTag( "+Prq", PREREQUIRES);	// list of pre-requires tags
+	t->setEndTag("-Prq");
 	t = createTag( "+Prv", PROVIDES);	// list of provides tags
 	t->setEndTag("-Prv");
 	t = createTag( "+Con", CONFLICTS);	// list of conflicts tags
@@ -138,6 +141,8 @@ public:
 	t = createTag( "+Aut", AUTHORS);	// list of authors
 	t->setEndTag("-Aut");
 	createTag( "=Shr", SHAREWITH);		// package to share data with
+	t = createTag( "+Key", KEYWORDS);	// list of keywords
+	t->setEndTag("-Key");
     };
 
 private:

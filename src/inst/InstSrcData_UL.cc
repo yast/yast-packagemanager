@@ -29,6 +29,8 @@
 #include <y2util/stringutil.h>
 
 #include <y2pm/InstSrcData_UL.h>
+//#include <y2pm/PMPackageDataProvider_UL.h>
+//#include <y2pm/PMPackageDataProviderPtr.h>
 
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
@@ -304,11 +306,12 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     CommonPkdParser::TagSet* tagset;
     tagset = new InstSrcData_ULTags ();
     
-    bool repeatassign = false;
     bool parse = true;
     
     while( parse && parser.lookupTag (packages))
     {
+	bool repeatassign = false;
+
 	tagstr = parser.startTag();
 
 	do
@@ -316,9 +319,6 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 	    switch( tagset->assign (tagstr.c_str(), parser, packages))
 	    {
 		case CommonPkdParser::Tag::ACCEPTED:
-		    // fill InstSrcDescr 
-		    Tag2Package( tagset );
-		    count++;
 		    repeatassign = false;
 		    err = Error::E_ok;
 		    break;
@@ -326,7 +326,8 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    //Tag2Package( tagset );
+		    Tag2Package( tagset );
+		    count++;
 		    tagset->clear();
 		    repeatassign = true;
 		    err = Error::E_ok;
@@ -337,9 +338,13 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    break;
 	    }
 	} while( repeatassign );
-
     }
 
+    if (parse)
+    {
+	Tag2Package( tagset );
+	count++;
+    }
     tagset->clear();
 
     if( !parse )
@@ -359,19 +364,102 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     return err;
 }
 
+static
+string & vector2string(vector<string> multi)
+{
+    static string out;
+    out = "";
+    for (vector<string>::iterator pos = multi.begin(); pos < multi.end(); pos++)
+    {
+	if (!out.empty())
+	    out += " ";
+	out += *pos;
+    }
+    return out;
+}
 
 PMPackagePtr
 InstSrcData_UL::Tag2Package( CommonPkdParser::TagSet * tagset )
 {
+    // PACKAGE
     string package ((tagset->getTagByIndex(InstSrcData_ULTags::PACKAGE))->Data());
-    std::vector<std::string> package_splitted;
-    stringutil::split (package, package_splitted, " ", false);
-//MIL << package_splitted[0] << "-" << package_splitted[1] << "-" << package_splitted[2] << "." << package_splitted[3] << endl;
-    PkgName name (package_splitted[0]);
-    PkgEdition edition (package_splitted[1].c_str(), package_splitted[2].c_str());
-    PkgArch arch (package_splitted[3]);
+    std::vector<std::string> multi;
+    stringutil::split (package, multi, " ", false);
+MIL << "------------------------------------------------------------" << endl;
+MIL << multi[0] << "-" << multi[1] << "-" << multi[2] << "." << multi[3] << endl;
+
+    // Pkg -> PMPackage
+    PkgName name (multi[0]);
+    PkgEdition edition (multi[1].c_str(), multi[2].c_str());
+    PkgArch arch (multi[3]);
     PMPackagePtr pac( new PMPackage (name, edition, arch));
 
+    // REQUIRES, list of requires tags
+    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::REQUIRES))->MultiData();
+MIL << "Requires: " << vector2string(multi) << endl;
+
+    // PREREQUIRES, list of pre-requires tags
+    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::PREREQUIRES))->MultiData();
+MIL << "PreRequires: " << vector2string(multi) << endl;
+
+    // PROVIDES, list of provides tags
+    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::PROVIDES))->MultiData();
+MIL << "Provides: " << vector2string(multi) << endl;
+
+    // CONFLICTS, list of conflicts tags
+    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::CONFLICTS))->MultiData();
+MIL << "Conflicts: " << vector2string(multi) << endl;
+
+    // OBSOLETES, list of obsoletes tags
+    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::OBSOLETES))->MultiData();
+MIL << "Obsoletes: " << vector2string(multi) << endl;
+
+    // RECOMMENDS, list of recommends tags
+    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::RECOMMENDS))->MultiData();
+MIL << "Recommends: " << vector2string(multi) << endl;
+
+    // SUGGESTS, list of suggests tags
+    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::SUGGESTS))->MultiData();
+MIL << "Suggests: " << vector2string(multi) << endl;
+
+    // LOCATION, file location
+    string location ((tagset->getTagByIndex(InstSrcData_ULTags::LOCATION))->Data());
+MIL << "Location: " << location << endl;
+
+    // SIZE, packed and unpacked size
+    string size ((tagset->getTagByIndex(InstSrcData_ULTags::SIZE))->Data());
+MIL << "Size: " << size << endl;
+
+    // BUILDTIME, buildtime
+    string buildtime ((tagset->getTagByIndex(InstSrcData_ULTags::BUILDTIME))->Data());
+MIL << "Buildtime: " << buildtime << endl;
+
+    // SOURCE, source package
+    string source ((tagset->getTagByIndex(InstSrcData_ULTags::SOURCE))->Data());
+MIL << "Source: " << source << endl;
+
+    // GROUP, rpm group
+    string group ((tagset->getTagByIndex(InstSrcData_ULTags::GROUP))->Data());
+MIL << "Group: " << group << endl;
+
+    // LICENSE, license
+    string license ((tagset->getTagByIndex(InstSrcData_ULTags::LICENSE))->Data());
+MIL << "License: " << license << endl;
+
+    // AUTHORS, list of authors
+    multi = (tagset->getTagByIndex(InstSrcData_ULTags::AUTHORS))->MultiData();
+MIL << "Authors: " << vector2string(multi) << endl;
+
+    // SHAREWITH, package to share data with
+    string sharewith ((tagset->getTagByIndex(InstSrcData_ULTags::SHAREWITH))->Data());
+MIL << "SharedWith: " << sharewith << endl;
+
+    // KEYWORDS, list of keywords
+    multi = (tagset->getTagByIndex(InstSrcData_ULTags::KEYWORDS))->MultiData();
+MIL << "Keywords: " << vector2string(multi) << endl;
+
+//    PMPackageDataProviderPtr ( new InstSrcProvide_UL());
+//    pac->setDataProvider (new 
     return pac;
 }
 
