@@ -25,7 +25,10 @@ libPkgDb.tex: relationmatch.eps pathmacros.tex header.eps
 
 # also pack generated *.ps and *.eps to dist
 # so we dont need TeX for building
-EXTRA_DIST = \
+EXTRA_DIST =
+
+# contains obsolete libPkgDb stuff
+# \
 	dstrukt-entwurf.tex	\
 	libPkgDb.tex		\
 	libPkgDep.tex		\
