@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Feb 25 19:16:54 CET 2005 - ma@suse.de
+
+- Try to honor pre-reqs by deleting packages in reverse
+  install order. (#66651)
+- 2.11.23
+
+-------------------------------------------------------------------
 Tue Feb 22 15:36:14 CET 2005 - mir@suse.de
 
 - Bugfix: Sometimes under obscure circumstances YOU used the

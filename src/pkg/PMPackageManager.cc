@@ -64,7 +64,7 @@ ostream & operator<<( ostream & str, const set<_Ct, Compare> & obj ) {
 void strip_obsoleted_to_delete( list<PMPackagePtr> & deleteList_r,
 				const list<PMPackagePtr> & instlist_r )
 {
-  if ( deleteList_r.size() == 0 )
+  if ( deleteList_r.size() == 0 || instlist_r.size() == 0 )
     return; // ---> nothing to do
 
   // build obsoletes from instlist_r
@@ -276,11 +276,10 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 	}
     }
 
+    MIL << "PackagesToInsDel: delete " << dellist_r.size()
+      << ", install " << instlist_r.size()
+	<< ", srcinstall " << srclist_r.size() << endl;
 
-    MIL << "PackagesToInsDel: delete " << dellist_r.size() << ", install " << instlist_r.size() << ", srcinstall " << srclist_r.size() << endl;
-    if ( instlist_r.empty() ) {
-      return;
-    }
     ///////////////////////////////////////////////////////////////////
     //
     // strip packages to_delete which get obsoleted by
@@ -290,11 +289,43 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
     ///////////////////////////////////////////////////////////////////
     strip_obsoleted_to_delete( dellist_r, instlist_r );
 
+    if ( dellist_r.size() ) {
+      ///////////////////////////////////////////////////////////////////
+      //
+      // sort delete list...
+      //
+      ///////////////////////////////////////////////////////////////////
+      PkgSet dset;  // for delete order
+      PkgSet dummy; // dummy, empty, should contain already installed
+      for ( list<PMPackagePtr>::const_iterator pkgIt = dellist_r.begin();
+	    pkgIt != dellist_r.end(); ++pkgIt ) {
+	dset.add( *pkgIt );
+      }
+
+      InstallOrder order( dset, dummy ); // sort according top prereq
+      order.init();
+      const InstallOrder::SolvableList & dsorted( order.getTopSorted() );
+
+      dellist_r.clear();
+      for ( InstallOrder::SolvableList::const_reverse_iterator cit = dsorted.rbegin();
+	    cit != dsorted.rend(); ++cit ) {
+	PMPackagePtr cpkg = PMPackagePtr::cast_away_const( *cit );
+	if ( !cpkg ) {
+	  INT << "SORT returned NULL Package" << endl;
+	  continue;
+	}
+	dellist_r.push_back( cpkg );
+      }
+    }
+
     ///////////////////////////////////////////////////////////////////
     //
     // sort installed list...
     //
     ///////////////////////////////////////////////////////////////////
+    if ( instlist_r.empty() ) {
+      return;
+    }
 
     ///////////////////////////////////////////////////////////////////
     // Get desired order of InstSrc'es to install from.
