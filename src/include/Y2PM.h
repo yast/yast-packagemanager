@@ -246,8 +246,13 @@ class Y2PM {
     static int commitPackages( unsigned int media_nr,
 			       std::list<std::string>& errors_r,
 			       std::list<std::string>& remaining_r,
+			       std::list<std::string>& srcremaining_r );
+    /** OBSOLETE, using installrank argument **/
+    static int commitPackages( unsigned int media_nr,
+			       std::list<std::string>& errors_r,
+			       std::list<std::string>& remaining_r,
 			       std::list<std::string>& srcremaining_r,
-			       InstSrcManager::ISrcIdList installrank = InstSrcManager::ISrcIdList() );
+			       InstSrcManager::ISrcIdList installrank );
 
     /**
      * Install a single rpm file.
