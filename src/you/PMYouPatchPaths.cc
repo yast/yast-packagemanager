@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/SysConfig.h>
 
 #include <Y2PM.h>
 #include <y2pm/InstSrcError.h>
@@ -253,12 +254,9 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
 {
   D__ << "url: '" << u << endl;
 
-  // Check if YAST2_LOADFTPSERVER is set to yes
-  const char *cmd ="grep 'YAST2_LOADFTPSERVER=' /etc/sysconfig/onlineupdate |"
-                   "grep yes >/dev/null 2>/dev/null";
-  int status = system( cmd );
-
-  if ( status == 0 ) {
+  SysConfig cfg( "onlineupdate" );
+  
+  if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
     string url = u;
 
     if ( addFile ) {
