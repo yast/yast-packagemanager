@@ -17,7 +17,7 @@ test -p "$LPIPE" || {
         mkfifo $LPIPE
 }
 if ! fuser $LPIPE >/dev/null; then
-        ~ma/bin/sy1l.tcl $LPIPE &
+        ~ma/bin/sy2l.tcl $LPIPE &
 fi
 
 echo > $LPIPE

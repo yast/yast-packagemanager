@@ -151,11 +151,54 @@ class RpmDb: virtual public Rep
 	 */
 	PMError installTmpDatabase( void );
 
-	/** acquire data about installed packages
-	 *
-	 * @param pkglist where to store newly created PMPackages
+	/**
+	 * Returns the current-path of the rpm-DB
 	 * */
-	const std::list<PMPackagePtr>& getPackages ();
+	std::string queryCurrentDBPath ( void ) { return dbPath.asString(); };
+
+
+    public:
+        ///////////////////////////////////////////////////////////////////
+        //
+        // Cached RPM database retrieval via librpm.
+        //
+        ///////////////////////////////////////////////////////////////////
+
+	/**
+	 * If necessary build, and return the list of all installed packages.
+	 **/
+	const std::list<PMPackagePtr> & getPackages();
+
+        ///////////////////////////////////////////////////////////////////
+        //
+        // Direct RPM database retrieval via librpm.
+        //
+        ///////////////////////////////////////////////////////////////////
+
+	/**
+	 * Return true if at least one package owns a certain file.
+	 **/
+	bool hasFile( const std::string & file_r ) const;
+
+	/**
+	 * Return true if at least one package provides a certain tag.
+	 **/
+	bool hasProvides( const std::string & tag_r ) const;
+
+	/**
+	 * Return true if at least one package requires a certain tag.
+	 **/
+	bool hasRequiredBy( const std::string & tag_r ) const;
+
+	/**
+	 * Return true if at least one package conflicts with a certain tag.
+	 **/
+	bool hasConflicts( const std::string & tag_r ) const;
+
+	/**
+	 * Return true if package is installed.
+	 **/
+	bool hasPackage( const PkgName & name_r ) const;
 
 	/**
 	 * Get an installed packages data from rpmdb. Package is
@@ -182,6 +225,12 @@ class RpmDb: virtual public Rep
 	PMError getData( const Pathname & path,
 			 constRpmLibHeaderPtr & result_r ) const;
 
+        ///////////////////////////////////////////////////////////////////
+        //
+        //
+        //
+        ///////////////////////////////////////////////////////////////////
+
 	/**
 	 * Check rpm with rpm --checksig
 	 *
@@ -192,29 +241,6 @@ class RpmDb: virtual public Rep
 	 * @return checkPackageResult
 	 */
 	unsigned checkPackage (const Pathname& filename, std::string version = "", std::string md5 = "" );
-
-	/**
-	 * Returns the current-path of the rpm-DB
-	 * */
-	std::string queryCurrentDBPath ( void ) { return dbPath.asString(); };
-
-	/**
-	 * query system for provided tag (rpm -q --whatprovides)
-	 */
-	bool isProvided (const std::string& tag);
-
-	/**
-	 * query system for installed package (rpm -q)
-	 */
-	bool isInstalled (const std::string& name);
-
-	/**
-	 * query system for package the given file belongs to
-	 * (rpm -qf)
-	 * if full_name == true (the default) report name-version-release
-	 * else report name only
-	 */
-	std::string belongsTo (const Pathname& name, bool full_name = true);
 
 	/**
 	 * Hack to lookup required and conflicting file relations.

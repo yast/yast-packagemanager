@@ -635,7 +635,7 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   // Access to rpmdb
   ///////////////////////////////////////////////////////////////////
   RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpen() ) {
+  if ( rpmdb.dbOpenError() ) {
     return _packages._list;
   }
 
@@ -727,7 +727,7 @@ void RpmDb::traceFileRel( const PkgRelation & rel_r )
   // packages already initialized. Must check and insert here
   //
   RpmLibDb rpmdb( _rootdir + dbPath );
-  if ( rpmdb.dbOpen() ) {
+  if ( rpmdb.dbOpenError() ) {
     return;
   }
 
@@ -745,6 +745,101 @@ void RpmDb::traceFileRel( const PkgRelation & rel_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : RpmDb::hasFile
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool RpmDb::hasFile( const std::string & file_r ) const
+{
+  if ( _old_present || !_initialized )
+    return false;
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  if ( rpmdb.dbOpenError() ) {
+    return false;
+  }
+  return rpmdb.hasFile( file_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::hasProvides
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool RpmDb::hasProvides( const std::string & tag_r ) const
+{
+  if ( _old_present || !_initialized )
+    return false;
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  if ( rpmdb.dbOpenError() ) {
+    return false;
+  }
+  return rpmdb.hasProvides( tag_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::hasRequiredBy
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool RpmDb::hasRequiredBy( const std::string & tag_r ) const
+{
+  if ( _old_present || !_initialized )
+    return false;
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  if ( rpmdb.dbOpenError() ) {
+    return false;
+  }
+  return rpmdb.hasRequiredBy( tag_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::hasConflicts
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool RpmDb::hasConflicts( const std::string & tag_r ) const
+{
+  if ( _old_present || !_initialized )
+    return false;
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  if ( rpmdb.dbOpenError() ) {
+    return false;
+  }
+  return rpmdb.hasConflicts( tag_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::hasPackage
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool RpmDb::hasPackage( const PkgName & name_r ) const
+{
+  if ( _old_present || !_initialized )
+    return false;
+  RpmLibDb rpmdb( _rootdir + dbPath );
+  if ( rpmdb.dbOpenError() ) {
+    return false;
+  }
+  return rpmdb.hasPackage( name_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : RpmDb::getData
 //	METHOD TYPE : PMError
 //
@@ -756,9 +851,8 @@ PMError RpmDb::getData( const PkgName & name_r,
   result_r = 0;
   FAILIFNOTINITIALIZED;
   RpmLibDb rpmdb( _rootdir + dbPath );
-  PMError err = rpmdb.dbOpen();
-  if ( err ) {
-    return err;
+  if ( rpmdb.dbOpenError() ) {
+    return rpmdb.dbOpenError();
   }
   result_r = rpmdb.findPackage( name_r );
   return Error::E_ok;
@@ -778,9 +872,8 @@ PMError RpmDb::getData( const PkgName & name_r, const PkgEdition & ed_r,
   result_r = 0;
   FAILIFNOTINITIALIZED;
   RpmLibDb rpmdb( _rootdir + dbPath );
-  PMError err = rpmdb.dbOpen();
-  if ( err ) {
-    return err;
+  if ( rpmdb.dbOpenError() ) {
+    return rpmdb.dbOpenError();
   }
   result_r = rpmdb.findPackage( name_r, ed_r );
   return Error::E_ok;
@@ -1034,58 +1127,6 @@ bool
 RpmDb::queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r)
 {
     return queryRPM (path.asString(), "-qp", format, true, result_r);
-}
-
-/**
- * query system for provided tag
- */
-bool
-RpmDb::isProvided (const std::string& tag)
-{
-    std::string result;
-    if (queryRPM (tag, "-q", "--whatprovides", false, result))
-    {
-	if (result.size() < 3)
-	    return false;
-	return (result.substr(0,3) != "no ");
-    }
-    return false;
-}
-
-/**
- * query system for installed package
- */
-bool
-RpmDb::isInstalled (const std::string& name)
-{
-    std::string result;
-    if (queryRPM (name, "-q", 0, false, result))
-    {
-	if (result.size() > 8)
-	    return (result.substr(0,8) != "package ");
-	return false;
-    }
-    return false;
-}
-
-
-/**
- * query system for package the given file belongs to
- * (rpm -qf)
- */
-std::string
-RpmDb::belongsTo (const Pathname& name, bool full_name)
-{
-    std::string result;
-    if (full_name)
-    {
-	queryRPM (name.asString(), "-qf", 0, false, result);
-    }
-    else
-    {
-	queryRPM (name.asString(), "-qf", "%{NAME}", true, result);
-    }
-    return result;
 }
 
 // determine changed files of installed package

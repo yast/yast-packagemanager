@@ -19,13 +19,7 @@
 
 /-*/
 
-#include <cstdio>
-extern "C" {
-#include <fcntl.h>
-#include <rpm/rpmmacro.h>
-}
-
-#include <cstdlib>
+#include "RpmLib.h"
 
 #include <iostream>
 #include <map>
@@ -49,6 +43,54 @@ bool RpmLibDb::_globalInitialized = false;
 
 ///////////////////////////////////////////////////////////////////
 //
+//	CLASS NAME : RpmLibDb::const_header_set
+//
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : RpmLibDb::const_header_set::index_set
+/**
+ * Wrapper for librpm struct dbiIndexSet to handle necessary dbiFreeIndexRecord calls.
+ **/
+class RpmLibDb::const_header_set::index_set {
+  index_set            ( const index_set & ); // no copy
+  index_set & operator=( const index_set & ); // no assign
+  public:
+    std::vector<unsigned> _idxSet;
+  public:
+    index_set( dbiIndexSet & idxSet_r ) {
+      if ( idxSet_r.count ) {
+	_idxSet.resize( idxSet_r.count );
+	for ( int i = 0; i < idxSet_r.count; ++i ) {
+	  _idxSet[i] = idxSet_r.recs[i].recOffset;
+	}
+      }
+      ::dbiFreeIndexRecord( idxSet_r );
+      idxSet_r.count = 0;
+      idxSet_r.recs = 0;
+    }
+};
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::const_header_set::const_header_set
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+RpmLibDb::const_header_set::const_header_set( rpmdb dbptr_r, const index_set & idxSet_r )
+    : _dbptr( dbptr_r )
+{
+  if ( _dbptr ) {
+    _idxSet = idxSet_r._idxSet;
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : RpmLibDb::const_header_set::operator[]
 //	METHOD TYPE : constRpmLibHeaderPtr
@@ -65,6 +107,29 @@ constRpmLibHeaderPtr RpmLibDb::const_header_set::operator[]( const unsigned idx_
       ERR << "Bad record number " << _idxSet[idx_r] << " in rpmdb" << endl;
   }
   return 0;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : RpmLibDb::const_iterator
+//
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::const_iterator::const_iterator
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+RpmLibDb::const_iterator::const_iterator( rpmdb dbptr_r )
+    : _hptr( 0 )
+    , _dbptr( dbptr_r )
+    , _recnum( 0 )
+{
+  if ( _dbptr )
+    setrec( ::rpmdbFirstRecNum( _dbptr ) );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -94,6 +159,26 @@ void RpmLibDb::const_iterator::setrec( int recnum_r )
 }
 
 ///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::const_iterator::operator++
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void RpmLibDb::const_iterator::operator++()
+{
+  if ( _dbptr )
+    setrec( ::rpmdbNextRecNum( _dbptr, _recnum ) );
+}
+
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : RpmLibDb
+//
+///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -103,12 +188,16 @@ void RpmLibDb::const_iterator::setrec( int recnum_r )
 //
 //	DESCRIPTION :
 //
-RpmLibDb::RpmLibDb( const Pathname & dbPath_r )
+RpmLibDb::RpmLibDb( const Pathname & dbPath_r, const bool no_open_r )
     : _dbPath( dbPath_r )
     , _db( 0 )
+    , _dbOpenError( Error::E_RpmLib_db_not_open )
 {
   if ( !_globalInitialized ) {
     globalInit();
+  }
+  if ( ! no_open_r ) {
+    dbOpen();
   }
 }
 
@@ -142,7 +231,7 @@ PMError RpmLibDb::globalInit()
   int rc = ::rpmReadConfigFiles( 0, 0 );
   if ( rc ) {
     ERR << "rpmReadConfigFiles returned: " << rc << endl;
-    return Error::E_RpmLib_read_config;
+    return Error::E_RpmLib_read_config_failed;
   }
 
   _globalInitialized = true;
@@ -162,27 +251,27 @@ PMError RpmLibDb::globalInit()
 PMError RpmLibDb::dbOpen()
 {
   if ( _db ) {
-    return Error::E_ok;
+    return _dbOpenError; // is Error::E_ok
   }
 
-  PMError err = globalInit();
-  if ( err ) {
-    ERR << *this << " globalInit returned: " << err << endl;
-    return err;
+  _dbOpenError = globalInit();
+  if ( _dbOpenError ) {
+    ERR << *this << " globalInit returned: " << _dbOpenError << endl;
+    return _dbOpenError;
   }
 
   ::addMacro(NULL, "_dbpath", NULL, _dbPath.asString().c_str(), RMIL_CMDLINE);
 
-  //int rc = rpmdbOpenForTraversal( 0, &_db );
   int rc = ::rpmdbOpen( 0, &_db, O_RDONLY, 0644 );
   if ( rc ) {
     ERR << *this << " rpmdbOpen returned: " << rc << endl;
+    _dbOpenError = Error::E_RpmLib_dbopen_failed; // set it before calling dbClose
     dbClose();
-    return Error::E_RpmLib_dbopen;
+    return _dbOpenError;
   }
 
-  //MIL << *this << " dbOpen " << err << endl;
-  return err;
+  M__ << *this << " dbOpen " << _dbOpenError << endl;
+  return _dbOpenError; // is Error::E_ok
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -198,7 +287,9 @@ PMError RpmLibDb::dbClose()
   if ( _db ) {
     ::rpmdbClose( _db );
     _db = 0;
-    //MIL << *this << " dbClose " << Error::E_ok << endl;
+    if ( !_dbOpenError )
+      _dbOpenError = Error::E_RpmLib_db_not_open;
+    M__ << *this << " dbClose " << Error::E_ok << endl;
   }
   return Error::E_ok;
 }
@@ -211,13 +302,97 @@ PMError RpmLibDb::dbClose()
 //
 //	DESCRIPTION :
 //
-RpmLibDb::const_header_set RpmLibDb::findByFile( const std::string & which_r ) const
+RpmLibDb::const_header_set RpmLibDb::findByFile( const std::string & file_r ) const
 {
-  if ( ! which_r[0] == '/' )
+  if ( ! file_r[0] == '/' )
     return const_header_set();
 
   dbiIndexSet idxSet;
-  switch ( ::rpmdbFindByFile( _db, which_r.c_str(), &idxSet ) ) {
+  switch ( ::rpmdbFindByFile( _db, file_r.c_str(), &idxSet ) ) {
+  case 0:
+    return const_header_set( _db, idxSet );
+
+  case -1:
+    WAR << "Error reading a database record" << endl;
+  }
+  return const_header_set();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findByProvides
+//	METHOD TYPE : RpmLibDb::const_header_set
+//
+//	DESCRIPTION :
+//
+RpmLibDb::const_header_set RpmLibDb::findByProvides( const std::string & tag_r ) const
+{
+  dbiIndexSet idxSet;
+  switch ( ::rpmdbFindByProvides( _db, tag_r.c_str(), &idxSet ) ) {
+  case 0:
+    return const_header_set( _db, idxSet );
+
+  case -1:
+    WAR << "Error reading a database record" << endl;
+  }
+  return const_header_set();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findByRequiredBy
+//	METHOD TYPE : RpmLibDb::const_header_set
+//
+//	DESCRIPTION :
+//
+RpmLibDb::const_header_set RpmLibDb::findByRequiredBy( const std::string & tag_r ) const
+{
+  dbiIndexSet idxSet;
+  switch ( ::rpmdbFindByRequiredBy( _db, tag_r.c_str(), &idxSet ) ) {
+  case 0:
+    return const_header_set( _db, idxSet );
+
+  case -1:
+    WAR << "Error reading a database record" << endl;
+  }
+  return const_header_set();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findByConflicts
+//	METHOD TYPE : RpmLibDb::const_header_set
+//
+//	DESCRIPTION :
+//
+RpmLibDb::const_header_set RpmLibDb::findByConflicts( const std::string & tag_r ) const
+{
+  dbiIndexSet idxSet;
+  switch ( ::rpmdbFindByConflicts( _db, tag_r.c_str(), &idxSet ) ) {
+  case 0:
+    return const_header_set( _db, idxSet );
+
+  case -1:
+    WAR << "Error reading a database record" << endl;
+  }
+  return const_header_set();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findAllPackages
+//	METHOD TYPE : RpmLibDb::const_header_set
+//
+//	DESCRIPTION :
+//
+RpmLibDb::const_header_set RpmLibDb::findAllPackages( const PkgName & name_r ) const
+{
+  dbiIndexSet idxSet;
+  switch ( ::rpmdbFindPackage( _db, name_r->c_str(), &idxSet ) ) {
   case 0:
     return const_header_set( _db, idxSet );
 
@@ -237,24 +412,14 @@ RpmLibDb::const_header_set RpmLibDb::findByFile( const std::string & which_r ) c
 //
 constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgName & name_r ) const
 {
-  dbiIndexSet idxSet;
-  switch ( ::rpmdbFindPackage( _db, name_r->c_str(), &idxSet ) ) {
-  case 0:
-    {
-      constRpmLibHeaderPtr h;
-      const_header_set result( _db, idxSet );
-      for ( unsigned i = 0; i < result.size(); ++i ) {
-	if ( !h || h->tag_installtime() < result[i]->tag_installtime() ) {
-	  h = result[i];
-	}
-      }
-      return h;
+  constRpmLibHeaderPtr h;
+  const_header_set result( findAllPackages( name_r ) );
+  for ( unsigned i = 0; i < result.size(); ++i ) {
+    if ( !h || h->tag_installtime() < result[i]->tag_installtime() ) {
+      h = result[i];
     }
-
-  case -1:
-    WAR << "Error reading a database record" << endl;
   }
-  return 0;
+  return h;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -267,20 +432,11 @@ constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgName & name_r ) const
 //
 constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgName & name_r, const PkgEdition & ed_r ) const
 {
-  dbiIndexSet idxSet;
-  switch ( ::rpmdbFindPackage( _db, name_r->c_str(), &idxSet ) ) {
-  case 0:
-    {
-      const_header_set result( _db, idxSet );
-      for ( unsigned i = 0; i < result.size(); ++i ) {
-	constRpmLibHeaderPtr h = result[i];
-	if ( ed_r == h->tag_edition() )
-	  return h;
-      }
-    }
-
-  case -1:
-    WAR << "Error reading a database record" << endl;
+  const_header_set result( findAllPackages( name_r ) );
+  for ( unsigned i = 0; i < result.size(); ++i ) {
+    constRpmLibHeaderPtr h = result[i];
+    if ( ed_r == h->tag_edition() )
+      return h;
   }
   return 0;
 }
