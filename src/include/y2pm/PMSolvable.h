@@ -238,6 +238,16 @@ class PMSolvable : virtual public Rep {
     const std::string & release() const { return _edition.release(); }
 
     /**
+     * Returns "name-version-release" string
+     **/
+    std::string nameEd() const { return (const std::string &)_name + '-' + _edition.asString(); }
+
+    /**
+     * Returns "name-version-release-arch" string
+     **/
+    std::string nameEdArch() const { return nameEd() + '-' + (const std::string &)_arch; }
+
+    /**
      * access methods for dependencies
      * use PkgRelList2StringList to convert them to list<string>
      */
