@@ -15,6 +15,8 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		libPkgDep/include \
 	   ) -I$(includedir) -I$(includedir)/y2util/qt
 
+noinst_HEADERS = show_pm.h
+ 
 noinst_PROGRAMS = \
 	test_rpmdb	\
 	test_tofromString.exe	\
