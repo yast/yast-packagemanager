@@ -99,7 +99,6 @@ PMSelectionManager::getAlternativeSelectable (std::string pkgstr,
     string::size_type startpos = pkgstr.find_first_of (" ");
     if (startpos == string::npos)
 	return selectable;
-MIL << "getAlternativeSelectable(" << pkgstr.substr (0, startpos) << ")" << endl;
 
     // try initial pack
     selectable = package_mgr.getItem (pkgstr.substr (0, startpos));
@@ -119,15 +118,12 @@ MIL << "getAlternativeSelectable(" << pkgstr.substr (0, startpos) << ")" << endl
 		if (commapos == string::npos)
 		    commapos = endpos;
 		selectable = package_mgr.getItem (pkgstr.substr (startpos, commapos-startpos));
-MIL << "?(" << pkgstr.substr (startpos, commapos-startpos) << ")" << endl;
 		if (selectable)
 		    break;			// found it !
 		startpos = commapos + 1;
 	    }
 	}
     }
-if (selectable) MIL << "found!" << endl;
-else MIL << "nope!" << endl;
     return selectable;
 }
 
