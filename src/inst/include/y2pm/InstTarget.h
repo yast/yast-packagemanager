@@ -133,7 +133,7 @@ class InstTarget: virtual public Rep {
      * @return list of PMSolvablePtr on this source
      */
     const std::list<PMSolvablePtr> *getSelections() const;
-    
+
     /**
      * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source
@@ -154,13 +154,13 @@ class InstTarget: virtual public Rep {
      * @param to be defined
      * set 'rpm' parameters used during package installation
      */
-    int setPkgInstParam (const string & param);
+    int setPkgInstParam (const std::string & param);
 
     /**
      * get current package installation parameters
      * get 'rpm' parameters currently used for package installation
      */
-    const string & getPkgInstParam (void) const;
+    const std::string & getPkgInstParam (void) const;
 
     /**
      * install PMPackage object to the target
@@ -193,13 +193,13 @@ class InstTarget: virtual public Rep {
      * @param to be defined
      * set parameters used during patch installation
      */
-    int setPatchInstParam (const string & param);
+    int setPatchInstParam (const std::string & param);
 
     /**
      * get current patch installation parameters
      * get parameters currently used for patch installation
      */
-    const string & getPatchInstParam (void) const;
+    const std::string & getPatchInstParam (void) const;
 
     /**
      * install PMSolvable object of patch to the target

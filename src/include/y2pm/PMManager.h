@@ -25,8 +25,8 @@
 
 #include <y2util/BitField.h>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PMSelectablePtr.h>
+#include <y2pm/PMObject.h>
+#include <y2pm/PMSelectable.h>
 #include <y2pm/PMObjectContainerIter.h>
 
 ///////////////////////////////////////////////////////////////////

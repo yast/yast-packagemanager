@@ -10,10 +10,13 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+  File:       Y2PM.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Core class providing access to all components of the
+  Package Management creating them on demand.
 
 /-*/
 #ifndef Y2PM_h
@@ -21,15 +24,49 @@
 
 #include <iosfwd>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+//#include <y2pm/InstTarget.h>
+//#include <y2pm/InstSrcManager.h>
+#include <y2pm/PMPackageManager.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : Y2PM
+/**
+ * Core class providing access to all components of the
+ * Package Management creating them on demand.
+ **/
+class Y2PM {
+
+  private:
+
+    //static InstTarget * _instTarget;
+
+    //static InstSrcManager * _instSrcManager;
+
+    static PMPackageManager * _packageManager;
+
+  public:
+
+#if 0
+    /**
+     * Access to the installation target
+     **/
+    static InstTarget & instTarget();
+#endif
+
+#if 0
+    /**
+     * Access to the installation source manager
+     **/
+    static InstSrcManager & instSrcManager();
+#endif
+
+    /**
+     * Access to the package manager
+     **/
+    static PMPackageManager & packageManager();
+};
+
+///////////////////////////////////////////////////////////////////
 
 #endif // Y2PM_h

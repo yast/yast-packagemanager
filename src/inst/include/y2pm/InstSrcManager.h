@@ -10,10 +10,10 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcManager.h
+  File:       InstSrcManager.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
 #ifndef InstSrcManager_h
@@ -31,7 +31,7 @@
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstSrcManager
-/*
+/**
  *
  **/
 class InstSrcManager {
@@ -43,8 +43,7 @@ class InstSrcManager {
 
   private:
 
-    static InstSrcManager * _ISM;
-
+    friend class Y2PM;
     InstSrcManager();
     ~InstSrcManager();
 
@@ -74,8 +73,6 @@ class InstSrcManager {
     ISrcList _enabledSources;
 
   public:
-
-    static InstSrcManager & ISM();
 
     /**
      * Access media. Detect kind of InstSrc available on media( if type == T_UKNOWN ).

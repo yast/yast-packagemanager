@@ -27,27 +27,6 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-
-InstSrcManager * InstSrcManager::_ISM = 0;
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcManager::ISM
-//	METHOD TYPE : InstSrcManager &
-//
-//	DESCRIPTION :
-//
-InstSrcManager & InstSrcManager::ISM()
-{
-  if ( !_ISM )
-    _ISM = new InstSrcManager;
-  return *_ISM;
-}
-
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcManager::InstSrcManager
@@ -57,8 +36,6 @@ InstSrcManager & InstSrcManager::ISM()
 //
 InstSrcManager::InstSrcManager()
 {
-  MIL << "Launch ISM..." << endl;
-  MIL << "Created ISM" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -71,8 +48,6 @@ InstSrcManager::InstSrcManager()
 //
 InstSrcManager::~InstSrcManager()
 {
-  MIL << "Shtudown ISM..." << endl;
-  MIL << "Deleted ISM" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
