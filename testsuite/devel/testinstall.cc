@@ -44,6 +44,7 @@
 #include <y2pm/InstTarget.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
+#include <y2pm/InstSrcDescr.h>
 
 #include <asm/msr.h>
 #include <stdint.h>
@@ -63,6 +64,8 @@ static string _rootdir = "/";
 
 static bool _initialized = false;
 
+static bool _keep_running = true;
+
 static vector<string> nullvector;
 
 static const char* statestr[] = { "@i", "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
@@ -81,7 +84,6 @@ void showsources(vector<string>& argv);
 void deselect(vector<string>& argv);
 void showpackage(vector<string>& argv);
 void solve(vector<string>& argv);
-void showtimes(vector<string>& argv);
 void createbackups(vector<string>& argv);
 void rebuilddb(vector<string>& argv);
 void du(vector<string>& argv);
@@ -104,7 +106,7 @@ void cdattach(vector<string>& argv);
 struct Funcs {
     const char* name;
     void (*func)(vector<string>&);
-    bool need_init;
+    short flags;
     const char* helptext;
 };
 
@@ -163,9 +165,9 @@ static map<string,string> vardesc;
 
 static inline void printvar(ostream& os, string name, const Variable& v)
 {
-    os << name << "[" << v.typestr() << "] = " << v;
+    os << name /*<< "[" << v.typestr() << "]" */ << " = " << v;
     if(vardesc.count(name))
-	os << "\t" << vardesc[name];
+	os << "  \t" << vardesc[name];
     os << endl;
 }
 
@@ -400,37 +402,37 @@ bool Variable::canUnset() const
 }
 
 static struct Funcs func[] = {
+    // flags: 1 = need init, 2 = hidden, 4 = advanced
     { "install",	install,	1,	"select packages for installation" },
-    { "rpminstall",	rpminstall,	1,	"install rpm files" },
-    { "consistent",	consistent,	1,	"check consistency" },
+    { "rpminstall",	rpminstall,	3,	"install rpm files" },
+    { "consistent",	consistent,	3,	"check consistency" },
     { "set",		varset,		0,	"set or show variable" },
     { "unset",		varunset,	0,	"unset variable" },
     { "init",		init,		1,	"initialize packagemanager" },
     { "show",		show,		1,	"show package info" },
     { "remove",		remove,		1,	"select package for removal" },
-    { "help",		help,		0,	"this screen" },
-    { "instlog",	instlog,	1,	"set installation log file" },
+    { "instlog",	instlog,	3,	"set installation log file" },
     { "source",		source,		1,	"scan media for inst sources" },
     { "showsources",	showsources,	1,	"show known sources" },
     { "autoenablesources", autoenablesources,	1,	"enable all sources" },
     { "deselect",	deselect,	1,	"deselect packages marked for installation" },
-    { "solve",		solve,		1,	"solve" },
-    { "showtimes",	showtimes,	0,	"showtimes" },
-    { "createbackups",	createbackups,	0,	"createbackups" },
+    { "solve",		solve,		1,	"solve dependencies" },
+    { "createbackups",	createbackups,	2,	"createbackups" },
     { "rebuilddb",	rebuilddb,	1,	"rebuild rpm db" },
     { "du",		du,		1,	"display disk space forecast" },
-    { "selstate",	showselection,	1, "show state of selection (all if none specified. -a to show also not installed" },
-    { "pkgstate",	showpackage,	1, "show state of package (all if none specified. -a to show also not installed" },
-    { "setappl",	setappl,	1,	"set package to installed like a selection would do" },
-    { "order",		order,		1,	"compute installation order" },
+    { "selstate",	showselection,	5, 	"show state of selection (all if none specified. -a to show also not installed" },
+    { "pkgstate",	showpackage,	1,	 "show state of package (all if none specified. -a to show also not installed" },
+    { "setappl",	setappl,	5,	"set package to installed like a selection would do" },
+    { "order",		order,		3,	"compute installation order" },
     { "upgrade",	upgrade,	1,	"compute upgrade" },
     { "commit",		commit,		1,	"commit changes to and actually perform installation" },
-    { "setsel",		setsel,		1,	"mark selection for installation, need to call solvesel" },
-    { "delsel",		delsel,		1,	"delete selection from installation, need to call solvesel" },
-    { "solvesel",	solvesel,	1,	"solve selection dependencies" },
-    { "cdattach",	cdattach,	0,	"cdattach" },
+    { "setsel",		setsel,		5,	"mark selection for installation, need to call solvesel" },
+    { "delsel",		delsel,		5,	"delete selection from installation, need to call solvesel" },
+    { "solvesel",	solvesel,	5,	"solve selection dependencies" },
+    { "cdattach",	cdattach,	2,	"cdattach" },
     { "mem",		mem,		0,	"memory statistics" },
-    { "testset",	testset,	0,	"test memory consumption of PkgSet" },
+    { "testset",	testset,	2,	"test memory consumption of PkgSet" },
+    { "help",		help,		0,	"this screen" },
 
     { NULL,		NULL,		0,	NULL }
 };
@@ -523,14 +525,32 @@ static const char* setroot(const Variable& v)
     return NULL;
 }
 
+static const char* timestat(const Variable& v)
+{
+    if(!v.isBool()) return "must be bool";
+
+    _showtimes = v.getBool();
+
+    cout << "time statistics " << (_showtimes?"enabled":"disabled") << endl;
+
+    return NULL;
+}
+
+
 void init_variables()
 {
-	variables["debug"] = Variable("0",false,setdebug);
-	vardesc["debug"] = "whether to enable debug messages";
-	variables["verbose"] = Variable("0",false);
-	vardesc["verbose"] = "certain commands display more info if >0, >1 etc.";
-	variables["root"] = Variable("/",false,setroot);
-	vardesc["root"] = "set root directory for operation";
+    variables["debug"] = Variable("0",false,setdebug);
+    vardesc["debug"] = "whether to enable debug messages";
+    variables["verbose"] = Variable("0",false);
+    vardesc["verbose"] = "certain commands display more info if >0, >1 etc.";
+    variables["root"] = Variable("/",false,setroot);
+    vardesc["root"] = "set root directory for operation";
+    variables["autosource"] = Variable("1",false);
+    vardesc["autosource"] = "automatically enable installation sources on init";
+    variables["timestat"] = Variable("0",false,timestat);
+    vardesc["timestat"] = "measure how long commands take";
+    variables["quitoncommit"] = Variable("1",false);
+    vardesc["quitoncommit"] = "quit after packages are commited";
 }
 
 void instlog(vector<string>& argv)
@@ -556,13 +576,6 @@ void instlog(vector<string>& argv)
     bool ret = Y2PM::instTarget().setInstallationLogfile(_instlog);
 
     cout << (ret?" ok":" failed") << endl;
-}
-
-void showtimes(vector<string>& argv)
-{
-    _showtimes = _showtimes?false:true;
-
-    cout << "show times " << (_showtimes?"enabled":"disabled") << endl;
 }
 
 void createbackups(vector<string>& argv)
@@ -625,13 +638,17 @@ void showsources(vector<string>& argv)
     for(InstSrcManager::ISrcIdList::iterator it = _isrclist.begin();
 	it != _isrclist.end(); ++it, count++)
     {
-	cout << count << ": " << *it << endl;
+	constInstSrcDescrPtr descr = (*it)->descr();
+	cout << count << ": ";
+	cout << descr->content_label() << " (" << descr->url() << ")" << endl;
     }
 }
 
 void autoenablesources(vector<string>& argv)
 {
     InstSrcManager::ISrcIdList isrclist;
+
+    cout << "read list of available packages ..." << endl;
 
     Y2PM::instSrcManager().getSources(isrclist);
 
@@ -737,7 +754,7 @@ void init(vector<string>& argv)
     }
     _initialized = true;
 
-    cout << "initializing ... " << endl;
+    cout << "reading installed packages ..." << endl;
 
     Y2PM::packageManager();
     Y2PM::selectionManager();
@@ -763,70 +780,31 @@ void init(vector<string>& argv)
     Y2PM::setPackageStartCallback(pkgstartcallback, NULL);
     Y2PM::setPackageProgressCallback(progresscallback, NULL);
     Y2PM::setPackageDoneCallback(donecallback, NULL);
+
+    if(variables["autosource"].getBool())
+    {
+	vector<string> v;
+	autoenablesources(v);
+    }
 }
 
 void help(vector<string>& argv)
 {
+    unsigned filtermask = 6;
+    if(argv.size()>1)
+    {
+	if(argv[1]=="all")
+	    filtermask = 0;
+	else if(argv[1]=="hidden")
+	    filtermask = 4;
+	else if(argv[1]=="advanced")
+	    filtermask = 2;
+    }
     for(unsigned i=0; func[i].name; i++)
     {
-	cout << func[i].name << ": " << func[i].helptext << endl;
+	if(func[i].flags && func[i].flags&filtermask) continue;
+	cout << func[i].name << "   " << func[i].helptext << endl;
     }
-}
-
-// example
-Alternatives::AltDefaultList alternative_default( PkgName name )
-{
-    Alternatives::AltDefaultList list;
-    if(name==PkgName("spell"))
-	list.push_front(PkgName("aspell"));
-    else if(name==PkgName("libGL.so.1") || name==PkgName("libgl"))
-	list.push_front(PkgName("mesasoft"));
-    return list;
-}
-
-static PMSolvable::PkgRelList_type& addprovidescallback(constPMSolvablePtr& ptr)
-{
-    PMSolvable::PkgRelList_type* list = new PMSolvable::PkgRelList_type();
-    if(ptr->name() == "bash")
-    {
-	DBG << "add provides for bash" << endl;
-	list->push_back(PkgRelation(PkgName("/bin/sh"), EQ, PkgEdition(PkgEdition::UNSPEC)));
-	list->push_back(PkgRelation(PkgName("/bin/bash"), EQ, PkgEdition(PkgEdition::UNSPEC)));
-    }
-    else if(ptr->name() == "libpng-devel")
-    {
-	DBG << "add provides for" << ptr->name() << endl;
-	list->push_back(PkgRelation(PkgName("/usr/include/png.h"), EQ, PkgEdition(PkgEdition::UNSPEC)));
-    }
-
-    return *list;
-}
-
-PkgSet* getInstalled()
-{
-    PkgSet* set = new PkgSet();
-    set->setAdditionalProvidesCallback(addprovidescallback);
-
-    MIL << "initialize manager" << endl;
-    PMPackageManager& manager = Y2PM::packageManager();
-    MIL << "got " << manager.size() << endl;
-
-    for(PMManager::PMSelectableVec::const_iterator it = manager.begin();
-	it != manager.end(); ++it )
-    {
-	// create set of all packages
-	set->add( (*it)->installedObj() );
-    }
-
-    return set;
-}
-
-/** not implemented yet */
-PkgSet* getAvailable()
-{
-    PkgSet* set = new PkgSet();
-    set->setAdditionalProvidesCallback(addprovidescallback);
-    return set;
 }
 
 int printgoodlist(PkgDep::ResultList& good)
@@ -1109,7 +1087,14 @@ void commit(vector<string>& argv)
 	}
     }
 
-    cout << endl << "please quit now" << endl;
+    if(variables["quitoncommit"].getBool())
+    {
+	exit(0);
+    }
+    else
+    {
+	cout << endl << "System is in an undefined state now, please quit" << endl;
+    }
 }
 
 void consistent(vector<string>& argv)
@@ -1343,6 +1328,8 @@ int main( int argc, char *argv[] )
 
     init_variables();
 
+    cout << "Welcome to the YaST2 Package Manager!" << endl;
+    cout << "This tool is meant for debugging purpose only." << endl << endl;
     cout << "type help for help, ^D to exit" << endl << endl;
 
     {
@@ -1362,7 +1349,7 @@ int main( int argc, char *argv[] )
     }
 
     buf = readline(prompt);
-    while(buf)
+    while(buf && _keep_running)
     {
 	vector<string> cmds;
 
@@ -1379,7 +1366,8 @@ int main( int argc, char *argv[] )
 	    goto readnext;
 	}
 
-	for(vector<string>::iterator vit = cmds.begin(); vit != cmds.end(); ++vit)
+	for(vector<string>::iterator vit = cmds.begin();
+		vit != cmds.end() && _keep_running; ++vit)
 	{
 	    vector<string> argv;
 	    unsigned i;
@@ -1401,7 +1389,7 @@ int main( int argc, char *argv[] )
 		TimeClass t;
 		uint64_t s,e;
 		rdtscll(s);
-		if(func[i].need_init && !_initialized && func[i].func != init)
+		if((func[i].flags&1) && !_initialized && func[i].func != init)
 		{
 		    if(_showtimes) t.startTimer();
 		    init(nullvector);
