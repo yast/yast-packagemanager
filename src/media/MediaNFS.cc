@@ -84,18 +84,18 @@ MediaNFS::dumpOn( ostream & str ) const
 //
 //
 //	METHOD NAME : MediaNFS::attachTo
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : attach media to path
 //
-MediaResult
+PMError
 MediaNFS::attachTo (const Pathname & to)
 {
     if(!_url.isValid())
-	    return E_bad_url;
+	    return Error::E_bad_url;
 
     if(_url.getHost().empty())
-	    return E_no_host_specified;
+	    return Error::E_no_host_specified;
 
     const char* const filesystem = "nfs";
     const char *mountpoint = to.asString().c_str();
@@ -115,20 +115,20 @@ MediaNFS::attachTo (const Pathname & to)
 	<< " to " << mountpoint
 	<< " filesystem " << filesystem << ": ";
 
-    MediaResult ret = mount.mount(path,mountpoint,filesystem,options);
-    if(ret == E_none)
+    PMError ret = mount.mount(path,mountpoint,filesystem,options);
+    if(ret == Error::E_ok)
     {
 	MIL << "succeded" << endl;
     }
     else
     {
-	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
 
     _attachPoint = to;
 
-    return E_none;
+    return Error::E_ok;
 }
 
 
@@ -136,26 +136,26 @@ MediaNFS::attachTo (const Pathname & to)
 //
 //
 //	METHOD NAME : MediaNFS::release
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult
+PMError
 MediaNFS::release (bool eject)
 {
     if(_attachPoint.asString().empty())
     {
-	return E_not_attached;
+	return Error::E_not_attached;
     }
     
     MIL << "umount " << _attachPoint.asString();
 
     Mount mount;
-    MediaResult ret;
+    PMError ret;
 
-    if ((ret = mount.umount(_attachPoint.asString())) != E_none)
+    if ((ret = mount.umount(_attachPoint.asString())) != Error::E_ok)
     {
-	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
     
@@ -169,22 +169,22 @@ MediaNFS::release (bool eject)
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaNFS::provideFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	get file denoted by path to 'attached path'
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult
+PMError
 MediaNFS::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, NFS path is mounted at destination
     if(!_url.isValid())
-	return E_bad_url;
+	return Error::E_bad_url;
 
     if(_attachPoint.asString().empty())
-	return E_not_attached;
+	return Error::E_not_attached;
 
     Pathname src = _attachPoint;
     src += filename;
@@ -194,17 +194,17 @@ MediaNFS::provideFile (const Pathname & filename) const
     if(!info.isFile())
     {
 	    D__ << src.asString() << " does not exist" << endl;
-	    return E_file_not_found;
+	    return Error::E_file_not_found;
     }
 
-    return E_none;
+    return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : MediaNFS::findFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	find file denoted by pattern

@@ -126,26 +126,26 @@ MediaCD::dumpOn( ostream & str ) const
 //
 //
 //	METHOD NAME : MediaCD::attachTo
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : attach media at path
 //
-MediaResult
+PMError
 MediaCD::attachTo (const Pathname & to)
 {
     // FIXME, issue "eject -t" to close the tray
     // really? mine does close automatically -- lnussel
-    
+
 
     if(!_attachPoint.empty())
-	return E_already_attached;
-    
+	return Error::E_already_attached;
+
     _attachPoint = to;
 
     Mount mount;
     const char *mountpoint = _attachPoint.asString().c_str();
     bool mountsucceeded = false;
-    MediaResult ret = E_none;
+    PMError ret = Error::E_ok;
 
     string options = _url.getOption("mountoptions");
     if(options.empty())
@@ -155,11 +155,11 @@ MediaCD::attachTo (const Pathname & to)
 
     //TODO: make configurable
     list<string> filesystems;
-    
+
     // if DVD, try UDF filesystem before iso9660
     if(_url.getProtocol() == "dvd")
 	filesystems.push_back("udf");
-    
+
     filesystems.push_back("iso9660");
 
     // try all devices in sequence
@@ -176,7 +176,7 @@ MediaCD::attachTo (const Pathname & to)
 		<< " to " << mountpoint
 		<< " filesystem " << *fsit << ": ";
 	    ret = mount.mount(*it,mountpoint,*fsit,options);
-	    if( ret == E_none )
+	    if( ret == Error::E_ok )
 	    {
 		mountsucceeded = true;
 		MIL << "succeded" << endl;
@@ -184,7 +184,7 @@ MediaCD::attachTo (const Pathname & to)
 	    }
 	    else
 	    {
-		MIL << "failed: " << media_result_strings[ret] << endl;
+		MIL << "failed: " << ret << endl;
 	    }
 	}
     }
@@ -195,7 +195,7 @@ MediaCD::attachTo (const Pathname & to)
 	_mounteddevice.erase();
 	return ret;
     }
-    return E_none;
+    return Error::E_ok;
 }
 
 
@@ -203,28 +203,28 @@ MediaCD::attachTo (const Pathname & to)
 //
 //
 //	METHOD NAME : MediaCD::release
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult
+PMError
 MediaCD::release (bool eject)
 {
     if(_mounteddevice.empty())
     {
-	return E_not_attached;
+	return Error::E_not_attached;
     }
 
     MIL << "umount " << _attachPoint.asString() << endl;
 
     Mount mount;
-    MediaResult ret; 
-    if ((ret = mount.umount(_attachPoint.asString())) != E_none)
+    PMError ret;
+    if ((ret = mount.umount(_attachPoint.asString())) != Error::E_ok)
     {
-	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
-    
+
     // eject device
     if(eject)
     {
@@ -240,51 +240,51 @@ MediaCD::release (bool eject)
 
     _attachPoint = "";
     _mounteddevice.erase();
-    
-    return E_none;
+
+    return Error::E_ok;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaCD::provideFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	get file denoted by path to 'attached path'
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult
+PMError
 MediaCD::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, CD is mounted at destination
 
     if(!_url.isValid())
-	return E_bad_url;
+	return Error::E_bad_url;
 
     if(_attachPoint.asString().empty())
-	return E_not_attached;
+	return Error::E_not_attached;
 
     Pathname src = _attachPoint;
     src += _url.getPath();
     src += filename;
 
     PathInfo info(src);
-    
+
     if(!info.isFile())
     {
 	    D__ << src.asString() << " does not exist" << endl;
-	    return E_file_not_found;
+	    return Error::E_file_not_found;
     }
-    return E_none;
+    return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : MediaCD::findFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	find file denoted by pattern

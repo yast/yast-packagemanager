@@ -16,16 +16,16 @@ int main(int argc, char* argv[])
 		cerr << endl;
 		return 1;
 	}
-	
-	unsigned result;
+
+	PMError result;
 	//result = m->open("ftp:hewitt:/suse-STABLE");
 	Url url(argv[1]);
 	result = m->open(url);
-	DBG << media_result_strings[result] << endl;
+	DBG << result << endl;
 	result = m->attachTo(argv[2]);
-	DBG << media_result_strings[result] << endl;
+	DBG << result << endl;
 	//result = m->provideFile("/apt/SuSE/STABLE-i386/examples/sources.list.FTP");
 	result = m->provideFile(argv[3]);
-	DBG << media_result_strings[result] << endl;
+	DBG << result << endl;
 	m->release(true);
 }

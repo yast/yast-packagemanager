@@ -53,7 +53,7 @@ Mount::~Mount()
    M__ << "~Mount() end" << endl;   
 }
 
-MediaResult Mount::mount ( const string& source,
+PMError Mount::mount ( const string& source,
 			    const string& target,
 			    const string& filesystem,
 			    const string& options)
@@ -67,13 +67,13 @@ MediaResult Mount::mount ( const string& source,
 	NULL
      };
 
-    MediaResult ok = E_none;
+    PMError ok = Error::E_ok;
 
     this->run(argv, ExternalProgram::Stderr_To_Stdout);
 
     if ( process == NULL )
     {
-	return E_mount_failed;
+	return Error::E_mount_failed;
     }
 
     string value;
@@ -99,15 +99,15 @@ MediaResult Mount::mount ( const string& source,
 
 	if  ( value.find ( "is already mounted on" ) != string::npos )
 	{
-	    ok = E_already_mounted;
+	    ok = Error::E_already_mounted;
 	}
 	else if  ( value.find ( "ermission denied" ) != string::npos )
 	{
-	    ok = E_no_permission;
+	    ok = Error::E_no_permission;
 	}
 	else if  ( value.find ( "wrong fs type" ) != string::npos )
 	{
-	    ok = E_invalid_filesystem;
+	    ok = Error::E_invalid_filesystem;
 	}
 
 
@@ -116,22 +116,22 @@ MediaResult Mount::mount ( const string& source,
 
     int status = Status();
 
-    if ( status == 0 && ok != E_none )
+    if ( status == 0 && ok != Error::E_ok )
     {
 	D__ << endl;
 	// strange
-	ok = E_none;
+	ok = Error::E_ok;
     }
-    else if ( status != 0 && ok == E_none )
+    else if ( status != 0 && ok == Error::E_ok )
     {
 	D__ << endl;
-	ok = E_mount_failed;
+	ok = Error::E_mount_failed;
     }
 
     return ( ok );
 }
 
-MediaResult Mount::umount (const string& path)
+PMError Mount::umount (const string& path)
 {
     const char *const argv[] = {
 	"/bin/umount",
@@ -139,13 +139,13 @@ MediaResult Mount::umount (const string& path)
 	NULL
      };
 
-    MediaResult ok = E_none;
+    PMError ok = Error::E_ok;
 
     this->run(argv, ExternalProgram::Stderr_To_Stdout);
 
     if ( process == NULL )
     {
-	return E_mount_failed;
+	return Error::E_mount_failed;
     }
 
     string value;
@@ -171,12 +171,12 @@ MediaResult Mount::umount (const string& path)
 
 	if  ( value.find ( "not mounted" ) != string::npos )
 	{
-	//    ok = E_already_mounted;
+	//    ok = Error::E_already_mounted;
 	}
 
 	if  ( value.find ( "device is busy" ) != string::npos )
 	{
-	    ok = E_busy;
+	    ok = Error::E_busy;
 	}
 
 	output = process->receiveLine();            
@@ -184,16 +184,16 @@ MediaResult Mount::umount (const string& path)
 
     int status = Status();
 
-    if ( status == 0 && ok != E_none )
+    if ( status == 0 && ok != Error::E_ok )
     {
 	D__ << endl;
 	// strange
-	ok = E_none;
+	ok = Error::E_ok;
     }
-    else if ( status != 0 && ok == E_none )
+    else if ( status != 0 && ok == Error::E_ok )
     {
 	D__ << endl;
-	ok = E_mount_failed;
+	ok = Error::E_mount_failed;
     }
 
     return ( ok );

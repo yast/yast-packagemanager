@@ -25,7 +25,7 @@
 #include <set>
 #include <string>
 
-#include <y2pm/MediaResult.h>
+#include <y2pm/MediaError.h>
 #include <y2util/ExternalProgram.h>
 
 /**
@@ -34,6 +34,10 @@
 
 class Mount
 {
+    public:
+
+        typedef MediaError Error; // default error class
+
     public:
 
 	/**
@@ -55,7 +59,7 @@ class Mount
 	* @param options mount options (e.g. ro) (-o parameter)
 	*/
 
-	MediaResult mount (const std::string& source,
+	PMError mount (const std::string& source,
 		  const std::string& target,
 		  const std::string& filesystem,
 		  const std::string& options);
@@ -64,7 +68,7 @@ class Mount
 	 *
 	 * @param path device or mountpoint to umount
 	 * */
-	MediaResult umount (const std::string& path);
+	PMError umount (const std::string& path);
 
     private:
 

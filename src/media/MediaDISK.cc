@@ -89,11 +89,11 @@ MediaDISK::dumpOn( ostream & str ) const
 //
 //
 //	METHOD NAME : MediaDISK::attachTo
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : attach media to path
 //
-MediaResult
+PMError
 MediaDISK::attachTo (const Pathname & to)
 {
     // FIXME
@@ -103,13 +103,13 @@ MediaDISK::attachTo (const Pathname & to)
     // FIXME: try all filesystems
 
     if(!_url.isValid())
-	    return E_bad_url;
+	    return Error::E_bad_url;
 
     if(_device.empty())
-	    return E_no_destination;
+	    return Error::E_no_destination;
 
     if(_filesystem.empty())
-	    return E_invalid_filesystem;
+	    return Error::E_invalid_filesystem;
 
     Mount mount;
     const char *mountpoint = to.asString().c_str();
@@ -123,20 +123,20 @@ MediaDISK::attachTo (const Pathname & to)
 	<< " to " << mountpoint
 	<< " filesystem " << _filesystem << ": ";
 
-    MediaResult ret = mount.mount(_device,mountpoint,_filesystem,options);
-    if( ret == E_none )
+    PMError ret = mount.mount(_device,mountpoint,_filesystem,options);
+    if( ret == Error::E_ok )
     {
 	MIL << "succeded" << endl;
     }
     else
     {
-	MIL << "failed" << media_result_strings[ret] << endl;
+	MIL << "failed" << ret << endl;
 	return ret;
     }
 
     _attachPoint = to;
 
-    return E_none;
+    return Error::E_ok;
 }
 
 
@@ -144,53 +144,53 @@ MediaDISK::attachTo (const Pathname & to)
 //
 //
 //	METHOD NAME : MediaDISK::release
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult
+PMError
 MediaDISK::release (bool eject)
 {
     if(_attachPoint.asString().empty())
     {
-	return E_not_attached;
+	return Error::E_not_attached;
     }
     
     MIL << "umount " << _attachPoint.asString() << endl;
 
     Mount mount;
-    MediaResult ret;
+    PMError ret;
 
-    if ((ret = mount.umount(_attachPoint.asString())) != E_none)
+    if ((ret = mount.umount(_attachPoint.asString())) != Error::E_ok)
     {
-	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
 
     _attachPoint = "";
-    return E_none;
+    return Error::E_ok;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaDISK::provideFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	provide file denoted by path to 'attached path'
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult
+PMError
 MediaDISK::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, disk is mounted at destination
     if(!_url.isValid())
-	return E_bad_url;
+	return Error::E_bad_url;
 
     if(_attachPoint.asString().empty())
-	return E_not_attached;
+	return Error::E_not_attached;
 
     Pathname src = _attachPoint;
     src += _url.getPath();
@@ -201,17 +201,17 @@ MediaDISK::provideFile (const Pathname & filename) const
     if(!info.isFile())
     {
 	    D__ << src.asString() << " does not exist" << endl;
-	    return E_file_not_found;
+	    return Error::E_file_not_found;
     }
 
-    return E_none;
+    return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : MediaDISK::findFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	find file denoted by pattern
