@@ -89,7 +89,7 @@ int main( int argc, char *argv[] )
       cerr << "genIS_PLAINcache: missing operand after '" << argv[argc-1] << "'" << endl;
       usage(); // does not return
     }
-    cerr << "genIS_PLAINcache: extra operand '" << argv[optind] << "'" << endl;
+    cerr << "genIS_PLAINcache: extra operand '" << argv[optind+1] << "'" << endl;
     usage(); // does not return
   }
 
