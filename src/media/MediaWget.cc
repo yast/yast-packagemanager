@@ -128,8 +128,22 @@ PMError MediaWget::getFile( const Pathname & filename ) const {
     else
     {
 	DBG << "wget error: " << wget.error_string(status) << endl;
-	//TODO wget errors
-	return Error::E_system;
+        switch ( status ) {
+            case WGET_ERROR_FILE:
+                return Error::E_file_not_found;
+            case WGET_ERROR_LOGIN:
+                return Error::E_login_failed;
+            case WGET_ERROR_CONNECT:
+                return Error::E_connection_failed;
+            case WGET_ERROR_PROXY_AUTH:
+                return Error::E_proxyauth_failed;
+            case WGET_ERROR_UNEXPECTED:
+  	        return Error::E_system;            
+            case WGET_ERROR_SERVER:
+            case WGET_ERROR_INVALID_URL:
+            default:
+                return Error::E_error;
+        }
     }
 }
 
