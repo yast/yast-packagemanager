@@ -6,6 +6,6 @@ noinst_PROGRAMS = maketable
 
 maketable_SOURCES = maketable.c keywords.h
 
-../src/lookuptable.h: maketable ./keywords.h
+lookuptable.h: maketable ./keywords.h
 	./maketable -o $@
-
+	mv $@ ../src
