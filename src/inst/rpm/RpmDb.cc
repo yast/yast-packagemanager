@@ -38,6 +38,10 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMRpmPackageDataProvider.h>
 
+#ifndef _
+#define _(X) X
+#endif
+
 //XXX make configurable
 #define ORIGINALRPMPATH "/var/lib/rpm/"
 //XXX make configurable
@@ -111,11 +115,11 @@ RpmDb::~RpmDb()
 /* If Flag "createNew" is set, than it will be created, if not	*/
 /* exist --> returns DbNewCreated if successfully created 	*/
 /*--------------------------------------------------------------*/
-DbStatus RpmDb::initDatabase( bool createNew )
+RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 {
     Pathname     dbFilename = rootfs;
     struct stat  dummyStat;
-    DbStatus	 dbStatus = DB_OK;
+    DbStatus	 dbStatus = RPMDB_OK;
 
     DBG << "calling initDatabase" << endl;
 
@@ -131,7 +135,7 @@ DbStatus RpmDb::initDatabase( bool createNew )
        ERR << "dbFilename not found " << dbFilename.asString() << endl;
 
        // DB not found
-       dbStatus = DB_NOT_FOUND;
+       dbStatus = RPMDB_NOT_FOUND;
 
        if ( createNew )
        {
@@ -148,17 +152,17 @@ DbStatus RpmDb::initDatabase( bool createNew )
 	  if ( systemStatus() != 0 )
 	  {
 	     // error
-	     dbStatus = DB_ERROR_CREATED;
+	     dbStatus = RPMDB_ERROR_CREATED;
 	     ERR << "Error creating rpm database, rpm error was: " << rpmerrormsg << endl;
 	  }
 	  else
 	  {
-	     dbStatus = DB_NEW_CREATED;
+	     dbStatus = RPMDB_NEW_CREATED;
 	  }
        }
     }
 
-    if ( dbStatus == DB_OK )
+    if ( dbStatus == RPMDB_OK )
     {
        // Check, if it is an old rpm-Db
        RpmArgVec opts(2);
@@ -176,7 +180,7 @@ DbStatus RpmDb::initDatabase( bool createNew )
        if ( rpmmsg.empty() )
        {
 	  // error
-	  dbStatus = DB_ERROR_CHECK_OLD_VERSION;
+	  dbStatus = RPMDB_ERROR_CHECK_OLD_VERSION;
 	  ERR << "rpm silently failed while checking old rpm version" << endl;
        }
        else
@@ -184,7 +188,7 @@ DbStatus RpmDb::initDatabase( bool createNew )
 	  if ( rpmmsg.find ( "old format database is present" ) !=
 	       string::npos )
 	  {
-	     dbStatus = DB_OLD_VERSION;
+	     dbStatus = RPMDB_OLD_VERSION;
 	     WAR <<  "RPM-Db on the system is old"  << endl;
 	  }
 	  else
@@ -192,7 +196,7 @@ DbStatus RpmDb::initDatabase( bool createNew )
 	     if ( systemStatus() != 0 )
 	     {
 		// error
-		dbStatus = DB_ERROR_CHECK_OLD_VERSION;
+		dbStatus = RPMDB_ERROR_CHECK_OLD_VERSION;
 		ERR << "checking for old rpm version failed, rpm output was: "
 		    << rpmmsg << endl;
 	     }
@@ -210,14 +214,14 @@ DbStatus RpmDb::initDatabase( bool createNew )
 /* If copyOldRpm == true than the rpm-database from		*/
 /* /var/lib/rpm will be copied.					*/
 /*--------------------------------------------------------------*/
-bool RpmDb::createTmpDatabase ( bool copyOldRpm )
+RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
 {
    // searching a non-existing rpm-path
    int counter = 0;
    struct stat  dummyStat;
    string rpmPath;
    string saveDbPath = dbPath;
-   bool ok = true;
+   DbStatus err = RPMDB_OK;
    char number[10];
 
    number[0] = 0;
@@ -234,7 +238,7 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
 
    if ( mkdir ( rpmPath.c_str(), S_IRWXU ) == -1 )
    {
-      ok = false;
+      err = RPMDB_ERROR_MKDIR;
       ERR << "ERROR command: mkdir " << rpmPath.c_str() << endl;
 
    }
@@ -250,7 +254,7 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
       dbPath = dbPath + "rpm.new." + number;
    }
 
-   if ( ok )
+   if ( !err )
    {
       RpmArgVec opts(1);
       opts[0] = "--initdb";
@@ -258,13 +262,13 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
       if ( systemStatus() != 0 )
       {
 	 // error
-	 ok = false;
+	 err = RPMDB_ERROR_INITDB;
 	 ERR << "ERROR command: rpm --initdb  --dbpath " <<
 		  dbPath.c_str() << endl;
       }
    }
 
-   if ( ok && copyOldRpm )
+   if ( !err && copyOldRpm )
    {
       // copy old RPM-DB into temporary RPM-DB
 
@@ -274,15 +278,15 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
 
       if ( system ( command.c_str() ) == 0 )
       {
-	 ok = true;
+	 err = RPMDB_OK;
       }
       else
       {
-	 ok = false;
+	 err = RPMDB_ERROR_COPY_TMPDB;
 	 ERR << "ERROR command: " << command.c_str() << endl;
       }
 
-      if ( ok )
+      if ( !err )
       {
 	  RpmArgVec opts(1);
 	  opts[0] = "--rebuilddb";
@@ -290,14 +294,14 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
 	 if ( systemStatus() != 0 )
 	 {
 	    // error
-	    ok = false;
+	    err = RPMDB_ERROR_REBUILDDB;
 	    ERR << "ERROR command: rpm --rebuilddb  --dbpath " <<
 		     dbPath.c_str() << endl;
 	 }
       }
    }
 
-   if ( ok )
+   if ( !err )
    {
       temporary = true;
    }
@@ -307,16 +311,16 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
       dbPath = saveDbPath;
    }
 
-   return ( ok );
+   return ( err );
 }
 
 /*--------------------------------------------------------------*/
 /* Installing the rpm-database to /var/lib/rpm, if the		*/
 /* current has been created by "createTmpDatabase".		*/
 /*--------------------------------------------------------------*/
-bool RpmDb::installTmpDatabase( void )
+RpmDb::DbStatus RpmDb::installTmpDatabase( void )
 {
-   bool ok = true;
+   DbStatus err = RPMDB_OK;
    string oldPath;
    struct stat  dummyStat;
    int counter = 1;
@@ -325,17 +329,17 @@ bool RpmDb::installTmpDatabase( void )
 
    if ( !temporary  )
    {
-      DBG << "RPM-database have not to be updated." << endl;
-      return ( true );
+      DBG << "RPM-database does not have to be updated." << endl;
+      return ( RPMDB_OK );
    }
 
    if ( dbPath.length() <= 0 )
    {
       ERR << "RPM-DB is not initialized." << endl;
-      return ( false );
+      return ( RPMDB_ERROR_NOT_INITIALIZED );
    }
 
-   if ( ok )
+   if ( !err )
    {
       // creating path for saved rpm-DB
       oldPath = rootfs + RPMPATH + "rpm.old";
@@ -350,11 +354,11 @@ bool RpmDb::installTmpDatabase( void )
       if ( mkdir ( oldPath.c_str(), S_IRWXU ) == -1 )
       {
 	 ERR << "ERROR command: mkdir %s" << oldPath.c_str() << endl;
-	 ok = false;
+	 err = RPMDB_ERROR_MKDIR;
       }
    }
 
-   if ( ok )
+   if ( !err )
    {
       // saving old rpm
       string command = "cp -a ";
@@ -362,17 +366,17 @@ bool RpmDb::installTmpDatabase( void )
 
       if ( system ( command.c_str() ) == 0)
       {
-	 ok = true;
+	 err = RPMDB_OK;
       }
       else
       {
 	 ERR << "ERROR command: " << command.c_str() << endl;
-	 ok = false;
+	 err = RPMDB_ERROR_COPY_TMPDB;
       }
    }
 
 
-   if ( ok )
+   if ( !err )
    {
       string command = "cp -a ";
       command = command + rootfs + dbPath + "/* " +
@@ -380,16 +384,16 @@ bool RpmDb::installTmpDatabase( void )
 
       if ( system ( command.c_str() ) == 0)
       {
-	 ok = true;
+	 err = RPMDB_OK;
       }
       else
       {
 	 ERR << "ERROR command: " << command.c_str() << endl;
-	 ok = false;
+	 err = RPMDB_ERROR_COPY_TMPDB;
       }
    }
 
-   if ( ok )
+   if ( !err )
    {
       // remove temporary RPM-DB
       string command = "rm -R ";
@@ -401,7 +405,7 @@ bool RpmDb::installTmpDatabase( void )
       dbPath = ORIGINALRPMPATH;
    }
 
-   return ( ok );
+   return ( err );
 }
 
 // split in into pieces seperated by sep, return vector out
@@ -535,7 +539,7 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 }
 
 // fill pkglist with installed packages
-bool RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
+RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 {
     string rpmquery;
 
@@ -573,7 +577,7 @@ bool RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     run_rpm(opts, ExternalProgram::Discard_Stderr);
 
     if(!process)
-	return false;
+	return RPMDB_ERROR_SUBPROCESS_FAILED;
 
     string value;
     string output;
@@ -650,301 +654,15 @@ bool RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	
 	output = process->receiveLine();
     }
-    
-    return true;
+
+    if ( systemStatus() != 0 )
+    {
+	return RPMDB_ERROR_SUBPROCESS_FAILED;
+    }
+
+    return RPMDB_OK;
 }
 
-#if 0
-/*--------------------------------------------------------------*/
-/* Evaluate all installed packages WITH all Information		*/
-/* Returns false, if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-bool RpmDb::getInstalledPackagesInfo ( InstalledPackageMap &packageMap )
-{
-   bool ok = true;
-
-   const char *const opts1[] = {
-      "-qa",  "--queryformat", "%{RPMTAG_NAME};%{RPMTAG_VERSION}-%{RPMTAG_RELEASE};%{RPMTAG_INSTALLTIME};%{RPMTAG_BUILDTIME};%{RPMTAG_GROUP}\\n"
-     };
-
-   const char *const opts2[] = {
-      "-qa",  "--queryformat", "%{RPMTAG_NAME};%{OBSOLETES};%{PROVIDES}\\n"
-     };
-
-   const char *const opts3[] = {
-      "-qa",  "--queryformat", "%{RPMTAG_NAME};[ %{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}];[ %{CONFLICTNAME} %{CONFLICTFLAGS} %{CONFLICTVERSION}] \\n"
-     };
-
-   packageMap.clear();
-
-   run_rpm(sizeof(opts1) / sizeof(*opts1), opts1,
-	   ExternalProgram::Discard_Stderr);
-
-   if ( process == NULL )
-      return false;
-
-   string value;
-
-   string output = process->receiveLine();
-
-   while ( output.length() > 0 )
-   {
-      string::size_type ret;
-
-      // extract \n
-      ret = output.find_first_of ( "\n" );
-      if ( ret != string::npos )
-      {
-	 value.assign ( output, 0, ret );
-      }
-      else
-      {
-	 value = output;
-      }
-
-      // parse line
-      string::size_type begin;
-      string::size_type end;
-      const string 	seperator(";");
-      int counter = 1;
-      InstalledPackageElement package;
-
-      begin = value.find_first_not_of ( seperator );
-      while ( begin != string::npos )
-      {
-	 // each entry separated by ;
-
-	 end = value.find_first_of ( seperator, begin );
-	 if ( end == string::npos )
-	 {
-	    // end of line
-	    end = value.length();
-	 }
-	 switch ( counter )
-	 {
-	    case 1:
-	       package.packageName = value.substr ( begin, end-begin );
-	       break;
-	    case 2:
-	       package.version = value.substr ( begin, end-begin );
-	       break;
-	    case 3:
-	       package.installtime = atol(
-				(value.substr ( begin, end-begin )).c_str());
-	       break;
-	    case 4:
-	       package.buildtime = atol(
-				(value.substr ( begin, end-begin )).c_str());
-	       break;
-	    case 5:
-	       package.rpmgroup = value.substr ( begin, end-begin );
-	       break;
-	   default:
-	      break;
-	 }
-	 counter++;
-	 // next entry
-	 begin = value.find_first_not_of ( seperator, end );
-      }
-
-      packageMap.insert(pair<const string, const InstalledPackageElement >
-			( package.packageName, package ) );
-      output = process->receiveLine();
-   }
-
-   if ( systemStatus() != 0 )
-   {
-      ok = false;
-   }
-
-   // Evaluate obsoletes and provides
-
-   if ( ok )
-   {
-         run_rpm(sizeof(opts2) / sizeof(*opts2), opts2,
-	   ExternalProgram::Discard_Stderr);
-
-	 if ( process == NULL )
-	    ok = false;
-   }
-
-   if ( ok )
-   {
-
-      output = process->receiveLine();
-
-      while ( output.length() > 0 )
-      {
-	 string::size_type ret;
-
-	 // extract \n
-	 ret = output.find_first_of ( "\n" );
-	 if ( ret != string::npos )
-	 {
-	    value.assign ( output, 0, ret );
-	 }
-	 else
-	 {
-	    value = output;
-	 }
-
-	 // parse line
-	 string::size_type begin;
-	 string::size_type end;
-	 const string 	seperator(";");
-	 int counter = 1;
-	 InstalledPackageElement *package = NULL;
-	 InstalledPackageMap::iterator pos;
-
-	 begin = value.find_first_not_of ( seperator );
-	 while ( begin != string::npos )
-	 {
-	    // each entry separated by ;
-
-	    end = value.find_first_of ( seperator, begin );
-	    if ( end == string::npos )
-	    {
-	       // end of line
-	       end = value.length();
-	    }
-	    switch ( counter )
-	    {
-	       case 1:
-		  pos = packageMap.find ( value.substr ( begin, end-begin ) );
-		  if ( pos != packageMap.end() )
-		  {
-		     package = &(pos->second);
-		  }
-		  else
-		  {
-		     package = NULL;
-		  }
-		  break;
-	    case 2:
-	       if ( package != NULL &&
-		    value.substr ( begin, end-begin ) != "(none)" )
-	       {
-		  package->obsoletes = value.substr ( begin, end-begin );
-	       }
-	       break;
-	    case 3:
-	       if ( package != NULL &&
-		    value.substr ( begin, end-begin ) != "(none)" )
-	       {
-		  package->provides = value.substr ( begin, end-begin );
-	       }
-	       break;
-	    default:
-	       break;
-	    }
-	    counter++;
-	    // next entry
-	    begin = value.find_first_not_of ( seperator, end );
-	 }
-	 output = process->receiveLine();
-      }
-   }
-
-   if ( systemStatus() != 0 )
-   {
-      ok = false;
-   }
-
-
-   // Evaluate requires and conflicts
-
-   if ( ok )
-   {
-         run_rpm(sizeof(opts3) / sizeof(*opts3), opts3,
-	   ExternalProgram::Discard_Stderr);
-
-	 if ( process == NULL )
-	    ok = false;
-   }
-
-   if ( ok )
-   {
-      output = process->receiveLine();
-
-      while ( output.length() > 0 )
-      {
-	 string::size_type ret;
-
-	 // extract \n
-	 ret = output.find_first_of ( "\n" );
-	 if ( ret != string::npos )
-	 {
-	    value.assign ( output, 0, ret );
-	 }
-	 else
-	 {
-	    value = output;
-	 }
-
-	 // parse line
-	 string::size_type begin;
-	 string::size_type end;
-	 const string 	seperator(";");
-	 int counter = 1;
-	 InstalledPackageElement *package = NULL;
-	 InstalledPackageMap::iterator pos;
-
-	 begin = value.find_first_not_of ( seperator );
-	 while ( begin != string::npos )
-	 {
-	    // each entry separated by ;
-
-	    end = value.find_first_of ( seperator, begin );
-	    if ( end == string::npos )
-	    {
-	       // end of line
-	       end = value.length();
-	    }
-	    switch ( counter )
-	    {
-	       case 1:
-		  pos = packageMap.find ( value.substr ( begin, end-begin ) );
-		  if ( pos != packageMap.end() )
-		  {
-		     package = &(pos->second);
-		  }
-		  else
-		  {
-		     package = NULL;
-		  }
-		  break;
-	    case 2:
-	       if ( package != NULL )
-	       {
-		  package->requires = value.substr ( begin, end-begin );
-	       }
-	       break;
-	    case 3:
-	       if ( package != NULL )
-	       {
-		  package->conflicts = value.substr ( begin, end-begin );
-	       }
-	       break;
-	    default:
-	       break;
-	    }
-	    counter++;
-	    // next entry
-	    begin = value.find_first_not_of ( seperator, end );
-	 }
-
-	 output = process->receiveLine();
-      }
-   }
-
-   if ( systemStatus() != 0 )
-   {
-      ok = false;
-   }
-
-   return ( ok );
-}
-#endif
 
 #if 0
 /*--------------------------------------------------------------*/
@@ -1142,17 +860,15 @@ bool RpmDb::queryDirectories ( FileList &fileList, string packageName )
 /* Checking the source rpm <rpmpath> with rpm --chcksig and     */
 /* the version number.						*/
 /*--------------------------------------------------------------*/
-bool RpmDb::checkPackage( string packagePath, string version, string md5 )
+unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
 {
-    bool ok = true;
-
-    bool md5ok = false;
-    bool gpgok = false;
+    unsigned result = 0;
 
     if(!md5.empty())
     {
 	//TODO
 	WAR << "md5sum check not yet implemented" << endl;
+	return CHK_INCORRECT_FILEMD5;
     }
 
    if ( version != "" )
@@ -1200,95 +916,109 @@ bool RpmDb::checkPackage( string packagePath, string version, string md5 )
 	 ok = false;
       }
 #endif
+	return CHK_INCORRECT_VERSION;
    }
 
-    if ( ok )
+    // checking --checksig
+    const char *const argv[] = {
+	"rpm", "--checksig",  packagePath.c_str(), 0
+    };
+
+    exit_code = -1;
+
+    string output = "";
+    unsigned int k;
+    for ( k = 0; k < (sizeof(argv) / sizeof(*argv)) -1; k++ )
     {
-	// checking --checksig
-	const char *const argv[] = {
-	    "rpm", "--checksig",  packagePath.c_str(), 0
-	};
+	output = output + " " + argv[k];
+    }
 
-	exit_code = -1;
+    DBG << "rpm command: " << output << endl;
 
-	string output = "";
-	unsigned int k;
-	for ( k = 0; k < (sizeof(argv) / sizeof(*argv)) -1; k++ )
+    if ( process != NULL )
+    {
+	delete process;
+	process = NULL;
+    }
+    // Launch the program
+    process = new ExternalProgram( argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
+
+
+    if ( process == NULL )
+    {
+	result |= CHK_OTHER_FAILURE;
+	D__ << "create process failed" << endl;
+    }
+
+    string value;
+    output = process->receiveLine();
+
+    while ( output.length() > 0)
+    {
+	string::size_type         ret;
+
+	// extract \n
+	ret = output.find_first_of ( "\n" ); 
+	if ( ret != string::npos )
 	{
-	    output = output + " " + argv[k];
+	    value.assign ( output, 0, ret );
+	}
+	else    
+	{
+	    value = output; 
 	}
 
-	DBG << "rpm command: " << output << endl;
+	D__ << "stdout: " << value << endl;
 
-	if ( process != NULL )
+	string::size_type pos;
+	if((pos = value.find(packagePath)) != string::npos)
 	{
-	    delete process;
-	    process = NULL;
-	}
-	// Launch the program
-	process = new ExternalProgram( argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
-
-
-	if ( process == NULL )
-	{
-	    ok = false;
-	    D__ << "create process failed" << endl;
-	}
-
-	string value;
-	output = process->receiveLine();
-
-	while ( output.length() > 0)
-	{
-	    string::size_type         ret;
-
-	    // extract \n
-	    ret = output.find_first_of ( "\n" ); 
-	    if ( ret != string::npos )
+	    string rest = value.substr(pos+packagePath.length()+1);
+	    if(rest.find("NOT OK") == string::npos)
 	    {
-		value.assign ( output, 0, ret );
-	    }
-	    else    
-	    {
-		value = output; 
-	    }
-
-	    D__ << "stdout: " << value << endl;
-
-	    string::size_type pos;
-	    if((pos = value.find(packagePath)) != string::npos)
-	    {
-		string rest = value.substr(pos+1);
-		if(rest.find("NOT OK") == string::npos)
+		// see what checks are ok
+		if(rest.find("md5") == string::npos)
 		{
-		    if(rest.find("md5") != string::npos)
-		    {
-			md5ok = true;
-		    }
-		    if(rest.find("gpg") != string::npos)
-		    {
-			gpgok = true;
-		    }
-		    else
-			DBG << "gpg signature missing" << endl;
+		    result |= CHK_MD5SUM_MISSING;
+		}
+		if(rest.find("gpg") == string::npos)
+		{
+		    result |= CHK_GPGSIG_MISSING;
+		}
+	    }
+	    else
+	    {
+		// see what checks are not ok
+		if(rest.find("MD5") != string::npos)
+		{
+		    result |= CHK_INCORRECT_PKGMD5;
 		}
 		else
 		{
-		    md5ok = gpgok = false;
+		    result |= CHK_MD5SUM_MISSING;
+		}
+
+		if(rest.find("GPG") != string::npos)
+		{
+		    result |= CHK_INCORRECT_GPGSIG;
+		}
+		else
+		{
+		    result |= CHK_GPGSIG_MISSING;
 		}
 	    }
-
-	    output = process->receiveLine();
 	}
 
-	if ( systemStatus() != 0 )
-	{
-	    // error
-	    ok = false;
-	}
+	output = process->receiveLine();
     }
 
-    return ( ok && md5ok && gpgok );
+    if ( result == 0 && systemStatus() != 0 )
+    {
+	// error
+	result |= CHK_OTHER_FAILURE;
+    }
+
+    return ( result );
 }
 
 
@@ -1577,3 +1307,28 @@ bool RpmDb::removePackage(const string& label, unsigned iflags)
     return true;
 }
 
+string RpmDb::checkPackageResult2string(unsigned code)
+{
+    string msg;
+    if(code == 0)
+	return _("Ok\n");
+
+    msg = _("Package is not OK for the following reasons:\n");
+
+    if(code&CHK_INCORRECT_VERSION)
+	msg+=_(" - Package contains different version than expected\n");
+    if(code&CHK_INCORRECT_FILEMD5)
+	msg+=_(" - Package file has incorrect MD5 sum\n");
+    if(code&CHK_GPGSIG_MISSING)
+	msg+=_(" - Package is not signed\n");
+    if(code&CHK_MD5SUM_MISSING)
+	msg+=_(" - Package has no MD5 sum\n");
+    if(code&CHK_INCORRECT_GPGSIG)
+	msg+=_(" - Package has incorrect signature\n");
+    if(code&CHK_INCORRECT_PKGMD5)
+	msg+=_(" - Package archive has incorrect MD5 sum\n");
+    if(code&CHK_OTHER_FAILURE)
+	msg+=_(" - rpm failed for unkown reason, see log file\n");
+
+    return msg;
+}

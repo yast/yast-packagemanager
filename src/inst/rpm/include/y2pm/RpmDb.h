@@ -40,14 +40,31 @@
  * @short Interface to the rpm program
  */
 
-enum DbStatus { DB_OK, DB_NOT_FOUND, DB_OLD_VERSION , DB_NEW_CREATED,
-                DB_ERROR_CREATED, DB_ERROR_CHECK_OLD_VERSION };
-
 class RpmDb: virtual public Rep
 {
     REP_BODY(RpmDb)
 
     public:
+
+	enum DbStatus
+	{
+	    RPMDB_OK = 0,
+	    RPMDB_NOT_FOUND,
+	    RPMDB_OLD_VERSION, // informational
+	    RPMDB_NEW_CREATED, // informational
+	    RPMDB_ERROR_CREATED,
+	    RPMDB_ERROR_CHECK_OLD_VERSION,
+	    RPMDB_ERROR_MKDIR,
+	    RPMDB_ERROR_INITDB,
+	    RPMDB_ERROR_COPY_TMPDB,
+	    RPMDB_ERROR_REBUILDDB,
+	    RPMDB_ERROR_NOT_INITIALIZED,
+	    RPMDB_ERROR_SUBPROCESS_FAILED,
+
+	    RPMDB_NUM_ERRORS
+	};
+
+	const char* const _errorstrings[];
 
 	typedef std::set<std::string> FileList;
 	
@@ -64,6 +81,22 @@ class RpmDb: virtual public Rep
 	    RPMINST_FORCE      = 0x04,
 	    RPMINST_NODEPS     = 0x08,
 	    RPMINST_IGNORESIZE = 0x10
+	};
+
+	/** Bits of possible package corruptions
+	 * @see checkPackage
+	 * @see checkPackageResult2string
+	 * */
+	enum checkPackageResult
+	{
+	    CHK_OK                = 0x00,
+	    CHK_INCORRECT_VERSION = 0x01, // package does not contain expected version
+	    CHK_INCORRECT_FILEMD5 = 0x02, // md5sum of file is wrong (outside)
+	    CHK_GPGSIG_MISSING    = 0x04, // package is not signeed
+	    CHK_MD5SUM_MISSING    = 0x08, // package is not signeed
+	    CHK_INCORRECT_GPGSIG  = 0x10, // signature incorrect
+	    CHK_INCORRECT_PKGMD5  = 0x20, // md5sum incorrect (inside)
+	    CHK_OTHER_FAILURE     = 0x40  // rpm failed for some reason
 	};
 
 	/**
@@ -97,19 +130,19 @@ class RpmDb: virtual public Rep
 	 * If copyOldRpm == true than the rpm-database from
 	 * /var/lib/rpm will be copied.
 	 */
-	bool createTmpDatabase(bool copyOldRpm = false );
+	DbStatus createTmpDatabase(bool copyOldRpm = false );
 
 	/**
 	 * Installing the rpm-database to /var/lib/rpm, if the
 	 * current has been created by "createTmpDatabase".
 	 */
-	bool installTmpDatabase( void );
+	DbStatus installTmpDatabase( void );
 
 	/** acquire data about installed packages
 	 *
 	 * @param pkglist where to store newly created PMPackages
 	 * */
-	bool getPackages (std::list<PMPackagePtr>& pkglist);
+	DbStatus getPackages (std::list<PMPackagePtr>& pkglist);
 
 	/**
 	 * Check rpm with rpm --checksig
@@ -117,8 +150,10 @@ class RpmDb: virtual public Rep
 	 * @param filename which file to check
 	 * @param version check if package really contains this version, leave emtpy to skip check
 	 * @param md5 md5sum for whole file, leave empty to skip check (not yet implemented)
+	 *
+	 * @return checkPackageResult
 	 */
-	bool checkPackage( std::string filename, std::string version = "", std::string md5 = "" );
+	unsigned checkPackage( std::string filename, std::string version = "", std::string md5 = "" );
 
 
 	/**
@@ -262,7 +297,7 @@ class RpmDb: virtual public Rep
 	 * */
 	void ReportProgress(double p)
 	    { if(_progressfunc != NULL) (*_progressfunc)(p); }
-    
+
     public: // static members
 
 	/** split string into tokens delimited by a one character
@@ -275,6 +310,11 @@ class RpmDb: virtual public Rep
 	 * @return number of tokens found
 	 **/
 	static unsigned tokenize(const std::string& in, char sep, std::vector<std::string>& out);
+
+	/** create error description of bits set according to
+	 * checkPackageResult
+	 * */
+	static std::string checkPackageResult2string(unsigned code);
 };
 
 #endif

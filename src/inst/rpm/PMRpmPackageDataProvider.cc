@@ -135,6 +135,9 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	case PMPackage::ATTR_ARCHIVESIZE:
 	    queryformat = "%{ARCHIVESIZE}";
 	    break;
+	case PMPackage::ATTR_AUTHOR:
+	    // not available as rpm tag
+	    return "";
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid
 	    return "invalid query";
