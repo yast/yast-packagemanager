@@ -256,7 +256,7 @@ InstSrcData::writeCache (const Pathname &descrpathname)
 const std::list<PMSelectionPtr>&
 InstSrcData::getSelections() const
 {
-    MIL << "InstSrcData::getSelections()" << endl;
+    MIL << "InstSrcData::getSelections(" << _selections.size() << ")" << endl;
     return _selections;
 }
 
@@ -267,7 +267,7 @@ InstSrcData::getSelections() const
 const std::list<PMPackagePtr>&
 InstSrcData::getPackages() const
 {
-    MIL << "InstSrcData::getPackages()" << endl;
+    MIL << "InstSrcData::getPackages(" << _packages.size() << ")" << endl;
     return _packages;
 }
 
