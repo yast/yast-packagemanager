@@ -25,6 +25,8 @@
 #include <list>
 
 #include <y2pm/RpmLibHeaderPtr.h>
+#include <y2pm/binHeader.h>
+
 #include <y2pm/PMPackage.h>
 #include <y2pm/FileDeps.h>
 #include <y2pm/PkgChangelog.h>
@@ -51,44 +53,19 @@ class RpmLibHeader : virtual public Rep {
 
   private:
 
-    typedef int tag;
-    typedef struct headerToken * Header;
+    binHeaderPtr _hdr;
 
-    class filemode;
+    bool         _isSrc;
 
-  private:
-
-    Header _h;
-    bool   _isSrc;
-
-  private:
-
-    bool has_tag( tag tag_r ) const;
-
-  private:
-
-    class intList;
-    unsigned int_list( tag tag_r, intList & lst_r ) const;
-
-    class stringList;
-    unsigned string_list( tag tag_r, stringList & lst_r ) const;
-
-  private:
-
-    int int_val( tag tag_r ) const;
-
-    std::string string_val( tag tag_r ) const;
-
-    std::list<std::string> stringList_val( tag tag_r ) const;
-
-    PMSolvable::PkgRelList_type PkgRelList_val( tag tag_r, FileDeps::FileNames * freq_r = 0 ) const;
+    PMSolvable::PkgRelList_type PkgRelList_val( binHeader::tag tag_r, FileDeps::FileNames * freq_r = 0 ) const;
 
   public:
 
     /**
-     * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>Header</code>! </B>
+     * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>binHeaderPtr</code>! </B>
      **/
-    RpmLibHeader( Header h, bool isSrc = false );
+    RpmLibHeader( binHeader::Header h_r, bool isSrc = false );
+    RpmLibHeader( binHeaderPtr hdr_r, bool isSrc = false );
 
     virtual ~RpmLibHeader();
 
