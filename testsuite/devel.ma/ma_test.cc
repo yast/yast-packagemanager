@@ -28,6 +28,7 @@
 #include <y2pm/RpmHeaderCache.h>
 #include <y2pm/RpmHeader.h>
 #include <y2pm/InstallOrder.h>
+#include <y2pm/ULSelectionParser.h>
 
 #include "PMCB.h"
 
@@ -255,7 +256,7 @@ int main( int argc, char * argv[] )
   set_log_filename( "-" );
   MIL << "START (" << argc << ")" << endl;
 
-  if ( 1 ) {
+  if ( 0 ) {
     //Y2PM::setNotRunningFromSystem();
     //Y2PM::setCacheToRamdisk( false );
     //Y2PM::noAutoInstSrcManager();
@@ -276,17 +277,34 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  std::list<PMPackagePtr> ll;
+  unsigned medianr = 2;
+  Url url( "nfs://172.16.23.110/work/susebeta/9.3-b1/cd2" );
+  bool triedReOpen = false;
+  MIL << url << endl;
 
-  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin();
-	it != PMGR.end(); ++it ) {
-    if ( (*it)->installedObj() ) {
-      ll.push_back( (*it)->installedObj() );
-      go( ll );
+    if ( ! triedReOpen ) {
+      triedReOpen = true; // don't come here again
+      string path = url.path();
+      string::size_type pos = path.find_last_not_of( '/' );
+      if ( pos != string::npos && ++pos != path.size() ) {
+	path.erase( pos );
+      }
+      pos = path.find_last_not_of( "1234567890" );
+      if ( pos != string::npos && ++pos != path.size() ) {
+	string mnum( stringutil::numstring( medianr ) );
+	if ( mnum != path.substr( pos ) ) {
+	  path.erase( pos );
+	  path += mnum;
+
+	  // give it a try
+	  //_media->close();
+	  url.setPath( path );
+	  WAR << url << endl;
+	  // continue;             // ------------------------------------> continue
+	}
+      }
     }
-
-  }
-
+  MIL << url << endl;
 
 #if 0
   dumpLangWhatIf( SEC, true );
