@@ -259,7 +259,7 @@ PMRpmPackageDataProvider::filenames ( const PMPackage & pkg_r ) const
 //
 std::list<std::string> PMRpmPackageDataProvider::du( const PMPackage & pkg_r ) const
 {
-  //INT << "TBD PMRpmPackageDataProvider::du( " << pkg_r.nameEd() << " )" << endl;
+  I__ << "TBD PMRpmPackageDataProvider::du( " << pkg_r.nameEd() << " )" << endl;
   return PMPackageDataProvider::du();
 }
 

@@ -52,7 +52,6 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMRpmPackageDataProvider.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
-#include <y2pm/RpmCache.h>
 #include <y2pm/PMPackageManager.h>
 
 #include <Y2PM.h>
@@ -1036,113 +1035,6 @@ RpmDb::queryPackage (const Pathname& path, const char *format, std::list<std::st
 {
     return queryRPM (path.asString(), "-qp", format, true, result_r);
 }
-
-/**
- * queryCache()
- *
- * fill struct rpmCache with data from package
- */
-
-bool
-RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
-{
-    string pkgname = pkg2rpm (package);
-
-    //------------------------------------------------
-    //*** !!! ***
-    // DON'T CHANGE THE ORDER OR THE COUNT
-    // WITHOUT ALSO CHANGING THE PARSING
-    // BELOW
-    //*** !!! ***
-    int querycount = 9;	// number of attributes
-    string rpmquery = "%{BUILDHOST};%{INSTALLTIME};%{DISTRIBUTION};";
-    rpmquery += "%{LICENSE};%{PACKAGER};%{URL};%{OS};";
-    rpmquery += "%{SOURCERPM};%{DESCRIPTION}";
-    //------------------------------------------------
-
-
-    RpmArgVec opts(4);
-    opts[0] = "-q";
-    opts[1] = "--queryformat";
-    opts[2] = rpmquery.c_str();
-    opts[3] = pkgname.c_str();
-    run_rpm (opts, ExternalProgram::Discard_Stderr);
-
-    if (!process)
-    {
-	theCache->_description.clear();
-	theCache->_buildhost.clear();
-	theCache->_installtime = Date();
-	theCache->_distribution.clear();
-	theCache->_license.clear();
-	theCache->_packager.clear();
-	theCache->_url.clear();
-	theCache->_os.clear();
-	theCache->_sourcerpm.clear();
-	ERR << "RpmDB subprocess start failed" << endl;
-	return false;
-    }
-
-    string output;
-
-    output = process->receiveLine();
-
-    //
-    // parse output to pkgattribs
-    // the queryformat specified ";" as the output separator
-    //
-
-    vector<string> pkgattribs;
-
-    tokenize (output, ';', querycount, pkgattribs);
-
-//0	%{BUILDHOST};
-//1	%{INSTALLTIME};
-//2	%{DISTRIBUTION};
-//3	%{LICENSE};
-//4	%{PACKAGER};
-//5	%{URL};
-//6	%{OS};
-//7	%{SOURCERPM};
-//8	%{DESCRIPTION}
-
-    theCache->_buildhost = pkgattribs[0];
-    theCache->_installtime = Date(pkgattribs[1]);
-    theCache->_distribution = pkgattribs[2];
-    theCache->_license = pkgattribs[3];
-    theCache->_packager = pkgattribs[4];
-    theCache->_url = pkgattribs[5];
-    theCache->_os = pkgattribs[6];
-    theCache->_sourcerpm = pkgattribs[7];
-
-    theCache->_description.clear();
-
-    string::size_type pos = pkgattribs[8].find("\n");
-    if (pos != string::npos)
-	theCache->_description.push_back (pkgattribs[8].substr (0, pos));
-    else
-	theCache->_description.push_back (pkgattribs[8]);
-
-    for (;;)
-    {
-	output = process->receiveLine();
-	if (output.size() == 0)
-	    break;
-	pos = output.find("\n");
-	if (pos != string::npos)
-	    theCache->_description.push_back (output.substr (0, pos));
-	else
-	    theCache->_description.push_back (output);
-    }
-
-    if ( systemStatus() != 0 )
-    {
-	ERR << "Failed running rpm";
-	return false;
-    }
-    return true;
-}
-
 
 /**
  * query system for provided tag
