@@ -1324,37 +1324,3 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
 
     return err;
 }
-
-//---------------------------------------------------------------------...
-// public
-
-/**
- * generate PMSelection objects for each Item on the source
- * @return list of PMSelectionPtr on this source
- * */
-const std::list<PMSelectionPtr>&
-InstSrcDataUL::getSelections() const
-{
-  return _selections;
-}
-
-/**
- * generate PMPackage objects for each Item on the source
- * @return list of PMPackagePtr on this source
- * */
-const std::list<PMPackagePtr>&
-InstSrcDataUL::getPackages() const
-{
-  return _packages;
-}
-
-/**
- * generate PMYouPatch objects for each patch on the target
- * @return list of PMYouPatchPtr on this target
- */
-const std::list<PMYouPatchPtr>&
-InstSrcDataUL::getPatches (void) const
-{
-  // Return empty list as we do not hold Patches
-  return InstData::getPatches();
-}

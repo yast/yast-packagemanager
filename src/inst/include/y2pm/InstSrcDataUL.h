@@ -63,6 +63,12 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	 * */
 	const std::list<PMPackagePtr>& getPackages() const { return _packages; }
 
+	/**
+	 * generate PMYouPatch objects for each patch on the target
+	 * @return list of PMYouPatchPtr on this target
+	 * Return empty list as we do not hold Patches
+	 */
+	const std::list<PMYouPatchPtr>& getPatches (void) const { return InstData::getPatches(); }
     private:
 
 	//-----------------------------------------------------------
