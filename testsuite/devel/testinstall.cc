@@ -55,7 +55,6 @@
 
 using namespace std;
 
-static int _verbose = 0;
 static bool _showtimes = false;
 static bool _createbackups = false;
 
@@ -68,24 +67,19 @@ static vector<string> nullvector;
 
 static const char* statestr[] = { "@i", "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
 
-
-//void installold(vector<string>& argv);
 void install(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
 void init(vector<string>& argv);
+void autoenablesources(vector<string>& argv);
 void show(vector<string>& argv);
 void remove(vector<string>& argv);
-void verbose(vector<string>& argv);
-void debug(vector<string>& argv);
 void rpminstall(vector<string>& argv);
 void instlog(vector<string>& argv);
-void setroot(vector<string>& argv);
 void source(vector<string>& argv);
 void showsources(vector<string>& argv);
 void deselect(vector<string>& argv);
 void showpackage(vector<string>& argv);
-//void setmaxremove(vector<string>& argv);
 void solve(vector<string>& argv);
 void showtimes(vector<string>& argv);
 void createbackups(vector<string>& argv);
@@ -100,6 +94,8 @@ void order(vector<string>& argv);
 void upgrade(vector<string>& argv);
 void commit(vector<string>& argv);
 void mem(vector<string>& argv);
+void varset(vector<string>& argv);
+void varunset(vector<string>& argv);
 
 void testset(vector<string>& argv);
 
@@ -112,36 +108,320 @@ struct Funcs {
     const char* helptext;
 };
 
+class Variable
+{
+    public:
+	enum Type { t_string=0, t_bool, t_int };
+
+	// return NULL on sucess, error message otherwise
+	typedef const char* (*ValidateFunc)(const Variable& v);
+
+    private:
+	Type _type;
+	union {
+	    char* _strval;
+	    bool _boolval;
+	    long _intval;
+	};
+
+    public:
+	bool _can_unset;
+	ValidateFunc _valid;
+	
+    public:
+	Variable();
+	Variable(const char* value, bool can_unset = true, ValidateFunc valid = NULL);
+	Variable( const Variable& );
+	~Variable();
+	bool isBool() const;
+	bool isInt() const;
+	bool isString() const;
+	long getInt() const;
+	bool getBool() const;
+	const char* getString() const;
+	bool canUnset() const;
+	void dumpOn(ostream& os) const;
+	const char* typestr() const;
+
+	// return NULL on sucess, error message otherwise
+	static const char* assign(Variable& v, const char* value);
+
+	// does not call validate function
+	Variable& operator=( const Variable& );
+
+};
+
+ostream& operator<<(ostream& os, const Variable& v)
+{
+    v.dumpOn(os);
+    return os;
+}
+
+typedef map<string,Variable> VariableMap;
+static VariableMap variables;
+static map<string,string> vardesc;
+
+static inline void printvar(ostream& os, string name, const Variable& v)
+{
+    os << name << "[" << v.typestr() << "] = " << v;
+    if(vardesc.count(name))
+	os << "\t" << vardesc[name];
+    os << endl;
+}
+
+void varset(vector<string>& argv)
+{
+    if(argv.size()<2)
+    {
+	for(VariableMap::iterator it = variables.begin();
+		it != variables.end(); ++it)
+	{
+	    printvar(cout,it->first,it->second);
+	}
+	return;
+    }
+    else if(argv.size()<3)
+    {
+	if(!variables.count(argv[1]))
+	{
+	    cout << argv[1] << " not set" << endl;
+	    return;
+	}
+	else
+	{
+	    Variable& v = variables[argv[1]];
+	    printvar(cout,argv[1],v);
+	}
+    }
+    else
+    {
+	const char* msg = Variable::assign(variables[argv[1]], argv[2].c_str());
+	if(msg)
+	    cout << "unable to set requested value, " << msg << endl;
+    }
+}
+
+void varunset(vector<string>& argv)
+{
+    if(argv.size()<2)
+    {
+	cout << "unset <variable name>" << endl;
+	return;
+    }
+    
+    if(!variables.count(argv[1]))
+    {
+	    cout << argv[1] << " not set" << endl;
+	    return;
+    }
+
+    if(!variables[argv[1]].canUnset())
+    {
+	cout << argv[1] << " is protected" << endl;
+	return;
+    }
+	
+    variables.erase(argv[1]);
+}
+
+Variable::Variable()
+    : _type(t_bool), _boolval(false), _can_unset(true), _valid(NULL)
+{
+//    cout << __PRETTY_FUNCTION__ << ':' << __LINE__ << endl;
+}
+
+Variable::Variable(const Variable& v)
+{
+    _type = v._type;
+    _valid = v._valid;
+    _can_unset = v._can_unset;
+    switch(_type)
+    {
+	case t_bool: _boolval = v._boolval; break;
+	case t_int: _intval = v._intval; break;
+	case t_string: _strval = strdup(v._strval); break;
+    }
+}
+
+Variable& Variable::operator=( const Variable& v )
+{
+    _type = v._type;
+    _valid = v._valid;
+    _can_unset = v._can_unset;
+    switch(_type)
+    {
+	case t_bool: _boolval = v._boolval; break;
+	case t_int: _intval = v._intval; break;
+	case t_string: _strval = strdup(v._strval); break;
+    }
+
+    return *this;
+}
+
+const char* Variable::assign(Variable& v, const char* value)
+{
+    Variable tmp(value,v._can_unset,v._valid);
+    const char* msg = (v._valid?v._valid(tmp):NULL);
+    if(msg)
+	return msg;
+
+    v=tmp;
+
+    return NULL;
+}
+
+Variable::Variable(const char* value, bool can_unset, ValidateFunc valid)
+{
+    long val = 0;
+    char* endptr;
+    _can_unset = can_unset;
+    _valid = valid;
+    val = strtol(value,&endptr, 10);
+    if(value != endptr)
+    {
+	if(val == 0 || val == 1)
+	{
+	    _type = t_bool;
+	    _boolval = val;
+	}
+	else
+	{
+	    _type = t_int;
+	    _intval = val;
+	}
+    }
+    else if(!strcasecmp(value,"true") || !strcasecmp(value,"yes"))
+    {
+	_type = t_bool;
+	_boolval = true;
+    }
+    else if(!strcasecmp(value,"false") || !strcasecmp(value,"no"))
+    {
+	_type = t_bool;
+	_boolval = false;
+    }
+    else
+    {
+	_type = t_string;
+	_strval = strdup(value);
+    }
+}
+
+Variable::~Variable()
+{
+    if( _type == t_string && _strval )
+    {
+	free(_strval);
+	_strval = NULL;
+    }
+}
+
+void Variable::dumpOn(ostream& os) const
+{
+    switch(_type)
+    {
+	case t_bool: os << (_boolval?"true":"false") ; break;
+	case t_int: os << _intval; break;
+	case t_string: os << '"' << _strval << '"'; break;
+    }
+}
+
+const char* Variable::typestr() const
+{
+    switch(_type)
+    {
+	case t_bool: return "bool";
+	case t_int: return "int";
+	case t_string: return "string";
+    }
+    return NULL;
+}
+
+bool Variable::isBool() const
+{
+    return ( _type == t_bool );
+}
+
+bool Variable::isInt() const
+{
+    return ( _type == t_int );
+}
+
+bool Variable::isString() const
+{
+    return ( _type == t_string );
+}
+
+long Variable::getInt() const
+{
+    switch(_type)
+    {
+	case t_bool:
+	    return _boolval;
+	case t_int:
+	    return _intval;
+	case t_string:
+	    return 0;
+    }
+    return 0;
+}
+
+bool Variable::getBool() const
+{
+    switch(_type)
+    {
+	case t_bool:
+	    return _boolval;
+	case t_int:
+	    return ( _intval != 0 );
+	case t_string:
+	    return 0;
+    }
+    return false;
+}
+
+const char* Variable::getString() const
+{
+    switch(_type)
+    {
+	case t_bool:
+	    return (_boolval?"true":"false");
+	case t_int:
+	    return ""; //XXX
+	case t_string:
+	    return _strval;
+    }
+    return NULL;
+}
+
+bool Variable::canUnset() const
+{
+    return _can_unset;
+}
+
 static struct Funcs func[] = {
-//    { "installold",    installold,    "simulated install of a package, direct PkgDep" },
     { "install",	install,	1,	"select packages for installation" },
     { "rpminstall",	rpminstall,	1,	"install rpm files" },
     { "consistent",	consistent,	1,	"check consistency" },
+    { "set",		varset,		0,	"set or show variable" },
+    { "unset",		varunset,	0,	"unset variable" },
     { "init",		init,		1,	"initialize packagemanager" },
     { "show",		show,		1,	"show package info" },
     { "remove",		remove,		1,	"select package for removal" },
     { "help",		help,		0,	"this screen" },
-    { "verbose",	verbose,	0,	"set verbosity level" },
-    { "debug",		debug,		0,	"switch on/off debug" },
     { "instlog",	instlog,	1,	"set installation log file" },
-    { "setroot",	setroot,	0,	"set root directory for operation" },
     { "source",		source,		1,	"scan media for inst sources" },
     { "showsources",	showsources,	1,	"show known sources" },
+    { "autoenablesources", autoenablesources,	1,	"enable all sources" },
     { "deselect",	deselect,	1,	"deselect packages marked for installation" },
-//    { "setmaxremove",	setmaxremove,	1,	"set maximum number of packages that will be removed on upgrade" },
     { "solve",		solve,		1,	"solve" },
     { "showtimes",	showtimes,	0,	"showtimes" },
     { "createbackups",	createbackups,	0,	"createbackups" },
     { "rebuilddb",	rebuilddb,	1,	"rebuild rpm db" },
     { "du",		du,		1,	"display disk space forecast" },
-
-    { "selstate",	showselection,	1,
-	"show state of selection (all if none specified. -a to show also not installed" },
-    { "pkgstate",	showpackage,	1,
-	"show state of package (all if none specified. -a to show also not installed" },
-
+    { "selstate",	showselection,	1, "show state of selection (all if none specified. -a to show also not installed" },
+    { "pkgstate",	showpackage,	1, "show state of package (all if none specified. -a to show also not installed" },
     { "setappl",	setappl,	1,	"set package to installed like a selection would do" },
-
     { "order",		order,		1,	"compute installation order" },
     { "upgrade",	upgrade,	1,	"compute upgrade" },
     { "commit",		commit,		1,	"commit changes to and actually perform installation" },
@@ -150,8 +430,7 @@ static struct Funcs func[] = {
     { "solvesel",	solvesel,	1,	"solve selection dependencies" },
     { "cdattach",	cdattach,	0,	"cdattach" },
     { "mem",		mem,		0,	"memory statistics" },
-
-    { "testset",	testset,		0,	"test memory consumption of PkgSet" },
+    { "testset",	testset,	0,	"test memory consumption of PkgSet" },
 
     { NULL,		NULL,		0,	NULL }
 };
@@ -161,7 +440,6 @@ static ostream& operator<<( ostream& os, const struct mallinfo& i )
     os << "Memory from system: " << (i.arena >> 10) << "k, used: " << (i.uordblks >> 10) << "k";
     return os;
 }
-
 
 static int lastprogress = 0;
 void progresscallback(int p, void* nix)
@@ -208,6 +486,53 @@ bool pkgstartcallback(const std::string& name, const std::string& summary, const
     return true;
 }
 
+static const char* setdebug(const Variable& v)
+{
+    if(!v.isBool()) return "must be bool";
+
+    if(v.getBool())
+    {
+	cout << "debug enabled" << endl;
+	Y2SLog::dbg_enabled_bm = true;
+    }
+    else
+    {
+	cout << "debug disabled" << endl;
+	Y2SLog::dbg_enabled_bm = false;
+    }
+
+    return NULL;
+}
+
+static const char* setroot(const Variable& v)
+{
+    if(_initialized)
+    {
+	return "target already initialized, can't change root";
+    }
+
+    if(!v.isString()) return "must be String";
+
+    PathInfo p(v.getString());
+    if(!p.isDir()) return "not a directory";
+
+    _rootdir = v.getString();
+
+    cout << "root dir set to " << _rootdir << endl;
+
+    return NULL;
+}
+
+void init_variables()
+{
+	variables["debug"] = Variable("0",false,setdebug);
+	vardesc["debug"] = "whether to enable debug messages";
+	variables["verbose"] = Variable("0",false);
+	vardesc["verbose"] = "certain commands display more info if >0, >1 etc.";
+	variables["root"] = Variable("/",false,setroot);
+	vardesc["root"] = "set root directory for operation";
+}
+
 void instlog(vector<string>& argv)
 {
     if(argv.size()<2)
@@ -231,39 +556,6 @@ void instlog(vector<string>& argv)
     bool ret = Y2PM::instTarget().setInstallationLogfile(_instlog);
 
     cout << (ret?" ok":" failed") << endl;
-}
-
-void setroot(vector<string>& argv)
-{
-    if(_initialized)
-    {
-	cout << "target already initialized, can't change root" << endl;
-	return;
-    }
-
-    if(argv.size()<2)
-    {
-	cout << "need argument" << endl;
-	return;
-    }
-
-    _rootdir = argv[1].c_str();
-
-    cout << "root dir set to " << _rootdir << endl;
-}
-
-
-void verbose(vector<string>& argv)
-{
-    if(argv.size()<2)
-    {
-	cout << "verbose level: " << _verbose << endl;
-	return;
-    }
-
-    _verbose = atoi(argv[1].c_str());
-
-    cout << "verbose level set to " << _verbose << endl;
 }
 
 void showtimes(vector<string>& argv)
@@ -298,42 +590,6 @@ void rebuilddb(vector<string>& argv)
     }
     else
 	cout << "done" << endl;
-}
-
-/*
-void setmaxremove(vector<string>& argv)
-{
-    if(argv.size()<2)
-    {
-	cout << "current max remove: "
-	    << (_maxremove<0?string("default"):stringutil::form("%d", _maxremove)) << endl;
-	return;
-    }
-    int tmp = atoi(argv[1].c_str());
-    if(tmp < 0)
-    {
-	cout  << "maxremove must be positive" << endl;
-	return;
-    }
-
-    _maxremove = tmp;
-    Y2PM::packageManager().setMaxRemoveThreshold(_maxremove);
-
-    cout << "maxremove set to " << _maxremove << endl;
-}
-*/
-void debug(vector<string>& argv)
-{
-    if(Y2SLog::dbg_enabled_bm)
-    {
-	cout << "debug disabled" << endl;
-	Y2SLog::dbg_enabled_bm = false;
-    }
-    else
-    {
-	cout << "debug enabled" << endl;
-	Y2SLog::dbg_enabled_bm = true;
-    }
 }
 
 void show(vector<string>& argv)
@@ -373,6 +629,18 @@ void showsources(vector<string>& argv)
     }
 }
 
+void autoenablesources(vector<string>& argv)
+{
+    InstSrcManager::ISrcIdList isrclist;
+
+    Y2PM::instSrcManager().getSources(isrclist);
+
+    for(InstSrcManager::ISrcIdList::iterator it = isrclist.begin();
+	it != isrclist.end(); ++it)
+    {
+	Y2PM::instSrcManager().enableSource(*it);
+    }
+}
 
 void source(vector<string>& argv)
 {
@@ -478,23 +746,23 @@ void init(vector<string>& argv)
     {
 	cout << "error initializing target: " << dbstat << endl;
 	_initialized = false;
-    }
-    else
-    {
-	Y2PM::instTarget().createPackageBackups(_createbackups);
-	Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages() );
-	Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections() );
-
-	Y2PM::setRebuildDBProgressCallback(progresscallback, NULL);
-	Y2PM::setProvideStartCallback(providestartcallback, NULL);
-	Y2PM::setProvideProgressCallback(progresscallback, NULL);
-	Y2PM::setProvideDoneCallback(donecallback, NULL);
-	Y2PM::setPackageStartCallback(pkgstartcallback, NULL);
-	Y2PM::setPackageProgressCallback(progresscallback, NULL);
-	Y2PM::setPackageDoneCallback(donecallback, NULL);
+	return;
     }
 
 
+    Y2PM::instTarget().createPackageBackups(_createbackups);
+    Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages() );
+    Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections() );
+
+    Y2PM::noAutoInstSrcManager();
+
+    Y2PM::setRebuildDBProgressCallback(progresscallback, NULL);
+    Y2PM::setProvideStartCallback(providestartcallback, NULL);
+    Y2PM::setProvideProgressCallback(progresscallback, NULL);
+    Y2PM::setProvideDoneCallback(donecallback, NULL);
+    Y2PM::setPackageStartCallback(pkgstartcallback, NULL);
+    Y2PM::setPackageProgressCallback(progresscallback, NULL);
+    Y2PM::setPackageDoneCallback(donecallback, NULL);
 }
 
 void help(vector<string>& argv)
@@ -515,45 +783,6 @@ Alternatives::AltDefaultList alternative_default( PkgName name )
 	list.push_front(PkgName("mesasoft"));
     return list;
 }
-
-static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
-    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p)
-{
-
-    if(rel.name()->find("rpmlib(") != std::string::npos)
-	return PkgDep::UNRES_IGNORE;
-
-    if(rel.name() == "/bin/bash" || rel.name() == "/bin/sh")
-    {
-	const PkgSet set = solver->current_installed();
-	p = set.lookup(PkgName("bash"));
-	if(p==NULL)
-	{
-	    const PkgSet set = solver->current_available();
-	    p = set.lookup(PkgName("bash"));
-	}
-	return PkgDep::UNRES_TAKETHIS;
-    }
-    if(rel.name() == "/usr/bin/perl")
-    {
-	const PkgSet set = solver->current_installed();
-	p = set.lookup(PkgName("perl"));
-	if(p==NULL)
-	{
-	    const PkgSet set = solver->current_available();
-	    p = set.lookup(PkgName("perl"));
-	}
-	return PkgDep::UNRES_TAKETHIS;
-    }
-    if(rel.name()->operator[](0)=='/')
-    {
-	DBG << "ignoring file requirement " << rel.name() << endl;
-	return PkgDep::UNRES_IGNORE;
-    }
-
-    return PkgDep::UNRES_FAIL;
-}
-
 
 static PMSolvable::PkgRelList_type& addprovidescallback(constPMSolvablePtr& ptr)
 {
@@ -603,6 +832,7 @@ PkgSet* getAvailable()
 int printgoodlist(PkgDep::ResultList& good)
 {
     int numinst = 0;
+    int _verbose = variables["verbose"].getInt();
     cout << "*** Packages to install ***" << endl;
 
      // otherwise, print what should be installed and what removed
@@ -632,6 +862,7 @@ int printgoodlist(PkgDep::ResultList& good)
 int printremovelist(PkgDep::SolvableList& to_remove)
 {
     int numrem = 0;
+    int _verbose = variables["verbose"].getInt();
 
     cout << "*** Packages to remove ***" << endl;
     for(PkgDep::SolvableList::const_iterator q=to_remove.begin();q!=to_remove.end();++q)
@@ -881,154 +1112,6 @@ void commit(vector<string>& argv)
     cout << endl << "please quit now" << endl;
 }
 
-#if 0
-void installold(vector<string>& argv)
-{
-
-    // build sets
-    PkgSet empty;
-    PkgSet candidates;
-    candidates.setAdditionalProvidesCallback(addprovidescallback);
-
-    PkgSet *installed = NULL;
-    PkgSet *available = NULL;
-
-    // swapped since available is not yet implemented
-    installed = getAvailable();
-    available = getInstalled();
-
-    for (unsigned i=1; i < argv.size() ; i++) {
-	if (available->lookup(PkgName(argv[i])) == NULL) {
-		std::cout << "package " << argv[i] << " is not available.\n";
-		return;
-	}
-	candidates.add(available->lookup(PkgName(argv[i])));
-    }
-/*
-    if (!oncmdline) {
-	    char fupp[200];
-	    while (fgets(fupp,sizeof(fupp),stdin)) {
-		char *s;
-		s = strchr(fupp,'\n'); if (s) *s = '\0';
-		s = strchr(fupp,'\r'); if (s) *s = '\0';
-		if (available->lookup(fupp))
-		    candidates.add(available->lookup(fupp));
-	    }
-    }
-*/
-    // construct PkgDep object
-//    PkgDep::set_default_alternatives_mode(PkgDep::AUTO_IF_NO_DEFAULT);
-    PkgDep engine( *installed, *available, alternative_default );
-    engine.set_unresolvable_callback(unresolvable_callback);
-
-    // call upgrade
-    PkgDep::ResultList good;
-    PkgDep::ErrorResultList bad;
-    PkgDep::NameList to_remove;
-
-    int numinst=0,numrem=0,numbad=0;
-    bool success = false;
-
-    TimeClass t;
-    t.startTimer();
-
-    success = engine.install( candidates, good, bad);
-
-    t.stopTimer();
-
-    if (!success) {
-	// if it failed, print problems
-	cout << "*** Conflicts ***" << endl;
-	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
-	     p != bad.end(); ++p ) {
-	    cout << *p << endl;
-	    numbad++;
-	}
-    }
-
-    cout << "*** Packages to install ***" << endl;
-
-    // otherwise, print what should be installed and what removed
-    for(PkgDep::ResultList::const_iterator p=good.begin();p!=good.end();++p) {
-	switch (_verbose) {
-	case 0: cout << "install " << p->name << endl;break;
-	case 1: cout << "install " << p->name << "-" << p->edition << endl;break;
-	default: cout << "install " << *p << endl;break;
-	}
-	numinst++;
-
-    }
-    cout << "*** Packages to remove ***" << endl;
-    for(PkgDep::NameList::const_iterator q=to_remove.begin();q!=to_remove.end();++q) {
-	switch (_verbose) {
-	case 0: cout << "remove " << *q << endl;break;
-	default: cout << "remove " << *q << endl;break;
-	}
-	numrem++;
-    }
-    cout << "***" << endl;
-    cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
-    cout << "Time consumed: " << t.getTimer() << endl;
-
-    delete installed;
-    delete available;
-
-    InstallOrder order(candidates);
-    order.startrdfs();
-
-    cout << "Installation order:" << endl;
-    for(InstallOrder::SolvableList::const_iterator cit = order.getTopSorted().begin();
-	cit != order.getTopSorted().end(); ++cit)
-    {
-	cout << (*cit)->name() << " ";
-    }
-    cout << endl;
-}
-#endif
-
-void removephi(vector<string>& argv)
-{
-//    PMPackageManager& manager = Y2PM::packageManager();
-    vector<string>::iterator it=argv.begin();
-    ++it; // first one is function name itself
-
-    PkgDep::SolvableList list1;
-    PkgDep::SolvableList list2;
-
-    PkgSet *installed = NULL;
-    PkgSet *available = NULL;
-
-    installed = getInstalled();
-    available = getAvailable();
-
-    for(;it!=argv.end();++it)
-    {
-	PMSolvablePtr p;
-	if((p = installed->lookup(PkgName(*it))) != NULL)
-	{
-	    list1.push_back(p);
-	    list2.push_back(p);
-	}
-    }
-
-
-    PkgDep engine( *installed, *available, alternative_default );
-    engine.set_unresolvable_callback(unresolvable_callback);
-
-    engine.remove(list1);
-
-    cout << "Additionally removing ";
-    for(PkgDep::SolvableList::iterator it = list1.begin(); it != list1.end(); ++it)
-    {
-	if(find(list2.begin(),list2.end(),*it) == list2.end())
-	{
-	    cout << (*it)->name() << " ";
-	}
-    }
-    cout << endl;
-}
-
-
 void consistent(vector<string>& argv)
 {
     int numbad=0;
@@ -1043,39 +1126,6 @@ void consistent(vector<string>& argv)
     cout << "***" << endl;
     cout << numbad << " bad" << endl;
 }
-
-/*
-void consistent(vector<string>& argv)
-{
-    PkgSet *installed = NULL;
-    PkgSet *available = NULL;
-
-    installed = getInstalled();
-    available = getAvailable();
-
-    PkgDep engine( *installed, *available, alternative_default );
-    engine.set_unresolvable_callback(unresolvable_callback);
-
-    PkgDep::ErrorResultList bad;
-
-    bool success = engine.consistent(bad);
-    if(!success)
-    {
-	int numbad = 0;
-	cout << " *** system inconsistent: " << endl << endl;
-	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
-	     p != bad.end(); ++p ) {
-	    cout << *p << endl;
-	    numbad++;
-	}
-	cout << endl << " *** "<< numbad << " errors" << endl;
-    }
-    else
-    {
-	cout << "everything allright" << endl;
-    }
-}
-*/
 
 void deselect(vector<string>& argv)
 {
@@ -1114,58 +1164,12 @@ void rpminstall(vector<string>& argv)
     else
 	Y2PM::instTarget().installPackages(pkgs);
 }
-/*
-void upgrade(vector<string>& argv)
-{
-    PkgDep::ResultList good;
-    PkgDep::ErrorResultList bad;
-    PkgDep::SolvableList to_remove;
 
-    int numinst=0,numrem=0,numbad=0;
-    bool success = false;
-
-    for (unsigned i=1; i < argv.size() ; i++) {
-	string pkg = stringutil::trim(argv[i]);
-
-	if(pkg.empty()) continue;
-
-	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
-	if(!selp || !selp->has_candidate())
-	{
-	    std::cout << "package " << pkg << " is not available.\n";
-	    continue;
-	}
-	PMSelectable::UI_Status s = PMSelectable::S_Install;
-
-	if(selp->has_installed())
-	{
-	    s = PMSelectable::S_Update;
-	}
-	if(!selp->set_status(s))
-	{
-	    cout << stringutil::form("coult not mark %s for %s", pkg.c_str(),
-		(s==PMSelectable::S_Install?"installation":"update")) << endl;
-	}
-    }
-
-    success = Y2PM::packageManager().solveUpgrade(good, bad, to_remove);
-
-    numbad = printbadlist(bad);
-    numinst = printgoodlist(good);
-    numrem = printremovelist(to_remove);
-
-    cout << "***" << endl;
-    cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
-    if(!success)
-    {
-	cout << "*** upgrade failed, manual intervention required to solve conflicts ***" << endl;
-    }
-}
-*/
 static void showstate_internal(PMManager& manager, vector<string>& argv)
 {
     bool nonone = true;
     bool showall = true;
+    int _verbose = variables["verbose"].getInt();
 
     PMManager::PMSelectableVec selectables;
     PMManager::PMSelectableVec::const_iterator begin, end;
@@ -1237,8 +1241,13 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 				cout << " / ";
 
 			    cout << (*cit)->candidateObj()->edition();
+			    if((*cit)->candidateObj()->edition()
+				    > (*cit)->installedObj()->edition())
+			    {
+				cout << '*';
+			    }
 			}
-			cout << ")";
+			cout << ')';
 		}
 	    }
 	    cout << endl;
@@ -1324,33 +1333,6 @@ void cdattach(vector<string>& argv)
     }
 }
 
-/*
-void solve(vector<string>& argv)
-{
-    PkgDep::ResultList good;
-    PkgDep::ErrorResultList bad;
-    PkgDep::SolvableList to_remove;
-
-    int numinst=0,numrem=0,numbad=0;
-    bool success = false;
-
-//    success = Y2PM::packageManager().solveEverythingRight(good, bad, to_remove);
-
-    cout << "doesnt work" << endl;
-
-    numbad = printbadlist(bad);
-    numinst = printgoodlist(good);
-    numrem = printremovelist(to_remove);
-
-    cout << "***" << endl;
-    cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
-    if(!success)
-    {
-	cout << "*** selection broken, manual intervention required to solve conflicts ***" << endl;
-    }
-}
-*/
-
 int main( int argc, char *argv[] )
 {
     char prompt[]="y2pm > ";
@@ -1358,6 +1340,8 @@ int main( int argc, char *argv[] )
     char* buf = NULL;
     string inputstr;
     string historyfile;
+
+    init_variables();
 
     cout << "type help for help, ^D to exit" << endl << endl;
 
