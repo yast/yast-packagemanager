@@ -298,10 +298,10 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
           }
           break;
         case CURLE_FTP_COULDNT_RETR_FILE:
+        case CURLE_FTP_ACCESS_DENIED:
           err = Error::E_file_not_found;
           break;
         case CURLE_BAD_PASSWORD_ENTERED:
-        case CURLE_FTP_ACCESS_DENIED:
         case CURLE_FTP_USER_PASSWORD_INCORRECT:
           err = Error::E_login_failed;
           break;
