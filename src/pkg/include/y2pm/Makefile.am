@@ -7,11 +7,10 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
-	PMPackage.h \
-	PMPackageDataProvider.h \
-	PMPackageDataProviderPtr.h \
+	PMPackage.h PMPackagePtr.h \
+	PMPackageDataProvider.h PMPackageDataProviderPtr.h \
 	PMPackageManager.h PMPackageManager_update.h \
-	PMPackagePtr.h
+	PMPackageImEx.h PMPackageImExPtr.h
 
 #<INSTALL-HEADER-TARGET>
 

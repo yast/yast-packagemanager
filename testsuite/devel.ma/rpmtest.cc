@@ -14,6 +14,7 @@
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/Timecount.h>
+#include <y2pm/PMPackageImEx.h>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/Date.h>
@@ -123,7 +124,6 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 int main()
 {
   Y2Logging::setLogfileName("-");
-  SMGR.installOnTarget();
   MIL << "START" << endl;
   //Y2PM::noAutoInstSrcManager();
   Timecount _t( "Launch InstTarget" );
@@ -138,29 +138,10 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); 0 && it != SMGR.end(); ++it ) {
-    PMSelectionPtr isel( (*it)->installedObj() );
-    PMSelectionPtr csel( (*it)->candidateObj() );
+  PMPackageImEx P;
 
-    INT << (*it) << endl;
-    if ( isel )
-      MIL << " iSEL " << isel->inspacks_ptrs().size() << " (" << isel->delpacks_ptrs().size() << ")" << endl;
-    if ( csel )
-      MIL << " cSEL " << csel->inspacks_ptrs().size() << " (" << csel->delpacks_ptrs().size() << ")" << endl;
-  }
+  P.getPMState();
 
-  dumpPkgWhatIf( DBG );
-  dumpSelWhatIf( ERR, true );
-
-  SMGR["LOST"]->user_set_delete();
-  SMGR["LSB"]->user_set_install();
-  dumpSelWhatIf( ERR, true );
-
-  SMGR.activate( PMGR );
-  dumpPkgWhatIf( DBG );
-
-  SMGR.installOnTarget();
-  dumpSelWhatIf( ERR, true );
 
   SEC << "STOP" << endl;
   return 0;
