@@ -16,3 +16,47 @@ Conflicts-With: cups-client-1.0-1 conflicts with lprng, lprng-1.0-1 conflicts wi
 Remove-To-Solve-Conflict: cups-client
 Remove-Referers: lsb
 
+--- Test 2
+
+Name: cups-client
+Edition: 1.0-1
+From-Input-List: yes
+Referers: lsb-1.0-1 requires /usr/bin/lpr
+
+Name: lsb
+Edition: 1.0-1
+From-Input-List: yes
+
+--- Test 3
+
+Name: lprng
+Edition: 1.0-1
+From-Input-List: yes
+Referers: lsb-1.0-1 requires /usr/bin/lpr
+
+Name: lsb
+Edition: 1.0-1
+From-Input-List: yes
+
+--- Test 4
+
+Name: cups
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: cups-client
+Edition: 1.0-1
+Referers: cups-1.0-1 requires cups-client, lsb-1.0-1 requires /usr/bin/lpr
+
+Name: lsb
+Edition: 1.0-1
+From-Input-List: yes
+
+--- Test 5
+
+Name: /usr/bin/lpr(*)
+Edition: EDITION-UNSPEC
+Referers: lsb-1.0-1 requires /usr/bin/lpr
+Alternatives: lprng(S), cups-client(S)
+Remove-Referers: lsb
+
