@@ -23,6 +23,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <functional>
 
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
@@ -76,14 +77,6 @@ class PkgIdent {
      * Returns "name-version-release.arch" string
      **/
     std::string nameEdArch() const { return nameEd() + '.' + _arch.asString(); }
-
-  public:
-
-    /**
-     * Order to be used by associative std::container (set/map):
-     * Lexicographic by _name, _edition then _arch.
-     **/
-    friend bool std::less<PkgIdent>::operator()( const PkgIdent & lhs, const PkgIdent & rhs ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -95,6 +88,7 @@ class PkgIdent {
 //      Order to be used by associative std::container (set/map):
 //      Lexicographic by _name, _edition then _arch.
 //
+template<>
 inline bool std::less<PkgIdent>::operator()( const PkgIdent & lhs, const PkgIdent & rhs ) const
 {
   int r = lhs.name()->compare( rhs.name() );
