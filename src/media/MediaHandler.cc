@@ -260,7 +260,7 @@ PMError MediaHandler::provideDir( Pathname dirname ) const
   }
 
   list<string> filelist;
-  PMError err = getDirInfo( filelist, dirname, false );
+  PMError err = dirInfo( filelist, dirname, false );
   if ( err ) {
     WAR << "provideDir(" << dirname << "): " << err << endl;
   } else {
