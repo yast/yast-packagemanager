@@ -65,7 +65,6 @@ int main( int argc, char **argv )
     paths.setPatchPath( patchPath );
 #else
     paths.setPatchUrl( Url( "http://localhost/you/" ) );
-    paths.setAttachPoint( "/tmp/youtest" );
 #endif
 
     PMError error = patchInfo.getPatches( &paths, patches );
