@@ -32,7 +32,7 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_HANDLES(PMRpmPackageDataProvider);
+IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMDataProvider );
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -80,7 +80,7 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	if(it != _pkgmap.end())
 	{
 //	    D__ << "found " << pkg->name() << " in cache" << endl;
-	    
+
 	    AttrVec& vec = it->second;
 	    ret = vec[pos];
 	    if(!ret.empty())
@@ -185,7 +185,7 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
 	if(it != _pkgmap.end())
 	{
 //	    D__ << "found " << pkg->name() << " in cache" << endl;
-	    
+
 	    AttrVec& vec = it->second;
 	    ret = vec[pos];
 	    if(!ret.empty())
@@ -194,7 +194,7 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
     }
 
     ret = _rpmdb->queryPackage(queryformat,string(pkg->name())+"-"+pkg->edition().as_string());
-    
+
     // if attribute is to be cached but not stored yet, do it now
     if(pos != AV_POS_INVALID)
     {
@@ -249,7 +249,7 @@ void PMRpmPackageDataProvider::_setAttributeValue(
     PkgMap::iterator it = _pkgmap.find(pkg);
 
     AttrVec vec;
-    
+
     // package not known yet
     if(it == _pkgmap.end())
     {

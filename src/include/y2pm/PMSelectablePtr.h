@@ -28,7 +28,7 @@
 /**
  *
  **/
-DEFINE_BASIC_HANDLES(PMSelectable);
+DEFINE_BASE_POINTER(PMSelectable);
 
 #endif // PMSelectablePtr_h
 

@@ -28,7 +28,7 @@
 /**
  *
  **/
-DEFINE_BASIC_HANDLES(MediaAccess);
+DEFINE_BASE_POINTER(MediaAccess);
 
 #endif // MediaAccessPtr_h
 

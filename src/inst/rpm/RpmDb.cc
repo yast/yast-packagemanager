@@ -46,7 +46,7 @@
 
 using namespace std;
 
-IMPL_HANDLES(RpmDb);
+IMPL_BASE_POINTER(RpmDb);
 
 /****************************************************************/
 /* public member-functions					*/

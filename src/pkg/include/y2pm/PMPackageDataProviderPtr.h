@@ -28,7 +28,7 @@
 /**
  *
  **/
-DEFINE_DERIVED_HANDLES(PMPackageDataProvider, public, PMDataProvider );
+DEFINE_DERIVED_POINTER(PMPackageDataProvider, PMDataProvider, PMDataProvider );
 
 #endif // PMPackageDataProviderPtr_h
 

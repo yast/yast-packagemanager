@@ -35,7 +35,7 @@
 
 using namespace std;
 
-IMPL_HANDLES(MediaAccess);
+IMPL_BASE_POINTER(MediaAccess);
 
 ///////////////////////////////////////////////////////////////////
 //

@@ -28,6 +28,6 @@
 /**
  *
  **/
-DEFINE_DERIVED_HANDLES( PMObject, public, PMSolvable );
+DEFINE_DERIVED_POINTER( PMObject, PMSolvable, PMSolvable );
 
 #endif // PMObjectPtr_h

@@ -28,7 +28,7 @@
 /**
  *
  **/
-DEFINE_DERIVED_HANDLES(PMPackageSelectable, public, PMSelectable );
+DEFINE_DERIVED_POINTER(PMPackageSelectable, PMSelectable, PMSelectable );
 
 #endif // PMPackageSelectablePtr_h
 

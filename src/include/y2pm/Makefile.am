@@ -19,10 +19,7 @@ pkginclude_HEADERS =	\
 	\
 	PMSelectable.h PMSelectablePtr.h	\
 	\
-	PMDataProvider.h PMDataProviderPtr.h	\
-	\
-	MediaInfo.h	MediaInfoPtr.h
-		FAKEMediaInfo.h	FAKEMediaInfoPtr.h
+	PMDataProvider.h PMDataProviderPtr.h
 
 #<INSTALL-HEADER-TARGET>
 
