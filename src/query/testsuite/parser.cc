@@ -13,9 +13,9 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <y2pm/PMQuery.h>
+#include <y2pm/Query.h>
 
-extern struct qnode *parse_query (char **query, PMQueryError *error);
+extern struct qnode *parse_query (char **query, QueryError *error);
 
 static void print_node (struct qnode *node);
 
@@ -142,7 +142,7 @@ static void
 do_query (const std::string query)
 {
     PMError error;
-    PMQueryParser parser;
+    QueryParser parser;
     struct qnode *node = 0;
     int errpos;
     error = parser.parseQuery (query, errpos, &node);

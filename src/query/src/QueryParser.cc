@@ -1,5 +1,5 @@
 /*
-   PMQueryParseer.cc
+   QueryParseer.cc
 
    parse query
 
@@ -14,7 +14,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <y2pm/PMQueryParser.h>
+#include <y2pm/QueryParser.h>
 
 extern int matchword (const char *word);
 
@@ -23,7 +23,7 @@ extern int matchword (const char *word);
 
  */
 void
-PMQueryParser::free_node (struct qnode *node)
+QueryParser::free_node (struct qnode *node)
 {
     if (node->left.type == QTYPE_NODE)
 	free_node (node->left.v.node);
@@ -46,7 +46,7 @@ fprintf (stderr, "free(%p)\n", node);
 
  */
 int
-PMQueryParser::op_binding (enum operation op)
+QueryParser::op_binding (enum operation op)
 {
     switch (op)
     {
@@ -72,7 +72,7 @@ PMQueryParser::op_binding (enum operation op)
 */
 
 enum operation
-PMQueryParser::parse_op (const char **query)
+QueryParser::parse_op (const char **query)
 {
     char qchar;
 #ifdef PARSER_DEBUG
@@ -175,13 +175,13 @@ fprintf (stderr, "parse_op(%s)", *query);
   disallow compare ops with flags
   disallow boolean ops with values
 
-  return PMQueryError::E_ok if ok
-  return PMQueryError::E_compare_flag if compare op with flag
-  return PMQueryError::E_andor_value if boolean op with value
+  return QueryError::E_ok if ok
+  return QueryError::E_compare_flag if compare op with flag
+  return QueryError::E_andor_value if boolean op with value
  */
 
 PMError
-PMQueryParser::check_node (struct qnode *node)
+QueryParser::check_node (struct qnode *node)
 {
     enum operation op = (enum operation)(node->op & ~OP_ATOMIC);
 #ifdef PARSER_DEBUG
@@ -192,7 +192,7 @@ fprintf (stderr, "check_node(%d, %d, %d)\n", (int)node->left.type, (int)node->op
 	if ((node->right.type != QTYPE_NONE)
 	    || (node->left.type != QTYPE_FLAG))
 	{
-	    return PMQueryError::E_bad_expr;
+	    return QueryError::E_bad_expr;
 	}
     }
     else if (op < OP_BOOLEAN)	// boolean op
@@ -202,7 +202,7 @@ fprintf (stderr, "check_node(%d, %d, %d)\n", (int)node->left.type, (int)node->op
 	    || (node->left.type == QTYPE_ATTR)
 	    || (node->right.type == QTYPE_ATTR))
 	{
-	    return PMQueryError::E_andor_const;
+	    return QueryError::E_andor_const;
 	}
     }
     else			// compare op
@@ -212,10 +212,10 @@ fprintf (stderr, "check_node(%d, %d, %d)\n", (int)node->left.type, (int)node->op
 	    && (node->left.type != QTYPE_ATTR)
 	    && (node->right.type != QTYPE_ATTR))
 	{
-	    return PMQueryError::E_compare_flag;
+	    return QueryError::E_compare_flag;
 	}
     }
-    return PMQueryError::E_ok;
+    return QueryError::E_ok;
 }
 
 /*
@@ -234,7 +234,7 @@ fprintf (stderr, "check_node(%d, %d, %d)\n", (int)node->left.type, (int)node->op
  */
 
 int
-PMQueryParser::parse_value (struct qvalue *value, const char **query, PMError *error)
+QueryParser::parse_value (struct qvalue *value, const char **query, PMError *error)
 {
     while (isspace (**query))
 	(*query)++;
@@ -253,7 +253,7 @@ fprintf (stderr, "parse_value(%s)\n", *query);
 	}
 	if (**query != ')')
 	{
-	    *error = PMQueryError::E_open_paranthesis;
+	    *error = QueryError::E_open_paranthesis;
 	    return -1;
 	}
 	(*query)++;
@@ -275,7 +275,7 @@ fprintf (stderr, "parse_value(%s)\n", *query);
 	not_node = (struct qnode *)malloc (sizeof (struct qnode));
 	if (not_node == 0)
 	{
-	    *error = PMQueryError::E_memory;
+	    *error = QueryError::E_memory;
 	    return -1;
 	}
 	memset (not_node, 0, sizeof (struct qnode));
@@ -290,7 +290,7 @@ fprintf (stderr, "not_node at %p\n", not_node);
 	    return -1;
 	}
 	*error = check_node (not_node);
-	if (*error != PMQueryError::E_ok)
+	if (*error != QueryError::E_ok)
 	{
 	    free_node (not_node);
 	    return -1;
@@ -324,7 +324,7 @@ fprintf (stderr, "not_node at %p\n", not_node);
 	    }
 	    (*query)++;
 	}
-	*error = PMQueryError::E_unterminated_string;
+	*error = QueryError::E_unterminated_string;
 	*query = qptr;
 	return -1;
     }
@@ -342,7 +342,7 @@ fprintf (stderr, "%s -> %d\n", *query, word);
 		value->type = QTYPE_ATTR;
 	    else
 	    {
-		*error = PMQueryError::E_bad_value;
+		*error = QueryError::E_bad_value;
 		return -1;
 	    }
 	    value->v.attr = word;
@@ -364,7 +364,7 @@ fprintf (stderr, "%s -> %d\n", *query, word);
 	}
 	return 0;
     }
-    *error = PMQueryError::E_unknown_operand;
+    *error = QueryError::E_unknown_operand;
     return -1;
 }
 
@@ -376,7 +376,7 @@ fprintf (stderr, "%s -> %d\n", *query, word);
  */
 
 struct qnode *
-PMQueryParser::parse_expr (const char **query, PMError *error)
+QueryParser::parse_expr (const char **query, PMError *error)
 {
     struct qnode *node;
 
@@ -387,7 +387,7 @@ fprintf (stderr, "parse_expr (%s)\n", *query);
 	node = (struct qnode *)malloc (sizeof (struct qnode));
 	if (node == 0)
 	{
-	    *error = PMQueryError::E_memory;
+	    *error = QueryError::E_memory;
 	    return 0;
 	}
 	memset (node, 0, sizeof (struct qnode));
@@ -442,7 +442,7 @@ fprintf (stderr, "obsolete(%p), node(%p)\n", obsolete, node);
 		}
 		break;
 		default:
-		    *error = PMQueryError::E_no_op;
+		    *error = QueryError::E_no_op;
 		    free_node (node);
 		    node = 0;
 		break;
@@ -456,7 +456,7 @@ fprintf (stderr, "obsolete(%p), node(%p)\n", obsolete, node);
 	node->op = parse_op (query);
 	if (node->op == OP_NONE)
 	{
-	    *error = PMQueryError::E_unknown_operation;
+	    *error = QueryError::E_unknown_operation;
 	    *query = start;
 	    free_node (node);
 	    node = 0;
@@ -493,7 +493,7 @@ fprintf (stderr, "only left\n");
 
 	// does the next operand match the operation ?
 	*error = check_node (node);
-	if (*error != PMQueryError::E_ok)
+	if (*error != QueryError::E_ok)
 	{
 	    *query = start;
 	    free_node (node);
@@ -535,7 +535,7 @@ fprintf (stderr, "final (%s)\n", *query);
 	    break;
 	if (**query != ')')
 	{
-	    *error = PMQueryError::E_syntax;
+	    *error = QueryError::E_syntax;
 	    free_node (node);
 	    node = 0;
 	}
@@ -548,14 +548,14 @@ fprintf (stderr, "final (%s)\n", *query);
 // public
 
 PMError
-PMQueryParser::parseQuery (const std::string& query, int& errpos, struct qnode **node)
+QueryParser::parseQuery (const std::string& query, int& errpos, struct qnode **node)
 {
     if (node == 0)
-	return PMQueryError::E_error;
+	return QueryError::E_error;
     PMError err;
     const char *cquery = query.c_str();
     *node = parse_expr (&cquery, &err);
-    if (err != PMQueryError::E_ok)
+    if (err != QueryError::E_ok)
     {
 	errpos = cquery - query.c_str();
     }

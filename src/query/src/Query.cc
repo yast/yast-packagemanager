@@ -10,43 +10,50 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMQueryParser.h
+   File:       Query.cc
 
-   Author:     Klaus Kaempf <kkaempf@suse.de>
-   Maintainer: Klaus Kaempf <kkaempf@suse.de>
+   Author:	Klaus Kaempf <kkaempf@suse.de>
+   Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
 /-*/
-#ifndef PMQueryParser_h
-#define PMQueryParser_h
 
-#include <iosfwd>
-#include <string>
+#include <iostream>
 
-#include <y2pm/PMQueryError.h>
-#include <y2pm/PMQueryNode.h>
-#include <y2pm/PMQueryScanner.h>
+#include <y2util/Y2SLog.h>
+
+#include <y2pm/Query.h>
+#include <y2pm/PMSelectable.h>
+
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMQueryParser
-/**
- * @short parser query from string to struct qnode
- **/
-class PMQueryParser {
-
-    private:
-	void free_node (struct qnode *node);
-	int op_binding (enum operation op);
-	enum operation parse_op (const char **query);
-	PMError check_node (struct qnode *node);
-	int parse_value (struct qvalue *value, const char **query, PMError *error);
-	struct qnode *parse_expr (const char **query, PMError *error);
-    public:
-	PMQueryParser () {}
-	~PMQueryParser () {}
-	PMError parseQuery (const std::string& query, int& errpos, struct qnode **node);
-};
-
+//	CLASS NAME : Query
+//
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMQuery_h
+IMPL_BASE_POINTER( Query );
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Query::Query
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+Query::Query()
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Query::~Query
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+Query::~Query()
+{
+}

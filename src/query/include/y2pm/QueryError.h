@@ -10,17 +10,17 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMQueryError.h
+  File:       QueryError.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose: Definition of "InstSrc" error values.
+  Purpose: Definition of "Query" error values.
 
 /-*/
 
-#ifndef PMQueryError_h
-#define PMQueryError_h
+#ifndef QueryError_h
+#define QueryError_h
 
 #include <iosfwd>
 
@@ -28,12 +28,12 @@
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMQueryError
+//	CLASS NAME : QueryError
 /**
  * @short Definition of "InstSrc" error values.
  * @see PMError
  **/
-class PMQueryError {
+class QueryError {
 
   private:
 
@@ -64,4 +64,4 @@ class PMQueryError {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMQueryError_h
+#endif // QueryError_h

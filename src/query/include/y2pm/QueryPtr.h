@@ -10,50 +10,23 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMQuery.cc
+   File:       QueryPtr.h
 
-   Author:	Klaus Kaempf <kkaempf@suse.de>
-   Maintainer:	Klaus Kaempf <kkaempf@suse.de>
+   Author:     Michael Andres <ma@suse.de>
+   Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Declaration of pointer classes constQueryPtr and QueryPtr.
 
 /-*/
+#ifndef QueryPtr_h
+#define QueryPtr_h
 
-#include <iostream>
-
-#include <y2util/Y2SLog.h>
-
-#include <y2pm/PMQuery.h>
-#include <y2pm/PMSelectable.h>
-
-using namespace std;
+#include <y2util/RepDef.h>
 
 ///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : PMQuery
-//
+//	CLASS NAME : QueryPtr
+//	CLASS NAME : constQueryPtr
 ///////////////////////////////////////////////////////////////////
+DEFINE_BASE_POINTER(Query);
 
-IMPL_BASE_POINTER( PMQuery );
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMQuery::PMQuery
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION :
-//
-PMQuery::PMQuery()
-{
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMQuery::~PMQuery
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-PMQuery::~PMQuery()
-{
-}
+#endif // QueryPtr_h

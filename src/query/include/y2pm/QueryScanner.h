@@ -10,15 +10,15 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMQueryScanner.h
+   File:       QueryScanner.h
 
    Author:     Klaus Kaempf <kkaempf@suse.de>
    Maintainer: Klaus Kaempf <kkaempf@suse.de>
 
 /-*/
-#ifndef PMQueryScanner_h
-#define PMQueryScanner_h
+#ifndef QueryScanner_h
+#define QueryScanner_h
 
 int matchword (const char *word);
 
-#endif // PMQueryScanner_h
+#endif // QueryScanner_h

@@ -17,11 +17,11 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 noinst_PROGRAMS = scanner parser
 
 scanner_SOURCES = scanner.cc
-scanner_LDADD = ../src/PMQueryScanner.o
+scanner_LDADD = $(top_builddir)/src/query/src/liby2pmquery.la $(top_builddir)/src/liby2pm.la
 scanner.cc: ../tools/keywords.h
 
 parser_SOURCES = parser.cc
-parser_LDADD = ../src/PMQueryParser.o ../src/PMQueryScanner.o
+parser_LDADD = $(top_builddir)/src/query/src/liby2pmquery.la $(top_builddir)/src/liby2pm.la
 
 clean-local:
 	rm -f matchword
