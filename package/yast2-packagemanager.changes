@@ -2,7 +2,8 @@
 Thu Mar  6 16:27:42 CET 2003 - ma@suse.de
 
 - On Update: Disable already existing InstSources on system and install
-  the new sources with highes priority. (#24369)
+  the new sources with highest priority. (#24369)
+  On the fly adjust directory permissions below /var/adm/YaST to 0755.
 
 -------------------------------------------------------------------
 Thu Mar  6 13:52:33 CET 2003 - cschum@suse.de

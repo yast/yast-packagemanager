@@ -172,7 +172,7 @@ PMError InstTargetProdDB::open( const Pathname & system_root_r, const bool creat
     }
 
     // should create one.
-    int res = PathInfo::assert_dir( db.path(), 0700 );
+    int res = PathInfo::assert_dir( db.path() );
     if ( res ) {
       ERR << "Error create: " << db << " (errno " << res << ")" << endl;
       return Error::E_ProdDB_open_failed;
