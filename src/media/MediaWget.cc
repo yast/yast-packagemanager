@@ -66,7 +66,7 @@ MediaWget::dumpOn( ostream & str ) const
 PMError
 MediaWget::attachTo (const Pathname & to)
 {
-    
+
     // FIXME
     // connect to FTP server, cd to path
     //
@@ -96,7 +96,7 @@ MediaWget::release (bool eject)
 
 /** get file denoted by path to 'attached path' filename is interpreted
  * relative to the attached url and a path prefix is preserved to destination
- * */ 
+ * */
 
 PMError MediaWget::provideFile (const Pathname & filename) const {
 
@@ -126,12 +126,12 @@ PMError MediaWget::provideFile (const Pathname & filename) const {
 
     // TODO: recreate fs structure
     Pathname dest = _attachPoint+filename;
-    if(PathInfo::mkdir(dest.dirname()))
+    if(PathInfo::assert_dir(dest.dirname()))
     {
-	DBG << "mkdir " << dest.asString() << " failed" << endl;
+	DBG << "assert_dir " << dest.asString() << " failed" << endl;
 	return Error::E_system;
     }
-    
+
     WgetStatus status = wget.getFile( url, dest.asString() );
     if(status == WGET_OK)
 	return Error::E_ok;

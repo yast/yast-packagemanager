@@ -43,7 +43,10 @@ class MediaAccess : virtual public Rep {
 
     public:
 
-        typedef MediaError Error; // default error class
+        /**
+	 * default error class
+	 **/
+        typedef MediaError Error;
 
     private:
 

@@ -123,7 +123,7 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
     {
 	DBG << "creating new database" << endl;
 	// New rpm-DB will be created
-	if(!PathInfo::mkdir(dbFilename.dirname()))
+	if(!PathInfo::assert_dir(dbFilename.dirname()))
 	{
 	    dbPath = _varlibrpm;
 
@@ -174,9 +174,9 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
        {
 	   rpmmsg+=str;
        }
-       
+
        int status = systemStatus();
-       
+
        if ( rpmmsg.empty() )
        {
 	  // error
@@ -267,10 +267,10 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
       rpmPath.extend(number);
    }
 
-   if (!PathInfo::mkdir( rpmPath, S_IRWXU ))
+   if (!PathInfo::assert_dir( rpmPath, S_IRWXU ))
    {
       err = RPMDB_ERROR_MKDIR;
-      ERR << "ERROR command: mkdir " << rpmPath.asString() << endl;
+      ERR << "ERROR command: assert_dir " << rpmPath.asString() << endl;
 
    }
 
@@ -389,9 +389,9 @@ RpmDb::DbStatus RpmDb::installTmpDatabase( void )
 	 oldPath.extend(number);
       }
 
-      if (!PathInfo::mkdir ( oldPath, S_IRWXU ))
+      if (!PathInfo::assert_dir ( oldPath, S_IRWXU ))
       {
-	 ERR << "ERROR command: mkdir %s" << oldPath.asString() << endl;
+	 ERR << "ERROR command: assert_dir %s" << oldPath.asString() << endl;
 	 err = RPMDB_ERROR_MKDIR;
       }
    }
@@ -563,7 +563,7 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 
 	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,cdep_Ci.version.c_str());
 //	D__ << dep << endl;
-	
+
 	dep.setPreReq(cdep_Ci.isprereq);
 
 	deps.push_back(dep);
