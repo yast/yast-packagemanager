@@ -70,7 +70,8 @@ class PMYouPatch : public PMObject
       kind_recommended = 4,
       kind_optional = 8,
       kind_document = 16,
-      kind_all = 31
+      kind_patchlevel = 32,
+      kind_all = 63
     };
     /**
      * Set kind attribute.

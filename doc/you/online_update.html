@@ -219,8 +219,8 @@ Segakcap:
 <tr><th>Tag</th><th>Possible values</th><th>Description</th></tr>
 <tr>
   <td>Kind</td>
-  <td>one of the strings "security", "recommended", "optional",
-      "document" or "YaST2"</td>
+  <td>one of the strings "security", "recommended", "patchlevel" (since 9.1),
+  "optional", "document" or "YaST2"</td>
   <td>Type of patch. See the <a href="#preselection">section about selection of patches</a>
       for details.</td>
 </tr>
@@ -393,10 +393,13 @@ version will be offered for installation.</p>
 <p>There are some criterions for preselecting patches which will be installed
 by YOU:
 <ul>
-  <li>If there is a patch of kind "YaST2" the newest patch of this kind is selected. All other
-  patches are deselected by default.</li>
+  <li>If there is a patch of kind "YaST2" the newest patch of this kind is
+  selected. All other patches are deselected by default.</li>
 <!--  <li>The scripted defined in the patchdescription ( flag "Installtrigger" ) 
   returns true.</li>-->
+  <li>If no explicit kind is given and no patch of kind "YaST2" is selected all
+  patches of the kinds "security", "recommended" and "patchlevel" are considered
+  for selection. All other kinds are deselected by default.</li>
   <li>If one or more packages of the patch are installed and have older versions, the patch will
   be selected.</li>
   <li>If one or more packages of the patch are older as the installed package, the patch will not
@@ -464,7 +467,7 @@ signatures of the downloaded files aren't checked.</p>
 
 <pre>
 Usage: online-update [-u url] [-p product] [-v version] [-a arch] [-d] [-s] [-n] [-g]
-  [-i] [security] [recommended] [document] [optional]
+  [-i] [security] [recommended] [patchlevel] [document] [optional]
 
 -u url      Base URL of directory tree used to get patches from.
 
@@ -482,7 +485,7 @@ Usage: online-update [-u url] [-p product] [-v version] [-a arch] [-d] [-s] [-n]
 -V          Be verbose.
 -D          Debug output.
 
-security | recommended | document | optional   Types of patches to be installed.
+security | recommended | patchlevel | document | optional   Types of patches to be installed.
 </pre>
 
 

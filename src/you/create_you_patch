@@ -50,7 +50,7 @@ Usage: create_you_patch [options] filenames
     --patchversion <version>    Patch version
 
     --kind <kind>               Kind of patch. Possible values: YaST2,
-                                security, recommended, optional
+                                security, recommended, patchlevel, optional
     
     --updateonlyinstalled       Set the UpdateOnlyInstalled flag in the patch
                                 file
@@ -101,7 +101,7 @@ if ( $copyRpms && !$outputDir ) {
 }
 
 if ( $patchKind ) {
-  my @kinds = ( "recommended", "security", "YaST2", "optional" );
+  my @kinds = ( "recommended", "security", "YaST2", "patchlevel", "optional" );
   my $valid;
   foreach my $kind ( @kinds ) {
     if ( $kind eq $patchKind ) { $valid = 1; }

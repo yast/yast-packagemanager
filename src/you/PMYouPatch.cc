@@ -110,6 +110,8 @@ string PMYouPatch::kindLabel( Kind kind )
       return _("Recommended");
     case kind_security:
       return _("Security");
+    case kind_patchlevel:
+      return _("Patchlevel");
     case kind_optional:
       return _("Optional");
     case kind_document:
