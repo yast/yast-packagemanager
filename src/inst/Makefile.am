@@ -6,25 +6,27 @@ SUBDIRS = include rpm
 
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
-		include	\
+		include		\
 		pkg/include	\
 		sel/include	\
 		you/include	\
 		inst/include	\
-		inst/rpm/include	\
+		inst/rpm/include\
 		media/include	\
 	   ) -I$(includedir) -I$(QTDIR)/include
 
 noinst_LTLIBRARIES = liby2pminstsrc.la
 
-liby2pminstsrc_la_SOURCES =	\
-	InstSrc.cc 	\
-	InstSrcError.cc	\
-	InstSrcDescr.cc \
-	InstSrcData.cc	\
-		InstSrcData_UL.cc	\
+liby2pminstsrc_la_SOURCES = \
+	InstSrc.cc 			\
+	InstSrcError.cc			\
+	InstSrcDescr.cc 		\
+	InstSrcData.cc			\
+	InstSrcData_UL.cc		\
 	\
-	InstTarget.cc	\
+	InstTarget.cc			\
 	InstTargetError.cc
+
+#	PMPackageDataProvider_UL.cc
 
 liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la

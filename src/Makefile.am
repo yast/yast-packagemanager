@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src
 #
 
-SUBDIRS = include inst pkg sel you media libPkgDep
+SUBDIRS = include pkg inst sel you media libPkgDep
 
 AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
 
