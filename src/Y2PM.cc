@@ -385,3 +385,44 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 }
 
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::installFile
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : install a single rpm file,  uses callbacks !
+PMError
+Y2PM::installFile (const Pathname& path)
+{
+    if (_callbacks._package_start_func)
+	(*_callbacks._package_start_func) (path.asString(), "", 0, false, _callbacks._package_start_data);
+
+    PMError err = instTarget().installPackage (path);
+
+    if (_callbacks._package_done_func)
+	(*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+
+    return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::removePackage
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : remove a single package by name, uses callbacks !
+PMError
+Y2PM::removePackage (const std::string& pkgname)
+{
+    if (_callbacks._package_start_func)
+	(*_callbacks._package_start_func) (pkgname, "", 0, true, _callbacks._package_start_data);
+
+    PMError err = instTarget().removePackage (pkgname);
+
+    if (_callbacks._package_done_func)
+	(*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+
+    return err;
+}
