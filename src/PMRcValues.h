@@ -30,6 +30,7 @@ namespace PM {
 ;//////////////////////////////////////////////////////////////////
 
 struct RcValues {
+  PM::LocaleSet         initialRequestedLocales;
   PM::LocaleSet         requestedLocales;
   PM::CandidateOrder    candidateOrder;
   std::set<std::string> trustedVendors;

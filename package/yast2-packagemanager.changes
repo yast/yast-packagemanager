@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Feb 17 19:19:56 CET 2005 - ma@suse.de
+
+- LanguageManager: Do not consider languages as 'installed' before
+  changes are committed. Do not consider fallback packages when
+  looking for language specific packages.
+- 2.11.19
+
+-------------------------------------------------------------------
 Thu Feb 17 11:01:14 CET 2005 - ma@suse.de
 
 - Fixed smb/cifs share name handling. (#26059)

@@ -348,6 +348,9 @@ PMError Y2PM::instTargetInit( Pathname root_r )
       if ( _selectionManager ) {
 	_selectionManager->poolSetInstalled( instTarget().getSelections() );
       }
+      if ( _languageManager ) {
+	_languageManager->setComittedLocales( PM::rcValues().initialRequestedLocales );
+      }
     }
 
   }
@@ -522,6 +525,9 @@ PMLanguageManager & Y2PM::languageManager()
     MIL << "Launch LanguageManager..." << endl;
     _languageManager = new PMLanguageManager;
     MIL << "Created LanguageManager @" << _languageManager << endl;
+    if ( _instTarget && instTarget().initialized() ) {
+      _languageManager->setComittedLocales( PM::rcValues().initialRequestedLocales );
+    }
   }
   if ( _languageManagerDirty ) {
     _languageManagerDirty = false;

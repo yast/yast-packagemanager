@@ -166,6 +166,7 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 
         // the per locale entry ( no default lang argument! )
 	virtual PM::LocaleSet             supportedLocales( const PMSelection & sel_r ) const;
+	virtual std::set<PMSelectablePtr> pureInspacks_ptrs( const PMSelection & sel_r, const LangCode & locale ) const;
 	virtual std::set<PMSelectablePtr> inspacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale ) const;
 	virtual std::set<PMSelectablePtr> delpacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale ) const;
 

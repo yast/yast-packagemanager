@@ -81,6 +81,8 @@ class PMLanguageManager : public PMManager {
 
     virtual void rescan();
 
+    void setComittedLocales( PM::LocaleSet locales_r );
+
   public:
 
     typedef std::set<PMSelectablePtr> PkgSelectables;
