@@ -737,7 +737,7 @@ InstSrc::provideMedia (int medianr)
 	    break;
 	}
 
-#warning TDB use gettext
+#warning TBD use gettext
 	reply = (*_mediachangefunc) (0, _medianr, medianr, _mediachangedata);
 	if (reply != 0)
 	{
@@ -758,56 +758,22 @@ InstSrc::provideMedia (int medianr)
 **	FUNCTION NAME : providePackage
 **	FUNCTION TYPE : std::string
 **
-**	DESCRIPTION : provide file by medianr and location
-**		if 'is_source == false' (the default), search through
-**		the list of allowed (arch based) pathes for a proper
-**		match.
-**		
+**	DESCRIPTION : provide package file by medianr and directory
+**
 */
 Pathname
-InstSrc::providePackage (int medianr, const Pathname& location, bool is_source)
+InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir)
 {
     PMError err = provideMedia (medianr);
     if (err != PMError::E_ok)
 	return Pathname();
 
-    Pathname datadir = _descr->content_datadir();
-    Pathname filename;
-
-    if (is_source)
-    {
-	string strpath = location.asString();
-	string::size_type rpmpos = strpath.rfind (".rpm");
-	if (rpmpos == string::npos)
-	{
-	    ERR << "Not .rpm: '" << strpath << "'" << endl;
-	    return Pathname();
-	}
-	rpmpos--;
-	string::size_type dotpos = strpath.rfind (".", rpmpos);
-	if (dotpos == string::npos)
-	{
-	    ERR << "Not .(no)src.rpm: '" << strpath << "'" << endl;
-	    return Pathname();
-	}
-	filename = datadir + Pathname (strpath.substr (dotpos+1, rpmpos-dotpos)) + location;
-	err = _media->provideFile (filename);
-    }
-    else
-    {
-	for (std::list<Pathname>::const_iterator pathIt = _datasubdirs.begin();
-	     pathIt != _datasubdirs.end(); ++pathIt)
-	{
-	    filename = datadir + *pathIt + location;
-	    err = _media->provideFile (filename);
-	    if (err == PMError::E_ok)
-		break;
-	}
-    } // !is_source
+    Pathname filename = _descr->content_datadir() + dir + name;
+    err = _media->provideFile (filename);
 
     if (err != PMError::E_ok)
     {
-	ERR << "Media can't provide '" << location << "': " << err.errstr() << endl;
+	ERR << "Media can't provide '" << dir+name << "': " << err.errstr() << endl;
 	return Pathname();
     }
     return _media->localPath (filename);
