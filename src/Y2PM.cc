@@ -116,19 +116,26 @@ InstSrcManager & Y2PM::instSrcManager()
 //
 //	DESCRIPTION :
 //
-PMPackageManager & Y2PM::packageManager()
+PMPackageManager & Y2PM::packageManager(bool with_target)
 {
-  if ( !_packageManager ) {
+  if ( !_packageManager )
+  {
     MIL << "Launch PackageManager..." << endl;
     _packageManager = new PMPackageManager;
     MIL << "Created PackageManager" << endl;
 
-    WAR << "Fake InstTarget and load installed Packages..." << endl;
-    PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
-    if( dbstat != InstTargetError::E_ok ) {
-      ERR << "error initializing target: " << dbstat << endl;
-    } else {
-      Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
+    if (with_target)
+    {
+	WAR << "Fake InstTarget and load installed Packages..." << endl;
+	PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
+	if( dbstat != InstTargetError::E_ok )
+	{
+	    ERR << "error initializing target: " << dbstat << endl;
+	}
+	else
+	{
+	    Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
+	}
     }
   }
   return *_packageManager;

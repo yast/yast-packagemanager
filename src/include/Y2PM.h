@@ -78,8 +78,12 @@ class Y2PM {
 
     /**
      * Access to the Package manager
+     * if with_target == true ( the default)
+     * also start up InstTarget at "/"
+     * if with_target == false, we're running in the inst-sys
+     * and there is no target yet.
      **/
-    static PMPackageManager & packageManager();
+    static PMPackageManager & packageManager(bool with_target = true);
 
     /**
      * Access to the Selection manager
