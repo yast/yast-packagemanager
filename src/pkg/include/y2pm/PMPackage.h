@@ -71,7 +71,7 @@ class PMPackage : virtual public Rep, public PMObject {
       ATTR_LOCATION,
       ATTR_KEYWORDS,
       // last entry:
-      PKG_NUM_ATTRIBUTES
+      PMPKG_NUM_ATTRIBUTES
     };
 
     /**
