@@ -43,6 +43,7 @@ Pathname Y2PM::_system_rootdir    ( "/" );
 LangCode Y2PM::_preferred_locale ("en");
 std::list<LangCode> Y2PM::_requested_locales;
 PkgArch Y2PM::_base_arch;
+std::list<PkgArch> Y2PM::_allowed_archs;
 
 ///////////////////////////////////////////////////////////////////
 // components provided
@@ -85,6 +86,7 @@ Y2PM::baseArch(void)
     {
 	_base_arch = instTarget().baseArch();
     }
+
     return _base_arch;
 }
 
@@ -193,3 +195,6 @@ PMYouPatchManager & Y2PM::youPatchManager()
   }
   return *_youPatchManager;
 }
+
+
+
