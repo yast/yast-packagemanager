@@ -24,7 +24,8 @@ noinst_PROGRAMS = \
 	test_content	\
 	test_packages	\
 	test_selections	\
-	gs_test
+	gs_test \
+        test_you
 
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
@@ -47,8 +48,8 @@ testinstall_SOURCES = testinstall.cc show_pm.cc
 testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline -lncurses
 testinstall_LDFLAGS = -static
 
-test_patchinfo_SOURCES = test_patchinfo.cc show_pm.cc
-test_patchinfo_LDADD = $(top_builddir)/src/liby2pm.la
+test_patchinfo_SOURCES = test_patchinfo.cc
+test_patchinfo_LDADD = $(top_srcdir)/src/liby2pm.la
 test_patchinfo_LDFLAGS = -static
 
 test_content_SOURCES = test_content.cc show_pm.cc
@@ -62,3 +63,7 @@ test_packages_LDFLAGS = -static
 test_selections_SOURCES = test_selections.cc show_pm.cc
 test_selections_LDADD = $(top_builddir)/src/liby2pm.la
 test_selections_LDFLAGS = -static
+
+test_you_SOURCES = test_you.cc
+test_you_LDADD = $(top_builddir)/src/liby2pm.la
+test_you_LDFLAGS = -static
