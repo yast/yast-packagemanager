@@ -432,7 +432,7 @@ Url PMYouPatchPaths::defaultServer()
 
 Url PMYouPatchPaths::currentServer()
 {
-  return Url();
+  return *(servers().begin());
 }
 
 string PMYouPatchPaths::encodeUrl( const string &url )
