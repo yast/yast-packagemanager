@@ -378,6 +378,40 @@ InstSrcManager::ISrcId InstSrcManager::poolAdd( InstSrcPtr nsrc_r, bool rankchec
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::activateSource
+//	METHOD TYPE : PMError
+//
+PMError InstSrcManager::activateSource( const InstSrcPtr & isrc_r, bool yesno_r )
+{
+  if ( ! isrc_r ) {
+    INT << "Bad ISrcPtr NULL" << endl;
+    return Error::E_bad_id;
+  }
+  if ( isrc_r->enabled() == yesno_r ) {
+    return Error::E_ok;
+  }
+  return( yesno_r ? isrc_r->enableSource() : isrc_r->disableSource() );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::activateSource
+//	METHOD TYPE : PMError
+//
+PMError InstSrcManager::activateSource( const ISrcId & isrc_r, bool yesno_r )
+{
+  InstSrcPtr it( lookupId( isrc_r ) );
+  if ( ! it ) {
+    WAR << "bad ISrcId " << isrc_r << endl;
+    return Error::E_bad_id;
+  }
+  return activateSource( it, yesno_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::scanMedia
 //	METHOD TYPE : PMError
 //
@@ -483,44 +517,6 @@ PMError InstSrcManager::scanMedia( ISrcId & isrc_r, const Url & mediaurl_r, cons
   } // else no InstSrc found
 
   return err;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcManager::enableSource
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//
-PMError InstSrcManager::enableSource( const ISrcId & isrc_r )
-{
-  InstSrcPtr it( lookupId( isrc_r ) );
-  if ( it ) {
-    return it->enableSource();
-  }
-
-  WAR << "bad ISrcId " << isrc_r << endl;
-  return Error::E_bad_id;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcManager::disableSource
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//
-PMError InstSrcManager::disableSource( const ISrcId & isrc_r )
-{
-  InstSrcPtr it( lookupId( isrc_r ) );
-  if ( it ) {
-    return it->disableSource();
-  }
-
-  WAR << "bad ISrcId " << isrc_r << endl;
-  return Error::E_bad_id;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -779,9 +775,21 @@ void InstSrcManager::disableAllSources()
 {
   MIL << "Going to disable all InstSrc'es..." << endl;
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
-    if ( (*it)->enabled() ) {
-      DBG << *it << ": " << (*it)->disableSource() << endl;
-    }
+    activateSource( *it, false );
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::enableDefaultSources
+//	METHOD TYPE : void
+//
+void InstSrcManager::enableDefaultSources()
+{
+  MIL << "Going to enable all default InstSrc'es..." << endl;
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    activateSource( *it, (*it)->descr()->default_activate() );
   }
 }
 
