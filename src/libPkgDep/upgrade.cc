@@ -303,14 +303,28 @@ bool PkgDep::solvesystemnoauto(
 	{
 	    ci_for( PkgSet::, it, installed. )
 	    {
+		bool obsolete = false;
 		PkgName iname = it->key;
 		PMSolvablePtr instd = it->value;
 		// ignore if installed is already a candidate
 		if(!candidates.empty() && candidates.includes(iname))
 		    continue;
 
+		RevRel_for( candidates.obsoleted()[iname], obs ) {
+			if (obs->relation().matches( instd->self_provides() )) {
+				WAR << "installed " << iname << " is obsoleted by candidate "
+					 << obs->pkg()->name() << " -- not checking consistency"
+					 << endl;
+				if(iname == obs->pkg()->name())
+				{
+				    ERR << obs->pkg()->nameEd() << " obsoletes itself!" << endl;
+				}
+				obsolete = true;
+			}
+		}
+
 		// add installed as candiate if it's inconsistent
-		if(!pkg_consistent(instd, NULL))
+		if(!obsolete && !pkg_consistent(instd, NULL))
 		{
 		    numinconsistent++;
 		    brokeninstalled.add(instd);
