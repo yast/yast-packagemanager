@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src
 #
 
-SUBDIRS = inst pkg sel you media libPkgDep query y2pm
+SUBDIRS = inst pkg sel you media libPkgDep y2pm
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -DLOCALEDIR=\"${localedir}\" -Wall
 AM_LDFLAGS = -L$(libdir)
@@ -35,8 +35,7 @@ liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			sel/liby2pmsel.la	\
 			you/liby2pmyou.la	\
 			inst/liby2pminstsrc.la	\
-			media/liby2pmMedia.la	\
-			query/src/liby2pmquery.la\
+			media/liby2pmMedia.la   \
 			libPkgDep/libPkgDep.la	\
 			-ly2util
 

@@ -76,13 +76,6 @@ pkginclude_HEADERS = Y2PMCallbacks.h \
 	PMPackageManager.h PMPackageManagerCallbacks.h PMPackageManager_update.h \
 	PMPackageImEx.h PMPackageImExPtr.h \
         \
-	Query.h		\
-	QueryPtr.h	\
-	QueryNode.h	\
-	QueryError.h	\
-	QueryParser.h	\
-	QueryScanner.h \
-        \
 	PMSelection.h \
 	PMSelectionDataProvider.h \
 	PMSelectionDataProviderPtr.h \
