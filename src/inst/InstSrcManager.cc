@@ -711,20 +711,15 @@ InstSrcManager::SrcStateVector InstSrcManager::editGet() const
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::editSet( const SrcStateVector & keep_r, const SrcDelSet del_r )
+PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
 {
   PMError ret;
-
-  ///////////////////////////////////////////////////////////////////
-  // check args. all _knownSources must be listed once in either keep_r
-  // or del_r.
-  ///////////////////////////////////////////////////////////////////
 
   ISrcPool       known;
   list<ISrcId>   todel;
   set<ISrcId>    seen;
 
-  // new known sources
+  // Check new known sources. Remember all sources we saw.
   for ( SrcStateVector::const_iterator it = keep_r.begin(); it != keep_r.end(); ++it ) {
     InstSrcPtr item( lookupSourceByID( it->first ) );
     if ( ! item ) {
@@ -739,25 +734,11 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r, const SrcDelSet 
     known.push_back( item );
   }
 
-  // sources to delete
-  for ( SrcDelSet::const_iterator it = del_r.begin(); it != del_r.end(); ++it ) {
-    InstSrcPtr item( lookupSourceByID( *it ) );
-    if ( ! item ) {
-      ERR << "bad srcId " << *it << endl;
-      return Error::E_bad_id;
+  // old sources not mentioned in seen are to be deleted
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    if ( seen.insert( *it ).second ) {
+      todel.push_back( *it );
     }
-    if ( ! seen.insert( item ).second ) {
-      ERR << "srcId(" << *it << ") listed twice" << endl;
-      return Error::E_isrc_cache_duplicate;
-    }
-    DBG << "To delete: srcID(" << *it << ") " << item << endl;
-    todel.push_back( item );
-  }
-
-  // all sources we saw were valid
-  if ( seen.size() != _knownSources.size() ) {
-    ERR << "Expected " << _knownSources.size() << " sources, but saw just " << seen.size() << endl;
-    return Error::E_no_source;
   }
 
   seen.clear();
