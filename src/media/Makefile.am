@@ -29,8 +29,6 @@ liby2pmMedia_la_SOURCES = \
 	MediaDISK.cc		\
 	MediaSMB.cc		\
 	MediaCurl.cc		\
-	MediaWget.cc		\
-	Wget.cc			\
 	Mount.cc
 
 liby2pmMedia_la_LIBADD = -lcurl -ly2util
