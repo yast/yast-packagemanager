@@ -21,12 +21,6 @@
 
 using namespace std;
 
-const char* const PMObject::PMObjectAttributeNames[] = {
-      "Summary",
-      "Description",
-      "Size"
-};
-
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMObject
@@ -63,7 +57,24 @@ PMObject::~PMObject()
 
 string PMObject::getAttributeName(PMObjectAttribute attr)
 {
-    return PMObjectAttributeNames[attr];
+    const char* str;
+    switch(attr)
+    {
+	case PMObject::PMOBJ_DESCRIPTION:
+	    str = "DESCRIPTION";
+	    break;
+	case PMObject::PMOBJ_SUMMARY:
+	    str = "SUMMARY";
+	    break;
+	case PMObject::PMOBJ_SIZE:
+	    str = "SIZE";
+	    break;
+	case PMObject::PMOBJ_NUM_ATTRIBUTES:
+	    // invalid
+	    return "invalid query";
+    }
+    
+    return str;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -38,9 +38,16 @@ int main(int argc, char* argv[])
 	{
 	    typedef list<PMPackagePtr>::iterator PkgLI;
 	    PkgLI p = find_if(pkglist.begin(),pkglist.end(),PMPkg_eq(argv[i]));
-	    cout << "query of " << argv[i] << endl;
-	    cout << (*p)->getAttributeValue(PMPackage::PKG_LICENSE) << endl;
-	    cout << (*p)->getAttributeValue(PMPackage::PMOBJ_DESCRIPTION) << endl;
+	    if(p == pkglist.end())
+	    {
+		cout << argv[i] << " is not installed" << endl;
+	    }
+	    else
+	    {
+		cout << "query of " << argv[i] << endl;
+		cout << (*p)->getAttributeValue(PMPackage::PKG_LICENSE) << endl;
+		cout << (*p)->getAttributeValue(PMPackage::PMOBJ_DESCRIPTION) << endl;
+	    }
 	}
     }
     else
