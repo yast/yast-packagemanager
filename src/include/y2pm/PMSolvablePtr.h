@@ -28,6 +28,6 @@
 /**
  *
  **/
-DEFINE_BASIC_HANDLES(PMSolvable);
+DEFINE_BASE_POINTER(PMSolvable);
 
 #endif // PMSolvablePtr_h

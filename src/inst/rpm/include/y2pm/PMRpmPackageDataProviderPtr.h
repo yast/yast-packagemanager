@@ -29,7 +29,7 @@
 /**
  *
  **/
-DEFINE_DERIVED_HANDLES(PMRpmPackageDataProvider,public,PMPackageDataProvider);
+DEFINE_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMDataProvider );
 
 #endif // PMRpmPackageDataProviderPtr_h
 

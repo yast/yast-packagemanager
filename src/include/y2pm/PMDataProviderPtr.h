@@ -28,6 +28,6 @@
 /**
  *
  **/
-DEFINE_BASIC_HANDLES(PMDataProvider);
+DEFINE_BASE_POINTER(PMDataProvider);
 
 #endif // PMDataProviderPtr_h

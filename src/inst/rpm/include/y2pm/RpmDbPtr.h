@@ -22,7 +22,7 @@
 
 #include <y2util/RepDef.h>
 
-DEFINE_BASIC_HANDLES(RpmDb);
+DEFINE_BASE_POINTER(RpmDb);
 
 #endif // RpmDbPtr_h
 
