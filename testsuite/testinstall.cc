@@ -172,7 +172,7 @@ void donecallback(PMError error, const std::string& reason, void*)
 	cout << "ok" << endl;
 }
 
-void pkgstartcallback(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*)
+bool pkgstartcallback(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*)
 {
     if(is_delete)
     {
@@ -182,6 +182,7 @@ void pkgstartcallback(const std::string& name, const std::string& summary, const
     {
 	cout << stringutil::form("Installing %s (%s) - %s ",name.c_str(),size.asString().c_str(),summary.c_str()) << endl;
     }
+    return true;
 }
 
 void instlog(vector<string>& argv)
