@@ -141,7 +141,7 @@ class PMSolvable : virtual public Rep {
     PkgArch _arch;
 
     // relations of the package
-    PkgRelList_type _requires, _conflicts, _provides, _obsoletes, _prerequires;
+    PkgRelList_type _requires, _conflicts, _provides, _obsoletes;
 
   public:
 
@@ -198,13 +198,14 @@ class PMSolvable : virtual public Rep {
     }
 
     /**
-     * set prerequires list
+     * add prerequires flag for requires
+     *
+     * @param prerequires list of relations in requires that have to be marked
+     * as prerequires
+     *
+     * @return reference to requires
      */
-    const PkgRelList_type& setPreRequires(PkgRelList_type& prerequires)
-    {
-      _prerequires = prerequires;
-      return _prerequires;
-    }
+    const PkgRelList_type& addPreRequires(PkgRelList_type& prerequires);
 
     /**
      * set obsoletes list
@@ -264,7 +265,7 @@ class PMSolvable : virtual public Rep {
      * use PkgRelList2StringList to convert them to list<string>
      */
     const PkgRelList_type& requires() const { return _requires; }
-    const PkgRelList_type& prerequires() const { return _prerequires; }
+    PkgRelList_type prerequires() const;
     const PkgRelList_type& conflicts() const { return _conflicts; }
     const PkgRelList_type& provides() const { return _provides; }
     const PkgRelList_type& obsoletes() const { return _obsoletes; }
@@ -285,7 +286,6 @@ class PMSolvable : virtual public Rep {
 		return _##name.end(); }
 
     decl_PkgRelList_iterators(requires)
-    decl_PkgRelList_iterators(prerequires)
     decl_PkgRelList_iterators(conflicts)
     decl_PkgRelList_iterators(provides)
     decl_PkgRelList_iterators(obsoletes)
