@@ -557,8 +557,14 @@ public:
 
     public: // static members
 
+	/** recoursive remove package pkg from PkgSet set and extend
+	 * to_remove with all removed packages */
 	static void remove_package( PkgSet *set, PMSolvablePtr pkg,
 						 SolvableList& to_remove);
+
+	/**
+	 * count number of packages providing req in set
+	 * */
 	static unsigned count_providers_for( const PkgSet* set, const PkgRelation& req );
 };
 
