@@ -24,7 +24,6 @@ noinst_PROGRAMS = \
 	test_content	\
 	test_packages	\
 	test_selections	\
-	order	\
 	gs_test
 
 ma_test_exe_SOURCES = ma_test.cc
@@ -40,31 +39,26 @@ test_tofromString_exe_SOURCES = test_tofromString.cc
 test_tofromString_exe_LDADD = $(top_builddir)/src/liby2pm.la
 test_tofromString_exe_LDFLAGS = -static
 
-test_rpmdb_SOURCES = test_rpmdb.cc
+test_rpmdb_SOURCES = test_rpmdb.cc show_pm.cc
 test_rpmdb_LDADD = $(top_builddir)/src/liby2pm.la
 test_rpmdb_LDFLAGS = -static
 
-testinstall_SOURCES = testinstall.cc
+testinstall_SOURCES = testinstall.cc show_pm.cc
 testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline -lncurses
 testinstall_LDFLAGS = -static
 
-test_patchinfo_SOURCES = test_patchinfo.cc
-test_patchinfo_LDADD = $(top_builddir)/src/liby2pm.la
+test_patchinfo_SOURCES = test_patchinfo.cc show_pm.cc
+test_patchinfo_LDADD = $(top_srcdir)/src/liby2pm.la
 test_patchinfo_LDFLAGS = -static
 
-test_content_SOURCES = test_content.cc
-test_content_LDADD = $(top_builddir)/src/liby2pm.la
+test_content_SOURCES = test_content.cc show_pm.cc
+test_content_LDADD = $(top_srcdir)/src/liby2pm.la
 test_content_LDFLAGS = -static
 
 test_packages_SOURCES = test_packages.cc show_pm.cc
-test_packages_LDADD = $(top_builddir)/src/liby2pm.la
+test_packages_LDADD = $(top_srcdir)/src/liby2pm.la
 test_packages_LDFLAGS = -static
 
 test_selections_SOURCES = test_selections.cc show_pm.cc
-test_selections_LDADD = $(top_builddir)/src/liby2pm.la
+test_selections_LDADD = $(top_srcdir)/src/liby2pm.la
 test_selections_LDFLAGS = -static
-
-order_SOURCES = order.cc
-order_LDADD = $(top_builddir)/src/liby2pm.la
-order_LDFLAGS = -static
-
