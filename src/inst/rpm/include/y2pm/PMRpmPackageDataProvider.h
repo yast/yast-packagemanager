@@ -105,31 +105,6 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	const std::string location () const { return PMPackageDataProvider::location(); }
 	const std::list<std::string> keywords () const { return PMPackageDataProvider::keywords(); }
 
-	/**
-	 * Object attribute retrieval. (DataProvider interface)
-	 * @see PMDataProvider
-	 * @see PMObject
-	 **/
-	virtual PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
-						     PMObject::PMObjectAttribute attr_r );
-	/**
-	 * Package attribute retrieval. (PackageDataProvider interface)
-	 * @see PMPackageDataProvider
-	 * @see PMPackage
-	 **/
-	virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
-						     PMPackage::PMPackageAttribute attr_r );
-
-        /** inject attibute to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	    const PkgAttributeValue& value);
-
-	/** inject attibute to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	    const PkgAttributeValue& value);
-
     public:
 
 	virtual std::ostream & dumpOn( std::ostream & str ) const;

@@ -42,7 +42,6 @@ class PMPackage : virtual public Rep, public PMObject {
     REP_BODY(PMPackage);
 
     public:
-
 	/**
 	 * Attributes provided by PMPackage
 	 **/
@@ -119,26 +118,6 @@ class PMPackage : virtual public Rep, public PMObject {
 	const std::list<std::string> suggests() const;
 	const std::string location() const;
 	const std::list<std::string> keywords() const;
-
-	/**
-	 * Get attribute name as string.
-	 **/
-	std::string getAttributeName(PMPackageAttribute attr) const;
-
-	/**
-	 * Access to base class getAttributeName
-	 **/
-	PMObject::getAttributeName;
-
-	/**
-	 * Get attribute value
-	 **/
-	PkgAttributeValue getAttributeValue(PMPackageAttribute attr) const;
-
-	/**
-	 * Access to base class getAttributeValue
-	 **/
-	PMObject::getAttributeValue;
 
     protected:
 

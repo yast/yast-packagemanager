@@ -224,32 +224,6 @@ PMRpmPackageDataProvider::filenames () const
     return value;
 }
 
-PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
-							       PMObject::PMObjectAttribute attr )
-{
-    return PkgAttributeValue();
-}
-
-PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
-							       PMPackage::PMPackageAttribute attr )
-{
-    return PkgAttributeValue();
-}
-
-/** inject attibute to cache */
-void PMRpmPackageDataProvider::setAttributeValue(
-    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr, const PkgAttributeValue& value)
-{
-    return;
-}
-
-/** inject attibute to cache */
-void PMRpmPackageDataProvider::setAttributeValue(
-    PMPackagePtr pkg, PMObject::PMObjectAttribute attr, const PkgAttributeValue& value)
-{
-    return;
-}
-
 ///////////////////////////////////////////////////////////////////
 //
 //

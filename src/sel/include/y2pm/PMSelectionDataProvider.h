@@ -69,12 +69,6 @@ class PMSelectionDataProvider : virtual public Rep, public PMDataProvider  {
 	virtual const FSize archivesize() const = 0;
 	virtual const std::string order() const = 0;
 
-    /**
-     * Selection attribute retrieval.
-     * @see PMSelection
-     **/
-    virtual PkgAttributeValue getAttributeValue( constPMSelectionPtr sel_r,
-						 PMSelection::PMSelectionAttribute attr_r ) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////

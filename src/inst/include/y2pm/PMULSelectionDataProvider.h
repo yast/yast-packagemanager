@@ -69,11 +69,6 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	// retrieval pointer for *.sel data
 	TagCacheRetrieval *_selection_retrieval;
 
-    private:
-	// internal attribute value provider
-	PkgAttributeValue getValue( constPMObjectPtr obj_r,
-				    PMSelection::PMSelectionAttribute attr_r );
-
     public:
 
 	PMULSelectionDataProvider (const Pathname& selectionname);
@@ -111,32 +106,6 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	const std::list<std::string> delpacks(const std::string& lang = "") const;
 	const FSize archivesize() const;
 	const std::string order() const;
-
-	/**
-	 * Object attribute retrieval. (DataProvider interface)
-	 * @see PMDataProvider
-	 * @see PMObject
-	 **/
-	PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
-					     PMObject::PMObjectAttribute attr_r );
-
-	/**
-	 * Package attribute retrieval. (SelectionDataProvider interface)
-	 * @see PMSelectionDataProvider
-	 * @see PMSelection
-	 **/
-	PkgAttributeValue getAttributeValue( constPMSelectionPtr pkg_r,
-					     PMSelection::PMSelectionAttribute attr_r );
-
-	/** inject attribute to cache */
-	virtual void setAttributeValue(
-	    PMSelectionPtr pkg, PMSelection::PMSelectionAttribute attr,
-	    const PkgAttributeValue& value);
-
-	/** inject offset/size to cache */
-	virtual void setAttributeValue(
-	    PMSelectionPtr pkg, PMSelection::PMSelectionAttribute attr,
-	    std::streampos begin, std::streampos end);
 
     public:
 

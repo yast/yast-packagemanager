@@ -65,58 +65,6 @@ PMObject::~PMObject()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMObject::getAttributeName
-//	METHOD TYPE : string
-//
-//	DESCRIPTION :
-//
-string PMObject::getAttributeName( PMObjectAttribute attr ) const
-{
-    if (attr < PMObject::PMOBJ_ATTR_BEGIN)
-	return getAttributeName ((PMSolvable::PMSolvableAttribute)attr);
-  switch ( attr ) {
-
-#define ENUM_OUT(V) case ATTR_##V: return #V; break
-    ENUM_OUT( SUMMARY );
-    ENUM_OUT( DESCRIPTION );
-    ENUM_OUT( SIZE );
-    ENUM_OUT( INSNOTIFY );
-    ENUM_OUT( DELNOTIFY );
-#undef ENUM_OUT
-
-  ///////////////////////////////////////////////////////////////////
-  // no default: let compiler warn '... not handled in switch'
-  ///////////////////////////////////////////////////////////////////
-  case PMOBJ_NUM_ATTRIBUTES:
-    // illegal attr value
-    break;
-  }
-  // HERE: illegal attr value or forgott do adjust switch.
-  ERR << "Illegal PMObjectAttribute(" << attr << ')' << endl;
-  return "";
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMObject::getAttributeValue
-//	METHOD TYPE : PkgAttributeValue
-//
-//	DESCRIPTION :
-//
-PkgAttributeValue PMObject::getAttributeValue( PMObjectAttribute attr ) const
-{
-  PMDataProviderPtr dataprovider( dataProvider() );
-  if ( !dataprovider ) {
-    ERR << "No dataprovider for " << *this << endl;
-    return PkgAttributeValue();
-  }
-  return dataprovider->getAttributeValue( this, attr );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : PMObject::dumpOn
 //	METHOD TYPE : ostream &
 //

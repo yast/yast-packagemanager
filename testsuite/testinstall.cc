@@ -36,6 +36,8 @@
 #include <y2pm/PkgDep.h>
 #include <y2pm/PMPackage.h>
 
+#include "show_pm.h"
+
 #undef Y2SLOG
 #define Y2SLOG "testinstall" 
 
@@ -131,45 +133,7 @@ void query(vector<string>& argv)
 	else
 	{
 	    PMPackagePtr obj = static_cast<PMPackagePtr>(sel->installedObj());
-	    for(PMSolvable::PMSolvableAttribute attr = PMSolvable::PMSLV_ATTR_BEGIN;
-		attr < PMSolvable::PMSLV_NUM_ATTRIBUTES;
-		attr = PMSolvable::PMSolvableAttribute(attr+1))
-	    {
-		cout
-		    << obj->getAttributeName(attr)
-		    << ": ";
-		PkgAttributeValue val = obj->getAttributeValue(attr);
-		if(attr == PMPackage::ATTR_REQUIRES)
-		{
-		    for(PkgAttributeValue::iterator it = val.begin();
-			it != val.end(); ++it)
-		    {
-			cout << *it << endl;
-		    }
-		}
-		else
-		    cout << val << endl;
-	    }
-	    for(PMObject::PMObjectAttribute attr = PMObject::PMOBJ_ATTR_BEGIN;
-		attr < PMObject::PMOBJ_NUM_ATTRIBUTES;
-		attr = PMObject::PMObjectAttribute(attr+1))
-	    {
-		cout
-		    << obj->getAttributeName(attr)
-		    << ": "
-		    << obj->getAttributeValue(attr)
-		    << endl;
-	    }
-	    for(PMPackage::PMPackageAttribute attr = PMPackage::PKG_ATTR_BEGIN;
-		attr < PMPackage::PMPKG_NUM_ATTRIBUTES;
-		attr = PMPackage::PMPackageAttribute(attr+1))
-	    {
-		cout
-		    << obj->getAttributeName(attr)
-		    << ": "
-		    << obj->getAttributeValue(attr)
-		    << endl;
-	    }
+	    show_pmpackage (obj);
 	}
     }
 }

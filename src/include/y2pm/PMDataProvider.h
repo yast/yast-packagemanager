@@ -64,12 +64,6 @@ class PMDataProvider : virtual public Rep {
 	virtual const std::list<std::string> delnotify () const = 0;
 	virtual const FSize size () const = 0;
 
-    /**
-     * Object attribute retrieval.
-     * @see PMObject
-     **/
-    virtual PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
-						 PMObject::PMObjectAttribute attr_r ) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////

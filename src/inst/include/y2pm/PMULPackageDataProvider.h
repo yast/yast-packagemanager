@@ -91,10 +91,6 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// fallback provider (Share entry in packages)
 	PMULPackageDataProviderPtr _fallback_provider;
 
-    private:
-	// internal attribute value provider
-	PkgAttributeValue getValue( constPMObjectPtr obj_r, PMPackage::PMPackageAttribute attr_r );
-
     public:
 	void setValue( PMPackage::PMPackageAttribute attr_r, std::string& value_r );
 	void setValue( PMPackage::PMPackageAttribute attr_r, std::streampos begin, std::streampos end);
@@ -148,32 +144,6 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	const std::list<std::string> suggests () const;
 	const std::string location () const;
 	const std::list<std::string> keywords () const;
-
-	/**
-	 * Object attribute retrieval. (DataProvider interface)
-	 * @see PMDataProvider
-	 * @see PMObject
-	 **/
-	PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
-					     PMObject::PMObjectAttribute attr_r );
-
-	/**
-	 * Package attribute retrieval. (PackageDataProvider interface)
-	 * @see PMPackageDataProvider
-	 * @see PMPackage
-	 **/
-	PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
-					     PMPackage::PMPackageAttribute attr_r );
-
-	/** inject attribute to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	    const PkgAttributeValue& value);
-
-	/** inject offset/size to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	    std::streampos begin, std::streampos end);
 
     public:
 
