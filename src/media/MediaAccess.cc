@@ -43,10 +43,14 @@ IMPL_BASE_POINTER(MediaAccess);
 
 // constructor
 
+int MediaAccess::_media_count = 0;
+
 MediaAccess::MediaAccess ()
     : _type (Unknown)
     , _handler (0)
+    , _preferred_attach_point (Pathname (""))
 {
+    _media_count++;
     DBG << endl;
 }
 
@@ -57,17 +61,42 @@ MediaAccess::~MediaAccess()
     {
 	this->close ();
     }
+    _media_count--;
 }
 
 
 // open URL
 PMError
-MediaAccess::open (const Url& url)
+MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
 {
     if(!url.isValid())
 	return Error::E_bad_url;
 
     this->close();
+
+    if (preferred_attach_point.empty())
+    {
+	char attachdir[50];
+	struct stat statbuf;
+	sprintf (attachdir, "/var/adm/mount/media%d", _media_count);
+	if (stat (attachdir, &statbuf) != 0)
+	{
+	    if (mkdir (attachdir, 0755) != 0)
+		return Error::E_bad_attachpoint;
+	}
+	else if (!S_ISDIR(statbuf.st_mode))
+	{
+	    return Error::E_not_a_directory;
+	}
+    }
+    else
+    {
+	_preferred_attach_point = preferred_attach_point;
+	if (!PathInfo(_preferred_attach_point).isDir())
+	{
+	    return Error::E_bad_attachpoint;
+	}
+    }
 
     D__ << url.asString() << endl;
 
@@ -176,7 +205,7 @@ MediaAccess::attach (void)
 	return Error::E_already_attached;
     }
 
-    err = _handler->attachTo (Pathname ("/var/adm/mount"));
+    err = _handler->attachTo (_preferred_attach_point);
 
     if (err == Error::E_attachpoint_fixed)	// attached somewhere else
 	err = Error::E_ok;
