@@ -46,7 +46,11 @@ noinst_PROGRAMS = \
 	ma_test.exe	\
 	gs_test		\
         test_you	\
-        cschum_test
+        cschum_test	\
+	test_updateinf
+
+test_updateinf_SOURCES = test_updateinf.cc
+test_updateinf_LDADD = $(top_builddir)/src/liby2pm.la
 
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
