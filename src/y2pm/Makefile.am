@@ -89,10 +89,15 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	PMPackageImEx.h PMPackageImExPtr.h \
         \
 	PMSelection.h \
+	PMSelectionPtr.h \
 	PMSelectionDataProvider.h \
 	PMSelectionDataProviderPtr.h \
 	PMSelectionManager.h PMSelectionManagerCallbacks.h \
-	PMSelectionPtr.h \
+        \
+        PMLanguage.h \
+        PMLanguagePtr.h \
+        PMLanguageManager.h \
+        PMLanguageManagerCallbacks.h \
         \
 	InstYou.h			\
 	PMYouPatch.h			\

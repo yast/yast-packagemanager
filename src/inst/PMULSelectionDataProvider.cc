@@ -78,10 +78,10 @@ PMULSelectionDataProvider::~PMULSelectionDataProvider()
 PMULSelectionDataProvider::posmapIT
 PMULSelectionDataProvider::posmapFind (const TaggedFile::Tag::posmaptype& theMap, const LangCode& locale, bool with_empty) const
 {
-    posmapIT it = theMap.find (locale.asString());	// try full locale
+    posmapIT it = theMap.find (locale.code());	// try full locale
     if (it == theMap.end())
     {
-	it = theMap.find (locale.languageOnly().asString());	// try 2-char locale
+	it = theMap.find (locale.language().code());	// try 2-char locale
 	if (it == theMap.end())
 	{
 	    it = theMap.find ("default");	// try "default" locale
@@ -108,16 +108,17 @@ PMULSelectionDataProvider::slcmapFind (const slcmaptype& theMap, const LangCode&
     slcmapIT it = theMap.find (locale);
     if (it == theMap.end())
     {
-	it = theMap.find (locale.languageOnly());
+	it = theMap.find (locale.language());
 	if (it == theMap.end())
 	{
 	    it = theMap.find (LangCode ("default"));	// try "default" locale
 	}
 	if (it == theMap.end() && with_empty)
 	{
-	    it = theMap.find (LangCode (""));		// try empty locale
+	    it = theMap.find (LangCode());		// try empty locale
 	}
     }
+
     return it;
 }
 
@@ -413,6 +414,22 @@ std::list<std::string>
 PMULSelectionDataProvider::delpacks(const PMSelection & sel_r, const LangCode& locale) const
 {
     return pkgsList (locale, true);
+}
+
+PM::LocaleSet
+PMULSelectionDataProvider::supportedLocales( const PMSelection & sel_r ) const
+{
+  PM::LocaleSet ret;
+  LangCode omit( "default" ); // selection internal tag
+
+  for ( posmapIT it = _attr_INSPACKS.begin(); it != _attr_INSPACKS.end(); ++it ) {
+    LangCode cl( it->first );
+    if ( cl.isSet() && cl != omit ) {
+      ret.insert( cl );
+    }
+  }
+
+  return ret;
 }
 
 std::set<PMSelectablePtr>

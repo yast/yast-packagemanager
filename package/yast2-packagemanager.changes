@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan 20 10:08:39 CET 2005 - ma@suse.de
+
+- Basic LanguageManager provided. Code adapted to libutils new
+  language and country code classes.
+- 2.11.8
+
+-------------------------------------------------------------------
 Thu Jan 13 13:44:48 CET 2005 - lnussel@suse.de
 
 - don't download patch rpm if full rpm is already there (#47807)

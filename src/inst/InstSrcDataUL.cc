@@ -462,7 +462,7 @@ void InstSrcDataUL::preferredLocaleChanged() const
   PM::LocaleOrder langs( Y2PM::getLocaleFallback() );
   for ( PM::LocaleOrder::const_iterator lang = langs.begin(); lang != langs.end(); ++lang ) {
 
-    string nfile( stem + "." + lang->asString() );
+    string nfile( stem + "." + lang->code() );
     if ( nfile == ofile ) {
       MIL << "Nothing to be done:  New locale '" << *lang << "' is current locale." << endl;
       return;

@@ -66,6 +66,39 @@ PMObjectPtr PMSelectionManager::assertObjectType( const PMObjectPtr & object_r )
   return p;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::postPSI
+//	METHOD TYPE : void
+//
+void PMSelectionManager::postPSI()
+{
+  Y2PM::languageManagerTagDirty();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::postPAC
+//	METHOD TYPE : void
+//
+void PMSelectionManager::postPAC()
+{
+  Y2PM::languageManagerTagDirty();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::postPRC
+//	METHOD TYPE : void
+//
+void PMSelectionManager::postPRC()
+{
+  Y2PM::languageManagerTagDirty();
+}
+
 /******************************************************************
 **
 **

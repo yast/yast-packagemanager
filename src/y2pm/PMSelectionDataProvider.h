@@ -28,12 +28,12 @@
 
 #include <y2util/FSize.h>
 #include <y2util/Vendor.h>
-#include <y2util/LangCode.h>
 #include <y2util/Pathname.h>
 
 #include <y2pm/PMSelectablePtr.h>
 
 #include <y2pm/PMError.h>
+#include <y2pm/PMLangCode.h>
 #include <y2pm/PMSelectionDataProviderPtr.h>
 #include <y2pm/PMSelectionPtr.h>
 
@@ -81,6 +81,7 @@ class PMSelectionDataProvider : public CountedRep {
     static std::list<std::string>    delpacks     ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
 
     // the per locale entry ( no default lang argument! )
+    static PM::LocaleSet             supportedLocales() { return PM::LocaleSet(); }
     static std::set<PMSelectablePtr> inspacks_ptrs( const LangCode& lang ) { return std::set<PMSelectablePtr>(); }
     static std::set<PMSelectablePtr> delpacks_ptrs( const LangCode& lang ) { return std::set<PMSelectablePtr>(); }
 
@@ -131,6 +132,7 @@ class PMSelectionDataProvider : public CountedRep {
     virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delpacks(); }
 
     // the per locale entry ( no default lang argument! )
+    virtual PM::LocaleSet             supportedLocales( const PMSelection & sel_r ) const { return PM::LocaleSet(); }
     virtual std::set<PMSelectablePtr> inspacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang ) const { return inspacks_ptrs(lang); }
     virtual std::set<PMSelectablePtr> delpacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang ) const { return delpacks_ptrs(lang); }
 

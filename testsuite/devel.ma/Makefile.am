@@ -24,7 +24,8 @@ EXTRA_PROGRAMS = \
 	wfm_test.bin		\
 	rpmtest.bin		\
 	test_librpm_seek.bin	\
-	test_rpm.bin
+	test_rpm.bin		\
+	VComp
 
 ma_test_bin_SOURCES = ma_test.cc
 ma_test_bin_LDADD = $(LDADD)
@@ -40,5 +41,8 @@ test_librpm_seek_bin_LDADD = -ly2util -lrpm
 
 test_rpm_bin_SOURCES =  test_rpm.cc
 test_rpm_bin_LDADD = -ly2pm -ly2util -lrpm
+
+VComp_SOURCES = VComp.cc
+VComp_LDADD = $(LDADD)
 
 ALL: $(EXTRA_PROGRAMS)

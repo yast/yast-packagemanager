@@ -42,7 +42,7 @@ namespace TextParse {
 ///////////////////////////////////////////////////////////////////
 template<>
 bool TextConvert<LangCode>::toText( const value_type & value_r, text_type & asText_r ) {
-  asText_r = value_r;
+  asText_r = value_r.code();
   return true;
 }
 template<>

@@ -39,6 +39,7 @@ class InstSrcManager;
 class PMPackageManager;
 class PMYouPatchManager;
 class PMSelectionManager;
+class PMLanguageManager;
 
 namespace PM {
 
