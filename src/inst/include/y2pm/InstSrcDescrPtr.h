@@ -29,5 +29,20 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(InstSrcDescr);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref InstSrcDescr *></code>
+ *
+ * <b>See:</> @ref InstSrcDescr
+ **/
+class InstSrcDescrPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref InstSrcDescr *></code>
+ *
+ * <b>See:</> @ref InstSrcDescr
+ **/
+class constInstSrcDescrPtr {};
+#endif // just for kdoc
+
 #endif // InstSrcDescrPtr_h
 

@@ -15,7 +15,7 @@
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Count and log elapsed time for debug purpose
 
 /-*/
 

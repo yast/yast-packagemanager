@@ -30,5 +30,20 @@
  **/
 DEFINE_BASE_POINTER(PMYouPatchPaths);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref PMYouPatchPaths *></code>
+ *
+ * <b>See:</> @ref PMYouPatchPaths
+ **/
+class PMYouPatchPathsPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref PMYouPatchPaths *></code>
+ *
+ * <b>See:</> @ref PMYouPatchPaths
+ **/
+class constPMYouPatchPathsPtr {};
+#endif // just for kdoc
+
 #endif // PMYouPatchPathsPtr_h
 

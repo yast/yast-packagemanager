@@ -29,4 +29,19 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(Query);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref Query *></code>
+ *
+ * <b>See:</> @ref Query
+ **/
+class QueryPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref Query *></code>
+ *
+ * <b>See:</> @ref Query
+ **/
+class constQueryPtr {};
+#endif // just for kdoc
+
 #endif // QueryPtr_h

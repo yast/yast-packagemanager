@@ -36,7 +36,16 @@ extern "C" {
 //
 //	CLASS NAME : RpmLibHeader
 /**
+ * @short Wrapper class for rpm header struct.
  *
+ * <code>RpmLibHeader</code> provides methods to query the content
+ * of a rpm header struct retrieved from the RPM database or by reading
+ * the rpm header of a package on disk.
+ *
+ * The rpm header contains all data associated with a package. So you
+ * probabely do not want to permanently store too many of them.
+ *
+ * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>Header</code>! </B>
  **/
 class RpmLibHeader : virtual public Rep {
   REP_BODY(RpmLibHeader); // includes no cpoy, no assign
@@ -71,12 +80,28 @@ class RpmLibHeader : virtual public Rep {
 
   public:
 
+    /**
+     * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>Header</code>! </B>
+     **/
     RpmLibHeader( Header h );
 
     virtual ~RpmLibHeader();
 
   public:
 
+    /**
+     * @short Changelog returned by <code>RpmLibHeader::tag_changelog()</code>.
+     *
+     * <code>Changelog</code> contains a <code>std::list&lt;Changelog::Entry></code>.
+     * Each <code>Entry</code> consists of date, author and text, as derived from the
+     * header.
+     *
+     * A conversion <code>std::list&lt;std::string> asStringList()</code> is provided.
+     * The list returned contains the changelog line by line, fromated the same way
+     * <code>'rpm -q --changelog'</code> would do.
+     *
+     * @see #Changelog
+     **/
     class Changelog {
       public:
 	struct Entry {
@@ -115,9 +140,22 @@ class RpmLibHeader : virtual public Rep {
     Date       tag_installtime() const;
     Date       tag_buildtime()   const;
 
+    /**
+     * Dependencies referencing the package itself are filtered out.
+     * If <code>freq_r</code> is not NULL, file dependencies found are inserted.
+     **/
     PMSolvable::PkgRelList_type tag_provides ( FileDeps::FileNames * freq_r = 0 ) const;
+    /**
+     * @see #tag_provides
+     **/
     PMSolvable::PkgRelList_type tag_requires ( FileDeps::FileNames * freq_r = 0 ) const;
+    /**
+     * @see #tag_provides
+     **/
     PMSolvable::PkgRelList_type tag_conflicts( FileDeps::FileNames * freq_r = 0 ) const;
+    /**
+     * @see #tag_provides
+     **/
     PMSolvable::PkgRelList_type tag_obsoletes( FileDeps::FileNames * freq_r = 0 ) const;
 
     FSize tag_size()        const;
@@ -129,17 +167,20 @@ class RpmLibHeader : virtual public Rep {
     std::string tag_vendor()       const;
     std::string tag_distribution() const;
     std::string tag_license()      const;
-    std::string tag_buildhost() const;
-    std::string tag_packager() const;
-    std::string tag_url() const;
-    std::string tag_os() const;
-    std::string tag_prein() const;
-    std::string tag_postin() const;
-    std::string tag_preun() const;
-    std::string tag_postun() const;
-    std::string tag_sourcerpm() const;
+    std::string tag_buildhost()    const;
+    std::string tag_packager()     const;
+    std::string tag_url()          const;
+    std::string tag_os()           const;
+    std::string tag_prein()        const;
+    std::string tag_postin()       const;
+    std::string tag_preun()        const;
+    std::string tag_postun()       const;
+    std::string tag_sourcerpm()    const;
 
-    Changelog   tag_changelog() const;
+    /**
+     * @see #Changelog
+     **/
+    Changelog   tag_changelog()    const;
     std::list<std::string> tag_filenames() const;
 
   public:

@@ -30,5 +30,20 @@
  **/
 DEFINE_BASE_POINTER(PMSelectable);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref PMSelectable *></code>
+ *
+ * <b>See:</> @ref PMSelectable
+ **/
+class PMSelectablePtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref PMSelectable *></code>
+ *
+ * <b>See:</> @ref PMSelectable
+ **/
+class constPMSelectablePtr {};
+#endif // just for kdoc
+
 #endif // PMSelectablePtr_h
 

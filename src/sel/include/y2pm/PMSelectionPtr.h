@@ -29,4 +29,19 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_DERIVED_POINTER( PMSelection, PMObject, PMSolvable );
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref PMSelection *></code>
+ *
+ * <b>See:</> @ref PMSelection
+ **/
+class PMSelectionPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref PMSelection *></code>
+ *
+ * <b>See:</> @ref PMSelection
+ **/
+class constPMSelectionPtr {};
+#endif // just for kdoc
+
 #endif // PMSelectionPtr_h
