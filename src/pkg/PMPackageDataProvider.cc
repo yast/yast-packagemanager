@@ -105,6 +105,12 @@ PMPackageDataProvider::group () const
     return "";
 }
 
+YStringTree *
+PMPackageDataProvider::group_ptr () const
+{
+    return 0;
+}
+
 const std::list<std::string>
 PMPackageDataProvider::changelog () const
 {

@@ -62,6 +62,7 @@ class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
 	virtual const std::string license () const = 0;
 	virtual const std::string packager () const = 0;
 	virtual const std::string group () const = 0;
+        virtual YStringTree * group_ptr () const = 0;
 	virtual const std::list<std::string> changelog () const = 0;
 	virtual const std::string url () const = 0;
 	virtual const std::string os () const = 0;

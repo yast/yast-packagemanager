@@ -117,6 +117,9 @@ PMPackage::packager() const { return _dataProvider->packager (); }
 const std::string
 PMPackage::group() const { return _dataProvider->group (); }
 
+YStringTree *
+PMPackage::group_ptr() const { return _dataProvider->group_ptr (); }
+
 const std::list<std::string>
 PMPackage::changelog() const { return _dataProvider->changelog (); }
 
