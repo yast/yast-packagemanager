@@ -469,16 +469,27 @@ void providestartcallback(const std::string& name, const FSize& s, bool, void*)
     cout << stringutil::form("Downloading %s (%s)",name.c_str(), s.asString().c_str()) << endl;
 }
 
-void donecallback(PMError error, const std::string& reason, void*)
+std::string providedonecallback(PMError error, const std::string& reason, const std::string&, void*)
 {
     if(lastprogress != 100)
 	progresscallback(100,NULL);
     lastprogress = 0;
 
     if(error)
+    {
 	cout << error << ": " << reason << endl;
+	return "I";
+    }
     else
+    {
 	cout << "ok" << endl;
+	return "";
+    }
+}
+
+std::string packagedonecallback(PMError error, const std::string& reason, void*)
+{
+    return providedonecallback(error,reason,"",NULL);
 }
 
 bool pkgstartcallback(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*)
@@ -788,11 +799,11 @@ void init(vector<string>& argv)
 
     Y2PM::setProvideStartCallback(providestartcallback, NULL);
     Y2PM::setProvideProgressCallback(progresscallback, NULL);
-    Y2PM::setProvideDoneCallback(donecallback, NULL);
+    Y2PM::setProvideDoneCallback(providedonecallback, NULL);
 
     Y2PM::setPackageStartCallback(pkgstartcallback, NULL);
     Y2PM::setPackageProgressCallback(progresscallback, NULL);
-    Y2PM::setPackageDoneCallback(donecallback, NULL);
+    Y2PM::setPackageDoneCallback(packagedonecallback, NULL);
     
     Y2PM::setSourceChangeCallback(sourcechangecallback, NULL);
 

@@ -297,6 +297,7 @@ class Y2PM {
 
 	/**
 	 * called right after package 'name' was provided
+	 * function is supposed to return "" for Ok, "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
 	 * */
 	static void setProvideDoneCallback(std::string (*func)(PMError error, const std::string& reason, const std::string& name, void*), void* data);
 
