@@ -53,8 +53,6 @@ class PMManager {
     PMSelectablePool _itemPool;
     PMSelectableVec _items;
 
-    BitField _bf_installed;
-
   private:
 
     /**
@@ -93,8 +91,6 @@ class PMManager {
 
     PMManager();
     virtual ~PMManager();
-
-    void REINIT(); // dont use it
 
   public:
 

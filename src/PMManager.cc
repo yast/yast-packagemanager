@@ -55,19 +55,6 @@ PMManager::~PMManager()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMManager::REINIT
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :
-//
-void PMManager::REINIT()
-{
-  clearAll();
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : PMManager::clearAll
 //	METHOD TYPE : void
 //
@@ -75,8 +62,10 @@ void PMManager::REINIT()
 //
 void PMManager::clearAll()
 {
+  DBG << "clearAll" << endl;
   for ( unsigned i = 0; i < _items.size(); ++i ) {
     _items[i]->clearAll();
+    _items[i]->_mgr_detach();
   }
   _items.clear();
   _itemPool.clear();
