@@ -602,10 +602,6 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
 	}
 
 	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,PkgEdition::fromString(cdep_Ci.version));
-#warning SUSPICIOUS usage of version to create PkgEdition
-	// ma: IMHO version part of depend. query may be [epoch:]version-release
-	// maybe 'PkgEdition::fromString( cdep_Ci.version )' creates the Edition
-	// you need.
 
 //	D__ << dep << endl;
 
