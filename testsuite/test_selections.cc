@@ -1,5 +1,5 @@
 /*
-  test_packages.cc
+  test_selections.cc
 
   test program for InstSrcData->tryGetData()
 
@@ -16,6 +16,7 @@
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcPtr.h>
+#include <y2pm/InstSrcData.h>
 #include <iostream>
 #include <algorithm>
 
@@ -154,7 +155,7 @@ int main(int argc, char* argv[])
 	for(; argpos < argnum; argpos++)
 	{
 	    cout << "querying " << args[argpos] << endl;
-	    const std::list<PMSelectionPtr>& selections = nsrc->getSelections ();
+	    const std::list<PMSelectionPtr>& selections = InstData::findSelections (nsrc->getSelections (), args[argpos], selection_version, selection_release, selection_arch);
 	    if (selections.empty())
 	    {
 		cout << args[argpos] << " is not available" << endl;
