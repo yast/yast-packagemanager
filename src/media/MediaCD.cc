@@ -132,7 +132,7 @@ PMError MediaCD::attachTo()
 	; ++it )
     {
 	// close tray
-	const char *const argv[] = { "/bin/eject", "-t", (*it).c_str, NULL };
+	const char *const argv[] = { "/bin/eject", "-t", (*it).c_str(), NULL };
 	ExternalProgram *process = new ExternalProgram (argv, ExternalProgram::Discard_Stderr);
 	delete process;
 
