@@ -53,7 +53,9 @@ PMSolvable::PkgRelList2StringList ( const PkgRelList_type & rellist_r )
 //		      to PkgRelList_type
 //
 PMSolvable::PkgRelList_type
-PMSolvable::StringList2PkgRelList (const list<string>& relationlist)
+PMSolvable::StringList2PkgRelList ( const list<string>& relationlist,
+				    const PkgName &     forPkg,
+				    const std::string & kind )
 {
     PkgRelList_type pkgrellist;
 
@@ -61,7 +63,12 @@ PMSolvable::StringList2PkgRelList (const list<string>& relationlist)
     {
 	for (list<string>::const_iterator it = relationlist.begin(); it != relationlist.end(); ++it)
 	{
-	    pkgrellist.push_back (PkgRelation::fromString (*it));
+	  PkgRelation newrel = PkgRelation::fromString (*it);
+	  if ( forPkg->size() && newrel.name() == forPkg ) {
+	    _INT("DEPCHECK") << forPkg << " self " << kind << ": " << newrel << endl;
+	    break;
+	  }
+	  pkgrellist.push_back (newrel);
 	}
     }
     return pkgrellist;

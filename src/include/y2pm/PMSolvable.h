@@ -264,7 +264,9 @@ class PMSolvable : virtual public Rep {
 
 
     static std::list<std::string> PkgRelList2StringList ( const PkgRelList_type & rellist_r );
-    static PkgRelList_type StringList2PkgRelList (const std::list<std::string>& relationlist);
+    static PkgRelList_type StringList2PkgRelList ( const std::list<std::string>& relationlist,
+						   const PkgName &     forPkg = PkgName(),
+						   const std::string & kind   = "reference" );
 
     // for convenience: directly return an iterator for relation lists
 #define decl_PkgRelList_iterators(name)					\
