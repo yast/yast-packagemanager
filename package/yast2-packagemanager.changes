@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar  4 16:38:35 CET 2005 - ma@suse.de
+
+- Workaround distributed packages with faulty vendor tag. Otherwise
+  they would be treated as 'foreign' on update.
+- 2.11.25
+
+-------------------------------------------------------------------
 Tue Mar  1 15:21:28 CET 2005 - ma@suse.de
 
 - Fixed MediaChange failure switching back from a CDn to a CD1

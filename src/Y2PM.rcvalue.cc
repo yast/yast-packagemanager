@@ -448,6 +448,7 @@ PMError Y2PM::rcInit()
   _yp2pmrc.trustedVendors.insert( "sgi" );
   _yp2pmrc.trustedVendors.insert( "silicon graphics" );
   _yp2pmrc.trustedVendors.insert( "novell" );
+  _yp2pmrc.trustedVendors.insert( "jpackage project" );
 
   if ( runningFromSystem() ) {
 
