@@ -57,10 +57,51 @@ PMYouPackageDataProvider::~PMYouPackageDataProvider()
 {
 }
 
-std::string PMYouPackageDataProvider::location( const PMPackage & pkg_r ) const {
-  return _patchInfo->location( mkPtr(pkg_r) );
+FSize PMYouPackageDataProvider::size( const PMPackage &pkg ) const
+{
+  map<PMPackagePtr,FSize>::const_iterator it = _sizes.find( mkPtr( pkg ) );
+  if ( it == _sizes.end() ) return FSize( 0 );
+  else return it->second;
 }
 
-FSize PMYouPackageDataProvider::size( const PMPackage & pkg_r ) const {
-  return _patchInfo->size( mkPtr(pkg_r) );
+void PMYouPackageDataProvider::setSize( const PMPackagePtr &pkg, const FSize &size )
+{
+  _sizes[ pkg ] = size;
+}
+
+string PMYouPackageDataProvider::location( const PMPackage &pkg ) const
+{
+  map<PMPackagePtr,string>::const_iterator it = _locations.find( mkPtr( pkg ) );
+  if ( it == _locations.end() ) return "";
+  else return it->second;
+}
+
+void PMYouPackageDataProvider::setLocation( const PMPackagePtr &pkg, const string &str )
+{
+  _locations[ pkg ] = str;
+}
+
+const string PMYouPackageDataProvider::externalUrl( const PMPackagePtr &pkg ) const
+{
+  map<PMPackagePtr,string>::const_iterator it = _externalUrls.find( pkg );
+  if ( it == _externalUrls.end() ) return "";
+  else return it->second;
+}
+
+void PMYouPackageDataProvider::setExternalUrl( const PMPackagePtr &pkg, const string &str )
+{
+  _externalUrls[ pkg ] = str;
+}
+
+const list<PkgEdition> PMYouPackageDataProvider::patchRpmBaseVersions( const PMPackagePtr &pkg ) const
+{
+  map<PMPackagePtr,list<PkgEdition> >::const_iterator it = _patchRpmBaseVersions.find( pkg );
+  if ( it == _patchRpmBaseVersions.end() ) return list<PkgEdition>();
+  else return it->second;
+}
+
+void PMYouPackageDataProvider::setPatchRpmBaseVersions( const PMPackagePtr &pkg,
+                                              const list<PkgEdition> &editions )
+{
+  _patchRpmBaseVersions[ pkg ] = editions;
 }

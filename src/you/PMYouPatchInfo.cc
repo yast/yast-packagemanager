@@ -101,6 +101,8 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
     _packageTagSet.setAllowUnknownTags( true );
 
     _paths = new PMYouPatchPaths("noproduct","noversion","noarch");
+
+    _packageDataProvider = new PMYouPackageDataProvider( this );
 }
 
 PMYouPatchInfo::~PMYouPatchInfo()
@@ -146,15 +148,13 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
 
   PkgEdition edition( version, release );
 
-  PMYouPackageDataProviderPtr
-      dataProvider( new PMYouPackageDataProvider( this ) );
 #warning TBD InstSrcPtr for PMPackage
   PMPackagePtr pkg( new PMPackage( name, edition, _paths->baseArch(),
-                                   dataProvider ) );
+                                   _packageDataProvider ) );
   patch->addPackage( pkg );
 
   value = tagValue( YOUPackageTagSet::SIZE );
-  setSize( pkg, FSize( atoll( value.c_str() ) ) );
+  _packageDataProvider->setSize( pkg, FSize( atoll( value.c_str() ) ) );
 
   value = tagValue( YOUPackageTagSet::OBSOLETES );
   list<PkgRelation> relations = PkgRelation::parseRelations( value );
@@ -180,11 +180,11 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   for( it = versions.begin(); it != versions.end(); ++it ) {
     editions.push_back( PkgEdition( *it ) );
   }
-  setPatchRpmBaseVersions( pkg, editions );
+  _packageDataProvider->setPatchRpmBaseVersions( pkg, editions );
 
   value = tagValue( YOUPackageTagSet::INSTPATH );
   if ( !value.empty() ) {
-    setExternalUrl( pkg, value );
+    _packageDataProvider->setExternalUrl( pkg, value );
   }
 
   return PMError();
@@ -523,51 +523,7 @@ string PMYouPatchInfo::translateLangCode( const LangCode &lang )
     return result;
 }
 
-FSize PMYouPatchInfo::size( const PMPackagePtr &pkg ) const
+PMYouPackageDataProviderPtr PMYouPatchInfo::packageDataProvider() const
 {
-  map<PMPackagePtr,FSize>::const_iterator it = _sizes.find( pkg );
-  if ( it == _sizes.end() ) return FSize( 0 );
-  else return it->second;
-}
-
-void PMYouPatchInfo::setSize( const PMPackagePtr &pkg, const FSize &size )
-{
-  _sizes[ pkg ] = size;
-}
-
-const string PMYouPatchInfo::location( const PMPackagePtr &pkg ) const
-{
-  map<PMPackagePtr,string>::const_iterator it = _locations.find( pkg );
-  if ( it == _locations.end() ) return "";
-  else return it->second;
-}
-
-void PMYouPatchInfo::setLocation( const PMPackagePtr &pkg, const string &str )
-{
-  _locations[ pkg ] = str;
-}
-
-const string PMYouPatchInfo::externalUrl( const PMPackagePtr &pkg ) const
-{
-  map<PMPackagePtr,string>::const_iterator it = _externalUrls.find( pkg );
-  if ( it == _externalUrls.end() ) return "";
-  else return it->second;
-}
-
-void PMYouPatchInfo::setExternalUrl( const PMPackagePtr &pkg, const string &str )
-{
-  _externalUrls[ pkg ] = str;
-}
-
-const list<PkgEdition> PMYouPatchInfo::patchRpmBaseVersions( const PMPackagePtr &pkg ) const
-{
-  map<PMPackagePtr,list<PkgEdition> >::const_iterator it = _patchRpmBaseVersions.find( pkg );
-  if ( it == _patchRpmBaseVersions.end() ) return list<PkgEdition>();
-  else return it->second;
-}
-
-void PMYouPatchInfo::setPatchRpmBaseVersions( const PMPackagePtr &pkg,
-                                              const list<PkgEdition> &editions )
-{
-  _patchRpmBaseVersions[ pkg ] = editions;
+  return _packageDataProvider;
 }
