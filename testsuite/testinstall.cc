@@ -62,7 +62,7 @@ static bool _initialized = false;
 
 static vector<string> nullvector;
 
-static const char* statestr[] = { "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
+static const char* statestr[] = { "--", "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
 
 
 //void installold(vector<string>& argv);
@@ -1196,6 +1196,7 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 	    continue;
 	switch(s)
 	{
+	    case PMSelectable::S_Keep:
 	    case PMSelectable::S_Taboo:
 	    case PMSelectable::S_Del:
 	    case PMSelectable::S_Update:

@@ -23,6 +23,7 @@
 #include <y2util/LangCode.h>
 #include <Y2PM.h>
 #include <y2pm/PMSelectionManager.h>
+#include <y2pm/InstTarget.h>
 
 using namespace std;
 
@@ -363,6 +364,19 @@ PMSelectionManager::activate (PMPackageManager & package_mgr)
     }
     MIL << _currently_actives.size() << " are active now" << endl;
 
-    return PMError::E_ok;
+    return installOnTarget();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::installOnTarget
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError PMSelectionManager::installOnTarget() const
+{
+  return PMError::E_ok;
 }
 
