@@ -76,17 +76,25 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
 
     if (preferred_attach_point.empty())
     {
-	char attachdir[50];
-	struct stat statbuf;
-	sprintf (attachdir, "/var/adm/mount/media%d", _media_count);
-	if (stat (attachdir, &statbuf) != 0)
-	{
-	    if (mkdir (attachdir, 0755) != 0)
-		return Error::E_bad_attachpoint;
+#warning CHECK if fixed "/var/adm/mount" is appropriate
+        Pathname apoint( "/var/adm/mount" );
+        PathInfo adir( apoint );
+	if ( !adir.isDir() ) {
+	  E__ << "directory does not exist: " << adir << endl;
+	  return Error::E_bad_attachpoint;
 	}
-	else if (!S_ISDIR(statbuf.st_mode))
-	{
-	    return Error::E_not_a_directory;
+
+	apoint += stringutil::form( "media%d", _media_count );
+	adir.stat( apoint );
+	if ( !adir.isExist() ) {
+	  int err = PathInfo::mkdir( adir.path(), 0755 );
+	  if ( err ) {
+	    E__ << "can't mkdir: " << adir << " (errno " << err << ")" << endl;
+	    return Error::E_bad_attachpoint;
+	  }
+	} else if ( !adir.isDir() ) {
+	  E__ << "attachpoint is not a directory: " << adir << endl;
+	  return Error::E_bad_attachpoint;
 	}
     }
     else
@@ -99,6 +107,7 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
     }
 
     D__ << url.asString() << endl;
+    D__ << _preferred_attach_point << endl;
 
     string protocol = url.getProtocol();
 
