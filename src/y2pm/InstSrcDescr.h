@@ -241,6 +241,11 @@ class InstSrcDescr : public CountedRep {
      **/
     std::string label() const;
 
+    /**
+     * Return whether a contentflag is set.
+     **/
+    bool hasFlag( const std::string & flag_r ) const;
+
   public:
 
     //////////////////////////////////////////////////////////////////

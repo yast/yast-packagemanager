@@ -109,6 +109,20 @@ std::string InstSrcDescr::label() const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcDescr::hasFlag
+//	METHOD TYPE : bool
+//
+bool InstSrcDescr::hasFlag( const string & flag_r ) const
+{
+  vector<string> words;
+  stringutil::split( content_flags(), words );
+  return( find( words.begin(), words.end(), flag_r ) != words.end() );
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcDescr::sameContentProduct
 //	METHOD TYPE : bool
 //
