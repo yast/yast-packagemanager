@@ -41,7 +41,7 @@ using namespace std;
 InstYou::InstYou()
 {
 #warning FIXME: get information about product/version/arch
-  _paths = new PMYouPatchPaths("Dummy","1.0","i386");
+  _paths = new PMYouPatchPaths();
 #warning FIXME: get language information
   _info = new PMYouPatchInfo( "german" );
 
@@ -236,6 +236,12 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     if ( error ) {
       E__ << "Installation of RPMs of patch " << patch->name()
           << "failed" << endl;
+      return error;
+    }
+    
+    error = Y2PM::instTarget().installPatch( patch->localFile() );
+    if ( error ) {
+      E__ << "Error installing patch info." << endl;
       return error;
     }
   }

@@ -267,6 +267,8 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
                                      _paths->baseArch(),
 				     PMYouPatchDataProviderPtr() ) );
 
+    p->setLocalFile( path + fileName );
+
     string value = tagValue( YOUPatchTagSet::KIND );
     PMYouPatch::Kind kind = PMYouPatch::kind_invalid;
     if ( value == "security" ) { kind = PMYouPatch::kind_security; }
@@ -308,37 +310,35 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                                  list<PMYouPatchPtr> &patches )
 {
-    MediaAccessPtr media( new MediaAccess );
-
-    PMError error = media->open( baseUrl );
+    PMError error = _media.open( baseUrl );
     if ( error != PMError::E_ok ) {
       E__ << "MediaAccess::open() failed." << endl;
       return error;
     }
 
-    error = media->attach( );
+    error = _media.attach( );
     if ( error != PMError::E_ok ) {
       E__ << "MediaAccess::attach() failed." << endl;
       return error;
     }
 
-    D__ << "Attach point: " << media->localRoot() << endl;
+    D__ << "Attach point: " << _media.localRoot() << endl;
 
     list<string> patchFiles;
 
-    error = media->provideFile( patchPath + "directory" );
+    error = _media.provideFile( patchPath + "directory" );
     if ( error ) {
       W__ << "no directory file found." << endl;
 
-      error = media->dirInfo( patchFiles, patchPath );
+      error = _media.dirInfo( patchFiles, patchPath );
       if ( error ) {
-        if ( error == MediaAccess::Error::E_not_supported_by_media ) {
-	  E__ << "dirInfo not supported on " << media << ": " << error << endl;
+        if ( error == MediaError::E_not_supported_by_media ) {
+	  E__ << "dirInfo not supported on " << _media << ": " << error << endl;
         }
         return error;
       }
     } else {
-      Pathname dirFile = media->localRoot() + patchPath + "directory";
+      Pathname dirFile = _media.localRoot() + patchPath + "directory";
 
       string buffer;
       ifstream in( dirFile.asString().c_str() );
@@ -350,12 +350,12 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
     list<string>::const_iterator it;
     for( it = patchFiles.begin(); it != patchFiles.end(); ++it ) {
         if ( *it == "." || *it == ".." || *it == "directory" ) continue;
-        error = media->provideFile( patchPath + *it );
+        error = _media.provideFile( patchPath + *it );
         if ( error != PMError::E_ok ) {
             E__ << error << patchPath + *it << endl;
             cerr << "ERR: " << *it << endl;
         } else {
-            Pathname path = media->localRoot() + patchPath;
+            Pathname path = _media.localRoot() + patchPath;
             D__ << "read patch: file: " << *it << endl;
             error = readFile( path, *it, patches );
             if ( error != PMError::E_ok ) {

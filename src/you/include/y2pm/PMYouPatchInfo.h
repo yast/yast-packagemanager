@@ -29,6 +29,7 @@
 #include <y2util/Pathname.h>
 
 #include <y2pm/PMError.h>
+#include <y2pm/MediaAccess.h>
 
 #include <y2pm/PMYouPatchPtr.h>
 #include <y2pm/PMYouPackageDataProviderPtr.h>
@@ -110,6 +111,8 @@ class PMYouPatchInfo : virtual public Rep {
     PMYouPackageDataProviderPtr _packageProvider;
 
     PMYouPatchPathsPtr _paths;
+
+    MediaAccess _media;
 };
 
 ///////////////////////////////////////////////////////////////////
