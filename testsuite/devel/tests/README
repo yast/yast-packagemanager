@@ -1,0 +1,3 @@
+those are mostly original test cases from PHI, so output does not exactly match
+the current solver. Nevertheless it's quite interesting and one should manually
+check for valid solver results after changing anything in the solver

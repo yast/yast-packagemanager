@@ -1,0 +1,8 @@
+Name: XFree86-libs
+Edition: 4.3.0-1
+Obsoletes: xshared
+Provides: xshared
+
+Name: XFree86
+Edition: 4.3.0-1
+Obsoletes: xf86

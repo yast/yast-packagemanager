@@ -1,0 +1,56 @@
+Name: p1
+Edition: 1.0-1
+
+Name: p2
+Edition: 1.0-1
+
+Name: p3
+Edition: 1.0-1
+
+Name: p4
+Edition: 1.0-1
+Requires: p4a < 1.1
+
+Name: p4a
+Edition: 1.0-1
+
+Name: p5
+Edition: 1.0-1
+
+Name: p5a
+Edition: 1.0-1
+
+Name: p5b
+Edition: 1.0-1
+Requires: p5a
+
+Name: p6
+Edition: 1.0-1
+
+Name: p7
+Edition: 1.0-1
+
+Name: p8
+Edition: 1.0-1
+Conflicts: p8a < 1.0
+
+Name: p8a
+Edition: 1.0-1
+
+Name: p9
+Edition: 1.0-1
+
+Name: p10
+Edition: 1.0-1
+
+Name: p10a
+Edition: 1.0-1
+Requires: p10
+
+Name: p11
+Edition: 1.0-1
+
+Name: p11a
+Edition: 1.0-1
+Requires: p11
+

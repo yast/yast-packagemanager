@@ -1,0 +1,154 @@
+--- Test 1
+
+Name: p2
+Edition: 1.0-1
+From-Input-List: yes
+Conflicts-With: p1 conflicts p2
+Remove-To-Solve-Conflict: p1
+
+--- Test 2
+
+Name: sendmail
+Edition: 2.0-1
+From-Input-List: yes
+Conflicts-With: smail conflicts MTA, sendmail conflicts MTA
+Remove-To-Solve-Conflict: smail
+
+--- Test 3
+
+Name: bar
+Edition: 2.0-1
+From-Input-List: yes
+Conflicts-With: bar conflicts foo
+Remove-To-Solve-Conflict: foo
+
+--- Test 4
+
+Name: libident-dev
+Edition: 2.0-1
+From-Input-List: yes
+
+Name: libident
+Edition: 2.0-1
+Referers: libident-dev requires libident = 2.0-1
+Is-Upgrade-From: 1.9-1
+Conflicts-With: smail conflicts libident >= 2.0
+Remove-To-Solve-Conflict: smail
+
+--- Test 5
+
+Name: libc6
+Edition: 2.1.0-1
+From-Input-List: yes
+Is-Upgrade-From: 2.0.7-2
+Conflicts-With: smail requires libc6 < 2.1
+Remove-To-Solve-Conflict: smail
+
+--- Test 6
+
+Name: test3
+Edition: 1.0-1
+From-Input-List: yes
+Conflicts-With: test3 conflicts test2
+Remove-To-Solve-Conflict: test1, test2
+
+--- Test 7
+
+Name: test4
+Edition: 1.0-1
+From-Input-List: yes
+Conflicts-With: test4 conflicts test2
+Remove-To-Solve-Conflict: test2
+
+--- Test 8
+
+Name: baz
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: foo
+Edition: 2.0-1
+Is-Upgrade-From: 1.0-1
+Upgrade-To-Remove-Conflict: yes
+
+--- Test 9
+
+Name: baz2
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: foo2
+Edition: 2.0-1
+Is-Upgrade-From: 1.0-1
+Upgrade-To-Remove-Conflict: yes
+
+--- Test 10
+
+Name: baz3
+Edition: 1.0-1
+From-Input-List: yes
+Conflicts-With: foo3 conflicts baz31
+Remove-To-Solve-Conflict: foo3
+
+--- Test 11
+
+Name: required
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: requirerer
+Edition: 2.0-1
+Is-Upgrade-From: 1.0-1
+Upgrade-To-Remove-Conflict: yes
+
+--- Test 12
+
+Name: required2
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: requirerer2
+Edition: 2.0-1
+Is-Upgrade-From: 1.0-1
+Upgrade-To-Remove-Conflict: yes
+Unresolvable: requirerer2 requires required2a
+
+Name: required2a
+Edition: -*-UNSPEC-*-
+Referers: requirerer2 requires required2a
+Not-Available: any
+
+--- Test 13
+
+Name: required3
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: requirerer3
+Edition: 1.0-1
+Is-Downgrade-From: 2.0-1
+Upgrade-To-Remove-Conflict: yes
+
+--- Test 14
+
+Name: foouser
+Edition: 1.0-2
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: libfoog
+Edition: 1.1-1
+Referers: foouser requires libfoog, libfoo-dev requires libfoog = 1.1-1
+
+Name: libfoo
+Edition: 1.1-1
+Is-Upgrade-From: 1.0-1
+Upgrade-To-Remove-Conflict: yes
+
+Name: libfoo-dev
+Edition: 1.1-1
+Is-Upgrade-From: 1.0-1
+Upgrade-To-Remove-Conflict: yes

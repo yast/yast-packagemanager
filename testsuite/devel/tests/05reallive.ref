@@ -1,0 +1,92 @@
+--- Test 1
+
+Name: dosemu
+Edition: 0.98.5-3
+From-Input-List: yes
+
+Name: dviutils
+Edition: 1.0-8
+From-Input-List: yes
+
+Name: fetchmail
+Edition: 5.0.4-0
+From-Input-List: yes
+
+Name: freeciv
+Edition: 1.8.0-1
+From-Input-List: yes
+
+Name: ghostscript
+Edition: 5.10-2
+From-Input-List: yes
+
+Name: XFree86-libs
+Edition: 3.3.5-1
+Referers: dosemu requires libX11.so.6, dosemu requires libXext.so.6, freeciv requires libICE.so.6, freeciv requires libSM.so.6, freeciv requires libX11.so.6, freeciv requires libXext.so.6, freeciv requires libXmu.so.6, freeciv requires libXt.so.6, ghostscript requires libICE.so.6, ghostscript requires libSM.so.6, ghostscript requires libX11.so.6, ghostscript requires libXext.so.6, ghostscript requires libXt.so.6, XFree86-libs requires libICE.so.6, XFree86-libs requires libSM.so.6, XFree86-libs requires libX11.so.6, XFree86-libs requires libXext.so.6, XFree86-libs requires libXmu.so.6, XFree86-libs requires libXt.so.6, teTeX requires libICE.so.6, teTeX requires libSM.so.6, teTeX requires libX11.so.6, teTeX requires libXaw.so.6, teTeX requires libXext.so.6, teTeX requires libXmu.so.6, teTeX requires libXt.so.6, Xaw3d requires libICE.so.6, Xaw3d requires libSM.so.6, Xaw3d requires libX11.so.6, Xaw3d requires libXext.so.6, Xaw3d requires libXmu.so.6, Xaw3d requires libXt.so.6
+
+Name: teTeX
+Edition: 1.0.5-1
+Referers: dviutils requires teTeX
+
+Name: tcsh
+Edition: 6.08.00-2
+Referers: dviutils requires /bin/tcsh
+Is-Upgrade-From: 6.08.00-1
+
+Name: Xaw3d
+Edition: 1.5-2
+Referers: freeciv requires libXaw3d.so.6
+
+Name: xpm
+Edition: 4.11-1
+Referers: freeciv requires libXpm.so.4
+
+Name: sed
+Edition: 3.02-1
+Referers: teTeX requires sed
+
+--- Test 2
+
+Name: inn
+Edition: 2.2.1-2
+From-Input-List: yes
+
+Name: isdn4k-utils
+Edition: 3.0beta2-4
+From-Input-List: yes
+
+Name: kdbg
+Edition: 1.0beta1-1
+From-Input-List: yes
+
+Name: XFree86-libs
+Edition: 3.3.5-1
+Referers: isdn4k-utils requires libICE.so.6, isdn4k-utils requires libSM.so.6, isdn4k-utils requires libX11.so.6, isdn4k-utils requires libXaw.so.6, isdn4k-utils requires libXext.so.6, isdn4k-utils requires libXmu.so.6, isdn4k-utils requires libXt.so.6, kdbg requires libX11.so.6, kdbg requires libXext.so.6, XFree86-libs requires libICE.so.6, XFree86-libs requires libSM.so.6, XFree86-libs requires libX11.so.6, XFree86-libs requires libXext.so.6, XFree86-libs requires libXmu.so.6, XFree86-libs requires libXt.so.6, kdelibs requires libX11.so.6, kdelibs requires libXext.so.6
+
+Name: gdbm
+Edition: 1.8.0-3
+Referers: isdn4k-utils requires libgdbm.so.2
+
+Name: kdelibs
+Edition: 1.1.2-1
+Referers: kdbg requires libkdecore.so.2, kdbg requires libkdeui.so.2, kdbg requires libkfile.so.2, kdbg requires libkfm.so.2
+
+--- Test 3
+
+Name: jdk-shared
+Edition: 1.0.2-8
+From-Input-List: yes
+
+Name: XFree86-libs
+Edition: 3.3.5-1
+Referers: jdk-shared requires libX11.so.6, XFree86-libs requires libICE.so.6, XFree86-libs requires libSM.so.6, XFree86-libs requires libX11.so.6, XFree86-libs requires libXext.so.6, XFree86-libs requires libXmu.so.6, XFree86-libs requires libXt.so.6
+
+Name: jdk
+Edition: 1.0.2-8
+Referers: jdk-shared requires jdk = 1.0.2
+Unresolvable: jdk requires libXm.so.2
+
+Name: libXm.so.2
+Edition: -*-UNSPEC-*-
+Referers: jdk requires libXm.so.2
+Not-Available: any

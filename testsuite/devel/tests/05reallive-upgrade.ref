@@ -1,0 +1,297 @@
+
+--- Test 1
+
+Name: ncurses
+Edition: 4.2-4
+From-Input-List: yes
+Is-Upgrade-From: 4.2-1
+
+Name: rpm
+Edition: 2.5.5-3
+From-Input-List: yes
+Is-Upgrade-From: 2.5.5-2
+
+Name: sysklogd
+Edition: 1.3.31-1
+From-Input-List: yes
+Is-Upgrade-From: 1.3.26-3
+
+Name: linux-kernel-include
+Edition: 2.2.13-1S
+From-Input-List: yes
+Is-Upgrade-From: 2.2.1-0a
+
+Name: svgalib
+Edition: 1.4.0-0
+From-Input-List: yes
+Is-Upgrade-From: 1.3.1-1
+
+Name: ld.so
+Edition: 1.9.11-1
+From-Input-List: yes
+Is-Upgrade-From: 1.9.9-2
+
+Name: sendmail
+Edition: 8.9.3-1
+From-Input-List: yes
+Is-Upgrade-From: 8.8.7-7
+
+Name: egcs
+Edition: 2.91.66-5
+From-Input-List: yes
+Is-Upgrade-From: 2.91.60-3
+
+Name: tcsh
+Edition: 6.08.00-2
+From-Input-List: yes
+Referers: util-linux requires /bin/tcsh
+Is-Upgrade-From: 6.08.00-1
+
+Name: libpwdb
+Edition: 0.54-8
+From-Input-List: yes
+Is-Upgrade-From: 0.54-7
+
+Name: ncurses-devel-static
+Edition: 4.2-4
+From-Input-List: yes
+Is-Upgrade-From: 4.2-1
+
+Name: qt-devel
+Edition: 1.44-4
+From-Input-List: yes
+Is-Upgrade-From: 1.4.2-1
+
+Name: crontabs
+Edition: 1.12-1
+From-Input-List: yes
+Is-Upgrade-From: 1.10-2
+
+Name: ncurses-devel
+Edition: 4.2-4
+From-Input-List: yes
+Is-Upgrade-From: 4.2-1
+
+Name: linux-kernel-binary
+Edition: 2.2.13-1S
+From-Input-List: yes
+Is-Upgrade-From: 2.2.1-0a
+
+Name: python-devel
+Edition: 1.5.1-1
+From-Input-List: yes
+Is-Upgrade-From: 1.5.1-0a
+
+Name: LPRng
+Edition: 3.5.3-2
+From-Input-List: yes
+Is-Upgrade-From: 3.5.3-1
+
+Name: setup
+Edition: 2.0-6
+From-Input-List: yes
+Is-Upgrade-From: 2.0-0a
+
+Name: python
+Edition: 1.5.1-1
+From-Input-List: yes
+Is-Upgrade-From: 1.5.1-0a
+
+Name: lisa
+Edition: 4.0-7
+From-Input-List: yes
+Referers: SysVinit-scripts requires lisa >= 4.0, util-linux requires lisa >= 4.0
+Is-Upgrade-From: 3.1-0
+
+Name: ncurses-termcap-devel
+Edition: 4.2-4
+From-Input-List: yes
+Is-Upgrade-From: 4.2-1
+
+Name: modutils
+Edition: 2.1.121-10
+Referers: linux-kernel-binary requires modutils >= 2.1.121-5
+
+Name: less
+Edition: 340-1
+From-Input-List: yes
+Is-Upgrade-From: 332-3
+
+Name: autoconf
+Edition: 2.13-1
+From-Input-List: yes
+Is-Upgrade-From: 2.13-0
+
+Name: ncurses-termcap-devel-static
+Edition: 4.2-4
+From-Input-List: yes
+Is-Upgrade-From: 4.2-1
+
+Name: libgr
+Edition: 2.0.13-2
+From-Input-List: yes
+Is-Upgrade-From: 2.0.13-1
+
+Name: DEV
+Edition: 3.4-1
+From-Input-List: yes
+Is-Upgrade-From: 3.3-0
+
+Name: glibc
+Edition: 2.1.2-1
+From-Input-List: yes
+Is-Upgrade-From: 2.1-1
+
+Name: python-eclass
+Edition: 1.2-2
+From-Input-List: yes
+Is-Upgrade-From: 1.2-0
+
+Name: perl-add
+Edition: 5.005_02-1
+From-Input-List: yes
+Is-Upgrade-From: 5.005_02-0
+
+Name: kbd
+Edition: 0.99-1
+From-Input-List: yes
+Is-Upgrade-From: 0.96-1
+
+Name: perl
+Edition: 5.005_02-1
+From-Input-List: yes
+Is-Upgrade-From: 5.005_02-0
+
+Name: procps
+Edition: 2.0.2-1
+From-Input-List: yes
+Is-Upgrade-From: 1.2.9-2
+
+Name: strace
+Edition: 4.0-2
+From-Input-List: yes
+Is-Upgrade-From: 3.1-3
+
+Name: SysVinit-scripts
+Edition: 1.05-5
+From-Input-List: yes
+Is-Upgrade-From: 1.04-0
+
+Name: XFree86-libs
+Edition: 3.3.5-1
+Referers: XFree86-libs requires libICE.so.6, XFree86-libs requires libSM.so.6, XFree86-libs requires libX11.so.6, XFree86-libs requires libXext.so.6, XFree86-libs requires libXmu.so.6, XFree86-libs requires libXt.so.6, qt requires libX11.so.6, qt requires libXext.so.6
+
+Name: mtabase
+Edition: 1.0-8
+From-Input-List: yes
+Is-Upgrade-From: 1.0-5
+
+Name: LPRng-lpd
+Edition: 3.5.3-2
+From-Input-List: yes
+Is-Upgrade-From: 3.5.3-1
+
+Name: libz
+Edition: 1.0.2-2
+From-Input-List: yes
+Is-Upgrade-From: 1.0.2-1
+
+Name: bash
+Edition: 1.14.7-10
+From-Input-List: yes
+Is-Upgrade-From: 1.14.7-9
+
+Name: man
+Edition: 1.5f-5
+From-Input-List: yes
+Is-Upgrade-From: 1.5f-1
+
+Name: sh-utils
+Edition: 1.16-7
+From-Input-List: yes
+Is-Upgrade-From: 1.16-3
+
+Name: isapnptools
+Edition: 1.18-1
+From-Input-List: yes
+Is-Upgrade-From: 1.16-1
+
+Name: ext2fs
+Edition: 1.14-2
+From-Input-List: yes
+
+Name: findutils
+Edition: 4.1-11
+From-Input-List: yes
+Is-Upgrade-From: 4.1-9
+
+Name: nis-client
+Edition: 2.0-8
+From-Input-List: yes
+Is-Upgrade-From: 2.0-0
+
+Name: binutils
+Edition: 2.9.1.0.21-2
+From-Input-List: yes
+Referers: binutils requires libbfd-2.9.1.0.21.so.0, binutils requires libopcodes-2.9.1.0.21.so.0
+Is-Upgrade-From: 2.9.1.0.19a-0
+
+Name: procmail
+Edition: 3.13.1-1
+From-Input-List: yes
+Is-Upgrade-From: 3.10-8
+
+Name: pciutils
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.99.4-1
+
+Name: gdb
+Edition: 4.17.0.11-2
+From-Input-List: yes
+Is-Upgrade-From: 4.17-2
+
+Name: util-linux
+Edition: 2.9s-4
+From-Input-List: yes
+Is-Upgrade-From: 2.7.1-5
+
+Name: libpam
+Edition: 0.66-3
+From-Input-List: yes
+Is-Upgrade-From: 0.66-1
+
+Name: vixie-cron
+Edition: 3.0.1-19
+From-Input-List: yes
+Is-Upgrade-From: 3.0.1-18
+
+Name: qt
+Edition: 1.44-4
+From-Input-List: yes
+Referers: qt-devel requires qt = 1.44
+Is-Upgrade-From: 1.4.2-1
+
+Name: slang
+Edition: 1.3.7-1
+From-Input-List: yes
+Is-Upgrade-From: 1.2.2-0
+
+Name: SysVinit
+Edition: 2.76.3-2
+From-Input-List: yes
+Is-Upgrade-From: 2.76-0
+
+Name: gdbm
+Edition: 1.8.0-3
+Referers: perl-add requires libgdbm.so.2
+
+Name: egcs-c++
+Edition: 2.91.66-5
+From-Input-List: yes
+Is-Upgrade-From: 2.91.60-3
+
+Name: libstdc++
+Edition: 2.9.0-5
+Referers: egcs-c++ requires libstdc++ = 2.9.0
+Install-To-Avoid-Break: yes
