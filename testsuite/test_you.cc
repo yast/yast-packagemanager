@@ -38,7 +38,7 @@ void usage()
 */
 int main( int argc, char **argv )
 {
-  Y2SLog::setLogfileName( "test_you.log" );
+  Y2Logging::setLogfileName( "test_you.log" );
   MIL << "START" << endl;
 
   const char *urlStr = 0;

@@ -12,7 +12,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		you/include	\
 		inst/include	\
 		media/include	\
-	   ) -I$(includedir) -I$(QTDIR)/include
+	   ) -I$(includedir) -I$(includedir)/y2util/qt
 
 noinst_LTLIBRARIES = liby2pmyou.la
 

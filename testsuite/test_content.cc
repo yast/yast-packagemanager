@@ -38,7 +38,7 @@ inline string dec( unsigned i ) {
 */
 int main(int argc, char **argv)
 {
-  Y2SLog::setLogfileName("-");
+  Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
   if (argc != 3)
   {
