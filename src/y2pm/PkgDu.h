@@ -363,6 +363,11 @@ class PkgDuMaster {
      **/
     FSize _pkg_diff;
 
+    /**
+     * Mountpoint of partition where src packages are installed
+     **/
+    std::string _src_on;
+
   private:
 
     friend class PkgDuSlave;
@@ -408,6 +413,11 @@ class PkgDuMaster {
      * Total pkg_diff (summ of all partitions)
      **/
     FSize pkg_diff() const { return _pkg_diff; }
+
+    /**
+     * Add size of source packages to install
+     **/
+    void addSrcPkgs( const FSize & srcSize_r );
 
   public:
 
