@@ -96,6 +96,41 @@ PMSolvable::~PMSolvable()
 {
 }
 
+const PMSolvable::PkgRelList_type& PMSolvable::addPreRequires(PMSolvable::PkgRelList_type& prerequires)
+{
+    // walk through requires
+    for (PkgRelList_type::iterator rit=_requires.begin();
+	    rit != _requires.end(); ++rit)
+    {
+	// walk through new prerequires
+	for (PkgRelList_type::iterator pit=prerequires.begin();
+		pit != prerequires.end(); ++pit)
+	{
+	    if(*pit == *rit)
+	    {
+		rit->setPreReq(true);
+
+		prerequires.erase(pit);
+		break;
+	    }
+	}
+    }
+}
+
+PMSolvable::PkgRelList_type PMSolvable::prerequires() const
+{
+    PkgRelList_type newlist;
+
+    for (PkgRelList_type::const_iterator rit=_requires.begin();
+	    rit != _requires.end(); ++rit)
+    {
+	if(rit->isPreReq())
+	{
+	    newlist.push_back(*rit);
+	}
+    }
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -209,8 +244,6 @@ ostream & PMSolvable::dumpOn( ostream & os ) const
   os << "Edition: " << _edition << endl;
   if (_requires.size())
     os << "Requires: " << _requires << endl;
-  if (_prerequires.size())
-    os << "PreRequires: " << _prerequires << endl;
   if (_conflicts.size())
     os << "Conflicts: " << _conflicts << endl;
   if (_provides.size())

@@ -134,7 +134,7 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(REQUIRES))->MultiData()))
 	package->setRequires (pkgrellist);
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(PREREQUIRES))->MultiData()))
-	package->setPreRequires (pkgrellist);
+	package->addPreRequires (pkgrellist); // pkgrellist is modified after that
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(PROVIDES))->MultiData()))
 	package->setProvides (pkgrellist);
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(CONFLICTS))->MultiData()))
