@@ -69,15 +69,8 @@ InstSrcDataUL::lookupSelections (const std::list<PMSelectionPtr> all_selections,
 	 selIt != selections.end(); ++selIt)
     {
 	std::list<PMSelectionPtr> matches = InstData::findSelections (all_selections, *selIt);
-	if (matches.size() == 0)
-	{
-	    WAR << "No match for selection \"" << *selIt << "\"" << endl;
-	}
-	else if (matches.size() > 1)
-	{
-	    WAR << "Multiple matches for selection \"" << *selIt << "\"" << endl;
-	}
-	else
+	// silently ignore selections not found
+	if (matches.size() > 0)
 	{
 	    selection_ptrs.push_back (matches.front());
 	}
@@ -103,11 +96,8 @@ InstSrcDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const
 	 pkgIt != packages.end(); ++pkgIt)
     {
 	std::list<PMPackagePtr> matches = InstData::findPackages (all_packages, *pkgIt);
-	if (matches.size() == 0)
-	{
-	    WAR << "No match for package \"" << *pkgIt << "\"" << endl;
-	}
-	else
+	// silently ignore packages not found
+	if (matches.size() > 0)
 	{
 	    package_ptrs.push_back (matches.front());
 	}
@@ -399,7 +389,7 @@ InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonP
     SET_LCACHE (SUMMARY, "");
     std::string category = GET_TAG(CATEGORY)->Data();
     SET_VALUE (CATEGORY, category);
-    SET_VALUE (ISBASE, strncmp (category.c_str(), "base", 4) == 0);
+    SET_VALUE (ISBASE, (strncmp (category.c_str(), "base", 4) == 0));
     SET_VALUE (VISIBLE, GET_TAG(VISIBLE)->Data() == "true");
     SET_CACHE (SUGGESTS);
     SET_CACHE (RECOMMENDS);
