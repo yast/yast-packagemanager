@@ -288,8 +288,9 @@ class InstTarget: virtual public Rep, public InstData {
 	/**
 	 * query system for package the given file belongs to
 	 * (rpm -qf)
+	 * report 'name-version-release' if full_name, else 'name' only
 	 */
-	std::string belongsTo (const Pathname& name) { return _rpmdb->belongsTo (name); }
+	std::string belongsTo (const Pathname& name, bool full_name = true) { return _rpmdb->belongsTo (name, full_name); }
 
 
       ///////////////////////////////////////////////////////////////////

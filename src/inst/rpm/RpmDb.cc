@@ -1382,10 +1382,17 @@ RpmDb::isInstalled (const std::string& name)
  * (rpm -qf)
  */
 std::string
-RpmDb::belongsTo (const Pathname& name)
+RpmDb::belongsTo (const Pathname& name, bool full_name)
 {
     std::string result;
-    queryRPM (name.asString(), "-qf", "%{NAME}", false, result);
+    if (full_name)
+    {
+	queryRPM (name.asString(), "-qf", 0, false, result);
+    }
+    else
+    {
+	queryRPM (name.asString(), "-qf", "%{NAME}", true, result);
+    }
     return result;
 }
     

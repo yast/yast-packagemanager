@@ -213,8 +213,10 @@ class RpmDb: virtual public Rep
 	/**
 	 * query system for package the given file belongs to
 	 * (rpm -qf)
+	 * if full_name == true (the default) report name-version-release
+	 * else report name only
 	 */
-	std::string belongsTo (const Pathname& name);
+	std::string belongsTo (const Pathname& name, bool full_name = true);
 
 	/** install rpm package
 	 *
