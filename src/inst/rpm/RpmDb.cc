@@ -2136,8 +2136,8 @@ RpmDb::backupPackage(const string& packageName)
 	    NULL
 	};
 
-	// execute tar in chroot
-	ExternalProgram tar(argv, ExternalProgram::Stderr_To_Stdout, false, -1, true, _rootdir);
+	// execute tar in inst-sys (we dont know if there is a tar below _rootdir !)
+	ExternalProgram tar(argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
 
 	string tarmsg;
 	
