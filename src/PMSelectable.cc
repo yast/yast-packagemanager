@@ -685,6 +685,13 @@ std::ostream & operator<<( std::ostream & str, PMSelectable::UI_Status obj )
 //
 ostream & PMSelectable::dumpOn( ostream & str ) const
 {
+  str << _name << '{' << _state
+    << " i:" << (_installedObj?_installedObj->nameEdArch():string("-"))
+    << " c:" << (_candidateObj?_candidateObj->nameEdArch():string("-"))
+    << " av:" << _candidateList.size();
+  return str << '}';
+
+#if 0
   str << _name << '{';
   Rep::dumpOn( str );
   str << _state
@@ -692,6 +699,7 @@ ostream & PMSelectable::dumpOn( ostream & str ) const
     << " c:" << _candidateObj
     << " av:" << _candidateList.size();
   return str << '}';
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -166,7 +166,7 @@ class SelState {
     /**
      * True if modification was auto requested
      **/
-    bool by_auto()       const { return!( _bits & M_BY ); }
+    bool by_auto()       const { return( !( _bits & M_BY ) && to_modify() ); }
 
     /**
      * True if no modification allowed by user.
