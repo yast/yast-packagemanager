@@ -65,7 +65,6 @@ IMPL_DERIVED_POINTER(InstSrcData_UL,InstSrcData,InstSrcData);
 int
 InstSrcData_UL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist)
 {
-MIL << "InstSrcData_UL::Tag2PkgRelList()" << endl;
     int count = 0;
     pkgrellist.clear();
     if (!relationlist.empty())
@@ -74,12 +73,10 @@ MIL << "InstSrcData_UL::Tag2PkgRelList()" << endl;
 	 relation_str_iter != relationlist.end();
 	 ++relation_str_iter)
     {
-MIL << *relation_str_iter << endl;
 	pkgrellist.push_back (PkgRelation::fromString (*relation_str_iter));
 	count++;
     }
     }
-MIL << count << " relations created" << endl;
     return count;
 }
 
@@ -171,7 +168,9 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
     string sharewith ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SHAREWITH))->Data());
     if (!sharewith.empty())
     {
+//MIL << "Share " << package->name() << "-" << package->version() << "-" << package->release() << "." << package->arch() << endl;
 	stringutil::split (sharewith, splitted, " ", false);
+//MIL << "With " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 	const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
 
 	if (!candidates
@@ -208,6 +207,7 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
 
     std::vector<std::string> splitted;
     stringutil::split (single, splitted, " ", false);
+//MIL << "Lang for " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
     const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
 
@@ -265,7 +265,7 @@ InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::Tag
     std::vector<std::string> splitted;
 
     stringutil::split (single, splitted, " ", false);
-    if (splitted.size() < 4)
+    while (splitted.size() < 4)
 	splitted.push_back("");
 
 //cerr << "-----------------------------" << endl;
@@ -291,11 +291,6 @@ InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::Tag
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 #define SET_SINGLE(tagname) \
     SET_VALUE (tagname, (GET_TAG(tagname))->Data())
-
-    SET_VALUE (NAME, splitted[0]);
-    SET_VALUE (VERSION, splitted[1]);
-    SET_VALUE (RELEASE, splitted[2]);
-    SET_VALUE (ARCH, splitted[3]);
 
     SET_SINGLE (SUMMARY);
     SET_SINGLE (CATEGORY);
@@ -660,7 +655,8 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
 	ndata->setPackages (packagelist);
     }
-    tagset->clear();
+    
+    delete tagset;
 
     MIL << "done packages parsing" << endl;
 
@@ -723,7 +719,8 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 	LangTag2Package (langcache, packagelist, tagset);
 	count++;
     }
-    tagset->clear();
+
+    delete tagset;
 
     MIL << "done packages.<lang> parsing" << endl;
 
@@ -778,32 +775,34 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     count = 0;
 
-    std::list<std::string>::iterator selfile = selection_names.begin();
     std::ifstream selection_stream;
 
-    while (selfile != selection_names.end())
+    tagset = new InstSrcData_ULSelTags ();
+    for (std::list<std::string>::iterator selfile = selection_names.begin();
+	 selfile != selection_names.end();
+	 ++selfile)
     {
 	Pathname selectionname = descr_dir_r + *selfile;
 	selection_stream.open (selectionname.asString().c_str());
 
-	if( !selection_stream)
+	if (!selection_stream)
 	{
-	    ERR << "Cant open " << selectionname << ": " << Error::E_open_file << endl;
-	    ++selfile;
+	    ERR << "Cant open " << selectionname << endl;
 	    continue;
 	}
 
-	tagset = new InstSrcData_ULSelTags ();
+MIL << "Reading " << selectionname << endl;
+
 	TagCacheRetrieval *selcache = new TagCacheRetrieval (selectionname);
 	parser = selcache->getParser();
 
-    MIL << "start " << *selfile << " parsing" << endl;
+	MIL << "start " << *selfile << " parsing" << endl;
 
-    while( parse && parser.lookupTag (selection_stream))
-    {
-	bool repeatassign = false;
+	while( parse && parser.lookupTag (selection_stream))
+	{
+	    bool repeatassign = false;
 
-	tagstr = parser.startTag();
+	    tagstr = parser.startTag();
 
 	do
 	{
@@ -829,12 +828,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    break;
 	    }
 	} while( repeatassign );
-    }
-
-	selection_stream.close();
-	++selfile;
-
-	MIL << "done " << *selfile << " parsing" << endl;
+        }
 
 	if (parse)
 	{
@@ -842,7 +836,11 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 	    count++;
 	}
 	tagset->clear();
-    } // while selfile
+	delete selcache;
+	selection_stream.clear();
+	selection_stream.close();
+	MIL << "done " << *selfile << " parsing" << endl;
+    } // for ()
 
     ndata->setSelections(selectionlist);
 
