@@ -22,9 +22,6 @@ lib_LTLIBRARIES = liby2pmquery.la
 liby2pmquery_la_SOURCES = QueryScanner.cc QueryParser.cc QueryError.cc Query.cc
 liby2pmquery_la_LDFLAGS = -version-info 2:0
 
-$(srcdir)/lookuptable.h: $(top_srcdir)/src/query/tools/keywords.h
-	$(top_builddir)/src/query/tools/maketable -o $@
-
 $(srcdir)/QueryScanner.cc:  $(srcdir)/lookuptable.h
 
 EXTRA_DIST = lookuptable.h
