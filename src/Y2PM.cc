@@ -994,7 +994,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
     srcremaining_r.push_back ((*it)->name());
   }
 
-  return (error ? count : -count);
+  return (error ? -count : count);
 }
 
 ///////////////////////////////////////////////////////////////////
