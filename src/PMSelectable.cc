@@ -104,7 +104,7 @@ PMSelectable::PMObjectList::iterator PMSelectable::clistLookup( PMObjectPtr obj_
 PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
 {
   if ( _installedObj == obj_r )
-    return E_OK;
+    return E_Ok;
 
   delInstalledObj();
 
@@ -113,7 +113,7 @@ PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
     _installedObj->_selectable = this;
   }
 
-  return E_OK;
+  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -130,7 +130,7 @@ PMSelectable::Error PMSelectable::delInstalledObj()
     _installedObj->_selectable = 0;
     _installedObj = 0;
   }
-  return E_OK;
+  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
   obj_r->_selectable = this;
 
 #warning must rerank on add
-  return E_OK;
+  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
 #warning must rerank on del
   }
 
-  return E_OK;
+  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -215,7 +215,7 @@ PMSelectable::Error PMSelectable::clistClearAll()
   }
   _candidateList.clear();
 
-  return E_OK;
+  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -231,7 +231,7 @@ PMSelectable::Error PMSelectable::clearAll()
   delInstalledObj();
   clistClearAll();
 
-  return E_OK;
+  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////

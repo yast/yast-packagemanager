@@ -34,7 +34,7 @@ class PMError {
   public:
 
     enum Reporter {
-      E_OK           = 0,
+      E_Ok      = 0,
       E_INST_SRC_MGR = 10*_range,
       E_INST_SRC     = 11*_range
     };
@@ -45,7 +45,7 @@ class PMError {
 
   public:
 
-    PMError( const int e = E_OK ) { _errval = e; }
+    PMError( const int e = E_Ok ) { _errval = e; }
 
     operator int() const { return _errval; }
 
