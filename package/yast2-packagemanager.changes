@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Sep 18 18:22:31 CEST 2004 - schwab@suse.de
+
+- Fix C++ syntax.
+
+-------------------------------------------------------------------
 Fri Sep 10 11:34:19 CEST 2004 - ma@suse.de
 
 - Tell disk usage calculation which partitions are mounted read-only.
