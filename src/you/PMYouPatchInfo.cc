@@ -477,7 +477,9 @@ PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
 {
     _paths = paths;
 
-    _paths->config()->writeEntry( "LastServer", _paths->patchUrl().asString() );
+    Url url = _paths->patchUrl();
+
+    _paths->config()->writeEntry( "LastServer", url.saveAsString() );
     _paths->config()->save();
 
     PMError error = readDir( paths->patchUrl(), paths->patchPath(), patches,
