@@ -59,6 +59,8 @@ struct PkgNameEd {
 	    return (edition < ne2.edition);
 	}
 
+        std::string asString() const;
+
 	friend std::ostream& operator<<( std::ostream&, const PkgNameEd& );
 
       public:

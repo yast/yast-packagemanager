@@ -18,11 +18,24 @@ UstringHash PkgName::_nameHash;
 
 ostream& operator<<( ostream& os, const PkgNameEd& ne )
 {
-  // if you don't like implement your own format here,
-  // but don't change toString().
-  return os << PkgNameEd::toString( ne );
+  return os << ne.asString();
 }
 
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgNameEd::asString
+//	METHOD TYPE : string
+//
+//	DESCRIPTION : name-edition (edition contains one '-')
+//
+string PkgNameEd::asString() const
+{
+  // if you don't like implement your own format here,
+  // but don't change toString().
+  return toString( *this );
+}
 
 ///////////////////////////////////////////////////////////////////
 //
