@@ -30,10 +30,13 @@
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSolvablePtr.h>
 
+#include <y2pm/MediaAccess.h>
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstData
 class InstData {
+  REP_BODY(InstData);
 
   private:
     const std::list<PMSolvablePtr> *_selections;
@@ -47,6 +50,12 @@ class InstData {
      * initialization with known media
      */
     InstData (const Pathname & contentcachefile);
+
+    /**
+     * constructor
+     * initialization with new media
+     */
+    InstData (MediaAccessPtr media);
 
     virtual ~InstData();
 
@@ -81,10 +90,22 @@ class InstData {
     int numPatches() const;
 
     /**
+     * set list of selections
+     * @return void
+     */
+    void setSelections (std::list<PMSolvablePtr> *sels) { _selections = sels; }
+    
+    /**
      * generate PMSolvable objects for each selection on the source
      * @return list of PMSolvablePtr on this source
      */
     const std::list<PMSolvablePtr> *getSelections (void) const;
+    
+    /**
+     * set list of packages
+     * @return void
+     */
+    void setPackages (std::list<PMPackagePtr> *pacs) { _packages = pacs; }
     
     /**
      * generate PMPackage objects for each Item on the source
@@ -92,6 +113,12 @@ class InstData {
      * */
     const std::list<PMPackagePtr> *getPackages (void) const;
 
+    /**
+     * set list of patches
+     * @return void
+     */
+    void setPatches (std::list<PMSolvablePtr> *pats) { _patches = pats; }
+    
     /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source

@@ -28,6 +28,7 @@
 #include <y2util/PathInfo.h>
 #include <y2util/stringutil.h>
 
+#include <y2pm/PMPackagePtr.h>
 #include <y2pm/InstSrcData_UL.h>
 #include <y2pm/PMULPackageDataProvider.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
@@ -56,6 +57,7 @@ IMPL_DERIVED_POINTER(InstSrcData_UL,InstSrcData,InstSrcData);
 //	DESCRIPTION :
 //
 InstSrcData_UL::InstSrcData_UL()
+    : InstSrcData ("")
 {
 }
 
@@ -155,7 +157,6 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     char *vptr = lptr;		// vptr == value
     while (*lptr) lptr++;
     lptr--;
-    MIL << lbuf << "=" << vptr << endl;
 
     if (strcmp (lbuf, "PRODUCT") == 0)
     {
@@ -277,7 +278,8 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     ndata_r = 0;
     PMError err;
 
-    InstSrcDataPtr ndata( new InstSrcData );
+    std::list<PMPackagePtr> *pacs = new (std::list<PMPackagePtr>);
+    InstSrcDataPtr ndata( new InstSrcData (media_r) );
 
     ///////////////////////////////////////////////////////////////////
     // parse packages file and fill into ndata
@@ -326,7 +328,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    Tag2Package( tagset );
+		    pacs->push_back (Tag2Package( tagset ));
 		    count++;
 		    tagset->clear();
 		    repeatassign = true;
@@ -342,8 +344,10 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     if (parse)
     {
-	Tag2Package( tagset );
+	pacs->push_back (Tag2Package( tagset ));
 	count++;
+
+	ndata->setPackages (pacs);
     }
     tagset->clear();
 
@@ -356,9 +360,13 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     // done
     ///////////////////////////////////////////////////////////////////
 
-    if ( err == Error::E_ok )
+    if ( !err )
     {
 	ndata_r = ndata;
+    }
+    else
+    {
+	ERR << "tryGetData failed: " << err << endl;
     }
 
     return err;
@@ -382,75 +390,82 @@ InstSrcData_UL::Tag2Package( CommonPkdParser::TagSet * tagset )
     PkgArch arch (splitted[3]);
 
     PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider());
-    PMPackagePtr pac( new PMPackage (name, edition, arch, PMPackageDataProviderPtr()));
+    PMPackagePtr pac( new PMPackage (name, edition, arch, dataprovider));
+
+#define SET_VALUE(tagname,value) \
+    dataprovider->setAttributeValue (pac, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
+#define SET_MULTI(tagname) \
+    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->MultiData())
+#define SET_SINGLE(tagname) \
+    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->Data())
 
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_NAME
+    SET_VALUE (NAME, splitted[0]);
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_VERSION
+    SET_VALUE (VERSION, splitted[1]);
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_RELEASE
-
-#define SET_MULTI(kind,tagname) \
-    dataprovider->setAttributeValue (pac, PM##kind::ATTR_##tagname,  (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->MultiData())
-#define SET_SINGLE(kind,tagname) \
-    dataprovider->setAttributeValue (pac, PM##kind::ATTR_##tagname,  (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->Data())
+    SET_VALUE (RELEASE, splitted[2]);
+    // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_ARCH
+    SET_VALUE (ARCH, splitted[3]);
 
     // REQUIRES, list of requires tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_REQUIRES
-    SET_MULTI (Package, REQUIRES);
+    SET_MULTI (REQUIRES);
 
     // PREREQUIRES, list of pre-requires tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_PREREQUIRES
-    SET_MULTI (Package, PREREQUIRES);
+    SET_MULTI (PREREQUIRES);
 
     // PROVIDES, list of provides tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_PROVIDES
-    SET_MULTI (Package, PROVIDES);
+    SET_MULTI (PROVIDES);
 
     // CONFLICTS, list of conflicts tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_CONFLICTS
-    SET_MULTI (Package, CONFLICTS);
+    SET_MULTI (CONFLICTS);
 
     // OBSOLETES, list of obsoletes tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_OBSOLETES
-    SET_MULTI (Package, OBSOLETES);
+    SET_MULTI (OBSOLETES);
 
     // RECOMMENDS, list of recommends tags
     // FIXME Where to put RECOMMENDS ?
-    //SET_MULTI (Package, RECOMMENDS);
+    //SET_MULTI (RECOMMENDS);
 
     // SUGGESTS, list of suggests tags
     // FIXME Where to put SUGGESTS ?
-    //SET_MULTI (Package, SUGGESTS);
+    //SET_MULTI (SUGGESTS);
 
     // LOCATION, file location
     // FIXME Where to put LOCATION ?
-    //SET_SINGLE (Package, LOCATION);
+    //SET_SINGLE (LOCATION);
 
     // SIZE, packed and unpacked size
     // -> PMPackage::PMObjectAttribute::ATTR_SIZE (installed)
     // -> PMPackage::PMPackageAttribute::ATTR_ARCHIVESIZE (package)
     stringutil::split ((tagset->getTagByIndex(InstSrcData_ULTags::SIZE))->Data(), splitted, " ", false);
     dataprovider->setAttributeValue (pac, PMPackage::ATTR_ARCHIVESIZE, splitted[0]);
-    dataprovider->setAttributeValue (pac, PMObject::ATTR_SIZE, splitted[1]);
+    dataprovider->setAttributeValue (pac, (PMPackage::PMPackageAttribute)PMPackage::ATTR_SIZE, splitted[1]);
 
     // BUILDTIME, buildtime
     // -> PMPackage::PMPackageAttribute::ATTR_BUILDTIME
-    SET_SINGLE (Package, BUILDTIME);
+    SET_SINGLE (BUILDTIME);
 
     // SOURCE, source package
     // PMPackage::PMPackageAttribute::ATTR_SOURCERPM
-    SET_SINGLE (Package, SOURCERPM);
+    SET_SINGLE (SOURCERPM);
 
     // GROUP, rpm group
     // -> PMPackage::PMPackageAttribute::ATTR_GROUP
-    SET_SINGLE (Package, GROUP);
+    SET_SINGLE (GROUP);
 
     // LICENSE, license
     // -> PMPackage::PMPackageAttribute::ATTR_LICENSE
-    SET_SINGLE (Package, LICENSE);
+    SET_SINGLE (LICENSE);
 
     // AUTHORS, list of authors
     // -> PMPackage::PMPackageAttribute::ATTR_AUTHOR
-    SET_MULTI (Package, AUTHOR);
+    SET_MULTI (AUTHOR);
 
     // SHAREWITH, package to share data with
     // FIXME
@@ -458,9 +473,7 @@ InstSrcData_UL::Tag2Package( CommonPkdParser::TagSet * tagset )
 
     // KEYWORDS, list of keywords
     // FIXME Where to put KEYWORDS
-    //SET_MULTI (Package, KEYWORDS);
+    //SET_MULTI (KEYWORDS);
 
     return pac;
 }
-
-

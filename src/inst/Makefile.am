@@ -19,6 +19,7 @@ noinst_LTLIBRARIES = liby2pminstsrc.la
 
 liby2pminstsrc_la_SOURCES = \
 	InstSrc.cc 			\
+	InstData.cc 			\
 	InstSrcError.cc			\
 	InstSrcDescr.cc 		\
 	InstSrcData.cc			\

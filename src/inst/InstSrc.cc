@@ -195,17 +195,6 @@ InstSrc::getSelections() const
 }
 
 /**
- * generate PMPackage objects for each Item on the source
- * @return list of PMPackagePtr on this source
- * */
-const std::list<PMPackagePtr> *
-InstSrc::getPackages() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _data->getPackages();
-}
-
-/**
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
  */
@@ -216,6 +205,22 @@ InstSrc::getPatches() const
     return _data->getPatches();
 }
 #endif
+
+/**
+ * generate PMPackage objects for each Item on the source
+ * @return list of PMPackagePtr on this source
+ * */
+const std::list<PMPackagePtr> *
+InstSrc::getPackages() const
+{
+    D__ << __FUNCTION__ << std::endl;
+    if (!_data)
+    {
+	cerr << "InstSrc::getPackages() no _data" << endl;
+	return 0;
+    }
+    return _data->getPackages();
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -377,7 +382,8 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
 
   bool autodetect = ( type_r == T_AUTODETECT );
 
-  for ( Type ctype = ( autodetect ? Type(1) : type_r );
+  Type ctype;
+  for ( ctype = ( autodetect ? Type(1) : type_r );
 	ctype < T_AUTODETECT && !ndescr; ctype = Type(ctype+1) ) {
 
     if ( autodetect ) {
@@ -422,12 +428,17 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
     return Error::E_no_instsrc_on_media;
   }
 
+  ndescr->set_type( ctype );
+
   MIL << "Found InstSrc " << ndescr << endl;
-  if ( !err )
-  {
-      InstSrcDataPtr ndata;
-      err = InstSrcData_UL::tryGetData( ndata, _media, product_dir_r + ndescr->content_descrdir() );
-  }
+
+    if ( !err )
+    {
+	InstSrcDataPtr ndata;
+	err = InstSrcData_UL::tryGetData( ndata, _media, product_dir_r + ndescr->content_descrdir() );
+	if (!err)
+	    _data = ndata;
+    }
 
   ///////////////////////////////////////////////////////////////////
   // done

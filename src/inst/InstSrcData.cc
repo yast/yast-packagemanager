@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
+
 #include <y2pm/InstSrcData.h>
 
 #include <y2pm/InstSrc.h>
@@ -41,9 +43,21 @@ IMPL_BASE_POINTER(InstSrcData);
 //	METHOD NAME : InstSrcData::InstSrcData
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
+//	DESCRIPTION : initialization with new media
 //
-InstSrcData::InstSrcData()
+InstSrcData::InstSrcData(MediaAccessPtr media_r)
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::InstSrcData
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION : initialization with known media
+//
+InstSrcData::InstSrcData(const Pathname & contentcachefile)
 {
 }
 
@@ -105,3 +119,18 @@ PMError InstSrcData::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   return err;
 }
 
+/**
+ * generate PMPackage objects for each Item on the source
+ * @return list of PMPackagePtr on this source
+ * */
+const std::list<PMPackagePtr> *
+InstSrcData::getPackages() const
+{
+    D__ << __FUNCTION__ << std::endl;
+    if (!_data)
+    {
+	cerr << "InstSrcData::getPackages() no _data" << endl;
+	return 0;
+    }
+    return _data->getPackages();
+}

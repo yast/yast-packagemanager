@@ -57,8 +57,9 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	 * @see PMDataProvider
 	 * @see PMObject
 	 **/
-	virtual PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
-						     PMObject::PMObjectAttribute attr_r );
+	PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
+					     PMObject::PMObjectAttribute attr_r );
+
 	/**
 	 * Package attribute retrieval. (PackageDataProvider interface)
 	 * @see PMPackageDataProvider
@@ -67,34 +68,14 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
 						     PMPackage::PMPackageAttribute attr_r );
 
-        /** inject attribute to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	    const PkgAttributeValue& value);
-
 	/** inject attribute to cache */
 	virtual void setAttributeValue(
 	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
 	    const PkgAttributeValue& value);
 
-	/** inject attribute to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
-	    const PkgAttributeValue& value);
-
-        /** inject offset/size to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	    std::streampos pos, int size);
-
 	/** inject offset/size to cache */
 	virtual void setAttributeValue(
 	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	    std::streampos pos, int size);
-
-	/** inject offset/size to cache */
-	virtual void setAttributeValue(
-	    PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
 	    std::streampos pos, int size);
 
     public:

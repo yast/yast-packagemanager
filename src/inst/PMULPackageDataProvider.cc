@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
+
 #include <y2pm/PMULPackageDataProvider.h>
 
 using namespace std;
@@ -59,15 +61,16 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMULPackageDataProvider::~PMULPackageDataProvider
-//	METHOD TYPE : Destructor
+//	METHOD NAME : PMULPackageDataProvider::getAttributeValue
+//	METHOD TYPE : PkgAttributeValue
 //
-//	DESCRIPTION :Package attribute retrieval.
+//	DESCRIPTION : Object attribute retrieval.
 //
 PkgAttributeValue
 PMULPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
-					PMPackage::PMObjectAttribute attr )
+					PMObject::PMObjectAttribute attr )
 {
+    D__ << "PMULPackageDataProvider::getAttributeValue (" << obj_r->getAttributeName(attr) << ")" << endl;
     if (attr >= PMObject::PMOBJ_NUM_ATTRIBUTES)
 	return PkgAttributeValue("invalid query");
 
@@ -82,10 +85,19 @@ PMULPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
     return PkgAttributeValue("**undef**");
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::getAttributeValue
+//	METHOD TYPE : PkgAttributeValue
+//
+//	DESCRIPTION :Package attribute retrieval.
+//
 PkgAttributeValue
 PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
 					PMPackage::PMPackageAttribute attr )
 {
+    D__ << "PMULPackageDataProvider::getAttributeValue (" << pkg_r->getAttributeName(attr) << ")" << endl;
     if (attr >= PMPackage::PKG_NUM_ATTRIBUTES)
 	return PkgAttributeValue("invalid query");
 
@@ -106,69 +118,23 @@ PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
 //	METHOD NAME : PMULPackageDataProvider::setAttributeValue
 //	METHOD TYPE : attribute set
 //
-//	DESCRIPTION : inject some SINGLE object attribute by value
-//
-void
-PMULPackageDataProvider::setAttributeValue(
-	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	const PkgAttributeValue& value)
-{
-    attrpos[attr].size = -1;
-    attrval[attr] = PkgAttributeValue (value);
-    return;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
-//	METHOD TYPE : attribute set
-//
-//	DESCRIPTION : inject some SINGLE object attribute by value
+//	DESCRIPTION : inject some object attribute by value
 //
 void
 PMULPackageDataProvider::setAttributeValue(
 	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
 	const PkgAttributeValue& value)
 {
-    attrpos[attr].size = -1;
-    attrval[attr] = PkgAttributeValue (value);
-    return;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
-//	METHOD TYPE : attribute set
-//
-//	DESCRIPTION : inject some SINGLE object attribute by value
-//
-void
-PMULPackageDataProvider::setAttributeValue(
-	PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
-	const PkgAttributeValue& value)
-{
-    attrpos[attr].size = -1;
-    attrval[attr] = PkgAttributeValue (value);
-    return;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
-//	METHOD TYPE : attribute set
-//
-//	DESCRIPTION :inject some package attribute by file offset
-//
-void
-PMULPackageDataProvider::setAttributeValue(
-	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	std::streampos pos, int size)
-{
-    attrpos[attr].pos = pos;
-    attrpos[attr].size = size;
+    D__ << "PMULPackageDataProvider::setAttributeValue (" << pkg->getAttributeName(attr) << ")" << endl;
+    if (attr < PMPackage::PKG_NUM_ATTRIBUTES)
+    {
+	attrpos[attr].size = -1;
+	attrval[attr] = PkgAttributeValue (value);
+    }
+    else
+    {
+	ERR << "PMULPackageDataProvider::setAttributeValue(" << attr << ", " << value << ")" << endl;
+    }
     return;
 }
 
@@ -183,24 +149,6 @@ PMULPackageDataProvider::setAttributeValue(
 void
 PMULPackageDataProvider::setAttributeValue(
 	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	std::streampos pos, int size)
-{
-    attrpos[attr].pos = pos;
-    attrpos[attr].size = size;
-    return;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
-//	METHOD TYPE : attribute set
-//
-//	DESCRIPTION :inject some package attribute by file offset
-//
-void
-PMULPackageDataProvider::setAttributeValue(
-	PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
 	std::streampos pos, int size)
 {
     attrpos[attr].pos = pos;

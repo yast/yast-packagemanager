@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcData.cc
+   File:       InstData.cc
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include <y2pm/InstSrcData.h>
+#include <y2pm/InstData.h>
 
 #include <y2pm/DataOldSuSE.h>
 
@@ -27,16 +27,16 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : InstSrcData
+//	CLASS NAME : InstData
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_HANDLES(InstSrcData);
+//IMPL_HANDLES(InstSrcData);
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::InstSrcData
+//	METHOD NAME : InstData::InstData
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
@@ -45,39 +45,20 @@ IMPL_HANDLES(InstSrcData);
      * constructor
      * initialization with new media
      */
-InstSrcData::InstSrcData (MediaAccess *media)
+InstData::InstData (MediaAccessPtr media)
 {
-    // try to determine media kind
-
-    DataOldSuSE oldsuse (media);
-
-    if (oldsuse.getPackages() != 0)
-    {
-	// found packages in old suse format -> correct media type
-
-	_selections = oldsuse.getSelections ();
-	_packages = oldsuse.getPackages ();
-	_patches = oldsuse.getPatches ();
-
-        return;		// destroy DataOldSuSE object
-    }
-
     return;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::InstSrcData
+//	METHOD NAME : InstData::InstData
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
+//	DESCRIPTION : initialization with known media
 //
-    /**
-     * constructor
-     * initialization with known media
-     */
-InstSrcData::InstSrcData (const Pathname & contentcachefile)
+InstData::InstData (const Pathname & contentcachefile)
 {
     return;
 }
@@ -85,12 +66,12 @@ InstSrcData::InstSrcData (const Pathname & contentcachefile)
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::~InstSrcData
+//	METHOD NAME : InstData::~InstData
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-InstSrcData::~InstSrcData()
+InstData::~InstData()
 {
 }
 
@@ -101,7 +82,7 @@ InstSrcData::~InstSrcData()
  * writes content cache data to an ascii file
  */
 const Pathname
-InstSrcData::writeCache (const Pathname &descrpathname)
+InstData::writeCache (const Pathname &descrpathname)
 {
     Pathname datacachename = descrpathname.dirname() + "content.cache";
     return datacachename;
@@ -114,7 +95,7 @@ InstSrcData::writeCache (const Pathname &descrpathname)
  * return the number of selections on this source
  */
 int
-InstSrcData::numSelections() const
+InstData::numSelections() const
 {
     return _selections->size();
 }
@@ -124,7 +105,7 @@ InstSrcData::numSelections() const
  * return the number of packages on this source
  */
 int
-InstSrcData::numPackages() const
+InstData::numPackages() const
 {
     return _packages->size();
 }
@@ -134,7 +115,7 @@ InstSrcData::numPackages() const
  * return the number of patches on this source
  */
 int
-InstSrcData::numPatches() const
+InstData::numPatches() const
 {
     return _patches->size();
 }
@@ -145,7 +126,7 @@ InstSrcData::numPatches() const
  * @return list of PMSolvablePtr on this source
  */
 const std::list<PMSolvablePtr> *
-InstSrcData::getSelections() const
+InstData::getSelections() const
 {
     return _selections;
 }
@@ -156,7 +137,7 @@ InstSrcData::getSelections() const
  * @return list of PMPackagePtr on this source
  */
 const std::list<PMPackagePtr> *
-InstSrcData::getPackages() const
+InstData::getPackages() const
 {
     return _packages;
 }
@@ -167,7 +148,7 @@ InstSrcData::getPackages() const
  * @return list of PMSolvablePtr on this source
  */
 const std::list<PMSolvablePtr> *
-InstSrcData::getPatches() const
+InstData::getPatches() const
 {
     return _patches;
 }
@@ -176,14 +157,14 @@ InstSrcData::getPatches() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::dumpOn
+//	METHOD NAME : InstData::dumpOn
 //	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-ostream & InstSrcData::dumpOn( ostream & str ) const
+ostream & InstData::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str );
+//  Rep::dumpOn( str );
   return str;
 }
 
