@@ -159,7 +159,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	    count = 1;
 	}
 
-	ndescr->set_media_vendor(vendor);
+	ndescr->set_media_vendor( Vendor(vendor) );
 	ndescr->set_media_id(id);
 	ndescr->set_media_count(count);
     }
@@ -210,7 +210,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	}
 	else if (tag == "VENDOR")
 	{
-	    ndescr->set_content_vendor (value);
+	    ndescr->set_content_vendor ( Vendor(value) );
 	}
 	else if (tag == "DEFAULTBASE")
 	{

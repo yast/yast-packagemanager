@@ -650,7 +650,7 @@ std::string number2string (int nr)
 **	FUNCTION TYPE : PMError
 **
 **	DESCRIPTION : provide media by medianr
-**		
+**
 */
 PMError
 InstSrc::provideMedia (int medianr) const
@@ -874,7 +874,7 @@ InstSrc::provideFile (int medianr, const Pathname& path, Pathname& file_r) const
 **	DESCRIPTION : if the media needs some time to provide a package
 */
 bool
-InstSrc::isRemote ()
+InstSrc::isRemote () const
 {
     return (_media->type() == MediaAccess::FTP)
 	   || (_media->type() == MediaAccess::HTTP)

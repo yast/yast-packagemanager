@@ -407,7 +407,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
 	{
 	    std::list<std::string>::iterator multi_pos = multi.begin();
 	    //  only check if ( !(*multi_pos).empty() ) if an empty string is an error
-	    ndescr->set_media_vendor( *multi_pos++ );
+	    ndescr->set_media_vendor( Vendor(*multi_pos++) );
 	    ndescr->set_media_id( *multi_pos++ );
 	    ndescr->set_media_count( atoi(multi_pos->c_str()) );
 	    multi_pos++;
@@ -460,7 +460,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
 	    *multi_pos++;
 	    ndescr->set_content_baseproduct( PkgNameEd::fromString(*multi_pos));
 	    *multi_pos++;
-	    ndescr->set_content_vendor( *multi_pos++ );
+	    ndescr->set_content_vendor( Vendor(*multi_pos++) );
 	}
 	else
 	{

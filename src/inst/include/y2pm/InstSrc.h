@@ -366,7 +366,7 @@ class InstSrc: virtual public Rep {
 	 * is the media for this source is remote
 	 * and package provide takes some time
 	 */
-	bool isRemote (void);
+	bool isRemote (void) const;
 
   public:
 
