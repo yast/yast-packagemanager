@@ -304,7 +304,7 @@ PMSolvable::PkgRelList_type PkgRelation::parseRelations( const string & data_tr 
   if ( cdep_Ci.name.size() ) {
     if ( cdep_Ci.compare == NONE || cdep_Ci.version.size() ) {
       PkgRelation dep( PkgName( cdep_Ci.name ), cdep_Ci.compare,
-                       PkgEdition( cdep_Ci.version ) );
+                       PkgEdition( PkgEdition::fromString(cdep_Ci.version) ) );
       ret_VCi.push_back( dep );
     } else {
 	ERR << "Missplaced operator " << op_str[depOp_ei] << " in dependency of "

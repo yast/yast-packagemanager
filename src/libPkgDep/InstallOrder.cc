@@ -111,40 +111,57 @@ void InstallOrder::rdfsvisit(constPMSolvablePtr node)
 	requirement != reqnprereq.end(); ++requirement)
     {
 	D__ << "check requirement " << *requirement << endl;
-	RevRel_for(_toinstall.provided()[requirement->name()], prov)
+	SolvableList tovisit;
+
+	// package could provide its own requirement
+	if(node->doesProvide(*requirement))
 	{
-	    if(requirement->matches(prov->relation()))
+		D__ << "self-provides " << endl;
+//		tovisit.push_back(node);
+	}
+	else
+	{
+	    RevRel_for(_toinstall.provided()[requirement->name()], prov)
 	    {
-		D__ << "provided by " << prov->pkg()->name() << endl;
-		if(_nodes[prov->pkg()].visited == false)
+		if(requirement->matches(prov->relation()))
+		{
+		    D__ << "provided by " << prov->pkg()->name() << endl;
+		    tovisit.push_back(prov->pkg());
+		}
+	    }
+	}
+
+	for( SolvableList::iterator it = tovisit.begin();
+		it != tovisit.end(); ++it)
+	{
+	    if(_nodes[*it].visited == false)
+	    {
+		info.order++;
+		_rgraph[*it].push_back(node);
+		_graph[node].push_back(*it);
+		rdfsvisit(*it);
+	    }
+	    else if(_nodes[*it].endtime == 0)
+	    {
+		if(*it != node)
+		{
+		    WAR  << "backward edge " << node->name() << " -> " << (*it)->name() << endl;
+		}
+	    }
+	    else
+	    {
+		// filter multiple depends on same node (cosmetic)
+		SolvableList& lrg = _rgraph[*it];
+		if(find(lrg.begin(),lrg.end(),node) == lrg.end())
 		{
 		    info.order++;
-		    _rgraph[prov->pkg()].push_back(node);
-		    _graph[node].push_back(prov->pkg());
-		    rdfsvisit(prov->pkg());
-		}
-		else if(_nodes[prov->pkg()].endtime == 0)
-		{
-		    if(prov->pkg() != node)
-		    {
-			WAR  << "backward edge " << node->name() << " -> " << prov->pkg()->name() << endl;
-		    }
-		}
-		else
-		{
-		    // filter multiple depends on same node (cosmetic)
-		    SolvableList& lrg = _rgraph[prov->pkg()];
-		    if(find(lrg.begin(),lrg.end(),node) == lrg.end())
-		    {
-			info.order++;
-			lrg.push_back(node);
+		    lrg.push_back(node);
 
-			SolvableList& lg = _graph[prov->pkg()];
-			if(find(lg.begin(),lg.end(),node) == lg.end())
-			    lg.push_back(node);
-		    }
-
+		    SolvableList& lg = _graph[*it];
+		    if(find(lg.begin(),lg.end(),node) == lg.end())
+			lg.push_back(node);
 		}
+
 	    }
 	}
     }
@@ -179,7 +196,7 @@ void InstallOrder::startrdfs()
     {
 	if(_nodes[it->value].visited == false)
 	{
-	    WAR << "start recursion on " << it->value->name() << endl;
+	    M__ << "start recursion on " << it->value->name() << endl;
 	    rdfsvisit(it->value);
 	}
     }

@@ -232,6 +232,24 @@ PkgAttributeValue PMSolvable::getAttributeValue( PMSolvableAttribute attr ) cons
   return PkgAttributeValue();
 }
 
+bool PMSolvable::doesProvide(const PkgRelation& rel) const
+{
+    if(rel.matches(self_provides()))
+    {
+	D__ << rel << " self-provides" << endl;
+	return true;
+    }
+    for(PkgRelList_const_iterator it = _provides.begin();
+	it != _provides.end(); ++it)
+    {
+	if(rel.matches(*it))
+	{
+	    D__ << *it << " matcheXXs " << rel << endl;
+	    return true;
+	}
+    }
+    return false;
+}
 ///////////////////////////////////////////////////////////////////
 //
 //

@@ -3,6 +3,7 @@
 #include <alloca.h>
 #include <cctype>
 
+#include <y2util/Y2SLog.h>
 #include <y2util/stringutil.h>
 
 #include <y2pm/PkgEdition.h>
@@ -74,8 +75,16 @@ bool PkgEdition::edition_eq( const PkgEdition& e2 ) const
 	}
 	if ((type == EPOCH) && (e2.type == EPOCH) && (_epoch != e2._epoch))
 		return false;
+	
+	// empty means any version matches
+	if(_version.empty() || e2._version.empty())
+	    return true;
 	if (rpmvercmp( _version, e2._version ) != 0)
 		return false;
+
+	// empty means any release matches
+	if(_release.empty() || e2._release.empty())
+	    return true;
 	if (rpmvercmp( _release, e2._release ))
 		return false;
 	// NOTE: we do not compare buildtimes here. If versions/release/libs
@@ -121,6 +130,8 @@ int PkgEdition::rpmvercmp( const std::string & lhs, const std::string & rhs ) co
     char * one, * two;
     int rc;
     int isnum;
+
+    D__ << lhs << " - " << rhs << endl;
 
     if ( lhs == rhs )  return 0;
     // empty is less than anything else:

@@ -18,6 +18,8 @@
 /-*/
 
 #include <cstdlib>
+#include <iostream>
+#include <set>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/ExternalProgram.h>
@@ -29,6 +31,8 @@
 
 #undef Y2SLOG
 #define Y2SLOG "testinstall" 
+
+#define FORTHORSTEN
 
 using namespace std;
 
@@ -80,7 +84,7 @@ int main( int argc, char *argv[] )
 	return 1;
     }
 
-    cout << "parsing package info" << endl;
+    MIL << "parsing package info" << endl;
     err = nsrc->enableSource();
 
     if (err)
@@ -93,20 +97,32 @@ int main( int argc, char *argv[] )
 
     const std::list<PMPackagePtr> *pacs = nsrc->getPackages();
 
+    std::set<std::string> tocompute;
+
+    
+    MIL << "specify packages" << endl;
+    while (cin)
+    {
+	string tmp;
+	cin >> tmp;
+	tocompute.insert(tmp);
+    }
+
     unsigned count = 0;
     for(std::list<PMPackagePtr>::const_iterator it = pacs->begin();
 	it != pacs->end();
 	++it, count++)
     {
-//	if(string((*it)->name()).find("SDL") != string::npos)
+//	if(string((*it)->name()).find("glide") != string::npos)
+	if(tocompute.find(string((*it)->name())) != tocompute.end())
 	    candidates.add(*it);
     }
 
     InstallOrder order(candidates);
-    cout << "computing installation order" << endl;
+    MIL << "computing installation order" << endl;
 //    Y2SLog::dbg_enabled_bm = true;
     order.startrdfs();
-
+#ifndef FORTHORSTEN
     cout << "Deps:" << endl;
     cout << "------------------------" << endl;
     order.printAdj(cout);
@@ -119,12 +135,14 @@ int main( int argc, char *argv[] )
 
     cout << "Installation order (topsort):" << endl;
     cout << "------------------------" << endl;
+#endif // FORTHORSTEN
     for(InstallOrder::SolvableList::const_iterator cit = order.getTopSorted().begin();
 	cit != order.getTopSorted().end(); ++cit)
     {
 	cout << (*cit)->name() << " ";
     }
     cout << endl;
+#ifndef FORTHORSTEN
     cout << "------------------------" << endl;
     cout << "Installation order (sets):" << endl;
     cout << "------------------------" << endl;
@@ -146,4 +164,5 @@ int main( int argc, char *argv[] )
     }
     cout << endl;
     cout << "------------------------" << endl;
+#endif // FORTHORSTEN
 }
