@@ -47,12 +47,10 @@ using namespace std;
 //	DESCRIPTION :
 //
 MediaSMB::MediaSMB( const Url &      url_r,
-		    const Pathname & attach_point_hint_r,
-		    MediaAccess::MediaType type_r )
+		    const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
 		    false, // attachPoint_is_mediaroot
-		    false, // does_download
-		    type_r )
+		    false ) // does_download
 {
 }
 
@@ -78,7 +76,7 @@ PMError MediaSMB::attachTo(bool next)
 
     string path = "//";
     path += _url.host();
-    path += _url.path().asString();
+    path += _url.path();
 
     string options = _url.option("mountoptions");
     string username = _url.username();

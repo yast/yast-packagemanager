@@ -45,12 +45,10 @@ using namespace std;
 //                    Thus attach_point_hint_r is ignored.
 //
 MediaDIR::MediaDIR( const Url &      url_r,
-		    const Pathname & /*attach_point_hint_r*/,
-		    MediaAccess::MediaType type_r )
+		    const Pathname & /*attach_point_hint_r*/ )
     : MediaHandler( url_r, url_r.path(),
 		    false, // attachPoint_is_mediaroot
-		    false, // does_download
-		    type_r )
+		    false ) // does_download
 {
 }
 

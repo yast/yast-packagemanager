@@ -55,12 +55,10 @@ using namespace std;
 //	DESCRIPTION :
 //
 MediaCD::MediaCD( const Url &      url_r,
-		  const Pathname & attach_point_hint_r,
-		  MediaAccess::MediaType type_r )
+		  const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
 		    true,  // attachPoint_is_mediaroot
-		    false, // does_download
-		    type_r ),
+		    false ), // does_download
     _lastdev(-1)
 {
     Url::OptionMapType options = _url.options();
@@ -127,7 +125,7 @@ PMError MediaCD::attachTo(bool next)
     list<string> filesystems;
 
     // if DVD, try UDF filesystem before iso9660
-    if (_url.protocol() == "dvd")
+    if ( _url.protocol() == Url::dvd )
 	filesystems.push_back("udf");
 
     filesystems.push_back("iso9660");

@@ -53,8 +53,7 @@ class MediaCD : public MediaHandler {
   public:
 
     MediaCD( const Url &      url_r,
-	     const Pathname & attach_point_hint_r,
-	     MediaAccess::MediaType type_r );
+	     const Pathname & attach_point_hint_r );
 
     virtual ~MediaCD() { release(); }
 };

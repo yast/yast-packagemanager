@@ -84,12 +84,6 @@ class MediaHandler {
 	bool _does_download;
 
         /**
-	 * Type hint for MediaAccess. Just stored, but not evaluated by
-	 * MeadiaHandler.
-	 **/
-	const MediaAccess::MediaType _type;
-
-        /**
 	 * True, if media is attached.
 	 **/
 	bool _isAttached;
@@ -167,8 +161,7 @@ class MediaHandler {
 	MediaHandler ( const Url&       url_r,
 		       const Pathname & attach_point_r,
 		       const bool       attachPoint_is_mediaroot_r,
-		       const bool       does_download_r,
-		       MediaAccess::MediaType type_r );
+		       const bool       does_download_r );
 
 	/**
 	 * Contolling MediaAccess takes care, that attached media is released
@@ -179,9 +172,9 @@ class MediaHandler {
     public:
 
         /**
-	 * Type hint for MediaAccess.
+	 * Protocol hint for MediaAccess.
 	 **/
-        MediaAccess::MediaType type() const { return _type; }
+        Url::Protocol protocol() const { return _url.protocol(); }
 
 	/**
 	 * Use concrete handler to attach the media.

@@ -39,8 +39,7 @@ class MediaSMB : public MediaHandler {
   public:
 
     MediaSMB( const Url&       url_r,
-	      const Pathname & attach_point_hint_r,
-	      MediaAccess::MediaType type_r );
+	      const Pathname & attach_point_hint_r );
 
     virtual ~MediaSMB() { release(); }
 };

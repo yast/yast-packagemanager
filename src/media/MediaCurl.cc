@@ -45,12 +45,10 @@ MediaCurl::Callbacks *MediaCurl::_callbacks = 0;
 ///////////////////////////////////////////////////////////////////
 
 MediaCurl::MediaCurl( const Url &      url_r,
-		      const Pathname & attach_point_hint_r,
-		      MediaAccess::MediaType type_r )
+		      const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
 		    false, // attachPoint_is_mediaroot
-		    true,  // does_download
-		    type_r ),
+		    true ), // does_download
       _curl( 0 )
 {
 }
@@ -106,9 +104,9 @@ PMError MediaCurl::attachTo (bool next)
   SysConfig cfg( "proxy" );
 
   if ( cfg.readBoolEntry( "PROXY_ENABLED", false ) ) {
-    if ( _url.protocol() == "ftp" ) {
+    if ( _url.protocol() == Url::ftp ) {
       _proxy = cfg.readEntry( "FTP_PROXY" );
-    } else if ( _url.protocol() == "http" ) {
+    } else if ( _url.protocol() == Url::http ) {
        _proxy = cfg.readEntry( "HTTP_PROXY" );
     } else {
       _proxy = "";

@@ -47,12 +47,10 @@ using namespace std;
 //	DESCRIPTION :
 //
 MediaDISK::MediaDISK( const Url &      url_r,
-		      const Pathname & attach_point_hint_r,
-		      MediaAccess::MediaType type_r )
+		      const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
 		    true,  // attachPoint_is_mediaroot
-		    false, // does_download
-		    type_r )
+		    false ) // does_download
 {
 	_device = _url.option("device");
 	_filesystem = _url.option("filesystem");
