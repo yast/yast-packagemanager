@@ -184,6 +184,23 @@ class Y2PM {
      **/
     static PMYouPatchManager & youPatchManager();
 
+    /**
+     * [package/selectionManager] Save current selection
+     **/
+    static void packageSelectionSaveState();
+    /**
+     * [package/selectionManager] Restore previously saved selection.
+     **/
+    static bool packageSelectionRestoreState();
+    /**
+     * [package/selectionManager] Return true if current selection differs from previously saved selection.
+     **/
+    static bool packageSelectionDiffState();
+    /**
+     * [package/selectionManager] Forgett a previously saved selection.
+     **/
+    static void packageSelectionClearSaveState();
+
   private:
 
     ///////////////////////////////////////////////////////////////////

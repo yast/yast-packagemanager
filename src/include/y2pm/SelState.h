@@ -264,6 +264,13 @@ class SelState {
   public:
 
     friend std::ostream & operator<<( std::ostream & str, const SelState & obj );
+
+    friend bool operator==( const SelState & lhs, const SelState & rhs ) {
+      return( lhs._bits == rhs._bits );
+    }
+    friend bool operator!=( const SelState & lhs, const SelState & rhs ) {
+      return !operator==( lhs, rhs );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////

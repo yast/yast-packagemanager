@@ -53,8 +53,9 @@ class PMSelectable : virtual public Rep {
 	PMObjectPtr     _userCandidateObj;
 
 	SavedState( const PMSelectablePtr & item_r );
-	bool mayReplay();
+	bool mayReplay() const;
 	bool replay();
+	bool diff() const;
     };
 
   private:

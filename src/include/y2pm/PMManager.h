@@ -81,6 +81,11 @@ class PMManager {
     bool RestoreState();
 
     /**
+     * Return true if current selection differs from previously saved selection.
+     **/
+    bool DiffState() const;
+
+    /**
      * Forgett a previously saved selection.
      **/
     void ClearSaveState();

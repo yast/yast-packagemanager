@@ -115,6 +115,53 @@ void Y2PM::cleanupAtExit()
 }
 
 ///////////////////////////////////////////////////////////////////
+// packageSelection [package/selectionManager]
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::packageSelectionSaveState
+//	METHOD TYPE : void
+//
+void Y2PM::packageSelectionSaveState() {
+  selectionManager().SaveState();
+  packageManager().SaveState();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::packageSelectionRestoreState
+//	METHOD TYPE : bool
+//
+bool Y2PM::packageSelectionRestoreState() {
+  bool ret = selectionManager().RestoreState();
+  return packageManager().RestoreState() && ret; // try to restore both but report if either failed
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::packageSelectionDiffState
+//	METHOD TYPE : bool
+//
+bool Y2PM::packageSelectionDiffState() {
+  return selectionManager().DiffState() || packageManager().DiffState();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::packageSelectionClearSaveState
+//	METHOD TYPE : void
+//
+void Y2PM::packageSelectionClearSaveState() {
+  selectionManager().ClearSaveState();
+  packageManager().ClearSaveState();
+}
+
+///////////////////////////////////////////////////////////////////
 // CallBacks
 ///////////////////////////////////////////////////////////////////
 
@@ -249,8 +296,6 @@ Y2PM::baseArch(void)
 //
 //	METHOD NAME : Y2PM::instTarget
 //	METHOD TYPE : InstTarget &
-//
-//	DESCRIPTION :
 //
 InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
 {
