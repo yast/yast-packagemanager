@@ -248,6 +248,9 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
       url += "?product=" + product();
       url += "&version=" + version();
       url += "&basearch=" + string( baseArch() );
+      url += "&business=";
+      if ( businessProduct() ) url += "1";
+      else url += "0";
     }
 
     url = encodeUrl( url );

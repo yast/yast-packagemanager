@@ -424,11 +424,13 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
             if ( checkSig ) {
                 string filePath = ( path + *it ).asString();
+                D__ << "Check signature of '" << filePath << "'" << endl;
                 if ( !gpg.check_file( filePath ) ) {
                     E__ << "Signature check for '" << filePath << "' failed."
                         << endl;
                     return PMError( YouError::E_bad_sig_file );
                 }
+                D__ << "Signature ok." << endl;
             }
 
             D__ << "read patch: file: " << *it << endl;
