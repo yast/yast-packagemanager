@@ -44,8 +44,7 @@ InstYou::InstYou()
 {
 #warning FIXME: get information about product/version/arch
   _paths = new PMYouPatchPaths();
-#warning FIXME: get language information
-  _info = new PMYouPatchInfo( "german" );
+  _info = new PMYouPatchInfo();
 
   init();
 }
