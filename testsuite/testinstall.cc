@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include <y2util/timeclass.h>
+#include <y2util/stringutil.h>
 #include <y2util/Y2SLog.h>
 #include <Y2PM.h>
 #include <y2pm/InstallOrder.h>
@@ -46,17 +47,28 @@ using namespace std;
 static int _verbose = 0;
 
 static string _instlog;
+static string _rootdir = "/";
+
+static bool _initialized = false;
+
+static vector<string> nullvector;
+
+#define DOINIT \
+    if(!_initialized) init(nullvector);
 
 void install(vector<string>& argv);
+void install2(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
 void init(vector<string>& argv);
-void query(vector<string>& argv);
+void show(vector<string>& argv);
 void remove(vector<string>& argv);
 void verbose(vector<string>& argv);
 void debug(vector<string>& argv);
 void rpminstall(vector<string>& argv);
 void instlog(vector<string>& argv);
+void setroot(vector<string>& argv);
+void source(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -65,16 +77,19 @@ struct Funcs {
 };
 
 static struct Funcs func[] = {
-    { "install",    install,    "simulated install of a package" },
+    { "install",    install,    "simulated install of a package, direct PkgDep" },
+    { "install2",    install2,    "simulated install of a package, through manager" },
     { "rpminstall", rpminstall, "install rpm files" },
     { "consistent", consistent, "check consistency" },
     { "init",       init,       "initialize packagemanager" },
-    { "query",      query,      "query packages" },
+    { "show",       show,       "show package info" },
     { "remove",     remove,     "simulate remove packages" },
     { "help",       help,       "this screen" },
     { "verbose",    verbose,    "set verbosity level" },
     { "debug",      debug,      "switch on/off debug" },
     { "instlog",    instlog,    "set installation log file" },
+    { "setroot",    setroot,    "set root directory for operation" },
+    { "source",     source,     "scan media for inst sources" },
     { NULL,         NULL,       NULL }
 };
 
@@ -120,6 +135,26 @@ void instlog(vector<string>& argv)
     cout << (ret?" ok":" failed") << endl;
 }
 
+void setroot(vector<string>& argv)
+{
+    if(_initialized)
+    {
+	cout << "target already initialized, can't change root" << endl;
+	return;
+    }
+
+    if(argv.size()<2)
+    {
+	cout << "need argument" << endl;
+	return;
+    }
+
+    _rootdir = argv[1].c_str();
+
+    cout << "root dir set to " << _rootdir << endl;
+}
+
+
 void verbose(vector<string>& argv)
 {
     if(argv.size()<2)
@@ -147,8 +182,10 @@ void debug(vector<string>& argv)
     }
 }
 
-void query(vector<string>& argv)
+void show(vector<string>& argv)
 {
+    DOINIT
+
     PMPackageManager& manager = Y2PM::packageManager();
     vector<string>::iterator it=argv.begin();
     ++it; // first one is function name itself
@@ -167,13 +204,106 @@ void query(vector<string>& argv)
     }
 }
 
+static InstSrcManager::ISrcIdList _isrclist;
+
+void source(vector<string>& argv)
+{
+    if(argv.size()<2)
+    {
+	cout << "Usage: source <url|--enable nr|--forget>" << endl;
+	return;
+    }
+
+    unsigned parampos = 1;
+    string param = argv[parampos++];
+    if(param == "--forget")
+    {
+	_isrclist.erase(_isrclist.begin(), _isrclist.end());
+	return;
+    }
+    else if(param == "--enable")
+    {
+	if (parampos >= argv.size())
+	{
+	    cout << "must specify number" << endl;
+	    return;
+	}
+	while(parampos < argv.size())
+	{
+	    int num = atoi(argv[parampos++].c_str());
+	    if(num < 0 || static_cast<unsigned>(num) >= _isrclist.size())
+	    {
+		cout << "invalid number" << endl;
+		continue;
+	    }
+
+	    int count = 0;
+	    for(InstSrcManager::ISrcIdList::iterator it = _isrclist.begin();
+		it != _isrclist.end(); ++it, count++)
+	    {
+		if(count != num)
+		    continue;
+		    
+		PMError err = Y2PM::instSrcManager().enableSource(*it);
+		if( err != PMError::E_ok)
+		{
+		    cout << err << endl;
+		}
+	    }
+	}
+    }
+    else
+    {
+	if(!_isrclist.empty())
+	{
+	    _isrclist.erase(_isrclist.begin(), _isrclist.end());
+	}
+
+	Url url(param);
+
+	PMError err = Y2PM::instSrcManager().scanMedia(_isrclist, url);
+
+	if(err != PMError::E_ok)
+	{
+	    cout << "failed to detect source on " << url << endl;
+	    cout << err << endl;
+	    return;
+	}
+
+	cout << "Detected media: " << endl;
+	unsigned count = 0;
+	for(InstSrcManager::ISrcIdList::iterator it = _isrclist.begin();
+	    it != _isrclist.end(); ++it, count++)
+	{
+	    cout << count << ": " << *it << endl;
+	}
+    }
+}
+
 void init(vector<string>& argv)
 {
+    if(_initialized)
+    {
+	cout << "already initialized" << endl;
+	return;
+    }
+    _initialized = true;
+
     TimeClass t;
     cout << "initializing packagemanager ... " << endl;
 
     t.startTimer();
-    Y2PM::packageManager();
+    Y2PM::packageManager(false);
+    PMError dbstat = Y2PM::instTarget().init(_rootdir, false);
+    if( dbstat != InstTargetError::E_ok )
+    {
+	ERR << "error initializing target: " << dbstat << endl;
+    }
+    else
+    {
+	Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
+    }
+
     t.stopTimer();
 
     cout << "done in " << t.getTimer() << " seconds" << endl;
@@ -258,6 +388,8 @@ static PMSolvable::PkgRelList_type& addprovidescallback(constPMSolvablePtr& ptr)
 
 PkgSet* getInstalled()
 {
+    DOINIT
+
     PkgSet* set = new PkgSet();
     set->setAdditionalProvidesCallback(addprovidescallback);
 
@@ -278,13 +410,93 @@ PkgSet* getInstalled()
 /** not implemented yet */
 PkgSet* getAvailable()
 {
+    DOINIT
+
     PkgSet* set = new PkgSet();
     set->setAdditionalProvidesCallback(addprovidescallback);
     return set;
 }
 
+void install2(vector<string>& argv)
+{
+    DOINIT
+
+    PkgDep::ResultList good;
+    PkgDep::ErrorResultList bad;
+    PkgDep::NameList to_remove;
+
+    int numinst=0,numrem=0,numbad=0;
+    bool success = false;
+
+    for (unsigned i=1; i < argv.size() ; i++) {
+	string pkg = stringutil::trim(argv[i]);
+
+	if(pkg.empty()) continue;
+	
+	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
+	if(!selp)
+	{
+	    std::cout << "package " << pkg << " is not available.\n";
+	    continue;
+	}
+	PMSelectable::UI_Status s = PMSelectable::S_Install;
+	if(selp->has_installed())
+	{
+	    s = PMSelectable::S_Update;
+	}
+	if(!selp->set_status(s))
+	{
+	    cout << stringutil::form("coult not mark %s for %s", pkg.c_str(),
+		(s==PMSelectable::S_Install?"installation":"update")) << endl;
+	}
+    }
+
+    TimeClass t;
+    t.startTimer();
+
+    success = Y2PM::packageManager().solveInstall(good, bad);
+
+    t.stopTimer();
+
+    if (!success) {
+	// if it failed, print problems
+	cout << "*** Conflicts ***" << endl;
+	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
+	     p != bad.end(); ++p ) {
+	    cout << *p << endl;
+	    numbad++;
+	}
+    }
+
+    cout << "*** Packages to install ***" << endl;
+
+    // otherwise, print what should be installed and what removed
+    for(PkgDep::ResultList::const_iterator p=good.begin();p!=good.end();++p) {
+	switch (_verbose) {
+	case 0: cout << "install " << p->name << endl;break;
+	case 1: cout << "install " << p->name << "-" << p->edition << endl;break;
+	default: cout << "install " << *p << endl;break;
+	}
+	numinst++;
+
+    }
+    cout << "*** Packages to remove ***" << endl;
+    for(PkgDep::NameList::const_iterator q=to_remove.begin();q!=to_remove.end();++q) {
+	switch (_verbose) {
+	case 0: cout << "remove " << *q << endl;break;
+	default: cout << "remove " << *q << endl;break;
+	}
+	numrem++;
+    }
+    cout << "***" << endl;
+    cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
+    cout << "Time consumed: " << t.getTimer() << endl;
+}
+
 void install(vector<string>& argv)
 {
+    DOINIT
+
     // build sets
     PkgSet empty;
     PkgSet candidates;
@@ -387,6 +599,8 @@ void install(vector<string>& argv)
 
 void remove(vector<string>& argv)
 {
+    DOINIT
+
 //    PMPackageManager& manager = Y2PM::packageManager();
     vector<string>::iterator it=argv.begin();
     ++it; // first one is function name itself
@@ -425,6 +639,8 @@ void remove(vector<string>& argv)
 
 void consistent(vector<string>& argv)
 {
+    DOINIT
+
     PkgSet *installed = NULL;
     PkgSet *available = NULL;
 
@@ -458,6 +674,7 @@ void progresscallback(int p, void* nix)
 {
     cout << p << endl;
 }
+
 void rpminstall(vector<string>& argv)
 {
     vector<string>::iterator it=argv.begin();
@@ -471,7 +688,7 @@ void rpminstall(vector<string>& argv)
 
     Y2PM::instTarget().setPackageInstallProgressCallback(progresscallback, NULL);
 
-    if(Y2PM::instTarget().init("/", false) != InstTarget::Error::E_ok)
+    if(Y2PM::instTarget().init(_rootdir, false) != InstTarget::Error::E_ok)
     {
 	cout << "initialization failed" << endl;
     }

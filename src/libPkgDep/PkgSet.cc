@@ -1,5 +1,6 @@
 #include <functional>
 
+#include <y2util/Y2SLog.h>
 #include <y2pm/PkgSet.h>
 #include <y2pm/PMSolvable.h>
 
@@ -41,6 +42,11 @@ PkgSet::~PkgSet() {
 
 void PkgSet::add( PMSolvablePtr pkg, bool force )
 {
+	if(!pkg)
+	{
+	    ERR << "got NULL" << endl;
+	    return;
+	}
 	PMSolvablePtr opkg = lookup(pkg->name());
 	if (opkg != NULL) {
 		// the same name is already contained in this set

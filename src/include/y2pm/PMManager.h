@@ -29,6 +29,8 @@
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMObjectContainerIter.h>
 
+#include <y2pm/PkgDep.h>
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMManager
@@ -163,6 +165,19 @@ class PMManager {
      * Set all Selectables to NothingSelected ( neither install nor delete )
      **/
     void setNothingSelected();
+
+  public:
+    // solver Part
+
+    /**
+     * resolve dependences for Packages marked for installation
+     *
+     * @param good (output) list of PkgDep::Result that can be installed
+     * @param bad (output) list of PkgDep::ErrorResult that have trouble
+     *
+     * @return true if no conflicts where found (i.e no bad)
+     * */
+    bool solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad);
 
 };
 
