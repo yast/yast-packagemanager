@@ -82,12 +82,12 @@ Y2PM::CallBacks::CallBacks()
 //
 InstTarget & Y2PM::instTarget()
 {
-  if ( !_instTarget ) {
-    MIL << "Launch InstTarget... (rootdir " << _instTarget_rootdir << ")" << endl;
-    _instTarget = new InstTarget( _instTarget_rootdir );
-    MIL << "Created InstTarget" << endl;
-  }
-  return *_instTarget;
+    if ( !_instTarget ) {
+	MIL << "Launch InstTarget... ()" << endl;
+	_instTarget = new InstTarget ();
+	MIL << "Created InstTarget" << endl;
+    }
+    return *_instTarget;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ PMPackageManager & Y2PM::packageManager()
     MIL << "Created PackageManager" << endl;
 
     WAR << "Fake InstTarget and load installed Packages..." << endl;
-    PMError dbstat = Y2PM::instTarget().init();
+    PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
     if( dbstat != InstTargetError::E_ok ) {
       ERR << "error initializing target: " << dbstat << endl;
     } else {
