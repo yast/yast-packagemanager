@@ -726,7 +726,7 @@ InstSrc::provideMedia (int medianr) const
 		    {
 			changereply = report->changeMedia( error, url.asString(), product,
 							   -1, "",
-							   medianr, "",
+							   medianr, descr()->media_label( medianr )(),
 							   descr()->media_doublesided() );
 
 			if (changereply != "E")		// eject
@@ -816,8 +816,8 @@ InstSrc::provideMedia (int medianr) const
 	for (;;)
 	{
 	    changereply = report->changeMedia( err.asString(), url.asString(), product,
-					       _medianr, "",
-					       medianr, "",
+					       _medianr, descr()->media_label( _medianr )(),
+					       medianr, descr()->media_label( medianr )(),
 					       descr()->media_doublesided() );
 
 	    if (changereply != "E")		// eject

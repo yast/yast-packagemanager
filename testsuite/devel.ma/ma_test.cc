@@ -196,10 +196,16 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
+  //Y2PM::noAutoInstSrcManager();
+  //InstSrcManager::ISrcId nid = newSrc( "/tmp/isrc" );
+  //ISM.deleteSource( nid );
+    Y2PM::instSrcManager();
+
+
+#if 0
   MIL << "=========================" << endl;
   MIL << Y2PM::getRequestedLocales() << endl;
   MIL << "=========================" << endl;
-#if 0
   MIL << Y2PM::getRequestedLocales() << endl;
   Y2PM::setRequestedLocales( LangCode("de_AT") );
   MIL << Y2PM::getRequestedLocales() << endl;

@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       F_Medianames.h
+  File:       PMLangCode.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -18,54 +18,39 @@
   Purpose:
 
 /-*/
-#ifndef F_Medianames_h
-#define F_Medianames_h
 
-#include <iosfwd>
-#include <string>
-#include <map>
+#include <iostream>
 
-#include <y2util/LangCode.h>
-#include <y2util/Pathname.h>
+#include <Y2PM.h>
+#include <y2pm/PMLangCode.h>
 
-#include <y2pm/PMError.h>
+using namespace std;
+using namespace PM;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : F_Medianames
-/**
- *
- **/
-class F_Medianames {
-
-  friend std::ostream & operator<<( std::ostream & str, const F_Medianames & obj );
-
-  public:
-
-    typedef std::map<LangCode,std::string> LangString;
-    typedef std::map<unsigned,LangString>  LabelMap;
-
-  private:
-
-    static const std::string _noLabel;
-
-    LabelMap _labels;
-
-  public:
-
-    F_Medianames();
-    ~F_Medianames();
-
-    const LabelMap & labels() const { return _labels; }
-
-    const std::string & label( unsigned number_r ) const;
-
-  public:
-
-   PMError read( std::istream & stream_r );
-   PMError read( const Pathname & file_r );
-};
-
+// CLASS NAME : LocaleInfo
+//
 ///////////////////////////////////////////////////////////////////
 
-#endif // F_Medianames_h
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : LocaleInfo::preferredLocale
+//	METHOD TYPE : LangCode
+//
+LangCode LocaleInfo::preferredLocale()
+{
+  return Y2PM::getPreferredLocale();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : LocaleInfo::localeFallback
+//	METHOD TYPE : LocaleOrder
+//
+LocaleOrder LocaleInfo::localeFallback( const LangCode & lang_r )
+{
+  return Y2PM::getLocaleFallback( lang_r );
+}

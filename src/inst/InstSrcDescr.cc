@@ -189,12 +189,23 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   str << "=" << DefActTag << ": " << (_default_activate?"1":"0") << endl;
   str << "=" << DefRankTag << ": " << _default_rank << endl;
   // data from media file
+#warning let F_Media read/write data
   str << "+" << MediaTag << ":" << endl;
   str << _media_vendor << endl;
   str << _media_id << endl;
   str << _media_count << endl;
   if ( _media_doublesided ) {
     str << FlagMediaDoublesided << endl;
+  }
+  for ( F_Media::LabelMap::const_iterator it = _media_labels.begin(); it != _media_labels.end(); ++it ) {
+    const PM::LocaleString::datamap & data( it->second._datamap );
+    for ( PM::LocaleString::datamap::const_iterator el = data.begin(); el != data.end(); ++el ) {
+      str << "MEDIA" << it->first;
+      if ( ! el->first->empty() ) {
+	str << '.' << el->first;
+      }
+      str << ' ' << el->second << endl;
+    }
   }
   str << "-" << MediaTag << ":" << endl;
 
@@ -410,6 +421,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     GET_POS(MEDIA).retrieveData (descrstream, multi);
     if ( multi.size() >= 3 )
     {
+#warning let F_Media read/write data
 	std::list<std::string>::iterator multi_pos = multi.begin();
 	// only check if ( !(*multi_pos).empty() ) if an empty string is an error
 	ndescr->set_media_vendor( Vendor(*multi_pos) );
@@ -417,9 +429,34 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 	ndescr->set_media_id(*multi_pos);
 	++multi_pos;
 	ndescr->set_media_count( atoi(multi_pos->c_str()) );
+
 	if ( multi.size() > 3 ) {
 	  ++multi_pos;
 	  ndescr->set_media_doublesided( *multi_pos == FlagMediaDoublesided );
+	  bool skipread = ( (*multi_pos).substr( 0, 5 ) == "MEDIA" ); // in case we got the 1st medianame here
+  F_Media::LabelMap media_labels;
+  while ( true ) {
+    if ( skipread ) {
+      skipread = false;
+    } else {
+      ++multi_pos;
+      if (  multi_pos == multi.end() )
+	break;
+    }
+    string line( *multi_pos );
+    string tag = stringutil::stripFirstWord( line );
+    if ( tag.substr( 0, 5 ) == "MEDIA" && tag.find_first_of( "123456789", 5 ) == 5 ) {
+      // MEDIA{N}[.LANG]
+      unsigned num = atoi( tag.c_str() + 5 );
+      LangCode lang;
+      string::size_type dot = tag.rfind( '.' );
+      if ( dot != string::npos ) {
+	lang = LangCode( tag.substr( dot+1 ) );
+      }
+      media_labels[num]._datamap[lang] = line;
+    }
+  }
+  ndescr->set_media_labels( media_labels );
 	}
     }
 

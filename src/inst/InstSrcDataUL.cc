@@ -30,6 +30,8 @@
 #include <y2util/stringutil.h>
 #include <y2util/TaggedFile.h>
 
+#include <y2pm/F_Media.h>
+
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/InstSrcDataUL.h>
@@ -49,6 +51,7 @@
 
 #include <Y2PM.h>
 
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -56,81 +59,6 @@ using namespace std;
 //	CLASS NAME : constInstSrcDataULPtr
 ///////////////////////////////////////////////////////////////////
 IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData);
-
-
-#warning Put MediaFile parsing and data into some class or struct!
-/**
- * read media.X/media file
- *
- * @param media_r MediaAccessPtr
- * @param number the X in media.X
- * @param vendor where to store vendor
- * @param id where to store id
- * @param count where to store count
- **/
-static PMError readMediaFile( MediaAccessPtr media_r,
-			      unsigned number, std::string& vendor, std::string& id,
-			      unsigned& count, bool & doublesided )
-{
-    vendor = id = string();
-    count = 0;
-    doublesided = false;
-
-    Pathname filename = stringutil::form("/media.%d/media", number);
-
-    MediaAccess::FileProvider contentfile( media_r, filename );
-    if ( contentfile.error() ) {
-	ERR << "Media can't provide '" << filename << "' " << contentfile.error() << endl;
-	return contentfile.error();
-    }
-
-    std::ifstream content( contentfile().asString().c_str());
-    if( ! content ) {
-	ERR << "Can't open '" << filename << "' for reading." << endl;
-	return InstSrcError::E_open_file;
-    }
-
-    enum MF_state { MF_VENDOR = 0, MF_ID, MF_COUNT, MF_FLAG, MF_NUM_STATES } state = MF_VENDOR;
-
-    string value;
-    // If not reading trimmed, at least rtrim value
-    for ( value = stringutil::getline( content, true );
-	  content.good() && state < MF_NUM_STATES;
-	  value = stringutil::getline( content, true ),
-	  state = MF_state(state+1))
-    {
-	switch (state)
-	{
-	    case MF_VENDOR:
-		    vendor = value;
-		    DBG << "vendor " << value << endl;
-		break;
-	    case MF_ID:
-		    id = value;
-		    DBG << "id " << value << endl;
-		break;
-	    case MF_COUNT:
-		    count = atoi(value.c_str());
-		    DBG << "count " << count << endl;
-		break;
-	    case MF_FLAG:
-	            doublesided = (value == "doublesided");
-		    DBG << "doublesided " << doublesided << endl;
-		break;
-	    case MF_NUM_STATES:
-		break;
-	}
-
-    }
-
-    if ( content.bad() )
-    {
-	ERR << "Error parsing " << contentfile() << endl;
-	return InstSrcError::E_no_instsrc_on_media;
-    }
-
-    return InstSrcError::E_ok;
-}
 
 //////////////////////////////////////////////////////////////////
 // static
@@ -155,35 +83,30 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     // parse InstSrcDescr from media_r and fill ndescr
     ///////////////////////////////////////////////////////////////////
 
+    // read media.1/media
     {
-	// read media.1/media
-	string vendor;
-	string id;
-	unsigned count;
-	bool doublesided;
+      Pathname filename = stringutil::form("/media.1/media" );
+      MediaAccess::FileProvider mediafile( media_r, filename );
+      if ( mediafile.error() ) {
+	ERR << "Media can't provide '" << filename << "' " << mediafile.error() << endl;
+	return mediafile.error();
+      }
 
-	err = readMediaFile(media_r, 1, vendor, id, count, doublesided);
-	if(err != PMError::E_ok )
-	    return err;
+      F_Media f_media;
+      err = f_media.read( mediafile() );
+      if( err ) {
+	return InstSrcError::E_no_instsrc_on_media;
+      }
 
-	if(vendor.empty() || id.empty())
-	{
-	    ERR << "Media must have vendor and id" << endl;
-	    return InstSrcError::E_no_instsrc_on_media;
-	}
-
-	if(count == 0)
-	{
-	    WAR << "Media count in /media.1/media may not be zero. Assume 1" << endl;
-	    count = 1;
-	}
-
-	ndescr->set_media_vendor( Vendor(vendor) );
-	ndescr->set_media_id(id);
-	ndescr->set_media_count(count);
-	ndescr->set_media_doublesided(doublesided);
+#warning Provide F_Media assign in InstSrcDescr
+      ndescr->set_media_vendor( f_media.vendor() );
+      ndescr->set_media_id( f_media.ident() );
+      ndescr->set_media_count( f_media.count() );
+      ndescr->set_media_doublesided( f_media.doublesided() );
+      ndescr->set_media_labels( f_media.labels() );
     }
 
+    // read content file
     Pathname filename = product_dir_r + "/content";
 
     MediaAccess::FileProvider contentfile( media_r, filename );
