@@ -173,6 +173,7 @@ PMYouPatchManager & Y2PM::youPatchManager()
   if ( !_youPatchManager ) {
     MIL << "Launch YouPatchManager..." << endl;
     _youPatchManager = new PMYouPatchManager;
+    _youPatchManager->poolSetInstalled( Y2PM::instTarget().getPatches () );
     MIL << "Created YouPatchManager @" << _youPatchManager << endl;
   }
   return *_youPatchManager;
