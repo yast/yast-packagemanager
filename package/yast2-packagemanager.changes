@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Mar  7 18:26:13 CET 2003 - ma@suse.de
+
+- Make Y2PM::commitPackages turn the selectables state to unmodify,
+  after the binary package was successfully installed/deleted. For
+  successfully installed source packes, clear the selectables
+  source_install flag. There's no need to process them again in later
+  calls to commitPackages (unless someone selected them again).
+- 2.7.27
+
+-------------------------------------------------------------------
 Thu Mar  6 16:27:42 CET 2003 - ma@suse.de
 
 - On Update: Disable already existing InstSources on system and install

@@ -112,6 +112,51 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 }
 
 
+class Logfile {
+  Logfile( const Logfile & );
+  Logfile & operator=( const Logfile & );
+  private:
+    static ofstream _log;
+    static unsigned _refcnt;
+    static Pathname _fname;
+    static void openLog() {
+      if ( !_fname.empty() ) {
+	_log.clear();
+	_log.open( _fname.asString().c_str(), std::ios::out|std::ios::app );
+	if( !_log )
+	  ERR << "Could not open logfile '" << _fname << "'" << endl;
+      }
+    }
+    static void closeLog() {
+      _log.clear();
+      _log.close();
+    }
+    static void refUp() {
+      if ( !_refcnt )
+	openLog();
+      ++_refcnt;
+    }
+    static void refDown() {
+      --_refcnt;
+      if ( !_refcnt )
+	closeLog();
+    }
+  public:
+    Logfile() { refUp(); }
+    ~Logfile() { refDown(); }
+    ostream & operator()() { return _log; }
+    static void setFname( const Pathname & fname_r ) {
+      if ( _refcnt )
+	closeLog();
+      _fname = fname_r;
+      if ( _refcnt )
+	openLog();
+    }
+};
+Pathname Logfile::_fname;
+ofstream Logfile::_log;
+unsigned Logfile::_refcnt = 0;
+
 /******************************************************************
 **
 **
@@ -124,6 +169,41 @@ int main()
 {
   Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
+
+  {
+    Logfile flog;
+    flog() << "test1" << endl;
+    flog.setFname( "." );
+    flog() << "test2" << endl;
+  }
+  Logfile::setFname( "log_test" );
+  {
+    Logfile flog;
+    flog() << "test3";
+    {
+      Logfile flog2;
+      Logfile::setFname( "log_test2" );
+      flog2() << "test4" << endl;
+    }
+    flog() << endl;
+  }
+  {
+    Logfile::setFname( "" );
+    Logfile flog;
+    flog() << "not" << endl;
+  }
+
+  SEC << "STOP" << endl;
+  return 0;
+
+
+
+
+
+
+
+
+
   //Y2PM::noAutoInstSrcManager();
   Timecount _t( "Launch InstTarget" );
   Y2PM::instTarget(true,"/");
@@ -142,4 +222,5 @@ int main()
   SEC << "STOP" << endl;
   return 0;
 }
+
 

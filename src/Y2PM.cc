@@ -445,6 +445,33 @@ PMYouPatchManager & Y2PM::youPatchManager()
 }
 
 
+/******************************************************************
+**
+**
+**	FUNCTION NAME : commitSucceeded
+**	FUNCTION TYPE : inline void
+*/
+inline void commitSucceeded( const PMPackagePtr & pkg_r )
+{
+  // adjust selectables state
+  if ( pkg_r && pkg_r->hasSelectable() ) {
+    pkg_r->getSelectable()->user_unset();
+  }
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : commitSrcSucceeded
+**	FUNCTION TYPE : inline void
+*/
+inline void commitSrcSucceeded( const PMPackagePtr & pkg_r )
+{
+  // adjust selectables state
+  if ( pkg_r && pkg_r->hasSelectable() ) {
+    pkg_r->getSelectable()->set_source_install( false );
+  }
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -517,6 +544,9 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		}
 	    }
 	    PMError err = instTarget().removePackage (*it);
+	    if ( ! err ) {
+	      commitSucceeded( *it );
+	    }
 
 	    if (_callbacks._package_done_func)
 	    {
@@ -698,6 +728,9 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	    }
 
 	    err = instTarget().installPackage (path);
+	    if ( ! err ) {
+	      commitSucceeded( *it );
+	    }
 
 	    if (_callbacks._package_done_func)
 	    {
@@ -828,6 +861,9 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		    }
 
 		    err = instTarget().installPackage (path);
+		    if ( ! err ) {
+		      commitSrcSucceeded( *it );
+		    }
 
 		    if (_callbacks._package_done_func)
 		    {
