@@ -1,6 +1,6 @@
 @HEADER-COMMENT@
 
-# neededforbuild  autoconf automake gpp libgpp libycp libycp-devel yast2-devtools ydoc
+# neededforbuild  autoconf automake gpp libgpp yast2-core yast2-core-devel yast2-devtools
 
 @HEADER@
 Summary:	-
@@ -10,7 +10,9 @@ Summary:	-
 
 @HEADER-DEVEL@
 Summary:	-
-Provides:	liby2:/usr/lib/YaST2/include/Y2.h
+
+# FIXME: required for logging only
+Requires: yast2-core
 
 %description devel
 -
