@@ -224,6 +224,7 @@ class PMSolvable : virtual public Rep {
 
 
     PkgAttributeValue PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const;
+    std::list<std::string> PkgRelList2StringList ( const PkgRelList_type & rellist_r ) const;
 
     void setName(PkgName& n) { _name = n; };
 
