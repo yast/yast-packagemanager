@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Sep 23 11:39:40 CEST 2003 - ma@suse.de
+
+- Prevent installation of source rpms from accessing a media, which
+  YaST was told to skip. Do not forgett to install source rpms from
+  media not needed for binary packages.(#31559)
+- 2.8.30
+
+-------------------------------------------------------------------
 Mon Sep 22 11:15:36 CEST 2003 - ma@suse.de
 
 - Fixed possible endless loop when skipping media during install.
