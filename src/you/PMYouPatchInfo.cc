@@ -10,7 +10,8 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMYouPatchInfo.cc
+  File:       PMYouPatchInfo.ccIMPL_BASE_POINTER(PMSolvable);
+
 
   Author:     Cornelius Schumacher <cschum@suse.de>
   Maintainer: Cornelius Schumacher <cschum@suse.de>
@@ -35,11 +36,14 @@
 
 using namespace std;
 
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMYouPatchInfo
 //
 ///////////////////////////////////////////////////////////////////
+
+IMPL_BASE_POINTER(PMYouPatchInfo);
 
 PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 {
@@ -57,7 +61,6 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 
 PMYouPatchInfo::~PMYouPatchInfo()
 {
-    delete _paths;
     delete _patchFiles;
     delete _packagetagset;
     delete _patchtagset;
@@ -380,10 +383,9 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 //
 //	DESCRIPTION :
 //
-PMError PMYouPatchInfo::getPatches( PMYouPatchPaths *paths,
+PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
                                     list<PMYouPatchPtr> &patches )
 {
-    delete _paths;
     _paths = paths;
     return readDir( paths->patchUrl(), paths->patchPath(), patches );
 }

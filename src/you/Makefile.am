@@ -22,4 +22,5 @@ liby2pmyou_la_SOURCES = \
 	PMYouPatchManager.cc \
         PMYouPatchInfo.cc \
         PMYouPackageDataProvider.cc \
-        PMYouPatchPaths.cc
+        PMYouPatchPaths.cc \
+        InstYou.cc

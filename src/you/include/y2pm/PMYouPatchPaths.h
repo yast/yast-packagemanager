@@ -28,8 +28,10 @@
 #include <y2util/Pathname.h>
 
 #include <y2pm/PMError.h>
-
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PkgArch.h>
+
+#include <y2pm/PMYouPatchPathsPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -37,9 +39,11 @@
 /**
  * Pathes for patches.
  **/
-class PMYouPatchPaths {
+class PMYouPatchPaths : virtual public Rep {
+  REP_BODY(PMYouPatchPaths);
 
   public:
+    PMYouPatchPaths() {}
     PMYouPatchPaths( const std::string &product, const std::string &version,
                      const std::string &arch );
 

@@ -39,6 +39,8 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
+IMPL_BASE_POINTER(PMYouPatchPaths);
+
 PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
                                   const string &arch )
   : _arch( arch )
