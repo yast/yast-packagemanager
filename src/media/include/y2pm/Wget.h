@@ -17,6 +17,10 @@
    
 /*
  * $Log$
+ * Revision 1.5  2002/09/05 12:57:06  cschum
+ * Add optional Cookie support to Wget class.
+ * Support Cookies when getting the server list from www.suse.de.
+ *
  * Revision 1.4  2002/09/04 09:22:42  cschum
  * Implemented user/password authentification.
  *
@@ -98,6 +102,12 @@ public:
   void setProxyUser( const std::string username, const std::string passwd);
     
   /**
+    Set file used to load and save cookies. If this isn't set cookies aren't
+    handled.
+  */
+  void setCookiesFile( const std::string &filename );
+
+  /**
    * Error status to string
    */
   std::string error_string ( WgetStatus status );
@@ -110,6 +120,7 @@ private:
     std::string proxyUser;
     std::string proxyPassword;
 
+  std::string _cookiesFile;
     
   /**
    * The connection to the wget process.

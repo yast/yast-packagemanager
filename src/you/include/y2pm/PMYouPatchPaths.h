@@ -93,6 +93,8 @@ class PMYouPatchPaths : virtual public Rep {
     
     Url defaultServer();
 
+    Pathname cookiesFile();
+
   protected:
     void init( const std::string &path );
 
