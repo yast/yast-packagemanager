@@ -209,11 +209,30 @@ int main( int argc, char * argv[] )
 
   //Y2PM::setNotRunningFromSystem();
   //Y2PM::instTargetInit("/");
-  Y2PM::instSrcManager();
+  //Y2PM::instSrcManager();
   //InstSrcManager::ISrcId nid = newSrc( "/mounts/work/CDs/all/full-x86_64/suse/i586" );
   //InstSrcManager::ISrcId nid = newSrc( "/tmp/foo" );
   //ISM.enableSource( nid );
-  ISM.disableAllSources();
+  //ISM.disableAllSources();
+  string u( "ftp://10.20.0.20/netboot/find/SuSE-9.2-Prof-i386-Beta2-CD1/media.1" );
+  u += ";proxy=10.20.1.24;proxyport=8080;proxyproto=http";
+
+  Url url( u );
+  PMError err;
+  MediaAccessPtr  media = new MediaAccess;
+  if ( (err = media->open( url )) ) {
+    ERR << "Failed to open " << url << " " << err << endl;
+    return err;
+  }
+  if ( (err = media->attach()) ) {
+    ERR << "Failed to attach media: " << err << endl;
+    return err;
+  }
+  if ( (err = media->provideFile( "/media" )) ) {
+    ERR << "Failed to provide: " << err << endl;
+    return err;
+  }
+
 
 #if 0
   Pathname cachefile_r( "/tmp/foo/IS_PLAINcache" );

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep 29 13:02:27 CEST 2004 - ma@suse.de
+
+- Don't pass URL options which libcurl does not understand (#45477)
+
+-------------------------------------------------------------------
 Wed Sep 29 00:23:30 CEST 2004 - ma@suse.de
 
 - Fixed SEGV on loading rpm header data. (#45941)
