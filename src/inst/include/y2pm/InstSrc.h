@@ -28,10 +28,15 @@
 #include <list>
 #include <string>
 
-#include <y2pm/InstSrcPtr.h>		// pointer to self
-#include <y2pm/MediaAccessPtr.h>	// physical media access class
-#include <y2pm/InstSrcDescrPtr.h>	// source description
-#include <y2pm/InstSrcDataPtr.h>	// source content
+#include <y2util/Pathname.h>
+
+#include <y2pm/InstSrc.h>		// pointer to self
+#include <y2pm/MediaAccess.h>		// physical media access class
+#include <y2pm/InstSrcDescr.h>		// source description
+#include <y2pm/InstSrcData.h>		// source content
+
+#include <y2pm/PMSolvable.h>
+#include <y2pm/PMPackage.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -47,17 +52,17 @@ class InstSrc: virtual public Rep {
     /**
      * direct media access
      */
-    MediaAccessPtr	_media;
+    MediaAccess	*_media;
 
     /**
      * description of media
      */
-    InstSrcDescrPtr     _descr;
+    InstSrcDescr *_descr;
 
     /**
      * content of media
      */
-    InstSrcDataPtr      _data;
+    InstSrcData *_data;
 
   public:
     /**
@@ -97,13 +102,13 @@ class InstSrc: virtual public Rep {
      * @return description of Installation source
      * This is needed by the InstSrcMgr
      */
-    const InstSrcDescrPtr getDescription() const;
+    const InstSrcDescr *getDescription() const;
 
     /**
      * register this source (store cache files etc)
      * return pathname of saved content file
      */
-    const Pathname & registerSource (void) const;
+    const Pathname registerSource (void) const;
 
     //-----------------------------
     // activation status

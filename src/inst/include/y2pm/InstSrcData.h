@@ -26,6 +26,7 @@
 
 #include <y2pm/InstSrcDataPtr.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSolvablePtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -35,11 +36,67 @@ class InstSrcData: virtual public Rep {
 
   public:
 
-    InstSrcData ();
+    /**
+     * constructor
+     * initialization with new media
+     */
+    InstSrcData (MediaAccess *media);
+
+    /**
+     * constructor
+     * initialization with known media
+     */
+    InstSrcData (const Pathname & contentcachefile);
 
     virtual ~InstSrcData();
 
   public:
+
+    //-----------------------------
+    // cache file handling
+    /**
+     * write media content data to cache file
+     * @param pathname of corresponding InstSrcDescr cache file
+     * @return pathname of written cache
+     * writes content cache data to an ascii file
+     */
+    const Pathname writeCache (const Pathname &descrpathname);
+
+    //-----------------------------
+    // source content access
+
+    /**
+     * return the number of selections on this source
+     */
+    int numSelections() const;
+
+    /**
+     * return the number of packages on this source
+     */
+    int numPackages() const;
+
+    /**
+     * return the number of patches on this source
+     */
+    int numPatches() const;
+
+    /**
+     * generate PMSolvable objects for each selection on the source
+     * @return list of PMSolvablePtr on this source
+     */
+    std::list<PMSolvablePtr> getSelections();
+    
+    /**
+     * generate PMPackage objects for each Item on the source
+     * @return list of PMPackagePtr on this source
+     * */
+    std::list<PMPackagePtr> getPackages();
+
+    /**
+     * generate PMSolvable objects for each patch on the source
+     * @return list of PMSolvablePtr on this source
+     */
+    std::list<PMSolvablePtr> getPatches();
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 };

@@ -39,7 +39,7 @@ IMPL_HANDLES(InstSrcData);
 //
 //	DESCRIPTION :
 //
-InstSrcData::InstSrcData(MediaInfoPtr media_r) : _media(media_r)
+InstSrcData::InstSrcData()
 {
 }
 

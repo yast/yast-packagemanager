@@ -41,10 +41,48 @@ IMPL_HANDLES(InstSrcDescr);
 //	METHOD NAME : InstSrcDescr::InstSrcDescr
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
+//	DESCRIPTION : initialization with new media
 //
-InstSrcDescr::InstSrcDescr()
+InstSrcDescr::InstSrcDescr (MediaAccessPtr media)
 {
+    MediaHandler _handler = media.handler;
+    if (_handler)
+    {
+	Pathname mountpoint = _handler->getAttachPoint();
+
+	// try new-style ".media" file first
+
+	Pathinfo *info = _handler->fileInfo (".media");
+	if (info != 0)
+	{
+	    // parse new ".media" file
+	    parseMediaFile (mountpoint, new_media);
+	}
+	else
+	{
+	    // parse old "suse/setup/descr/info" file
+	    Pathname susefile = _handler->findFile (".S.u.S.E-disk-*");
+	    if (susefile != "")
+	    {
+		parseSuSEFile (mountpoint, susefile, new_media);
+	    }
+	}
+    }
+
+    return;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDescr::InstSrcDescr
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION : initialization with known media
+int
+InstSrcDescr::InstSrcDescr (const Pathname & contentfile)
+{
+    return 0;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -165,49 +203,6 @@ fprintf (stderr, "parseSuSEFile(%s) = %p\n", filename.asString().c_str(), info);
     return;
 }
 
-
-
-/**
- * initialization with new media
- */
-int
-InstSrcDescr::init (MediaAccessPtr media)
-{
-    MediaHandler _handler = media.handler;
-    if (_handler)
-    {
-	Pathname mountpoint = _handler->getAttachPoint();
-
-	// try new-style ".media" file first
-
-	Pathinfo *info = _handler->fileInfo (".media");
-	if (info != 0)
-	{
-	    // parse new ".media" file
-	    parseMediaFile (mountpoint, new_media);
-	}
-	else
-	{
-	    // parse old "suse/setup/descr/info" file
-	    Pathname susefile = _handler->findFile (".S.u.S.E-disk-*");
-	    if (susefile != "")
-	    {
-		parseSuSEFile (mountpoint, susefile, new_media);
-	    }
-	}
-    }
-
-    return 0;
-}
-
-/**
- * initialization with known media
- */
-int
-InstSrcDescr::init (const Pathname & contentfile)
-{
-    return 0;
-}
 
 
 /**

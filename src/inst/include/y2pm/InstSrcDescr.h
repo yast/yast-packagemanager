@@ -46,18 +46,15 @@ class REP_CLASS(InstSrcDescr) {
 
     /**
      * constructor
-     */
-    InstSrcDescr (void);
-
-    /**
      * initialization with new media
      */
-    int init (MediaAccessPtr media);
+    InstSrcDescr (MediaAccess *media);
 
     /**
+     * constructor
      * initialization with known media
      */
-    int init (const Pathname & contentfile);
+    InstSrcDescr (const Pathname & descrcachefile);
 
     virtual ~InstSrcDescr();
   
@@ -70,7 +67,7 @@ class REP_CLASS(InstSrcDescr) {
      */
     bool _activated;
 
-    std::string _url		// url for media access
+    std::string _url;		// url for media access
     int count;			// media count (if spawned on multiple cds)
     std::string _id;		// ID code for media match
 
@@ -86,11 +83,12 @@ class REP_CLASS(InstSrcDescr) {
     int _numparts;
     std::list<std::string> _architectures;
 
-
+    // internal helper function
+    // used to parse suse/setup/descr/info
     void parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile, bool new_media);
 
   public:
-    string getURL (void) const { return _url; }
+    std::string getURL (void) const { return _url; }
 
     /**
      * write media description to cache file
@@ -98,6 +96,19 @@ class REP_CLASS(InstSrcDescr) {
      * writes private data to an ascii file
      */
     const Pathname writeCache (void);
+
+    //-----------------------------
+    // activation status
+
+    /**
+     * return activation status
+     */
+    bool getActivation() const;
+
+    /**
+     * temporary (de)activate source
+     */
+    void setActivation (bool yesno);
 
     const std::string& Vendor() const { return _vendor; }
     const std::string& Language() const { return _default_language; }

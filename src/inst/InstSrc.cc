@@ -36,7 +36,7 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_HANDLES(InstSrc);
+//IMPL_HANDLES(InstSrc);
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -54,15 +54,24 @@ IMPL_HANDLES(InstSrc);
      */
 InstSrc::InstSrc ( const std::string & mediaurl )
 {
+    _media = new MediaAccess ();
+
+    if (_media == 0)
+	abort();
+
     // open media by url
-    if (_media.open (mediaurl) != E_none)
+    if (_media->open (mediaurl) != 0)
     {
 	D__ << "_media.open (" << mediaurl << ") failed." << std::endl;
+	return;
     }
-    else
-    {
-	_descr.init (_media);	// retrieve description data from media
-    }
+
+    // retrieve description data from media
+    _descr = new InstSrcDescr (media);
+    if (_descr == 0)
+	abort();
+
+    return;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -81,7 +90,9 @@ InstSrc::InstSrc ( const std::string & mediaurl )
      */
 InstSrc::InstSrc ( const Pathname & contentfile )
 {
-    _descr.init (contentfile);		// read description data from file
+    _descr = new InstSrcDescr (contentfile);
+    if (_descr == 0)
+	abort();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -95,7 +106,7 @@ InstSrc::InstSrc ( const Pathname & contentfile )
 InstSrc::~InstSrc()
 {
     if (_media)
-	_media.close ();
+	_media->close ();
 }
 
 //-----------------------------
@@ -115,7 +126,7 @@ InstSrc::Erase()
  * @return description of Installation source
  * This is needed by the InstSrcMgr
  */
-const InstSrcDescrPtr
+const InstSrcDescr *
 InstSrc::getDescription() const
 {
     D__ << __FUNCTION__ << std::endl;
@@ -126,11 +137,11 @@ InstSrc::getDescription() const
  * register this source (store cache files etc)
  * return pathname of saved content file
  */
-const Pathname &
+const Pathname
 InstSrc::registerSource (void) const
 {
     D__ << __FUNCTION__ << std::endl;
-    return _descr.writeCache ();
+    return _descr->writeCache ();
 }
 
 //-----------------------------
@@ -143,7 +154,7 @@ bool
 InstSrc::getActivation() const
 {
     D__ << __FUNCTION__ << std::endl;
-    return _descr.getActivation();
+    return _descr->getActivation();
 }
 
 
@@ -154,7 +165,7 @@ void
 InstSrc::setActivation (bool yesno)
 {
     D__ << __FUNCTION__ << std::endl;
-    return _descr.setActivation (yesno);
+    return _descr->setActivation (yesno);
 }
 
 //-----------------------------
@@ -167,7 +178,7 @@ int
 InstSrc::numSelections() const
 {
     D__ << __FUNCTION__ << std::endl;
-    return _data.numSelections();
+    return _data->numSelections();
 }
 
 
@@ -178,7 +189,7 @@ int
 InstSrc::numPackages() const
 {
     D__ << __FUNCTION__ << std::endl;
-    return _data.numPackages();
+    return _data->numPackages();
 }
 
 
@@ -189,7 +200,7 @@ int
 InstSrc::numPatches() const
 {
     D__ << __FUNCTION__ << std::endl;
-    return _data.numPatches();
+    return _data->numPatches();
 }
 
 
@@ -201,7 +212,7 @@ std::list<PMSolvablePtr>
 InstSrc::getSelections()
 {
     D__ << __FUNCTION__ << std::endl;
-    return _data.getSelections();
+    return _data->getSelections();
 }
 
 /**
@@ -209,10 +220,10 @@ InstSrc::getSelections()
  * @return list of PMPackagePtr on this source
  * */
 std::list<PMPackagePtr>
-InstSrc::getPackages();
+InstSrc::getPackages()
 {
     D__ << __FUNCTION__ << std::endl;
-    return _data.getPackages();
+    return _data->getPackages();
 }
 
 /**
@@ -223,7 +234,7 @@ std::list<PMSolvablePtr>
 InstSrc::getPatches()
 {
     D__ << __FUNCTION__ << std::endl;
-    return _data.getPatches();
+    return _data->getPatches();
 }
 
 ///////////////////////////////////////////////////////////////////
