@@ -28,54 +28,6 @@
 
 using namespace std;
 
-
-const char* const PMPackage::PackageAttributeNames[] = {
-      "Buildtime",
-      "Installtime",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)",
-      "type yourself, i'm too lazy ;)"
-};
-
-const char* const PMPackage::PackageQueryFormat[] = {
-      "%{SUMMARY}",
-      "%{DESCRIPTION}",
-      "%{SIZE}",
-      "%{BUILDTIME}",
-      "%{INSTALLTIME}",
-      "%{DISTRIBUTION}",
-      "%{VENDOR}",
-      "%{LICENSE}",
-      "%{PACKAGER}",
-      "%{GROUP}",
-      "%{CHANGELOG}",
-      "%{URL}",
-      "%{OS}",
-      "%{ARCH}",
-      "%{PREIN}",
-      "%{POSTIN}",
-      "%{PREUN}",
-      "%{POSTUN}",
-      "%{SOURCERPM}",
-      "%{ARCHIVESIZE}"
-};
-
-
-
-
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMPackage
@@ -157,7 +109,69 @@ std::string PMPackage::getAttributeValue(PMPackageAttribute attr)
 
 std::string PMPackage::getAttributeName(PMPackageAttribute attr)
 {
-    return PackageAttributeNames[attr-PMOBJ_NUM_ATTRIBUTES];
+    const char* str;
+    switch(attr)
+    {
+	case PMPackage::PKG_BUILDTIME:
+	    str = "BUILDTIME";
+	    break;
+	case PMPackage::PKG_BUILDHOST:
+	    str = "BUILDHOST";
+	    break;
+	case PMPackage::PKG_INSTALLTIME:
+	    str = "INSTALLTIME";
+	    break;
+	case PMPackage::PKG_DISTRIBUTION:
+	    str = "DISTRIBUTION";
+	    break;
+	case PMPackage::PKG_VENDOR:
+	    str = "VENDOR";
+	    break;
+	case PMPackage::PKG_LICENSE:
+	    str = "LICENSE";
+	    break;
+	case PMPackage::PKG_PACKAGER:
+	    str = "PACKAGER";
+	    break;
+	case PMPackage::PKG_GROUP:
+	    str = "GROUP";
+	    break;
+	case PMPackage::PKG_CHANGELOG:
+	    str = "CHANGELOG";
+	    break;
+	case PMPackage::PKG_URL:
+	    str = "URL";
+	    break;
+	case PMPackage::PKG_OS:
+	    str = "OS";
+	    break;
+	case PMPackage::PKG_ARCH:
+	    str = "ARCH";
+	    break;
+	case PMPackage::PKG_PREIN:
+	    str = "PREIN";
+	    break;
+	case PMPackage::PKG_POSTIN:
+	    str = "POSTIN";
+	    break;
+	case PMPackage::PKG_PREUN:
+	    str = "PREUN";
+	    break;
+	case PMPackage::PKG_POSTUN:
+	    str = "POSTUN";
+	    break;
+	case PMPackage::PKG_SOURCERPM:
+	    str = "SOURCERPM";
+	    break;
+	case PMPackage::PKG_ARCHIVESIZE:
+	    str = "ARCHIVESIZE";
+	    break;
+	case PMPackage::PKG_NUM_ATTRIBUTES:
+	    // invalid
+	    return "invalid query";
+    }
+    
+    return str;
 }
 
 ///////////////////////////////////////////////////////////////////

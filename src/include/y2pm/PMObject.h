@@ -44,10 +44,6 @@ class REP_CLASS(PMObject), public PMSolvable {
       PMOBJ_NUM_ATTRIBUTES
     };
 
-  private:
-
-      static const char* const PMObjectAttributeNames[PMOBJ_NUM_ATTRIBUTES];
-
   public:
 
     PMObject( const PkgName &    name_r,

@@ -63,15 +63,6 @@ class REP_CLASS(PMPackage), public PMObject {
       PKG_NUM_ATTRIBUTES
   };
 
-  private:
-
-	static const char* const
-	    PackageAttributeNames[PKG_NUM_ATTRIBUTES-PMOBJ_NUM_ATTRIBUTES];
-
-	/** stores rpm queryformat string for every attribute */
-	static const char* const
-	    PMPackage::PackageQueryFormat[PKG_NUM_ATTRIBUTES];
-
   protected:
 
     PkgArch _arch;
