@@ -1076,6 +1076,28 @@ void commit(vector<string>& argv)
     std::list<std::string> remaining_r;
     std::list<std::string> srcremaining_r;
 
+    Pathname etc(_rootdir);
+    etc+="/etc";
+    PathInfo::assert_dir(etc);
+
+    PathInfo passwd(etc+"passwd");
+    if(!passwd.isExist())
+    {
+	ofstream os;
+	os.open(passwd.asString().c_str());
+	os << "root:x:0:0:root:/root:/bin/bash" << endl;
+	os.close();
+    }
+
+    passwd = etc+"group";
+    if(!passwd.isExist())
+    {
+	ofstream os;
+	os.open(passwd.asString().c_str());
+	os << "root:x:0:root" << endl;
+	os.close();
+    }
+
     Y2PM::commitPackages (0,errors_r, remaining_r, srcremaining_r);
 
     if(!remaining_r.empty())
@@ -1089,7 +1111,7 @@ void commit(vector<string>& argv)
 
     if(variables["quitoncommit"].getBool())
     {
-	exit(0);
+	_keep_running = false;
     }
     else
     {
@@ -1328,6 +1350,8 @@ int main( int argc, char *argv[] )
 
     init_variables();
 
+    ::setenv("YAST_IS_RUNNING","1",1);
+
     cout << "Welcome to the YaST2 Package Manager!" << endl;
     cout << "This tool is meant for debugging purpose only." << endl << endl;
     cout << "type help for help, ^D to exit" << endl << endl;
@@ -1412,6 +1436,7 @@ int main( int argc, char *argv[] )
 
 	add_history(inputstr.c_str());
     readnext:
+	if(!_keep_running) break;
 	buf = readline(prompt);
     }
 
