@@ -48,17 +48,17 @@ testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline -lncurses
 testinstall_LDFLAGS = -static
 
 test_patchinfo_SOURCES = test_patchinfo.cc show_pm.cc
-test_patchinfo_LDADD = $(top_srcdir)/src/liby2pm.la
+test_patchinfo_LDADD = $(top_builddir)/src/liby2pm.la
 test_patchinfo_LDFLAGS = -static
 
 test_content_SOURCES = test_content.cc show_pm.cc
-test_content_LDADD = $(top_srcdir)/src/liby2pm.la
+test_content_LDADD = $(top_builddir)/src/liby2pm.la
 test_content_LDFLAGS = -static
 
 test_packages_SOURCES = test_packages.cc show_pm.cc
-test_packages_LDADD = $(top_srcdir)/src/liby2pm.la
+test_packages_LDADD = $(top_builddir)/src/liby2pm.la
 test_packages_LDFLAGS = -static
 
 test_selections_SOURCES = test_selections.cc show_pm.cc
-test_selections_LDADD = $(top_srcdir)/src/liby2pm.la
+test_selections_LDADD = $(top_builddir)/src/liby2pm.la
 test_selections_LDFLAGS = -static

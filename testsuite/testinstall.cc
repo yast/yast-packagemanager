@@ -492,7 +492,7 @@ int main( int argc, char *argv[] )
     {
 	vector<string> argv;
 	unsigned i;
-	if(RpmDb::tokenize(buf, ' ', argv) < 1)
+	if(RpmDb::tokenize(buf, ' ', 0, argv) < 1)
 	{
 	    free(buf);
 	    break;
