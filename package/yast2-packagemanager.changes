@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 22 12:59:31 CET 2003 - lnussel@suse.de
+
+- look in virtual installed set for provides of installed packages, fixes
+  #21829
+
+-------------------------------------------------------------------
 Mon Jan 20 10:46:49 CET 2003 - cschum@suse.de
 
 - Read a path prefix from /media.1/patches which is prepended to

@@ -14,7 +14,7 @@ unsigned PkgDep::default_max_remove = 10;
 bool PkgDep::also_provided_by_installed( const PkgRelation& req )
 {
 	bool also_provided_by_installed = false;
-	RevRel_for( installed.provided()[req.name()], prov ) {
+	RevRel_for( vinstalled.provided()[req.name()], prov ) {
 		if (req.matches( prov->relation() )) {
 			also_provided_by_installed = true;
 			break;
