@@ -135,7 +135,7 @@ class PMSolvable : virtual public Rep {
     /**
      * add a provides: by PkgName
      */
-    const PkgRelation& addProvides( PkgName name ) {
+    const PkgRelation& addProvides(const PkgName name ) {
       _provides.push_front( PkgRelation( name, EQ, PkgEdition(PkgEdition::UNSPEC) ));
       return *(_provides.begin());
     }
@@ -150,7 +150,7 @@ class PMSolvable : virtual public Rep {
     /**
      * set provides list
      */
-    const PkgRelList_type& setProvides(PkgRelList_type& provides)
+    const PkgRelList_type& setProvides(const PkgRelList_type& provides)
     {
       _provides = provides;
       return _provides;
@@ -159,7 +159,7 @@ class PMSolvable : virtual public Rep {
     /**
      * set requires list
      */
-    const PkgRelList_type& setRequires(PkgRelList_type& requires)
+    const PkgRelList_type& setRequires(const PkgRelList_type& requires)
     {
       _requires = requires;
       return _requires;
@@ -173,12 +173,12 @@ class PMSolvable : virtual public Rep {
      *
      * @return reference to requires
      */
-    const PkgRelList_type& addPreRequires(PkgRelList_type& prerequires);
+    const PkgRelList_type& addPreRequires(const PkgRelList_type& prerequires);
 
     /**
      * set obsoletes list
      */
-    const PkgRelList_type& setObsoletes(PkgRelList_type& obsoletes)
+    const PkgRelList_type& setObsoletes(const PkgRelList_type& obsoletes)
     {
       _obsoletes = obsoletes;
       return _obsoletes;
@@ -187,7 +187,7 @@ class PMSolvable : virtual public Rep {
     /**
      * set conflicts list
      */
-    const PkgRelList_type& setConflicts(PkgRelList_type& conflicts)
+    const PkgRelList_type& setConflicts(const PkgRelList_type& conflicts)
     {
       _conflicts = conflicts;
       return _conflicts;
@@ -196,7 +196,7 @@ class PMSolvable : virtual public Rep {
     /**
      * add a requires relation to the front
      */
-    const PkgRelation& addRequires(PkgRelation& r) {
+    const PkgRelation& addRequires(const PkgRelation& r) {
       _requires.push_front(r);
       return *(_requires.begin());
     }
