@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Aug 13 12:21:58 CEST 2004 - lnussel@suse.de
+
+- re-enable hack to check dependencies of packages that obsolete installed ones
+  first.
+- fix a debug log message
+- 2.10.7
+
+-------------------------------------------------------------------
 Thu Aug 12 11:33:12 CEST 2004 - jsrain@suse.cz
 
 - added libpng to neededforbuild

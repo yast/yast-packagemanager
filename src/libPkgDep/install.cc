@@ -38,7 +38,7 @@ bool PkgDep::P::is_obsoleted_by_candidate(PkgSet& candidates, PMSolvablePtr pkg,
 	
 	    if (obs->relation().matches( *prov ))
 	    {
-		D__ << pkg->nameEd() << " obsoleted by candidate " << (*prov).name() << endl;
+		D__ << pkg->nameEd() << " obsoleted by candidate " << obs->pkg()->name() << endl;
 		if(res)
 		{
 		    res->add_conflict(*obs, _dep, obs->pkg(), pkg, RelInfo::OBSOLETION);
@@ -113,7 +113,7 @@ bool PkgDep::install( PkgSet& in_candidates,
 		}
 		else {
 			++numtocheck;
-#if 0
+#if 1
 			bool pushfront=false;
 			// ensure that packages that obsolete something
 			// installed are checked first
