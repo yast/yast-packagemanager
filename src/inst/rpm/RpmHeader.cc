@@ -85,7 +85,8 @@ RpmHeader::~RpmHeader()
 //	METHOD NAME : RpmHeader::readPackage
 //	METHOD TYPE : constRpmHeaderPtr
 //
-constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r, bool checkDigest )
+constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r,
+					  VERIFICATION verification_r )
 {
   PathInfo file( path_r );
   if ( ! file.isFile() ) {
@@ -102,12 +103,18 @@ constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r, bool checkDig
   }
 
   rpmts ts = ::rpmtsCreate();
-  rpmVSFlags vsflag = rpmVSFlags( checkDigest ? (_RPMVSF_NOSIGNATURES)
-					      : (_RPMVSF_NOSIGNATURES | _RPMVSF_NODIGESTS) );
-  ::rpmtsSetVSFlags( ts, vsflag );
+  unsigned vsflag = RPMVSF_DEFAULT;
+  if ( verification_r & NODIGEST )
+    vsflag |= _RPMVSF_NODIGESTS;
+  if ( verification_r & NOSIGNATURE )
+    vsflag |= _RPMVSF_NOSIGNATURES;
+  ::rpmtsSetVSFlags( ts, rpmVSFlags(vsflag) );
+
   Header nh = 0;
   int res = ::rpmReadPackageFile( ts, fd, path_r.asString().c_str(), &nh );
+
   ts = ::rpmtsFree(ts);
+
   ::Fclose( fd );
 
   if ( ! nh ) {
