@@ -174,6 +174,19 @@ InstTarget::getPatches (void) const
 //--------------------------------------------------------------------
 // target specific functions
 
+void
+InstTarget::setBackupPath (const Pathname& path)
+{
+    _rpmdb->setBackupPath (path);
+}
+
+Pathname
+InstTarget::getBackupPath ()
+{
+    return _rpmdb->getBackupPath ();
+}
+
+
 void InstTarget::setPkgInstFlags(unsigned flags)
 {
     _rpminstflags = flags;
