@@ -23,6 +23,7 @@
 #ifndef mount_h
 #define mount_h
 #include <set>
+#include <map>
 #include <string>
 
 #include <y2pm/MediaError.h>
@@ -46,6 +47,21 @@ class Mount
 	 * to mount
 	 **/
 	typedef ExternalProgram::Environment Environment;
+
+	/**
+	 * Mount options. 'key' or 'key=value' pairs, separated by ','
+	 **/
+	typedef std::map<std::string,std::string> Options;
+
+	/**
+	 * Split mount options string into map
+	 **/
+	static Options splitOptions( const std::string & options_r );
+
+	/**
+	 * Join mount options map into string
+	 **/
+	static std::string joinOptions( const Options & options_r );
 
     public:
 
