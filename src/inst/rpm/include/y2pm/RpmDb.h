@@ -24,7 +24,7 @@
 #ifndef RpmDb_h
 #define RpmDb_h
 
-#include <iosfwd>
+#include <fstream>
 #include <set>
 #include <string>
 #include <list>
@@ -230,6 +230,15 @@ class RpmDb: virtual public Rep
 	 * */
 	const std::string& getRoot() const { return _rootdir.asString(); }
 
+	/**
+	 * set logfile for progress log.
+	 *
+	 * @param filename file to log into, empty to disable logging
+	 *
+	 * @return true if file was successfully opened
+	 * */
+	bool setInstallationLogfile( const std::string& filename );
+
     private:
 
 	/** progress callback */
@@ -310,6 +319,9 @@ class RpmDb: virtual public Rep
 	/** whether rpmdb is ready to use */
 	bool _initialized;
 
+	/** progress of installation will be logged here */
+	std::ofstream _progresslogstream;
+
 	/* parse string of the form name/number/version into rellist. number is
 	 * the rpm number representing the operator <, <=, = etc. number&64
 	 * means prerequires
@@ -329,6 +341,17 @@ class RpmDb: virtual public Rep
 	 * */
 	bool queryPackage (const std::string& package, const char *qparam, const char *format, std::string& result_r);
 	bool queryPackage (const std::string& package, const char *qparam, const char *format, std::list<std::string>& result_r);
+
+	/**
+	 * handle rpm messages like "/etc/testrc saved as /etc/testrc.rpmorig"
+	 *
+	 * @param line rpm output starting with warning:
+	 * @param name name of package, appears in subject line
+	 * @param typemsg " saved as " or " created as "
+	 * @param difffailmsg what to put into mail if diff failed, must contain two %s for the two files
+	 * @param diffgenmsg what to put into mail if diff succeeded, must contain two %s for the two files
+	 * */
+	void processConfigFiles(const std::string& line, const std::string& name, const char* typemsg, const char* difffailmsg, const char* diffgenmsg);
 
     public: // static members
 

@@ -45,6 +45,8 @@ using namespace std;
 
 static int _verbose = 0;
 
+static string _instlog;
+
 void install(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
@@ -54,6 +56,7 @@ void remove(vector<string>& argv);
 void verbose(vector<string>& argv);
 void debug(vector<string>& argv);
 void rpminstall(vector<string>& argv);
+void instlog(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -71,6 +74,7 @@ static struct Funcs func[] = {
     { "help",       help,       "this screen" },
     { "verbose",    verbose,    "set verbosity level" },
     { "debug",      debug,      "switch on/off debug" },
+    { "instlog",    instlog,    "set installation log file" },
     { NULL,         NULL,       NULL }
 };
 
@@ -89,6 +93,31 @@ void usage(char **argv) {
 "	remove <pkgname>		Remove this package.\n"
 	    ;
 	exit(1);
+}
+
+void instlog(vector<string>& argv)
+{
+    if(argv.size()<2)
+    {
+	cout << "Usage: instlog <--clear|path to logfile>" << endl;
+	return;
+    }
+
+    _instlog = argv[1];
+
+    if(_instlog == "--clear")
+    {
+	_instlog.erase();
+	cout << "disable install log";
+    }
+    else
+    {
+	cout << "set install log to " << _instlog;
+    }
+
+    bool ret = Y2PM::instTarget().setInstallationLogfile(_instlog);
+
+    cout << (ret?" ok":" failed") << endl;
 }
 
 void verbose(vector<string>& argv)
@@ -382,9 +411,9 @@ void remove(vector<string>& argv)
 
     engine.remove(list1);
 
+    cout << "Additionally removing ";
     for(PkgDep::NameList::iterator it = list1.begin(); it != list1.end(); ++it)
     {
-	cout << "Additionally removing ";
 	if(find(list2.begin(),list2.end(),*it) == list2.end())
 	{
 	    cout << *it << " ";
