@@ -33,6 +33,8 @@
 #include <y2pm/YouError.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/PMPackageManager.h>
+#include <y2pm/PMSelectable.h>
 
 #include <y2pm/PMYouPatchPaths.h>
 
@@ -55,6 +57,14 @@ PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
                                   const string &baseArch )
 {
   init( product, version, baseArch );
+}
+
+PMYouPatchPaths::~PMYouPatchPaths()
+{
+  if ( _config ) {
+    _config->save();
+    delete _config;
+  }
 }
 
 void PMYouPatchPaths::init( const string &product, const string &version,
@@ -91,6 +101,8 @@ void PMYouPatchPaths::init( const string &product, const string &version,
 
 void PMYouPatchPaths::init( const string &path )
 {  
+  _config = 0;
+
   if ( _businessProduct  ) {
     _patchUrl = Url( "http://support.suse.de/" );
   } else {
@@ -230,6 +242,20 @@ Pathname PMYouPatchPaths::cookiesFile()
   return localDir() + "cookies";
 }
 
+Pathname PMYouPatchPaths::configFile()
+{
+  return localDir() + "config";
+}
+
+SysConfig *PMYouPatchPaths::config()
+{
+  if ( !_config ) {
+    _config = new SysConfig( configFile() );
+  }
+  
+  return _config;
+}
+
 string PMYouPatchPaths::product()
 {
   return _product;
@@ -273,6 +299,42 @@ PMError PMYouPatchPaths::requestServers( const string &u )
       url += "&business=";
       if ( businessProduct() ) url += "1";
       else url += "0";
+
+      PMSelectablePtr selectable = Y2PM::packageManager().getItem( "yast2-online-update" );
+      if ( !selectable ) {
+        WAR << "yast2-online-update not installed." << endl;
+      } else {
+        PMPackagePtr pkg = selectable->installedObj();
+        if ( !pkg ) {
+          WAR << "No installed object for yast2-online-update" << endl;
+        } else {
+          url += "&yast2-online-update=" + pkg->edition().asString();
+        }
+      }
+
+      selectable = Y2PM::packageManager().getItem( "yast2-packagemanager" );
+      if ( !selectable ) {
+        ERR << "yast2-packagemanager not installed." << endl;
+      } else {
+        PMPackagePtr pkg = selectable->installedObj();
+        if ( !pkg ) {
+          ERR << "No installed object for yast2-packagemanager" << endl;
+        } else {
+          url += "&yast2-packagemanager=" + pkg->edition().asString();
+        }
+      }
+
+      selectable = Y2PM::packageManager().getItem( "liby2util" );
+      if ( !selectable ) {
+        ERR << "liby2util not installed." << endl;
+      } else {
+        PMPackagePtr pkg = selectable->installedObj();
+        if ( !pkg ) {
+          ERR << "No installed object for liby2util" << endl;
+        } else {
+          url += "&liby2util=" + pkg->edition().asString();
+        }
+      }
     }
 
     url = encodeUrl( url );

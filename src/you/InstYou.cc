@@ -23,6 +23,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/GPGCheck.h>
+#include <y2util/SysConfig.h>
 
 #include <Y2PM.h>
 
@@ -348,7 +349,7 @@ PMError InstYou::installCurrentPatch()
   D__ << "Install current Patch" << endl;
 
   if ( _selectedPatchesIt == _patches.end() ) {
-    E__ << "No more patches." << endl;
+    ERR << "No more patches." << endl;
     return PMError( InstSrcError::E_error );
   }
 
@@ -358,7 +359,7 @@ PMError InstYou::installCurrentPatch()
 PMError InstYou::retrieveCurrentPatch( bool reload, bool checkSig )
 {
   if ( _selectedPatchesIt == _patches.end() ) {
-    E__ << "No more patches." << endl;
+    ERR << "No more patches." << endl;
     return PMError( InstSrcError::E_error );
   }
 
@@ -372,6 +373,8 @@ PMError InstYou::installPatches( bool dryrun )
     PMError error = installPatch( patch, dryrun );
     if ( error ) return error;
   }
+
+  writeLastUpdate();
 
   return PMError();
 }
@@ -810,4 +813,32 @@ PMError InstYou::patchProgress( int i, const string &pkg )
 
   if ( ret ) return PMError();
   else return YouError::E_user_abort;
+}
+
+int InstYou::lastUpdate()
+{
+  string date = _paths->config()->readEntry( "LastUpdate" );
+
+  D__ << "LastUpdate: '" << date << "'" << endl;
+
+  if ( date.empty() ) return -1;
+
+  Date lastUpdate( date );
+  DBG << "LastUpdate: " << lastUpdate << endl;
+
+  int diff = Date::now() - lastUpdate;  
+
+  DBG << diff << endl;
+
+  return diff / 60 / 60 / 24;
+}
+
+PMError InstYou::writeLastUpdate()
+{
+  MIL << "writeLastUpdate" << endl;
+
+  _paths->config()->writeEntry( "LastUpdate", Date::toSECONDS( Date::now() ) );
+  _paths->config()->save();
+
+  return PMError();
 }

@@ -33,6 +33,8 @@
 
 #include <y2pm/PMYouPatchPathsPtr.h>
 
+class SysConfig;
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMYouPatchPaths
@@ -46,6 +48,8 @@ class PMYouPatchPaths : virtual public Rep {
     PMYouPatchPaths();
     PMYouPatchPaths( const std::string &product, const std::string &version,
                      const std::string &baseArch );
+
+    ~PMYouPatchPaths();
 
     void init( const std::string &product, const std::string &version,
                const std::string &baseArch, const std::string &youUrl,
@@ -108,6 +112,10 @@ class PMYouPatchPaths : virtual public Rep {
     Url defaultServer();
 
     Pathname cookiesFile();
+    
+    Pathname configFile();
+
+    SysConfig *config();
 
   protected:
     void init( const std::string &path );
@@ -131,6 +139,8 @@ class PMYouPatchPaths : virtual public Rep {
 
     std::string _youUrl;
     bool _businessProduct;
+
+    SysConfig *_config;
 };
 
 ///////////////////////////////////////////////////////////////////

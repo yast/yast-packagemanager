@@ -153,7 +153,6 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
 
   PkgEdition edition( version, release );
 
-#warning TBD InstSrcPtr for PMPackage
   PMPackagePtr pkg( new PMPackage( name, edition, _paths->baseArch(),
                                    _packageDataProvider ) );
   patch->addPackage( pkg );
@@ -282,7 +281,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     if ( name.empty() ) name = fileName;
     if ( version.empty() ) version = "0";
-#warning TBD InstSrcPtr for PMYouPatch
+
     PMYouPatchPtr p( new PMYouPatch( PkgName( name ), PkgEdition( version ),
                                      _paths->baseArch() ) );
 

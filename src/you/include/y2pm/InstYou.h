@@ -190,6 +190,17 @@ class InstYou {
     */
     PMError patchProgress( int, const std::string &pkg = std::string() );
 
+    /**
+      Returns how many days ago the last update was performed. Returns -1
+      when no update has occured yet.
+    */
+    int lastUpdate();
+
+    /**
+      Writes current date as date of last update.
+    */
+    PMError writeLastUpdate();
+
   public:
     class Callbacks
     {
