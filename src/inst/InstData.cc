@@ -150,6 +150,44 @@ InstData::findPackages (const std::list<PMPackagePtr>& packages, const string& n
     return hits;
 }
 
+
+const std::list<PMSelectionPtr>
+InstData::findSelections (const std::list<PMSelectionPtr>& selections, const string& name, const string& version, const string& release, const string& arch)
+{
+    std::list<PMSelectionPtr> hits;
+//    MIL << "InstData::findSelections (" << selections << ", " << name << ", " << version << ", " << release << ", " << arch << ")" << endl;
+//    MIL << "checking " << selectionlist->size() << " selections" << endl;
+    typedef std::list<PMSelectionPtr>::const_iterator SolvLI;
+    for (SolvLI selection = selections.begin(); selection != selections.end(); ++selection)
+    {
+//    MIL << "?: " << (*selection)->name() << "-" << (*selection)->version() << "-" << (*selection)->release() << "-" << (*selection)->arch() << endl;
+	if (!name.empty()
+	    && ((*selection)->name() != name))
+	{
+	    continue;
+	}
+	if (!version.empty()
+	    && ((*selection)->edition().version() != version))
+	{
+	    continue;
+	}
+	if (!release.empty()
+	    && ((*selection)->edition().release() != release))
+	{
+	    continue;
+	}
+	if (!arch.empty()
+	    && ((*selection)->arch() != arch))
+	{
+	    continue;
+	}
+	hits.push_back (*selection);
+    }
+//    MIL << "returning " << hits.size() << " selections" << endl;
+    return hits;
+}
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //

@@ -92,15 +92,26 @@ const bool
 PMSelection::visible () const { return _dataProvider->visible(); }
 const std::list<std::string>
 PMSelection::suggests() const { return _dataProvider->suggests(); }
+const std::list<PMSelectionPtr>
+PMSelection::suggests_ptrs() const { return _dataProvider->suggests_ptrs(); }
+const std::list<std::string>
+PMSelection::recommends() const { return _dataProvider->recommends(); }
+const std::list<PMSelectionPtr>
+PMSelection::recommends_ptrs() const { return _dataProvider->recommends_ptrs(); }
 const std::list<std::string>
 PMSelection::inspacks(const std::string& lang) const { return _dataProvider->inspacks(lang); }
+const std::list<PMPackagePtr>
+PMSelection::inspacks_ptrs(const std::string& lang) const { return _dataProvider->inspacks_ptrs(lang); }
 const std::list<std::string>
 PMSelection::delpacks(const std::string& lang) const { return _dataProvider->delpacks(lang); }
+const std::list<PMPackagePtr>
+PMSelection::delpacks_ptrs(const std::string& lang) const { return _dataProvider->delpacks_ptrs(lang); }
 const FSize
 PMSelection::archivesize() const { return _dataProvider->archivesize(); }
 const std::string
 PMSelection::order() const { return _dataProvider->order(); }
-
+const bool
+PMSelection::isBase() const { return _dataProvider->isBase(); }
 
 ///////////////////////////////////////////////////////////////////
 //

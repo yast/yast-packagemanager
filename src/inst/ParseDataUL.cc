@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <string.h>
 #include <ctype.h>
 
 #include <y2util/Y2SLog.h>
@@ -279,13 +279,20 @@ ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkd
 
 #define SET_VALUE(tagname,value) \
     do { dataprovider->_attr_##tagname = value; } while (0)
+#define SET_LVALUE(tagname,value,lang) \
+    do { dataprovider->_attr_##tagname[lang] = value; } while (0)
 #define SET_POS(tagname,start,stop) \
     do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
+#define SET_LPOS(tagname,start,stop,lang) \
+    do { dataprovider->_attr_##tagname[lang].set (start, stop); } while (0)
 #define GET_TAG(tagname) \
     tagset->getTagByIndex(ParseDataULSelTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); \
 	 SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
+#define SET_LCACHE(tagname,lang) \
+    do { tagptr = GET_TAG (tagname); \
+	 SET_LPOS (tagname, tagptr->posDataStart(), tagptr->posDataEnd(), lang); } while (0)
 
     PMSolvable::PkgRelList_type pkgrellist;
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(REQUIRES))->MultiData()))
@@ -297,10 +304,13 @@ ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkd
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(OBSOLETES))->MultiData()))
 	selection->setObsoletes (pkgrellist);
 
-    SET_CACHE (SUMMARY);
-    SET_VALUE (CATEGORY, GET_TAG(CATEGORY)->Data());
+    SET_LCACHE (SUMMARY, "");
+    std::string category = GET_TAG(CATEGORY)->Data();
+    SET_VALUE (CATEGORY, category);
+    SET_VALUE (ISBASE, strncmp (category.c_str(), "base", 4) == 0);
     SET_VALUE (VISIBLE, GET_TAG(VISIBLE)->Data() == "true");
     SET_CACHE (SUGGESTS);
+    SET_CACHE (RECOMMENDS);
 
     stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
     if (splitted.size() > 0)
@@ -312,14 +322,17 @@ ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkd
 	}
     }
 
-    SET_CACHE (INSPACKS);
-    SET_CACHE (DELPACKS);
+    SET_LCACHE (INSPACKS, "");
+    SET_LCACHE (DELPACKS, "");
     SET_VALUE (ORDER, (GET_TAG(ORDER))->Data());
 
 #undef SET_VALUE
+#undef SET_LVALUE
 #undef SET_POS
+#undef SET_LPOS
 #undef GET_TAG
 #undef SET_CACHE
+#undef SET_LCACHE
 
     return selection;
 }
@@ -653,6 +666,18 @@ ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
     return PMError::E_ok;
 }
 
+
+// fill selections with caching data
+// set up lists of PMSelectionPtr and PMPackagePtr
+// for suggests, inspacks, delpacks
+
+PMError
+ParseDataUL::fillSelections (InstSrcDataPtr & ndata)
+{
+    PMError err;
+
+    return err;
+}
 ///////////////////////////////////////////////////////////////////
 // PUBLIC
 ///////////////////////////////////////////////////////////////////
@@ -848,12 +873,20 @@ PMError ParseDataUL::tryGetData( InstSrcDataPtr & ndata_r,
 
     InstSrcDataPtr ndata( new InstSrcData );
 
+    // parse <DESCRDIR>/packages
     if (!parsePackages (ndata, media_r, descr_dir_r))
     {
+	// parse <DESCRDIR>/packages.<lang>
 	parsePackagesLang (ndata, media_r, descr_dir_r);
     }
 
+    // parse <DESCRDIR>/selections and <DESCRDIR>/*.sel
     parseSelections (ndata, media_r, descr_dir_r);
+
+    // fill selections with caching data
+    // set up lists of PMSelectionPtr and PMPackagePtr
+    // for suggests, inspacks, delpacks
+    fillSelections (ndata);
 
     ///////////////////////////////////////////////////////////////////
     // done
