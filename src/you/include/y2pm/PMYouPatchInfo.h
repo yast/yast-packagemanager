@@ -55,7 +55,7 @@ class PMYouPatchInfo : virtual public Rep {
      *
      * @param lang  language to be parsed.
      **/
-    PMYouPatchInfo( PMYouPatchPathsPtr paths, const std::string &lang = "" );
+    PMYouPatchInfo( PMYouPatchPathsPtr paths );
 
     /**
      * Destructor
@@ -113,17 +113,6 @@ class PMYouPatchInfo : virtual public Rep {
     */
     PMError parseFiles( const std::string &files, const PMYouPatchPtr &patch );
 
-    /**
-      Return language code used for displaying messages to the user.
-    */
-    LangCode langCode() const { return _lang; }
-
-    /**
-     * Translate standard lang code into full language name as used in patch
-     * info files.
-     */
-    static std::string translateLangCode( const LangCode &lang );
-
     PMYouPackageDataProviderPtr packageDataProvider() const;
 
     PMError readDirectoryFile( const Pathname &,
@@ -149,10 +138,6 @@ class PMYouPatchInfo : virtual public Rep {
     YOUPackageTagSet _packageTagSet;
     
     PMYouPatchPathsPtr _paths;
-
-    LangCode _lang;
-    std::string _locale;
-    static const std::string _defaultLocale;
 
     MediaAccess _media;
 

@@ -26,6 +26,7 @@
 
 #include <y2util/Url.h>
 #include <y2util/Pathname.h>
+#include <y2util/LangCode.h>
 
 #include <y2pm/PMError.h>
 #include <y2pm/PMPackagePtr.h>
@@ -277,6 +278,33 @@ class PMYouPatchPaths : virtual public Rep {
     */
     std::string youUrl();
 
+    /**
+      Set language code used for displaying messages to the user. If the
+      language code argument is empty, the preferred YaST locale is set.
+    */
+    void setLangCode( const LangCode & );
+
+    /**
+      Return language code used for displaying messages to the user.
+    */
+    LangCode langCode() const { return _lang; }
+
+    /**
+      Return clear text locale as used by the patch file parser.
+    */
+    std::string locale() const;
+
+    /**
+      Return default locale. See locale().
+    */
+    std::string defaultLocale() const;
+
+    /**
+     * Translate standard lang code into full language name as used in patch
+     * info files.
+     */
+    static std::string translateLangCode( const LangCode &lang );
+
   protected:
     void init( const std::string &path );
 
@@ -302,6 +330,8 @@ class PMYouPatchPaths : virtual public Rep {
     bool _businessProduct;
 
     SysConfig *_config;
+
+    LangCode _lang;
 };
 
 ///////////////////////////////////////////////////////////////////
