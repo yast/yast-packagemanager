@@ -212,6 +212,8 @@ class PMSolvable : virtual public Rep {
 
     // access methods for components
     const PkgName& name() const { return _name; }
+    const std::string & version() const { return _edition.version(); }
+    const std::string & release() const { return _edition.release(); }
     const PkgEdition& edition() const { return _edition; }
     const PkgArch& arch() const { return _arch; }
     const PkgRelList_type& requires() const { return _requires; }
@@ -219,6 +221,9 @@ class PMSolvable : virtual public Rep {
     const PkgRelList_type& conflicts() const { return _conflicts; }
     const PkgRelList_type& provides() const { return _provides; }
     const PkgRelList_type& obsoletes() const { return _obsoletes; }
+
+
+    PkgAttributeValue PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const;
 
     void setName(PkgName& n) { _name = n; };
 
