@@ -191,7 +191,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 //    bool success = engine.install( toinstall, good, bad);
     bool success = engine.solvesystemnoauto( toinstall, good, bad);
     PkgDep::SolvableList to_remove;
-    
+
     setAutoState(good, to_remove);
 
     return success;
@@ -206,7 +206,7 @@ bool PMManager::solveConsistent(PkgDep::ErrorResultList& bad)
     buildSets(installed, available, toinstall);
 
     PkgDep engine( installed, available ); // TODO alternative_default
-    engine.set_unresolvable_callback(unresolvable_callback); //TODO
+//    engine.set_unresolvable_callback(unresolvable_callback); //TODO
 
     bool success = engine.consistent(bad);
 
