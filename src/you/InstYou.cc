@@ -80,7 +80,7 @@ PMError InstYou::servers( list<Url> &servers )
   return PMError();
 }
 
-PMError InstYou::retrievePatches( const Url &url )
+PMError InstYou::retrievePatchInfo( const Url &url )
 {
   _patches.clear();
 
@@ -128,7 +128,7 @@ void InstYou::selectPatches( int kinds )
   _selectedPatchesIt = _selectedPatches.begin();
 }
 
-PMError InstYou::retrievePackages()
+PMError InstYou::attachSource()
 {
   PMError error = _media.open( _paths->patchUrl(), _paths->localDir() );
   if ( error ) {
@@ -138,32 +138,30 @@ PMError InstYou::retrievePackages()
   error = _media.attach();
   if ( error ) {
     E__ << "Error attaching media." << endl;
-    return error;
   }
+
+  return error;
+}
+
+PMError InstYou::retrievePatches()
+{
+  PMError error = attachSource();
+  if ( error ) return error;
 
   list<PMYouPatchPtr>::const_iterator itPatch;
   for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
        ++itPatch ) {
-//    D__ << "PATCH: " << (*itPatch)->name() << endl;
-    list<PMPackagePtr> packages = (*itPatch)->packages();
-    list<PMPackagePtr>::const_iterator itPkg;
-    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      Pathname rpmPath = _paths->rpmPath( *itPkg );
-//      D__ << "  RPM: " << (*itPkg)->name() << ": " << rpmPath.asString() << endl;
-      error = _media.provideFile( rpmPath );
-      if ( error ) {
-        E__ << "Error downloading RPM '" << (*itPkg)->name() << "' from '"
-            << _paths->patchUrl() << "/" << rpmPath << "'" << endl;
-        return error;
-      }
-    }
+    PMError error = retrievePatch( *itPatch );
+    if ( error ) return error;
   }
 
   return PMError();
 }
 
-PMYouPatchPtr InstYou::nextPatch()
+PMYouPatchPtr InstYou::firstPatch()
 {
+  _selectedPatchesIt = _selectedPatches.begin();
+
   if ( _selectedPatchesIt == _selectedPatches.end() ) {
     return PMYouPatchPtr();
   }
@@ -171,14 +169,37 @@ PMYouPatchPtr InstYou::nextPatch()
   return *_selectedPatchesIt;
 }
 
-PMError InstYou::installNextPatch()
+PMYouPatchPtr InstYou::nextPatch()
+{
+  ++_selectedPatchesIt;
+
+  if ( _selectedPatchesIt == _selectedPatches.end() ) {
+    return PMYouPatchPtr();
+  }
+
+  return *_selectedPatchesIt;
+}
+
+PMError InstYou::installCurrentPatch()
+{
+  D__ << "Install current Patch" << endl;
+
+  if ( _selectedPatchesIt == _selectedPatches.end() ) {
+    E__ << "No more patches." << endl;
+    return PMError( InstSrcError::E_error );
+  }
+
+  return installPatch( *_selectedPatchesIt );
+}
+
+PMError InstYou::retrieveCurrentPatch()
 {
   if ( _selectedPatchesIt == _selectedPatches.end() ) {
     E__ << "No more patches." << endl;
     return PMError( InstSrcError::E_error );
   }
 
-  return installPatch( *_selectedPatchesIt++ );  
+  return retrievePatch( *_selectedPatchesIt );
 }
 
 PMError InstYou::installPatches( bool dryrun )
@@ -186,8 +207,6 @@ PMError InstYou::installPatches( bool dryrun )
   list<PMYouPatchPtr>::const_iterator itPatch;
   for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
        ++itPatch ) {
-    D__ << "INSTALL: " << (*itPatch)->name() << endl;
-    
     PMError error = installPatch( *itPatch, dryrun );
     if ( error ) return error;
   }
@@ -197,6 +216,8 @@ PMError InstYou::installPatches( bool dryrun )
 
 PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 {
+  D__ << "INSTALL PATCH: " << patch->name() << endl;
+    
   list<string> packageFileNames;
 
   list<PMPackagePtr> packages = patch->packages();
@@ -204,7 +225,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
     Pathname fileName = _media.localPath( _paths->rpmPath( *itPkg ) );
     packageFileNames.push_back( fileName.asString() );
-    D__ << "install " << fileName << endl;      
+    D__ << "INSTALL PKG " << fileName << endl;      
     if ( dryrun ) {
       cout << "INSTALL: " << fileName << endl;
     }
@@ -215,6 +236,25 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     if ( error ) {
       E__ << "Installation of RPMs of patch " << patch->name()
           << "failed" << endl;
+      return error;
+    }
+  }
+  
+  return PMError();
+}
+
+PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
+{
+//  D__ << "PATCH: " << (*itPatch)->name() << endl;
+  list<PMPackagePtr> packages = patch->packages();
+  list<PMPackagePtr>::const_iterator itPkg;
+  for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+    Pathname rpmPath = _paths->rpmPath( *itPkg );
+//    D__ << "  RPM: " << (*itPkg)->name() << ": " << rpmPath.asString() << endl;
+    PMError error = _media.provideFile( rpmPath );
+    if ( error ) {
+      E__ << "Error downloading RPM '" << (*itPkg)->name() << "' from '"
+          << _paths->patchUrl() << "/" << rpmPath << "'" << endl;
       return error;
     }
   }
