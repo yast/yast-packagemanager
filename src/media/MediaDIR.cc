@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
 #include <y2pm/MediaDIR.h>
 
 #include <sys/mount.h>
@@ -130,6 +131,15 @@ MediaResult
 MediaDIR::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, DIR is mounted at destination
+
+    Pathname src = _attachPoint + filename;
+    PathInfo info(src);
+    
+    if(!info.isFile())
+    {
+	    D__ << src.asString() << " does not exist" << endl;
+	    return E_system;
+    }
     return E_none;
 }
 
