@@ -121,6 +121,18 @@ int main(int argc, char* argv[])
 			<< endl;
 		}
 		*/
+		cout << (*p)->getAttributeName(PMPackage::ATTR_GROUP)
+		    << ": "
+		    << (*p)->getAttributeValue(PMPackage::ATTR_GROUP)
+		    << endl;
+		cout << (*p)->getAttributeName(PMPackage::ATTR_GROUP)
+		    << ": "
+		    << (*p)->getAttributeValue(PMPackage::ATTR_GROUP)
+		    << endl;
+		cout << (*p)->getAttributeName(PMPackage::ATTR_SUMMARY)
+		    << ": "
+		    << (*p)->getAttributeValue(PMPackage::ATTR_SUMMARY)
+		    << endl;
 	    }
 	}
     }

@@ -586,7 +586,7 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	RPM_NAME,
 	RPM_VERSION,
 	RPM_RELEASE,
-	RPM_INSTALLTIME,
+	RPM_SIZE,
 	RPM_BUILDTIME,
 	RPM_GROUP,
 	RPM_ARCH,
@@ -598,8 +598,9 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	NUM_RPMTAGS
     };
 
+    // this must match the enum
     rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};";
-    rpmquery += "%{RPMTAG_INSTALLTIME};%{RPMTAG_BUILDTIME};%{RPMTAG_GROUP};";
+    rpmquery += "%{RPMTAG_SIZE};%{RPMTAG_BUILDTIME};%{RPMTAG_GROUP};";
     rpmquery += "%{RPMTAG_ARCH};";
     rpmquery += "[%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},];";
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
@@ -663,6 +664,12 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 				PkgName(pkgattribs[RPM_NAME]),
 				edi,
 				PkgArch(pkgattribs[RPM_ARCH]));
+
+	    if(_dataprovider != NULL)
+	    {
+		_dataprovider->setAttributeValue(p,PMPackage::ATTR_SIZE,pkgattribs[RPM_SIZE]);
+		_dataprovider->setAttributeValue(p,PMPackage::ATTR_GROUP,pkgattribs[RPM_GROUP]);
+	    }
 
 	    p->setDataProvider(_dataprovider);
 
