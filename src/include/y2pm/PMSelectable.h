@@ -290,6 +290,13 @@ class PMSelectable : virtual public Rep {
      **/
     void setNothingSelected() { _state.user_unset( true ); }
 
+    /**
+     * Downgrade condition. Returns true, iff both objects are present, and
+     * installation of candidateObj would just replace or downgrade the installedObj.
+     * <b>Always false for non package objects!</b>
+     **/
+    bool downgrade_condition() const;
+
     ///////////////////////////////////////////////////////////////////
     // public usable part of SelState
     ///////////////////////////////////////////////////////////////////
@@ -402,8 +409,16 @@ class PMSelectable : virtual public Rep {
     /**
      * Application request to install the candidate object. Fails if no
      * candidate object is present, or user requested delete or taboo.
+     * <b>Does not check for downgrade_condition. Do not use it without need.</b>
      **/
-    bool appl_set_install() { return _state.appl_set_install( true ); }
+    bool appl_force_install() { return _state.appl_set_install( true ); }
+
+    /**
+     * Application request to install the candidate object. Fails if no
+     * candidate object is present, or user requested delete or taboo.
+     * Fails if downgrade_condition is true.
+     **/
+    bool appl_set_install() { return !downgrade_condition() && appl_force_install(); }
 
   public:
 
@@ -414,16 +429,24 @@ class PMSelectable : virtual public Rep {
     bool auto_unset() { return _state.auto_unset( true ); }
 
     /**
-     * Auto request to install the candidate object. Fails if no
-     * candidate object is present, or user/appl requested delete or taboo.
-     **/
-    bool auto_set_install() { return _state.auto_set_install( true ); }
-
-    /**
      * Auto request to delete the installed object. Fails if no
      * installed object is present, or user/appl requested install or taboo.
      **/
     bool auto_set_delete() { return _state.auto_set_delete( true ); }
+
+    /**
+     * Auto request to install the candidate object. Fails if no
+     * candidate object is present, or user/appl requested delete or taboo.
+     * <b>Does not check for downgrade_condition. Do not use it without need.</b>
+     **/
+    bool auto_force_install() { return _state.auto_set_install( true ); }
+
+    /**
+     * Auto request to install the candidate object. Fails if no
+     * candidate object is present, or user/appl requested delete or taboo.
+     * Fails if downgrade_condition is true.
+     **/
+    bool auto_set_install() { return !downgrade_condition() && auto_force_install(); }
 
   public:
 
