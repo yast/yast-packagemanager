@@ -22,8 +22,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/Query.h>
-#include <y2pm/PMSelectable.h>
-
+ 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -43,6 +42,7 @@ IMPL_BASE_POINTER( Query );
 //	DESCRIPTION :
 //
 Query::Query()
+    : _query (0)
 {
 }
 
@@ -56,4 +56,41 @@ Query::Query()
 //
 Query::~Query()
 {
+    if (_query)
+	QueryParser::free_node (_query);
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Query::parseQuery (const std::string& query)
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : parse textual query to filter
+//
+PMError
+Query::parseQuery (const std::string& query)
+{
+    QueryParser parser;
+    return parser.parseQuery (query, _errpos, &_query);
+}
+
+
+const std::list<PMSelectablePtr>
+Query::querySelectables()
+{
+    return std::list<PMSelectablePtr>();
+}
+
+const std::list<PMPackagePtr>
+Query::queryPackages()
+{
+    return std::list<PMPackagePtr>();
+}
+
+const std::list<PMSelectionPtr>
+Query::querySelections()
+{
+    return std::list<PMSelectionPtr>();
+}
+

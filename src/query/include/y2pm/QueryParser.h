@@ -33,14 +33,16 @@
  * @short parser query from string to struct qnode
  **/
 class QueryParser {
-
+    friend class Query;
     private:
-	void free_node (struct qnode *node);
 	int op_binding (enum operation op);
 	enum operation parse_op (const char **query);
 	PMError check_node (struct qnode *node);
 	int parse_value (struct qvalue *value, const char **query, PMError *error);
 	struct qnode *parse_expr (const char **query, PMError *error);
+    protected:
+	static void free_node (struct qnode *node);
+
     public:
 	QueryParser () {}
 	~QueryParser () {}
