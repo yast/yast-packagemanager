@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 12 22:20:10 CEST 2003 - ma@suse.de
+
+- Added ability to import ascii armored public key to rpmdatabase.
+
+-------------------------------------------------------------------
 Fri Sep 12 14:40:05 CEST 2003 - cschum@suse.de
 
 - MediaCurl: FTP_ACCESS_DENIED isn't a login error. (#30420).

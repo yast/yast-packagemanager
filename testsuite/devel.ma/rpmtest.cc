@@ -201,7 +201,8 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  //ret = mmain( argc, argv )
+  ret = mmain( argc, argv );
+#if 0
   xx();
   xx();
 
@@ -212,6 +213,7 @@ int main( int argc, const char * argv[] ) {
   SEC << Y2PM::removePackage( "test" ) << endl;
   xx();
   xx();
+#endif
 
   SEC << "STOP -> " << ret << endl;
   return ret;
@@ -238,9 +240,9 @@ int mmain( int argc, const char * argv[] )
   INT << db.initDatabase( root, dbPath ) << endl;
   SEC << db << endl;
 
-  INT << db.removePackage( "test", Fdel ) << endl;
+  // /usr/lib/rpm/gnupg/pubring.gpg build@suse.de
 
-  INT << db.installPackage( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm", Finst ) << endl;
+  INT << db.importPubkey( "/usr/lib/rpm/gnupg/pubring.gpg", "build@suse.de" ) << endl;
 
   return 0;
 }
