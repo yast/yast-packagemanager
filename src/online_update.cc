@@ -160,11 +160,20 @@ int main( int argc, char **argv )
   PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( lang );
   PMYouPatchPathsPtr patchPaths = new PMYouPatchPaths( product, version, arch );
 
-  cout << "Product:      " << product << endl;
-  cout << "Version:      " << version << endl;
-  cout << "Architecture: " << arch << endl;
-  cout << "Language:     " << lang << endl;
+  InstYou you( patchInfo, patchPaths );
 
+  if ( !productStr && !versionStr && !archStr ) {
+    you.initProduct();
+  }
+
+  cout << "Product:      " << you.paths()->product() << endl;
+  cout << "Version:      " << you.paths()->version() << endl;
+  cout << "Architecture: " << you.paths()->baseArch() << endl;
+  if ( verbose || debug ) {
+    cout << "Business Product: "
+         << ( you.paths()->businessProduct() ? "Yes" : "No" ) << endl;
+  }
+  cout << "Language:     " << you.patchInfo()->langCode() << endl;
 
   // Get URL of you source.
 
@@ -177,17 +186,16 @@ int main( int argc, char **argv )
       exit( 1 );
     }
   } else {
-    error = patchPaths->requestServers();
+    error = you.paths()->requestServers();
     if ( error ) {
       cerr << "Error while requesting servers: " << error << endl;
       exit( 1 );
     }
-    url = patchPaths->defaultServer();
+    url = you.paths()->defaultServer();
   }
   
   cout << "URL: " << url.asString() << endl;
-
-  InstYou you( patchInfo, patchPaths );
+  cout << "Path: " << you.paths()->patchPath() << endl;
 
   error = you.retrievePatchInfo( url, checkSig );
   if ( error ) {
