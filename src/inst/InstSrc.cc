@@ -765,6 +765,7 @@ InstSrc::provideMedia (int medianr) const
 			url = Url(changereply);
 			if (url.isValid())
 			{
+			    _media->close();				// close medium
 			    MIL << "Retry url '" << url << "'" << endl;
 			    continue;
 			}
@@ -835,6 +836,7 @@ InstSrc::provideMedia (int medianr) const
 	}
 	else					// new url
 	{
+	    _media->close();			// close medium
 	    url = Url(changereply);
 	}
     }
