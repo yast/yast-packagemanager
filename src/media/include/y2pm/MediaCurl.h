@@ -51,6 +51,8 @@ class MediaCurl : public MediaHandler {
     char _curlError[ CURL_ERROR_SIZE ]; 
     
     std::string _userpwd;
+    std::string _proxy;
+    std::string _proxyuserpwd;
 };
 
 ///////////////////////////////////////////////////////////////////
