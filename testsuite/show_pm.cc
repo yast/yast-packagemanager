@@ -21,7 +21,8 @@
 
 using namespace std;
 
-std::string list2string (const std::list<std::string>& slist, const char *sep)
+std::string
+strlist2string (const std::list<std::string>& slist, const char *sep)
 {
    std::string ret;
    if (slist.empty())
@@ -36,16 +37,50 @@ std::string list2string (const std::list<std::string>& slist, const char *sep)
    return ret;
 }
 
+std::string
+pkglist2string (const std::list<PMPackagePtr>& plist, const char *sep)
+{
+   std::string ret;
+   if (plist.empty())
+	return ret;
+   for (std::list<PMPackagePtr>::const_iterator pos = plist.begin();
+	pos != plist.end(); ++pos)
+   {
+	if (!ret.empty())
+	    ret += sep;
+	ret += ((const std::string &)((*pos)->name()) + "-" + (*pos)->version() + "-" + (*pos)->release() + "." + (const std::string &)((*pos)->arch()));
+   }
+   return ret;
+}
+
+
+std::string
+sellist2string (const std::list<PMSelectionPtr>& slist, const char *sep)
+{
+   std::string ret;
+   if (slist.empty())
+	return ret;
+   for (std::list<PMSelectionPtr>::const_iterator pos = slist.begin();
+	pos != slist.end(); ++pos)
+   {
+	if (!ret.empty())
+	    ret += sep;
+	ret += ((const std::string &)((*pos)->name()) + "-" + (*pos)->version() + "-" + (*pos)->release() + "." + (const std::string &)((*pos)->arch()));
+   }
+   return ret;
+}
+
+
 void
 show_pmsolvable (PMSolvablePtr p)
 {
     cout << "-- Solvable --" << endl;
     cout << p->name() << "-" << p->version() << "-" << p->release() << "." << p->arch() << endl;
-    cout << "Requires: " << list2string (PMSolvable::PkgRelList2StringList (p->requires())) << endl;
-    cout << "PreRequires: " << list2string (PMSolvable::PkgRelList2StringList (p->prerequires())) << endl;
-    cout << "Provides: " << list2string (PMSolvable::PkgRelList2StringList (p->provides())) << endl;
-    cout << "Obsoletes: " << list2string (PMSolvable::PkgRelList2StringList (p->obsoletes())) << endl;
-    cout << "Conflicts: " << list2string (PMSolvable::PkgRelList2StringList (p->conflicts())) << endl;
+    cout << "Requires: " << strlist2string (PMSolvable::PkgRelList2StringList (p->requires())) << endl;
+    cout << "PreRequires: " << strlist2string (PMSolvable::PkgRelList2StringList (p->prerequires())) << endl;
+    cout << "Provides: " << strlist2string (PMSolvable::PkgRelList2StringList (p->provides())) << endl;
+    cout << "Obsoletes: " << strlist2string (PMSolvable::PkgRelList2StringList (p->obsoletes())) << endl;
+    cout << "Conflicts: " << strlist2string (PMSolvable::PkgRelList2StringList (p->conflicts())) << endl;
 }
 
 void
@@ -55,9 +90,9 @@ show_pmobject (PMObjectPtr p)
     cout << "-- Object --" << endl;
 #if 1
     cout << "Summary: " << p->summary() << endl;
-    cout << "Description: " << list2string (p->description(), "\n") << endl;
-    cout << "InsNotify: " << list2string (p->insnotify(), "\n") << endl;
-    cout << "DelNotify: " << list2string (p->delnotify(), "\n") << endl;
+    cout << "Description: " << strlist2string (p->description(), "\n") << endl;
+    cout << "InsNotify: " << strlist2string (p->insnotify(), "\n") << endl;
+    cout << "DelNotify: " << strlist2string (p->delnotify(), "\n") << endl;
     cout << "Size: " << p->size().asString() << endl;
 #endif
 }
@@ -76,21 +111,21 @@ show_pmpackage (PMPackagePtr p)
     cout << "License: " << p->license() << endl;
     cout << "Packager: " << p->packager() << endl;
     cout << "Group: " << p->group() << endl;
-    cout << "Changelog: " << list2string(p->changelog(), "\n") << endl;
+    cout << "Changelog: " << strlist2string(p->changelog(), "\n") << endl;
     cout << "Url: " << p->url() << endl;
     cout << "OS: " << p->os() << endl;
-    cout << "PreIn: " << list2string(p->prein(), "\n") << endl;
-    cout << "PostIn: " << list2string(p->postin(), "\n") << endl;
-    cout << "PreUn: " << list2string(p->preun(), "\n") << endl;
-    cout << "PostUn: " << list2string(p->postun(), "\n") << endl;
+    cout << "PreIn: " << strlist2string(p->prein(), "\n") << endl;
+    cout << "PostIn: " << strlist2string(p->postin(), "\n") << endl;
+    cout << "PreUn: " << strlist2string(p->preun(), "\n") << endl;
+    cout << "PostUn: " << strlist2string(p->postun(), "\n") << endl;
     cout << "Source: " << p->sourcerpm() << endl;
     cout << "Archivesize: " << p->archivesize() << endl;
-    cout << "Authors: " << list2string(p->authors(), ", ") << endl;
-    cout << "Files: " << list2string(p->filenames(), "\n") << endl;
-    cout << "Recommends: " << list2string(p->recommends()) << endl;
-    cout << "Suggests: " << list2string(p->suggests()) << endl;
+    cout << "Authors: " << strlist2string(p->authors(), ", ") << endl;
+    cout << "Files: " << strlist2string(p->filenames(), "\n") << endl;
+    cout << "Recommends: " << strlist2string(p->recommends()) << endl;
+    cout << "Suggests: " << strlist2string(p->suggests()) << endl;
     cout << "Location: " << p->location() << endl;
-    cout << "Keywords: " << list2string(p->keywords()) << endl;
+    cout << "Keywords: " << strlist2string(p->keywords()) << endl;
     cout << "========" << endl;
     p->stopRetrieval();
     return;
@@ -107,9 +142,12 @@ show_pmselection (PMSelectionPtr s)
     cout << "IsBase: " << s->isBase () << endl;
     cout << "Visible: " << s->visible () << endl;
     cout << "Order: " << s->order() << endl;
-    cout << "Suggests: " << list2string(s->suggests()) << endl;
-    cout << "InsPacks: " << list2string(s->inspacks("")) << endl;
-    cout << "DelPacks: " << list2string(s->delpacks("")) << endl;
+    cout << "Suggests: " << strlist2string(s->suggests()) << endl;
+    cout << "SuggestsPtrs: " << sellist2string(s->suggests_ptrs(), ", ") << endl;
+    cout << "InsPacks: " << strlist2string(s->inspacks("")) << endl;
+    cout << "InsPacksPtrs: " << pkglist2string(s->inspacks_ptrs(""), ", ") << endl;
+    cout << "DelPacks: " << strlist2string(s->delpacks("")) << endl;
+    cout << "DelPacksPtrs: " << pkglist2string(s->delpacks_ptrs(""), ", ") << endl;
     cout << "Archivesize: " << s->archivesize() << endl;
     cout << "========" << endl;
     s->stopRetrieval();
