@@ -1,9 +1,15 @@
 -------------------------------------------------------------------
+Fri Mar  5 11:27:24 CET 2004 - lnussel@suse.de
+
+- allow uncached plain sources
+
+-------------------------------------------------------------------
 Fri Mar  5 11:32:22 CET 2004 - cschum@suse.de
 
 - Merged proof-reading results.
 
 -------------------------------------------------------------------
+
 Thu Mar  4 20:58:56 CET 2004 - ma@suse.de
 
 - Parse and provide packages license text from packages.<lang>
