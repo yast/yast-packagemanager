@@ -14,6 +14,7 @@ pkginclude_HEADERS =	\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
 	InstSrcData.h	InstSrcDataPtr.h	\
 	InstSrcData_UL.h InstSrcData_ULPtr.h	\
+	InstDescr.h	InstData.h		\
 	\
 	InstTargetError.h			\
 	InstTarget.h	InstTargetPtr.h		\
