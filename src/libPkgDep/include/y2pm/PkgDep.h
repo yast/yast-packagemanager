@@ -426,12 +426,8 @@ class PkgDep {
 	// remove.cc
 	void virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
 								 PMSolvablePtr assume_instd = NULL ) const;
-	void remove_package( PkgSet *set, PMSolvablePtr pkg,
-						 SolvableList& to_remove) const;
 	// utils.cc
 	bool also_provided_by_installed( const PkgRelation& rel );
-	unsigned count_providers_for( const PkgSet* set,
-								  const PkgRelation& req ) const;
 	PMSolvablePtr upgrade_solves_conflict( PMSolvablePtr pkg,
 											const PkgRelation& confl );
 	PMSolvablePtr try_upgrade_conflictor( PMSolvablePtr pkg,
@@ -558,6 +554,12 @@ public:
 	static void set_default_max_remove( unsigned mr ) {
 		default_max_remove = mr;
 	}
+
+    public: // static members
+
+	static void remove_package( PkgSet *set, PMSolvablePtr pkg,
+						 SolvableList& to_remove);
+	static unsigned count_providers_for( const PkgSet* set, const PkgRelation& req );
 };
 
 // output.cc

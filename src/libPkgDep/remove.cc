@@ -34,8 +34,7 @@ void PkgDep::virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
 }
 	
 
-void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg,
-				 SolvableList& to_remove ) const
+void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg, SolvableList& to_remove )
 {
 	D__ << "removing package " << pkg->name() << endl;
 	set->remove( pkg );
