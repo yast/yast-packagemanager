@@ -40,10 +40,10 @@
 class MediaAccess : virtual public Rep {
 	REP_BODY(MediaAccess);
 
-	typedef enum media_type {
+	enum MediaType {
 	    Unknown = 0,
 	    CD, DVD, NFS, DIR, DISK, FTP, SMB, HTTP, HTTPS
-	} MediaType;
+	};
 
 	// type of media
 	MediaType _type;
