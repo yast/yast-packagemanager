@@ -64,8 +64,6 @@ class InstYou {
     */
     PMError initProduct();
 
-    PMError initDu();
-
     /**
      * Get list of patch servers.
      */
@@ -76,7 +74,7 @@ class InstYou {
      */
     PMError checkAuthorization( const Url &url, const std::string &regcode,
                                 const std::string &password );
-    
+
     /**
      * Read patch information files.
      *

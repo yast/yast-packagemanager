@@ -86,30 +86,6 @@ PMError InstYou::initProduct()
   return _paths->initProduct();
 }
 
-PMError InstYou::initDu()
-{
-#if 0
-  std::set<PkgDuMaster::MountPoint> mountpoints;
-
-  std::string dname = "/var/lib/YaST2/you";
-
-  long long dfree = 0LL;
-  long long dused = 0LL;
-
-  dfree = 44040192;
-  dused = 0;
-
-  long long dirsize = dfree + dused;
-  
-  PkgDuMaster::MountPoint point (dname, FSize (4096), FSize (dirsize), FSize (dused));
-  mountpoints.insert (point);
-
-  Y2PM::packageManager().setMountPoints(mountpoints);
-#endif
-
-  return PMError();
-}
-
 PMError InstYou::servers( list<Url> &servers )
 {
   PMYouServers youServers( _paths );
@@ -143,14 +119,14 @@ PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
   D__ << path << endl;
   u.setPath( path );
 
-  int err = PathInfo::assert_dir( _paths->localDir() );
+  int err = PathInfo::assert_dir( _paths->localWriteDir() );
   if ( err ) {
-    ERR << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
+    ERR << "Can't create " << _paths->localWriteDir() << " (errno: " << err << ")"
         << endl;
     return PMError( InstSrcError::E_error );
   }
 
-  Pathname dummyFile = _paths->localDir() + "dummy";
+  Pathname dummyFile = _paths->localWriteDir() + "dummy";
 
   PMError error = MediaAccess::getFile( u, dummyFile );
 
@@ -548,7 +524,7 @@ class CurlCallbacks : public MediaCurl::Callbacks
 {
   public:
     CurlCallbacks( InstYou *instYou, int total )
-      : _instYou( instYou ), _total( total ), _current( 0 )
+      : _total( total ), _current( 0 ), _instYou( instYou )
     {
     }
 
