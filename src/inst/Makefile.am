@@ -8,7 +8,7 @@ CPPFLAGS = -DY2LOG=__FILE__
 
 INCLUDES = -I$(QTDIR)/include -I$(includedir) -I$(top_srcdir)/src/include \
 	-I$(top_srcdir)/src/media/include \
-	-I$(top_srcdir)/src/instsrc/include \
+	-I$(top_srcdir)/src/inst/include \
 	-I$(top_srcdir)/src/pkg/include
 
 noinst_LTLIBRARIES = liby2pminstsrc.la
