@@ -185,16 +185,6 @@ class PMManager {
     void poolSortCandidates();
 
   public:
-    /**
-     * update all installed objects within this manager
-     * return number of objects affected
-     *
-     * goes through all managed objects and marks every object
-     * as 'to_install' if an installed and a (newer) candidate exists.
-     */
-    unsigned int updateAllInstalled (bool only_newer = true);
-
-  public:
 
     /**
      * The number of Selectables within this Manager.
