@@ -86,6 +86,10 @@ PMULSelectionDataProvider::posmapFind (const TaggedFile::Tag::posmaptype& theMap
 	    {
 		it = theMap.find (LangCode ("default"));	// try "default" locale
 	    }
+	    if (it == theMap.end())
+	    {
+		it = theMap.find (LangCode (""));		// try empty locale
+	    }
 	}
     }
     return it;
@@ -109,6 +113,14 @@ PMULSelectionDataProvider::slcmapFind (const slcmaptype& theMap, const LangCode&
 	if (lang.size() > 2)
 	{
 	    it = theMap.find (LangCode (lang.substr (0, 2)));
+	    if (it == theMap.end())
+	    {
+		it = theMap.find (LangCode ("default"));	// try "default" locale
+	    }
+	    if (it == theMap.end())
+	    {
+		it = theMap.find (LangCode (""));		// try empty locale
+	    }
 	}
     }
     return it;
