@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan 27 23:55:27 CET 2004 - lnussel@suse.de
+
+- reduce and fix error results for alternatives
+
+-------------------------------------------------------------------
 Tue Jan 27 22:01:27 CET 2004 - ma@suse.de
 
 - Let parser classes use std::streamoff instead of std::streampos.
