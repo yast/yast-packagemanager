@@ -497,6 +497,79 @@ inline void commitSrcSucceeded( const PMPackagePtr & pkg_r )
 /******************************************************************
 **
 **
+**	FUNCTION NAME : commitCkeckMediaGpg
+**	FUNCTION TYPE : void
+**
+** Hack, called immediately before a binary package is about to
+** be installed.
+**
+** Check whether there are any 'gpg-pubkey-*.asc' in the media
+** rootdir. If so, import them into the rpm database, if not
+** already present.
+**
+*/
+static void commitCkeckMediaGpg( PMPackagePtr pkg_r )
+{
+  if ( Y2PM::instTarget().rootdir() == "/" )
+    return;
+
+  static set<unsigned> known_Srces;
+  static set<string>   known_pubkeys;
+  static string prefix( "gpg-pubkey-" );
+  static string ext( ".asc" );
+
+  if ( known_Srces.empty() ) {
+    // load any installed pubkeys. PkgEditions may differ by
+    // buildtime. We're interested in string value only.
+    set<PkgEdition> pubkeys( Y2PM::instTarget().pubkeys() );
+    for( set<PkgEdition>::const_iterator it = pubkeys.begin(); it != pubkeys.end(); ++it ) {
+      known_pubkeys.insert( (*it).asString() );
+    }
+  }
+
+  constInstSrcPtr csource( pkg_r->source() );
+  if ( known_Srces.insert( csource->srcID() ).second ) {
+    // srcID was not yet present
+    list<string> files;
+    PMError err = csource->media()->dirInfo( files, "/", /*dots*/false );
+    if ( err ) {
+      ERR << "Unable to read media root: " << err << endl;
+      return;
+    }
+
+    for ( list<string>::const_iterator it = files.begin(); it != files.end(); ++it ) {
+
+      string key = *it;
+      if ( key.find( prefix ) != 0 )
+	continue;
+      key.erase( 0, prefix.size() );
+      if ( key.size() <= key.size() || key.rfind( ext ) != (key.size() - ext.size()) )
+	continue;
+      key.erase( key.size() - ext.size() );
+
+      if ( known_pubkeys.insert( key ).second ) {
+	// pubkey was not yet present
+	MediaAccess::FileProvider pubkey( csource->media(), *it );
+	if ( pubkey.error() ) {
+	  ERR << "Media can't provide '" << pubkey() << "' " << pubkey.error() << endl;
+	  known_pubkeys.erase( key );
+	  continue;
+	}
+	err = Y2PM::instTarget().importPubkey( pubkey() );
+	if ( err ) {
+	  known_pubkeys.erase( key );
+	  continue;
+	}
+      }
+
+    }
+  }
+}
+
+
+/******************************************************************
+**
+**
 **	FUNCTION NAME : commitPkgSucceeded
 **	FUNCTION TYPE : void
 **
@@ -545,6 +618,11 @@ static PMError commitInstall( PMPackagePtr pkg_r, bool srcpkg_r, const Pathname 
     }
     if ( err ) {
       break; // canceled
+    }
+
+#warning probabely not the best place to handle media gpg-pubkey
+    if ( ! srcpkg_r ) {
+      commitCkeckMediaGpg( pkg_r );
     }
 
     err = Y2PM::instTarget().installPackage( path_r );
