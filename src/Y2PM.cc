@@ -974,6 +974,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
 	current_src_ptr = cpkgSource;
 	current_src_media = cpkgMedianr;
 	report->advanceToMedia( current_src_ptr, current_src_media );
+	MIL << "Process media " << current_src_media << " of " << current_src_ptr << endl;
       }
 
     }
@@ -1026,24 +1027,30 @@ static int internal_commitPackages( unsigned mediaNr_r,
     ///////////////////////////////////////////////////////////////////
     switch ( res ) {
     case InstSrcError::E_cancel_media: // cancel all
+      WAR << "Received " << res << endl;
+      ++it; // current package already pushed to remaining or error list
       for ( ; it != inslist.end(); ++it ) {
 	remaining_r.push_back( (*it)->name() ); // package unprocessed
       }
+      --it; // not to miss loop end
       error = res;
       break;
     case InstSrcError::E_skip_media:   // skip current media
+      WAR << "Received " << res << ": skip media " << current_src_media << " of " << current_src_ptr << endl;
+      ++it; // current package already pushed to remaining or error list
       for ( ; it != inslist.end(); ++it ) {
 	if ( (*it)->source() == current_src_ptr && (*it)->medianr() == current_src_media ) {
 	  remaining_r.push_back( (*it)->name() ); // package unprocessed
 	} else {
-	  --it; // not to miss the fist package of next medis
-	  break;
+	  break; // next media or end
 	}
       }
+      --it; // not to miss the fist package of next media or loop end
       break;
     default:                           // continue
       break;
     }
+
     if ( error ) {
       break; // canceled
     }
