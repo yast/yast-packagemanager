@@ -35,6 +35,7 @@
 #include <y2util/Pathname.h>
 #include <y2pm/MediaAccess.h>
 
+#include <y2pm/InstDescr.h>
 #include <y2pm/InstSrcDescrPtr.h>	// pointer to self
 
 ///////////////////////////////////////////////////////////////////
@@ -73,18 +74,27 @@ class REP_CLASS(InstSrcDescr) {
     int count;			// media count (if spawned on multiple cds)
     std::string _id;		// ID code for media match
 
-    // data from suse/setup/descr/info
-    std::string _vendor;
     std::string _default_language;
     std::string _default_timezone;
+    int _count;
+    std::list<std::string> _architectures;
+
+    /**
+     * data below should go to InstDescr.h
+     */
+
+    // data from suse/setup/descr/info
+    std::string _vendor;
     std::string _version;
     int _release;
     std::string _name;
     std::string _product;
     std::string _type;
     std::string _label;
-    int _count;
-    std::list<std::string> _architectures;
+
+    /**
+     * data above should go to InstDescr.h
+     */
 
     // internal helper function
     // used to parse suse/setup/descr/info
@@ -113,13 +123,22 @@ class REP_CLASS(InstSrcDescr) {
      */
     void setActivation (bool yesno);
 
+    /**
+     * data below should go to InstDescr.h
+     */
+
     const std::string& Vendor() const { return _vendor; }
-    const std::string& Language() const { return _default_language; }
-    const std::string& Timezone() const { return _default_timezone; }
     const std::string& Version() const { return _version; }
     int Release() const { return _release; }
     const std::string& Name() const { return _name; }
     const std::string& Product() const { return _product; }
+
+    /**
+     * data above should go to InstDescr.h
+     */
+
+    const std::string& Language() const { return _default_language; }
+    const std::string& Timezone() const { return _default_timezone; }
     const std::string& Id() const { return _id; }
     int Count() const { return _count; }
     const std::list<std::string>& Architectures() const { return _architectures; }

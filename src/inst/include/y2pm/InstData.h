@@ -10,53 +10,45 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcData.h
+   File:       InstData.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
-    Purpose:	Works on a MediaInfoPtr, has access to physical package
-		descriptions, creates PMSolvable objects from descriptions
+    Purpose:	Keeps information about installation descriptions.
+
+		Used for source and target sides.
 /-*/
-#ifndef InstSrcData_h
-#define InstSrcData_h
+#ifndef InstData_h
+#define InstData_h
 
 #include <iosfwd>
 #include <list>
 
 #include <y2util/Pathname.h>
 
-#include <y2pm/MediaAccess.h>
-
-#include <y2pm/InstSrcDataPtr.h>
-#include <y2pm/InstData.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSolvablePtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : InstSrcData
-class InstSrcData: virtual public Rep {
-  REP_BODY(InstSrcData)
+//	CLASS NAME : InstData
+class InstData {
 
   private:
-    InstData *_data;
+    const std::list<PMSolvablePtr> *_selections;
+    const std::list<PMPackagePtr>  *_packages;
+    const std::list<PMSolvablePtr> *_patches;
 
   public:
 
     /**
      * constructor
-     * initialization with new media
-     */
-    InstSrcData (MediaAccess *media);
-
-    /**
-     * constructor
      * initialization with known media
      */
-    InstSrcData (const Pathname & contentcachefile);
+    InstData (const Pathname & contentcachefile);
 
-    virtual ~InstSrcData();
+    virtual ~InstData();
 
   public:
 
@@ -111,5 +103,5 @@ class InstSrcData: virtual public Rep {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // InstSrcData_h
+#endif // InstData_h
 
