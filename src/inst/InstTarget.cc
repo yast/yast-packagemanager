@@ -333,7 +333,7 @@ PMError InstTarget::installPatch( const Pathname &filename )
     if ( err ) {
       E__ << "Can't create " << dest << " (errno: " << err
           << ")" << endl;
-      return PMError( InstTargetError::E_error );
+      return Error::E_error;
     }
 
     dest += filename.basename();
@@ -343,12 +343,12 @@ PMError InstTarget::installPatch( const Pathname &filename )
     ifstream in( filename.asString().c_str() );
     if ( in.fail() ) {
         E__ << "Can't read " << filename << endl;
-        return PMError( InstTargetError::E_error );
+        return Error::E_error;
     }
     ofstream out( dest.asString().c_str() );
     if ( out.fail() ) {
         E__ << "Can't write " << dest << endl;
-        return PMError( InstTargetError::E_error );
+        return Error::E_error;
     }
 
     int size = 1000;
@@ -358,7 +358,7 @@ PMError InstTarget::installPatch( const Pathname &filename )
       out.write( buf, in.gcount() );
     }
 
-    return PMError();
+    return Error::E_ok;
 }
 
 PMError InstTarget::executeScript( const Pathname &scriptname )
@@ -367,15 +367,28 @@ PMError InstTarget::executeScript( const Pathname &scriptname )
     int result = prg.close();
     if ( result != 0 ) {
         E__ << "Script failed. Exit code " << result << endl;
-        return PMError( InstTargetError::E_error );
+        return Error::E_error;
     }
 
-    return PMError();
+    return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 // Product related interface
 ///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::mayAccessProducts
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool InstTarget::mayAccessProducts() const
+{
+  return _proddb->isOpen();
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -432,6 +445,19 @@ PMError InstTarget::removeProduct( const constInstSrcDescrPtr & isd_r )
 ///////////////////////////////////////////////////////////////////
 // Selection related interface
 ///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::mayAccessSelections
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool InstTarget::mayAccessSelections() const
+{
+  return _seldb->isOpen();
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -521,12 +547,17 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 	    continue;
 	  }
 
+	  //
+	  // Filter filesystems without '/' (porc,shmfs,..)
+	  //
 	  if ( words[0].find( '/' ) == string::npos ) {
 	    DBG << "Discard mount point : " << l << endl;
 	    continue;
 	  }
 
-	  // words[1] contains the mountpoint. stat it and get the data
+	  //
+	  // Filter mountpoints not at or below _rootdir
+	  //
 	  string mp = words[1];
 	  if ( prfx.size() ) {
 	    if ( mp.compare( 0, prfx.size(), prfx ) != 0 ) {
@@ -545,8 +576,11 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 	    }
 	  }
 
+	  //
+	  // statvfs (full path!) and get the data
+	  //
 	  struct statvfs sb;
-	  if ( statvfs( words[1].c_str(), &sb ) != 0 ) { // statvfs full path!
+	  if ( statvfs( words[1].c_str(), &sb ) != 0 ) {
 	    WAR << "Unable to statvfs(" << words[1] << "); errno " << errno << endl;
 	    ret.insert( PkgDuMaster::MountPoint( mp ) );
 	  } else {
