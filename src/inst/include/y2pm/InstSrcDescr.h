@@ -81,7 +81,7 @@ class InstSrcDescr : virtual public Rep {
     /**
      * Name of the cachefile to read or write.
      **/
-    static const std::string _cache_file;
+    static const Pathname _cache_file;
 
     /**
      * The architecture of the target system (determined by hwinfo).
@@ -256,6 +256,13 @@ public:
      * Write data to cache description
      **/
     PMError writeCache( const Pathname & cache_dir_r ) const;
+
+  private:
+
+    /**
+     * Used by writeCache to actually write the data.
+     **/
+    std::ostream & writeStream( std::ostream & str ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
