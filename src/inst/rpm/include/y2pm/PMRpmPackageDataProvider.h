@@ -36,7 +36,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	RpmDbPtr _rpmdb;
 
 	/** vector to hold cached data */
-	typedef std::vector<std::string> AttrVec;
+	typedef std::vector<PkgAttributeValue> AttrVec;
 
 	/** meaning of vector positions
 	 * pkgattr2pos must be adapted if changed
@@ -64,7 +64,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 
 	/** inject attibute to cache */
 	void _setAttributeValue(
-	    PMPackagePtr pkg, unsigned attr, const std::string& value);
+	    PMPackagePtr pkg, unsigned attr, const PkgAttributeValue& value);
 
     public:
 
@@ -87,21 +87,21 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
 						     PMPackage::PMPackageAttribute attr_r );
 
-
+/*
 	std::string PMRpmPackageDataProvider::OLD_getAttributeValue( PMPackagePtr pkg,
 								     PMObject::PMObjectAttribute attr );
 	std::string PMRpmPackageDataProvider::OLD_getAttributeValue( PMPackagePtr pkg,
 								     PMPackage::PMPackageAttribute attr );
-
+*/
         /** inject attibute to cache */
 	virtual void setAttributeValue(
 	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	    const std::string& value);
+	    const PkgAttributeValue& value);
 
 	/** inject attibute to cache */
 	virtual void setAttributeValue(
 	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	    const std::string& value);
+	    const PkgAttributeValue& value);
 
     public:
 

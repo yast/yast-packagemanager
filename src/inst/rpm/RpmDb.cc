@@ -1020,7 +1020,7 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
     if ( !version.empty() )
     {
 
-	string value = queryPackage("%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}",packagePath,false);
+	string value = queryPackage("%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}",packagePath,false).firstLine();
 
 	D__ <<  "comparing version " << version << " <-> " << value << endl;
 	if ( version != value )
@@ -1036,8 +1036,9 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
 /*--------------------------------------------------------------*/
 /* Query the current package using the specified query format	*/
 /*--------------------------------------------------------------*/
-string RpmDb::queryPackage(const char *format, string packageName, bool installed)
+PkgAttributeValue RpmDb::queryPackage(const char *format, string packageName, bool installed)
 {
+    PkgAttributeValue value;
     RpmArgVec opts(4);
     if(installed)
 	opts[0] = "-q";
@@ -1049,15 +1050,20 @@ string RpmDb::queryPackage(const char *format, string packageName, bool installe
     run_rpm(opts, ExternalProgram::Discard_Stderr);
 
   if ( process == NULL )
-     return "";
+     return value;
 
-  string value;
+  string line;
   char buffer[4096];
   size_t nread;
-  while ( nread = process->receive(buffer, sizeof(buffer)), nread != 0)
+/*  while ( nread = process->receive(buffer, sizeof(buffer)), nread != 0)
     value.append(buffer, nread);
+*/
+  while(systemReadLine(line))
+  {
+    value.push_back(line);
+  }
   systemStatus();
-
+/*
   if ( value.length() >= 1 && value.at(value.length()-1) == ' ' )
   {
      if ( value.length() > 1 )
@@ -1071,6 +1077,7 @@ string RpmDb::queryPackage(const char *format, string packageName, bool installe
 	value = "";
      }
   }
+  */
 
   return value;
 }
