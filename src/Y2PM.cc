@@ -549,7 +549,7 @@ Y2PM::installFile (const Pathname& path)
     if (_callbacks._package_start_func)
 	(*_callbacks._package_start_func) (path.asString(), "", 0, false, _callbacks._package_start_data);
 
-    PMError err = instTarget().installPackage (path);
+    PMError err = instTarget().installPackage (path, RPMINST_NONE);
 
     if (_callbacks._package_done_func)
 	(*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);

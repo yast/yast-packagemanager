@@ -1758,12 +1758,12 @@ PMError
 RpmDb::installPackage(const Pathname& filename, unsigned flags)
 {
     RpmArgVec opts;
-
+MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
     FAILIFNOTINITIALIZED
 
-    if(_packagebackups)
+    if (_packagebackups)
     {
-	if(!backupPackage(filename))
+	if (!backupPackage (filename))
 	{
 	    ERR << "backup of " << filename.asString() << " failed" << endl;
 	    _progresslogstream << "backup of " << filename.asString() << " failed" << endl;
@@ -1772,24 +1772,23 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 
     _packages_valid = false;
 
-    opts.push_back("-U");
-    opts.push_back("--percent");
+    opts.push_back ("-U");
+    opts.push_back ("--percent");
 
-    if(flags&RPMINST_NODOCS)
-	opts.push_back("--excludedocs");
-    if(flags&RPMINST_NOSCRIPTS)
-	opts.push_back("--noscripts");
-    if(flags&RPMINST_FORCE)
-	opts.push_back("--force");
-    if(flags&RPMINST_NODEPS)
-	opts.push_back("--nodeps");
-    if(flags&RPMINST_IGNORESIZE)
-	opts.push_back("--ignoresize");
-    if(flags&RPMINST_JUSTDB)
-	opts.push_back("--justdb");
+    if (flags & RPMINST_NODOCS)
+	opts.push_back ("--excludedocs");
+    if (flags & RPMINST_NOSCRIPTS)
+	opts.push_back ("--noscripts");
+    if (flags & RPMINST_FORCE)
+	opts.push_back ("--force");
+    if (flags & RPMINST_NODEPS)
+	opts.push_back ("--nodeps");
+    if(flags & RPMINST_IGNORESIZE)
+	opts.push_back ("--ignoresize");
+    if(flags & RPMINST_JUSTDB)
+	opts.push_back ("--justdb");
 
-
-    opts.push_back(filename.asString().c_str());
+    opts.push_back (filename.asString().c_str());
 
     // %s = filename of rpm package
 //    _progresslogstream << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
