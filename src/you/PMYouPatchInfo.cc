@@ -544,6 +544,11 @@ PMError PMYouPatchInfo::getPatches( list<PMYouPatchPtr> &patches )
 
     _settings->config()->writeEntry( "LastServer", server.toString() );
     _settings->config()->save();
+     
+    _settings->config()->writeEntry( "LastServerType", server.type() );
+    _settings->config()->save();
+
+    y2milestone ( "Wrote: LastServerType=\"%s\" to /var/lib/YaST2/you/config", server.type().c_str() );
 
     if ( !_doneMediaDir ) {
       PMError error = processMediaDir();

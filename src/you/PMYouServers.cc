@@ -58,12 +58,13 @@ SLPBoolean MySLPSrvURLCallback( SLPHandle hslp,
 	// service url e.g.:	 service:you.suse:http://sturm.suse.de
 	if ( srvurl )
 	{
-	    string srv = srvurl;
 	    vector<string> splitted;
 	    stringutil::split( srvurl, splitted, ":", true );
-	    srv = splitted[2] + ":" + splitted[3] + "/YOU" + ";" + "YOU Server";
 
-	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(srv) );
+	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(splitted[2] + ":" + splitted[3] + "/YOU",
+									"YOU Server",
+									"",
+									"slp") );
 	}
     } 
 
@@ -257,7 +258,10 @@ PMError PMYouServers::readServers( const Pathname &file )
   while( getline( in, line ) ) {
     if ( !line.empty() && *line.begin() != '#' ) {
       PMYouServer server;
-      if ( server.fromString( line ) ) addServer( server );
+      if ( server.fromString( line ) ) {
+	  server.setType( "default" );
+	  addServer( server );
+      }
     }
   }
 
@@ -267,7 +271,7 @@ PMError PMYouServers::readServers( const Pathname &file )
       y2milestone ("Cecking for SLP severs" );
       addSLPServers( );
   }
-
+  
   return PMError();
 }
 
