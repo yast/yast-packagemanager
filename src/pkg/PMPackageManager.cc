@@ -98,7 +98,7 @@ ostream & operator<<( ostream & str, const PMPackageManager & obj )
 //
 //
 //	METHOD NAME : PMPackageManager::anythingByUser
-//	METHOD TYPE : void
+//	METHOD TYPE : bool
 //
 //	DESCRIPTION :are there currently any "by_user" selectables ?
 //
@@ -108,6 +108,46 @@ PMPackageManager::anythingByUser(void)
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
     {
 	if ((*it)->by_user())
+	    return true;
+    }
+    return false;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::anythingToDelete
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :are there currently any selectables to delete ?
+//
+bool
+PMPackageManager::anythingToDelete (void)
+{
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
+    {
+	if ((*it)->to_delete())
+	    return true;
+    }
+    return false;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::anythingToInstall
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :are there currently any selectables to install ?
+//
+bool
+PMPackageManager::anythingToInstall (void)
+{
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
+    {
+	if ((*it)->to_install())
 	    return true;
     }
     return false;
