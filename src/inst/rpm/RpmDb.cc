@@ -954,15 +954,6 @@ set<PkgEdition> RpmDb::pubkeys() const
 }
 
 
-// helper function
-// converting PMPackagePtr to "name-version-release" string
-//
-std::string
-RpmDb::pkg2rpm (constPMPackagePtr package)
-{
-    return ((const string &)package->name()) + "-" + package->edition().asString();
-}
-
 // split in into pieces seperated by sep, return vector out
 // produce up to max tokens. if max is zero the number of tokens is unlimited
 //
@@ -1714,22 +1705,33 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 //	METHOD NAME : RpmDb::removePackage
 //	METHOD TYPE : PMError
 //
-PMError RpmDb::removePackage( const string & label, unsigned flags )
+PMError RpmDb::removePackage( constPMPackagePtr package, unsigned flags )
+{
+  return removePackage( package->name(), flags );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::removePackage
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::removePackage( const string & name_r, unsigned flags )
 {
     FAILIFNOTINITIALIZED;
 
-    MIL << "RpmDb::removePackage(" << label << "," << flags << ")" << endl;
+    MIL << "RpmDb::removePackage(" << name_r << "," << flags << ")" << endl;
 
     // report
     RemovePkgReport::Send report( removePkgReport );
-    report->start( label );
+    report->start( name_r );
     ProgressData pd;
 
     // backup
     if ( _packagebackups ) {
       report->progress( pd.init( -2, 100 ) ); // allow 1% for backup creation.
-      if ( ! backupPackage( label ) ) {
-	ERR << "backup of " << label << " failed" << endl;
+      if ( ! backupPackage( name_r ) ) {
+	ERR << "backup of " << name_r << " failed" << endl;
       }
       report->progress( pd.set( 0 ) );
     } else {
@@ -1751,7 +1753,7 @@ PMError RpmDb::removePackage( const string & label, unsigned flags )
       WAR << "IGNORE OPTION: 'rpm -e' does not support '--force'" << endl;
     }
 
-    opts.push_back(label.c_str());
+    opts.push_back(name_r.c_str());
 
     modifyDatabase(); // BEFORE run_rpm
     run_rpm (opts, ExternalProgram::Stderr_To_Stdout);
