@@ -73,22 +73,22 @@ class PMManager {
     /**
      * Save current selection.
      **/
-    void SaveState();
+    virtual void SaveState();
 
     /**
      * Restore previously saved selection.
      **/
-    bool RestoreState();
+    virtual bool RestoreState();
 
     /**
      * Return true if current selection differs from previously saved selection.
      **/
-    bool DiffState() const;
+    virtual bool DiffState() const;
 
     /**
      * Forgett a previously saved selection.
      **/
-    void ClearSaveState();
+    virtual void ClearSaveState();
 
   private:
 

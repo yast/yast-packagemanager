@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Mar 18 13:34:21 CET 2003 - ma@suse.de
+
+- SelectionManager missed to save/restore it's internal list of
+  selections last state. As it's the transition 'last state -> new state'
+  that determines the fate of the selections packages, we correctly
+  restored a previously saved state, but further changes were sometimes
+  handled incorrect.
+- 2.7.36
+
+-------------------------------------------------------------------
 Sun Mar 16 02:57:08 CET 2003 - ma@suse.de
 
 - Added genIS_PLAINcache. Standalone binary to create a chachefile

@@ -72,6 +72,41 @@ class PMSelectionManager : public PMManager {
 
   private:
 
+    ActiveMap saved_last_active;
+
+  public:
+
+    /**
+     * Save current selection.
+     **/
+    virtual void SaveState() {
+      saved_last_active = _last_active;
+      PMManager::SaveState();
+    }
+
+    /**
+     * Restore previously saved selection.
+     **/
+    virtual bool RestoreState() {
+      if ( !PMManager::RestoreState() ) {
+	saved_last_active.clear();
+	return false;
+      }
+      _last_active = saved_last_active;
+      return true;
+    }
+
+    /**
+     * Forgett a previously saved selection.
+     **/
+    virtual void ClearSaveState() {
+      saved_last_active.clear();
+      PMManager::ClearSaveState();
+    }
+
+
+  private:
+
     /**
      * Make shure the passed PMObjectPtr actually references a PMSelection. If not,
      * rerport error and return NULL.
