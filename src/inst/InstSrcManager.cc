@@ -84,9 +84,9 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
     return err;
   }
 
-  if ( (err = _media->attachTo( tmpDir )) ) {
-    if ( err != MediaAccess::Error::E_attachpoint_fixed ) {
-      ERR << "Failed to attach media to " << tmpDir << " " << err << endl;
+  if ( (err = _media->attach ( )) ) {
+    if ( err != MediaAccess::Error::E_ok) {
+      ERR << "Failed to attach media: " << err << endl;
       return err;
     }
   }

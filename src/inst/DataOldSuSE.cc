@@ -355,8 +355,7 @@ DataOldSuSE::DataOldSuSE (MediaAccess *media)
     Pathname attachpoint = media->getAttachPoint();
     if (attachpoint.empty())
     {
-	attachpoint = Pathname ("/var/adm/mount");
-	media->attachTo (attachpoint);
+	media->attach ();
 	we_attached = true;
     }
 
