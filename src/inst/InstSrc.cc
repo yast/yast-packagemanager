@@ -677,7 +677,7 @@ InstSrc::provideMedia (int medianr) const
 	    {
 		MIL << "Not open, doing initial open '" << url << "'" << endl;
 		err = _media->open (url, cache_media_dir());
-		if (err != PMError::E_ok)
+		if (err != MediaError::E_ok)
 		{
 		    MIL << "open (" << url << ") failed" << endl;
 		}
@@ -687,12 +687,12 @@ InstSrc::provideMedia (int medianr) const
 		}
 	    }
 
-	    if (err != PMError::E_ok)
+	    if (err != MediaError::E_ok)
 	    {
 		MIL << "media error:" << err.errstr() << endl;
 		if (_mediaerrorfunc != 0)
 		{
-		    reply = (*_mediaerrorfunc) (err.errstr(), _mediaerrordata);
+		    reply = (*_mediaerrorfunc) (err, _mediaerrordata);
 		}
 		if (reply != 0)
 		    break;
@@ -702,7 +702,7 @@ InstSrc::provideMedia (int medianr) const
 	Pathname mediafile ("/media."+number2string(medianr)+"/media");
 
 	err = _media->provideFile (mediafile);
-	if (err == PMError::E_ok)
+	if (err == MediaError::E_ok)
 	{
 #warning TBD check 'media' file contents
 	    InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
@@ -743,7 +743,7 @@ InstSrc::provideMedia (int medianr) const
 	}
 
 #warning TBD use gettext
-	reply = (*_mediachangefunc) (0, _medianr, medianr, _mediachangedata);
+	reply = (*_mediachangefunc) ("", url, _medianr, medianr, _mediachangedata);
 	if (reply != 0)
 	{
 	    break;
