@@ -25,6 +25,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <Y2PM.h>
+#include <y2pm/RpmDb.h>
 
 using namespace std;
 
@@ -95,6 +96,17 @@ PMPackageManager & Y2PM::packageManager()
     MIL << "Launch PackageManager..." << endl;
     _packageManager = new PMPackageManager;
     MIL << "Created PackageManager" << endl;
+
+    WAR << "Fake InstTarget and load installed Packages..." << endl;
+    RpmDbPtr rpmdb( new RpmDb("/") );
+    list<PMPackagePtr> plist;
+    RpmDb::DbStatus dbstat = rpmdb->initDatabase(true);
+    if( ! (dbstat == RpmDb::RPMDB_OK || dbstat == RpmDb::RPMDB_NEW_CREATED)) {
+      ERR << "error initializing rpmdb: " << dbstat << endl;
+    } else {
+      dbstat = rpmdb->getPackages(plist);
+      Y2PM::packageManager().poolSetInstalled( plist );
+    }
   }
   return *_packageManager;
 }
