@@ -48,7 +48,7 @@ using namespace std;
 //
 // Callback for SLPFindAttrs
 //
-SLPBoolean MyAttrCallback(SLPHandle hslp,
+SLPBoolean PMAttrCallback(SLPHandle hslp,
 			  const char* attrlist,
 			  SLPError errcode,
 			  void* mydata )
@@ -67,7 +67,7 @@ SLPBoolean MyAttrCallback(SLPHandle hslp,
 //
 // Callback for SLPFindSrvs
 //
-SLPBoolean MySLPSrvURLCallback( SLPHandle hslp, 
+SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp, 
 				const char* srvurl, 
 				unsigned short lifetime, 
 				SLPError errcode, 
@@ -92,7 +92,7 @@ SLPBoolean MySLPSrvURLCallback( SLPHandle hslp,
 				    srvurl,
 				    "",			// use configured scopes
 				    "basepath,name",	// attributes
-				    MyAttrCallback,
+				    PMAttrCallback,
 				    (void *)&myattr );
 	    }
 
@@ -369,7 +369,7 @@ bool PMYouServers::addSLPServers( )
 			   "you.suse", 
 			   0,                    /* use configured scopes */ 
 			   0,                    /* no attr filter        */ 
-			   MySLPSrvURLCallback, 
+			   PMSLPSrvURLCallback, 
 			   this ); 
 
 	if( err != SLP_OK ) 
