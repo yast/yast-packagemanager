@@ -768,8 +768,6 @@ RpmDb::getPackages (void)
 				PkgArch(pkgattribs[RPM_ARCH]),
 			        dataprovider);
 
-	if(pkgattribs[RPM_NAME] == "libpng")
-	    ERR << value << endl;
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type provides;
 	    PMSolvable::PkgRelList_type obsoletes;
@@ -1704,6 +1702,7 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
     string line;
     string rpmmsg;
     double old_percent = 0.0;
+    vector<string> configwarnings;
 
     while (systemReadLine(line))
     {
@@ -1722,19 +1721,27 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 
 	if( line.substr(0,8) == "warning:" )
 	{
-	    processConfigFiles(line, Pathname::basename(filename), " saved as ",
+	    configwarnings.push_back(line);
+
+	}
+    }
+    int rpm_status = systemStatus();
+
+    for(vector<string>::iterator it = configwarnings.begin();
+	it != configwarnings.end(); ++it)
+    {
+	    processConfigFiles(*it, Pathname::basename(filename), " saved as ",
 		// %s = filenames
 		_("rpm saved %s as %s, but it was impossible to generate a diff"),
 		// %s = filenames
 		_("rpm saved %s as %s.\nHere are the first 25 lines of difference:\n"));
-	    processConfigFiles(line, Pathname::basename(filename), " created as ",
+	    processConfigFiles(*it, Pathname::basename(filename), " created as ",
 		// %s = filenames
 		_("rpm created %s as %s, but it was impossible to generate a diff"),
 		// %s = filenames
 		_("rpm created %s as %s.\nHere are the first 25 lines of difference:\n"));
-	}
     }
-    int rpm_status = systemStatus();
+
     if (rpm_status != 0)
     {
 	// %s = filename of rpm package

@@ -343,7 +343,7 @@ void init(vector<string>& argv)
 
     cout << "initializing packagemanager ... " << endl;
 
-    Y2PM::packageManager(false);
+    Y2PM::packageManager();
     PMError dbstat = Y2PM::instTarget().init(_rootdir, false);
     if( dbstat != InstTargetError::E_ok )
     {

@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 	y2pm.setPreferredLocale (locale);
     }
 
-    y2pm.packageManager(false);		// start without target
+    y2pm.packageManager();		// start without target
 #if 0
     InstSrcManager& mgr = y2pm.instSrcManager();
     InstSrcManager::ISrcIdList nids;
