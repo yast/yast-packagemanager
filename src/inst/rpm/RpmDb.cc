@@ -730,7 +730,7 @@ PMError RpmDb::rebuildDatabase()
 PMError
 RpmDb::rebuildDatabase()
 {
-    RpmArgVec opts(1);
+    RpmArgVec opts;
     PMError status = Error::E_ok;
     Pathname tmpdbpath;
     Pathname rpmdb = _root + _varlibrpm + _rpmdbname;
@@ -744,7 +744,7 @@ RpmDb::rebuildDatabase()
 
     DBG << endl;
 
-    opts[0] = "--rebuilddb";
+    opts.push_back("--rebuilddb");
 
     run_rpm (opts);
     if(process)
@@ -1212,14 +1212,13 @@ RpmDb::queryChangedFiles(FileList & fileList, const string& packageName)
 
     if( ! initialized() ) return false;
 
-    int argc = 0;
-    RpmArgVec opts(5);
+    RpmArgVec opts;
 
-    opts[argc++] = "-V";
-    opts[argc++] = "--nodeps";
-    opts[argc++] = "--noscripts";
-    opts[argc++] = "--nomd5";
-    opts[argc++] = packageName.c_str();
+    opts.push_back ("-V");
+    opts.push_back ("--nodeps");
+    opts.push_back ("--noscripts");
+    opts.push_back ("--nomd5");
+    opts.push_back (packageName.c_str());
 
     run_rpm (opts, ExternalProgram::Discard_Stderr);
 
@@ -1273,52 +1272,48 @@ void
 RpmDb::run_rpm(const RpmArgVec& options,
 		       ExternalProgram::Stderr_Disposition disp)
 {
+    if ( process ) {
+	delete process;
+	process = NULL;
+    }
+    exit_code = -1;
 
-  if ( process ) {
-    delete process;
-    process = NULL;
-  }
-  exit_code = -1;
+    if ( ! initialized() ) {
+	ERR << "Attempt to run rpm: " << Error::E_RpmDB_not_open << endl;
+	return;
+    }
 
-  if ( ! initialized() ) {
-    ERR << "Attempt to run rpm: " << Error::E_RpmDB_not_open << endl;
+    RpmArgVec args;
+
+    // always set root and dbpath
+    args.push_back("rpm");
+    args.push_back("--root");
+    args.push_back(_root.asString().c_str());
+    args.push_back("--dbpath");
+    args.push_back(_dbPath.asString().c_str());
+
+    unsigned int argc = 0;
+    const char* argv[args.size() + options.size() + 1];
+
+    for (RpmArgVec::const_iterator it1=args.begin();it1<args.end();++it1)
+    {
+	argv[argc++]=*it1;
+    }
+
+    for (RpmArgVec::const_iterator it2=options.begin();it2<options.end();++it2)
+    {
+	argv[argc++]=*it2;
+    }
+
+    argv[argc] = 0;
+
+    // Invalidate all outstanding database handles in case
+    // the database gets modified.
+    librpmDb::dbRelease( true );
+
+    // Launch the program with default locale
+    process = new ExternalProgram(argv, disp, false, -1, true);
     return;
-  }
-
-  RpmArgVec args (6);
-  unsigned argc = 0;
-
-  // always set root and dbpath
-  args[argc++] = "rpm";
-  args[argc++] = "--root";
-  args[argc++] = _root.asString().c_str();
-  args[argc++] = "--dbpath";
-  args[argc++] = _dbPath.asString().c_str();
-  args[argc++] = NULL;
-
-  const char* argv[argc+options.size()+2];
-  argc = 0;
-
-  for (RpmArgVec::iterator it=args.begin();it<args.end();++it)
-    {
-      if (*it == 0)
-	break;
-      argv[argc++]=*it;
-    }
-  for(RpmArgVec::const_iterator it2=options.begin();it2<options.end();++it2)
-    {
-      argv[argc++]=*it2;
-    }
-
-  argv[argc] = 0;
-
-  // Invalidate all outstanding database handles in case
-  // the database gets modified.
-  librpmDb::dbRelease( true );
-
-  // Launch the program with default locale
-  process = new ExternalProgram(argv, disp, false, -1, true);
-  return;
 }
 
 /*--------------------------------------------------------------*/
