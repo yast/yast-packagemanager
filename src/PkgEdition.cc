@@ -172,8 +172,10 @@ bool PkgEdition::edition_lt( const PkgEdition& e2 ) const
 		return d < 0;
 
 	// next compare releases
-	if (rpmvercmp( _release, e2._release ) >= 0)
-		return false;
+        d = rpmvercmp( _release, e2._release );
+	if ( d != 0)
+		return d < 0;
+
 	return (_buildtime < e2._buildtime); // no metahash needed here
 }
 
