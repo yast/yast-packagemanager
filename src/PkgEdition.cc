@@ -11,6 +11,11 @@ using namespace std;
 
 const char* op_str[GE+1] = { "none","==","!=","<","<=",">",">=" };
 
+// Use a 'version-release' form for these strings.
+// (i.e. exactly one '-')
+const std::string PkgEdition::_str_UNSPEC(  "EDITION-UNSPEC" );
+const std::string PkgEdition::_str_MAXIMUM( "EDITION-MAXIMUM");
+
 //
 // compare two editions
 //
@@ -71,8 +76,6 @@ bool PkgEdition::edition_eq( const PkgEdition& e2 ) const
 		return false;
 	if (rpmvercmp( _version, e2._version ) != 0)
 		return false;
-	if (!_release || !e2._release)
-		return true;
 	if (rpmvercmp( _release, e2._release ))
 		return false;
 	// NOTE: we do not compare buildtimes here. If versions/release/libs
@@ -104,24 +107,13 @@ bool PkgEdition::edition_lt( const PkgEdition& e2 ) const
 	if (d != 0)
 		return d < 0;
 
-	// check cases where one or both editions have no releases
-	if (!_release) {
-		if (!e2._release)
-			return false; // both have no rev -> equal
-		else
-			return true; // no rev is less than w/ rev
-	}
-	else {
-		if (!e2._release)
-			return false; // w/ rev is greater than no rev
-	}
 	// next compare releases
 	if (rpmvercmp( _release, e2._release ) >= 0)
 		return false;
 	return (_buildtime < e2._buildtime); // no metahash needed here
 }
 
-int PkgEdition::rpmvercmp(const char * a, const char * b) const
+int PkgEdition::rpmvercmp( const std::string & lhs, const std::string & rhs ) const
 {
     int num1, num2;
     char oldch1, oldch2;
@@ -130,13 +122,16 @@ int PkgEdition::rpmvercmp(const char * a, const char * b) const
     int rc;
     int isnum;
 
-    if (!strcmp(a, b)) return 0;
+    if ( lhs == rhs )  return 0;
+    // empty is less than anything else:
+    if ( lhs.empty() ) return -1;
+    if ( rhs.empty() ) return  1;
 
-    str1 = (char *)alloca(strlen(a) + 1);
-    str2 = (char *)alloca(strlen(b) + 1);
+    str1 = (char *)alloca(lhs.size() + 1);
+    str2 = (char *)alloca(rhs.size() + 1);
 
-    strcpy(str1, a);
-    strcpy(str2, b);
+    strcpy(str1, lhs.c_str());
+    strcpy(str2, rhs.c_str());
 
     one = str1;
     two = str2;
@@ -190,6 +185,7 @@ int PkgEdition::rpmvercmp(const char * a, const char * b) const
     if (!*one) return -1; else return 1;
 }
 
+
 string PkgEdition::as_string() const
 {
   // if you don't like implement your own format here,
@@ -227,8 +223,8 @@ string PkgEdition::toString( const PkgEdition & t )
   }
 
   ret += stringutil::form( "%s-%s",
-			   ( t._version ? t._version : "" ),
-			   ( t._release ? t._release : "" ) );
+			   t._version.c_str(),
+			   t._release.c_str() );
   return ret;
 }
 

@@ -193,12 +193,7 @@ ostream & PMSolvable::dumpOn( ostream & os ) const
   Rep::dumpOn( os );
   os << endl;
   os << "Name: " << _name << endl;
-  os << "Version: " << _edition.version() << endl;
-  if (_edition.has_release())
-    os << "Release: " << _edition.release() << endl;
-  if (_edition.has_epoch())
-    os << "Epoch: " << _edition.epoch() << endl;
-
+  os << "Edition: " << _edition << endl;
   if (_requires.size())
     os << "Requires: " << _requires << endl;
   if (_prerequires.size())
