@@ -186,11 +186,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
      * @see PMObject
      **/
     virtual std::string            summary()     const { return shortDescription(); }
-    virtual std::list<std::string> description() const {
-      std::list<std::string> ret;
-      ret.push_back( longDescription() );
-      return ret;
-    }
+    virtual std::list<std::string> description() const;
     virtual std::list<std::string> insnotify()       const { return PMObject::insnotify(); }
     virtual std::list<std::string> delnotify()       const { return PMObject::delnotify(); }
     virtual FSize                  size()            const { return patchSize(); }

@@ -23,6 +23,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/FSize.h>
+#include <y2util/stringutil.h>
 
 #include <y2pm/PMYouPatch.h>
 
@@ -134,4 +135,16 @@ string PMYouPatch::fullName() const
   result += "-";
   result += edition().asString();
   return result;
+}
+
+list<string> PMYouPatch::description() const
+{
+  list<string> ret;
+  vector<string> lines;
+  stringutil::split( longDescription(), lines, "\n", true );
+  vector<string>::const_iterator it;
+  for( it = lines.begin(); it != lines.end(); ++it ) {
+    ret.push_back( *it );
+  }
+  return ret;
 }
