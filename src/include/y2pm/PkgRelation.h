@@ -23,8 +23,8 @@ class PkgRelation {
 
 	// return true if this relation holds given a package (providing itself)
 	// or another relation (which is a provides relation)
-	bool matches( const PMSolvablePtr pkg ) const;
-	bool matches( const PkgRelation& rel ) const;
+	bool matches( constPMSolvablePtr pkg ) const;
+	bool matches( const PkgRelation & rel ) const;
 
 	bool operator==( const PkgRelation& r2 ) const {
 		return( _name == r2._name && _op == r2._op &&
