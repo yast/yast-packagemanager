@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jan 20 10:46:49 CET 2003 - cschum@suse.de
+
+- Read a path prefix from /media.1/patches which is prepended to
+  the path used for getting YOU patches.
+
+-------------------------------------------------------------------
 Wed Dec 18 15:02:25 CET 2002 - cschum@suse.de
 
 - Implemented PMManager::read/writeSettings(). It's currently only
