@@ -433,6 +433,51 @@ PMULSelectionDataProvider::supportedLocales( const PMSelection & sel_r ) const
 }
 
 std::set<PMSelectablePtr>
+PMULSelectionDataProvider::pureInspacks_ptrs(const PMSelection & sel_r, const LangCode& locale) const
+{
+  posmapIT it = _attr_INSPACKS.find (locale.code());	// try full locale
+  if (it == _attr_INSPACKS.end())
+    {
+      it = _attr_INSPACKS.find (locale.language().code());	// try 2-char locale
+    }
+
+  if (it == _attr_INSPACKS.end())		// no retrieval pointer
+  {
+    return std::set<PMSelectablePtr>();
+  }
+
+  std::list<std::string> strlist;
+  _selection_retrieval->retrieveData (it->second, strlist);
+
+  //-----------------------------------------------------
+  // now we have the string list and it's position
+  // convert the string list to a PMSelectable set
+
+  std::set<PMSelectablePtr> slclist;
+  for (std::list<std::string>::const_iterator strpos = strlist.begin();
+	strpos != strlist.end(); ++strpos)
+    {
+      PMSelectablePtr selectable = Y2PM::packageManager().getItem( *strpos );
+
+      if ( !selectable && strpos->find_first_of( " (,)" ) != string::npos ) {
+	// Scan for alternates: name(alternative [,alternative ...])
+	// Additional catches names surrounded by whitespace
+	vector<string> names;
+	stringutil::split( *strpos, names, " (,)" );
+	for ( unsigned i = 0; i < names.size(); ++i ) {
+	  selectable = Y2PM::packageManager().getItem( names[i] );
+	  if ( selectable )
+	    break;
+	}
+      }
+
+      if (selectable)
+	slclist.insert(selectable);
+    }
+  return slclist;
+}
+
+std::set<PMSelectablePtr>
 PMULSelectionDataProvider::inspacks_ptrs(const PMSelection & sel_r, const LangCode& locale) const
 {
     return pkgsPointers (locale, false);

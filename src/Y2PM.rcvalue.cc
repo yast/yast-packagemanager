@@ -34,6 +34,8 @@
 #include <Y2PM.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstTargetError.h>
+#include <y2pm/PMLanguageManager.h>
+
 #include "PMRcValues.h"
 #include "PMTextParse.h"
 
@@ -437,6 +439,9 @@ PMError Y2PM::rcInit()
   // postprocess
   ///////////////////////////////////////////////////////////////////
 
+  //
+  _yp2pmrc.initialRequestedLocales = _yp2pmrc.requestedLocales;
+
   // assert at least these vendor are present
   _yp2pmrc.trustedVendors.insert( "suse" );
   _yp2pmrc.trustedVendors.insert( "unitedlinux" );
@@ -488,6 +493,9 @@ PMError Y2PM::rcSave()
     WAR << "rcvalues not yet initialized." << endl;
     return PMError::E_ok;
   }
+
+  languageManager().setComittedLocales( _yp2pmrc.requestedLocales );
+
   if ( _yp2pmrc._rcfile.empty() ) {
     WAR << "Writing rcfile disabled." << endl;
     return PMError::E_ok;

@@ -227,19 +227,19 @@ int main( int argc, char * argv[] )
   set_log_filename( "-" );
   MIL << "START (" << argc << ")" << endl;
 
-  if ( 0 ) {
+  if ( 1 ) {
     //Y2PM::setNotRunningFromSystem();
     //Y2PM::setCacheToRamdisk( false );
     //Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
     Y2PM::instTargetInit("/");
-    _t.start( "Launch PMLanguageManager" );
-    Y2PM::languageManager();
     _t.start( "Launch PMPackageManager" );
     Y2PM::packageManager();
     _t.start( "Launch PMSelectionManager" );
     Y2PM::selectionManager();
+    _t.start( "Launch PMLanguageManager" );
+    Y2PM::languageManager();
     _t.start( "Launch InstSrcManager" );
     Y2PM::instSrcManager();
     _t.stop();
@@ -248,10 +248,11 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  Y2PM::noAutoInstSrcManager();
-  Y2PM::instTargetInit("/");
-  cedSrc( "smb://gray/machcd2/CDs/SuSE-9.3-Preview4-DVD/CD1" );
 
+
+  PMLanguageManager::PkgSelectables pkgs( LMGR.getLangPackagesFor( LangCode("tx") ) );
+  INT << pkgs << endl;
+  //dumpLangWhatIf( SEC, true );
 
 #if 0
   dumpLangWhatIf( SEC, true );
@@ -261,7 +262,7 @@ int main( int argc, char * argv[] )
   LMGR["af"]->user_set_onSystem();
   doSolve( PMGR );
 
-  PkgSelectables pkgs( LMGR.getLangPackagesFor( "af" ) );
+  PkgSelectables pkgs( LMGR.getLangPackagesFor( "" ) );
 
 
   dumpPkgWhatIf( INT );

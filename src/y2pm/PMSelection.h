@@ -85,8 +85,11 @@ class PMSelection : public PMObject {
     /**
      * <code>PackageManager</code>s list of Selectables included in
      * this Selection for a given locale. This is probaeely <b>not</b>,
-     * what you want. See <code>inspacks_ptrs()</code>.
+     * what you want. See <code>inspacks_ptrs()</code>. pureInspacks_ptrs
+     * returns just the locale specific packages, not using a 'default'
+     * entry as fallback (used by LanguageManager).
      **/
+    std::set<PMSelectablePtr>	pureInspacks_ptrs( const LangCode & locale );
     std::set<PMSelectablePtr>	inspacks_ptrs( const LangCode & locale );
     std::set<PMSelectablePtr>	inspacks_ptrs( const PM::LocaleSet & locales );
     /**

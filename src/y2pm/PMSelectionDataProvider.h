@@ -82,6 +82,7 @@ class PMSelectionDataProvider : public CountedRep {
 
     // the per locale entry ( no default lang argument! )
     static PM::LocaleSet             supportedLocales() { return PM::LocaleSet(); }
+    static std::set<PMSelectablePtr> pureInspacks_ptrs( const LangCode& lang ) { return std::set<PMSelectablePtr>(); }
     static std::set<PMSelectablePtr> inspacks_ptrs( const LangCode& lang ) { return std::set<PMSelectablePtr>(); }
     static std::set<PMSelectablePtr> delpacks_ptrs( const LangCode& lang ) { return std::set<PMSelectablePtr>(); }
 
@@ -133,6 +134,7 @@ class PMSelectionDataProvider : public CountedRep {
 
     // the per locale entry ( no default lang argument! )
     virtual PM::LocaleSet             supportedLocales( const PMSelection & sel_r ) const { return PM::LocaleSet(); }
+    virtual std::set<PMSelectablePtr> pureInspacks_ptrs( const PMSelection & sel_r, const LangCode& lang ) const { return pureInspacks_ptrs(lang); }
     virtual std::set<PMSelectablePtr> inspacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang ) const { return inspacks_ptrs(lang); }
     virtual std::set<PMSelectablePtr> delpacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang ) const { return delpacks_ptrs(lang); }
 

@@ -180,11 +180,18 @@ void PMLanguageManager::rescan()
   // adjust _availableObjs
   _availableObjs.swap( still_available );
   _availableObjs.insert( new_available.begin(), new_available.end() );
+}
 
-  // derive installed locales from rcfile
-  PM::LocaleSet locales( Y2PM::getRequestedLocales() );
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMLanguageManager::setComittedLocales
+//	METHOD TYPE : void
+//
+void PMLanguageManager::setComittedLocales( PM::LocaleSet locales_r )
+{
   _installedObjs.clear();
-  for ( PM::LocaleSet::const_iterator it = locales.begin(); it != locales.end(); ++it ) {
+  for ( PM::LocaleSet::const_iterator it = locales_r.begin(); it != locales_r.end(); ++it ) {
     _installedObjs[*it] = new PMLanguage( *it );
   }
   poolSetInstalled( _installedObjs );
@@ -204,15 +211,14 @@ PMLanguageManager::PkgSelectables PMLanguageManager::getLangPackagesFor( LangCod
 	sit != Y2PM::selectionManager().end(); ++sit ) {
 
     PMSelectionPtr sel = (*sit)->installedObj();
-
     if ( sel ) {
-      set<PMSelectablePtr> cpkg( sel->inspacks_ptrs( langCode_r ) );
+      set<PMSelectablePtr> cpkg( sel->pureInspacks_ptrs( langCode_r ) );
       packages.insert( cpkg.begin(), cpkg.end() );
     }
 
     sel = (*sit)->candidateObj();
     if ( sel ) {
-      set<PMSelectablePtr> cpkg( sel->inspacks_ptrs( langCode_r ) );
+      set<PMSelectablePtr> cpkg( sel->pureInspacks_ptrs( langCode_r ) );
       packages.insert( cpkg.begin(), cpkg.end() );
     }
   }
