@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  2 10:43:28 CET 2004 - cschum@suse.de
+
+- Fix return code of online_update command.
+- 2.9.19
+
+-------------------------------------------------------------------
 Mon Mar  1 16:27:31 CET 2004 - cschum@suse.de
 
 - Show patch pre-information messages before download and

@@ -29,6 +29,7 @@
 
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMSelectable.h>
+#include <y2pm/PMLocale.h>
 
 using namespace std;
 
