@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun 24 17:23:41 CEST 2004 - lnussel@suse.de
+
+- preliminary support for delta packages
+- 2.10.2
+
+-------------------------------------------------------------------
 Fri Jun 18 13:43:02 CEST 2004 - lnussel@suse.de
 
 - use uname() syscall instead of command
