@@ -621,7 +621,10 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
     callbacks.setBaseProgress( progressCurrent );
     PMError error = patchProgress( progressCurrent * 100 / progressTotal );
-    if ( error ) return error;
+    if ( error ) {
+      MediaCurl::setCallbacks( 0 );
+      return error;
+    }
     progressCurrent += 100;
 
     if ( patch->updateOnlyInstalled() ) {
@@ -634,6 +637,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
 
     error = retrievePackage( *itPkg, reload, noExternal );
     if ( error ) {
+      MediaCurl::setCallbacks( 0 );
       if ( error == MediaError::E_user_abort ) {
         return YouError::E_user_abort;
       } else {
@@ -650,6 +654,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
       }
       unsigned result = rpm.checkPackage( localRpm );
       if ( result != 0 ) {
+        MediaCurl::setCallbacks( 0 );
         ERR << "Signature check failed for " << localRpm << endl;
         return PMError( YouError::E_bad_sig_rpm );
       }
@@ -660,11 +665,15 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
   for( itFile = files.begin(); itFile != files.end(); ++itFile ) {
     callbacks.setBaseProgress( progressCurrent );
     PMError error = patchProgress( progressCurrent * 100 / progressTotal );
-    if ( error ) return error;
+    if ( error ) {
+      MediaCurl::setCallbacks( 0 );
+      return error;
+    }
     progressCurrent += 100;
 
     error = retrieveFile( *itFile, reload );
     if ( error ) {
+      MediaCurl::setCallbacks( 0 );
       ERR << "Error retrieving file." << endl;
       return error;
     }
