@@ -49,7 +49,7 @@ void usage()
 */
 int main( int argc, char *argv[] )
 {
-  Y2Logging::setLogfileName("/dev/null");
+  set_log_filename("/dev/null");
   Pathname pkgrootdir;
   Pathname cachefile;
   bool     force = false;
@@ -76,7 +76,7 @@ int main( int argc, char *argv[] )
       options.recurse = true;
       break;
     case 'v':
-      Y2Logging::setLogfileName("-");
+      set_log_filename("-");
       break;
 
     default:

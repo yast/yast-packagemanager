@@ -28,7 +28,7 @@ using namespace std;
 
 int main( int argc, char **argv )
 {
-//  Y2Logging::setLogfileName( "-" );
+//  set_log_filename( "-" );
 
   if ( argc < 1 || argc > 2 || argc == 2 && strcmp( argv[ 1 ], "-i" ) != 0 ) {
     cerr << "Usage: " << argv[ 0 ] << " [-i]" << endl;

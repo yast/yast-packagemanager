@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Dec 12 20:46:22 CET 2003 - msvec@suse.cz
+
+- adapted for the logging changes in liby2util
+- 2.9.11
+
+-------------------------------------------------------------------
 Tue Dec  9 13:12:14 CET 2003 - ma@suse.de
 
 - Reorder candidate lists if InsrSrc priority was changed.

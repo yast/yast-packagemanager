@@ -226,7 +226,7 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
  ******************************************************************/
 int mmain( int argc, const char * argv[] );
 int main( int argc, const char * argv[] ) {
-  Y2Logging::setLogfileName("-");
+  set_log_filename("-");
   SEC << "START" << endl;
   int ret = 0;
 

@@ -25,7 +25,7 @@ using namespace std;
 */
 int main( int argc, char **argv )
 {
-  Y2Logging::setLogfileName( "-" );
+  set_log_filename( "-" );
   MIL << "START" << endl;
 
   const char *readFile = 0;

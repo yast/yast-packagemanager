@@ -67,7 +67,7 @@ int main( int argc, char **argv )
 
   string patchFile = argv[ optind ];
 
-  if ( verbose ) Y2Logging::setLogfileName( "-" );
+  if ( verbose ) set_log_filename( "-" );
 
   PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo );
   std::list<PMYouPatchPtr> patches;
