@@ -250,7 +250,7 @@ int main( int argc, char * argv[] )
 
   Y2PM::noAutoInstSrcManager();
   Y2PM::instTargetInit("/");
-  cedSrc( "cifs://@host/share/dir" );
+  cedSrc( "smb://gray/machcd2/CDs/SuSE-9.3-Preview4-DVD/CD1" );
 
 
 #if 0
