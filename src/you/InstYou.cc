@@ -56,26 +56,6 @@
 
 using namespace std;
 
-template <class CB, class H>
-class CallbackSaver
-{
-  public:
-    CallbackSaver( H &hook, CB *callback )
-      : mHook( hook )
-    {
-      mCallback = hook.redirectTo( callback );
-    }
-
-    ~CallbackSaver()
-    {
-      mHook.redirectTo( mCallback );
-    }
-    
-  private:
-    H &mHook;
-    CB *mCallback;
-};
-
 InstYou::Callbacks *InstYou::_callbacks = 0;
 
 ///////////////////////////////////////////////////////////////////
@@ -285,7 +265,7 @@ void InstYou::selectPatches( int kinds )
 
         if ( (*it)->updateOnlyNew() ) toInstall = hasNewPackages( *it );
         else toInstall = hasOnlyNewPackages( *it );
-        
+
         if ( toInstall ) {
           PMSelectablePtr selectable = (*it)->getSelectable();
           if ( !selectable ) {
@@ -398,19 +378,16 @@ PMError InstYou::releaseSource()
     error = _media.release();
   }
 
-  return error;  
+  return error;
 }
 
 PMError InstYou::processPatches()
 {
   MIL << "Process patches." << endl;
-
-  CallbackSaver<RpmDbCallbacks::InstallPkgCallback,
-                RpmDbCallbacks::InstallPkgReport>
-      saver1( RpmDbCallbacks::installPkgReport, 0 );
-  CallbackSaver<MediaCallbacks::DownloadProgressCallback,
-                MediaCallbacks::DownloadProgressReport>
-      saver2( MediaCallbacks::downloadProgressReport, 0 );
+  ReportRedirect<RpmDbCallbacks::InstallPkgCallback>
+    saver1( RpmDbCallbacks::installPkgReport, 0 );
+  ReportRedirect<MediaCallbacks::DownloadProgressCallback>
+    saver2( MediaCallbacks::downloadProgressReport, 0 );
 
   resetProgress();
   _installedPatches = 0;
@@ -446,7 +423,7 @@ PMError InstYou::processPatches()
   int lastMediaNumber = -1;
 
   patch =  firstPatch();
-  
+
   if ( !patch ) {
     log( _("No patches have been selected for installation.\n") );
     return PMError::E_ok;
@@ -473,7 +450,7 @@ PMError InstYou::processPatches()
         ERR << "Media not found: " << _currentMediaNumber << endl;
         return error;
       }
-      
+
       lastMediaNumber = _currentMediaNumber;
     }
 
@@ -572,7 +549,7 @@ PMError InstYou::processPatches()
     return error;
   }
 
-  list<PMYouPatchPtr> patches;  
+  list<PMYouPatchPtr> patches;
   for( patch = firstPatch(); patch; patch = nextPatch() ) {
     if ( patch->skipped() ) continue;
     string postInfo = patch->postInformation();
@@ -617,7 +594,7 @@ PMError InstYou::installPatches( const vector<PMYouPatchPtr> &patches )
   vector<PMYouPatchPtr>::const_iterator it;
   for( it = patches.begin(); it != patches.end(); ++it ) {
     PMYouPatchPtr patch = *it;
-  
+
     string text = stringutil::form( _("Installing %s: \"%s\" "),
                                     patch->name().asString().c_str(),
                                     patch->summary().c_str() );
@@ -718,7 +695,7 @@ PMYouPatchPtr InstYou::firstPatch()
 PMYouPatchPtr InstYou::nextPatch()
 {
   ++_selectedPatchesIt;
-  
+
   while ( _selectedPatchesIt != _patches.end() ) {
     int mediaNumber = _info->mediaNumber( *_selectedPatchesIt );
     if ( mediaNumber >= 0 ) _currentMediaNumber = mediaNumber;
@@ -1558,7 +1535,7 @@ void InstYou::filterArchitectures( PMYouPatchPtr &patch )
   list<PMPackagePtr>::iterator it1 = packages.begin();
   while( it1 != packages.end() ) {
     D__ << "  PKG: " << (*it1)->nameEdArch() << endl;
-  
+
     PMSelectablePtr s = Y2PM::packageManager().getItem( (*it1)->name() );
 
     // Handle installed packages. If the package is already installed, all
@@ -1593,7 +1570,7 @@ void InstYou::filterArchitectures( PMYouPatchPtr &patch )
       it1 = packages.erase( it1 );
       continue;
     }
-    
+
     // Handle uninstalled packages. The instance of the package which has the
     // best architecture is used. All other instances are discarded.
     std::list<PMPackagePtr>::iterator bestArch = it1;
@@ -1633,7 +1610,7 @@ void InstYou::filterArchitectures( PMYouPatchPtr &patch )
         ++it2;
       }
     }
-  
+
     ++it1;
   }
 
@@ -1663,14 +1640,14 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
 
     log( stringutil::form( _("Request media %d."), number ) );
     log( " " );
-  
+
     if ( callback->isSet() ) {
       PMError error = releaseSource();
       if ( error ) {
         ERR << "Release source failed." << endl;
         return error;
       }
-    
+
       string errorStr = _("Media not found");
       string productStr = _("YOU Patch CD");
       string result = callback->changeMedia( errorStr, "", productStr,
@@ -1693,7 +1670,7 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
       log( _("Failed.\n") );
       return YouError::E_wrong_media;
     }
-    
+
     PMError error = attachSource();
     if ( error ) {
       ERR << "Attach source failed." << endl;
