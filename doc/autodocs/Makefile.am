@@ -31,7 +31,8 @@ doxygen.css @RPMNAME@.tag: index.html
 # No install-data-local necessary
 DOC=/usr/share/doc/packages
 index.html: $(SRC_INCLUDEHEADER)
-	@ybindir@/ydoxygen PROJECT_NAME=@RPMNAME@ \
+	${YDOXYGEN} PROJECT_NAME=@RPMNAME@ \
+		INPUT=$(top_srcdir)/src \
 		"TAGFILES=\
 		\"$(DOC)/liby2util/autodocs/liby2util.tag = \
 		  $(DOC)/liby2util/autodocs\" \
