@@ -136,6 +136,11 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         */
         FSize patchRpmSize( const PMPackage & ) const;
     
+        /**
+          Return disk usage information. This includes the required disk space
+          for downloading the RPMs.
+        */
+        std::list<std::string> du ( const PMPackage & pkg_r ) const;
 
     private:
         std::map<PMPackagePtr,std::string> _summaries;
