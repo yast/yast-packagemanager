@@ -119,6 +119,8 @@ class PkgSet {
 	{
 	    return _additionalprovides_callback;
 	}
+
+	std::ostream& dumpOn(std::ostream& os);
 };
 
 #endif  /* _PkgSet_h */

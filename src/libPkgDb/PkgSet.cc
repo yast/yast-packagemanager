@@ -108,6 +108,17 @@ void PkgSet::new_provides( const Solvable *pkg, const PkgRelation& prov )
 	_provided[prov.name()].push_back( PkgRevRelation( &prov, pkg ));
 }
 
+std::ostream& PkgSet::dumpOn(std::ostream& os);
+{
+    for(iterator it = begin(); it != end(); ++it)
+    {
+	if(it!=begin())
+	    os << " ";
+	os << it->key;
+    }
+    os << endl;
+}
+
 // Local Variables:
 // tab-width: 4
 // End:

@@ -19,6 +19,7 @@ bool PkgDep::install( PkgSet& in_candidates,
 	to_check = deque<PMSolvablePtr >();
 	notes = Notes_type();
 	i_obsoleted = NameList();
+	unsigned numtocheck = 0;
 
 	// sort out candidates that are already installed, mark others as
 	// coming from input
@@ -27,17 +28,22 @@ bool PkgDep::install( PkgSet& in_candidates,
 		PMSolvablePtr cand = c->value;
 
 		PMSolvablePtr instd = installed[candname];
-		if (instd && instd->edition() == cand->edition()) {
+		if (!_install_installed && instd && instd->edition() == cand->edition())
+		{
 			// is already installed in this version -- drop it
 			D__ << candname << " is already installed in same version "
 				 << cand->edition() << " -- dropping it\n";
 		}
 		else {
+			numtocheck++;
 			to_check.push_back( cand );
 			notes[cand->name()].from_input = true;
 		}
 		
 	}
+
+
+	DBG << numtocheck << " Packages to check" << endl;
 
 	do {
 		while( !to_check.empty() ) {
