@@ -1095,7 +1095,10 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
 			  std::list<std::string> & srcremaining_r,
 			  InstSrcManager::ISrcIdList installrank_r )
 {
-#warning Check for initialized target/packagemanager?
+  if ( ! ( _instTarget || && instTarget().initialized() ) ) {
+    ERR << "Can't commit packages without instTarget being initialized!" << endl;
+    return 0;
+  }
 
   if ( mediaNr_r == 9999 ) {
 #warning Using faked medianr 9999 to trigger instTargetUpdate
@@ -1103,15 +1106,19 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
     return 0;
   }
 
+  MIL << "Commiting packages..." << endl;
   int ret = internal_commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r, installrank_r );
 
   // Release all source media
+
+  MIL << "Commiting packages..." << endl;
   instSrcManager().releaseAllMedia();
 
   if ( ! mediaNr_r ) {
     instTargetUpdate(); // reread modified databases
   }
 
+  MIL << "Commiting packages returns " << ret << endl;
   return ret;
 }
 
