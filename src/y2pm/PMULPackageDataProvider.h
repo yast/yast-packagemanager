@@ -27,6 +27,7 @@
 
 #include <y2util/TagCacheRetrieval.h>
 
+#include <y2pm/ULParsePackagesLang.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
 
@@ -48,6 +49,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
 
     friend class ULPackagesParser;
+    friend class InstSrcDataUL;
 
     protected:
 
@@ -95,13 +97,17 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	const TagCacheRetrievalPtr _package_retrieval;
 
 	// retrieval pointer for packages.<locale> data
-	const TagCacheRetrievalPtr _locale_retrieval;
+	TagCacheRetrievalPtr _locale_retrieval;
 
 	// retrieval pointer for packages.DU data
 	const TagCacheRetrievalPtr _du_retrieval;
 
 	// fallback provider (Share entry in packages)
 	PMULPackageDataProviderPtr _fallback_provider;
+
+    protected:
+
+      void assignLocaleData( const ULParsePackagesLang::Entry & entry_r );
 
     public:
 

@@ -167,6 +167,11 @@ class InstSrcData: public CountedRep, public InstData {
      **/
     constInstSrcPtr attachedToInstSrc() const { return _instSrc; }
 
+    /**
+     * Triggered on change of preferredLocale
+     **/
+    virtual void preferredLocaleChanged() const {}
+
   public:
 
     std::ostream & dumpOn( std::ostream & str ) const;

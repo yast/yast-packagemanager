@@ -70,6 +70,23 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
 
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::assignLocaleData
+//	METHOD TYPE : void
+//
+void PMULPackageDataProvider::assignLocaleData( const ULParsePackagesLang::Entry & entry_r )
+{
+  _locale_retrieval = entry_r.retrieval;
+
+  _attr_SUMMARY          = entry_r.posSUMMARY;
+  _attr_DESCRIPTION      = entry_r.posDESCRIPTION;
+  _attr_INSNOTIFY        = entry_r.posINSNOTIFY;
+  _attr_DELNOTIFY        = entry_r.posDELNOTIFY;
+  _attr_LICENSETOCONFIRM = entry_r.posLICENSETOCONFIRM;
+}
+
 // NOTE:
 // The 'const PMPackage & pkg_r' argument is passed to the _fallback_provider->func.
 // This is ok, as InstSrcDataUL uses a per package DataProvider. The pkg_r argument

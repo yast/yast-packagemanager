@@ -259,6 +259,20 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMSelectionManager::requestedLocalesChanged
+//	METHOD TYPE : PMError
+//
+PMError PMSelectionManager::requestedLocalesChanged( const PM::LocaleSet & addLocales_r,
+						     const PM::LocaleSet & delLocales_r )
+{
+#warning TBI PMSelectionManager::requestedLocalesChanged
+  return PMError::E_ok;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMSelectionManager::installOnTarget
 //	METHOD TYPE : PMError
 //

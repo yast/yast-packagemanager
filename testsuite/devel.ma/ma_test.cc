@@ -35,7 +35,7 @@ using namespace std;
 template<typename _Ct>
 ostream & operator<<( ostream & str, const list<_Ct> & obj ) {
   str << '{';
-  for ( list<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+  for ( typename list<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
     if ( it == obj.begin() )
       str << endl;
     str << "  " << *it << endl;
@@ -46,7 +46,7 @@ ostream & operator<<( ostream & str, const list<_Ct> & obj ) {
 template<typename _Ct>
 ostream & operator<<( ostream & str, const set<_Ct> & obj ) {
   str << '{';
-  for ( set<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+  for ( typename set<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
     if ( it == obj.begin() )
       str << endl;
     str << "  " << *it << endl;
@@ -151,6 +151,18 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
+void xx() {
+  PMSelectablePtr s( PMGR["3ddiag"] );
+  DBG << "Sel " << s << endl;
+  if ( !s )
+    return;
+  PMPackagePtr p( s->theObject() );
+  DBG << "Pkg " << p << endl;
+  if ( !p )
+    return;
+  MIL << "Des " << p->description() << endl;
+}
+
 /******************************************************************
 **
 **
@@ -165,11 +177,14 @@ int main()
   set_log_filename( "-" );
   MIL << "START" << endl;
 
-  if ( 0 ) {
+  Y2PM::setNotRunningFromSystem();
+  Y2PM::setCacheToRamdisk( false );
+
+  if ( 1 ) {
     //Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
-    _t.start( "Launch InstTarget" );
-    Y2PM::instTargetInit("/");
+    //_t.start( "Launch InstTarget" );
+    //Y2PM::instTargetInit("/");
     _t.start( "Launch PMPackageManager" );
     Y2PM::packageManager();
     _t.start( "Launch PMSelectionManager" );
@@ -181,10 +196,25 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  MIL << Y2PM::getPreferredLocale() << endl;
-  MIL << Y2PM::getLocaleFallback( Y2PM::getPreferredLocale() ) << endl;
-  MIL << Y2PM::getLocaleFallback( LangCode("de_AT") ) << endl;
+  InstSrcManager::ISrcId nid = newSrc( "/schnell/CD-ARCHIVE/9.0/SuSE-9.0-DVD-i386-RC5/CD1" );
+  ISM.enableSource( nid );
 
+  SEC << Y2PM::getPreferredLocale() << endl;
+  xx();
+
+  SEC << Y2PM::setPreferredLocale( LangCode("de_AT") ) << endl;
+  SEC << Y2PM::getPreferredLocale() << endl;
+  xx();
+
+  SEC << Y2PM::setPreferredLocale( LangCode("") ) << endl;
+  SEC << Y2PM::getPreferredLocale() << endl;
+  xx();
+
+  SEC << Y2PM::setPreferredLocale( LangCode("en_US") ) << endl;
+  SEC << Y2PM::getPreferredLocale() << endl;
+  xx();
+
+#if 0
   MIL << Y2PM::getRequestedLocales() << endl;
   Y2PM::setRequestedLocales( LangCode("de_AT") );
   MIL << Y2PM::getRequestedLocales() << endl;
@@ -194,6 +224,7 @@ int main()
   MIL << Y2PM::getRequestedLocales() << endl;
   Y2PM::setRequestedLocales( LangCode("de_DE@euro") );
   MIL << Y2PM::getRequestedLocales() << endl;
+#endif
 
   SEC << "STOP" << endl;
   return 0;

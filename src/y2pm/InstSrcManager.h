@@ -356,12 +356,17 @@ class InstSrcManager {
     PMError releaseAllMedia( bool if_removable_r = false ) const;
 
     /**
+     * Trigger change of preferredLocale. Propagated to
+     * all known InstSrces.
+     **/
+    void preferredLocaleChanged() const;
+
+    /**
      * Used during installation/Upadte (where caching is disabled)
      * to install the caches on the system. So InstSrc'es will be
      * available in the running system after boot.
      **/
     PMError cacheCopyTo( const Pathname & newRoot_r );
-
 
     ///////////////////////////////////////////////////////////////////
     //

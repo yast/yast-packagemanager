@@ -116,6 +116,19 @@ InstSrc::~InstSrc()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrc::preferredLocaleChanged
+//	METHOD TYPE : void
+//
+void InstSrc::preferredLocaleChanged() const
+{
+  if ( _data ) {
+    _data->preferredLocaleChanged();
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrc::specialCache
 //	METHOD TYPE : bool
 //

@@ -88,6 +88,13 @@ class Y2PM {
     static LocaleOrder getLocaleFallback( const LangCode & locale_r );
 
     /**
+     * Return the locale fallbacks for PreferredLocale.
+     **/
+    static LocaleOrder getLocaleFallback() {
+      return getLocaleFallback( getPreferredLocale() );
+    }
+
+    /**
      * Return the preferred locale. The preferred language for labels,
      * descritions, etc. passed to the UI.
      **/

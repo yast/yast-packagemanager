@@ -937,6 +937,18 @@ PMError InstSrcManager::releaseAllMedia( bool if_removable_r ) const
   return ret;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::preferredLocaleChanged
+//	METHOD TYPE : void
+//
+void InstSrcManager::preferredLocaleChanged() const
+{
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    (*it)->preferredLocaleChanged();
+  }
+}
 
 /******************************************************************
 **
