@@ -48,6 +48,16 @@ class PMYouPatchDataProvider : virtual public Rep, public PMDataProvider  {
   public:
 
 	/**
+	 * hint before accessing multiple attributes
+	 */
+	void startRetrieval() const { return PMDataProvider::startRetrieval(); }
+
+	/**
+	 * hint after accessing multiple attributes
+	 */
+	void stopRetrieval() const { return PMDataProvider::stopRetrieval(); }
+
+	/**
 	 * provide PMObject attributes
 	 */
 	const std::string summary() const;

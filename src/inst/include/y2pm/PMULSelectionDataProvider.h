@@ -79,6 +79,9 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	PMULSelectionDataProvider (const Pathname& selectionname);
 	virtual ~PMULSelectionDataProvider();
 
+	void startRetrieval() const;
+	void stopRetrieval() const;
+
 	TagParser& getParser() { return _selection_retrieval->getParser(); }
 	void setSelection ( PMSelectionPtr selection) { _selection = selection; }
 

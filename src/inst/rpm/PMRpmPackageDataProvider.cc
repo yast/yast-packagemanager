@@ -47,6 +47,24 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
 {
 }
 
+/**
+ * hint before accessing multiple attributes
+ */
+void
+PMRpmPackageDataProvider::startRetrieval() const
+{
+    return;
+}
+
+/**
+ * hint after accessing multiple attributes
+ */
+void
+PMRpmPackageDataProvider::stopRetrieval() const
+{
+    return;
+}
+
 const std::string
 PMRpmPackageDataProvider::summary () const
 {

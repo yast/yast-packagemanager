@@ -57,6 +57,16 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	void setPackage (PMPackagePtr package) { _package = package; }
 
 	/**
+	 * hint before accessing multiple attributes
+	 */
+	void startRetrieval() const;
+
+	/**
+	 * hint after accessing multiple attributes
+	 */
+	void stopRetrieval() const;
+
+	/**
 	 * access functions for PMObject attributes
 	 */
 

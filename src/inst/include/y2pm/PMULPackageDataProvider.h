@@ -107,6 +107,9 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	void setPackage ( PMPackagePtr package ) { _package = package; }
 	void setShared ( PMULPackageDataProviderPtr provider_r ) { _fallback_provider = provider_r; }
 
+	void startRetrieval() const;
+	void stopRetrieval() const;
+
 	/**
 	 * access functions for PMObject attributes
 	 */

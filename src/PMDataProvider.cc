@@ -56,6 +56,25 @@ PMDataProvider::~PMDataProvider()
 }
 
 
+/**
+ * hint before accessing multiple attributes
+ */
+void
+PMDataProvider::startRetrieval() const
+{
+    return;
+}
+
+/**
+ * hint after accessing multiple attributes
+ */
+void
+PMDataProvider::stopRetrieval() const
+{
+    return;
+}
+
+
 const std::string
 PMDataProvider::summary () const
 {

@@ -57,6 +57,24 @@ PMPackage::PMPackage( const PkgName &    name_r,
     }
 }
 
+/**
+ * hint before accessing multiple attributes
+ */
+void
+PMPackage::startRetrieval() const
+{
+    _dataProvider->startRetrieval();
+}
+
+/**
+ * hint after accessing multiple attributes
+ */
+void
+PMPackage::stopRetrieval() const
+{
+    return _dataProvider->stopRetrieval();
+}
+
 // cant define functions in header because PMPackageDataProvider
 // is incomplete there
 

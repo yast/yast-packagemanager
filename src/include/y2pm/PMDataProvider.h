@@ -45,6 +45,16 @@ class PMDataProvider : virtual public Rep {
   public:
 
 	/**
+	 * hint before accessing multiple attributes
+	 */
+	virtual void startRetrieval() const = 0;
+
+	/**
+	 * hint after accessing multiple attributes
+	 */
+	virtual void stopRetrieval() const = 0;
+
+	/**
 	 * access functions for PMObject attributes
 	 */
 
