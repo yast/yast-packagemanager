@@ -226,8 +226,17 @@ class InstSrc: virtual public Rep {
      **/
     InstSrcDataPtr data() { return _data; }
 
-  public:
+    /**
+     * Const access to media
+     **/
+    constMediaAccessPtr media() const { return _media; }
 
+    /**
+     * Access to media
+     **/
+    MediaAccessPtr media() { return _media; }
+
+  public:
 
     /**
      * From InstSrcManager: Provide concrete InstSrcData according to Type
