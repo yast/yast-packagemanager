@@ -82,11 +82,6 @@ class InstSrcDescr : virtual public Rep {
      **/
     static const Pathname _cache_file;
 
-    /**
-     * The architecture of the target system (determined by hwinfo).
-     **/
-    PkgArch _base_arch;
-
   private:
 
     ///////////////////////////////////////////////////////////////////
@@ -162,7 +157,6 @@ public:
     // access functions
     ///////////////////////////////////////////////////////////////////
 
-    const PkgArch &      base_arch()           const { return _base_arch; }
     InstSrc::Type        type()                const { return _type; }
     const Url &          url()                 const { return _url; }
     const Pathname &     product_dir()         const { return _product_dir; }
@@ -206,7 +200,6 @@ public:
     // set value functions
     ///////////////////////////////////////////////////////////////////
 
-    void set_base_arch( const PkgArch & val_r )             { _base_arch = val_r; }
     void set_type( InstSrc::Type val_r )                    { _type = val_r; }
     void set_url( const Url & val_r )                       { _url = val_r; }
     void set_product_dir( const Pathname & val_r )          { _product_dir = val_r; }
