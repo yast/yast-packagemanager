@@ -1128,6 +1128,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
 	    current_src_ptr = (*it)->source();
 	    current_src_media = pkgmedianr;
 	    report->advanceToMedia( current_src_ptr, current_src_media );
+	    MIL << "Process media " << current_src_media << " of " << current_src_ptr << endl;
 	}
 
 	PMError res = installSpmFromMedia (current_src_ptr, current_src_media, srclist);	// install sources from it while we have it attached
@@ -1214,6 +1215,8 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
   } else {
     MIL << "commitPackages installed " << ret << " package(s)" << endl;
   }
+    MIL << "commitPackages errors(" << errors_r.size() << "), remaining(" << remaining_r.size()
+      << "), srcremaining(" << srcremaining_r.size() << ")" << endl;
   return ret;
 }
 

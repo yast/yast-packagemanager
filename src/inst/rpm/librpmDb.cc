@@ -93,7 +93,7 @@ class librpmDb::D {
 	return;
       }
 
-      DBG << "DBACCESS " << *this << endl;
+      D__ << "DBACCESS " << *this << endl;
     }
 
     ~D() {
@@ -305,7 +305,7 @@ unsigned librpmDb::dbRelease( bool force_r )
     }
     // else fall through:
   case 0:
-    MIL << "dbRelease: release" << (force_r && outstanding ? "(forced)" : "")
+    D__ << "dbRelease: release" << (force_r && outstanding ? "(forced)" : "")
       << ", outstanding " << outstanding << endl;
 
     _defaultDb->_d._error = Error::E_RpmDB_access_blocked; // tag handle invalid
