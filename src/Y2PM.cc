@@ -1095,10 +1095,20 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
 {
 #warning Check for initialized target/packagemanager?
 
+  if ( mediaNr_r == 9999 ) {
+#warning Using faked medianr 9999 to trigger instTargetUpdate
+    instTargetUpdate();
+    return 0;
+  }
+
   int ret = internal_commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r, installrank_r );
 
   // Release all source media
   instSrcManager().releaseAllMedia();
+
+  if ( ! mediaNr_r ) {
+    instTargetUpdate(); // reread modified databases
+  }
 
   return ret;
 }

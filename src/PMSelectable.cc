@@ -192,58 +192,27 @@ PMObjectPtr PMSelectable::autoCandidate() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMSelectable::_clearInstalledObj
+//	METHOD NAME : PMSelectable::setInstalledObj
 //	METHOD TYPE : void
 //
-//	DESCRIPTION : Helper for set/delInstalledObj
+//	DESCRIPTION :
 //
-inline void PMSelectable::_clearInstalledObj()
+void PMSelectable::setInstalledObj( PMObjectPtr obj_r )
 {
+  if ( _installedObj == obj_r )
+    return;
+
   if ( _installedObj ) {
     _detach_obj( _installedObj );
     _installedObj = 0;
-    _state.set_has_installed( false );
   }
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMSelectable::setInstalledObj
-//	METHOD TYPE : PMSelectable::Error
-//
-//	DESCRIPTION :
-//
-PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
-{
-  if ( _installedObj == obj_r )
-    return E_Ok;
-
-  _clearInstalledObj();
-
   if ( obj_r ) {
     _installedObj = obj_r;
     _attach_obj( obj_r );
-    _state.set_has_installed( true );
   }
+  _state.set_has_installed( _installedObj );
 
   chooseCandidateObj(); // installed arch influences it
-  return E_Ok;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMSelectable::delInstalledObj
-//	METHOD TYPE : PMSelectable::Error
-//
-//	DESCRIPTION :
-//
-PMSelectable::Error PMSelectable::delInstalledObj()
-{
-  _clearInstalledObj();
-  chooseCandidateObj(); // installed arch influences it
-  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -297,19 +266,15 @@ bool PMSelectable::clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & r
 //
 //
 //	METHOD NAME : PMSelectable::clistAdd
-//	METHOD TYPE : PMSelectable::Error
+//	METHOD TYPE : void
 //
 //	DESCRIPTION :
 //
-PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
+void PMSelectable::clistAdd( PMObjectPtr obj_r )
 {
   if ( !obj_r ) {
-    ERR << this << " won't add NULL object" << endl;
-    return E_Error;
-  }
-  if ( obj_r->_selectable ) {
-    ERR << this << " won't add object owned by " << obj_r->_selectable << endl;
-    return E_Error;
+    INT << this << " won't add NULL object" << endl;
+    return;
   }
 
   // sorted add: autocandidate rely's on this!
@@ -323,36 +288,27 @@ PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
   _attach_obj( obj_r );
 
   chooseCandidateObj();
-  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMSelectable::clistDel
-//	METHOD TYPE : PMSelectable::Error
+//	METHOD TYPE : void
 //
 //	DESCRIPTION :
 //
-PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
+void PMSelectable::clistDel( PMObjectPtr obj_r )
 {
   if ( !obj_r ) {
-    ERR << this << " won't delete NULL object" << endl;
-    return E_Error;
-  }
-  if ( !obj_r->_selectable ) {
-    ERR << this << " no owner for " << obj_r << endl;
-    return E_Error;
-  }
-  if ( obj_r->_selectable != this ) {
-    ERR << this << " not owner of " << obj_r << endl;
-    return E_Error;
+    INT << this << " won't delete NULL object" << endl;
+    return;
   }
 
   PMObjectList::iterator it = clistLookup( obj_r );
   if ( it == _candidateList.end() ) {
-    ERR << this << " object not in candidate list " << obj_r << endl;
-    return E_Error;
+    INT << this << " object not in candidate list " << obj_r << endl;
+    return;
   }
 
   _detach_obj( obj_r );
@@ -365,19 +321,17 @@ PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
     _candidateObj = 0;
   }
   chooseCandidateObj();
-
-  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMSelectable::clistClearAll
-//	METHOD TYPE : PMSelectable::Error
+//	METHOD TYPE : void
 //
 //	DESCRIPTION :
 //
-PMSelectable::Error PMSelectable::clistClearAll()
+void PMSelectable::clistClearAll()
 {
   for ( PMObjectList::iterator it = _candidateList.begin(); it != _candidateList.end(); ++it ) {
     _detach_obj( *it );
@@ -385,24 +339,20 @@ PMSelectable::Error PMSelectable::clistClearAll()
   _candidateList.clear();
   _userCandidateObj = 0;
   clearCandidateObj();
-
-  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMSelectable::clearAll
-//	METHOD TYPE : PMSelectable::Error
+//	METHOD TYPE : void
 //
 //	DESCRIPTION :
 //
-PMSelectable::Error PMSelectable::clearAll()
+void PMSelectable::clearAll()
 {
   delInstalledObj();
   clistClearAll();
-
-  return E_Ok;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -1,8 +1,17 @@
 -------------------------------------------------------------------
+Mon Sep  8 11:45:49 CEST 2003 - ma@suse.de
+
+- After commiting all packages, packagemanager is synced with
+  rpm database on target (#29679, #26586)
+- Invalidate solver cache if items are added or removed from
+  manager.
+- 2.8.11
+
+-------------------------------------------------------------------
 Sun Sep  7 13:30:53 CEST 2003 - ma@suse.de
 
 - Fixed instTargetInit and instTargetClose to properly
-  setup and shutdoen target and any existing managers.
+  setup and shutdown target and any existing managers.
   Prepared instTargetUpdate to reread rpm databes and
   propagate changes to an existing package manager. Still open,
   whether this can be done automaticaly on commitPackages.
