@@ -44,10 +44,12 @@ IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMPackageData
 //		      for later value retrieval on-demand
 //
 PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrievalPtr package_retrieval,
-			TagCacheRetrievalPtr locale_retrieval)
+			TagCacheRetrievalPtr locale_retrieval,
+			TagCacheRetrievalPtr du_retrieval)
     : _attr_GROUP(0)
     , _package_retrieval (package_retrieval)
     , _locale_retrieval (locale_retrieval)
+    , _du_retrieval (du_retrieval)
 {
 }
 
@@ -229,3 +231,11 @@ PMULPackageDataProvider::keywords ( const PMPackage & pkg_r ) const
     return value;
 }
 
+std::list<std::string>
+PMULPackageDataProvider::du ( const PMPackage & pkg_r ) const
+{
+    FALLBACK(_attr_DU,du);
+    std::list<std::string> value;
+    _du_retrieval->retrieveData (_attr_DU, value);
+    return value;
+}

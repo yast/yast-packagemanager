@@ -94,6 +94,10 @@ ULPackagesParser::ULPackagesParser(const InstSrcPtr source)
     _tagset.addTag ("Des", DESCRIPTION, TaggedFile::MULTI);
     _tagset.addTag ("Ins", INSNOTIFY,   TaggedFile::MULTI);
     _tagset.addTag ("Del", DELNOTIFY,   TaggedFile::MULTI);
+
+    // for the 'packages.DU' file
+
+    _tagset.addTag ("Dir", DU,		TaggedFile::MULTI);
 }
 
 
@@ -138,7 +142,7 @@ ULPackagesParser::allowedArch (const PkgArch& arch) const
 //			and add package to _pkgmap
 
 PMError
-ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr localecache)
+ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr localecache, TagCacheRetrievalPtr ducache)
 {
     //---------------------------------------------------------------
     // PACKAGE
@@ -175,7 +179,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     PkgName name (splitted[0].c_str());
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
 
-    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, localecache));
+    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, localecache, ducache));
     PMPackagePtr package (new PMPackage (name, edition, arch, dataprovider, _source));
 
     //---------------------------------------------------------------
@@ -371,6 +375,60 @@ ULPackagesParser::fromLocale ()
 }
 
 ///////////////////////////////////////////////////////////////////
+// private
+//	METHOD NAME : ULPackagesParser::fromDU
+//	METHOD TYPE : PMPackagePtr
+//
+//	DESCRIPTION : pass package data from DU tagset to package
+
+PMError
+ULPackagesParser::fromDU ()
+{
+    //---------------------------------------------------------------
+    // PACKAGE.DU
+
+    string single ((_tagset.getTagByIndex (PACKAGE))->Data());
+    if (single.empty ())
+    {
+	ERR << "No '=Pkg' value found" << endl;
+	return InstSrcError::E_data_bad_packages_lang;
+    }
+
+    std::vector<std::string> splitted;
+    stringutil::split (single, splitted, " ", false);
+//MIL << "Lang for " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+
+    //---------------------------------------------------------------
+    // find corresponding package
+
+    pkgmaptype::iterator pkgpos = _pkgmap.find (single);
+    if (pkgpos == _pkgmap.end())
+    {
+#if 0
+	ERR << "No package " << single << endl;
+	return InstSrcError::E_data_bad_packages_lang;
+#else
+	return InstSrcError::E_ok;
+#endif
+    }
+    PMULPackageDataProviderPtr dataprovider = pkgpos->second.second;
+
+    TaggedFile::Tag *tagptr;		// for SET_MULTI()
+
+#define GET_TAG(tagname) \
+    _tagset.getTagByIndex (tagname)
+#define SET_CACHE(tagname) \
+    do { tagptr = GET_TAG (tagname); dataprovider->_attr_##tagname = tagptr->Pos(); } while (0)
+
+    SET_CACHE (DU);
+
+#undef GET_TAG
+#undef SET_CACHE
+
+    return PMError::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
 // public
 //
 //	METHOD NAME : ULPackagesParser::fromPath
@@ -379,7 +437,7 @@ ULPackagesParser::fromLocale ()
 //	DESCRIPTION : pass packages data from path to _pkgmap
 
 PMError
-ULPackagesParser::fromPath (const Pathname& path, const Pathname& localepath)
+ULPackagesParser::fromPath (const Pathname& path, const Pathname& localepath, const Pathname& dupath)
 {
     std::ifstream pkgstream (path.asString().c_str());
 
@@ -415,6 +473,7 @@ ULPackagesParser::fromPath (const Pathname& path, const Pathname& localepath)
     // create a single cache for all packages
     TagCacheRetrievalPtr pkgcache (new TagCacheRetrieval (path));
     TagCacheRetrievalPtr localecache (new TagCacheRetrieval (localepath));
+    TagCacheRetrievalPtr ducache (new TagCacheRetrieval (dupath));
 
     for (;;)
     {
@@ -425,7 +484,7 @@ ULPackagesParser::fromPath (const Pathname& path, const Pathname& localepath)
 
 	if (status == TaggedFile::ACCEPTED_FULL)
 	{
-	    PMError err = fromCache (pkgcache, localecache);
+	    PMError err = fromCache (pkgcache, localecache, ducache);
 	    if (err)
 		ERR << path << ":" << _parser.lineNumber() << ":" << err.errstr() << endl;
 	}
@@ -512,6 +571,75 @@ ULPackagesParser::fromPathLocale (const Pathname& path)
     return PMError::E_ok;
 }
 
+///////////////////////////////////////////////////////////////////
+// public
+//
+//	METHOD NAME : ULPackagesParser::fromPathDU
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : pass packages.DU data from path to _pkgmap
+
+PMError
+ULPackagesParser::fromPathDU (const Pathname& path)
+{
+    std::ifstream dustream (path.asString().c_str());
+
+    if (!dustream.is_open())
+    {
+	ERR << "Cant open " << path.asString() << endl;
+	return InstSrcError::E_open_file;
+    }
+
+    //---------------------------------------------------------------
+    // find initial version tag
+
+    // find any initial tag
+    TaggedParser::TagType type = _parser.lookupTag (dustream);
+    if ((type != TaggedParser::SINGLE)
+	|| (_parser.currentTag() != "Ver")
+	|| (!_parser.currentLocale().empty()))
+    {
+	ERR << path << ": Initial '=Ver:' tag missing" << endl;
+	return InstSrcError::E_data_bad_packages_du;
+    }
+
+    string version = _parser.data();
+    if (version != "2.0")
+    {
+	ERR << path << ": Version '" << version << "' != 2.0" << endl;
+	return InstSrcError::E_data_bad_packages_du;
+    }
+
+    //---------------------------------------------------------------
+    // assign set repeatedly
+
+    PMError err;
+
+    for (;;)
+    {
+	TaggedFile::assignstatus status = _tagset.assignSet (_parser, dustream);
+
+	if (status == TaggedFile::REJECTED_EOF)
+	    break;
+
+	if (status == TaggedFile::ACCEPTED_FULL)
+	{
+	    err = fromDU ();
+	    if (err)
+		ERR << path << ":" << _parser.lineNumber() << ":" << err.errstr() << endl;
+	}
+	else
+	{
+	    ERR << path << ":" << _parser.lineNumber() << endl;
+	    ERR << "Status " << (int)status << ", Last tag read: " << _parser.currentTag();
+	    ERR << endl;
+	    return InstSrcError::E_data_bad_packages_du;
+	}
+    }
+
+    return PMError::E_ok;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////
@@ -548,35 +676,59 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
     }
 
     bool have_locale = true;
-    Pathname localename = filename.extend ("." + (const std::string&)(locale));
+    string localestr = (const std::string&)locale;
+    if (localestr.size() < 2)
+	localestr = "en";
+    Pathname localename = filename.extend ("." + localestr);
     err = media_r->provideFile ( localename );
-    if ( err )
+    while ( err )
     {
 	WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;
 
-	if (locale == "en")
+	if (localestr == "en")				// already english locale
+	{
+	    have_locale = false;			// dont check packages.en
+	    break;
+	}
+	else if (localestr.size() > 2)
+	{
+	    localename = filename.extend ("." + localestr.substr(0,2));
+	    err = media_r->provideFile ( localename );
+	    if (!err)
+		break;
+	}
+	
+	localename = filename.extend (".en");		// fallback to packages.en
+	err = media_r->provideFile ( localename );
 	{
 	    have_locale = false;
+	    WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;
 	}
-	else
-	{
-	    localename = filename.extend (".en");		// fallback to packages.en
-	    err = media_r->provideFile ( localename );
-	    {
-		have_locale = false;
-		WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;
-	    }
-	}
+	break;
     }
+
+    Pathname duname = filename.extend (".DU");
 
     Pathname fullpath = media_r->localPath (filename);
     Pathname fulllocalepath = media_r->localPath (localename);
+    Pathname fulldupath = media_r->localPath (duname);
 
-    err = fromPath (fullpath, fulllocalepath);
-    if (!err
-	&& have_locale)
+    err = fromPath (fullpath, fulllocalepath, fulldupath);
+    if (!err)
     {
-	fromPathLocale (media_r->localPath (localename));
+	if (have_locale)
+	{
+	    fromPathLocale (media_r->localPath (localename));
+	}
+	err = media_r->provideFile ( duname );
+	if (err)
+	{
+	    WAR << "Media can't provide " << duname << ":" << err.errstr() << endl;
+	}
+	else
+	{
+	    fromPathDU (media_r->localPath(duname));
+	}
     }
 
     packages.clear ();

@@ -75,6 +75,10 @@ class ULPackagesParser : virtual public Rep {
 	    DESCRIPTION,// long description
 	    INSNOTIFY,	// install notification
 	    DELNOTIFY,	// delete notification
+
+	    // packages.DU
+	    DU,		// disk usage data
+
 	    NUM_TAGS
 	};
 
@@ -97,18 +101,24 @@ class ULPackagesParser : virtual public Rep {
 	bool allowedArch (const PkgArch& arch) const;
 
 	// create package from tagset and cache and add to _pkgmap  
-	PMError fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr localecache);
+	PMError fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr localecache, TagCacheRetrievalPtr ducache);
 
 	// augment package data (_pkgmap) with data from packages.<locale> cache
 	PMError fromLocale ();
 
+	// augment package data (_pkgmap) with data from packages.DU cache
+	PMError fromDU ();
+
 	// parse 'packages' from path to _pkgmap
 	// localepath is only for initialization of the dataprovider
 	// fromPathLocale() does the parsing of the locale file
-	PMError fromPath (const Pathname& path, const Pathname& localepath);
+	PMError fromPath (const Pathname& path, const Pathname& localepath, const Pathname& dupath);
 
 	// augment _pkgmap data from 'packages.<locale>' at path
 	PMError fromPathLocale (const Pathname& path);
+
+	// augment _pkgmap data from 'packages.DU' at path
+	PMError fromPathDU (const Pathname& path);
 
     public:
 	ULPackagesParser (const InstSrcPtr source);

@@ -74,6 +74,7 @@ class InstSrcError {
       // InstSrcData
       E_data_bad_packages,
       E_data_bad_packages_lang,
+      E_data_bad_packages_du,
       E_data_bad_selection
     };
 };

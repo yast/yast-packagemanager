@@ -85,6 +85,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	TagRetrievalPos		_attr_LOCATION;
 	unsigned int		_attr_MEDIANR;
 	TagRetrievalPos		_attr_KEYWORDS;
+	TagRetrievalPos		_attr_DU;
 
 	// retrieval pointer for packages data
 	TagCacheRetrievalPtr _package_retrieval;
@@ -92,12 +93,17 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// retrieval pointer for packages.<locale> data
 	TagCacheRetrievalPtr _locale_retrieval;
 
+	// retrieval pointer for packages.DU data
+	TagCacheRetrievalPtr _du_retrieval;
+
 	// fallback provider (Share entry in packages)
 	PMULPackageDataProviderPtr _fallback_provider;
 
     public:
 
-	PMULPackageDataProvider (TagCacheRetrievalPtr package_retrieval, TagCacheRetrievalPtr locale_retrieval);
+	PMULPackageDataProvider (TagCacheRetrievalPtr package_retrieval,
+				 TagCacheRetrievalPtr locale_retrieval,
+				 TagCacheRetrievalPtr du_retrieval);
 	virtual ~PMULPackageDataProvider();
 
     public:
@@ -145,6 +151,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual std::string            location    ( const PMPackage & pkg_r ) const;
 	virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const;
 	virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> du	   ( const PMPackage & pkg_r ) const;
 
 };
 

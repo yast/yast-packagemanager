@@ -159,10 +159,9 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
     }
 
 #warning check source priority and media count
-    
 
     // loop over medias
-    for (int cdnum = 1; cdnum < 10; ++cdnum)
+    for (unsigned int cdnum = 1; cdnum < 10; ++cdnum)
     {
 	PkgSet iset; // for install order
 

@@ -1472,13 +1472,12 @@ RpmDb::run_rpm(const RpmArgVec& options,
 
     exit_code = -1;
 
-    RpmArgVec args(6);
-    args[0] = "LANG=C";			// output english !
-    args[1] = "rpm";
-    args[2] = "--root";
-    args[3] = _rootdir.asString().c_str();
-    args[4] = "--dbpath";
-    args[5] = dbPath.asString().c_str();
+    RpmArgVec args(5);
+    args[0] = "rpm";
+    args[1] = "--root";
+    args[2] = _rootdir.asString().c_str();
+    args[3] = "--dbpath";
+    args[4] = dbPath.asString().c_str();
 
     const char* argv[args.size()+options.size()+2];
     unsigned argc = 0;
@@ -1505,7 +1504,7 @@ RpmDb::run_rpm(const RpmArgVec& options,
 	delete process;
 	process = NULL;
     }
-    // Launch the program
+    // Launch the program with default locale
     process = new ExternalProgram(argv, disp, false, -1, true);
 }
 
