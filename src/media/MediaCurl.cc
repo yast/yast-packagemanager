@@ -101,14 +101,30 @@ PMError MediaCurl::attachTo (bool next)
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
 
-  if ( _url.protocol() == Url::ftp && _url.username().empty() ) {
-    string id = "yast2@";
-    id += VERSION;
-    DBG << "Anonymous FTP identification: '" << id << "'" << endl;
-    _userpwd += "anonymous:" + id;
+  /*---------------------------------------------------------------*
+   CURLOPT_USERPWD: [user name]:[password]
+
+   Url::username/password -> CURLOPT_USERPWD
+   If not provided, anonymous FTP identification
+   *---------------------------------------------------------------*/
+  if ( _url.username().empty() ) {
+    if ( _url.protocol() == Url::ftp ) {
+      string id = "yast2@";
+      id += VERSION;
+      DBG << "Anonymous FTP identification: '" << id << "'" << endl;
+      _userpwd = "anonymous:" + id;
+    }
+  } else {
+    _userpwd = _url.username();
+    if ( _url.password().size() ) {
+      _userpwd += ":" + _url.password();
+    }
+  }
+
+  if ( _userpwd.size() ) {
     ret = curl_easy_setopt( _curl, CURLOPT_USERPWD, _userpwd.c_str() );
     if ( ret != 0 ) {
-        return PMError( Error::E_curl_setopt_failed, _curlError );
+      return PMError( Error::E_curl_setopt_failed, _curlError );
     }
   }
 
@@ -295,8 +311,13 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     }
 
     DBG << "URL: " << url.asString().c_str() << endl;
-
-    string urlBuffer = url.asString(true,false,true); // without options
+    // Use URL without options (not RFC conform) and without
+    // username and passwd (some proxies dislike them in the URL.
+    // Curloptions for these were set in attachTo().
+    Url curlUrl( url );
+    curlUrl.setUsername( "" );
+    curlUrl.setPassword( "" );
+    string urlBuffer = curlUrl.asString(true,false,true); // without options
 
     CURLcode ret = curl_easy_setopt( _curl, CURLOPT_URL,
                                      urlBuffer.c_str() );
