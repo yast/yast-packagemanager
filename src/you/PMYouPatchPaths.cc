@@ -225,7 +225,7 @@ Pathname PMYouPatchPaths::scriptPath( const string &scriptName )
 
 Pathname PMYouPatchPaths::localScriptPath( const std::string &scriptName )
 {
-  return localDir() + "scripts/" + scriptName;
+  return localWriteDir() + "scripts/" + scriptName;
 }
 
 Pathname PMYouPatchPaths::localDir()
