@@ -51,7 +51,7 @@ const std::string InstSrcDescr::_cache_file( "description" );
 //	DESCRIPTION :
 InstSrcDescr::InstSrcDescr()
     : _type               ( InstSrc::T_UNKNOWN )
-    , _default_acitivate  ( false )
+    , _default_activate   ( false )
     , _content_product    ( PkgName(), PkgEdition() )
     , _content_baseproduct( PkgName(), PkgEdition() )
     , _content_requires   ( PkgName(), NONE, PkgEdition() )

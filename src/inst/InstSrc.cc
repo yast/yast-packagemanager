@@ -347,7 +347,7 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
 //
 //	DESCRIPTION :
 //
-PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produduct_dir_r,
+PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & product_dir_r,
 				 Type type_r )
 {
   PMError err;
@@ -387,11 +387,11 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produd
     switch ( ctype ) {
 
     case T_UnitedLinux:
-      err = InstSrcData_UL::tryGetDescr( ndescr, _media, produduct_dir_r );
+      err = InstSrcData_UL::tryGetDescr( ndescr, _media, product_dir_r );
       break;
 
     case T_TEST_DIST:
-      err = InstSrcData::tryGetDescr( ndescr, _media, produduct_dir_r );
+      err = InstSrcData::tryGetDescr( ndescr, _media, product_dir_r );
       break;
 
     ///////////////////////////////////////////////////////////////////
@@ -550,13 +550,13 @@ PMError InstSrc::vconstruct( InstSrcPtr & nsrc_r, const Pathname & cachedir_r )
 //	DESCRIPTION :
 //
 PMError InstSrc::vconstruct( InstSrcPtr & nsrc_r, const Pathname & cachedir_r,
-			     const Url & mediaurl_r, const Pathname & produduct_dir_r,
+			     const Url & mediaurl_r, const Pathname & product_dir_r,
 			     Type type_r )
 {
   nsrc_r = 0;
   PMError err;
   MIL << "Create InstSrc type " << type_r
-    << " from media " << mediaurl_r << " (" << produduct_dir_r << ")"
+    << " from media " << mediaurl_r << " (" << product_dir_r << ")"
     << " using cache " << cachedir_r << endl;
 
   ///////////////////////////////////////////////////////////////////
@@ -583,7 +583,7 @@ PMError InstSrc::vconstruct( InstSrcPtr & nsrc_r, const Pathname & cachedir_r,
   // access media and try to get an InstSrcDescr
   ///////////////////////////////////////////////////////////////////
 
-  if ( (err = nsrc->_init_newMedia( mediaurl_r, produduct_dir_r, type_r )) ) {
+  if ( (err = nsrc->_init_newMedia( mediaurl_r, product_dir_r, type_r )) ) {
     nsrc = 0; // removes cache in destructor
     ERR << "Unable to detect an InstSrc on " << mediaurl_r << " " << err << endl;
     return err;
