@@ -1,6 +1,6 @@
 #include <PkgDep.h>
 #include <PkgDep_int.h>
-#include <PkgDb.h>
+#include <y2pm/PkgDb.h>
 
 using namespace std;
 
@@ -71,8 +71,8 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	  case ASK_IF_NO_DEFAULT:
 	  case AUTO_IF_NO_DEFAULT:
 	  {
-		const PkgDb::AltDefaultList& defaults
-			= PkgPool.alternative_default(reqname);
+		const PkgDbRep::AltDefaultList& defaults
+			= _pool->alternative_default(reqname);
 		if (defaults.size() == 0) {
 			if (alt_mode == ASK_IF_NO_DEFAULT)
 				// no defaults -> let caller decide
@@ -81,12 +81,12 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 				goto auto_select;
 		}
 
-		PkgDb::AltDefaultList useable_defaults;
+		PkgDbRep::AltDefaultList useable_defaults;
 		if (cand) {
 			// filter out defaults that do not exist or not provide what we
 			// need
 			DBG( "Filtering defaults:\n" );
-			ci_for( PkgDb::AltDefaultList_, def, defaults. ) {
+			ci_for( PkgDbRep::AltDefaultList_, def, defaults. ) {
 				DBG( "  " << *def << ": " );
 				if (!available.includes(*def)) {
 					DBG( "not available -- skipping\n" );
@@ -125,7 +125,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		else {
 			// filter out defaults that aren't on the providers list
 			DBG( "Filtering defaults:\n" );
-			ci_for( PkgDb::AltDefaultList_, def, defaults. ) {
+			ci_for( PkgDbRep::AltDefaultList_, def, defaults. ) {
 				DBG( "  " << *def << ": " );
 				bool found = false;
 				ci_for( RevRelList_, alt, alt_info.providers. ) {
@@ -148,7 +148,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		// requirements ignored here -- if it's a default, accept that we
 		// maybe need more packages for it). If no conflict-free default
 		// found, use the first one.
-		ci_for( PkgDb::AltDefaultList_, def, useable_defaults. ) {
+		ci_for( PkgDbRep::AltDefaultList_, def, useable_defaults. ) {
 			if (altkind[*def] != CONFLICT) {
 				use_pkg = available[*def];
 				break;

@@ -2,7 +2,7 @@
 
 #include <y2pm/PkgSet.h>
 #include <y2pm/Solvable.h>
-#include <PkgDb.h>
+#include <y2pm/PkgDb.h>
 
 using namespace std;
 
@@ -29,11 +29,12 @@ PkgSet::PkgSet( PackageDataProvider* provider )
 }
 */
 PkgSet::~PkgSet() {
-	PkgPool.detach_set( this );
+	// FIXME
+//	PkgPool.detach_set( this );
 }
 
 #define RelList_for(field,var)											\
-	for( Package::PkgRelList_const_iterator var = pkg->field##_begin();	\
+	for( Solvable::PkgRelList_const_iterator var = pkg->field##_begin();	\
 	     var != pkg->field##_end(); ++p )
 
 void PkgSet::add( const Solvable *pkg, bool force )

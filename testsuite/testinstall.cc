@@ -1,8 +1,8 @@
 #include <unistd.h>
 #include <PkgDep.h>
+#include <y2pm/PkgDb.h>
 #include <y2pm/Package.h>
 #include <y2pm/PackageSource.h>
-#include <PkgDb.h>
 #include <Exception.h>
 #include <y2util/timeclass.h>
 
@@ -31,12 +31,14 @@ int main( int argc, char *argv[] )
     int verbose = 1;
 //    PkgPool.add_installed_packages();
 
+    PkgDb pkgpool(new PkgDbRep());
+
     // TODO: this has to be done by some dlopen magic
     new MediaAccess_FileRep();
     PackageDataProvider::Ref source;
     try
     {
-	source = new SuSEClassicDataProvider(Url("file:///mounts/dist/full/full-i386"));
+	source = new SuSEClassicDataProvider(pkgpool,Url("file:///mounts/dist/full/full-i386"));
 	source->addAllPackages();
 //	PackageDataProvider* inst = new SuSEClassicDataProvider(Url("file:///suse/lnussel/prog/phi/test"));
 //	inst->addAllPackages();
@@ -78,10 +80,10 @@ int main( int argc, char *argv[] )
 //    candidates.add(available->lookup("dialog"));
 
     // create set of all packages
-    for( PkgDb::const_iterator p = PkgPool.begin(); p != PkgPool.end(); ++p ) {
+    for( PkgDbRep::const_iterator p = pkgpool->begin(); p != pkgpool->end(); ++p ) {
 	    available->add( p->value );
     }
-    PkgPool.attach_set( available );
+    pkgpool->attach_set( available );
 
     for (int i=1; i < argc ; i++) {
 	if (!available->lookup(argv[i])) {
@@ -104,7 +106,7 @@ int main( int argc, char *argv[] )
 */
     // construct PkgDep object
     PkgDep::set_default_alternatives_mode(PkgDep::AUTO_IF_NO_DEFAULT);
-    PkgDep engine( installed, *available );
+    PkgDep engine( pkgpool, installed, *available );
 
     // call upgrade
     PkgDep::ResultList good;
@@ -117,20 +119,8 @@ int main( int argc, char *argv[] )
     TimeClass t;
     t.startTimer();
 
-    try {
-	success = engine.install( candidates, good, bad);
-    }
-    catch(const char* str)
-    {
-	cerr << str << endl;
-	return 1;
-    }
-    catch(...)
-    {
-	cerr << "some error occured" << endl;
-	return 1;
-    }
-
+    success = engine.install( candidates, good, bad);
+    
     t.stopTimer();
 
     if (!success) {

@@ -14,6 +14,7 @@ pkginclude_HEADERS =	\
 	Package.h	\
 	Solvable.h	\
 	PackageSource.h	\
+	PkgDb.h	\
 	PkgSet.h
 
 #<INSTALL-HEADER-TARGET>

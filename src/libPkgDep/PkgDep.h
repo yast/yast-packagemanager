@@ -11,6 +11,7 @@
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRevRel.h>
 #include <y2pm/PkgSet.h>
+#include <y2pm/PkgDb.h>
 
 class PkgDep {
 
@@ -214,6 +215,8 @@ class PkgDep {
 	PkgSet installed;
 	const PkgSet& available;
 
+	PkgDb _pool;
+
 	// --------------------- used during an install run --------------------
 	PkgSet vinstalled;
 	PkgSet *candidates;
@@ -269,16 +272,17 @@ class PkgDep {
 	void add_not_available( const Solvable *referer, const PkgRelation& rel );
 	
 public:
-	PkgDep( PkgSet& instd, const PkgSet& avail,
+	PkgDep( PkgDb pool, PkgSet& instd, const PkgSet& avail,
 			alternatives_mode m = default_alternatives_mode )
-		: alt_mode(m), installed(instd), available(avail) {}
-	PkgDep( const PkgSet& instd, alternatives_mode m=default_alternatives_mode)
-		: alt_mode(m), installed(instd), available(*default_avail) {}
+		: alt_mode(m), installed(instd), available(avail), _pool(pool) {}
+	PkgDep( PkgDb pool, const PkgSet& instd, alternatives_mode m=default_alternatives_mode)
+		: alt_mode(m), installed(instd), available(*default_avail), _pool(pool) {}
 /*	PkgDep( alternatives_mode m = default_alternatives_mode )
 		: alt_mode(m), installed(PkgSet(DTagListI0())),
 		  available(*default_avail) {}
 */
 	// install packages (if good result, add candidates to installed set)
+	// does not throw
 	bool install( PkgSet& candidates,
 				  ResultList& good, ErrorResultList& bad,
 				  bool commit_to_installed = true );

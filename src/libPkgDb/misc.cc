@@ -1,4 +1,4 @@
-#include <PkgDb.h>
+#include <y2pm/PkgDb.h>
 #include <Exception.h>
 #include <unistd.h>
 #include <wait.h>

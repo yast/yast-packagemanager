@@ -6,11 +6,11 @@
 #include <string>
 #include <iostream>
 #include <y2pm/Solvable.h>
-#include <y2pm/PackageSource.h>
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
 //#include <DistTag.h>
 #include <y2util/RefObject.h>
+#include <y2pm/PackageSource.h>
 
 class PackageDataProvider;
 

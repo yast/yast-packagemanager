@@ -6,6 +6,10 @@
 #include <y2util/hash.h>
 #include <y2util/RefObject.h>
 #include <y2pm/PkgName.h>
+#include <y2pm/PkgDb.h>
+
+class PkgDbRep;
+typedef class RefObject<PkgDbRep> PkgDb;
 
 // todo
 #define PkgIdent PkgNameEd
@@ -82,9 +86,11 @@ class PackageDataProvider
 	PackageDataProvider(const PackageDataProvider&); // no copy
 
 	enum stringAttributes { SIZE, BUILDTIME, LABEL, LICENSE};
+    protected:
+	PkgDb _pool;
 
     public:
-	PackageDataProvider() {};
+	PackageDataProvider(PkgDb pool) : _pool(pool) {};
 	virtual ~PackageDataProvider() {};
 
 	// create Package objects for all known Packages on this source
@@ -109,7 +115,8 @@ class SuSEClassicDataProvider : public PackageDataProvider
 
     public:
 
-	SuSEClassicDataProvider(const Url& url):_url(url) {};
+	SuSEClassicDataProvider(PkgDb pool, const Url& url)
+	    : PackageDataProvider(pool), _url(url) {};
 	~SuSEClassicDataProvider() {};
 	
 	void addAllPackages()

@@ -1,7 +1,8 @@
 #include <cassert>
 //#include <fstream>
 #include <string>
-#include <PkgDb.h>
+#include <y2pm/Package.h>
+#include <y2pm/PkgDb.h>
 #include <y2pm/PkgSet.h>
 #include <Exception.h>
 #include <unistd.h>
@@ -16,8 +17,6 @@
 
 using namespace std;
 
-PkgDb PkgPool;
-
 size_t hashfun( const PkgNameEd& ne )
 {
 	return hashfun(ne.name) + hashfun(ne.edition.as_string());
@@ -29,7 +28,7 @@ size_t hashfun( const PkgNameEd& ne )
 // ---------------------------------------------------------------------------
 
 
-void PkgDb::read_override_list()
+void PkgDbRep::read_override_list()
 {
 	cerr << "read_override_list not implemented" << endl;
 #if 0
@@ -78,7 +77,7 @@ void PkgDb::read_override_list()
 #endif
 }
 
-void PkgDb::read_static_reqfiles()
+void PkgDbRep::read_static_reqfiles()
 {
 	cerr << "read_static_reqfiles not implemented" << endl;
 #if 0
@@ -97,7 +96,7 @@ void PkgDb::read_static_reqfiles()
 #endif
 }
 
-void PkgDb::read_alt_defaults()
+void PkgDbRep::read_alt_defaults()
 {
 	cerr << "read_alt_defaults not implemented" << endl;
 #if 0
@@ -147,7 +146,7 @@ void PkgDb::read_alt_defaults()
 #endif
 }
 
-PkgDb::PkgDb()
+PkgDbRep::PkgDbRep()
 {
 	try {
 		read_override_list();
@@ -237,27 +236,27 @@ static bool is_newer_than_rpms( time_t cache_time, const char *path )
 }
 #endif
 
-void PkgDb::recheck_pool_for_ReqFile( const char *rf )
+void PkgDbRep::recheck_pool_for_ReqFile( const char *rf )
 {
 	for( iterator p = begin(); p != end(); ++p )
 		check_one_ReqFile( p->value, rf );
 }
 
-void PkgDb::check_new_ReqFiles( Package *pkg, const ReqFiles_type& RF )
+void PkgDbRep::check_new_ReqFiles( Package *pkg, const ReqFiles_type& RF )
 {
 	for( ReqFiles_const_iterator p = RF.begin(); p != RF.end(); ++p )
 		check_one_ReqFile( pkg, *p );
 }
 
-void PkgDb::notify_sets_of_new_provides( const Package *pkg,
+void PkgDbRep::notify_sets_of_new_provides( const Package *pkg,
 										 const PkgRelation& new_p )
 {
 	for( list<PkgSet*>::iterator p = attached_sets.begin();
 		 p != attached_sets.end(); ++p )
-		(*p)->new_provides( pkg, new_p );
+		(*p)->new_provides( static_cast<const Solvable*>(pkg), new_p );
 }
 
-void PkgDb::check_one_ReqFile( Package *pkg, const char *rf )
+void PkgDbRep::check_one_ReqFile( Package *pkg, const char *rf )
 {
 	for( Package::FileList_const_iterator p = pkg->files().begin();
 		 p != pkg->files().end(); ++p ) {
@@ -268,22 +267,22 @@ void PkgDb::check_one_ReqFile( Package *pkg, const char *rf )
 	}
 }
 
-static bool inReqF( const PkgDb::ReqFiles_type& RF, const char *rf )
+static bool inReqF( const PkgDbRep::ReqFiles_type& RF, const char *rf )
 {
-	for( PkgDb::ReqFiles_const_iterator p = RF.begin(); p != RF.end(); ++p )
+	for( PkgDbRep::ReqFiles_const_iterator p = RF.begin(); p != RF.end(); ++p )
 		if (strcmp( *p, rf ) == 0)
 			return true;
 	return false;
 }
 
-static void free_ReqFiles( PkgDb::ReqFiles_type& RF )
+static void free_ReqFiles( PkgDbRep::ReqFiles_type& RF )
 {
-	for( PkgDb::ReqFiles_iterator p = RF.begin(); p != RF.end(); ++p )
+	for( PkgDbRep::ReqFiles_iterator p = RF.begin(); p != RF.end(); ++p )
 		free( (void *)*p );
 }
 
 #if 0
-void PkgDb::add_source( const char *_path, DistTag tag )
+void PkgDbRep::add_source( const char *_path, DistTag tag )
 {
 	string path(_path);
 	bool have_summary = false;
@@ -458,7 +457,7 @@ void PkgDb::add_source( const char *_path, DistTag tag )
 }
 #endif
 
-void PkgDb::add_package( Package *pkg, PackageDataProvider* provider)
+void PkgDbRep::add_package( Package *pkg, PackageDataProvider* provider)
 {
 	PkgNameEd ne( pkg->name(), pkg->edition() );
 	if (Pool.exists( ne )) {

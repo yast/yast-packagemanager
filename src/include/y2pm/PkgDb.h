@@ -5,13 +5,15 @@
 
 #include <y2util/hash.h>
 #include <y2pm/PkgName.h>
-#include <y2pm/Package.h>
-#include <y2pm/PackageSource.h>
 #include <y2pm/PkgSet.h>
+#include <y2pm/PackageSource.h>
+
+class Package;
+class PackageDataProvider;
 
 size_t hashfun( const PkgNameEd& );
 
-class PkgDb {
+class PkgDbRep {
   public:
 	typedef hash<PkgNameEd,Package*> PkgPool_type;
 	typedef PkgPool_type::iterator iterator;
@@ -58,7 +60,7 @@ class PkgDb {
 	
   public:
 
-	PkgDb();
+	PkgDbRep();
 	// default copy constructor and assigment are ok
 
 	// feed packages into the pool
@@ -126,7 +128,9 @@ class PkgDb {
 	}
 };
 
-extern PkgDb PkgPool;
+typedef RefObject<PkgDbRep> PkgDb;
+
+//extern PkgDb PkgPool;
 
 #endif  /* _PkgDb_h */
 

@@ -3,6 +3,7 @@
 
 #include <y2pm/PkgEdition.h>
 #include <y2pm/Package.h>
+#include <y2pm/PkgDb.h>
 #include <y2pm/PackageSource.h>
 
 #include <Y2UTIL.h>
@@ -10,7 +11,6 @@
 #include <y2util/timeclass.h>
 
 #include <Exception.h>
-#include <PkgDb.h>
 
 using namespace std;
 
@@ -95,7 +95,7 @@ void SuSEClassicDataProvider::ParseCommonPkd()
 
 		    PkgEdition edi(pkgversion.c_str(),release.length()>0?release.c_str():NULL);
 
-		    PkgPool.add_package(
+		    _pool->add_package(
 			    new Package(
 				name,
 				edi,
