@@ -18,7 +18,7 @@ pkginclude_HEADERS =	\
 	MediaWget.h \
 	Wget.h \
 	Mount.h \
-	MediaResult.h
+	MediaError.h
 
 #<INSTALL-HEADER-TARGET>
 

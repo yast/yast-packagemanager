@@ -28,6 +28,7 @@
 #include <y2util/PathInfo.h>
 #include <y2util/Url.h>
 
+#include <y2pm/MediaError.h>
 #include <y2pm/MediaHandler.h>
 #include <y2pm/MediaAccessPtr.h>
 
@@ -35,68 +36,104 @@
 //
 //	CLASS NAME : MediaAccess
 /**
- *
+ * @short Handle access to a medium
  **/
 class MediaAccess : virtual public Rep {
 	REP_BODY(MediaAccess);
+
+    public:
+
+        typedef MediaError Error; // default error class
+
+    private:
 
 	enum MediaType {
 	    Unknown = 0,
 	    CD, DVD, NFS, DIR, DISK, FTP, SMB, HTTP, HTTPS
 	};
 
-	// type of media
+	/**
+	 * type of media
+	 **/
 	MediaType _type;
 
-	// destination directory for file retrieval
+	/**
+	 * destination directory for file retrieval
+	 **/
 	Pathname _destination;
 
-	// handler for 'physical' media
-	// == 0 if not open
+	/**
+	 * handler for 'physical' media
+	 * == 0 if not open
+	 **/
 	MediaHandler * _handler;
 
     public:
-	// constructor
 
+       /**
+        * constructor
+        **/
 	MediaAccess (void);
 
-	// open url
-	MediaResult open (const Url& url);
+	/**
+	 * open url
+	 **/
+	PMError open (const Url& url);
 
-	// close url
+	/**
+	 * close url
+	 **/
 	void close (void);
 
-	// get Handler
+	/**
+	 * get Handler
+	 **/
 	MediaHandler *handler (void) const;
 
-	// get destination for file retrieval
+	/**
+	 * get destination for file retrieval
+	 **/
 	const Pathname & getAttachPoint (void) const;
 
-	// attach media to directory
-	MediaResult attachTo (const Pathname & to);
+	/**
+	 * attach media to directory
+	 **/
+	PMError attachTo (const Pathname & to);
 
-	// release attached media
-	// if eject=true, physically eject media (i.e. CD-ROM)
-	MediaResult release (bool eject = false);
+	/**
+	 * release attached media
+	 * if eject=true, physically eject media (i.e. CD-ROM)
+	 **/
+	PMError release (bool eject = false);
 
-	// provide file denoted by path to 'destination'
-	// filename is interpreted relative to the attached url
-	// and a path prefix is preserved to destination
-	MediaResult provideFile (const Pathname & filename) const;
+	/**
+	 * provide file denoted by path to 'destination'
+	 * filename is interpreted relative to the attached url
+	 * and a path prefix is preserved to destination
+	 **/
+	PMError provideFile (const Pathname & filename) const;
 
-	// find file denoted by pattern
-	// filename is interpreted relative to the attached url
+	/**
+	 * find file denoted by pattern
+	 * filename is interpreted relative to the attached url
+	 **/
 	virtual const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const;
 
-	// get file information
+	/**
+	 * get file information
+	 **/
 	const std::list<std::string> * dirInfo (const Pathname & filename) const;
 
-	// get file information
+	/**
+	 * get file information
+	 **/
 	const PathInfo * fileInfo (const Pathname & filename) const;
 
-	// clean up a file from destination
-	// if filename == "", the whole destination is cleared
-	MediaResult cleanUp (const Pathname & filename) const;
+	/**
+	 * clean up a file from destination
+	 * if filename == "", the whole destination is cleared
+	 **/
+	PMError cleanUp (const Pathname & filename) const;
 
 	virtual ~MediaAccess();
 

@@ -88,15 +88,15 @@ MediaDIR::dumpOn( ostream & str ) const
 //
 //
 //	METHOD NAME : MediaDIR::attachTo
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : attach media at path
 //
-MediaResult
+PMError
 MediaDIR::attachTo (const Pathname & to)
 {
     // attach point is always / as files are not copied
-    return E_attachpoint_fixed;
+    return Error::E_attachpoint_fixed;
 }
 
 
@@ -104,14 +104,14 @@ MediaDIR::attachTo (const Pathname & to)
 //
 //
 //	METHOD NAME : MediaDIR::attach
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult
+PMError
 MediaDIR::release (bool eject)
 {
-    return E_none;
+    return Error::E_ok;
 }
 
 
@@ -119,20 +119,20 @@ MediaDIR::release (bool eject)
 //
 //
 //	METHOD NAME : MediaDIR::provideFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	provide file denoted by path to 'attached path'
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult
+PMError
 MediaDIR::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, DIR is mounted at destination
 
     if(!_url.isValid())
-	return E_bad_url;
+	return Error::E_bad_url;
 
     Pathname src = _url.getPath();
     src += filename;
@@ -142,9 +142,9 @@ MediaDIR::provideFile (const Pathname & filename) const
     if(!info.isFile())
     {
 	    D__ << src.asString() << " does not exist" << endl;
-	    return E_file_not_found;
+	    return Error::E_file_not_found;
     }
-    return E_none;
+    return Error::E_ok;
 }
 
 
@@ -152,7 +152,7 @@ MediaDIR::provideFile (const Pathname & filename) const
 //
 //
 //	METHOD NAME : MediaDIR::findFile
-//	METHOD TYPE : MediaResult
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //	find file denoted by pattern

@@ -63,7 +63,7 @@ MediaWget::dumpOn( ostream & str ) const
 /** attach media to path
  * */
 
-MediaResult
+PMError
 MediaWget::attachTo (const Pathname & to)
 {
     
@@ -73,24 +73,24 @@ MediaWget::attachTo (const Pathname & to)
     // copy files to '_attachPoint' later
 
     if(!_url.isValid())
-	return E_bad_url;
+	return Error::E_bad_url;
 
     _attachPoint = to;
 
     D__ << _attachPoint.asString() << endl;
 
-    return E_none;
+    return Error::E_ok;
 }
 
 
 /** release attached media
  * */
 
-MediaResult
+PMError
 MediaWget::release (bool eject)
 {
     _attachPoint = string();
-    return E_none;
+    return Error::E_ok;
 }
 
 
@@ -98,15 +98,15 @@ MediaWget::release (bool eject)
  * relative to the attached url and a path prefix is preserved to destination
  * */ 
 
-MediaResult MediaWget::provideFile (const Pathname & filename) const {
+PMError MediaWget::provideFile (const Pathname & filename) const {
 
     D__ << filename.asString() << endl;
 
     if(!_url.isValid())
-	return E_bad_url;
+	return Error::E_bad_url;
 
     if(_url.getHost().empty())
-	return E_no_host_specified;
+	return Error::E_no_host_specified;
 
     Wget wget;
     string tmp;
@@ -129,17 +129,17 @@ MediaResult MediaWget::provideFile (const Pathname & filename) const {
     if(PathInfo::mkdir(dest.dirname()))
     {
 	DBG << "mkdir " << dest.asString() << " failed" << endl;
-	return E_system;
+	return Error::E_system;
     }
     
     WgetStatus status = wget.getFile( url, dest.asString() );
     if(status == WGET_OK)
-	return E_none;
+	return Error::E_ok;
     else
     {
 	DBG << "wget error: " << wget.error_string(status) << endl;
 	//TODO wget errors
-	return E_system;
+	return Error::E_system;
     }
 }
 

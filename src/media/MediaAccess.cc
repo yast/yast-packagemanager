@@ -61,11 +61,11 @@ MediaAccess::~MediaAccess()
 
 
 // open URL
-MediaResult
+PMError
 MediaAccess::open (const Url& url)
 {
     if(!url.isValid())
-	return E_bad_url;
+	return Error::E_bad_url;
 
     this->close();
 
@@ -125,17 +125,17 @@ MediaAccess::open (const Url& url)
     }
     else
     {
-	return E_bad_media_type;
+	return Error::E_bad_media_type;
     }
 
     // check created handler
 
     if (_handler == 0)
     {
-	return E_system;
+	return Error::E_system;
     }
 
-    return E_none;
+    return Error::E_ok;
 }
 
 
@@ -170,7 +170,7 @@ MediaAccess::getAttachPoint (void) const
 
 
 // attach media to directory
-MediaResult
+PMError
 MediaAccess::attachTo (const Pathname & to)
 {
     PathInfo info (to);
@@ -178,26 +178,26 @@ MediaAccess::attachTo (const Pathname & to)
     if (!info.isDir())			// must be dir
     {
 	D__ << to.asString() << " is no directory" << endl;
-	return E_not_a_directory;
+	return Error::E_not_a_directory;
     }
 
     _destination = to;
 
     if (_handler == 0)
     {
-	return E_not_open;
+	return Error::E_not_open;
     }
 
     return _handler->attachTo (to);
 }
 
 // release attached media
-MediaResult
+PMError
 MediaAccess::release (bool eject)
 {
     if (_handler == 0)
     {
-	return E_not_open;
+	return Error::E_not_open;
     }
 
     return _handler->release (eject);
@@ -208,17 +208,17 @@ MediaAccess::release (bool eject)
 //
 // filename is interpreted relative to the attached url
 // and a path prefix is preserved to destination
-MediaResult
+PMError
 MediaAccess::provideFile (const Pathname & filename) const
 {
     D__ << filename.asString() << endl;
     if (_handler == 0)
     {
-	return E_not_open;
+	return Error::E_not_open;
     }
     if (_destination.empty())
     {
-	return E_no_destination;
+	return Error::E_no_destination;
     }
     return _handler->provideFile (filename);
 }
@@ -277,7 +277,7 @@ MediaAccess::fileInfo (const Pathname & filename) const
 
 // clean up a file from destination
 // if filename == "", the whole destination is cleared
-MediaResult
+PMError
 MediaAccess::cleanUp (const Pathname & filename) const
 {
     Pathname fullname = _destination + filename;
@@ -291,7 +291,7 @@ MediaAccess::cleanUp (const Pathname & filename) const
     {
 	unlink (fullname.asString().c_str());
     }
-    return E_none;
+    return Error::E_ok;
 }
 
 

@@ -29,7 +29,7 @@
 #include <y2util/PathInfo.h>
 #include <y2util/Url.h>
 
-#include <y2pm/MediaResult.h>
+#include <y2pm/MediaError.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -38,6 +38,10 @@
  *
  **/
 class MediaHandler {
+
+    public:
+
+        typedef MediaError Error; // default error class
 
     protected:
 
@@ -58,22 +62,22 @@ class MediaHandler {
 	MediaHandler (const Url& url);
 
 	/** attach media at path */
-	virtual MediaResult attachTo (const Pathname & to) = 0;
+	virtual PMError attachTo (const Pathname & to) = 0;
 
 	/** return current attach directory */
 	virtual Pathname & getAttachPoint (void) { return _attachPoint; }
 
 	/** release attached media
-	 * 
+	 *
 	 * @param eject if true, physically eject the media * (i.e. CD-ROM)
 	 * */
-	virtual MediaResult release (bool eject = false) = 0;
+	virtual PMError release (bool eject = false) = 0;
 
 	/** provide file denoted by path at 'attached path' filename is
 	 * interpreted relative to the attached url and a path prefix is
 	 * preserved to destination
 	 * */
-	virtual MediaResult provideFile (const Pathname & filename) const = 0;
+	virtual PMError provideFile (const Pathname & filename) const = 0;
 
 	/** find file denoted by pattern
 	 * filename is interpreted relative to the attached url
@@ -98,9 +102,9 @@ class MediaHandler {
 ///////////////////////////////////////////////////////////////////
 
 #define	MEDIA_HANDLER_API						\
-	MediaResult attachTo (const Pathname & path);			\
-	MediaResult release (bool eject = false);			\
-	MediaResult provideFile (const Pathname & filename) const;	\
+	PMError attachTo (const Pathname & path);			\
+	PMError release (bool eject = false);			\
+	PMError provideFile (const Pathname & filename) const;	\
 	const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const;	\
 	const std::list<std::string> * dirInfo (const Pathname & dirname) const;\
 	const PathInfo * fileInfo (const Pathname & filename) const;
