@@ -42,20 +42,22 @@ running system the URL used for getting the list of YOU servers is saved in the 
 <tt>/var/adm/YaST/ProdDB/prod_00000001</tt> or in the file with the highest number, if there
 is more than one.</p>
 
-<p>The list is stored locally at
-<tt>/etc/suseservers</tt>. If the variable <tt>YAST2_LOADFTPSERVER</tt> in the file
-<tt>/etc/sysconfig/onlineupdate</tt> is set to <tt>no</tt>, the server isn't contacted and
-the download base URLs are read from the local file <tt>/etc/suseservers</tt>.</p>
+<p>The list is stored locally at <tt>/var/lib/YaST2/you/youservers</tt> since SL
+8.2 (8.1 used the location <tt>/etc/suseservers</tt>). If the variable
+<tt>YAST2_LOADFTPSERVER</tt> in the file <tt>/etc/sysconfig/onlineupdate</tt> is
+set to <tt>no</tt>, the server isn't contacted and the download base URLs are
+read from the local file <tt>/etc/youservers</tt> (8.1 used the location
+<tt>/etc/suseservers</tt>).</p>
 
 <p>The default download base URLs are <tt>ftp://ftp.suse.com/pub/suse/</tt> for the box
 product and <tt>http://sdb.suse.de/download/</tt> for the business products.</p>
 
 <h4>Local Path</h4>
 
-Downloaded files are stored locally under the directory <tt>/var/lib/YaST2/you/</tt>.
-The description files for installed patches are stored at
-<tt>/var/lib/YaST2/you-installed</tt>. There is no product specifig path added to the path
-to the installed patches.
+<p>Downloaded files are stored locally under the directory
+<tt>/var/lib/YaST2/you/</tt>. The description files for installed patches are
+stored at <tt>/var/lib/YaST2/you-installed</tt>. There is no product specific
+path added to the path of the installed patches.</p>
 
 <h4>Product dependent paths</h4>
 
@@ -65,8 +67,8 @@ product, and <tt>&lt;basearch&gt;/update/&lt;productname&gt;/&lt;version&gt;</tt
 business products. <tt>&lt;version&gt</tt> is the version of the installed product.
 <tt>&lt;productname&gt;</tt> is the name of the installed product.</p>
 
-<p>The different components of the path like description, RPMs and scripts use different
-subdirectories of this path.</p>
+<p>The different components of the path like description, RPMs and scripts use
+different subdirectories of this path.</p>
 
 <h4>Paths to the patch descriptions</h4>
 
@@ -118,6 +120,19 @@ processing of download path or file name takes place.</p>
 <p>Example Scripts belonging to patches for the i386 version of the 8.1. box product are stored to
 <tt>/var/lib/YaST2/you/i386/update/8.1/scripts/</tt>.</p>
 
+<a name="extrafiles">
+<h4>Extra files</h4>
+
+<p>YOU provides the option to download extra files which aren't RPMs or scripts.
+The files are specified by a <a href="#tag_files"><tt>Files</tt> tag</a> in the
+patch file. Each file specification consists of an URL where the file is
+downloaded from and the size of the file in bytes.</p>
+
+<p>The files are downloaded into a directory <tt>files</tt> under the local path
+(usually <tt>/var/lib/YaST2/you/files</tt>). The directory hierachy of the file
+on the server is recreated under the <tt>files</tt> directory. For example a
+file with the URL <tt>http://ftp.suse.com/pub/suse/myfile.txt</tt> is downloaded
+to <tt>/var/lib/YaST2/you/files/pub/suse/myfile.txt</tt>.
 
 <h3>Download from the server</h3>
 
@@ -295,6 +310,18 @@ Segakcap:
   <td>Set of package informations, see <a href="#packageformat">package tag description</a> for
       details.</td>
 </tr>
+<a name="tag_files">
+<tr>
+  <td>Files</td>
+  <td>list of files</td>
+  <td>This is a multi-line tag which takes a list of extra files to be
+  downloaded.
+  Each line specifies a file by an URL where the file is to be downloaded from
+  and the size of the file in bytes. The URL and the size are separated by a
+  space. See the <a href="#extrafiles">extra files</a> section for details
+  about the handling of files.
+  </td>
+</tr>
 </table>
 
 <a name="packageformat">
@@ -465,30 +492,13 @@ URL is selected as source for the patches. If the argument <tt>.nosigcheck</tt> 
 signatures of the downloaded files aren't checked.</p>
 
 
-<h3>Command line version without GUI</h3>
+<h3>Command line version</h3>
 
-<pre>
-Usage: online-update [-u url] [-p product] [-v version] [-a arch] [-d] [-s] [-n] [-g]
-  [-i] [security] [recommended] [patchlevel] [document] [optional]
-
--u url      Base URL of directory tree used to get patches from.
-
--g          Only download patches, don't install.
--i          Install downloaded patches, don't download.
-
--p product  Name of product to get patches for.
--v version  Version of product to get patches for.
--a arch     Base architecture of product to get patches for.
-
--d          Dry run. Only get patches, don't install them.
--n          No signature check of downloaded files.
-
--s          Show list of patches.
--V          Be verbose.
--D          Debug output.
-
-security | recommended | patchlevel | document | optional   Types of patches to be installed.
-</pre>
+<p>There is a command line version of YOU which can be used to non-interactively
+download an install patches. The command is <tt>online_update</tt>. A short
+description of the available options is available by <tt>online_update
+--help</tt>. Calling the command without any options will download and install
+all available patches relevant to the installed system.</p>
 
 
 <h2>Patch CD Update</h2>
