@@ -107,7 +107,7 @@ MediaDIR::attachTo (const Pathname & to)
 //	DESCRIPTION : release attached media
 //
 MediaResult
-MediaDIR::release (void)
+MediaDIR::release (bool eject)
 {
     // make directory 'vanish'
     _attachPoint = "";

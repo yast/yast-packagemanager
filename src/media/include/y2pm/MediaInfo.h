@@ -52,12 +52,12 @@ class REP_CLASS(MediaInfo) {
 	/**
 	 * helper function to parse new .media file
 	 */
-	void parseMediaFile (const Pathname & filename);
+	void parseMediaFile (const Pathname & filename, bool new_media);
 
 	/**
 	 * helper function to parse old suse/setup/descr/info file
 	 */
-	void parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile);
+	void parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile, bool new_media);
 
     public:
 
@@ -69,11 +69,19 @@ class REP_CLASS(MediaInfo) {
 	 * It's up to the caller to interprete the data (and possibly
 	 * destroy the object instance and ask for a different media
 	 * via MediaAccess.
+	 * @param media		Pointer to media class for access
+	 * @param new_media	== false, if just ID and number are needed
+	 *			(media should be known, just check for right media)
+	 *			== true, to retrieve full media information
+	 *			from a new media
 	 */
-	MediaInfo (MediaAccess *media);
+	MediaInfo (MediaAccess *media, bool new_media = false);
 
+	// always valid
 	const std::string & getID (void) const { return _ID; }
 	const std::string & getNumber (void) const { return _number; }
+
+	// only valid if new_media == true in constructor
 	const std::string & getCount (void) const { return _count; }
 	const std::string & getProduct (void) const { return _product; }
 	const std::string & getVersion (void) const { return _version; }

@@ -115,7 +115,7 @@ MediaSMB::attachTo (const Pathname & to)
 //	DESCRIPTION : release attached media
 //
 MediaResult
-MediaSMB::release (void)
+MediaSMB::release (bool eject)
 {
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;

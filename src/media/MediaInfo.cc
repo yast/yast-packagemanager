@@ -28,8 +28,14 @@
 //
 //	CLASS NAME : MediaInfo
 
+// constructor
 
-MediaInfo::MediaInfo (MediaAccess *media)
+// initializes member elements by accessing media
+// and retrieving data
+// if full==true, retrieve full meta-data (product, vendor, ...)
+// if full==false, just retrieve media-Id
+
+MediaInfo::MediaInfo (MediaAccess *media, bool new_media)
     : _handler (media->handler())
 {
     if (_handler)
@@ -42,7 +48,7 @@ MediaInfo::MediaInfo (MediaAccess *media)
 	if (info != 0)
 	{
 	    // parse new ".media" file
-	    parseMediaFile (mountpoint);
+	    parseMediaFile (mountpoint, new_media);
 	}
 	else
 	{
@@ -50,7 +56,7 @@ MediaInfo::MediaInfo (MediaAccess *media)
 	    Pathname susefile = _handler->findFile (".S.u.S.E-disk-*");
 	    if (susefile != "")
 	    {
-		parseSuSEFile (mountpoint, susefile);
+		parseSuSEFile (mountpoint, susefile, new_media);
 	    }
 	}
     }
@@ -65,7 +71,7 @@ MediaInfo::MediaInfo (MediaAccess *media)
 
 // parse ".media" file
 void
-MediaInfo::parseMediaFile (const Pathname & filename)
+MediaInfo::parseMediaFile (const Pathname & filename, bool new_media)
 {
     return;
 }
@@ -74,7 +80,7 @@ MediaInfo::parseMediaFile (const Pathname & filename)
 //
 
 void
-MediaInfo::parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile)
+MediaInfo::parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile, bool new_media)
 {
     char buf[101];
     char *sptr = susefile.asString().c_str();
@@ -96,6 +102,9 @@ MediaInfo::parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile
 	return;
     sptr++;
     _ID = string (sptr);
+
+    if (!new_media)
+	return;
 
     // if not CD1, dont expect further info
     if (_number != 1)

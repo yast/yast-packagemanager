@@ -75,7 +75,8 @@ class REP_CLASS(MediaAccess) {
 	MediaResult attachTo (const Pathname & to);
 
 	// release attached media
-	MediaResult release (void);
+	// if eject=true, physically eject media (i.e. CD-ROM)
+	MediaResult release (bool eject = false);
 
 	// provide file denoted by path to 'destination'
 	// filename is interpreted relative to the attached url

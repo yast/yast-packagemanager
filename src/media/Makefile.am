@@ -4,6 +4,7 @@
 
 SUBDIRS = include
 
+CPPFLAGS = -DY2LOG=__FILE__
 INCLUDES = -I$(top_srcdir)/src/include -I$(QTDIR)/include -I$(includedir) -I$(top_srcdir)/src/media/include
 
 lib_LTLIBRARIES = liby2pmMedia.la

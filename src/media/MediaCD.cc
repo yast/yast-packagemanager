@@ -96,6 +96,7 @@ MediaCD::dumpOn( ostream & str ) const
 MediaResult
 MediaCD::attachTo (const Pathname & to)
 {
+    // FIXME, issue "eject -t" to close the tray
     
     // if DVD, try UDF filesystem before iso9660
 
@@ -122,11 +123,12 @@ MediaCD::attachTo (const Pathname & to)
 //	DESCRIPTION : release attached media
 //
 MediaResult
-MediaCD::release (void)
+MediaCD::release (bool eject)
 {
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
     }
+    // FIXME implement 'eject'
     _attachPoint = "";
     return E_none;
 }

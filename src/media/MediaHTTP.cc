@@ -116,7 +116,7 @@ MediaHTTP::attachTo (const Pathname & to)
 //	DESCRIPTION : release attached media
 //
 MediaResult
-MediaHTTP::release (void)
+MediaHTTP::release (bool eject)
 {
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;

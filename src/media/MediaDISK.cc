@@ -127,7 +127,7 @@ MediaDISK::attachTo (const Pathname & to)
 //	DESCRIPTION : release attached media
 //
 MediaResult
-MediaDISK::release (void)
+MediaDISK::release (bool eject)
 {
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	if (umount (TMPMNT) != 0) {

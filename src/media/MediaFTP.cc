@@ -120,7 +120,7 @@ MediaFTP::attachTo (const Pathname & to)
 //	DESCRIPTION : release attached media
 //
 MediaResult
-MediaFTP::release (void)
+MediaFTP::release (bool eject)
 {
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;

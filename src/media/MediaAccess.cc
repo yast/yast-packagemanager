@@ -223,14 +223,14 @@ MediaAccess::attachTo (const Pathname & to)
 
 // release attached media
 MediaResult
-MediaAccess::release (void)
+MediaAccess::release (bool eject)
 {
     if (_handler == 0)
     {
 	return E_not_open;
     }
 
-    return _handler->release ();
+    return _handler->release (eject);
 }
 
 

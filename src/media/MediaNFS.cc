@@ -115,7 +115,7 @@ MediaNFS::attachTo (const Pathname & to)
 //	DESCRIPTION : release attached media
 //
 MediaResult
-MediaNFS::release (void)
+MediaNFS::release (bool eject)
 {
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
