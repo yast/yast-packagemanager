@@ -402,7 +402,6 @@ void PMSelectable::chooseCandidateObj()
 
   PMObjectPtr newcand = bestCandidate();
   if ( _candidateObj != newcand ) {
-//    DBG << "chooseCandidate: old " << _candidateObj << " -> new " << newcand << endl;
     _candidateObj = newcand;
   }
   _state.set_has_candidate( _candidateObj );
@@ -504,8 +503,8 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
     break;
 
   case S_Install:
-    if ( ! clearTaboo( doit ) )
-      return false; // got no candidateObj
+    // TABOO state has no installed and no candidate set!
+    // No need for extra test
     if ( !_state.has_candidate_only() )
       return false;
     return _state.user_set_install( doit );
@@ -550,10 +549,8 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
     break;
 
   case S_NoInst:
-    // TABOO state has no installed and no candidate set!
-    // MUST TEST
-    if ( _state.is_taboo() )
-      return false;
+    if ( ! clearTaboo( doit ) )
+      return false; // got no candidateObj
     if ( _state.has_installed() )
       return false;
     return _state.user_unset( doit );
@@ -607,7 +604,7 @@ bool PMSelectable::set_status( const UI_Status state_r )
     INT << "SET_STATUS MISSMATCH: wanted " << state_r << " got " << status() << endl;
   }
 
-  return intern_set_status( state_r, true );
+  return ret;
 }
 
 /******************************************************************

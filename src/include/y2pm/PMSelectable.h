@@ -183,7 +183,6 @@ class PMSelectable : virtual public Rep {
      * One among the availableObjs() explicitly requested by user.
      **/
     PMObjectPtr userCandidate() const {
-      // PRELIMINARILY:
       return _userCandidateObj;
     }
 
@@ -219,14 +218,14 @@ class PMSelectable : virtual public Rep {
       // requested by user:
       S_Del,                 // delete  installedObj
       S_Update,              // install candidateObj ( have installedObj )
-      S_Install,             // install candidateObj ( have no installedObj ) ( clears taboo )
+      S_Install,             // install candidateObj ( have no installedObj )
       // not requested by user:
       S_AutoDel,             // delete  installedObj
       S_AutoUpdate,          // install candidateObj ( have installedObj )
       S_AutoInstall,         // install candidateObj ( have no installedObj )
       // no modification:
       S_KeepInstalled,       // no modification      ( have installedObj )
-      S_NoInst,              // no modification      ( have no installedObj )
+      S_NoInst,              // no modification      ( have no installedObj ) ( clears taboo )
     };
 
     friend std::ostream & operator<<( std::ostream & str, UI_Status obj );
