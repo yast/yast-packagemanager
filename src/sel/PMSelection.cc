@@ -54,16 +54,39 @@ PMSelection::PMSelection( const PkgName &    name_r,
 }
 
 
+// overlay virtual PMObject functions
+
 const std::string
-PMSelection::summary() const { return _dataProvider->summary(); }
+PMSelection::summary(const std::string& lang) const { return _dataProvider->summary(lang); }
+
 const std::list<std::string>
-PMSelection::description() const { return _dataProvider->description(); }
+PMSelection::description(const std::string& lang) const { return _dataProvider->description(lang); }
+
 const std::list<std::string>
-PMSelection::insnotify() const { return _dataProvider->insnotify(); }
+PMSelection::insnotify(const std::string& lang) const { return _dataProvider->insnotify(lang); }
+
 const std::list<std::string>
-PMSelection::delnotify() const { return _dataProvider->delnotify(); }
+PMSelection::delnotify(const std::string& lang) const { return _dataProvider->delnotify(lang); }
+
 const FSize
 PMSelection::size() const { return _dataProvider->size(); }
+
+/**
+ * access functions for PMSelection attributes
+ */
+
+const std::string
+PMSelection::category () const { return _dataProvider->category(); }
+const bool
+PMSelection::visible () const { return _dataProvider->visible(); }
+const std::list<std::string>
+PMSelection::suggests() const { return _dataProvider->suggests(); }
+const std::list<std::string>
+PMSelection::inspacks(const std::string& lang) const { return _dataProvider->inspacks(lang); }
+const std::list<std::string>
+PMSelection::delpacks(const std::string& lang) const { return _dataProvider->delpacks(lang); }
+const FSize
+PMSelection::archivesize() const { return _dataProvider->archivesize(); }
 
 
 ///////////////////////////////////////////////////////////////////
@@ -95,8 +118,9 @@ string PMSelection::getAttributeName( PMSelectionAttribute attr ) const
 #define ENUM_OUT(V) case ATTR_##V: return #V; break
     ENUM_OUT( CATEGORY );
     ENUM_OUT( VISIBLE );
-    ENUM_OUT( INSTALL );
-    ENUM_OUT( DELETE );
+    ENUM_OUT( SUGGESTS );
+    ENUM_OUT( INSPACKS );
+    ENUM_OUT( DELPACKS );
     ENUM_OUT( ARCHIVESIZE );
 #undef ENUM_OUT
 

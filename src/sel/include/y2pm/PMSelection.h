@@ -48,19 +48,35 @@ class PMSelection : virtual public Rep, public PMObject {
       PMSEL_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
       ATTR_CATEGORY = PMSEL_ATTR_BEGIN,
       ATTR_VISIBLE,
-      ATTR_INSTALL,
-      ATTR_DELETE,
+      ATTR_SUGGESTS,
+      ATTR_INSPACKS,
+      ATTR_DELPACKS,
       ATTR_ARCHIVESIZE,
       // last entry:
       PMSEL_NUM_ATTRIBUTES
     };
 
 	// overlay virtual PMObject functions
-	const std::string summary() const;
-	const std::list<std::string> description() const;
-	const std::list<std::string> insnotify() const;
-	const std::list<std::string> delnotify() const;
+	const std::string summary() const { return summary(""); }
+	const std::string summary(const std::string& lang = "") const;
+	const std::list<std::string> description() const { return description(""); }
+	const std::list<std::string> description(const std::string& lang = "") const;
+	const std::list<std::string> insnotify() const { return insnotify (""); }
+	const std::list<std::string> insnotify(const std::string& lang = "") const;
+	const std::list<std::string> delnotify() const { return delnotify (""); }
+	const std::list<std::string> delnotify(const std::string& lang = "") const;
 	const FSize size() const;
+
+	/**
+	 * access functions for PMSelection attributes
+	 */
+
+	const std::string category () const;
+	const bool visible () const;
+	const std::list<std::string> suggests() const;
+	const std::list<std::string> inspacks(const std::string& lang = "") const;
+	const std::list<std::string> delpacks(const std::string& lang = "") const;
+	const FSize archivesize() const;
 
     /**
      * Get attribute name as string.

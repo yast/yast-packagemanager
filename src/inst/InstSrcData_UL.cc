@@ -115,19 +115,19 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
 
     PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, langcache));
     PMPackagePtr package( new PMPackage (name, edition, arch, dataprovider));
+    dataprovider->setPackage (package);
 
     CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
 
 #define SET_VALUE(tagname,value) \
-    if (!value.empty()) dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
-#define SET_POS(tagname,begin,end) \
-    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
+    do { dataprovider->_attr_##tagname = value; } while (0)
+#define SET_POS(tagname,start,stop) \
+    do { dataprovider->_attr_##tagname.begin = start;\
+	 dataprovider->_attr_##tagname.end = stop; } while (0)
 #define GET_TAG(tagname) \
     tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname)
-#define SET_MULTI(tagname) \
+#define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
-#define SET_SINGLE(tagname) \
-    SET_VALUE (tagname, (GET_TAG(tagname))->Data())
 
     PMSolvable::PkgRelList_type pkgrellist;
 
@@ -142,25 +142,24 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
     if (Tag2PkgRelList (pkgrellist, (GET_TAG(OBSOLETES))->MultiData()))
 	package->setObsoletes (pkgrellist);
 
-    SET_MULTI (RECOMMENDS);
-    SET_MULTI (SUGGESTS);
-    SET_SINGLE (LOCATION);
+    SET_CACHE (RECOMMENDS);
+    SET_CACHE (SUGGESTS);
+    SET_CACHE (LOCATION);
 
-    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SIZE))->Data(), splitted, " ", false);
-    SET_VALUE (ARCHIVESIZE, splitted[0]);
-    SET_VALUE (SIZE, splitted[1]);
-    SET_SINGLE (BUILDTIME);
-    SET_SINGLE (SOURCERPM);
-    SET_SINGLE (GROUP);
-    SET_SINGLE (LICENSE);
-    SET_MULTI (AUTHORS);
-    SET_MULTI (KEYWORDS);
+    stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
+    SET_VALUE (ARCHIVESIZE, FSize (atoll(splitted[0].c_str())));
+    SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
+    SET_VALUE (BUILDTIME, Date (GET_TAG(BUILDTIME)->Data()));
+    SET_CACHE (SOURCERPM);
+    SET_CACHE (GROUP);
+    SET_CACHE (LICENSE);
+    SET_CACHE (AUTHORS);
+    SET_CACHE (KEYWORDS);
 
 #undef SET_VALUE
 #undef SET_POS
 #undef GET_TAG
-#undef SET_SINGLE
-#undef SET_MULTI
+#undef SET_CACHE
 
     // SHAREWITH, package to share data with
     // FIXME: does not support forwared shared declarations
@@ -221,27 +220,22 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
 
     CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
 
-#define SET_VALUE(tagname,value) \
-    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
-#define SET_POS(tagname,begin,end) \
-    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
+#define SET_POS(tagname,start,stop) \
+    do { dataprovider->_attr_##tagname.begin = start;\
+	 dataprovider->_attr_##tagname.end = stop; } while (0)
 #define GET_TAG(tagname) \
     tagset->getTagByIndex(InstSrcData_ULLangTags::tagname)
-#define SET_MULTI(tagname) \
+#define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
-#define SET_SINGLE(tagname) \
-    SET_VALUE (tagname, (GET_TAG(tagname))->Data())
 
-    SET_MULTI (SUMMARY);
-    SET_MULTI (DESCRIPTION);
-    SET_MULTI (INSNOTIFY);
-    SET_MULTI (DELNOTIFY);
+    SET_CACHE (SUMMARY);
+    SET_CACHE (DESCRIPTION);
+    SET_CACHE (INSNOTIFY);
+    SET_CACHE (DELNOTIFY);
 
-#undef SET_VALUE
 #undef SET_POS
 #undef GET_TAG
-#undef SET_SINGLE
-#undef SET_MULTI
+#undef SET_CACHE
 
     return;
 }
@@ -276,41 +270,49 @@ InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::Tag
 
     PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selcache));
     PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
-
+    dataprovider->setSelection (selection);
+  
     CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
 
 #define SET_VALUE(tagname,value) \
-    if (!value.empty()) dataprovider->setAttributeValue (selection, (PMSelection::PMSelectionAttribute)PMSelection::ATTR_##tagname, value)
-#define SET_POS(tagname,begin,end) \
-    dataprovider->setAttributeValue (selection, (PMSelection::PMSelectionAttribute)PMSelection::ATTR_##tagname, begin, end)
+    do { dataprovider->_attr_##tagname = value; } while (0)
+#define SET_POS(tagname,start,stop) \
+    do { dataprovider->_attr_##tagname.begin = start;\
+	 dataprovider->_attr_##tagname.end = stop; } while (0)
 #define GET_TAG(tagname) \
     tagset->getTagByIndex(InstSrcData_ULSelTags::tagname)
-#define SET_MULTI(tagname) \
-    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
-#define SET_SINGLE(tagname) \
-    SET_VALUE (tagname, (GET_TAG(tagname))->Data())
+#define SET_CACHE(tagname) \
+    do { tagptr = GET_TAG (tagname); \
+	 SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 
-    SET_SINGLE (SUMMARY);
-    SET_SINGLE (CATEGORY);
-    SET_SINGLE (VISIBLE);
+    PMSolvable::PkgRelList_type pkgrellist;
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(REQUIRES))->MultiData()))
+	selection->setRequires (pkgrellist);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(PROVIDES))->MultiData()))
+	selection->setProvides (pkgrellist);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(CONFLICTS))->MultiData()))
+	selection->setConflicts (pkgrellist);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(OBSOLETES))->MultiData()))
+	selection->setObsoletes (pkgrellist);
+    SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
 
-    SET_MULTI (REQUIRES);
-    SET_MULTI (PROVIDES);
-    SET_MULTI (CONFLICTS);
-    SET_MULTI (OBSOLETES);
+    SET_CACHE (SUMMARY);
+    SET_VALUE (CATEGORY, GET_TAG(CATEGORY)->Data() == "base");
+    SET_VALUE (VISIBLE, GET_TAG(VISIBLE)->Data() == "true");
 
-    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULSelTags::SIZE))->Data(), splitted, " ", false);
-    SET_VALUE (ARCHIVESIZE, splitted[0]);
-    SET_VALUE (SIZE, splitted[1]);
+    stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
+    if (splitted.size() > 0)
+    {
+	SET_VALUE (ARCHIVESIZE, FSize (atoll(splitted[0].c_str())));
+    }
 
-    SET_MULTI (INSTALL);
-    SET_MULTI (DELETE);
+    SET_CACHE (INSPACKS);
+    SET_CACHE (DELPACKS);
 
 #undef SET_VALUE
 #undef SET_POS
 #undef GET_TAG
-#undef SET_SINGLE
-#undef SET_MULTI
+#undef SET_CACHE
 
     return selection;
 }

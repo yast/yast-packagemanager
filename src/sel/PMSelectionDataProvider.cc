@@ -59,25 +59,25 @@ PMSelectionDataProvider::~PMSelectionDataProvider()
 
 
 const std::string
-PMSelectionDataProvider::summary() const
+PMSelectionDataProvider::summary(const std::string& lang) const
 {
     return "";
 }
 
 const std::list<std::string>
-PMSelectionDataProvider::description() const
+PMSelectionDataProvider::description(const std::string& lang) const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMSelectionDataProvider::insnotify() const
+PMSelectionDataProvider::insnotify(const std::string& lang) const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMSelectionDataProvider::delnotify() const
+PMSelectionDataProvider::delnotify(const std::string& lang) const
 {
     return std::list<std::string>();
 }
@@ -88,3 +88,38 @@ PMSelectionDataProvider::size() const
     return FSize(0);
 }
 
+const std::string
+PMSelectionDataProvider::category () const
+{
+    return "";
+}
+
+const bool
+PMSelectionDataProvider::visible () const
+{
+    return true;
+}
+
+const std::list<std::string>
+PMSelectionDataProvider::suggests() const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMSelectionDataProvider::inspacks(const std::string& lang) const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMSelectionDataProvider::delpacks(const std::string& lang) const
+{
+    return std::list<std::string>();
+}
+
+const FSize
+PMSelectionDataProvider::archivesize() const
+{
+    return 0;
+}
