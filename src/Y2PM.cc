@@ -284,6 +284,8 @@ PMError Y2PM::instTargetClose()
 
     MIL << "InstTarget down" << endl;
   }
+
+  return PMError::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
