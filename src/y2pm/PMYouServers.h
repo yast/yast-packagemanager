@@ -45,8 +45,8 @@ class PMYouServer
     PMYouServer() {}
     PMYouServer( const std::string & );
     PMYouServer( const Url &url, const std::string &name,
-                 const std::string &directory )
-      : _url( url ), _name( name ), _directory( directory ) {}
+                 const std::string &directory, const std::string &type )
+      : _url( url ), _name( name ), _directory( directory ), _type( type ){}
 
     void setUrl( const Url &url ) { _url = url; }
     void setUrl( const std::string &url ) { _url = Url( url ); }
@@ -61,15 +61,20 @@ class PMYouServer
     void setDirectory( const std::string &dir ) { _directory = dir; }
     std::string directory() const { return _directory; }
 
+    void setType( const std::string &type ) { _type = type; }
+    std::string type() const { return _type;  }
+
     bool operator==( const PMYouServer &server ) const;
 
     bool fromString( const std::string & );
     std::string toString() const;
 
+    
   private:
     Url _url;
     std::string _name;
     std::string _directory;
+    std::string _type;		// custom|default|slp
 };
 
 /**
