@@ -118,7 +118,7 @@ PMError MediaCurl::attachTo (bool next)
 
       string curlrcFile = string( getenv("HOME") ) + string( "/.curlrc" );
       SysConfig curlrc( curlrcFile );
-      _proxyuserpwd = curlrc.readEntry( "proxy-user" );      
+      _proxyuserpwd = curlrc.readEntry( "proxy-user" );
 
       ret = curl_easy_setopt( _curl, CURLOPT_PROXYUSERPWD,
                               _proxyuserpwd.c_str() );
@@ -128,14 +128,16 @@ PMError MediaCurl::attachTo (bool next)
     }
   }
 
+  _currentCookieFile = _cookieFile.asString();
+
   ret = curl_easy_setopt( _curl, CURLOPT_COOKIEFILE,
-                          _cookieFile.asString().c_str() );
+                          _currentCookieFile.c_str() );
   if ( ret != 0 ) {
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
 
   ret = curl_easy_setopt( _curl, CURLOPT_COOKIEJAR,
-                          _cookieFile.asString().c_str() );
+                          _currentCookieFile.c_str() );
   if ( ret != 0 ) {
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
