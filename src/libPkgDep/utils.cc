@@ -44,7 +44,7 @@ PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg,
 {
 	PkgName name = pkg->name();
 
-	DBG << "Trying to upgrade conflictor " << name << "-" << pkg->edition()
+	D__ << "Trying to upgrade conflictor " << name << "-" << pkg->edition()
 		 << " to solve confl source provides " << provides << std::endl;
 	// if no different version is available, we can't upgrade
 	PMSolvablePtr upgrade = available_upgrade(pkg);
@@ -66,7 +66,7 @@ PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
 {
 	PkgName name = pkg->name();
 
-	DBG << "Trying to upgrade provider " << name << "-" << pkg->edition()
+	D__ << "Trying to upgrade provider " << name << "-" << pkg->edition()
 		 << " to solve conflict " << confl << "\n";
 	// if no different version is available, we can't upgrade
 	PMSolvablePtr upgrade = available_upgrade(pkg);
@@ -91,12 +91,12 @@ PMSolvablePtr PkgDep::try_upgrade_requirerer(
 ) {
 	PkgName name = pkg->name();
 
-	DBG << "Trying to upgrade requirerer " << name << "-" << pkg->edition()
+	D__ << "Trying to upgrade requirerer " << name << "-" << pkg->edition()
 		 << " to solve broken requirement\n";
 	// if no different version is available, we can't upgrade
 	PMSolvablePtr upgrade = available_upgrade(pkg);
 	if (!upgrade) {
-		DBG << "no upgrade available for " << pkg->name() << "\n";
+		D__ << "no upgrade available for " << pkg->name() << "\n";
 		return NULL;
 	}
 
@@ -120,7 +120,7 @@ PMSolvablePtr PkgDep::available_upgrade( PMSolvablePtr pkg )
 	// if no different version is available, we can't upgrade
 	if (!available.includes(pkg->name()) ||
 		(upgrade = available[pkg->name()])->edition() == pkg->edition()) {
-		DBG << "  not possible, no different edition available\n";
+		D__ << "  not possible, no different edition available\n";
 		return NULL;
 	}
 	return upgrade;
@@ -132,11 +132,11 @@ void PkgDep::do_upgrade_for_conflict( PMSolvablePtr upgrade )
 	PkgName name = upgrade->name();
 	
 	if (candidates->includes(name) && ((*candidates)[name] == upgrade)) {
-		DBG << "Would upgrade " << name << " for solving conflict, but it's "
+		D__ << "Would upgrade " << name << " for solving conflict, but it's "
 			 "already a candidate\n";
 	}
 	else {
-		DBG << "Upgrading " << name << " to " << upgrade->edition()
+		D__ << "Upgrading " << name << " to " << upgrade->edition()
 			 << " to solve conflict\n";
 		candidates->add( upgrade );
 		to_check.push_back( upgrade );

@@ -35,7 +35,7 @@ bool PkgDep::upgrade(
 	noval_hash<PkgName> avoid_break_installs;
 	to_remove = SolvableList();
 	
-	DBG << "Starting upgrade\n";
+	D__ << "Starting upgrade\n";
 	
 	if (candidates.empty()) {
 		// for all installed packages...
@@ -48,7 +48,7 @@ bool PkgDep::upgrade(
 			PMSolvablePtr upgrade;
 			if (available.includes(iname) &&
 				(upgrade = available[iname])->edition() > ipkg->edition()) {
-				DBG << iname << ": upgrade from " << ipkg->edition()
+				D__ << iname << ": upgrade from " << ipkg->edition()
 					 << " to " << upgrade->edition() << endl;
 				candidates.add( upgrade );
 				real_from_input_list.insert( upgrade->name() );
@@ -59,7 +59,7 @@ bool PkgDep::upgrade(
 			if (!added) {
 				RevRel_for( available.obsoleted()[iname], obs ) {
 					if (obs->relation().matches( ipkg->self_provides() )) {
-						DBG << iname << ": obsoleted by available "
+						D__ << iname << ": obsoleted by available "
 							 << obs->pkg()->name() << "; installing "
 							 << obs->pkg()->name() << endl;
 						candidates.add( obs->pkg() );
@@ -70,7 +70,7 @@ bool PkgDep::upgrade(
 			}
 
 			if (!added)
-				DBG << iname << ": no upgrade\n";
+				D__ << iname << ": no upgrade\n";
 		}
 	}
 
@@ -79,9 +79,9 @@ bool PkgDep::upgrade(
 	while (--endless_protect > 0) {
 
 		// try installation of the candidates
-		DBG << "-------------------- install run --------------------\n";
+		D__ << "-------------------- install run --------------------\n";
 		install( candidates, out_good, out_bad, false );
-		DBG << "-------------------- install end --------------------\n";
+		D__ << "-------------------- install end --------------------\n";
 
 		if (out_bad.empty())
 			// no problems...
@@ -97,14 +97,14 @@ bool PkgDep::upgrade(
 			// if some pkg needs something that's not available, don't upgrade
 			// it
 			if (p->not_available) {
-				DBG << p->name <<" is not available, deselecting its referers\n";
+				D__ << p->name <<" is not available, deselecting its referers\n";
 				deselect_referers( PkgName("<none>"), candidates, p->referers, out_good, out_bad);
 			}
 
 			// alternatives possible: simply choose first one
 			if (!p->alternatives.empty()) {
 				PkgName alt = p->alternatives.front().name;
-				DBG << "Choosing " << alt << " as alternative for "
+				D__ << "Choosing " << alt << " as alternative for "
 					 << p->name << endl;
 				assert( available.includes(alt) );
 				candidates.add( available[alt] );
@@ -116,7 +116,7 @@ bool PkgDep::upgrade(
 			// remove
 			if (!p->conflicts_with.empty()) {
 				if (p->remove_to_solve_conflict.size() > max_remove) {
-					DBG << "too many packages ("
+					D__ << "too many packages ("
 						 << p->remove_to_solve_conflict.size()
 						 << ") to remove for conflict(s) of " << p->name
 						 << " -- aborting upgrade\n";
@@ -125,12 +125,12 @@ bool PkgDep::upgrade(
 				}
 				ci_for( SolvableList::, q, p->remove_to_solve_conflict. ) {
 					if (candidates.includes((*q)->name())) {
-						DBG << "removing candidate " << (*q)->name()
+						D__ << "removing candidate " << (*q)->name()
 							 << " due to conflict with " << p->name << endl;
 						candidates.remove( (*q)->name() );
 					}
 					else {
-						DBG << "removing installed " << (*q)->name()
+						D__ << "removing installed " << (*q)->name()
 							 << " due to conflict with " << p->name << endl;
 						to_remove.push_back( *q );
 					}
