@@ -229,6 +229,8 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
     ndescr_r = 0;
     PMError err = Error::E_ok;
 
+    string fileName = cache_dir_r.asString() + "/" + _cache_file;
+  
     InstSrcDescrPtr ndescr( new InstSrcDescr );
 
     ///////////////////////////////////////////////////////////////////
@@ -238,7 +240,7 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
     TagParser parser;
     std::string tagstr;
 
-    std::ifstream mediaCacheStream( cache_dir_r.asString().c_str() );
+    std::ifstream mediaCacheStream( fileName.c_str() );
 
     if( !mediaCacheStream )
     {
@@ -326,17 +328,6 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 
     // TODO: set ok=false if the result string is empty (are all values required ???)
     
-    // architecture
-    t = tagset->getTagByIndex( InstSrcMediaTags::ARCH );
-    if ( t )
-    {
-	ndescr->set_base_arch( PkgArch(t->Data()) );
-    }
-    else
-    {
-	ok = false;
-    }
-    
     // default activate
     t = tagset->getTagByIndex(InstSrcMediaTags::ACTIVATE);
     if ( t )
@@ -414,6 +405,58 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     {
 	ok = false;
     }
+
+    // content file data
+    t = tagset->getTagByIndex(InstSrcMediaTags::CONTENT);
+    if ( t )
+    {
+	std::list<std::string> multi = t->MultiData();
+
+	if ( multi.size() >= 4 )
+	{
+	    std::list<std::string>::iterator multi_pos = multi.begin();
+	    //  only check if ( !(*multi_pos).empty() ) if an empty string is an error
+	    ndescr->set_content_product( PkgNameEd::fromString(*multi_pos) );
+	    *multi_pos++;
+	    ndescr->set_content_baseproduct( PkgNameEd::fromString(*multi_pos));
+	    *multi_pos++;
+	    ndescr->set_content_vendor( *multi_pos++ );
+	    ndescr->set_content_defaultbase( *multi_pos++ );
+	}
+	else
+	{
+	    ok = false;
+	}	
+    }
+    else
+    {
+	ok = false;
+    }
+    
+    // archmap
+    t = tagset->getTagByIndex(InstSrcMediaTags::ARCH);
+    if ( t )
+    {
+	ArchMap arch;
+	std::list<std::string> multi = t->MultiData();
+	std::list<std::string>::iterator multi_pos;
+	for ( multi_pos = multi.begin(); multi_pos != multi.end(); ++multi_pos )
+	{
+	    vector<std::string> line = TagParser::split2words (*multi_pos, " ");
+	    list<Pathname> paths;
+	    unsigned int i;
+	    for ( i = 1; i < line.size(); i++ )
+	    {
+		paths.push_back( Pathname(line[i]) ); 
+	    }
+	    arch[line[0]] = paths;
+	}
+	ndescr->set_content_archmap( arch );
+    }
+    else
+    {
+	ok = false;
+    }
     
     return ok;
 }
@@ -430,24 +473,48 @@ PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
 {
 #warning TBD InstSrcDescr cache write
 
-    ofstream file( cache_dir_r.asString().c_str() );
+    string fileName = cache_dir_r.asString() + "/" + _cache_file;
+
+    ofstream file( fileName.c_str() );
 
     if ( !file )
     {
 	return Error::E_create_file;
     }
 
-    file << ArchTag << ": "<< _base_arch << endl;
     file << TypeTag << ": " << InstSrc::toString(_type) << endl;
     file << UrlTag << ": " << _url << endl;
     file << ProdDirTag << ": " << _product_dir << endl;
     file << DefActTag << ": " << (_default_activate?"1":"0") << endl;
-    file << MediaBTag << ": " << endl;
+    file << MediaBTag << ":" << endl;
     file << _media_vendor << endl;
     file << _media_id << endl;
     file << _media_count << endl;
     file << MediaETag << ":" << endl;
+    file << ContentBTag << ":" << endl;
+    file << PkgNameEd::toString(_content_product) << endl;
+    file << PkgNameEd::toString(_content_baseproduct) << endl;
+    file << _content_vendor << endl;
+    file << _content_defaultbase << endl;
+    file << ContentETag << ":" << endl;
+
+    file << ArchBTag << ":" << endl;
+    ArchMap::const_iterator arch_pos;
+    std::list<Pathname>::iterator pos;
     
+    for ( arch_pos = _content_archmap.begin(); arch_pos != _content_archmap.end(); ++arch_pos )
+    {
+ 	file << (*arch_pos).first << " ";
+	std::list<Pathname> paths =  (*arch_pos).second;
+	
+	for ( pos = paths.begin(); pos != paths.end(); ++pos  )
+	{
+	    file  << (*pos) << " ";
+	}
+	file << endl;
+    }
+    file << ArchETag << ":" << endl;
+
     return Error::E_ok;
 }
 
