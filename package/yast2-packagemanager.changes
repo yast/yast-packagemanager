@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug 28 22:06:32 CEST 2002 - kkaempf@suse.de
+
+- implement media change callbacks
+- fix cache read/write (ma@suse.de)
+- implement selection db (ma@suse.de)
+
+-------------------------------------------------------------------
 Tue Aug 27 17:48:59 CEST 2002 - kkaempf@suse.de
 
 - improve cache handling of data
