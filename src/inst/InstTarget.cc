@@ -53,8 +53,6 @@ IMPL_BASE_POINTER(InstTarget);
  * a directory
  */
 InstTarget::InstTarget ( const std::string & rootpath ) :
-    _progressfunc(NULL),
-    _progressdata(NULL),
     _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
     _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
     _rootdir(rootpath)
@@ -262,3 +260,7 @@ InstTarget::dumpOn( ostream & str ) const
     return str;
 }
 
+void InstTarget::setPackageInstallProgressCallback(void (*func)(double,void*), void* data)
+{
+    _rpmdb->setProgressCallback(func,data);
+}

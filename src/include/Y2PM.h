@@ -23,12 +23,14 @@
 #define Y2PM_h
 
 #include <iosfwd>
+#include <string>
 
 //#include <y2pm/InstTarget.h>
 //#include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/PMYouPatchManager.h>
+#include <y2pm/InstTarget.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -50,6 +52,10 @@ class Y2PM {
     static PMSelectionManager * _selectionManager;
 
     static PMYouPatchManager * _youPatchManager;
+    
+    static InstTarget * _instTarget;
+
+    static std::string * _rootdir;
 
   public:
 
@@ -81,6 +87,66 @@ class Y2PM {
      * Access to the YouPatch  manager
      **/
     static PMYouPatchManager & youPatchManager();
+
+    /**
+     * Access to InstTarget
+     * */
+    static InstTarget & instTarget();
+
+    /**
+     * set path where root fs is mounted
+     * */
+    static bool setRoot(const std::string& r);
+
+    private:
+
+	/**
+	 * callbacks and their data
+	 * */
+	struct CallBacks
+	{
+	    CallBacks();
+	    
+	    /**
+	     * called right before package 'name' is installed
+	     * */
+	    void (*_installation_package_start_func)(const std::string& name);
+	    void* _installation_package_start_data;
+	    
+	    /**
+	     * called multiple times during package installation, 'progress' is the
+	     * already installed percentage
+	     * */
+	    void (*_installation_package_progress_func)(const std::string& name, int progress);
+	    void* _installation_package_progress_data;
+
+	    /**
+	     * called after package 'name' got installed
+	     * */
+	    void (*_installation_package_done_func)(const std::string& name);
+	    void* _installation_package_done_data;
+
+	};
+
+	static CallBacks _callbacks;
+
+    public:
+    
+	/**
+	 * called right before package 'name' is installed
+	 * */
+	static void setInstallationPackageStartCallback(void (*func)(const std::string& name), void* data);
+
+	/**
+	 * called multiple times during package installation, 'progress' is the
+	 * already installed percentage
+	 * */
+	static void setInstallationPackageProgressCallback(void (*func)(const std::string& name, int progress), void* data);
+
+	/**
+	 * called after package 'name' got installed
+	 * */
+	static void setInstallationPackageDoneCallback(void (*func)(const std::string& name), void* data);
 };
 
 ///////////////////////////////////////////////////////////////////

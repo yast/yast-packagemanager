@@ -51,6 +51,7 @@ void query(vector<string>& argv);
 void remove(vector<string>& argv);
 void verbose(vector<string>& argv);
 void debug(vector<string>& argv);
+void rpminstall(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -59,11 +60,12 @@ struct Funcs {
 };
 
 static struct Funcs func[] = {
-    { "install", install, "install a package" },
+    { "install", install, "simulated install of a package" },
+    { "rpminstall", rpminstall, "install rpm files" },
     { "consistent", consistent, "check consistency" },
     { "init", init, "initialize packagemanager" },
     { "query", query, "query packages" },
-    { "remove", remove, "remove packages" },
+    { "remove", remove, "simulate remove packages" },
     { "help", help, "this screen" },
     { "verbose", verbose, "set verbosity level" },
     { "debug", debug, "switch on/off debug" },
@@ -455,6 +457,25 @@ void consistent(vector<string>& argv)
     {
 	cout << "everything allright" << endl;
     }
+}
+
+void rpminstall(vector<string>& argv)
+{
+    vector<string>::iterator it=argv.begin();
+    list<string> pkgs;
+    ++it; // first one is function name itself
+    
+    for(;it!=argv.end();++it)
+    {
+	pkgs.push_back(*it);
+    }
+
+    if(Y2PM::instTarget().init() != InstTarget::Error::E_ok)
+    {
+	cout << "initialization failed" << endl;
+    }
+    else
+	Y2PM::instTarget().installPackages(pkgs);
 }
 
 int main( int argc, char *argv[] )
