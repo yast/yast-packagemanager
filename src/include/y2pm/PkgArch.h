@@ -38,6 +38,15 @@ class PkgArch : public Ustring {
   public:
 
     explicit PkgArch( const std::string & n = "" ) : Ustring( _nameHash, n ) {}
+
+  public:
+
+    /**
+     * Comapre two PkgArch's according to Y2PM::allowedArchs
+     **/
+    static int compare( const PkgArch & lhs, const PkgArch & rhs );
+
+    int compare( const PkgArch & rhs ) const { return compare( *this, rhs ); }
 };
 
 ///////////////////////////////////////////////////////////////////
