@@ -947,16 +947,6 @@ int Y2PM::commitPackages( unsigned int media_nr,
 
     while (go_on)
     {
-	go_on = installSpmFromMedia (current_src_media, current_src_ptr, srclist);	// install sources from it while we have it attached
-	if (!go_on)
-	    break;
-
-	if (media_nr > 0)				// if a specific media number is requested
-	    break;
-
-	if (srclist.size() == 0)			// we're done
-	    break;
-
 	// peek to first package in source list to determine which is the next medium
 
 	PMPackagePtr spm = srclist.front();
@@ -979,6 +969,16 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		(*_callbacks._source_change_func)(current_src_ptr, pkgmedianr, _callbacks._source_change_data);
 	    }
 	}
+
+	go_on = installSpmFromMedia (current_src_media, current_src_ptr, srclist);	// install sources from it while we have it attached
+	if (!go_on)
+	    break;
+
+	if (media_nr > 0)				// if a specific media number is requested
+	    break;
+
+	if (srclist.size() == 0)			// we're done
+	    break;
     }
 
     if (current_src_ptr != 0)
