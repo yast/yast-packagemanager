@@ -94,7 +94,7 @@ PMYouSettings::PMYouSettings()
 }
 
 PMYouSettings::PMYouSettings( const string &product, const string &version,
-                                  const string &baseArch )
+                              const string &baseArch )
 {
   init( product, version, baseArch );
 }
@@ -108,9 +108,14 @@ PMYouSettings::~PMYouSettings()
 }
 
 void PMYouSettings::init( const string &product, const string &version,
-                            const string &baseArch )
+                          const string &baseArch )
 {
   _config = 0;
+
+  _checkSignatures = true;
+  _reloadPatches = true;
+  _noExternalPackages = false;
+  _dryRun = false;
 
   PMYouProductPtr p = new PMYouProduct( product, version, baseArch,
                                         *this );
@@ -315,4 +320,47 @@ PMYouProductPtr PMYouSettings::primaryProduct() const
   }
 
   return *_products.begin();
+}
+
+void PMYouSettings::setCheckSignatures( bool check )
+{
+  _checkSignatures = check;
+}
+
+bool PMYouSettings::checkSignatures() const
+{
+  return _checkSignatures;
+}
+
+/**
+  Set if patches should be reloaded from the server.
+*/
+void PMYouSettings::setReloadPatches( bool reload )
+{
+  _reloadPatches = reload;
+}
+
+bool PMYouSettings::reloadPatches()
+{
+  return _reloadPatches;
+}
+
+void PMYouSettings::setNoExternalPackages( bool noExternal )
+{
+  _noExternalPackages = noExternal;
+}
+
+bool PMYouSettings::noExternalPackages() const
+{
+  return _noExternalPackages;
+}
+
+void PMYouSettings::setDryRun( bool dry )
+{
+  _dryRun = dry;
+}
+
+bool PMYouSettings::dryRun() const
+{
+  return _dryRun;
 }
