@@ -81,7 +81,6 @@ class InstSrcManager {
      **/
     Pathname cache_tmp_dir() const { return cachePath( _cache_tmp_dir ); }
 
-
     /**
      * Return a new (not existing) directory name in cache_root_dir
      **/
@@ -122,13 +121,39 @@ class InstSrcManager {
 
     ISrcList _enabledSources;
 
+    /**
+     * Find InstSrcPtr in _knownSources by ISrcId.
+     * Return NULL if not in _knownSources.
+     **/
     InstSrcPtr lookupId( const ISrcId & isrc_r ) const;
+
+    /**
+     * Find InstSrcPtr in _knownSources by comparing
+     * InstSrcDescr. Return NULL if not in _knownSources.
+     **/
+    InstSrcPtr lookupInstSrc( const InstSrcPtr & isrc_r ) const;
+
+    /**
+     * Add nsrc_r to _knownSources if same product is not yet present.
+     * Return ISrcId for the added nsrc_r, or NULL if duplicate.
+     **/
+    ISrcId poolAdd( InstSrcPtr nsrc_r );
+
+    /**
+     * Preload all cached InstSrces.
+     **/
+    PMError initSrcPool();
+
+    /**
+     * Create InstSrc from cache and add it to ISrcPool.
+     **/
+    PMError scanSrcCache( const Pathname & srccache_r );
 
   public:
 
     /**
-     * Access media. Detect kind of InstSrc available on media.
-     *
+     * Access media. Detect kind of InstSrc(es) available on media, and
+     * load their descriptions. (add them to ISrcPool)
      **/
     PMError scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r );
 

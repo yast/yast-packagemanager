@@ -22,8 +22,11 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
 
+#include <Y2PM.h>
+
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrc.h>
+#include <y2pm/InstSrcDescr.h>
 
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMPackageManager.h>
@@ -53,6 +56,11 @@ InstSrcManager::InstSrcManager()
   if ( res ) {
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
   }
+  if ( Y2PM::runningFromSystem() ) {
+    initSrcPool();
+  } else
+    MIL << "Not running from system: no init from SrcPool" << endl;
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -123,6 +131,108 @@ InstSrcPtr InstSrcManager::lookupId( const ISrcId & isrc_r ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::lookupInstSrc
+//	METHOD TYPE : InstSrcPtr
+//
+//	DESCRIPTION :
+//
+InstSrcPtr InstSrcManager::lookupInstSrc( const InstSrcPtr & isrc_r ) const
+{
+  if ( ! ( isrc_r && isrc_r->descr() ) )
+    return 0;
+
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    if ( InstSrcDescr::sameContentProduct( (*it)->descr(), isrc_r->descr() ) ) {
+      return *it;
+    }
+  }
+  return 0;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::poolAdd
+//	METHOD TYPE : ISrcId
+//
+//	DESCRIPTION :
+//
+InstSrcManager::ISrcId InstSrcManager::poolAdd( InstSrcPtr nsrc_r )
+{
+  if ( ! nsrc_r ) {
+    INT << "Try to add NULL InstSrc" << endl;
+    return 0;
+  }
+
+  if ( ! nsrc_r->descr() ) {
+    INT << "Try to add InstSrc without InstSrcDescr" << endl;
+    return 0;
+  }
+
+  InstSrcPtr gotsrc = lookupInstSrc( nsrc_r );
+  if ( gotsrc ) {
+    WAR << "Try to add duplicate InstSrc: " << nsrc_r << " (have " << gotsrc << ")" << endl;
+    return 0;
+  }
+
+  _knownSources.insert( nsrc_r );
+  nsrc_r->_mgr_attach();
+
+  MIL << "Added InstSrc " << nsrc_r << endl;
+  return nsrc_r;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::initSrcPool
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::initSrcPool()
+{
+  MIL << "Init SrcPool from " << cache_root_dir() << endl;
+
+  PMError err;
+#warning need SrcPool init (scandir for IS_CACHE_*?)
+
+  scanSrcCache( cache_root_dir() + "testcache" );
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::scanSrcCache
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r )
+{
+  MIL << "Read InstSrc from cache " << srccache_r << endl;
+
+  InstSrcPtr nsrc;
+  PMError err = InstSrc::vconstruct( nsrc, srccache_r );
+  if ( err ) {
+    WAR << "Invalid InstSrc cache at " << srccache_r << " (" << err << ")" << endl;
+    return Error::E_isrc_cache_invalid;
+  }
+
+  ISrcId nid = poolAdd( nsrc );
+  if ( ! nid ) {
+    WAR << "Duplicate InstSrc cache at " << srccache_r << endl;
+    return Error::E_isrc_cache_duplicate;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::scanMedia
 //	METHOD TYPE : PMError
 //
@@ -176,10 +286,10 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
     if ( (scan_err = InstSrc::vconstruct( nsrc, srccache, mediaurl_r, iter->_dir)) ) {
       // no InstSrc found
     } else {
-#warning TBD prevent duplicate registration of sources
-      // add new source to known_Sources and idlist_r
-      _knownSources.insert( nsrc );
-      idlist_r.push_back( nsrc );
+      ISrcId nid = poolAdd( nsrc );
+      if ( nid ) {
+	idlist_r.push_back( nid );
+      }
     }
   }
 

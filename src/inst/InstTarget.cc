@@ -91,54 +91,6 @@ InstTarget::Erase()
     D__ << std::endl;
     return false;
 }
-#if 0
-/**
- * @return description of Installation source
- * This is needed by the InstTargetMgr
- */
-const InstDescr *
-InstTarget::getDescription() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr;
-}
-
-/**
- * register this source (store cache files etc)
- * return pathname of saved content file
- */
-const Pathname
-InstTarget::registerSource (void) const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr->writeCache ();
-}
-
-//-----------------------------
-// activation status
-
-/**
- * return activation status
- */
-bool
-InstTarget::getActivation() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr->getActivation();
-}
-
-
-/**
- * temporary (de)activate source
- */
-void
-InstTarget::setActivation (bool yesno)
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _descr->setActivation (yesno);
-}
-
-#endif
 
 //-----------------------------
 // target content access
@@ -172,13 +124,13 @@ const std::list<PMYouPatchPtr>&
 InstTarget::getPatches (void) const
 {
     if ( !_patchesInitialized ) {
-#warning FIXME: Get product info from InstTarget::descr    
+#warning FIXME: Get product info from InstTarget::descr
         PMYouPatchPaths paths;
         PMYouPatchInfo patchInfo;
 
         Url u( "dir://" + ( getRoot() + paths.installDir() ).asString() );
         Pathname path;
-                
+
         PMError error = patchInfo.readDir( u, path, _patches );
         if ( error ) {
             E__ << "Error reading patch info for installed patches." << endl;
@@ -188,21 +140,6 @@ InstTarget::getPatches (void) const
     }
 
     return _patches;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstTarget::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-std::ostream &
-InstTarget::dumpOn( std::ostream & str ) const
-{
-    Rep::dumpOn( str );
-    return str;
 }
 
 //--------------------------------------------------------------------
@@ -235,7 +172,7 @@ PMError InstTarget::installPackage (const std::string& filename, unsigned flags)
 
 PMError InstTarget::installPackages (const std::list<std::string>& filenames, unsigned flags)
 {
-    PMError err;    
+    PMError err;
     for(list<string>::const_iterator it= filenames.begin(); it != filenames.end(); ++it)
     {
 	err = installPackage(*it,flags);
@@ -251,7 +188,7 @@ PMError InstTarget::removePackage(const std::string& label, unsigned flags)
 
 PMError InstTarget::removePackages(const std::list<std::string>& labels, unsigned flags)
 {
-    PMError err;    
+    PMError err;
     for(list<string>::const_iterator it= labels.begin(); it != labels.end(); ++it)
     {
 	err = removePackage(*it,flags);
@@ -278,7 +215,7 @@ bool InstTarget::setInstallationLogfile(const std::string& logfile)
 
 PMError InstTarget::installPatch( const Pathname &filename )
 {
-#warning FIXME: Get product info from InstTarget::descr    
+#warning FIXME: Get product info from InstTarget::descr
     PMYouPatchPaths paths;
 
     Pathname dest = getRoot();
@@ -290,7 +227,7 @@ PMError InstTarget::installPatch( const Pathname &filename )
           << ")" << endl;
       return PMError( InstTargetError::E_error );
     }
-    
+
     dest += filename.basename();
 
     D__ << "in: " << filename << " out: " << dest << endl;
@@ -305,7 +242,7 @@ PMError InstTarget::installPatch( const Pathname &filename )
         E__ << "Can't write " << dest << endl;
         return PMError( InstTargetError::E_error );
     }
-    
+
     int size = 1000;
     char buf[size];
     while( !in.eof() ) {

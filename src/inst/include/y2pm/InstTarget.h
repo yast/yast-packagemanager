@@ -114,7 +114,7 @@ class InstTarget: virtual public Rep, public InstData {
 
 	//-----------------------------
 	// general functions
-	
+
 	/**
 	 * set log file for installation
 	 *
@@ -130,8 +130,6 @@ class InstTarget: virtual public Rep, public InstData {
 	//-----------------------------
 	// InstData interface
 	// target content access
-
-	virtual const Pathname writeCache (const Pathname &descrpathname) { return InstData::writeCache (descrpathname); }
 
 	/**
 	 * generate PMSelection objects for each selection on the source
@@ -150,8 +148,6 @@ class InstTarget: virtual public Rep, public InstData {
 	 * @return list of PMYouPatchPtr on this source
 	 */
 	virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
-
-	virtual std::ostream & dumpOn( std::ostream & str ) const;
 
 	//-----------------------------
 	// package install / remove

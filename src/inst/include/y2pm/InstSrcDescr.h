@@ -34,7 +34,6 @@
 #include <y2util/LangCode.h>
 
 #include <y2pm/InstSrcDescrPtr.h>
-#include <y2pm/InstSrcTags.h>
 
 #include <y2pm/InstSrc.h>
 #include <y2pm/PkgRelation.h>
@@ -63,8 +62,8 @@ class InstSrcDescr : virtual public Rep {
     typedef InstSrcError Error;
 
     typedef std::map<std::string,std::list<Pathname> >  ArchMap;
-    typedef std::map<LangCode,std::string>         LabelMap;
-    typedef std::list<LangCode>                    LinguasList;
+    typedef std::map<LangCode,std::string>              LabelMap;
+    typedef std::list<LangCode>                         LinguasList;
 
   public:
 
@@ -136,15 +135,14 @@ class InstSrcDescr : virtual public Rep {
 
 
     std::string _content_defaultbase;
-    ArchMap _content_archmap;
+    ArchMap     _content_archmap;
 
     PkgRelation _content_requires;
 
-
-    LangCode _content_language;
+    LangCode    _content_language;
     LinguasList _content_linguas;
     std::string _content_label;
-    LabelMap _content_labelmap;
+    LabelMap    _content_labelmap;
 
     std::string _content_timezone;
 
@@ -157,15 +155,6 @@ class InstSrcDescr : virtual public Rep {
      * package data directory below _product_dir
      **/
     Pathname _content_datadir;
-
-
-    /**
-     * Internal use - fill data from tag set into object
-     * @param ndescr The object to fill
-     * @param tagset The tag set
-     * @return bool true: data are complete, false: object only partly filled
-     **/
-    static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset );
 
 public:
 
@@ -240,6 +229,13 @@ public:
     void set_content_timezone( const std::string & val_r )  { _content_timezone = val_r; }
     void set_content_descrdir( const Pathname & val_r )     { _content_descrdir = val_r; }
     void set_content_datadir( const Pathname & val_r )      { _content_datadir = val_r; }
+
+  public:
+
+    /**
+     * Test for equal content_product.
+     **/
+    static bool sameContentProduct( const constInstSrcDescrPtr & rhs, const constInstSrcDescrPtr & lhs );
 
   public:
 

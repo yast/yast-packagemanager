@@ -51,6 +51,16 @@
 class InstSrc: virtual public Rep {
   REP_BODY(InstSrc);
 
+  private:
+
+    friend class InstSrcManager;
+
+    /**
+     * Called from InstSrcManager on add to it's known sources pool.
+     * Unsets _cache_deleteOnExit, and writes description cache.
+     **/
+    void _mgr_attach();
+
   public:
 
     /**
@@ -266,19 +276,12 @@ class InstSrc: virtual public Rep {
      **/
     bool enabled() const { return _data; }
 
-    //-----------------------------
-    // cache file handling
     /**
-     * write media content data to cache file
-     * @param pathname of corresponding InstSrcDescr cache file
-     * @return pathname of written cache
-     * writes content cache data to an ascii file
-     */
-    const Pathname writeCache (const Pathname &descrpathname);
+     * Sync InstSrcDescr and InstSrcData to cache
+     **/
+    PMError writeCache();
 
-    //-----------------------------
-    // source content access
-
+#if 0
     /**
      * generate PMSelection objects for each selection on the source
      * @return list of PMSelectionPtr on this source
@@ -296,6 +299,7 @@ class InstSrc: virtual public Rep {
      * @return list of PMSolvablePtr on this source
      */
     const std::list<PMYouPatchPtr>& getPatches (void) const;
+#endif
 
   public:
 

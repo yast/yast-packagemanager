@@ -65,8 +65,11 @@ class InstSrcError {
       E_src_no_description,
       E_src_already_enabled,
       E_src_not_enabled,
+      E_src_cache_disabled,
       // InstSrcMgr
-      E_bad_id
+      E_bad_id,
+      E_isrc_cache_invalid,
+      E_isrc_cache_duplicate
     };
 };
 

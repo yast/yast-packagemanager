@@ -183,6 +183,38 @@ void InstSrcData::withdrawObjects()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcData::writeCache
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcData::writeCache( const Pathname & cache_dir_r ) const
+{
+  MIL << *this << " does not support data cache." << endl;
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::dumpOn
+//	METHOD TYPE : std::ostream &
+//
+//	DESCRIPTION :
+//
+std::ostream & InstSrcData::dumpOn( std::ostream & str ) const
+{
+  Rep::dumpOn( str ) << "(";
+  str << "(" << ( _propagating ? "propagating" : "withdrawn" );
+  str << " sel:" << getSelections().size();
+  str << " pkg:" << getPackages().size();
+  str << " you:" << getPatches().size();
+  return str << ")";
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcData::tryGetDescr
 //	METHOD TYPE : PMError
 //
