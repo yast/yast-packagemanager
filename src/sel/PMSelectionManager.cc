@@ -96,24 +96,35 @@ PMSelectionManager::getAlternativeSelectable (std::string pkgstr,
 					 PMPackageManager & package_mgr)
 {
     PMSelectablePtr selectable;
-    string::size_type startpos = pkgstr.find_first_of ("(");
-    string::size_type endpos = pkgstr.find_first_of (")");
-    if ((startpos == string::npos)
-	|| (endpos == string::npos))
+    string::size_type startpos = pkgstr.find_first_of (" ");
+    if (startpos == string::npos)
 	return selectable;
-MIL << "getAlternativeSelectable(" << pkgstr << ")" << endl;
-    startpos++;
-    while (startpos < endpos)
+MIL << "getAlternativeSelectable(" << pkgstr.substr (0, startpos) << ")" << endl;
+
+    // try initial pack
+    selectable = package_mgr.getItem (pkgstr.substr (0, startpos));
+    if (!selectable)
     {
-	// find first comma or blank after startpos
-	string::size_type commapos = pkgstr.find_first_of (", ", startpos);
-	if (commapos == string::npos)
-	    commapos = endpos;
-	selectable = package_mgr.getItem (pkgstr.substr (startpos, commapos-startpos));
+	// nope, try "(alt1, ...)"
+	startpos = pkgstr.find_first_of ("(");
+	string::size_type endpos = pkgstr.find_first_of (")");
+	if ((startpos != string::npos)
+	    && (endpos != string::npos))
+	{
+	    startpos++;
+	    while (startpos < endpos)
+	    {
+		// find first comma or blank after startpos
+		string::size_type commapos = pkgstr.find_first_of (", ", startpos);
+		if (commapos == string::npos)
+		    commapos = endpos;
+		selectable = package_mgr.getItem (pkgstr.substr (startpos, commapos-startpos));
 MIL << "?(" << pkgstr.substr (startpos, commapos-startpos) << ")" << endl;
-	if (selectable)
-	    break;			// found it !
-	startpos = commapos + 1;
+		if (selectable)
+		    break;			// found it !
+		startpos = commapos + 1;
+	    }
+	}
     }
 if (selectable) MIL << "found!" << endl;
 else MIL << "nope!" << endl;
