@@ -62,8 +62,8 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 
 	const std::string summary () const;
 	const std::list<std::string> description () const;
-	const std::list<std::string> insnotify () const;
-	const std::list<std::string> delnotify () const;
+	const std::list<std::string> insnotify () const { return PMPackageDataProvider::insnotify(); }
+	const std::list<std::string> delnotify () const { return PMPackageDataProvider::delnotify(); }
 	const FSize size () const;
 
 	/**
@@ -86,14 +86,14 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	const std::list<std::string> preun () const;
 	const std::list<std::string> postun () const;
 	const std::string sourcerpm () const;
-	const FSize archivesize () const;
-	const std::list<std::string> authors () const;
+	const FSize archivesize () const { return PMPackageDataProvider::archivesize(); }
+	const std::list<std::string> authors () const { return PMPackageDataProvider::authors(); }
 	const std::list<std::string> filenames () const;
 	// suse packages values
-	const std::list<std::string> recommends () const;
-	const std::list<std::string> suggests () const;
-	const std::string location () const;
-	const std::list<std::string> keywords () const;
+	const std::list<std::string> recommends () const { return PMPackageDataProvider::recommends(); }
+	const std::list<std::string> suggests () const { return PMPackageDataProvider::suggests(); }
+	const std::string location () const { return PMPackageDataProvider::location(); }
+	const std::list<std::string> keywords () const { return PMPackageDataProvider::keywords(); }
 
 	/**
 	 * Object attribute retrieval. (DataProvider interface)

@@ -57,7 +57,6 @@ PMSelectionDataProvider::~PMSelectionDataProvider()
 {
 }
 
-
 const std::string
 PMSelectionDataProvider::summary(const std::string& lang) const
 {
@@ -80,12 +79,6 @@ const std::list<std::string>
 PMSelectionDataProvider::delnotify(const std::string& lang) const
 {
     return std::list<std::string>();
-}
-
-const FSize
-PMSelectionDataProvider::size() const
-{
-    return FSize(0);
 }
 
 const std::string

@@ -80,6 +80,12 @@ PMYouPackageDataProvider::delnotify() const
     return std::list<std::string>();
 }
 
+const FSize
+PMYouPackageDataProvider::size() const
+{
+    return FSize(0);
+}
+
 PkgAttributeValue PMYouPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
 							       PMObject::PMObjectAttribute attr )
 {

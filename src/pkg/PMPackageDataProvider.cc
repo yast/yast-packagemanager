@@ -57,37 +57,6 @@ PMPackageDataProvider::~PMPackageDataProvider()
 {
 }
 
-const std::string
-PMPackageDataProvider::summary () const
-{
-    return "";
-}
-
-const std::list<std::string>
-PMPackageDataProvider::description () const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMPackageDataProvider::insnotify () const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMPackageDataProvider::delnotify () const
-{
-    return std::list<std::string>();
-}
-
-const FSize
-PMPackageDataProvider::size () const
-{
-    return FSize(0);
-}
-
-
 const Date
 PMPackageDataProvider::buildtime () const
 {

@@ -122,24 +122,24 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	 */
 
 	const Date buildtime () const;
-	const std::string buildhost () const;
-	const Date installtime () const;
-	const std::string distribution () const;
-	const std::string vendor () const;
+	const std::string buildhost () const { return PMPackageDataProvider::buildhost(); }
+	const Date installtime () const { return PMPackageDataProvider::installtime(); }
+	const std::string distribution () const { return PMPackageDataProvider::distribution(); }
+	const std::string vendor () const { return PMPackageDataProvider::vendor(); }
 	const std::string license () const;
-	const std::string packager () const;
+	const std::string packager () const { return PMPackageDataProvider::packager(); }
 	const std::string group () const;
-	const std::list<std::string> changelog () const;
-	const std::string url () const;
-	const std::string os () const;
-	const std::list<std::string> prein () const;
-	const std::list<std::string> postin () const;
-	const std::list<std::string> preun () const;
-	const std::list<std::string> postun () const;
+	const std::list<std::string> changelog () const { return PMPackageDataProvider::changelog(); }
+	const std::string url () const { return PMPackageDataProvider::url(); }
+	const std::string os () const { return PMPackageDataProvider::os(); }
+	const std::list<std::string> prein () const { return PMPackageDataProvider::prein(); }
+	const std::list<std::string> postin () const { return PMPackageDataProvider::postin(); }
+	const std::list<std::string> preun () const { return PMPackageDataProvider::preun(); }
+	const std::list<std::string> postun () const { return PMPackageDataProvider::postun(); }
 	const std::string sourcerpm () const;
 	const FSize archivesize () const;
 	const std::list<std::string> authors () const;
-	const std::list<std::string> filenames () const;
+	const std::list<std::string> filenames () const { return PMPackageDataProvider::filenames(); }
 	// suse packages values
 	const std::list<std::string> recommends () const;
 	const std::list<std::string> suggests () const;
