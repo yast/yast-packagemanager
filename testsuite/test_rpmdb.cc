@@ -1,4 +1,6 @@
+#include <list>
 #include <string>
+#include <y2pm/PMPackagePtr.h>
 #include <y2pm/RpmDb.h>
 #include <iostream>
 
@@ -19,7 +21,8 @@ int main(int argc, char* argv[])
     if(package == "-a")
     {
 	rpmdb.initDatabase();
-	rpmdb.getPackages();
+	list<PMPackagePtr> pkglist;
+	rpmdb.getPackages(pkglist);
     }
     else
     {

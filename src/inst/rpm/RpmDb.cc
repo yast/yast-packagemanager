@@ -19,121 +19,10 @@
 
 /-*/
 
-/*
- * $Log$
- * Revision 1.1  2002/07/10 12:50:35  lnussel
- * first version of package provider for installed system
- *
- * Revision 1.1.1.1  2002/07/03 11:04:49  arvin
- * -m imported
- *
- * Revision 1.2  2002/04/08 16:54:51  arvin
- * - fixes for gcc 3.1
- *
- * Revision 1.1  2001/11/30 11:00:49  schubi
- * RPM agent added
- *
- * Revision 1.1  2001/11/12 16:57:25  schubi
- * agent for handling you
- *
- * Revision 1.29  2001/07/10 10:18:22  schubi
- * do not fetch rpm if it is already a valid version on the client
- *
- * Revision 1.28  2001/07/04 16:50:47  arvin
- * - adapt for new automake/autoconf
- * - partly fix for gcc 3.0
- *
- * Revision 1.27  2001/07/04 14:25:05  schubi
- * new selection groups works besides the old
- *
- * Revision 1.26  2001/07/03 13:40:39  msvec
- * Fixed all y2log calls.
- *
- * Revision 1.25  2001/04/24 13:37:41  schubi
- * logging reduced; function for version evaluation
- *
- * Revision 1.24  2001/04/23 13:47:41  schubi
- * no more conficts with YaST1 defines
- *
- * Revision 1.23  2001/04/12 12:48:28  schubi
- * logging added in RpmDB; bufix while parsing common.pkd
- *
- * Revision 1.22  2001/04/10 15:42:33  schubi
- * Reading dependencies from installed packages via RPM
- *
- * Revision 1.21  2001/01/16 20:12:45  schubi
- * memory overflow int getInstalledPackages
- *
- * Revision 1.20  2001/01/13 15:41:08  schubi
- * bugfix in backup changed files
- *
- * Revision 1.19  2000/12/14 16:42:44  schubi
- * bugfix in querypackage
- *
- * Revision 1.18  2000/12/14 09:31:48  schubi
- * return more information, if there are double entries in the DB
- *
- * Revision 1.17  2000/12/10 15:23:42  schubi
- * descructor call changed
- *
- * Revision 1.16  2000/10/05 14:36:16  schubi
- * logging changed
- *
- * Revision 1.15  2000/09/18 10:29:24  schubi
- * bugfixes while installing tmp-rpm-DB
- *
- * Revision 1.14  2000/09/15 16:32:12  schubi
- * bugfixes while creating tmp-rpm-DB
- *
- * Revision 1.13  2000/08/04 13:29:38  schubi
- * Changes from 7.0 to 7.1; Sorry Klaus, I do not know anymore
- *
- * Revision 1.12  2000/07/07 14:48:06  schubi
- * setenv( RPM_IgnoreFailedSymlinks, 1, 1 ) added; logging changed
- *
- * Revision 1.11  2000/07/06 17:31:56  schubi
- * installTmpDatabase returns true, if no temp.DB have been installed
- *
- * Revision 1.10  2000/07/04 13:26:06  schubi
- * removing links to S.u.S.E works now correctly
- *
- * Revision 1.9  2000/07/03 12:42:47  schubi
- * checking only links not the installed files of a package
- *
- * Revision 1.8  2000/07/02 15:59:59  schubi
- * removing ExternalProcess for multiline-requests
- *
- * Revision 1.7  2000/06/30 16:41:10  schubi
- * bug fixes
- *
- * Revision 1.6  2000/06/28 18:44:18  schubi
- * loggin inserted
- *
- * Revision 1.5  2000/06/27 16:02:41  schubi
- * save rpm-DB
- *
- * Revision 1.4  2000/05/30 15:43:43  kkaempf
- * fix include paths
- *
- * Revision 1.3  2000/05/18 14:01:21  schubi
- * removing liive-CD links and touch the directories
- *
- * Revision 1.2  2000/05/17 14:32:04  schubi
- * update Modus added after new cvs
- *
- * Revision 1.3  2000/05/11 11:47:55  schubi
- * update modus added
- *
- * Revision 1.2  2000/05/08 13:43:10  schubi
- * tested version
- *
- * Revision 1.1  2000/05/04 11:18:36  schubi
- * class to handle the rpm-DB; not testest
- *
- */
-
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include <cstdlib>
 
 #include <string>
 #include <list>
@@ -144,6 +33,7 @@
 #include <y2util/ExternalDataSource.h>
 #include <y2pm/RpmDb.h>
 #include <y2pm/PkgEdition.h>
+#include <y2pm/PkgRelation.h>
 #include <y2pm/PMPackage.h>
 
 #define ORIGINALRPMPATH "/var/lib/rpm/"
@@ -540,9 +430,140 @@ bool RpmDb::getInstalledPackages ( PackList &packageList )
 
 #endif
 
-const std::list<PMPackagePtr>* RpmDb::getPackages (void)
+// split in into pieces seperated by sep, return vector out
+unsigned RpmDb::tokenize(const string& in, char sep, vector<string>& out)
 {
-    list<PMPackagePtr>* packages = NULL;
+    unsigned count = 0;
+    string::size_type pos1=0, pos2=0;
+    while(pos1 != string::npos)
+    {
+	count++;
+	pos2 = in.find(sep,pos1);
+	if(pos2 != string::npos)
+	{
+	    out.push_back(in.substr(pos1,pos2-pos1));
+	    pos1=pos2+1;
+	}
+	else
+	{
+	    out.push_back(in.substr(pos1));
+	    pos1=pos2;
+	}
+    }
+    return count;
+}
+
+
+
+// parse string of the form name/number/version into rellist. number is the rpm
+// number representing the operator <, <=, = etc.
+void RpmDb::rpmdeps2rellist ( const string& depstr,
+		PMSolvable::PkgRelList_type& deps,
+		PMSolvable::PkgRelList_type& prereq,
+		bool ignore_prereqs)
+{
+    enum rpmdep
+    {
+	DNONE = 0,
+	DLT = 2,
+	DGT = 4,
+	DEQ = 8,
+	DGE = GT|EQ,
+	DLE = LT|EQ,
+	DPREREQ = 64
+    };
+    struct 
+    {
+	string name;
+	rel_op compare;
+	string version;
+	bool isprereq;
+	void clear()
+	{
+	    name = version.erase();
+	    compare=NONE;
+	    isprereq = false;
+	}
+    } cdep_Ci;
+
+    deps.clear();
+    if(!ignore_prereqs)
+	prereq.clear();
+
+    vector<string> depvec;
+    tokenize(depstr, ',', depvec);
+    
+//    D__ << "split " << depstr << " into " << depvec.size() << " pieces" << endl;
+    
+    if(depvec.size()<3) return;
+
+    for(vector<string>::size_type i = 0; i <= depvec.size()-3; i+=3 )
+    {
+	cdep_Ci.name = depvec[i];
+	cdep_Ci.version = depvec[i+2];
+
+	int op = atoi(depvec[i+1].c_str());
+	if(op&DPREREQ)
+	{
+	    cdep_Ci.isprereq=true;
+	    op^=DPREREQ;
+//	    D__ << "inversion " << op << endl;
+	}
+	else
+	{
+	    cdep_Ci.isprereq=false;
+	}
+
+	if(op == 0)
+	{
+	    cdep_Ci.compare = NONE;
+	}
+	else
+	{
+	    if(op&DLE)
+	    {
+		cdep_Ci.compare = LE;
+	    }
+	    else if(op&DGE)
+	    {
+		cdep_Ci.compare = GE;
+	    }
+	    else if(op&DGT)
+	    {
+		cdep_Ci.compare = GT;
+	    }
+	    else if(op&DLT)
+	    {
+		cdep_Ci.compare = LT;
+	    }
+	    else if(op&DEQ)
+	    {
+		cdep_Ci.compare = EQ;
+	    }
+	    else
+	    {
+		ERR << "operator " << op << " invalid" << endl;
+		cdep_Ci.compare = NONE;
+	    }
+
+	}
+	
+	PkgRelation dep(cdep_Ci.name,cdep_Ci.compare,cdep_Ci.version.c_str());
+//	D__ << dep << endl;
+	if(cdep_Ci.isprereq && !ignore_prereqs)
+	{
+	    prereq.push_back(dep);
+	}
+	else
+	    deps.push_back(dep);
+
+	cdep_Ci.clear();
+    }
+}
+
+// fill pkglist with installed packages
+bool RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
+{
     string rpmquery;
 
     // this enum tells the position in rpmquery string
@@ -565,15 +586,16 @@ const std::list<PMPackagePtr>* RpmDb::getPackages (void)
     rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};";
     rpmquery += "%{RPMTAG_INSTALLTIME};%{RPMTAG_BUILDTIME};%{RPMTAG_GROUP};";
     rpmquery += "%{RPMTAG_ARCH};";
-    rpmquery += "[%{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}];";
-    rpmquery += "[%{PROVIDENAME} %{PROVIDEFLAGS} %{PROVIDEVERSION}];";
-    rpmquery += "[%{OBSOLETENAME} %{OBSOLETEFLAGS} %{OBSOLETEVERSION}];";
-    rpmquery += "[%{CONFLICTNAME} %{CONFLICTFLAGS} %{CONFLICTVERSION}]";
+    rpmquery += "[%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},];";
+    rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
+    rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
+    rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},]";
     rpmquery += "\\n";
 
     const char* const opts[] =
     {
-	"-qa",
+	"-q",
+	"-a",
 	"--queryformat",
 	rpmquery.c_str()
     };
@@ -582,13 +604,11 @@ const std::list<PMPackagePtr>* RpmDb::getPackages (void)
 	ExternalProgram::Discard_Stderr);
 
     if(!process)
-	return packages;
+	return false;
 
     string value;
     string output;
 
-    packages = new list<PMPackagePtr>();
-    
     output = process->receiveLine();
 
     while ( output.length() > 0)
@@ -610,22 +630,7 @@ const std::list<PMPackagePtr>* RpmDb::getPackages (void)
 
 	vector<string> pkgattribs;
 
-	// split value into pieces seperated by semicolon
-	string::size_type pos1=0, pos2=0;
-	while(pos1 != string::npos)
-	{
-	    pos2 = value.find(';',pos1);
-	    if(pos2 != string::npos)
-	    {
-		pkgattribs.push_back(value.substr(pos1,pos2-pos1));
-		pos1=pos2+1;
-	    }
-	    else
-	    {
-		pkgattribs.push_back(value.substr(pos1));
-		pos1=pos2;
-	    }
-	}
+	tokenize(value,';',pkgattribs);
 
 	if( pkgattribs.size() != NUM_RPMTAGS )
 	{
@@ -633,21 +638,49 @@ const std::list<PMPackagePtr>* RpmDb::getPackages (void)
 	}
 	else
 	{
-	    /*
-	    PkgEdition edi(pkgattribs[RPM_VERSION].c_str(),pkgattribs[RPM_RELEASE].c_str());
+	    int buildtime = 0;
+	    if(!pkgattribs[RPM_BUILDTIME].empty())
+	    {
+		// XXX: use strtol instead?
+		buildtime = atoi(pkgattribs[RPM_BUILDTIME].c_str());
+	    }
+	    PkgEdition edi( buildtime, 0,
+			    pkgattribs[RPM_VERSION].c_str(),
+			    pkgattribs[RPM_RELEASE].c_str()
+			);
 	    PMPackagePtr p = new PMPackage(
 				pkgattribs[RPM_NAME],
 				edi,
 				pkgattribs[RPM_ARCH]);
-	    packages->push_back(p);
-	    */
-	    D__ << pkgattribs[RPM_NAME] << " " << endl;
+
+	    PMSolvable::PkgRelList_type requires;
+	    PMSolvable::PkgRelList_type prerequires;
+	    PMSolvable::PkgRelList_type provides;
+	    PMSolvable::PkgRelList_type obsoletes;
+	    PMSolvable::PkgRelList_type conflicts;
+	    
+	    PMSolvable::PkgRelList_type dummy;
+
+	    rpmdeps2rellist(pkgattribs[RPM_REQUIRES],requires,prerequires);
+	    rpmdeps2rellist(pkgattribs[RPM_PROVIDES],provides,dummy,true);
+	    rpmdeps2rellist(pkgattribs[RPM_OBSOLETES],obsoletes,dummy,true);
+	    rpmdeps2rellist(pkgattribs[RPM_CONFLICTS],conflicts,dummy,true);
+
+	    p->setRequires(requires);
+	    p->setPreRequires(prerequires);
+	    p->setProvides(provides);
+	    p->setObsoletes(obsoletes);
+	    p->setConflicts(conflicts);
+
+	    pkglist.push_back(p);
+	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
+	    D__ << p << endl;
 	}
 	
 	output = process->receiveLine();
     }
     
-    return packages;
+    return true;
 }
 
 #if 0
@@ -1334,6 +1367,7 @@ string RpmDb::queryPackageSummary( string packageName )
   return queryPackage("%{RPMTAG_SUMMARY} ", packageName );
 }
 
+#endif
 
 /*--------------------------------------------------------------*/
 /* Query the current package using the specified query format	*/
@@ -1373,7 +1407,7 @@ string RpmDb::queryPackage(const char *format, string packageName)
   return value;
 }
 
-
+#if 0
 /*--------------------------------------------------------------*/
 /* Evaluate all files of a package which have been changed	*/
 /* since last installation or update.				*/
