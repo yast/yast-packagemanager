@@ -1,5 +1,11 @@
 -------------------------------------------------------------------
-Fri Feb 28 14:35:07 CET 2003 - kk@suse.de
+Fri Feb 28 15:33:41 CET 2003 - kkaempf@suse.de
+
+- don't split LabelMap along spaces, just the first one
+  counts (#23573)
+
+-------------------------------------------------------------------
+Fri Feb 28 14:35:07 CET 2003 - kkaempf@suse.de
 
 - eject all cd drives if none is active on 'eject' (#24005)
 
