@@ -47,8 +47,6 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
     REP_BODY(PMULSelectionDataProvider);
 
     friend class ParseDataUL;
-	std::list<PMSelectionPtr> lookupSelections (const std::list<std::string>& selections);
-	std::list<PMPackagePtr> lookupPackages (const std::list<std::string>& packages);
 
     protected:
 

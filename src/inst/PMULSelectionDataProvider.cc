@@ -93,37 +93,6 @@ PMULSelectionDataProvider::stopRetrieval() const
 }
 
 
-///////////////////////////////////////////////////////////////////
-// private
-//
-//	METHOD NAME : PMULSelectionDataProvider::lookupSelections
-//	METHOD TYPE : std::list<PMPackagePtr>
-//
-//	DESCRIPTION : lookup selection names to PMSelectionPtr
-//
-std::list<PMSelectionPtr>
-PMULSelectionDataProvider::lookupSelections (const std::list<std::string>& selections)
-{
-    std::list<PMSelectionPtr> selection_ptrs;
-    return selection_ptrs;
-}
-
-///////////////////////////////////////////////////////////////////
-// private
-//
-//	METHOD NAME : PMULSelectionDataProvider::lookupPackages
-//	METHOD TYPE : std::list<PMPackagePtr>
-//
-//	DESCRIPTION : lookup package names to PMPackagePtr
-//
-std::list<PMPackagePtr>
-PMULSelectionDataProvider::lookupPackages (const std::list<std::string>& packages)
-{
-    std::list<PMPackagePtr> package_ptrs;
-    return package_ptrs;
-}
-
-
 //-------------------------------------------------------------------
 // public access functions
 //-------------------------------------------------------------------
@@ -195,11 +164,6 @@ PMULSelectionDataProvider::suggests() const
 const std::list<PMSelectionPtr>
 PMULSelectionDataProvider::suggests_ptrs()
 {
-    if ((_ptrs_attr_SUGGESTS.size() == 0)
-	&& !(_attr_SUGGESTS.empty()))
-    {
-	_ptrs_attr_SUGGESTS = lookupSelections (suggests());
-    }
     return _ptrs_attr_SUGGESTS;
 }
 
@@ -215,11 +179,6 @@ PMULSelectionDataProvider::recommends() const
 const std::list<PMSelectionPtr>
 PMULSelectionDataProvider::recommends_ptrs()
 {
-    if ((_ptrs_attr_RECOMMENDS.size() == 0)
-	&& !(_attr_RECOMMENDS.empty()))
-    {
-	_ptrs_attr_RECOMMENDS = lookupSelections (recommends());
-    }
     return _ptrs_attr_RECOMMENDS;
 }
 
@@ -238,10 +197,9 @@ PMULSelectionDataProvider::inspacks_ptrs(const std::string& lang)
 {
     // already set ?
     pkgsmapIT it = _ptrs_attr_INSPACKS.find(lang);
-    if (it != _ptrs_attr_INSPACKS.end())
-	return it->second;
-
-    return _ptrs_attr_INSPACKS[lang] = lookupPackages (inspacks());
+    if (it == _ptrs_attr_INSPACKS.end())
+	return std::list<PMPackagePtr>();
+    return it->second;
 }
 
 const std::list<std::string>
@@ -260,9 +218,8 @@ PMULSelectionDataProvider::delpacks_ptrs(const std::string& lang)
     // already set ?
     pkgsmapIT it = _ptrs_attr_DELPACKS.find(lang);
     if (it != _ptrs_attr_DELPACKS.end())
-	return it->second;
-
-    return _ptrs_attr_DELPACKS[lang] = lookupPackages (delpacks());
+	return std::list<PMPackagePtr>();
+    return it->second;
 }
 
 const FSize
