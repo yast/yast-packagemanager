@@ -356,13 +356,34 @@ PMError InstYou::retrievePatches()
 {
   D__ << "Retrieve patches." << endl;
 
+  bool hasPreInformation = false;
+
+  PMYouPatchPtr patch = firstPatch();
+  while ( patch ) {
+    string preInfo = patch->preInformation();
+    if ( !preInfo.empty() ) {
+      if ( !hasPreInformation ) {
+        hasPreInformation = true;
+        log( _("Show pre-installation messages...\n") );
+      }
+      list<PMYouPatchPtr> patches;
+      patches.push_back( patch );
+      PMError callbackError = showMessage( "preinfo", patches );
+      if ( callbackError == YouError::E_user_skip ) {
+        patch->setSkipped( true );
+      }
+    }
+
+    patch = nextPatch();
+  }
+
   PMError error = attachSource();
   if ( error ) {
     showError( error );
     return error;
   }
 
-  PMYouPatchPtr patch = firstPatch();
+  patch = firstPatch();
   
   if ( !patch ) {
     log( _("No patches have been selected for installation.\n") );
@@ -376,7 +397,7 @@ PMError InstYou::retrievePatches()
                                     patch->summary().c_str() );
     log( text );
 
-    if ( skipAll ) {
+    if ( skipAll || patch->skipped() ) {
       log( _("Skipped\n") );
       patch->setSkipped( true );
     } else {
@@ -543,27 +564,10 @@ bool InstYou::installPatches()
     if ( skipAll || patch->skipped() ) {
       log( _("Skipped\n") );
     } else {
-      string preInfo = patch->preInformation();
-      if ( !preInfo.empty() ) {
-        list<PMYouPatchPtr> patches;
-        patches.push_back( patch );
-        PMError callbackError = showMessage( "preinfo", patches );
-        if ( callbackError == YouError::E_user_skip ) {
-          log( _("Skipped\n") );
-          patch->setSkipped( true );
-        }
-      }
-
       if ( !patch->skipped() ) {
         error = installPatch( patch );
         if ( !error ) {
           installedPatches++;
-          string postInfo = patch->postInformation();
-          if ( !postInfo.empty() ) {
-            list<PMYouPatchPtr> patches;
-            patches.push_back( patch );
-            PMError callbackError = showMessage( "postinfo", patches );
-          }
           log( _("Ok\n") );
         } else {
           log( _("Error\n") );
@@ -602,6 +606,19 @@ bool InstYou::installPatches()
     }
 
     patch = nextPatch();
+  }
+
+  list<PMYouPatchPtr> patches;  
+  for( patch = firstPatch(); patch; patch = nextPatch() ) {
+    if ( patch->skipped() ) continue;
+    string postInfo = patch->postInformation();
+    if ( !postInfo.empty() ) {
+      patches.push_back( patch );
+    }
+  }
+  if ( !patches.empty() ) {
+    log( _("Show post-installation messages...\n") );
+    PMError callbackError = showMessage( "postinfo", patches );
   }
 
   log( _("Installation finished.\n") );
