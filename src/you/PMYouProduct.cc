@@ -156,6 +156,7 @@ void PMYouProduct::init( const string &path )
   _patchPath = path + "/patches/";
   _rpmPath = path + "/rpm/";
   _scriptPath = path + "/scripts/";
+  _deltaPath = path + "/deltas/";
 }
 
 void PMYouProduct::setPatchPath( const Pathname &path )
@@ -187,6 +188,11 @@ Pathname PMYouProduct::rpmPath( const PMPackagePtr &pkg, bool patchRpm )
 Pathname PMYouProduct::scriptPath( const string &scriptName )
 {
   return _settings.pathPrefix() + _scriptPath + scriptName;
+}
+
+Pathname PMYouProduct::deltaPath( const string &deltaName )
+{
+  return _settings.pathPrefix() + _deltaPath + deltaName;
 }
 
 Pathname PMYouProduct::localScriptPath( const std::string &scriptName )

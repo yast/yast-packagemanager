@@ -112,6 +112,9 @@ class PMYouPatchInfo : public CountedRep {
     */
     PMError parseFiles( const std::string &files, const PMYouPatchPtr &patch );
 
+    /** Parse Deltas tag */
+    PMError parseDeltas( const std::string &files, const PMYouPatchPtr &patch );
+
     PMYouPackageDataProviderPtr packageDataProvider() const;
 
     PMError readDirectoryFile( const Pathname &,
@@ -132,7 +135,7 @@ class PMYouPatchInfo : public CountedRep {
 
     std::string tagValue( YOUPackageTagSet::Tags tag );
 
-    PMError createPackage( const PMYouPatchPtr &patch );
+    PMError createPackage( const PMYouPatchPtr &patch, std::istream& strm );
 
     void readMediaMap( const Pathname &file );
 

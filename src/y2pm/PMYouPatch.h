@@ -28,11 +28,13 @@
 #include <y2util/Pathname.h>
 #include <y2util/FSize.h>
 
+#include <y2pm/PMError.h>
 #include <y2pm/PMYouPatchPtr.h>
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMYouProductPtr.h>
+#include <y2pm/PMPackageDelta.h>
 
 /**
   Information about YOU patch extra files.

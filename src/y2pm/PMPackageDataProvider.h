@@ -35,6 +35,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMPackageDelta.h>
 #include <y2pm/InstSrcPtr.h>
 
 class PkgDu;
@@ -102,6 +103,7 @@ class PMPackageDataProvider : public CountedRep {
     static std::string            location()    { return std::string(); }
     static unsigned int           medianr()     { return 0; }
     static std::list<std::string> keywords()    { return std::list<std::string>(); }
+    static std::string            md5sum()      { return std::string(); }
     static std::string            externalUrl() { return std::string(); }
     static std::list<PkgEdition>  patchRpmBaseVersions() { return std::list<PkgEdition>(); }
     static FSize                  patchRpmSize() { return FSize( 0 ); }
@@ -120,6 +122,8 @@ class PMPackageDataProvider : public CountedRep {
 
     // dudata is special
     static void du( PkgDu & dudata_r );
+
+    static std::list<PMPackageDelta>  deltas() { return std::list<PMPackageDelta>(); }
 
   protected:
 
@@ -179,6 +183,7 @@ class PMPackageDataProvider : public CountedRep {
     virtual std::string            location    ( const PMPackage & pkg_r ) const { return location(); }
     virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const { return medianr(); }
     virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const { return keywords(); }
+    virtual std::string            md5sum      ( const PMPackage & pkg_r ) const { return md5sum(); }
     virtual std::string            externalUrl ( const PMPackage & pkg_r ) const { return externalUrl(); }
     virtual std::list<PkgEdition>  patchRpmBaseVersions( const PMPackage & pkg_r ) const { return patchRpmBaseVersions(); }
     virtual FSize                  patchRpmSize( const PMPackage & pkg_r ) const { return patchRpmSize(); }
@@ -197,6 +202,8 @@ class PMPackageDataProvider : public CountedRep {
 
     // dudata is special
     virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const { return du( dudata_r ); }
+
+    virtual std::list<PMPackageDelta>  deltas( const PMPackage & pkg_r ) const { return deltas(); }
 };
 
 ///////////////////////////////////////////////////////////////////

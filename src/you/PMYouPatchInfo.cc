@@ -15,6 +15,8 @@
 
   Purpose: Read the patch info file.
 
+  Textdomain "packagemanager"
+
 /-*/
 
 #include <iostream>
@@ -41,6 +43,7 @@
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/PMYouSettings.h>
 #include <y2pm/PMYouMedia.h>
+#include <y2pm/PMLocale.h>
 
 using namespace std;
 
@@ -67,6 +70,42 @@ PMYouPatchInfo::~PMYouPatchInfo()
 {
 }
 
+static PMError parseDelta(PMPackagePtr pkg, PMYouPackageDataProviderPtr provider,  const string &line )
+{
+  PMError err;
+
+  if(!provider) { INT << "got NULL" << endl; return err; }
+  if(line.empty()) return err;
+
+  D__ << "Delta: " << line << endl;
+
+  vector<string> deltaData;
+  stringutil::split( line, deltaData );
+  if ( deltaData.size() != 6 )
+  {
+    string text = "Error parsing 'Deltas' attribute.";
+    text += " ";
+    text += stringutil::form(
+	"Line '%s' doesn't have form 'filename size md5sum name-edition-release buildtime srcmd5sum'.",
+	line.c_str() );
+    return PMError( YouError::E_parse_error, text );
+  }
+
+  string filename = deltaData[0];
+  FSize size = FSize(deltaData[1], FSize::B);
+  string md5sum = deltaData[2];
+  PkgNameEd ned = PkgNameEd::fromString(deltaData[3]);
+  Date buildtime = deltaData[4];
+  string srcmd5 = deltaData[5];
+
+  PMPackageDelta delta(filename, size, md5sum, ned, buildtime, srcmd5);
+  provider->addDelta(pkg, delta);
+
+  return PMError();
+}
+
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -75,13 +114,14 @@ PMYouPatchInfo::~PMYouPatchInfo()
 //
 //	DESCRIPTION :
 //
-PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
+PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch, std::istream& strm )
 {
+  PMError err;
   string value = tagValue( YOUPackageTagSet::FILENAME );
 
   if ( value.empty() ) {
     DBG << "No Filename. Skipping this package." << endl;
-    return PMError();
+    return PMError(YouError::E_parse_error, _("missing filename"));
   }
 
   string nameStr;
@@ -169,7 +209,69 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   bool forceInstall = tagValue( YOUPackageTagSet::FORCEINSTALL ) == "true";
   _packageDataProvider->setForceInstall( pkg, forceInstall );
 
-  return PMError();
+  // remember position since retrieveData will seek in the stream.
+  std::istream::pos_type posbeforedelta = strm.tellg();
+  std::istream::iostate state = strm.rdstate();
+  do
+  {
+    TaggedFile::Tag *tag = _packageTagSet.getTagByIndex( YOUPackageTagSet::DELTAS );
+    if ( !tag ) break;
+
+    list<string> data;
+    bool success = tag->Pos().retrieveData( strm, data );
+    if ( !success ) {
+      E__ << "Can't retrieve data." << endl;
+      break;
+    }
+
+    list<string>::const_iterator it;
+    for( it = data.begin(); it != data.end(); ++it )
+    {
+      PMError error = parseDelta( pkg, _packageDataProvider, *it );
+      if(error)
+      {
+	ERR << error << endl;
+	if(!err)
+	  err = error;
+      }
+    }
+  } while(0);
+
+  // seek to position we stored before so parsing can continue where it was.
+  strm.seekg(posbeforedelta);
+  strm.clear(state);
+
+  return err;
+}
+
+static std::string asString(TaggedFile::assignstatus status)
+{
+    switch(status)
+    {
+	case TaggedFile::ACCEPTED:
+	    return "ACCEPTED";
+	case TaggedFile::ACCEPTED_FULL:
+	    return "ACCEPTED_FULL";
+	case TaggedFile::REJECTED_EOF:
+	    return "REJECTED_EOF";
+	case TaggedFile::REJECTED_NOMATCH:
+	    return "REJECTED_NOMATCH";
+	case TaggedFile::REJECTED_LOCALE:
+	    return "REJECTED_LOCALE";
+	case TaggedFile::REJECTED_NOLOCALE:
+	    return "REJECTED_NOLOCALE";
+	case TaggedFile::REJECTED_FULL:
+	    return "REJECTED_FULL";
+	case TaggedFile::REJECTED_NOENDTAG:
+	    return "REJECTED_NOENDTAG";
+    }
+    return "?";
+}
+
+std::ostream& operator<<(std::ostream& os, TaggedFile::assignstatus status)
+{
+  os << asString(status);
+  return os;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -189,24 +291,38 @@ PMError PMYouPatchInfo::parsePackages( const string &packages,
   std::stringstream pkgstream;
   pkgstream << packages;
 
+  PMError err;
+
   while ( !pkgstream.eof() ) {
     TaggedFile::assignstatus status = _packageTagSet.assignSet( parser, pkgstream );
 
+    DBG << status << endl;
+
     if ( status == TaggedFile::REJECTED_EOF ) {
       D__ << "EOF" << endl;
+      err = YouError::E_parse_error;
+      err.setDetails(stringutil::form(_("Patch %s: unexpected end of file"), patch->fullName().c_str()));
       break;
     } else if ( status == TaggedFile::ACCEPTED_FULL ) {
       D__ << "parse complete" << endl;
-      createPackage( patch );
+      err = createPackage( patch, pkgstream );
+      if(err)
+	break;
     } else {
       D__ << parser.lineNumber() << ": " << "Status " << (int)status << endl;
       D__ << "Last tag read: " << parser.currentTag();
       if (!parser.currentLocale().empty()) D__ << "." << parser.currentLocale();
       D__ << endl;
+      err = YouError::E_parse_error;
+      err.setDetails(
+	  stringutil::form(_("Patch %s: parse error in line %d"),
+	      patch->fullName().c_str(),
+	      parser.lineNumber()));
+      break;
     }
   }
 
-  return PMError();
+  return err;
 }
 
 PMError PMYouPatchInfo::parseFiles( const string &files,
@@ -233,6 +349,7 @@ PMError PMYouPatchInfo::parseFiles( const string &files,
 
   return PMError();
 }
+
 
 ///////////////////////////////////////////////////////////////////
 //

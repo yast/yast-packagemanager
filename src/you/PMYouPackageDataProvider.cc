@@ -201,3 +201,15 @@ void PMYouPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) c
   D__ << "Package: " << pkg_r.summary() << dudata_r << endl;
 }
 
+
+void PMYouPackageDataProvider::addDelta(PMPackagePtr pkg, const PMPackageDelta& delta)
+{
+  _deltas[pkg].push_back(delta);
+}
+
+std::list<PMPackageDelta> PMYouPackageDataProvider::deltas( const PMPackage & pkg) const
+{
+  map<PMPackagePtr,list<PMPackageDelta> >::const_iterator it = _deltas.find( mkPtr( pkg ) );
+  if ( it == _deltas.end() ) return list<PMPackageDelta>();
+  else return it->second;
+}

@@ -31,6 +31,7 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/GPGCheck.h>
 #include <y2util/SysConfig.h>
+#include <y2util/Digest.h>
 
 #include <Y2PM.h>
 
@@ -52,11 +53,40 @@
 #include <y2pm/RpmDbCallbacks.h>
 #include <y2pm/MediaCallbacks.h>
 
+// see comment in destructor
+#include <y2pm/InstSrcManager.h>
+
 #include <y2pm/InstYou.h>
 
 using namespace std;
 
 InstYou::Callbacks *InstYou::_callbacks = 0;
+
+class InstYou::DeltaToApply
+{
+  public:
+    PMYouPatchPtr _patch;
+    PMPackageDelta _delta;
+    PMPackagePtr _pkg;
+    PMPackagePtr _basepkg;
+
+    DeltaToApply( PMYouPatchPtr patch, const PMPackageDelta& delta, PMPackagePtr pkg, PMPackagePtr basepkg)
+      : _patch(patch), _delta(delta), _pkg(pkg), _basepkg(basepkg)
+      {
+      }
+};
+
+static void clearDeltasToApplyList(std::vector<InstYou::DeltaToApply*>& list)
+{
+  for (std::vector<InstYou::DeltaToApply*>::iterator it = list.begin();
+	it != list.end(); ++it)
+  {
+    delete *it;
+  }
+  list.clear();
+}
+
+static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackageDelta& delta );
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -83,7 +113,12 @@ InstYou::InstYou( const PMYouPatchInfoPtr &info,
 
 InstYou::~InstYou()
 {
+#warning MediaAccess destructors
+  // XXX for some reason MediaAccess destructors are not called. if removed,
+  // remove include file above as well
+  Y2PM::instSrcManager().releaseAllMedia();
   releaseSource();
+  clearDeltasToApplyList(_deltastoapply);
 }
 
 void InstYou::init()
@@ -92,6 +127,14 @@ void InstYou::init()
   _progressTotal = 0;
   _progressCurrent = 0;
   _installedPatches = 0;
+
+  SysConfig syscfg( "onlineupdate" );
+  _usedeltas = syscfg.readBoolEntry("YAST2_YOU_USE_DELTAS", true);
+
+  if(_usedeltas)
+  {
+    Y2PM::instSrcManager();
+  }
 }
 
 PMError InstYou::initProduct()
@@ -202,8 +245,29 @@ PMError InstYou::retrievePatchInfo()
     list<PMPackagePtr> packages = (*itPatch)->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      D__ << "  Package: " << (*itPkg)->name() << endl;
-      if ( hasPatchRpm( *itPkg ) ) {
+      DBG << "  Package: " << (*itPkg)->name() << endl;
+
+      bool havedelta = false;
+      if(_usedeltas)
+      {
+	std::list<PMPackageDelta> d = (*itPkg)->deltas();
+	std::list<PMPackageDelta>::iterator it = d.begin();
+	std::list<PMPackageDelta>::iterator end = d.end();
+	for(; it != end; ++it)
+	{
+	  PMPackagePtr basepkg = getPackageForDelta((*itPkg), *it);
+	  if(basepkg)
+	  {
+	    DBG << "delta " << it->filename() << " fits "
+	      <<  basepkg->nameEd() << ", new size" << it->size() << endl;
+	    _info->packageDataProvider()->setArchiveSize( *itPkg, it->size() );
+	    havedelta = true;
+	    break;
+	  }
+	}
+      }
+
+      if ( !havedelta && hasPatchRpm( *itPkg ) ) {
         _info->packageDataProvider()->setArchiveSize( *itPkg, (*itPkg)->patchRpmSize() );
         D__ << "    Using patch RPM" << endl;
       }
@@ -559,6 +623,82 @@ PMError InstYou::processPatches()
 
   disconnect();
 
+  if(_usedeltas)
+  {
+    for (std::vector<DeltaToApply*>::iterator it = _deltastoapply.begin();
+	  it != _deltastoapply.end(); ++it)
+    {
+      DeltaToApply* delta = *it;
+      Pathname rpmPath = delta->_patch->product()->rpmPath( delta->_pkg, false );
+      Pathname dest = _media.localPath( rpmPath );
+
+      log(stringutil::form(_("Fetching package %s from installation medium\n"), delta->_basepkg->name()->c_str()));
+
+      Pathname orig;
+      error = delta->_basepkg->providePkgToInstall(orig);
+      if (error)
+      {
+	ERR << "Unable to fetch " << delta->_basepkg->nameEd() << ": " << error << endl;
+	log(stringutil::form(_("Failed: %s\n"), error.asString().c_str() ));
+	return error;
+      }
+      else
+      {
+	ifstream file(orig.asString().c_str());
+	string digest = Digest::digest("MD5", file);
+
+	if(digest.empty() || digest != delta->_delta.srcmd5())
+	{
+	  PMError err(YouError::E_md5sum_mismatch,stringutil::form(_("file '%s' has wrong MD5 checksum"),
+			  orig.asString().c_str()));
+	  log(err.errstr() + "\n");
+	  return err;
+	}
+
+	log(_("Ok\n"));
+      }
+
+      Pathname deltaloc = _media.localPath(delta->_patch->product()->deltaPath( delta->_delta.filename()));
+      int ret = PathInfo::assert_dir( dest.dirname() );
+      if(ret)
+      {
+	PMError err(YouError::E_mkdir_failed,dest.dirname().asString());
+	log(err.errstr() + "\n");
+	return err;
+      }
+
+      const char* argv[] = {
+	"delta2rpm",
+	orig.asString().c_str(),
+	dest.asString().c_str(),
+	deltaloc.asString().c_str(),
+	NULL
+      };
+
+      log(_("Applying delta\n"));
+
+      ExternalProgram prg(argv);
+      for ( string line( prg.receiveLine() ); line.length(); line = prg.receiveLine() )
+      {
+	ERR << line << endl;
+      }
+      ret = prg.close();
+
+      if(ret)
+      {
+	PMError err(YouError::E_reassemble_rpm_from_delta_failed, string("Delta: ") + delta->_delta.filename());
+	log(err.errstr() + "\n");
+	return err;
+      }
+      else
+	log(_("Ok\n"));
+
+      // if ok
+      _info->packageDataProvider()->setLocation( delta->_pkg, rpmPath.asString() );
+    }
+    clearDeltasToApplyList(_deltastoapply);
+  }
+
   error = installPatches( patchesToInstall );
 
   if ( error ) {
@@ -627,7 +767,7 @@ PMError InstYou::installPatches( const vector<PMYouPatchPtr> &patches )
       log( _("Skipped\n") );
     } else {
       if ( !patch->skipped() ) {
-        PMError error = installPatch( patch );
+	PMError error = installPatch( patch );
         if ( !error ) {
           _installedPatches++;
           log( _("Ok\n") );
@@ -930,6 +1070,37 @@ bool InstYou::packageToBeInstalled( const PMYouPatchPtr &patch,
   return true;
 }
 
+static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackageDelta& delta )
+{
+    DBG << "delta " << delta.filename() << " needs candidate for " <<  pkg->name() << endl;
+
+    PMSelectablePtr sel = pkg->getSelectable();
+    if(!sel)
+    {
+	INT << "selectable NULL" << endl;
+	return NULL;
+    }
+
+    PMSelectable::PMObjectList::const_iterator it = sel->av_begin();
+    PMSelectable::PMObjectList::const_iterator end = sel->av_end();
+    for(; it != end; ++it)
+    {
+	PMPackagePtr p = *it;
+	if(!p || p == pkg) continue;
+	DBG << "check " << pkg->nameEd() << endl;
+	if(p->edition() == delta.ned().edition && p->buildtime() == delta.buildtime())
+	{
+	    if(p->md5sum().empty() || p->md5sum() != delta.srcmd5())
+	    {
+	      DBG << pkg->nameEd() << " fits" << endl;
+	      return p;
+	    }
+	}
+    }
+    DBG << "no matching candiate found" << endl;
+    return NULL;
+}
+
 PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
 {
   D__ << "PATCH: " << patch->name() << endl;
@@ -958,6 +1129,36 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     if ( !_settings->getAll() && !packageToBeInstalled( patch, *itPkg ) ) {
       D__ << "Don't download" << endl;
       continue;
+    }
+
+
+    if(_usedeltas)
+    {
+      std::list<PMPackageDelta> d = (*itPkg)->deltas();
+      std::list<PMPackageDelta>::iterator it = d.begin();
+      std::list<PMPackageDelta>::iterator end = d.end();
+      bool havedelta = false;
+      for(; it != end; ++it)
+      {
+	PMPackagePtr basepkg = getPackageForDelta((*itPkg), *it);
+	if(basepkg)
+	{
+	  DBG << "delta " << it->filename() << " fits " <<  basepkg->nameEd() << endl;
+	  PMError err = retrieveDelta(it->filename(), patch->product(), it->md5sum() );
+	  if(!err)
+	  {
+	    havedelta = true;
+	    _deltastoapply.push_back(new DeltaToApply(patch, *it, (*itPkg), basepkg));
+	    break;
+	  }
+	}
+	else
+	{
+	  DBG << "no matching package found for delta " << it->filename() << endl;
+	}
+      }
+      if(havedelta)
+	continue;
     }
 
     error = retrievePackage( *itPkg, patch->product() );
@@ -1205,6 +1406,29 @@ PMError InstYou::retrieveFile( const PMYouFile &file )
   return PMError();
 }
 
+PMError InstYou::retrieveDelta( const std::string& name, const PMYouProductPtr& product, const std::string& md5sum)
+{
+
+  Pathname path = product->deltaPath( name );
+
+  PMError err = _media.provideFile( path, !_settings->reloadPatches() );
+  if ( err ) return err;
+
+  string fn = _media.localPath( path ).asString();
+
+  ifstream file(fn.c_str());
+  string digest = Digest::digest("MD5", file);
+
+  if(digest.empty() || digest != md5sum)
+  {
+    string msg = stringutil::form(_("file '%s' has wrong MD5 checksum"), path.asString().c_str());
+    return PMError(YouError::E_md5sum_mismatch, msg);
+  }
+
+
+  return PMError();
+}
+
 PMError InstYou::disconnect()
 {
   return _media.disconnect();
@@ -1282,6 +1506,18 @@ void InstYou::showPatches( bool verbose )
           cout << "not installed";
         }
         cout << ")" << endl;
+
+	std::list<PMPackageDelta> d = (*itPkg)->deltas();
+	if(!d.empty())
+	{
+	  cout << "Deltas:" << endl;
+	  std::list<PMPackageDelta>::iterator it = d.begin();
+	  std::list<PMPackageDelta>::iterator end = d.end();
+	  for(; it != end; ++it)
+	  {
+	    cout << "  " << *it;
+	  }
+	}
       }
     }
   }
