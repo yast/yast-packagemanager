@@ -30,6 +30,7 @@
 #include <Y2PM.h>
 
 #include <y2pm/InstSrcError.h>
+#include <y2pm/YouError.h>
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMYouPackageDataProvider.h>
@@ -412,7 +413,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                 if ( !gpg.check_file( filePath ) ) {
                     E__ << "Signature check for '" << filePath << "' failed."
                         << endl;
-                    return PMError( InstSrcError::E_error );
+                    return PMError( YouError::E_bad_sig_file );
                 }
             }
 

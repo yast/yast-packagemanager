@@ -157,7 +157,8 @@ class PMError {
       C_InstSrcError      = 10*_valrange,
       C_MediaError        = 11*_valrange,
       C_InstTargetError   = 12*_valrange,
-      C_QueryError	  = 13*_valrange
+      C_QueryError	  = 13*_valrange,
+      C_YouError	  = 14*_valrange
     };
 
     enum Error {
