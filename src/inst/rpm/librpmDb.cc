@@ -104,10 +104,10 @@ class librpmDb::D {
 	  WAR << "::rpmdbClose error(" << res << ")" << endl;
 	}
 	DBG << "DBCLOSE " << *this << endl;
-      }
 #else
       ::rpmdbClose( _db );
 #endif
+      }
     }
 };
 
