@@ -30,6 +30,7 @@
 #include <y2pm/PMPackageDataProvider.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMObject.h>
+#include <y2pm/RpmCache.h>
 
 class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvider
 {
@@ -48,6 +49,17 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	std::string _attr_SUMMARY;
 	FSize _attr_SIZE;
 	YStringTreeItem *_attr_GROUP;
+
+	/**
+	 * single package cache for _cachedPkg
+	 *
+	 * will be re-filled if attribute request
+	 * for a package != _cachedPkg is issued
+	 */
+	static PMPackagePtr _cachedPkg;
+	static struct rpmCache *_theCache;
+
+	void fillCache (PMPackagePtr package) const;
 
     public:
 

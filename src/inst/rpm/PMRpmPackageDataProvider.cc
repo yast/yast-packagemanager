@@ -36,6 +36,14 @@ using namespace std;
 
 IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMDataProvider );
 
+
+//-----------------------------------------------------------------
+// static class members
+
+PMPackagePtr PMRpmPackageDataProvider::_cachedPkg;
+struct rpmCache *PMRpmPackageDataProvider::_theCache = 0;
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -48,6 +56,22 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
     : _rpmdb(rpmdb)
     , _attr_GROUP(0)
 {
+    if (_theCache == 0)
+	_theCache = new (struct rpmCache);
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMRpmPackageDataProvider::~PMRpmPackageDataProvider
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+PMRpmPackageDataProvider::~PMRpmPackageDataProvider()
+{
+    if (_theCache != 0)
+	delete _theCache;
 }
 
 /**
@@ -68,6 +92,21 @@ PMRpmPackageDataProvider::stopRetrieval() const
     return;
 }
 
+
+//---------------------------------------------------------
+
+/**
+ * fill _theCache with data from package
+ */
+void
+PMRpmPackageDataProvider::fillCache (PMPackagePtr package) const
+{
+    _rpmdb->queryCache (package, _theCache);
+    _cachedPkg = package;
+    return;
+}
+
+//---------------------------------------------------------
 const std::string
 PMRpmPackageDataProvider::summary () const
 {
@@ -77,9 +116,9 @@ PMRpmPackageDataProvider::summary () const
 const std::list<std::string>
 PMRpmPackageDataProvider::description () const
 {
-    std::list<std::string> value;
-    _rpmdb->queryPackage (_package, "%{DESCRIPTION}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_description;
 }
 
 const FSize
@@ -98,49 +137,49 @@ PMRpmPackageDataProvider::buildtime () const
 const std::string
 PMRpmPackageDataProvider::buildhost () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{BUILDHOST}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_buildhost;
 }
 
 const Date
 PMRpmPackageDataProvider::installtime () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{INSTALLTIME}", value);
-    return Date (value);
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_installtime;
 }
 
 const std::string
 PMRpmPackageDataProvider::distribution () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{DISTRIBUTION}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_distribution;
 }
 
 const std::string
 PMRpmPackageDataProvider::vendor () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{VENDOR}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_vendor;
 }
 
 const std::string
 PMRpmPackageDataProvider::license () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{LICENSE}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_license;
 }
 
 const std::string
 PMRpmPackageDataProvider::packager () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{PACKAGER}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_packager;
 }
 
 const std::string
@@ -168,17 +207,17 @@ PMRpmPackageDataProvider::changelog () const
 const std::string
 PMRpmPackageDataProvider::url () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{URL}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_url;
 }
 
 const std::string
 PMRpmPackageDataProvider::os () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{OS}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_os;
 }
 
 const std::list<std::string>
@@ -216,9 +255,9 @@ PMRpmPackageDataProvider::postun () const
 const std::string
 PMRpmPackageDataProvider::sourcerpm () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{SOURCERPM}", value);
-    return value;
+    if (_package != _cachedPkg)
+	fillCache (_package);
+    return _theCache->_sourcerpm;
 }
 
 const std::list<std::string>
@@ -227,18 +266,6 @@ PMRpmPackageDataProvider::filenames () const
     std::list<std::string> value;
     _rpmdb->queryPackage (_package, "[%{FILENAMES}\n]", value);
     return value;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMRpmPackageDataProvider::~PMRpmPackageDataProvider
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-PMRpmPackageDataProvider::~PMRpmPackageDataProvider()
-{
 }
 
 ///////////////////////////////////////////////////////////////////

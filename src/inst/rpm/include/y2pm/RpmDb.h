@@ -193,6 +193,11 @@ class RpmDb: virtual public Rep
 	bool queryPackage (const Pathname& path, const char *format, std::string& result_r);
 	bool queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r);
 
+	/**
+	 * query all cache values
+	 */
+	bool queryCache (constPMPackagePtr package, struct rpmCache *theCache);
+
 	/** install rpm package
 	 *
 	 * @param filename file to install
