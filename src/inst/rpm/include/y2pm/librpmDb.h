@@ -510,6 +510,18 @@ class librpmDb::db_const_iterator {
      **/
     bool findByConflicts( const std::string & tag_r );
 
+    /**
+     * Reset to iterate all packages with a certain name.
+     *
+     * <B>NOTE:</B> Multiple entries for one package installed
+     * in different versions are possible but not desired. Usually
+     * you'll want to use @ref findPackage instead.
+     *
+     * findByName is needed to retrieve pseudo packages like
+     * 'gpg-pubkey', which in fact exist in multiple instances.
+     **/
+    bool findByName( const PkgName & name_r );
+
   public:
 
     /**

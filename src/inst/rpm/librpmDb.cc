@@ -787,6 +787,17 @@ bool librpmDb::db_const_iterator::findByConflicts( const std::string & tag_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : librpmDb::findByName
+//	METHOD TYPE : bool
+//
+bool librpmDb::db_const_iterator::findByName( const PkgName & name_r )
+{
+  return _d.init( RPMTAG_NAME, name_r->c_str() );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : librpmDb::db_const_iterator::findPackage
 //	METHOD TYPE : bool
 //
