@@ -1,5 +1,5 @@
 #include <y2pm/PkgDep.h>
-#include <y2pm/PkgDep_int.h>
+#include "PkgDep_int.h"
 
 using namespace std;
 

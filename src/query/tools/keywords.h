@@ -13,7 +13,7 @@
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
 
-#include <y2pm/querycodes.h>
+#include "querycodes.h"
 
 static struct keyword {
     char *word;

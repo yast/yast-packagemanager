@@ -19,7 +19,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
-#include <y2pm/PkgDep_int.h>
+#include "PkgDep_int.h"
 #include <iostream>
 
 using namespace std;

@@ -1,1 +1,0 @@
-SUBDIRS = y2pm
