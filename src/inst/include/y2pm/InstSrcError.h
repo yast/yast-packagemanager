@@ -58,6 +58,7 @@ class InstSrcError {
       E_open_file,
       E_create_file,
       E_write_file,
+      E_no_media,
       // InstSrc creation
       E_bad_url,
       E_no_instsrc_on_media,
