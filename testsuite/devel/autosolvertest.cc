@@ -209,8 +209,9 @@ static std::list<std::string> relstring2strings(std::string str)
     std::list<std::string> strlist;
     for( size_t start = 0; start < str.length(); ) {
 	size_t end = str.find_first_of( ",\n", start );
-	string substr = strip_ws(str.substr( start, end-start ));
-	strlist.push_back(substr);
+	string substr = stringutil::trim(str.substr( start, end-start ));
+	if(substr.length() > 0)
+	    strlist.push_back(substr);
 	start = (end == string::npos) ? end : end+1;
     }
 
@@ -510,7 +511,7 @@ static bool parse_one_tag( istream& is, DbHeader& hdr, int *lineno,
 	}
 	check_is(true);
 
-	value = strip_ws( value );
+	value = stringutil::trim( value );
 //	cout << "Line " << prev_line << ": Found tagname \"" << tagname << "\", value \"" << value << "\"\n";
 
 	if(!hdr.addtag(tagname,value))
