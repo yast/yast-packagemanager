@@ -98,49 +98,62 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 </TABLE>
 <p></p>
 <H2>Example</H2>
+(shortened at <tt>...</tt>)
 <pre>
-=Pkg: 3ddiag 0.494 16 i586
-+Req:
-/bin/cp
-/bin/ln
-/bin/ls
-/bin/mkdir
-/bin/mv
-/bin/rm
-/bin/cat
-aaa_base
-/bin/sh
-/bin/sh
-ld-linux.so.2
-libc.so.6
-libc.so.6(GLIBC_2.0)
-libhd.so.5
-rpmlib(PayloadIsBzip2) <= 3.0.5-1
--Req:
-+Prq:
-/bin/cp
-/bin/ln
-/bin/ls
-/bin/mkdir
-/bin/mv
-/bin/rm
-/bin/cat
-aaa_base
-/bin/sh
-rpmlib(PayloadIsBzip2) <= 3.0.5-1
--Prq:
-+Prv:
-mesa:/etc/mesa.conf
--Prv:
-=Loc: 1 3ddiag-0.494-16.i586.rpm
-=Siz: 27958 64932
-=Tim: 1028715372
-=Src: 3ddiag 0.494 16 src
-=Grp: System/Base
-=Lic: GPL
-+Aut:
-Stefan Dirsch <sndirsch@suse.de>
--Aut:
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Sat Aug 10 17:55:42 UTC 2002
+
+=Ver: 3.0
+
+=Sel: Kde-Desktop 8.1
+
+=Siz: 123456 1234567
+
+=Sum.cs: Prostředí KDE
+=Sum.de: KDE Desktop-Umgebung
+=Sum.en: KDE Desktop Environment
+=Sum.es: Entorno Gráfico KDE
+=Sum.fr: Environnement de bureau KDE
+=Sum.gl: KDE Desktop Environment
+=Sum.hu: KDE grafikus munkakörnyezet
+=Sum.it: Ambiente Desktop KDE
+=Sum.ja: KDE デスクトップ環境
+=Sum.lt: KDE Desktop Environment
+=Sum.nl: KDE Desktop omgeving
+=Sum.pt: KDE Desktop Environment
+=Sum.sv: KDE Desktop Environment
+=Sum.tr: KDE Desktop Environment
+
+=Req: X11 Basis-Sound 
+=Con: Minimal 
+=Cat: addon
+
+=Vis: true
+
++Ins:
+SDL
+aalib
+alsa
 </pre>
+<tt>...</tt>
+<pre>
+smpppd
+unixODBC
+wvdial
+-Ins:
+
++Ins.cs:
+kde3-i18n-cs
+-Ins.cs:
+
++Ins.da:
+kde3-i18n-da
+-Ins.da:
+
++Ins.de:
+kde3-i18n-de
+-Ins.de:
+</pre>
+<tt>...</tt>
 </BODY>
 </HTML>
