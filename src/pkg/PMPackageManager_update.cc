@@ -60,7 +60,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
   TodoMap     addMultiProvided;
 
   MIL << "doUpdate start... "
-    << "(delete_unmaintained:" << (delete_unmaintained?"yes":"no") << ")"
+    << "(delete_unmaintained:" << (opt_stats_r.delete_unmaintained?"yes":"no") << ")"
     << endl;
 
 
@@ -202,7 +202,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	  } else {
 	    DBG << " ==> (candidate older)" << candidate << endl;
 	    ++opt_stats_r.chk_to_keep_old;
-	    foreign_and_drop_set.insert( state );
+	    opt_stats_r.foreign_and_drop_set.insert( state );
 	  }
 	}
       } else {
@@ -215,7 +215,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       if ( ! installed->vendor().isSuSE() ) {
 	DBG << " ==> (keep non SuSE package)" << endl;
 	++opt_stats_r.chk_keep_foreign;
-	foreign_and_drop_set.insert( state );
+	opt_stats_r.foreign_and_drop_set.insert( state );
 	continue; // no check for splits
       }
 
@@ -246,7 +246,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	}
 	DBG << " ==> (dropped)" << endl;
 	++opt_stats_r.chk_dropped;
-	foreign_and_drop_set.insert( state );
+	opt_stats_r.foreign_and_drop_set.insert( state );
 	break;
       case 1:
         addProvided[installed] = mpkg;
@@ -353,24 +353,39 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 */
 std::ostream & operator<<( std::ostream & str, const PMUpdateStats & obj )
 {
-  str << "====================================================" << endl;
+  str << "===[options]========================================" << endl;
+  str << "delete_unmaintained " << obj.delete_unmaintained << endl;
+  str << "===[initial]========================================" << endl;
   str << "pre_todel           " << obj.pre_todel << endl;
   str << "pre_nocand          " << obj.pre_nocand << endl;
   str << "pre_avcand          " << obj.pre_avcand << endl;
-  str << endl;
+  str << "===[checks]=========================================" << endl;
   str << "chk_installed_total " << obj.chk_installed_total << endl;
-  str << "chk_already_todel   " << obj.chk_already_todel << endl;
-  str << "chk_already_toins   " << obj.chk_already_toins << endl;
   str << endl;
+  str << "chk_already_todel   " << obj.chk_already_todel << endl;
+  str << endl;
+  str << "chk_already_toins   " << obj.chk_already_toins << endl;
   str << "chk_to_update       " << obj.chk_to_update << endl;
   str << "chk_to_downgrade    " << obj.chk_to_downgrade << endl;
   str << "chk_to_keep_old     " << obj.chk_to_keep_old << endl;
+  str << "--------------------" << endl;
+  str << "              avcand"
+    <<  ( obj.chk_already_toins + obj.chk_to_update + obj.chk_to_downgrade + obj.chk_to_keep_old )
+      << endl;
   str << endl;
   str << "chk_keep_foreign    " << obj.chk_keep_foreign << endl;
   str << "chk_dropped         " << obj.chk_dropped << endl;
   str << "chk_renamed         " << obj.chk_renamed << endl;
   str << "chk_renamed_guessed " << obj.chk_renamed_guessed << endl;
   str << "chk_add_split       " << obj.chk_add_split << endl;
+  str << "--------------------" << endl;
+  str << "              nocand"
+    <<  ( obj.chk_keep_foreign + obj.chk_dropped + obj.chk_renamed + obj.chk_renamed_guessed + obj.chk_add_split )
+      << endl;
+  str << "===[sum]============================================" << endl;
+  str << "Packages checked    " << obj.chk_installed_total << endl;
+  str << "totalToInstall      " << obj.totalToInstall() << endl;
+  str << "totalToDelete       " << obj.totalToDelete() << endl;
   str << "====================================================" << endl;
 
   return str;
