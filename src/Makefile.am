@@ -9,20 +9,16 @@ INCLUDES = -I$(QTDIR)/include -I$(top_srcdir)/src/include -I$(includedir)
 lib_LTLIBRARIES = liby2pm.la
 
 liby2pm_la_SOURCES = \
-	PkgName.cc PkgEdition.cc PkgRelation.cc	PkgArch.cc	\
+	PkgName.cc	\
+	PkgEdition.cc	\
+	PkgRelation.cc	\
+	PkgArch.cc	\
 	PMError.cc	\
-	\
 	PMSolvable.cc	\
-		PMObject.cc	\
-	\
+	PMObject.cc	\
 	PMManager.cc	\
-	\
 	PMSelectable.cc	\
-	\
-	PMDataProvider.cc	\
-	\
-	MediaInfo.cc	\
-		FAKEMediaInfo.cc
+	PMDataProvider.cc
 
 liby2pm_la_LDFLAGS = -version-info 2:0
 
