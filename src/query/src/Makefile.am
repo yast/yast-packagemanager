@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src/query
 #
 
-AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
+AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
 # -DPARSER_DEBUG
 
 # first look into source tree, then into $(includedir)

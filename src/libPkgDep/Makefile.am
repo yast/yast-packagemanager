@@ -2,6 +2,8 @@
 
 SUBDIRS = include
 
+AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
+
 noinst_LTLIBRARIES = libPkgDep.la
 
 # first look into source tree, then into $(includedir)
