@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2pm/Mount.h>
 #include <y2pm/MediaDISK.h>
 
 #include <sys/types.h>
@@ -47,7 +48,6 @@ using namespace std;
 //
 MediaDISK::MediaDISK (const Url& url)
     : MediaHandler (url)
-    , _mountflags (MS_RDONLY)
 {
 	_device = _url.getOption("device");
 	_filesystem = _url.getOption("filesystem");
@@ -111,20 +111,27 @@ MediaDISK::attachTo (const Pathname & to)
     if(_filesystem.empty())
 	    return E_invalid_filesystem;
 
+    Mount mount;
     const char *mountpoint = to.asString().c_str();
+    string options = _url.getOption("mountoptions");
+    if(options.empty())
+    {
+	options="ro";
+    }
 
     MIL << "try mount " << _device
 	<< " to " << mountpoint
 	<< " filesystem " << _filesystem << ": ";
-    if(!::mount (_device.c_str(), mountpoint, _filesystem.c_str(), _mountflags, NULL))
+
+    MediaResult ret = mount.mount(_device,mountpoint,_filesystem,options);
+    if( ret == E_none )
     {
 	MIL << "succeded" << endl;
     }
     else
     {
-	D__ << strerror(errno) << endl;
-	MIL << "failed" << endl;
-	return E_system;
+	MIL << "failed" << media_result_strings[ret] << endl;
+	return ret;
     }
 
     _attachPoint = to;
@@ -151,8 +158,13 @@ MediaDISK::release (bool eject)
     
     MIL << "umount " << _attachPoint.asString() << endl;
 
-    if (umount (_attachPoint.asString().c_str()) != 0) {
-	    return E_system;
+    Mount mount;
+    MediaResult ret;
+
+    if ((ret = mount.umount(_attachPoint.asString())) != E_none)
+    {
+	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	return ret;
     }
 
     _attachPoint = "";

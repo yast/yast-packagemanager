@@ -30,13 +30,6 @@
 //	CLASS NAME : MediaSMB
 class MediaSMB : public MediaHandler {
 
-	unsigned long _mountflags;
-	std::string _server;
-	std::string _domain;
-	std::string _path;
-	std::string _user;
-	std::string _pass;
-
     public:
 	// constructor
 

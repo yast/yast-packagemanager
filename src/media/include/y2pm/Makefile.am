@@ -16,6 +16,8 @@ pkginclude_HEADERS =	\
 	MediaNFS.h \
 	MediaCD.h \
 	MediaWget.h \
+	Wget.h \
+	Mount.h \
 	MediaResult.h
 
 #<INSTALL-HEADER-TARGET>

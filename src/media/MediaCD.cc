@@ -22,12 +22,11 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2pm/Mount.h>
 #include <y2pm/MediaCD.h>
 
 #include <cstring> // strerror
 
-#include <sys/types.h>
-#include <sys/mount.h>
 #include <errno.h>
 #include <dirent.h>
 
@@ -56,7 +55,6 @@ using namespace std;
 //
 MediaCD::MediaCD (const Url& url)
     : MediaHandler (url)
-    , _mountflags (MS_RDONLY)
 {
     Url::OptionMapType options = _url.getOptions();
     Url::OptionMapType::iterator it;
@@ -144,10 +142,16 @@ MediaCD::attachTo (const Pathname & to)
     
     _attachPoint = to;
 
+    Mount mount;
     const char *mountpoint = _attachPoint.asString().c_str();
     bool mountsucceeded = false;
+    MediaResult ret = E_none;
 
-    D__ << _attachPoint << endl;
+    string options = _url.getOption("mountoptions");
+    if(options.empty())
+    {
+	options="ro";
+    }
 
     //TODO: make configurable
     list<string> filesystems;
@@ -168,10 +172,11 @@ MediaCD::attachTo (const Pathname & to)
 	    ; !mountsucceeded && fsit != filesystems.end()
 	    ; ++fsit)
 	{
-	    MIL << "try mount " << it->c_str()
+	    MIL << "try mount " << *it
 		<< " to " << mountpoint
-		<< " filesystem " << fsit->c_str() << ": ";
-	    if(!::mount (it->c_str(), mountpoint, fsit->c_str(), _mountflags, NULL))
+		<< " filesystem " << *fsit << ": ";
+	    ret = mount.mount(*it,mountpoint,*fsit,options);
+	    if( ret == E_none )
 	    {
 		mountsucceeded = true;
 		MIL << "succeded" << endl;
@@ -179,8 +184,7 @@ MediaCD::attachTo (const Pathname & to)
 	    }
 	    else
 	    {
-		D__ << strerror(errno) << endl;
-		MIL << "failed" << endl;
+		MIL << "failed: " << media_result_strings[ret] << endl;
 	    }
 	}
     }
@@ -189,7 +193,7 @@ MediaCD::attachTo (const Pathname & to)
     {
 	_attachPoint = "";
 	_mounteddevice.erase();
-	return E_system;
+	return ret;
     }
     return E_none;
 }
@@ -213,9 +217,14 @@ MediaCD::release (bool eject)
 
     MIL << "umount " << _attachPoint.asString() << endl;
 
-    if (umount (_attachPoint.asString().c_str()) != 0) {
-	return E_system;
+    Mount mount;
+    MediaResult ret; 
+    if ((ret = mount.umount(_attachPoint.asString())) != E_none)
+    {
+	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	return ret;
     }
+    
     // eject device
     if(eject)
     {

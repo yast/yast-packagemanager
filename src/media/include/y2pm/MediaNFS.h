@@ -30,8 +30,6 @@
 //	CLASS NAME : MediaNFS
 class MediaNFS : public MediaHandler {
 
-	unsigned long _mountflags;
-
     public:
 	// constructor
 

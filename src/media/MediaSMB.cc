@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
+#include <y2pm/Mount.h>
 #include <y2pm/MediaSMB.h>
 
 #include <sys/types.h>
@@ -46,10 +48,7 @@ using namespace std;
 //
 MediaSMB::MediaSMB (const Url& url)
     : MediaHandler (url)
-    , _mountflags (MS_RDONLY)
 {
-    // parse options to _mountflags
-    // "user=<username>,pass=<password>,domain=<smbdomain>"
 }
 
 
@@ -80,8 +79,7 @@ MediaSMB::~MediaSMB()
 ostream &
 MediaSMB::dumpOn( ostream & str ) const
 {
-    str << "MediaSMB (" << _server << "@" << _path << ")";
-    return str;
+    return MediaHandler::dumpOn(str);
 }
 
 
@@ -96,15 +94,62 @@ MediaSMB::dumpOn( ostream & str ) const
 MediaResult
 MediaSMB::attachTo (const Pathname & to)
 {
+    if(!_url.isValid())
+	    return E_bad_url;
+
+    if(_url.getHost().empty())
+	    return E_no_host_specified;
+
+    const char* const filesystem = "smbfs";
     const char *mountpoint = to.asString().c_str();
-    if (mount (_server.c_str(), mountpoint, "smbfs", _mountflags, 0) != 0) {
-	return E_system;
+    Mount mount;
+    MediaResult ret;
+
+    string path = "//";
+    path += _url.getHost();
+    path += _url.getPath();
+
+    string options = _url.getOption("mountoptions");
+    string username = _url.getUsername();
+    string password = _url.getPassword();
+    // need to add guest to prevent smbmount from asking for password
+    if(options.empty())
+    {
+	options="ro,guest";
     }
+    else if ( password.empty()
+	    && options.find("guest") == string::npos
+	    && options.find("credentials") == string::npos
+	    && options.find("password") == string::npos )
+    {
+	options += ",guest";
+    }
+
+    if(!username.empty())
+	options += ",username=" + username;
+
+    if(!password.empty())
+	options += ",password=" + password;
+
+    MIL << "try mount " << path
+	<< " to " << mountpoint
+	<< " filesystem " << filesystem << ": ";
+
+    ret = mount.mount(path,mountpoint,filesystem,options);
+    if(ret == E_none)
+    {
+	MIL << "succeded" << endl;
+    }
+    else
+    {
+	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	return ret;
+    }
+
     _attachPoint = to;
 
     return E_none;
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -117,11 +162,27 @@ MediaSMB::attachTo (const Pathname & to)
 MediaResult
 MediaSMB::release (bool eject)
 {
-    if (umount (_attachPoint.asString().c_str()) != 0) {
-	return E_system;
+    if(_attachPoint.asString().empty())
+    {
+	return E_not_attached;
     }
+    
+    MIL << "umount " << _attachPoint.asString();
+
+    Mount mount;
+    MediaResult ret;
+
+    if ((ret = mount.umount(_attachPoint.asString())) != E_none)
+    {
+	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	return ret;
+    }
+    
+    MIL << "succeded" << endl;
+
     _attachPoint = "";
-    return E_none;
+    return ret;
+
 }
 
 
@@ -138,7 +199,24 @@ MediaSMB::release (bool eject)
 MediaResult
 MediaSMB::provideFile (const Pathname & filename) const
 {
-    // no retrieval needed, SMB path is mounted at destination
+    // no retrieval needed, NFS path is mounted at destination
+    if(!_url.isValid())
+	return E_bad_url;
+
+    if(_attachPoint.asString().empty())
+	return E_not_attached;
+
+    Pathname src = _attachPoint;
+    src += filename;
+
+    PathInfo info(src);
+    
+    if(!info.isFile())
+    {
+	    D__ << src.asString() << " does not exist" << endl;
+	    return E_file_not_found;
+    }
+
     return E_none;
 }
 
