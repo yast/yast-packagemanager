@@ -11,6 +11,7 @@ pkginclude_HEADERS =	\
 	InstSrc.h	InstSrcPtr.h		\
 	InstSrcData.h	InstSrcDataPtr.h	\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
+	InstTarget.h	InstTargetPtr.h	        \
 	DataOldSuSE.h
 
 #<INSTALL-HEADER-TARGET>

@@ -58,7 +58,6 @@ IMPL_BASE_POINTER(RpmDb);
 RpmDb::RpmDb(string name_of_root) :
     _progressfunc(NULL),
     _progressdata(NULL),
-    _rpminstflags(RPMINST_NONE),
     _rootdir(name_of_root),
     _varlibrpm("/var/lib/rpm"),
     _varlib("/var/lib"),
@@ -68,6 +67,7 @@ RpmDb::RpmDb(string name_of_root) :
    exit_code = -1;
    temporary = false;
    dbPath = "";
+   //XXX dunno, copied from old yast2 installer
    setenv( "RPM_IgnoreFailedSymlinks", "1", 1 );
 }
 
@@ -1242,10 +1242,8 @@ void RpmDb::systemKill()
 
 
 // inststall package filename with flags iflags
-bool RpmDb::installPackage(const string& filename, unsigned iflags)
+bool RpmDb::installPackage(const string& filename, unsigned flags)
 {
-    unsigned flags = iflags|_rpminstflags;
-
     RpmArgVec opts;
 
     opts.push_back("-U");
@@ -1301,10 +1299,8 @@ bool RpmDb::installPackage(const string& filename, unsigned iflags)
 }
 
 // remove package named label
-bool RpmDb::removePackage(const string& label, unsigned iflags)
+bool RpmDb::removePackage(const string& label, unsigned flags)
 {
-    unsigned flags = iflags|_rpminstflags;
-
     RpmArgVec opts;
 
     opts.push_back("-e");

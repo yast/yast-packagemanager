@@ -37,13 +37,19 @@
 
 #include <y2util/Pathname.h>
 
-#include <y2pm/InstTarget.h>		// pointer to self
-#include <y2pm/MediaAccess.h>		// physical media access class
-#include <y2pm/InstDescr.h>		// target description
-#include <y2pm/InstData.h>		// target content
+#include <y2pm/PMError.h>
 
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMPackage.h>
+#include <y2pm/InstTargetPtr.h>		// pointer to self
+#include <y2pm/MediaAccessPtr.h>		// physical media access class
+//#include <y2pm/InstDescr.h>		// target description
+//#include <y2pm/InstData.h>		// target content
+
+//#include <y2pm/PMSolvable.h>
+#include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSelectionPtr.h>
+#include <y2pm/PMYouPatchPtr.h>
+
+#include <y2pm/RpmDb.h> // InstTarget is tied to RpmDb atm
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -54,7 +60,27 @@
 class InstTarget: virtual public Rep {
   REP_BODY(InstTarget);
 
-  protected:
+    public:
+
+	/**
+	 * Installation options like force, nodeps ...
+	 * Has to be moved from RpmDB to here
+	 *
+	 * @see RpmDB::RpmInstFlag
+	 * */
+	typedef enum RpmDb::RpmInstFlag InstFlag;
+
+	/**
+	 * Bits of possible package corruptions
+	 * Has to be moved from RpmDB to here
+	 *
+	 * @see RpmDb::checkPackageResult
+	 * */
+	typedef enum RpmDb::checkPackageResult checkPackageResult;
+
+    protected:
+
+#if 0
 
     /**
      * direct media access
@@ -78,153 +104,207 @@ class InstTarget: virtual public Rep {
      * this describes the content of the target
      */
     InstData *_data;
+#endif
 
-  public:
-    /**
-     * constructor
-     * @param rootpath, path to root ("/") of target system
-     * Usually "/" if the InstTarget object is actually running
-     * inside the target. But might be "/mnt" during installation
-     * (running in inst-sys) or "/whatever" if installing into
-     * a directory
-     */
-    InstTarget ( const std::string & rootpath );
+    public:
+	/**
+	 * constructor
+	 * @param rootpath, path to root ("/") of target system
+	 * Usually "/" if the InstTarget object is actually running
+	 * inside the target. But might be "/mnt" during installation
+	 * (running in inst-sys) or "/whatever" if installing into
+	 * a directory
+	 */
+	InstTarget ( const std::string & rootpath );
 
-    /**
-     * destructor
-     */
-    ~InstTarget();
+	/**
+	 * destructor
+	 */
+	~InstTarget();
 
-  public:
+    public:
 
-    //-----------------------------
-    // general functions
+	/**
+	 * Initialize target system. Takes necessary action to make installation,
+	 * queries etc possible.
+	 *
+	 * @param createnew create a new (e.g. rpm-) database if none is present.
+	 * It is safe to alwas use true here.
+	 * */
+	PMError init( bool createnew = true );
 
-    /**
-     * clean up, e.g. remove all caches
-     */
-    bool Erase();
+	/**
+	 * bring target into a clean state e.g. by calling rpm --rebuilddb
+	 * */
+	PMError bringIntoCleanState();
 
-    /**
-     * @return description of Installation target
-     */
-    const InstDescr **getDescriptions() const;
 
-    //-----------------------------
-    // target content access
+	//-----------------------------
+	// general functions
 
-    /**
-     * return the number of selections on this source
-     */
-    int numSelections() const;
+	/**
+	 * clean up, e.g. remove all caches
+	 */
+	bool Erase();
 
-    /**
-     * return the number of packages on this source
-     */
-    int numPackages() const;
+	/**
+	 * @return description of Installation target
+	 */
+    //    const InstDescr **getDescriptions() const;
 
-    /**
-     * return the number of patches on this source
-     */
-    int numPatches() const;
+	//-----------------------------
+	// target content access
 
-    /**
-     * generate PMSolvable objects for each selection on the source
-     * @return list of PMSolvablePtr on this source
-     */
-    const std::list<PMSolvablePtr> *getSelections() const;
+	/**
+	 * return the number of selections on this source
+	 */
+	int numSelections() const;
 
-    /**
-     * generate PMPackage objects for each Item on the source
-     * @return list of PMPackagePtr on this source
-     * */
-    const std::list<PMPackagePtr> *getPackages() const;
+	/**
+	 * return the number of packages on this source
+	 */
+	int numPackages() const;
 
-    /**
-     * generate PMSolvable objects for each patch on the source
-     * @return list of PMSolvablePtr on this source
-     */
-    const std::list<PMSolvablePtr> *getPatches() const;
+	/**
+	 * return the number of patches on this source
+	 */
+	int numPatches() const;
 
-    //-----------------------------
-    // package install / remove
+	/**
+	 * generate PMPackage objects for each Item on the source
+	 *
+	 * @param pkglist where to store newly created PMPackages
+	 * */
+	PMError getPackages (std::list<PMPackagePtr>& pkglist);
 
-    /**
-     * set package installation parameters
-     * @param to be defined
-     * set 'rpm' parameters used during package installation
-     */
-    int setPkgInstParam (const std::string & param);
+	/**
+	 * generate PMSelection objects for each Item on the source
+	 *
+	 * @param sellist where to store newly created PMSelections
+	 * */
+	PMError getSelections (std::list<PMSelectionPtr>& sellist);
 
-    /**
-     * get current package installation parameters
-     * get 'rpm' parameters currently used for package installation
-     */
-    const std::string & getPkgInstParam (void) const;
+	/**
+	 * generate PMYouPatch objects for each Item on the source
+	 *
+	 * @param youpatchlist where to store newly created PMYouPatches
+	 * */
+	PMError getYOUPatches (std::list<PMYouPatchPtr>& youpatchlist);
 
-    /**
-     * install PMPackage object to the target
-     * @param PMPackagePtr of package
-     * @return status
-     * this function retrieves package and installation source
-     * information from PMPackagePtr, creates the required MediaAccess
-     * (if not already done), attaches the media, calls provideFile
-     * and then 'rpm'
-     *
-     * A sucessfull package installation is reflected in
-     * numPackages() and getPackages()
-     */
-    int installPackage (PMPackagePtr package);
+	//-----------------------------
+	// package install / remove
 
-    /**
-     * remove PMPackage object from the target
-     * @return status
-     *
-     * A sucessfull package removal is reflected in
-     * numPackages() and getPackages()
-     */
-    int removePackage (PMPackagePtr package);
+	/**
+	 * set parameters to use on installation/update
+	 *
+	 * @param flags which parameters to use by default, eg.  * RPMINST_NODOCS|RPMINST_NOSCRIPTS
+	 * */
+	void setPkgInstFlags(unsigned flags);
 
-    //-----------------------------
-    // patch install / remove
+	/**
+	 * get current package installation parameters
+	 * get 'rpm' parameters currently used for package installation
+	 */
+	unsigned getPkgInstFlags() const;
 
-    /**
-     * set patch installation parameters
-     * @param to be defined
-     * set parameters used during patch installation
-     */
-    int setPatchInstParam (const std::string & param);
+	/**
+	 * set parameters to use on removal of packages
+	 *
+	 * @param flags which parameters to use by default, eg.  * RPMINST_FORCE|RPMINST_NODEPS
+	 * */
+	void setPkgRemoveFlags(unsigned flags);
 
-    /**
-     * get current patch installation parameters
-     * get parameters currently used for patch installation
-     */
-    const std::string & getPatchInstParam (void) const;
+	/**
+	 * get current package removal parameters
+	 * get 'rpm' parameters currently used for package removal
+	 */
+	unsigned getPkgRemoveFlags() const;
 
-    /**
-     * install PMSolvable object of patch to the target
-     * @param PMSolvablePtr for patch
-     * @return status
-     * this function retrieves patch and installation source
-     * information from PMSolvablePtr, creates the required MediaAccess
-     * (if not already done), attaches the media, calls provideFile
-     * and then does whatever is needed.
-     *
-     * A sucessfull patch installation is reflected in
-     * numPatches () and getPatches ()
-     */
-    int installPatch (PMSolvablePtr patch);
+	/**
+	 * install single Package to the target
+	 *
+	 * @param filename filename of package to install
+	 * @param flags which flags to use, default flags are used if 0
+	 */
+	PMError installPackage (const std::string& filename, unsigned flags = 0);
+	
+	/**
+	 * install packages to the target
+	 *
+	 * @param filename list of filenames of packages to install
+	 * @param flags which flags to use, default flags are used if 0
+	 * */
+	PMError installPackages (const std::list<std::string>& filenames, unsigned flags = 0);
 
-    /**
-     * remove PMPackage object from the target
-     * @return status
-     *
-     * A sucessfull patch removal is reflected in
-     * numPatches () and getPatches ()
-     */
-    int removePatch (PMSolvablePtr patch);
+	/**
+	 * remove single package
+	 *
+	 * @param label label of the rpm package to remove. always specify the
+	 * full label (name-version-release) as multiple packages with same
+	 * name but different versions could be installed
+	 * @param flags which flags to use, default flags are used if 0
+	 *
+	 * */
+	PMError removePackage(const std::string& label, unsigned flags = 0);
+	
+	/**
+	 * remove package
+	 *
+	 * @see removePackage
+	 * */
+	PMError removePackages(const std::list<std::string>& labels, unsigned flags = 0);
 
-    std::ostream & dumpOn( std::ostream & str ) const;
+	/**
+	 * set callback function for reporting progress of package
+	 * installation
+	 *
+	 * @param func callback function, must accept double as argument
+	 * @param data arbitrary data to pass when function is called
+	 * */
+	void setPackageInstallProgressCallback(void (*func)(double,void*), void* data)
+	{
+	    _progressfunc = func;
+	    _progressdata = data;
+	}
+
+	std::ostream & dumpOn( std::ostream & str ) const;
+
+	/**
+	 * @return destination root directory of target system
+	 * */
+	const std::string& getRoot() const;
+
+
+	// TODO: more function, like df, du etc.
+
+    private:
+
+	/** progress callback */
+	void (*_progressfunc)(double,void*);
+
+	/** arbitrary data to pass back for progress callback */
+	void* _progressdata;
+
+	/** parameters to use on installation/update
+	 * */
+	unsigned _rpminstflags;
+
+	/** parameters to use on removal
+	 * */
+	unsigned _rpmremoveflags;
+
+	/**
+	 * The name of the install root.
+	 */
+	Pathname _rootdir;
+
+
+	/** rpm database */
+	RpmDbPtr _rpmdb;
+
+    private:
+	// forbidden
+	InstTarget ();
 };
 
 ///////////////////////////////////////////////////////////////////
