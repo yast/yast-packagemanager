@@ -150,6 +150,10 @@ void InstSrcData::propagateObjects()
 {
     const std::list<PMPackagePtr>& packages = getPackages();
     Y2PM::packageManager().poolAddCandidates( packages );
+    const std::list<PMSelectionPtr>& selections = getSelections();
+    Y2PM::selectionManager().poolAddCandidates( selections );
+    const std::list<PMYouPatchPtr>& patches = getPatches();
+    Y2PM::youPatchManager().poolAddCandidates( patches );
 }
 
 ///////////////////////////////////////////////////////////////////

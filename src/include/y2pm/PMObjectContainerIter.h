@@ -25,6 +25,7 @@
 
 #include <y2pm/PMObjectPtr.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
 
 ///////////////////////////////////////////////////////////////////
@@ -133,6 +134,16 @@ class PMObjectContainerIter {
     }
     PMObjectContainerIter( const std::set<PMPackagePtr> & cont_r ) {
       _cont = new StdCont<std::set<PMPackagePtr> >( cont_r );
+    }
+
+    PMObjectContainerIter( const std::vector<PMSelectionPtr> & cont_r ) {
+      _cont = new StdCont<std::vector<PMSelectionPtr> >( cont_r );
+    }
+    PMObjectContainerIter( const std::list<PMSelectionPtr> & cont_r ) {
+      _cont = new StdCont<std::list<PMSelectionPtr> >( cont_r );
+    }
+    PMObjectContainerIter( const std::set<PMSelectionPtr> & cont_r ) {
+      _cont = new StdCont<std::set<PMSelectionPtr> >( cont_r );
     }
 
     PMObjectContainerIter( const std::vector<PMYouPatchPtr> & cont_r ) {
