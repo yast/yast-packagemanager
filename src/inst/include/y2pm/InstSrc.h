@@ -105,6 +105,16 @@ class InstSrc: virtual public Rep {
   private:
 
     /**
+     * Static counter to create unique InstSrc IDs
+     **/
+    static unsigned _SRCID;
+
+    /**
+     * Unique InstSrc ID
+     **/
+    const unsigned _srcID;
+
+    /**
      * Cachedir to use.
      **/
     Pathname _cache;
@@ -259,6 +269,11 @@ class InstSrc: virtual public Rep {
     InstSrcDataPtr _data;
 
   public:
+
+    /**
+     * Unique InstSrc ID
+     **/
+    unsigned srcID() const { return _srcID; }
 
     /**
      * Const access to installation source description
