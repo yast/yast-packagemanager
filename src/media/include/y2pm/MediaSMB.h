@@ -29,16 +29,16 @@
 class MediaSMB : public MediaHandler {
 
 	unsigned long _mountflags;
-	string _server;
-	string _domain;
-	string _path;
-	string _user;
-	string _pass;
+	std::string _server;
+	std::string _domain;
+	std::string _path;
+	std::string _user;
+	std::string _pass;
 
     public:
 	// constructor
 
-	MediaSMB (const string & device, const string & path, const string & options);
+	MediaSMB (const std::string & device, const std::string & path, const std::string & options);
 
 	MEDIA_HANDLER_API
 

@@ -40,13 +40,13 @@ class MediaHandler {
 
     protected:
 
-	const string & _device;		// which device
-	const string & _path;		// path on device
+	const std::string & _device;		// which device
+	const std::string & _path;		// path on device
 
 	Pathname _attachPoint;		// attached at
 
 	// scan directory 'dirname' for first file matching pattern
-	const Pathname *scanDirectory (const Pathname & dirname, const string & pattern) const;
+	const Pathname *scanDirectory (const Pathname & dirname, const std::string & pattern) const;
 
 	// read directory 'dirname' completely to string list
 	const std::list<std::string> * readDirectory (const Pathname & dirname) const;
@@ -54,13 +54,13 @@ class MediaHandler {
     public:
 	// constructor
 
-	MediaHandler (const string & device, const string & path);
+	MediaHandler (const std::string & device, const std::string & path);
 
 	// attach media at path
 	virtual MediaResult attachTo (const Pathname & to) = 0;
 
 	// return current attach directory
-	virtual Pathname & getAttachPoint (void);
+	virtual Pathname & getAttachPoint (void) { return _attachPoint; }
 
 	// release attached media
 	virtual MediaResult release (void) = 0;
@@ -72,7 +72,7 @@ class MediaHandler {
 
 	// find file denoted by pattern
 	// filename is interpreted relative to the attached url
-	virtual const Pathname * findFile (const Pathname & dirname, const string & pattern) const = 0;
+	virtual const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const = 0;
 
 	// get directory denoted by path to a string list
 	virtual const std::list<std::string> * dirInfo (const Pathname & dirname) const = 0;
@@ -93,7 +93,7 @@ class MediaHandler {
 	MediaResult attachTo (const Pathname & path);			\
 	MediaResult release (void);					\
 	MediaResult provideFile (const Pathname & filename) const;	\
-	const Pathname * findFile (const Pathname & dirname, const string & pattern) const;	\
+	const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const;	\
 	const std::list<std::string> * dirInfo (const Pathname & dirname) const;\
 	const PathInfo * fileInfo (const Pathname & filename) const;
 

@@ -28,18 +28,18 @@
 //	CLASS NAME : MediaHTTP
 class MediaHTTP : public MediaHandler {
 
-	string _proxy;		// http proxy server
+	std::string _proxy;		// http proxy server
 	int _port;		// proxy port
 
 	// if authorization required
 
-	string _user;		// username
-	string _pass;		// password
+	std::string _user;		// username
+	std::string _pass;		// password
 
     public:
 	// constructor
 
-	MediaHTTP (const string & server, const string & path, const string & options);
+	MediaHTTP (const std::string & server, const std::string & path, const std::string & options);
 
 	MEDIA_HANDLER_API
 

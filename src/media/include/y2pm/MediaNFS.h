@@ -29,13 +29,13 @@
 class MediaNFS : public MediaHandler {
 
 	unsigned long _mountflags;
-	string _server;
-	string _path;
+	std::string _server;
+	std::string _path;
 
     public:
 	// constructor
 
-	MediaNFS (const string & server, const string & path, const string & options);
+	MediaNFS (const std::string & server, const std::string & path, const std::string & options);
 
 	MEDIA_HANDLER_API
 

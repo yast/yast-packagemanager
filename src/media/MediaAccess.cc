@@ -20,6 +20,7 @@
 /-*/
 
 #include <string>
+#include <iostream>
 
 #include <y2pm/MediaAccess.h>
 
@@ -315,7 +316,7 @@ MediaAccess::dumpOn( std::ostream & str ) const
 	case HTTP: str << "HTTP"; break;
 	default:   str << "???"; break;
     }
-    str << "@" << _destination << endl;
+    str << "@" << _destination.asString() << endl;
     return str;
 }
 

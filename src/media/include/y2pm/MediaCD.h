@@ -34,7 +34,7 @@ class MediaCD : public MediaHandler {
     public:
 	// constructor
 
-	MediaCD (const string & device, const string & path, const string & options, bool as_dvd = false);
+	MediaCD (const std::string & device, const std::string & path, const std::string & options, bool as_dvd = false);
 
 	MEDIA_HANDLER_API
 

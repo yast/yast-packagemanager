@@ -22,6 +22,7 @@
 #define MediaAccess_h
 
 #include <iosfwd>
+#include <string>
 
 #include <y2util/Pathname.h>
 #include <y2util/PathInfo.h>
@@ -59,7 +60,7 @@ class REP_CLASS(MediaAccess) {
 	MediaAccess (void);
 
 	// open url
-	MediaResult open (const string & url);
+	MediaResult open (const std::string & url);
 
 	// close url
 	void close (void);

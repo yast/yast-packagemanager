@@ -148,7 +148,7 @@ MediaHandler::scanDirectory (const Pathname & dirname, const string & pattern) c
 //	  return NULL on error
 //
 const list<string> *
-MediaHandler::dirInfo (const Pathname & dirname) const
+MediaHandler::readDirectory (const Pathname & dirname) const
 {
     list<string> *dirlist = new list<string>;
 

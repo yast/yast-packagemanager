@@ -33,7 +33,7 @@ class MediaDISK : public MediaHandler {
     public:
 	// constructor
 
-	MediaDISK (const string & partition, const string & path, const string & options);
+	MediaDISK (const std::string & partition, const std::string & path, const std::string & options);
 
 	MEDIA_HANDLER_API
 
