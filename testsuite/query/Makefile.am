@@ -18,7 +18,7 @@ noinst_PROGRAMS = scanner parser
 
 scanner_SOURCES = scanner.cc
 scanner_LDADD = $(top_builddir)/src/liby2pm.la -ly2util
-scanner.cc: ../tools/keywords.h
+scanner.cc: $(top_builddir)/src/query/tools/keywords.h
 
 parser_SOURCES = parser.cc
 parser_LDADD = $(top_builddir)/src/liby2pm.la -ly2util
