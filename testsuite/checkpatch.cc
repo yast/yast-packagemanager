@@ -101,17 +101,21 @@ int main( int argc, char **argv )
         cout << "    Version: " << (*it2)->version() << endl;
         cout << "    Release: " << (*it2)->release() << endl;
 
-        list<PkgEdition> editions = (*it2)->patchRpmBaseVersions();
-        list<PkgEdition>::const_iterator it3;
-        for( it3 = editions.begin(); it3 != editions.end(); ++it3 ) {
-          cout << "    PATCHRPM BASEVERSION: '" << it3->asString() << "'" << endl;
-        }
+        cout << "    Size: " << (*it2)->size() << endl;
+        cout << "    ArchiveSize: " << (*it2)->archivesize() << endl;
+        cout << "    PatchRpmSize: " << (*it2)->patchRpmSize() << endl;
+
         if ( detailed ) {
+          list<PkgEdition> editions = (*it2)->patchRpmBaseVersions();
+          list<PkgEdition>::const_iterator it3;
+          for( it3 = editions.begin(); it3 != editions.end(); ++it3 ) {
+            cout << "    PATCHRPM BASEVERSION: '" << it3->asString() << "'" << endl;
+          }
           cout << "    REQUIRES:" << endl;
           list<PkgRelation> relations = (*it2)->requires();
-          list<PkgRelation>::const_iterator it3;
-          for( it3 = relations.begin(); it3 != relations.end(); ++it3 ) {
-            cout << "      " << (*it3).asString() << endl;          
+          list<PkgRelation>::const_iterator it4;
+          for( it4 = relations.begin(); it4 != relations.end(); ++it4 ) {
+            cout << "      " << (*it4).asString() << endl;          
           }
         }
       }
