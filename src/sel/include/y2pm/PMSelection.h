@@ -52,7 +52,7 @@ class PMSelection : virtual public Rep, public PMObject {
       ATTR_DELETE,
       ATTR_ARCHIVESIZE,
       // last entry:
-      SEL_NUM_ATTRIBUTES
+      PMSEL_NUM_ATTRIBUTES
     };
 
     /**
