@@ -190,6 +190,7 @@ show_pmselection (PMSelectionPtr s)
     show_pmobject ((PMObjectPtr)s);
 
     char *locales[] = { "", "default", "de", "en", "cs", "es", "fr", "gl", "hu", "it", "ja", "nl", "pt", "sv", "tr", "ru", "cz", 0 };
+//    char *locales[] = { "en", "de", "fr", 0};
     int pos = 0;
     cout << "Category: " << s->category () << endl;
     cout << "IsBase: " << s->isBase () << endl;
