@@ -27,6 +27,7 @@
 #include <y2pm/InstTargetSelDB.h>
 #include <y2pm/RpmHeaderCache.h>
 #include <y2pm/RpmHeader.h>
+#include <y2pm/InstallOrder.h>
 
 #include "PMCB.h"
 
@@ -213,6 +214,33 @@ ostream & dump( ostream & str, const Url & url ) {
 #include <y2pm/InstYou.h>
 #include <y2pm/PMYouPatchManager.h>
 
+void go( std::list<PMPackagePtr> dellist_r ) {
+  PkgSet dset;  // for delete order
+  PkgSet dummy; // dummy, empty, should contain already installed
+  for ( list<PMPackagePtr>::const_iterator pkgIt = dellist_r.begin();
+	pkgIt != dellist_r.end(); ++pkgIt ) {
+    dset.add( *pkgIt );
+  }
+
+  InstallOrder order( dset, dummy ); // sort according top prereq
+  order.init();
+  const InstallOrder::SolvableList & dsorted( order.getTopSorted() );
+
+  dellist_r.clear();
+  for ( InstallOrder::SolvableList::const_reverse_iterator cit = dsorted.rbegin();
+	cit != dsorted.rend(); ++cit ) {
+    PMPackagePtr cpkg = PMPackagePtr::cast_away_const( *cit );
+    if ( !cpkg ) {
+      INT << "SORT returned NULL Package" << endl;
+      continue;
+    }
+    dellist_r.push_back( cpkg );
+  }
+
+  SEC << endl;
+  INT << dellist_r << endl;
+}
+
 /******************************************************************
 **
 **
@@ -248,8 +276,17 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
+  std::list<PMPackagePtr> ll;
 
-  cedSrc("smb://user:pass@host/share/path;workgroup=domain");
+  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin();
+	it != PMGR.end(); ++it ) {
+    if ( (*it)->installedObj() ) {
+      ll.push_back( (*it)->installedObj() );
+      go( ll );
+    }
+
+  }
+
 
 #if 0
   dumpLangWhatIf( SEC, true );
