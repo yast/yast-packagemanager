@@ -37,6 +37,8 @@ void usage()
        << "                                   '/var/lib/YaST2/you/mnt'" << endl
        << endl
        << "-g, --download-only      Only download patches, don't install." << endl
+       << "-G, --get-all            Retrieve all available patches and packages for the" << endl
+       << "                         given product, don't install" << endl
        << "-i, --install-only       Install downloaded patches, don't download." << endl
        << endl
        << "-q, --quick-check        Quick check for new updates. Doesn't check for types" << endl
@@ -94,6 +96,7 @@ int main( int argc, char **argv )
   bool showConfig = false;
   bool checkUpdates = false;
   bool quickCheckUpdates = false;
+  bool getAll = false;
   
   int c;
   while( 1 ) {
@@ -115,12 +118,13 @@ int main( int argc, char **argv )
       { "version", required_argument, 0, 'v' },
       { "architecture", required_argument, 0, 'a' },
       { "language", required_argument, 0, 'l' },
+      { "get-all", no_argument, 0, 'G' },
       { 0, 0, 0, 0 }
     };
 
     int option_index = 0;
 
-    c = getopt_long( argc, argv, "qkrcgihdnsVDu:p:v:a:l:", long_options,
+    c = getopt_long( argc, argv, "qkrcgihdnsVDu:p:v:a:l:G", long_options,
                      &option_index );
     if ( c < 0 ) break;
 
@@ -178,6 +182,9 @@ int main( int argc, char **argv )
         break;
       case 'r':
         reload = true;
+        break;
+      case 'G':
+        getAll = true;
         break;
       default:
         cerr << "Error parsing command line." << endl;
@@ -257,6 +264,7 @@ int main( int argc, char **argv )
   settings->setCheckSignatures( checkSig );
   settings->setDryRun( dryrun );
   settings->setNoExternalPackages( autoInstall );
+  settings->setGetAll( getAll );
 
   list<PMYouProductPtr> products = you.settings()->products();
 
@@ -391,11 +399,11 @@ int main( int argc, char **argv )
 
   error = you.retrievePatches();
   if ( error ) {
-    cerr << "Error retrieving packages: " << error << endl;
+    cerr << "Error retrieving patches: " << error << endl;
     exit( -1 );
   }
 
-  if ( autoGet && !autoInstall ) {
+  if ( getAll || ( autoGet && !autoInstall ) ) {
     if ( verbose ) cout << "Got patches." << endl;
     return 0;
   }

@@ -169,7 +169,7 @@ PMError InstYou::retrievePatchInfo()
 
   list<PMYouPatchPtr>::iterator itPatch;
   for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
-    filterArchitectures( *itPatch );
+    if ( !_settings->getAll() ) filterArchitectures( *itPatch );
     Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
   }
 
@@ -214,9 +214,22 @@ PMError InstYou::retrievePatchInfo()
 
 void InstYou::selectPatches( int kinds )
 {
+  list<PMYouPatchPtr>::const_iterator it;
+
+  if ( _settings->getAll() ) {
+    for( it = _patches.begin(); it != _patches.end(); ++it ) {
+      PMSelectablePtr selectable = (*it)->getSelectable();
+      if ( !selectable ) {
+        INT << "Patch has no selectable." << endl;
+        return;
+      }
+      selectable->user_set_install();
+    }
+    return;
+  }
+
   PMSelectablePtr yastPatch;
 
-  list<PMYouPatchPtr>::const_iterator it;
   for( it = _patches.begin(); it != _patches.end(); ++it ) {
     if ( ( (*it)->kind() == PMYouPatch::kind_yast )
          && hasNewPackages( *it, true ) ) {
@@ -634,7 +647,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     }
     progressCurrent += 100;
 
-    if ( patch->updateOnlyInstalled() ) {
+    if ( patch->updateOnlyInstalled() && !_settings->getAll() ) {
       if ( !(*itPkg)->hasInstalledObj() ) {
         D__ << "Don't download '" << (*itPkg)->name()
             << "', no installed obj and UpdateOnlyInstalled=true." << endl;
@@ -648,6 +661,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
       if ( error == MediaError::E_user_abort ) {
         return YouError::E_user_abort;
       } else {
+        error.addDetails( "Patch: " + patch->name().asString() );
         return error;
       }
     }
@@ -826,7 +840,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
     }
   }
 
-  if ( !gotRpm ) {
+  if ( !gotRpm || _settings->getAll() ) {
     rpmPath = product->rpmPath( pkg, false );
     D__ << "Retrieving '" << _settings->patchUrl() << "/" << rpmPath
         << "'" << endl;
@@ -846,11 +860,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
 
   ERR << "Error retrieving RPM " << pkg->name() << endl;
 
-  string details = error.details();
-  if ( !details.empty() ) details += "\n";
-  details += pkg->nameEd();
-
-  error.setDetails( details );
+  error.addDetails( "Package: " + pkg->nameEd() );
 
   return error;
 }
