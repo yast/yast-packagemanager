@@ -14,6 +14,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		inst/include		\
 		inst/rpm/include	\
 		media/include		\
+		libPkgDep/include	\
 	   ) -I$(includedir) -I$(includedir)/y2util/qt
 
 lib_LTLIBRARIES = liby2pm.la

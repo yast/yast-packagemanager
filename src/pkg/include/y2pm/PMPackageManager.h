@@ -54,9 +54,19 @@ class PMPackageManager : public PMManager {
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
+  private:
+
     YRpmGroupsTree * _rpmGroupsTree;
 
   public:
+
+
+    /**
+     * Fill in the packages set to be deleted and to be installed.
+     * instlist_r is sorted according to PreReqs.
+     **/
+    void getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
+			      std::list<PMPackagePtr> & instlist_r );
 
     /**
      * Retrieve the internal RPM groups tree (for cloning tree items in the UI etc.).
@@ -77,7 +87,7 @@ class PMPackageManager : public PMManager {
      **/
     std::string rpmGroup( const YStringTreeItem * node )
 	{ return _rpmGroupsTree->rpmGroup( node ); }
-    
+
     /**
      * Returns the complete translated RPM group tag string for 'node'.
      **/
