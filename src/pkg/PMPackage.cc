@@ -73,7 +73,7 @@ std::list<std::string> PMPackage::filenames()    const { DP_GET( filenames ); }
 std::list<std::string> PMPackage::recommends()   const { DP_GET( recommends ); }
 std::list<std::string> PMPackage::suggests()     const { DP_GET( suggests ); }
 std::string            PMPackage::location()     const { DP_GET( location ); }
-int                    PMPackage::medianr()      const { DP_GET( medianr ); }
+unsigned int           PMPackage::medianr()      const { DP_GET( medianr ); }
 std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
 #undef DP_GET
 ///////////////////////////////////////////////////////////////////
@@ -89,8 +89,9 @@ std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
 PMPackage::PMPackage( const PkgName &    name_r,
 		      const PkgEdition & edition_r,
 		      const PkgArch &    arch_r,
-		      PMPackageDataProviderPtr dataProvider_r )
-    : PMObject( name_r, edition_r, arch_r )
+		      PMPackageDataProviderPtr dataProvider_r,
+		      constInstSrcPtr source )
+    : PMObject( name_r, edition_r, arch_r, source )
     , _dataProvider( dataProvider_r )
 {
   if ( !_dataProvider ) {

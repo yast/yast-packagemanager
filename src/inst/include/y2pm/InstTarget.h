@@ -223,7 +223,7 @@ class InstTarget: virtual public Rep, public InstData {
 	 * @param filename filename of package to install
 	 * @param flags which flags to use, default flags are used if 0
 	 */
-	PMError installPackage (const std::string& filename, unsigned flags = 0);
+	PMError installPackage (const Pathname& filename, unsigned flags = 0);
 
 	/**
 	 * install multiple packages to the target
@@ -231,7 +231,7 @@ class InstTarget: virtual public Rep, public InstData {
 	 * @param filename list of filenames of packages to install
 	 * @param flags which flags to use, default flags are used if 0
 	 * */
-	PMError installPackages (const std::list<std::string>& filenames, unsigned flags = 0);
+	PMError installPackages (const std::list<Pathname>& filenames, unsigned flags = 0);
 
 	/**
 	 * remove single package
@@ -243,6 +243,7 @@ class InstTarget: virtual public Rep, public InstData {
 	 *
 	 * */
 	PMError removePackage(const std::string& label, unsigned flags = 0);
+	PMError removePackage(constPMPackagePtr package, unsigned flags = 0);
 
 	/**
 	 * remove multiple packages
@@ -250,6 +251,7 @@ class InstTarget: virtual public Rep, public InstData {
 	 * @see removePackage
 	 * */
 	PMError removePackages(const std::list<std::string>& labels, unsigned flags = 0);
+	PMError removePackages(const std::list<PMPackagePtr>& packages, unsigned flags = 0);
 
 	/**
 	 * set callback function for reporting progress of package

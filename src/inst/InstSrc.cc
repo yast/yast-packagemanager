@@ -209,7 +209,7 @@ PMError InstSrc::enableSource()
 	}
 	MIL << "(F)Use cache " << cpath << endl;
       }
-      err = InstSrcDataUL::tryGetData( ndata, f_media, f_descrdir, archIt->second, Y2PM::getPreferredLocale() );
+      err = InstSrcDataUL::tryGetData( this, ndata, f_media, f_descrdir, archIt->second, Y2PM::getPreferredLocale() );
     }
     // EKAF
     // err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
@@ -653,7 +653,7 @@ std::string number2string (int nr)
 **		
 */
 PMError
-InstSrc::provideMedia (int medianr)
+InstSrc::provideMedia (int medianr) const
 {
     PMError err;
 
@@ -668,7 +668,8 @@ InstSrc::provideMedia (int medianr)
     {
 	if (!_media->isAttached())
 	{
-	    _medianr = 0;
+	    InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
+	    ptr->_medianr = 0;
 
 	    err = _media->attach();
 
@@ -704,7 +705,8 @@ InstSrc::provideMedia (int medianr)
 	if (err == PMError::E_ok)
 	{
 #warning TBD check 'media' file contents
-	    _medianr = medianr;
+	    InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
+	    ptr->_medianr = medianr;
 	    break;
 	}
 	else
@@ -735,7 +737,8 @@ InstSrc::provideMedia (int medianr)
 	if (_mediachangefunc == 0)
 	{
 	    ERR << "Can't find medium, can't ask user" << endl;
-	    _medianr = 0;
+	    InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
+	    ptr->_medianr = 0;
 	    break;
 	}
 
@@ -764,7 +767,7 @@ InstSrc::provideMedia (int medianr)
 **
 */
 Pathname
-InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir)
+InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir) const
 {
     PMError err = provideMedia (medianr);
     if (err != PMError::E_ok)
@@ -791,7 +794,7 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir)
 **	DESCRIPTION : provide file by medianr and relative path
 */
 Pathname
-InstSrc::provideFile (int medianr, const Pathname& path)
+InstSrc::provideFile (int medianr, const Pathname& path) const
 {
     PMError err = provideMedia (medianr);
     if (err != InstSrcError::E_ok)

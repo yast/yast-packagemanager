@@ -14,6 +14,8 @@ pkginclude_HEADERS =	\
 	QueryParser.h	\
 	QueryScanner.h
 
+noinst_HEADERS = querycodes.h
+
 # Automatically inserted by insert_install_target
 # DO NOT REMOVE THE TAGS!
 

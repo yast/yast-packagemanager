@@ -29,6 +29,8 @@
 
 #include <y2pm/PMSelectablePtr.h>
 
+#include <y2pm/InstSrcPtr.h>
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMObject
@@ -43,7 +45,12 @@ class PMObject : virtual public Rep, public PMSolvable {
     friend class PMManager;
     friend class PMSelectable;
 
+    // back pointer to selectable if this object is managed
     PMSelectablePtr _selectable;
+
+    // pointer to the source providing this package
+    // if NULL, the object is coming from the target
+    constInstSrcPtr _source;
 
   public:
 
@@ -63,11 +70,14 @@ class PMObject : virtual public Rep, public PMSolvable {
 
     PMObject( const PkgName &    name_r,
 	      const PkgEdition & edition_r,
-	      const PkgArch &    arch_r );
+	      const PkgArch &    arch_r,
+	      constInstSrcPtr	 source = 0 );
 
     virtual ~PMObject();
 
   public:
+
+    constInstSrcPtr source (void) { return _source; }
 
     ///////////////////////////////////////////////////////////////////
     // Shortcuts that tell about the Objects status within
@@ -75,7 +85,7 @@ class PMObject : virtual public Rep, public PMSolvable {
     ///////////////////////////////////////////////////////////////////
 
     /**
-     * Return true if the Object is liked to a Selectable. This is true
+     * Return true if the Object is linked to a Selectable. This is true
      * if the Object is under controll of a Manager.
      **/
     bool hasSelectable() const { return( _selectable != 0 ); }

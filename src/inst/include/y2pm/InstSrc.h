@@ -335,7 +335,7 @@ class InstSrc: virtual public Rep {
 	 * provide media by number
 	 *
 	 */
-	PMError provideMedia (int medianr);
+	PMError provideMedia (int medianr) const;
 
 	/**
 	 * provide package via medianr, name, and sub-dir
@@ -346,7 +346,7 @@ class InstSrc: virtual public Rep {
 	 * returns local path or empty on error
 	 * uses media change callback
 	 */
-	Pathname providePackage (int medianr, const Pathname& name, const Pathname& dir);
+	Pathname providePackage (int medianr, const Pathname& name, const Pathname& dir) const;
 
 	/**
 	 * provide file via medianr and path
@@ -356,7 +356,7 @@ class InstSrc: virtual public Rep {
 	 * returns local path or empty on error
 	 * uses media change callback
 	 */
-	Pathname provideFile (int medianr, const Pathname& path);
+	Pathname provideFile (int medianr, const Pathname& path) const;
 
   public:
 

@@ -99,9 +99,6 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
     virtual std::list<std::string> postun      ( const PMPackage & pkg_r ) const;
     virtual std::string            sourcerpm   ( const PMPackage & pkg_r ) const;
     virtual std::list<std::string> filenames   ( const PMPackage & pkg_r ) const;
-
-    // suse packages values
-    virtual int                    medianr     ( const PMPackage & pkg_r ) const { return 0; }
 };
 
 #endif // PMRpmPackageDataProvider_h

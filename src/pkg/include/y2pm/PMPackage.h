@@ -84,7 +84,7 @@ class PMPackage : virtual public Rep, public PMObject {
     std::list<std::string> recommends()   const;
     std::list<std::string> suggests()     const;
     std::string            location()     const;
-    int                    medianr()      const;
+    unsigned int           medianr()      const;
     std::list<std::string> keywords()     const;
 
   protected:
@@ -99,10 +99,11 @@ class PMPackage : virtual public Rep, public PMObject {
 
   public:
 
-    PMPackage( const PkgName &    name_r,
-	       const PkgEdition & edition_r,
-	       const PkgArch &    arch_r,
-	       PMPackageDataProviderPtr dataProvider_r );
+    PMPackage ( const PkgName &    name_r,
+		const PkgEdition & edition_r,
+		const PkgArch &    arch_r,
+		PMPackageDataProviderPtr dataProvider_r,
+		constInstSrcPtr source = 0 );
 
     virtual ~PMPackage();
 

@@ -295,7 +295,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 //
 //	DESCRIPTION :
 //
-PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
+PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndata_r,
 				MediaAccessPtr media_r, const Pathname & descr_dir_r,
 				const std::list<PkgArch>& allowed_archs, const LangCode& locale)
 {
@@ -311,12 +311,12 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
 
     // parse <descr_dir_r>/packages and <descr_dir_r>/packages.<locale>
 
-    ULPackagesParser pkg_parser;
+    ULPackagesParser pkg_parser (source);
     PMError pkgerr = pkg_parser.fromMediaDir (ndata->_packages, media_r, descr_dir_r, allowed_archs, locale);
 
     // parse <descr_dir_r>/selections and <descr_dir_r>/*.sel
 
-    ULSelectionParser sel_parser;
+    ULSelectionParser sel_parser (source);
     PMError selerr = sel_parser.fromMediaDir (ndata->_selections, media_r, descr_dir_r);
 
     if (!pkgerr

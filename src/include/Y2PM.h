@@ -217,6 +217,18 @@ class Y2PM {
 	 * called after package 'name' got installed
 	 * */
 	static void setInstallationPackageDoneCallback(void (*func)(const std::string& name), void* data);
+
+	/**
+	 * package deletion/installation main loop
+	 * deletes/installs all packages currently marked in packageManager()
+	 * if media_nr == 0, install everything regardless of media nr
+	 * if media_nr > 0, install only from this media nr
+	 * return list of failed package names in errors
+	 * return list of unavailable packages (due to InstSrc errors or wrong media nr) in remaining
+	 * return false if packages from wanted media could not be provided (remaining contains
+	 *	packages with medianr == media_nr)
+	 * */
+	static bool commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining);
 };
 
 ///////////////////////////////////////////////////////////////////

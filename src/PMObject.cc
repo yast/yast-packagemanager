@@ -56,8 +56,10 @@ FSize                  PMObject::size()        const { return FSize(0); }
 //
 PMObject::PMObject( const PkgName &    name_r,
 		    const PkgEdition & edition_r,
-		    const PkgArch &    arch_r )
+		    const PkgArch &    arch_r,
+		    constInstSrcPtr   source )
     : PMSolvable(name_r, edition_r, arch_r)
+    , _source (source)
 {
 }
 

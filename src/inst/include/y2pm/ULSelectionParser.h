@@ -34,11 +34,15 @@
 #include <y2pm/MediaAccessPtr.h>
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMULSelectionDataProviderPtr.h>
+#include <y2pm/InstSrcPtr.h>
 
 #include <y2pm/ULSelectionParserPtr.h>
 
 class ULSelectionParser : virtual public Rep {
     private:
+	// the source
+	const InstSrcPtr _source;
+
 	// tag ids for the TaggedParser
 	enum Tags {
 	    SELECTION,	// name version release arch
@@ -77,7 +81,7 @@ class ULSelectionParser : virtual public Rep {
 	void fillPointers (void);
 
     public:
-	ULSelectionParser ();
+	ULSelectionParser (const InstSrcPtr source);
 	~ULSelectionParser();
 
 	/**

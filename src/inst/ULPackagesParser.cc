@@ -59,7 +59,8 @@ IMPL_BASE_POINTER(ULPackagesParser);
 //
 //	DESCRIPTION : initialize parser and tag set for selections
 
-ULPackagesParser::ULPackagesParser()
+ULPackagesParser::ULPackagesParser(const InstSrcPtr source)
+    : _source (source)
 {
     // initialize tagset
 
@@ -175,7 +176,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
 
     PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, localecache));
-    PMPackagePtr package (new PMPackage (name, edition, arch, dataprovider));
+    PMPackagePtr package (new PMPackage (name, edition, arch, dataprovider, _source));
 
     //---------------------------------------------------------------
     // enter package to map for faster "=Shr:" (share) and packages.local lookup
@@ -239,7 +240,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     const char *locationname = location;
 
     while (*locationname && isblank (*locationname)) locationname++;
-    if ((dataprovider->_attr_MEDIANR = atoi (locationname)) <= 0)
+    if ((dataprovider->_attr_MEDIANR = atoi (locationname)) == 0)
     {
 	WAR << "** suspiciuous media nr '" << locationname << "'" << endl;
     }

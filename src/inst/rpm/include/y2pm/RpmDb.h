@@ -163,7 +163,7 @@ class RpmDb: virtual public Rep
 	 *
 	 * @return checkPackageResult
 	 */
-	unsigned checkPackage( std::string filename, std::string version = "", std::string md5 = "" );
+	unsigned checkPackage (const Pathname& filename, std::string version = "", std::string md5 = "" );
 
 
 	/**
@@ -221,7 +221,7 @@ class RpmDb: virtual public Rep
 	 *
 	 * @return success
 	 * */
-	PMError installPackage(const std::string& filename, unsigned flags = 0 );
+	PMError installPackage (const Pathname& filename, unsigned flags = 0 );
 
 	/** remove rpm package
 	 *
@@ -233,6 +233,7 @@ class RpmDb: virtual public Rep
 	 * @return success
 	 * */
 	PMError removePackage(const std::string& label, unsigned flags = 0);
+	PMError removePackage(constPMPackagePtr package, unsigned flags = 0) { return removePackage (pkg2rpm (package), flags); }
 
 	/** set callback function for reporting progress of package
 	 * installation
@@ -258,7 +259,14 @@ class RpmDb: virtual public Rep
 	 *
 	 * @return true if file was successfully opened
 	 * */
-	bool setInstallationLogfile( const std::string& filename );
+	bool setInstallationLogfile (const Pathname& filename);
+
+
+	/**
+	 * convert PMPackagePtr to package name for RPM
+	 *
+	 */
+	std::string pkg2rpm (constPMPackagePtr package);
 
     private:
 
