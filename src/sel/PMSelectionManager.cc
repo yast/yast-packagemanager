@@ -138,6 +138,7 @@ PMSelectionManager::setSelectionPackages (const std::list<std::string> packages,
 					 bool these_are_delpacks,
 					 PMPackageManager & package_mgr)
 {
+MIL << "setSelectionPackages (" << packages.size() << ", " << these_are_delpacks << ")" << endl;
     for (std::list<std::string>::const_iterator it = packages.begin();
 	 it != packages.end(); ++it)
     {
@@ -162,8 +163,8 @@ PMSelectionManager::setSelectionPackages (const std::list<std::string> packages,
 	    else
 	    {
 		// these are inspacks
-		if (selectable->to_install()
-		    && !selectable->by_user())
+		if (!selectable->to_install()	// not already set
+		    && !selectable->by_user())	// status not set by user
 		{
 		    selectable->auto_set_install();
 		}
@@ -192,6 +193,7 @@ PMSelectionManager::resetSelectionPackages (const std::list<std::string> package
 					bool these_are_inspacks,
 					PMPackageManager & package_mgr)
 {
+MIL << "resetSelectionPackages (" << packages.size() << ", " << these_are_inspacks << ")" << endl;
     for (std::list<std::string>::const_iterator it = packages.begin();
 	 it != packages.end(); ++it)
     {
@@ -240,7 +242,7 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
 {
     if (!selection)
 	return;
-
+MIL << "setSelection (" << selection->name() << ")" << endl;
     // get list of requested locales
     Y2PM y2pm;
     std::list<LangCode> requested_locales = y2pm.getRequestedLocales();
@@ -256,7 +258,7 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
     }
 
     // then, the inspacks
-    setSelectionPackages (selection->delpacks(""), false, package_mgr);
+    setSelectionPackages (selection->inspacks(""), false, package_mgr);
     for (std::list<LangCode>::iterator it = requested_locales.begin();
 	 it != requested_locales.end(); ++it)
     {
@@ -302,7 +304,7 @@ PMSelectionManager::resetSelection (PMSelectionPtr selection, PMPackageManager &
     for (std::list<LangCode>::iterator it = requested_locales.begin();
 	 it != requested_locales.end(); ++it)
     {
-	resetSelectionPackages (selection->delpacks(*it),
+	resetSelectionPackages (selection->inspacks(*it),
 			false,		// !these_are_delpacks
 			package_mgr);
     }
