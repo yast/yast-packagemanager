@@ -1,6 +1,6 @@
 @HEADER-COMMENT@
 
-# neededforbuild  autoconf automake gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr curl curl-devel
+# neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr curl curl-devel openssl openssl-devel
 
 Requires:	wget
 
