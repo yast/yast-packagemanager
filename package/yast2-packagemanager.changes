@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar  6 13:52:33 CET 2003 - cschum@suse.de
+
+- Don't ask for proxy password (#24723).
+
+-------------------------------------------------------------------
 Wed Mar  5 18:50:57 CET 2003 - kkaempf@suse.de
 
 - enhance provide and install callbacks to pass error code, error
