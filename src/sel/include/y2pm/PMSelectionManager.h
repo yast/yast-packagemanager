@@ -25,6 +25,7 @@
 
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
+#include <y2pm/PMSelectable.h>
 #include <y2pm/PMSelection.h>
 #include <y2pm/PMPackageManager.h>
 
@@ -47,33 +48,29 @@ class PMSelectionManager : public PMManager {
     PMSelectionManager();
     virtual ~PMSelectionManager();
 
-
-    typedef std::map<PMSelectablePtr,int> ActiveMap;
+#if 0
+    typedef std::map<PMSelectablePtr,PMSelectable::Fate> ActiveMap;
 
     /**
-     * Remembers selections state at last call to @ref activate.
-     * <ul>
-     * <li><code>-1</code> was to delete
-     * <li><code>0</code> was unmodified
-     * <li><code>1</code> was to install
-     * </ul>
+     * Remembers selections fate at last call to @ref activate.
      **/
     ActiveMap _last_active;
 
     /**
      * Remember selections state.
      **/
-    void setLast( const PMSelectablePtr & sel_r, int val_r );
+    void setLast( const PMSelectablePtr & sel_r, PMSelectable::Fate val_r );
 
     /**
      * Return selections remembered state.
      **/
-    int lastState( const PMSelectablePtr & sel_r ) const;
+    PMSelectable::Fate lastState( const PMSelectablePtr & sel_r ) const;
+#endif
 
     /**
      * Return selections current state.
      **/
-    int getState( const PMSelectablePtr & sel_r ) const;
+    PMSelectable::Fate getState( const PMSelectablePtr & sel_r ) const;
 
   private:
 
@@ -82,21 +79,6 @@ class PMSelectionManager : public PMManager {
      * rerport error and return NULL.
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
-
-  private:
-
-    /**
-     * Set all packages in this selection to unmodified.
-     **/
-    void resetSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr );
-    /**
-     * Install selection (install inspacks, delete delpacks).
-     **/
-    void setSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr );
-    /**
-     * Delete selection (delete inspacks, unmodify delpacks).
-     **/
-    void removeSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr );
 
   public:
 

@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Mar  3 17:23:57 CET 2003 - ma@suse.de
+
+- When deleting a selection, prevent packages included in other active
+  selections from being removed. (#23833)
+- Always install packages.en in InstSrc cache. Otherwise we might have
+  no texts at all if language is changed. (#24264)
+- 2.7.19
+
+-------------------------------------------------------------------
 Fri Feb 28 15:33:41 CET 2003 - kkaempf@suse.de
 
 - don't split LabelMap along spaces, just the first one

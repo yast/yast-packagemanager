@@ -112,6 +112,7 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 }
 
 
+void SBS( string name );
 
 /******************************************************************
 **
@@ -138,17 +139,152 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  PMPackageImEx P;
-  P.getPMState();
-  P.doImport( "/tmp/yy" );
-  P.doImport( "/tmp/zz" );
-  P.doImport( "/tmp/xx" );
-  P.setPMState();
-
+  SEC << "--------------------------------------------------------------------" << endl;
+  dumpSelWhatIf( DBG, true );
+  SBS( "default" );
   dumpSelWhatIf( DBG );
-  dumpPkgWhatIf( MIL );
+  dumpPkgWhatIf( DBG );
+  SEC << "--------------------------------------------------------------------" << endl;
+  SMGR["X11"]->user_set_delete();
+  SMGR.activate (PMGR);
+  dumpSelWhatIf( DBG );
+  dumpPkgWhatIf( DBG );
+  SEC << "--------------------------------------------------------------------" << endl;
+
+  if ( 0 ) {
+    SBS( "Minimal" );
+    dumpSelWhatIf( DBG );
+    dumpPkgWhatIf( DBG );
+  }
 
   SEC << "STOP" << endl;
   return 0;
 }
 
+#undef Y2LOG
+#define Y2LOG "SBS"
+
+bool SetSelectionString (std::string name, bool recursive = false)
+{
+  PMSelectablePtr selectable = SMGR.getItem(name);
+    if (selectable)
+    {
+      INT << "SetSelectionString " << name << " " << recursive << " " << selectable << endl;
+	PMSelectionPtr selection = selectable->theObject();
+	if (selection)
+	{
+	    if (!recursive && selection->isBase())
+	    {
+		MIL << "Changing base selection, re-setting manager" << endl;
+		SMGR.setNothingSelected();
+		PMGR.setNothingSelected();
+	    }
+	    else if (selectable->status() == PMSelectable::S_Install)
+	    {
+		DBG << "Don't recurse already selected." << endl;
+		return true;
+	    }
+	}
+
+	if (!selectable->user_set_install())
+	{
+	    ERR << name << "->user_set_install" << endl;
+	    return false;
+	}
+	DBG << name << "->user_set_install" << endl;
+
+	// RECURSION
+	// select all recommended selections of a base selection
+
+	if ( selection->isBase() )
+	{
+	    const std::list<std::string> recommends = selection->recommends();
+	    MIL << "Base ! Selecting all required and recommends (" << recommends.size() << ")..." << endl;
+	    for (std::list<std::string>::const_iterator it = recommends.begin();
+		 it != recommends.end(); ++it)
+	    {
+		SetSelectionString (*it, true);
+	    }
+	    MIL << "DONE: Selecting all required and recommends." << endl;
+	}
+
+	MIL << "Solve Selections...." << endl;
+	PkgDep::ResultList good;
+	PkgDep::ErrorResultList bad;
+	if ( !SMGR.solveInstall(good, bad) )
+	{
+	    ERR << bad.size() << " selections failed." << endl;
+	    for (PkgDep::ErrorResultList::const_iterator p = bad.begin();
+		 p != bad.end(); ++p )
+	    {
+		DBG << *p << std::endl;
+	    }
+
+	    return false;
+	}
+	return true;
+    }
+    WAR << "Unknown selection '" << name << "'" << endl;
+    return false;
+}
+
+
+bool ActivateSelections ()
+{
+  MIL << "ActivateSelections..." << endl;
+  SMGR.activate (PMGR);
+  return true;
+}
+
+
+bool PkgSolve ()
+{
+  MIL << "Solve Packages..." << endl;
+    bool filter_conflicts_with_installed = false;
+
+    PkgDep::ResultList good;
+    PkgDep::ErrorResultList bad;
+
+    if (!PMGR.solveInstall(good, bad, filter_conflicts_with_installed))
+    {
+        unsigned _solve_errors = bad.size();
+	ERR << bad.size() << " packages failed." << endl;
+	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
+	     p != bad.end(); ++p )
+	{
+	    DBG << *p << std::endl;
+	}
+
+	return false;
+    }
+    return true;
+}
+
+void SBS( string name )
+{
+  SEC << "SBS (" << name << ")..." << endl;
+  PMSelectablePtr selectable = SMGR.getItem( name );
+  if ( !selectable ) {
+    ERR << "No Selection '" << name << "'" << endl;
+    return;
+  }
+  PMSelectionPtr candidate = selectable->candidateObj();
+  if ( !candidate || !candidate->isBase() ) {
+    ERR << "No candidate or not base selection " << candidate << endl;
+    return;
+  }
+
+  MIL << "ClearSelection..." << endl;
+  SMGR.setNothingSelected();
+  PMGR.setNothingSelected();
+
+
+  MIL << "SetSelection '" << name << "'..." << endl;
+  SetSelectionString ( name );
+
+  ActivateSelections ();
+
+  //PkgSolve();
+
+  SEC << "DONE SBS (" << name << ")" << endl;
+}

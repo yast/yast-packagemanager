@@ -324,13 +324,7 @@ void PMPackageImEx::getPMState()
 */
 inline bool onSystem( const constPMSelectablePtr & sel_r )
 {
-  if ( sel_r ) {
-    if ( sel_r->has_installed() )
-      return( ! sel_r->to_delete() );
-    else
-      return( sel_r->to_install() );
-  }
-  return false;
+  return( sel_r && sel_r->is_onSystem() );
 }
 
 /******************************************************************
@@ -356,18 +350,7 @@ inline bool offSystem( const constPMSelectablePtr & sel_r )
 */
 inline bool user_set_onSystem( const PMSelectablePtr & sel_r )
 {
-  if ( sel_r ) {
-    if ( sel_r->has_installed() ) {
-      if ( ! sel_r->to_delete() )
-	return true; // already onSystem
-      return sel_r->user_unset();
-    } else {
-      if ( sel_r->to_install() )
-	return true; // already onSystem
-      return sel_r->user_set_install();
-    }
-  }
-  return false;
+  return( sel_r && sel_r->user_set_onSystem() );
 }
 
 /******************************************************************
@@ -380,18 +363,7 @@ inline bool user_set_onSystem( const PMSelectablePtr & sel_r )
 */
 inline bool user_set_offSystem( const PMSelectablePtr & sel_r )
 {
-  if ( sel_r ) {
-    if ( sel_r->has_installed() ) {
-      if ( sel_r->to_delete() )
-	return true; // already offSystem
-      return sel_r->user_set_delete();
-    } else {
-      if ( ! sel_r->to_install() )
-	return true; // already offSystem
-      return sel_r->user_unset();
-    }
-  }
-  return true;
+  return( !sel_r || sel_r->user_set_offSystem() );
 }
 
 /******************************************************************

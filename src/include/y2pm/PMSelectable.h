@@ -286,6 +286,19 @@ class PMSelectable : virtual public Rep {
 
   public:
 
+    enum Fate {
+      TO_DELETE  = -1,
+      UNMODIFIED = 0,
+      TO_INSTALL = 1
+    };
+
+    Fate fate() const {
+      if ( to_modify() ) {
+	return( to_delete() ? TO_DELETE : TO_INSTALL );
+      }
+      return UNMODIFIED;
+    }
+
     /**
      * Set to neither install nor delete (keeps taboo)
      **/
@@ -459,6 +472,99 @@ class PMSelectable : virtual public Rep {
      * Fails if downgrade_condition is true.
      **/
     bool auto_set_install() { return !downgrade_condition() && auto_force_install(); }
+
+  private:
+
+    /**
+     * Request to adjust state so that the object will be present on the targetSystem after install.
+     * Function pointers passed denote the modification level (user/appl/auto).
+     *
+     * In other words: If the object is set to delete, unset it (kepp the installed one).
+     * If it's not installed, set to install. If it already is_onSystem leave it as it is.
+     **/
+    bool do_set_onSystem( bool (PMSelectable::*fnc_unset)(), bool (PMSelectable::*fnc_install)() ) {
+      if ( has_installed() ) {
+	if ( ! to_delete() )
+	  return true; // already onSystem
+	return (this->*fnc_unset)();
+      } else {
+	if ( to_install() )
+	  return true; // already onSystem
+	return (this->*fnc_install)();
+      }
+    }
+
+    /**
+     * Request to adjust state so that the object won't be present on the targetSystem after install.
+     * Function pointers passed denote the modification level (user/appl/auto).
+     *
+     * In other words: If the object is installed, set to delete. If it's not installed, unset it.
+     * If it already is_offSystem leave it as it is.
+     **/
+    bool do_set_offSystem( bool (PMSelectable::*fnc_unset)(), bool (PMSelectable::*fnc_delete)() ) {
+      if ( has_installed() ) {
+	if ( to_delete() )
+	  return true; // already offSystem
+	return (this->*fnc_delete)();
+      } else {
+	if ( ! to_install() )
+	  return true; // already offSystem
+	return (this->*fnc_unset)();
+      }
+    }
+
+  public:
+
+    /**
+     * Return true if the object will be present on the targetSystem after install.
+     *
+     * In other words: The object either is installed, but not selected to delete, or
+     * is not installed but selected to install.
+     **/
+    bool is_onSystem() const {
+      if ( has_installed() )
+	return( ! to_delete() );
+      else
+	return( to_install() );
+    }
+
+    /**
+     * Return true if the object won't be present on the targetSystem after install.
+     *
+     * In other words: The object either is installed, but selected to delete, or
+     * is not installed and not selected to install.
+     **/
+    bool is_offSystem() const { return( ! is_onSystem() ); }
+
+    /**
+     * @ref do_set_onSystem requested by user.
+     **/
+    bool user_set_onSystem() { return do_set_onSystem( &PMSelectable::user_unset, &PMSelectable::user_set_install ); }
+
+    /**
+     * @ref do_set_offSystem requested by user.
+     **/
+    bool user_set_offSystem() { return do_set_offSystem( &PMSelectable::user_unset, &PMSelectable::user_set_delete ); }
+
+    /**
+     * @ref do_set_onSystem requested by appl.
+     **/
+    bool appl_set_onSystem() { return do_set_onSystem( &PMSelectable::appl_unset, &PMSelectable::appl_set_install ); }
+
+    /**
+     * @ref do_set_offSystem requested by appl.
+     **/
+    bool appl_set_offSystem() { return do_set_offSystem( &PMSelectable::appl_unset, &PMSelectable::appl_set_delete ); }
+
+    /**
+     * @ref do_set_onSystem requested by auto.
+     **/
+    bool auto_set_onSystem() { return do_set_onSystem( &PMSelectable::auto_unset, &PMSelectable::auto_set_install ); }
+
+    /**
+     * @ref do_set_offSystem requested by auto.
+     **/
+    bool auto_set_offSystem() { return do_set_offSystem( &PMSelectable::auto_unset, &PMSelectable::auto_set_delete ); }
 
   public:
 
