@@ -164,13 +164,20 @@ class PMError {
     enum Error {
       // more specific errors start here:
       E_TBD = C_Error+1
-    }; 
+    };
 
     unsigned _errval;
+
+    std::string _errdetails;
 
   public:
 
     PMError( const unsigned e = E_ok ) { _errval = e; }
+    PMError( const unsigned e, const std::string &details )
+    {
+      _errval = e;
+      _errdetails = details;
+    }
 
     operator unsigned() const { return _errval; }
 
@@ -181,6 +188,9 @@ class PMError {
     static ErrClass errClass( const unsigned e );
 
     ErrClass errClass() const { return errClass( _errval ); }
+
+    void setErrDetails( const std::string &details ) { _errdetails = details; }
+    std::string errDetails() const { return _errdetails; }
 
     friend std::ostream & operator<<( std::ostream & str, const PMError & obj );
 };

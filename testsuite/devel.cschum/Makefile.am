@@ -16,7 +16,8 @@ LDFLAGS = -static
 
 EXTRA_PROGRAMS = \
 	cschum_test	\
-	test_libcurl
+	test_libcurl \
+        err_test
 
 cschum_test_SOURCES = cschum_test.cc
 cschum_test_LDADD = $(top_builddir)/src/liby2pm.la
@@ -25,5 +26,9 @@ cschum_test_LDFLAGS = -static
 test_libcurl_SOURCES = test_libcurl.cc
 test_libcurl_LDADD = -lcurl $(top_builddir)/src/liby2pm.la
 test_libcurl_LDFLAGS = -static
+
+err_test_SOURCES = err_test.cc
+err_test_LDADD = -lcurl $(top_builddir)/src/liby2pm.la
+err_test_LDFLAGS = -static
 
 ALL: $(EXTRA_PROGRAMS)

@@ -57,7 +57,10 @@ int main( int argc, char **argv )
 {
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
-
+  M__ << "START DEBUG" << endl;
+  
+  return 0;
+  
 #if 0
   if ( argc != 4 ) {
     cerr << "Usage: " << argv[0] << " <url> <user> <password>" << endl;
