@@ -373,84 +373,92 @@ InstSrcData_UL::Tag2Package( CommonPkdParser::TagSet * tagset )
     std::vector<std::string> splitted;
 
     stringutil::split (single, splitted, " ", false);
-MIL << "------------------------------------------------------------" << endl;
-MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+//MIL << "-----------------------------" << endl;
+//MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
     // Pkg -> PMPackage
     PkgName name (splitted[0]);
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
     PkgArch arch (splitted[3]);
 
-//    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider());
+    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider());
     PMPackagePtr pac( new PMPackage (name, edition, arch, PMPackageDataProviderPtr()));
 
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_NAME
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_VERSION
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_RELEASE
 
+#define SET_MULTI(kind,tagname) \
+    dataprovider->setAttributeValue (pac, PM##kind::ATTR_##tagname,  (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->MultiData())
+#define SET_SINGLE(kind,tagname) \
+    dataprovider->setAttributeValue (pac, PM##kind::ATTR_##tagname,  (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->Data())
+
     // REQUIRES, list of requires tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_REQUIRES
-//    dataprovider->setAttributeValue (pac, PMPackage::  (tagset->getTagByIndex(InstSrcData_ULTags::REQUIRES))->MultiData();
+    SET_MULTI (Package, REQUIRES);
 
     // PREREQUIRES, list of pre-requires tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_PREREQUIRES
-//    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::PREREQUIRES))->MultiData();
+    SET_MULTI (Package, PREREQUIRES);
 
     // PROVIDES, list of provides tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_PROVIDES
-//    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::PROVIDES))->MultiData();
+    SET_MULTI (Package, PROVIDES);
 
     // CONFLICTS, list of conflicts tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_CONFLICTS
-//    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::CONFLICTS))->MultiData();
+    SET_MULTI (Package, CONFLICTS);
 
     // OBSOLETES, list of obsoletes tags
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_OBSOLETES
-//    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::OBSOLETES))->MultiData();
+    SET_MULTI (Package, OBSOLETES);
 
     // RECOMMENDS, list of recommends tags
     // FIXME Where to put RECOMMENDS ?
-//    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::RECOMMENDS))->MultiData();
+    //SET_MULTI (Package, RECOMMENDS);
 
     // SUGGESTS, list of suggests tags
     // FIXME Where to put SUGGESTS ?
-//    multi =  (tagset->getTagByIndex(InstSrcData_ULTags::SUGGESTS))->MultiData();
+    //SET_MULTI (Package, SUGGESTS);
 
     // LOCATION, file location
     // FIXME Where to put LOCATION ?
-    string location ((tagset->getTagByIndex(InstSrcData_ULTags::LOCATION))->Data());
+    //SET_SINGLE (Package, LOCATION);
 
     // SIZE, packed and unpacked size
     // -> PMPackage::PMObjectAttribute::ATTR_SIZE (installed)
     // -> PMPackage::PMPackageAttribute::ATTR_ARCHIVESIZE (package)
-    string size ((tagset->getTagByIndex(InstSrcData_ULTags::SIZE))->Data());
+    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULTags::SIZE))->Data(), splitted, " ", false);
+    dataprovider->setAttributeValue (pac, PMPackage::ATTR_ARCHIVESIZE, splitted[0]);
+    dataprovider->setAttributeValue (pac, PMObject::ATTR_SIZE, splitted[1]);
 
     // BUILDTIME, buildtime
     // -> PMPackage::PMPackageAttribute::ATTR_BUILDTIME
-    string buildtime ((tagset->getTagByIndex(InstSrcData_ULTags::BUILDTIME))->Data());
+    SET_SINGLE (Package, BUILDTIME);
 
     // SOURCE, source package
     // PMPackage::PMPackageAttribute::ATTR_SOURCERPM
-    string source ((tagset->getTagByIndex(InstSrcData_ULTags::SOURCE))->Data());
+    SET_SINGLE (Package, SOURCERPM);
 
     // GROUP, rpm group
     // -> PMPackage::PMPackageAttribute::ATTR_GROUP
-    string group ((tagset->getTagByIndex(InstSrcData_ULTags::GROUP))->Data());
+    SET_SINGLE (Package, GROUP);
 
     // LICENSE, license
     // -> PMPackage::PMPackageAttribute::ATTR_LICENSE
-    string license ((tagset->getTagByIndex(InstSrcData_ULTags::LICENSE))->Data());
+    SET_SINGLE (Package, LICENSE);
 
     // AUTHORS, list of authors
     // -> PMPackage::PMPackageAttribute::ATTR_AUTHOR
-//    multi = (tagset->getTagByIndex(InstSrcData_ULTags::AUTHORS))->MultiData();
+    SET_MULTI (Package, AUTHOR);
 
     // SHAREWITH, package to share data with
-    string sharewith ((tagset->getTagByIndex(InstSrcData_ULTags::SHAREWITH))->Data());
+    // FIXME
+    //string sharewith ((tagset->getTagByIndex(InstSrcData_ULTags::SHAREWITH))->Data());
 
     // KEYWORDS, list of keywords
     // FIXME Where to put KEYWORDS
-//    multi = (tagset->getTagByIndex(InstSrcData_ULTags::KEYWORDS))->MultiData();
+    //SET_MULTI (Package, KEYWORDS);
 
     return pac;
 }

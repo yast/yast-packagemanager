@@ -89,6 +89,7 @@ class InstSrcData_ULTags : public CommonPkdParser::TagSet
 {
 
 public:
+	// ** use same names as for PkgAttribute
     enum Tags {
 	VERSION,	// general file format version
 	PACKAGE,	// name version release arch
@@ -102,10 +103,10 @@ public:
 	LOCATION,	// file location
 	SIZE,		// packed and unpacked size
 	BUILDTIME,	// buildtime
-	SOURCE,		// source package
+	SOURCERPM,	// source package
 	GROUP,		// rpm group
 	LICENSE,	// license
-	AUTHORS,	// list of authors
+	AUTHOR,		// list of authors
 	SHAREWITH,	// package to share data with
 	KEYWORDS,	// list of keywords
 	NUM_TAGS
@@ -135,10 +136,10 @@ public:
 	createTag( "=Loc", LOCATION);		// file location
 	createTag( "=Siz", SIZE);		// packed and unpacked size
 	createTag( "=Tim", BUILDTIME);		// buildtime
-	createTag( "=Src", SOURCE);		// source package
+	createTag( "=Src", SOURCERPM);		// source package
 	createTag( "=Grp", GROUP);		// rpm group
 	createTag( "=Lic", LICENSE);		// license
-	t = createTag( "+Aut", AUTHORS);	// list of authors
+	t = createTag( "+Aut", AUTHOR);		// list of authors
 	t->setEndTag("-Aut");
 	createTag( "=Shr", SHAREWITH);		// package to share data with
 	t = createTag( "+Key", KEYWORDS);	// list of keywords

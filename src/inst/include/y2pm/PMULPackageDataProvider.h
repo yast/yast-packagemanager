@@ -38,43 +38,69 @@
  * @see DataProvider
  **/
 class PMULPackageDataProvider : public PMPackageDataProvider  {
-  REP_BODY(PMULPackageDataProvider);
-  private:
-    // save file position and size data for each attribute
-    typedef struct {std::streampos pos; int size;} attrpos_t;
-    attrpos_t attrpos[PMPackage::PKG_NUM_ATTRIBUTES];
-    // cache retrieved attribute values here
-    // these are set if attrpos[<attr>].size < 0
-    PkgAttributeValue attrval[PMPackage::PKG_NUM_ATTRIBUTES];
+    REP_BODY(PMULPackageDataProvider);
+    private:
+	// save file position and size data for each attribute
+	typedef struct {std::streampos pos; int size;} attrpos_t;
+	attrpos_t attrpos[PMPackage::PKG_NUM_ATTRIBUTES];
 
-  protected:
+	// cache retrieved attribute values here
+	// these are set if attrpos[<attr>].size < 0
+	PkgAttributeValue attrval[PMPackage::PKG_NUM_ATTRIBUTES];
 
-    PMULPackageDataProvider();
+    public:
 
-    ~PMULPackageDataProvider();
+	PMULPackageDataProvider();
+	virtual ~PMULPackageDataProvider();
 
-  public:
+	/**
+	 * Object attribute retrieval. (DataProvider interface)
+	 * @see PMDataProvider
+	 * @see PMObject
+	 **/
+	virtual PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
+						     PMObject::PMObjectAttribute attr_r );
+	/**
+	 * Package attribute retrieval. (PackageDataProvider interface)
+	 * @see PMPackageDataProvider
+	 * @see PMPackage
+	 **/
+	virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
+						     PMPackage::PMPackageAttribute attr_r );
 
-    /**
-     * Package attribute retrieval.
-     * @see PMPackage
-     **/
-    PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
-					 PMPackage::PMPackageAttribute attr_r );
+        /** inject attribute to cache */
+	virtual void setAttributeValue(
+	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
+	    const PkgAttributeValue& value);
 
-  public:
+	/** inject attribute to cache */
+	virtual void setAttributeValue(
+	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
+	    const PkgAttributeValue& value);
 
-    /** inject some object attribute by value
-     * */
-    void setAttributeValue(
-	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	const PkgAttributeValue value);
+	/** inject attribute to cache */
+	virtual void setAttributeValue(
+	    PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
+	    const PkgAttributeValue& value);
 
-    /** inject some package attribute by file offset
-     * */
-    void setAttributeValue(
-	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	std::streampos pos, int size);
+        /** inject offset/size to cache */
+	virtual void setAttributeValue(
+	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
+	    std::streampos pos, int size);
+
+	/** inject offset/size to cache */
+	virtual void setAttributeValue(
+	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
+	    std::streampos pos, int size);
+
+	/** inject offset/size to cache */
+	virtual void setAttributeValue(
+	    PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
+	    std::streampos pos, int size);
+
+    public:
+
+	virtual std::ostream & dumpOn( std::ostream & str ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
