@@ -931,14 +931,14 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
 	if(vendor.empty() || id.empty())
 	{
-	    ERR << "media must have vendor and id" << endl;
+	    ERR << "Media must have vendor and id" << endl;
 	    return InstSrcError::E_no_instsrc_on_media;
 	}
 
 	if(count == 0)
 	{
-	    ERR << "Number of media may not be zero" << endl;
-	    return InstSrcError::E_no_instsrc_on_media;
+	    WAR << "Media count in media.1/media may not be zero. Assume 1" << endl;
+	    count = 1;
 	}
 
 	ndescr->set_media_vendor(vendor);

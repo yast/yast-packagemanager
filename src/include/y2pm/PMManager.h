@@ -20,7 +20,7 @@
 #define PMManager_h
 
 #include <iosfwd>
-#include <vector>
+#include <set>
 #include <map>
 
 #include <y2util/BitField.h>
@@ -44,7 +44,7 @@ class PMManager {
 
   public:
 
-    typedef std::vector<PMSelectablePtr>  PMSelectableVec;
+    typedef std::set<PMSelectablePtr>  PMSelectableVec;
 
   private:
 
@@ -69,11 +69,6 @@ class PMManager {
     virtual PMSelectablePtr newSelectable( const PkgName & name_r ) const;
 
     /**
-     * Lookup Selectable by index.
-     **/
-    PMSelectablePtr poolLookup( unsigned idx_r ) const;
-
-    /**
      * Lookup Selectable by name.
      **/
     PMSelectablePtr poolLookup( const std::string & name_r ) const;
@@ -91,20 +86,6 @@ class PMManager {
 
     PMManager();
     virtual ~PMManager();
-
-  protected:
-
-    /**
-     * Non const version for inernal use
-     * (gcc does not like a protected non const and public const version)
-     **/
-    PMSelectableVec::iterator first() { return _items.begin(); }
-
-    /**
-     * Non const version for inernal use
-     * (gcc does not like a protected non const and public const version)
-     **/
-    PMSelectableVec::iterator last() { return _items.end(); }
 
   public:
 
@@ -160,19 +141,9 @@ class PMManager {
     PMSelectableVec::const_reverse_iterator rend() const { return _items.rend(); }
 
     /**
-     * PMSelectablePtr to the Selectable with the given index, or NULL if index is invalid.
-     **/
-    PMSelectablePtr getItem( const unsigned idx_r ) const { return poolLookup( idx_r ); }
-
-    /**
      * PMSelectablePtr to the Selectable with the given name, or NULL if there is none.
      **/
     PMSelectablePtr getItem( const std::string & name_t ) const { return poolLookup( name_t ); }
-
-    /**
-     * PMSelectablePtr to the Selectable with the given index, or NULL if index is invalid.
-     **/
-    PMSelectablePtr operator [] ( const unsigned idx_r ) const { return getItem( idx_r ); }
 
     /**
      * PMSelectablePtr to the Selectable with the given name, or NULL if there is none.

@@ -63,9 +63,9 @@ PMManager::~PMManager()
 void PMManager::clearAll()
 {
   DBG << "clearAll" << endl;
-  for ( unsigned i = 0; i < _items.size(); ++i ) {
-    _items[i]->clearAll();
-    _items[i]->_mgr_detach();
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    (*it)->clearAll();
+    (*it)->_mgr_detach();
   }
   _items.clear();
   _itemPool.clear();
@@ -101,21 +101,6 @@ PMSelectablePtr PMManager::newSelectable( const PkgName & name_r ) const
 //
 //	DESCRIPTION :
 //
-PMSelectablePtr PMManager::poolLookup( unsigned idx_r ) const
-{
-  if ( idx_r < _items.size() )
-    return _items[idx_r];
-  return 0;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMManager::poolLookup
-//	METHOD TYPE : PMSelectablePtr
-//
-//	DESCRIPTION :
-//
 PMSelectablePtr PMManager::poolLookup( const std::string & name_r ) const
 {
   PMSelectablePool::const_iterator iter = _itemPool.find( name_r );
@@ -138,10 +123,10 @@ PMSelectablePtr PMManager::poolProvide( const std::string & name_r )
   if ( !item ) {
     // create a new one
     item = newSelectable( PkgName( name_r ) );
-    item->_mgr_attach( this, _items.size() );
+    item->_mgr_attach( this );
 
     _itemPool.insert( PMSelectablePool::value_type( item->name(), item ) );
-    _items.push_back( item );
+    _items.insert( item );
   }
   return item;
 }
@@ -165,12 +150,12 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
   ///////////////////////////////////////////////////////////////////
   // set nothing installed
   ///////////////////////////////////////////////////////////////////
-  for ( unsigned i = 0; i < _items.size(); ++ i ) {
-    _items[i]->delInstalledObj();
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    (*it)->delInstalledObj();
   }
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    DBG << "  set installed object " << *iter_r << endl;
+    DBG << "--set installed object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -217,7 +202,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
   MIL << "Going to add " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    DBG << "  add object " << *iter_r << endl;
+    DBG << "--add object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -265,7 +250,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
   MIL << "Going to remove " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    M__ << "  remove object " << *iter_r << endl;
+    M__ << "--remove object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -321,7 +306,6 @@ void PMManager::checkPool() const
 {
   // test whether to remove empty items
 
-
   if ( _itemPool.size() == _items.size() )
     DBG << "Pool size " << _items.size() << endl;
   else
@@ -329,21 +313,17 @@ void PMManager::checkPool() const
 
   Rep::dumpRepStats( DBG ) << endl;
 
-  for ( unsigned i = 0; i < _items.size(); ++i ) {
-    PMSelectablePtr c = _items[i];
-    DBG << "[" << i << "] " << c << endl;
-
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    const PMSelectablePtr & c = *it;
     if ( ! c ) {
       INT << "  Null selectable" << endl;
     } else {
       if ( c->_manager != this )
 	INT << "  wrong manager->" << endl;
-      if ( c->_mgr_idx != i )
-	INT << "  wrong _mgr_idx " << c->_mgr_idx << endl;
+
       c->check();
     }
   }
-
 }
 
 /******************************************************************
@@ -371,8 +351,8 @@ ostream & operator<<( ostream & str, const PMManager & obj )
 void PMManager::setNothingSelected()
 {
   DBG << "setNothingSelected" << endl;
-  for ( unsigned i = 0; i < _items.size(); ++i ) {
-    _items[i]->setNothingSelected();
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    (*it)->setNothingSelected();
   }
 }
 
