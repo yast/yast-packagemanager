@@ -64,6 +64,7 @@ GetOptions (
   'patchfile=s' => \$patchFile,
   'patchname=s' => \$patchName,
   'patchsummary=s' => \$patchSummary,
+  'patchdescription=s' => \$patchDescription,
   'patchversion=s' => \$patchVersion,
   'kind=s' => \$patchKind,
   'updateonlyinstalled' => \$patchUpdateOnlyInstalled,
@@ -91,6 +92,7 @@ Usage: create_you_patch [options] filenames
     --patchname <name>          Patch name
     --patchversion <version>    Patch version
     --patchsummary <summary>    Patch summary
+    --patchdescription <desc>   Patch long description
 
     --kind <kind>               Kind of patch. Possible values: YaST2,
                                 security, recommended, patchlevel, optional
