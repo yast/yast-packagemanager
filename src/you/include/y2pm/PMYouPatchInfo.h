@@ -119,6 +119,17 @@ class PMYouPatchInfo : virtual public Rep {
     */
     const std::string location( const PMPackagePtr & ) const;
 
+    /**
+     * Set base versions for patch RPM.
+     */
+    void setPatchRpmBaseVersions( const PMPackagePtr &pkg,
+                                  const std::string &str );
+
+    /**
+      Get base versions for patch RPM.
+    */
+    const std::string patchRpmBaseVersions( const PMPackagePtr & ) const;
+
   protected:
     std::string tagValue( YOUPatchTagSet::Tags tag );
     std::string tagValue( YOUPackageTagSet::Tags tag );
@@ -134,6 +145,7 @@ class PMYouPatchInfo : virtual public Rep {
     MediaAccess _media;
 
     std::map<PMPackagePtr,std::string> _locations;
+    std::map<PMPackagePtr,std::string> _patchRpmBaseVersions;
 };
 
 ///////////////////////////////////////////////////////////////////

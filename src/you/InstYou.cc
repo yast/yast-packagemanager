@@ -123,8 +123,11 @@ void InstYou::selectPatches( int kinds )
 
   if ( yastPatch ) {
     yastPatch->user_set_install();
+    D__ << "Select yast patch: " << yastPatch->name() << endl;
   } else {
     for ( it = _patches.begin(); it != _patches.end(); ++it ) {
+      D__ << "Check patch " << (*it)->fullName() << " ("
+          << (*it)->kindLabel() << ")" << endl;
       if ( ( (*it)->kind() & kinds ) && hasNewPackages( *it, true ) ) {
         PMSelectablePtr selectable = (*it)->getSelectable();
         if ( !selectable ) {
@@ -133,7 +136,12 @@ void InstYou::selectPatches( int kinds )
         }
       
         PMYouPatchPtr candidate = selectable->candidateObj();
+        D__ << "Patch " << (*it)->fullName();
+        if ( candidate ) D__ << " has candidate." << endl;
+        else D__ << " has no candidate." << endl;
+        D__ << "Kind: " << candidate->kindLabel() << endl;
         if ( candidate && ( candidate->kind() & kinds ) ) {
+          D__ << "Select patch: " << (*it)->fullName() << endl;
           selectable->user_set_install();
         }
       }
@@ -369,14 +377,31 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg )
   list<string>::const_iterator it;
   for( it = archs.begin(); it != archs.end(); ++it ) {
     D__ << *it << endl;
-    rpmPath = _paths->rpmPath( pkg, *it );
+    
+    // If the package has a version installed, try to get patch RPM first.
+    bool pkgHasInstalledObj = pkg->hasInstalledObj();
+    rpmPath = _paths->rpmPath( pkg, *it, pkgHasInstalledObj );
     D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
         << "'" << endl;
     error = _media.provideFile( rpmPath );
     if ( error ) {
       D__ << "Downloading RPM '" << pkg->name() << "' failed: " << error
           << endl;
-    } else {
+          
+      // If patch RPM was requested first, try to get full RPM now.
+      if ( pkgHasInstalledObj ) {
+        rpmPath = _paths->rpmPath( pkg, *it, false );
+        D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
+            << "'" << endl;
+        error = _media.provideFile( rpmPath );
+        if ( error ) {
+          D__ << "Download failed." << endl;
+        }
+      }
+    }
+
+    // If download was successful store path to RPM and return.
+    if ( !error ) {
       _info->setLocation( pkg, rpmPath.asString() );
       D__ << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
       return PMError();
@@ -482,6 +507,9 @@ bool InstYou::hasNewPackages( const PMYouPatchPtr &patch,
       install = true;
     }
   }
+
+  D__ << "hasNewPackages: " << patch->fullName() << " "
+      << ( install ? "yes" : "no" ) << endl;
 
   return install;
 }

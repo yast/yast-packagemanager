@@ -29,6 +29,10 @@ class YOUPatchTagSet : public CommonPkdParser::TagSet
 {
     public:
 	enum Tags {
+            PATCHNAME,
+            PATCHVERSION,
+            REQUIRES,
+            PROVIDES,
 	    KIND,
 	    SHORTDESCRIPTION,
 	    LONGDESCRIPTION,
@@ -50,6 +54,10 @@ class YOUPatchTagSet : public CommonPkdParser::TagSet
 	YOUPatchTagSet(const std::string& locale) : TagSet(), _locale(locale) 
 	{
 	    CommonPkdParser::Tag *t;
+	    t = createTag("Patchname",PATCHNAME);
+	    t = createTag("Patchversion",PATCHVERSION);
+	    t = createTag("Requires",REQUIRES);
+	    t = createTag("Provides",PROVIDES);
 	    t = createTag("Kind",KIND);
 	    t = createTag("Shortdescription.",SHORTDESCRIPTION);
 	    t->setType(CommonPkdParser::Tag::ACCEPTLOCALEONLY);
@@ -114,6 +122,7 @@ class YOUPackageTagSet : public CommonPkdParser::TagSet
             REQUIRES,
             PROVIDES,
             CONFLICTS,
+            PATCHRPMBASEVERSIONS,
             NUM_TAGS
         };
 
@@ -135,6 +144,7 @@ class YOUPackageTagSet : public CommonPkdParser::TagSet
             createTag("Requires",REQUIRES);
             createTag("Provides",PROVIDES);
             createTag("Conflicts",CONFLICTS);
+            createTag("PatchRpmBaseVersions",PATCHRPMBASEVERSIONS);
         }
         
         CommonPkdParser::Tag *createTag( const std::string &tagname, int num )

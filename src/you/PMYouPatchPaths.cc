@@ -97,12 +97,13 @@ Url PMYouPatchPaths::patchUrl()
   return _patchUrl;
 }
 
-Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg )
+Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg, bool patchRpm )
 {
-  return rpmPath( pkg, baseArch() );
+  return rpmPath( pkg, baseArch(), patchRpm );
 }
 
-Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg, const string &arch )
+Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg, const string &arch,
+                                   bool patchRpm )
 {
   string rpmName = arch + "/";
   rpmName += pkg->name();
@@ -112,6 +113,7 @@ Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg, const string &arch )
   rpmName += pkg->release();
   rpmName += ".";
   rpmName += arch;
+  if ( patchRpm ) rpmName += ".patch";
   rpmName += ".rpm";
   return _rpmPath + rpmName;
 }

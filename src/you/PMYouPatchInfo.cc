@@ -162,6 +162,9 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   relations = PkgRelation::parseRelations( value );
   pkg->setConflicts( relations );
 
+  value = tagValue( YOUPackageTagSet::PATCHRPMBASEVERSIONS );
+  setPatchRpmBaseVersions( pkg, value );
+
   return PMError();
 }
 
@@ -294,27 +297,29 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
         return PMError( InstSrcError::E_error );
     }
 
-// We don't have patch version information yet.
-#if 0
-    unsigned int pos = fileName.find( '-' );
-    if ( pos < 0 ) {
-      E__ << "No '-' in '" << fileName << "'" << endl;
-      return PMError( InstSrcError::E_error );
-    }
+    string name = tagValue( YOUPatchTagSet::PATCHNAME );
+    string version = tagValue( YOUPatchTagSet::PATCHVERSION );
 
-    string name = fileName.substr( 0, pos );
-    string version = fileName.substr( pos + 1, fileName.length() - pos );
-#else
-    string name = fileName;
-    string version = "0";
-#endif
+    D__ << "Name: " << name << endl;
+    D__ << "Version: " << version << endl;
+    
+    if ( name.empty() ) name = fileName;
+    if ( version.empty() ) version = "0";
 
     PMYouPatchPtr p( new PMYouPatch( PkgName( name ), PkgEdition( version ),
                                      _paths->baseArch() ) );
 
     p->setLocalFile( path + fileName );
 
-    string value = tagValue( YOUPatchTagSet::KIND );
+    string value = tagValue( YOUPatchTagSet::REQUIRES );
+    list<PkgRelation> relations = PkgRelation::parseRelations( value );
+    p->setRequires( relations );
+
+    value = tagValue( YOUPatchTagSet::PROVIDES );
+    relations = PkgRelation::parseRelations( value );
+    p->setProvides( relations );
+
+    value = tagValue( YOUPatchTagSet::KIND );
     PMYouPatch::Kind kind = PMYouPatch::kind_invalid;
     if ( value == "security" ) { kind = PMYouPatch::kind_security; }
     else if ( value == "recommended" ) { kind = PMYouPatch::kind_recommended; }
@@ -509,4 +514,16 @@ const string PMYouPatchInfo::location( const PMPackagePtr &pkg ) const
 void PMYouPatchInfo::setLocation( const PMPackagePtr &pkg, const string &str )
 {
   _locations[ pkg ] = str;
+}
+
+const string PMYouPatchInfo::patchRpmBaseVersions( const PMPackagePtr &pkg ) const
+{
+  map<PMPackagePtr,string>::const_iterator it = _patchRpmBaseVersions.find( pkg );
+  if ( it == _patchRpmBaseVersions.end() ) return "";
+  else return it->second;
+}
+
+void PMYouPatchInfo::setPatchRpmBaseVersions( const PMPackagePtr &pkg, const string &str )
+{
+  _patchRpmBaseVersions[ pkg ] = str;
 }

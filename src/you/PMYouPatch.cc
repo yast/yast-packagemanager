@@ -126,3 +126,12 @@ void PMYouPatch::addPackage( const PMPackagePtr &pkg )
 {
   _packages.push_back( pkg );
 }
+
+
+string PMYouPatch::fullName() const
+{
+  string result = name();
+  result += "-";
+  result += edition().as_string();
+  return result;
+}
