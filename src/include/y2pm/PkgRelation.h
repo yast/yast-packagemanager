@@ -9,6 +9,7 @@ class PkgRelation {
 	PkgName _name;
 	rel_op _op;
 	PkgEdition _edition;
+	bool _isprereq;  // whether this is a prerequirement
   public:
 	PkgRelation( const PkgName& n, rel_op o, const PkgEdition& e ) :
 		_name(n), _op(o), _edition(e) {};
@@ -36,6 +37,16 @@ class PkgRelation {
 	 * Convert this into a human readable string.
 	 **/
 	std::string asString() const;
+
+	/**
+	 * Mark as pre-requirement
+	 * */
+	void setPreReq(bool yes) { _isprereq = yes; }
+
+	/**
+	 * determine if Relation is a pre-requirement
+	 * */
+	bool isPreReq() const { return _isprereq; }
 
 	/**
 	 * Write out asString()

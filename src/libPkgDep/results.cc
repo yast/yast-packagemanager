@@ -11,6 +11,7 @@ PkgDep::Result::Result( const PkgDep& pkgdep, PMSolvablePtr pkg )
 	upgrade_to_remove_conflict = false;
 	install_to_avoid_break = false;
 	from_input_list = false;
+	solvable = pkg;
 
 	if (pkgdep.installed.includes(n)) {
 		PMSolvablePtr ipkg = pkgdep.installed[n];

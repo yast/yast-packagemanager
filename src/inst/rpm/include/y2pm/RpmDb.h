@@ -314,16 +314,9 @@ class RpmDb: virtual public Rep
 	 *
 	 * @param depstr string to evaluate
 	 * @param deps reference to a list which will be cleared and filled with dependencies
-	 * @param prereq reference to a list which holds prerequire
-	 * dependencies
-	 * @param ignore_prereqs if set to true, prereq will not be touched and
-	 * all dependencies will be added to deps. Just pass a dummy list for
-	 * prereq in this case
 	 * */
 	void rpmdeps2rellist ( const std::string& depstr,
-			PMSolvable::PkgRelList_type& deps,
-			PMSolvable::PkgRelList_type& prereq,
-			bool ignore_prereqs = false);
+			PMSolvable::PkgRelList_type& deps);
 
 	/** wrapper for _progressfunc, does nothing if it's unset
 	 * */

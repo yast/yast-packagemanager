@@ -6,7 +6,7 @@
 |                        | | (_| |___) || |  / __/                     |
 |                        |_|\__,_|____/ |_| |_____|                    |
 |                                                                      |
-|                           Package Management                         |
+|                            Package Management                        |
 |                                                     (C) 2002 SuSE AG |
 \----------------------------------------------------------------------/
 
@@ -475,9 +475,7 @@ unsigned RpmDb::tokenize(const string& in, char sep, vector<string>& out)
 // parse string of the form name/number/version into rellist. number is the rpm
 // number representing the operator <, <=, = etc.
 void RpmDb::rpmdeps2rellist ( const string& depstr,
-		PMSolvable::PkgRelList_type& deps,
-		PMSolvable::PkgRelList_type& prereq,
-		bool ignore_prereqs)
+		PMSolvable::PkgRelList_type& deps)
 {
     enum rpmdep
     {
@@ -504,8 +502,6 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
     } cdep_Ci;
 
     deps.clear();
-    if(!ignore_prereqs)
-	prereq.clear();
 
     vector<string> depvec;
     tokenize(depstr, ',', depvec);
@@ -567,12 +563,10 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 
 	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,cdep_Ci.version.c_str());
 //	D__ << dep << endl;
-	if(cdep_Ci.isprereq && !ignore_prereqs)
-	{
-	    prereq.push_back(dep);
-	}
-	else
-	    deps.push_back(dep);
+	
+	dep.setPreReq(cdep_Ci.isprereq);
+
+	deps.push_back(dep);
 
 	cdep_Ci.clear();
     }
@@ -676,20 +670,18 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	    p->setDataProvider(_dataprovider);
 
 	    PMSolvable::PkgRelList_type requires;
-	    PMSolvable::PkgRelList_type prerequires;
 	    PMSolvable::PkgRelList_type provides;
 	    PMSolvable::PkgRelList_type obsoletes;
 	    PMSolvable::PkgRelList_type conflicts;
 
 	    PMSolvable::PkgRelList_type dummy;
 
-	    rpmdeps2rellist(pkgattribs[RPM_REQUIRES],requires,prerequires);
-	    rpmdeps2rellist(pkgattribs[RPM_PROVIDES],provides,dummy,true);
-	    rpmdeps2rellist(pkgattribs[RPM_OBSOLETES],obsoletes,dummy,true);
-	    rpmdeps2rellist(pkgattribs[RPM_CONFLICTS],conflicts,dummy,true);
+	    rpmdeps2rellist(pkgattribs[RPM_REQUIRES],requires);
+	    rpmdeps2rellist(pkgattribs[RPM_PROVIDES],provides);
+	    rpmdeps2rellist(pkgattribs[RPM_OBSOLETES],obsoletes);
+	    rpmdeps2rellist(pkgattribs[RPM_CONFLICTS],conflicts);
 
 	    p->setRequires(requires);
-	    p->setPreRequires(prerequires);
 	    p->setProvides(provides);
 	    p->setObsoletes(obsoletes);
 	    p->setConflicts(conflicts);
@@ -1053,9 +1045,10 @@ PkgAttributeValue RpmDb::queryPackage(const char *format, string packageName, bo
      return value;
 
   string line;
+  /*
   char buffer[4096];
   size_t nread;
-/*  while ( nread = process->receive(buffer, sizeof(buffer)), nread != 0)
+  while ( nread = process->receive(buffer, sizeof(buffer)), nread != 0)
     value.append(buffer, nread);
 */
   while(systemReadLine(line))

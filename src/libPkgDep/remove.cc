@@ -33,7 +33,7 @@ void PkgDep::virtual_remove_package( PMSolvablePtr pkg, NameList& to_remove,
 void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg,
 				 NameList& to_remove ) const
 {
-	DBG << "removing package " << pkg->name() << endl;
+	D__ << "removing package " << pkg->name() << endl;
 	set->remove( pkg );
 
 	bool already_present = false;
@@ -45,18 +45,38 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg,
 	}
 	if (!already_present)
 		to_remove.push_back( pkg->name() );
+
+	PMSolvable::PkgRelList_type list = pkg->provides();
 	
-	ci_for( PMSolvable::Provides_, prov, pkg->all_provides_) {
-		DBG << "  checking provided name " << (*prov).name() << endl;
-		RevRel_for( set->required()[(*prov).name()], req1 ) {
-			DBG << "    requirement: " << req1->relation()
-				 << " by " << req1->pkg()->name() << endl;
-			if (count_providers_for( set, req1->relation() ) < 1) {
-				DBG << "    no providers anymore, removing "
-					 << req1->pkg()->name() << endl;
-				remove_package( set, req1->pkg(), to_remove );
-			}
+		
+	for(unsigned callbackdone = 0;callbackdone < 2; callbackdone++)
+	{
+	    ci_for( PMSolvable::PkgRelList_, prov, list.) {
+		    D__ << "  checking provided name " << (*prov).name() << endl;
+		    RevRel_for( set->required()[(*prov).name()], req1 ) {
+			    D__ << "    requirement: " << req1->relation()
+				     << " by " << req1->pkg()->name() << endl;
+			    if (count_providers_for( set, req1->relation() ) < 1) {
+				    D__ << "    no providers anymore, removing "
+					     << req1->pkg()->name() << endl;
+				    remove_package( set, req1->pkg(), to_remove );
+			    }
+		    }
+	    }
+
+	    // add additional provides from packageset as well as the package name itself
+	    if(!callbackdone)
+	    {
+		if(set->AdditionalProvidesCallback())
+		{
+		    PkgSet::getAdditionalProvides_callback callback=set->AdditionalProvidesCallback();
+		    list = callback(pkg);
 		}
+		else
+		    list = PMSolvable::PkgRelList_type();
+
+		list.push_front(pkg->self_provides());
+	    }
 	}
 }
 

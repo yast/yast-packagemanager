@@ -19,6 +19,7 @@
 
 /-*/
 
+#include <cstdlib> //atoi
 
 // readline
 #include <cstdio>
@@ -30,6 +31,7 @@
 #include <y2util/timeclass.h>
 #include <y2util/Y2SLog.h>
 #include <Y2PM.h>
+#include <y2pm/InstallOrder.h>
 #include <y2pm/RpmDb.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PMPackage.h>
@@ -39,11 +41,16 @@
 
 using namespace std;
 
+static int _verbose = 0;
+
 void install(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
 void init(vector<string>& argv);
 void query(vector<string>& argv);
+void remove(vector<string>& argv);
+void verbose(vector<string>& argv);
+void debug(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -55,12 +62,13 @@ static struct Funcs func[] = {
     { "install", install, "install a package" },
     { "consistent", consistent, "check consistency" },
     { "init", init, "initialize packagemanager" },
-    { "query", query, "query package" },
+    { "query", query, "query packages" },
+    { "remove", remove, "remove packages" },
     { "help", help, "this screen" },
+    { "verbose", verbose, "set verbosity level" },
+    { "debug", debug, "switch on/off debug" },
     { NULL, NULL }
 };
-
-static int verbose = 0;
 
 void usage(char **argv) {
 	cerr <<
@@ -79,6 +87,32 @@ void usage(char **argv) {
 	exit(1);
 }
 
+void verbose(vector<string>& argv)
+{
+    if(argv.size()<2)
+    {
+	cout << "need argument" << endl;
+	return;
+    }
+
+    _verbose = atoi(argv[1].c_str());
+
+    cout << "verbose level set to " << _verbose << endl;
+}
+
+void debug(vector<string>& argv)
+{
+    if(Y2SLog::dbg_enabled_bm)
+    {
+	cout << "debug disabled" << endl;
+	Y2SLog::dbg_enabled_bm = false;
+    }
+    else
+    {
+	cout << "debug enabled" << endl;
+	Y2SLog::dbg_enabled_bm = true;
+    }
+}
 
 void query(vector<string>& argv)
 {
@@ -101,9 +135,18 @@ void query(vector<string>& argv)
 	    {
 		cout
 		    << obj->getAttributeName(attr)
-		    << ": "
-		    << obj->getAttributeValue(attr)
-		    << endl;
+		    << ": ";
+		PkgAttributeValue val = obj->getAttributeValue(attr);
+		if(attr == PMPackage::ATTR_REQUIRES)
+		{
+		    for(PkgAttributeValue::iterator it = val.begin();
+			it != val.end(); ++it)
+		    {
+			cout << *it << endl;
+		    }
+		}
+		else
+		    cout << val << endl;
 	    }
 	    for(PMObject::PMObjectAttribute attr = PMObject::PMOBJ_ATTR_BEGIN;
 		attr < PMObject::PMOBJ_NUM_ATTRIBUTES;
@@ -167,20 +210,29 @@ static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
 
     if(rel.name()->find("rpmlib(") != std::string::npos)
 	return PkgDep::UNRES_IGNORE;
- /*   
+
     if(rel.name() == "/bin/bash" || rel.name() == "/bin/sh")
     {
-	const PkgSet inst = solver->current_installed();
-	p = inst.lookup(PkgName("bash"));
+	const PkgSet set = solver->current_installed();
+	p = set.lookup(PkgName("bash"));
+	if(p==NULL)
+	{
+	    const PkgSet set = solver->current_available();
+	    p = set.lookup(PkgName("bash"));
+	}
 	return PkgDep::UNRES_TAKETHIS;
     }
     if(rel.name() == "/usr/bin/perl")
     {
-	const PkgSet inst = solver->current_installed();
-	p = inst.lookup(PkgName("perl"));
+	const PkgSet set = solver->current_installed();
+	p = set.lookup(PkgName("perl"));
+	if(p==NULL)
+	{
+	    const PkgSet set = solver->current_available();
+	    p = set.lookup(PkgName("perl"));
+	}
 	return PkgDep::UNRES_TAKETHIS;
     }
-*/ 
     if(rel.name()->operator[](0)=='/')
     {
 	DBG << "ignoring file requirement " << rel.name() << endl;
@@ -191,9 +243,28 @@ static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
 }
 
 
+static PMSolvable::PkgRelList_type& addprovidescallback(constPMSolvablePtr& ptr)
+{
+    PMSolvable::PkgRelList_type* list = new PMSolvable::PkgRelList_type();
+    if(ptr->name() == "bash")
+    {
+	DBG << "add provides for bash" << endl;
+	list->push_back(PkgRelation(PkgName("/bin/sh"), EQ, PkgEdition(PkgEdition::UNSPEC)));
+	list->push_back(PkgRelation(PkgName("/bin/bash"), EQ, PkgEdition(PkgEdition::UNSPEC)));
+    }
+    else if(ptr->name() == "libpng-devel")
+    {
+	DBG << "add provides for" << ptr->name() << endl;
+	list->push_back(PkgRelation(PkgName("/usr/include/png.h"), EQ, PkgEdition(PkgEdition::UNSPEC)));
+    }
+
+    return *list;
+}
+
 PkgSet* getInstalled()
 {
     PkgSet* set = new PkgSet();
+    set->setAdditionalProvidesCallback(addprovidescallback);
     
     MIL << "initialize manager" << endl;
     PMPackageManager& manager = Y2PM::packageManager();
@@ -212,7 +283,9 @@ PkgSet* getInstalled()
 /** not implemented yet */
 PkgSet* getAvailable()
 {
-    return new PkgSet();
+    PkgSet* set = new PkgSet();
+    set->setAdditionalProvidesCallback(addprovidescallback);
+    return set;
 }
 
 void install(vector<string>& argv)
@@ -220,6 +293,7 @@ void install(vector<string>& argv)
     // build sets
     PkgSet empty;
     PkgSet candidates;
+    candidates.setAdditionalProvidesCallback(addprovidescallback);
     
     PkgSet *installed = NULL;
     PkgSet *available = NULL;
@@ -281,7 +355,7 @@ void install(vector<string>& argv)
 
     // otherwise, print what should be installed and what removed
     for(PkgDep::ResultList::const_iterator p=good.begin();p!=good.end();++p) {
-	switch (verbose) {
+	switch (_verbose) {
 	case 0: cout << "install " << p->name << endl;break;
 	case 1: cout << "install " << p->name << "-" << p->edition << endl;break;
 	default: cout << "install " << *p << endl;break;
@@ -291,7 +365,7 @@ void install(vector<string>& argv)
     }
     cout << "*** Packages to remove ***" << endl;
     for(PkgDep::NameList::const_iterator q=to_remove.begin();q!=to_remove.end();++q) {
-	switch (verbose) {
+	switch (_verbose) {
 	case 0: cout << "remove " << *q << endl;break;
 	default: cout << "remove " << *q << endl;break;
 	}
@@ -303,7 +377,54 @@ void install(vector<string>& argv)
 
     delete installed;
     delete available;
+
+    InstallOrder order(candidates);
+    order.startrdfs();
+
+    cout << "Installation order:" << endl;
+    for(InstallOrder::SolvableList::const_iterator cit = order.getTopSorted().begin();
+	cit != order.getTopSorted().end(); ++cit)
+    {
+	cout << (*cit)->name() << " ";
+    }
+    cout << endl;
 }
+
+void remove(vector<string>& argv)
+{
+//    PMPackageManager& manager = Y2PM::packageManager();
+    vector<string>::iterator it=argv.begin();
+    ++it; // first one is function name itself
+    
+    PkgDep::NameList list1;
+    PkgDep::NameList list2;
+
+    for(;it!=argv.end();++it)
+    {
+	list1.push_back(PkgName(*it));
+	list2.push_back(PkgName(*it));
+    }
+
+    PkgSet *installed = NULL;
+    PkgSet *available = NULL;
+
+    installed = getInstalled();
+    available = getAvailable();
+
+    PkgDep engine( *installed, *available, alternative_default );
+    engine.set_unresolvable_callback(unresolvable_callback);
+
+    engine.remove(list1);
+
+    for(PkgDep::NameList::iterator it = list1.begin(); it != list1.end(); ++it)
+    {
+	if(find(list2.begin(),list2.end(),*it) == list2.end())
+	{
+	    cout << "Additionally removing " << *it << endl;
+	}
+    }
+}
+
 
 void consistent(vector<string>& argv)
 {

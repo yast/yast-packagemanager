@@ -25,6 +25,8 @@ class PkgSet {
 	typedef InvRel_type::iterator InvRel_iterator;
 	typedef InvRel_type::const_iterator InvRel_const_iterator;
 
+	typedef PMSolvable::PkgRelList_type& (*getAdditionalProvides_callback)( constPMSolvablePtr& ptr );
+
   private:
 	// list of pointers to package contained in this set (the pointers go into
 	// the pool)
@@ -35,8 +37,10 @@ class PkgSet {
 	InvRel_type _provided;
 	InvRel_type _obsoleted;
 
+	getAdditionalProvides_callback _additionalprovides_callback;
+
   public:
-	PkgSet() {}
+	PkgSet();
 	// make a set consisting of all packages with one of the given tags
 //	PkgSet( const DistTagList& tags );
 
@@ -97,6 +101,23 @@ class PkgSet {
 	decl_InvRel_iterators(conflicted)
 	decl_InvRel_iterators(provided)
 	decl_InvRel_iterators(obsoleted)
+
+	/**
+	 * set callback function which is called when Packages are added to this set
+	 * */
+	void setAdditionalProvidesCallback( getAdditionalProvides_callback callback )
+	{
+	    _additionalprovides_callback = callback;
+	}
+
+	/**
+	 * return current callback
+	 * */
+	getAdditionalProvides_callback AdditionalProvidesCallback() const
+	{
+	    return _additionalprovides_callback;
+	}
+
 };
 
 #endif  /* _PkgSet_h */
