@@ -40,7 +40,8 @@ IMPL_DERIVED_POINTER(PMYouPackageDataProvider, PMPackageDataProvider, PMDataProv
 //
 //	DESCRIPTION :
 //
-PMYouPackageDataProvider::PMYouPackageDataProvider()
+PMYouPackageDataProvider::PMYouPackageDataProvider( const PMYouPatchInfoPtr &info )
+  : _patchInfo( info )
 {
 }
 
@@ -84,6 +85,11 @@ const FSize
 PMYouPackageDataProvider::size() const
 {
     return FSize(0);
+}
+
+const std::string PMYouPackageDataProvider::location() const
+{
+  return _patchInfo->location( _pkg );
 }
 
 ///////////////////////////////////////////////////////////////////

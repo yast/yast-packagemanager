@@ -97,8 +97,6 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 
     _packagetagset = new YOUPackageTagSet();
 
-    _packageProvider = new PMYouPackageDataProvider();
-
     _paths = new PMYouPatchPaths("noproduct","noversion","noarch");
 }
 
@@ -141,8 +139,13 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
 
   PkgEdition edition( version, release );
 
+  PMYouPackageDataProviderPtr
+      dataProvider( new PMYouPackageDataProvider( this ) );
+
   PMPackagePtr pkg( new PMPackage( name, edition, _paths->baseArch(),
-                                   _packageProvider ) );
+                                   dataProvider ) );
+  dataProvider->setPackage( pkg );
+
   patch->addPackage( pkg );
 
   value = tagValue( YOUPackageTagSet::OBSOLETES );
@@ -499,4 +502,16 @@ string PMYouPatchInfo::translateLangCode( const LangCode &lang )
     D__ << "Translated " << lang << " to " << result << endl;
 
     return result;
+}
+
+const string PMYouPatchInfo::location( const PMPackagePtr &pkg ) const
+{
+  map<PMPackagePtr,string>::const_iterator it = _locations.find( pkg );
+  if ( it == _locations.end() ) return "";
+  else return it->second;
+}
+
+void PMYouPatchInfo::setLocation( const PMPackagePtr &pkg, const string &str )
+{
+  _locations[ pkg ] = str;
 }

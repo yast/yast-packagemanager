@@ -126,11 +126,11 @@ InstTarget::getPatches (void) const
     if ( !_patchesInitialized ) {
 #warning FIXME: Get product info from InstTarget::descr
         PMYouPatchPaths paths;
-        PMYouPatchInfo patchInfo;
+        PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo );
 
         Url u( "dir://" + ( getRoot() + paths.installDir() ).asString() );
         Pathname path;
-        PMError error = patchInfo.readDir( u, path, _patches, false );
+        PMError error = patchInfo->readDir( u, path, _patches, false );
         if ( error ) {
             E__ << "Error reading patch info for installed patches." << endl;
         }
