@@ -20,6 +20,7 @@
 /-*/
 
 #include <iostream>
+#include <fstream>
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/MediaHandler.h>
@@ -316,6 +317,28 @@ PMError MediaHandler::dirInfo( std::list<std::string> & retlist,
 
   if ( !_isAttached )
     return Error::E_not_attached;
+
+  Pathname dirFile = dirname.absolutename() + "directory.yast";
+
+  PMError err = getFile( dirFile );
+  if ( err ) {
+    DBG << "Directory file '" << dirFile << "': " << err << endl;
+  } else {
+    DBG << "Reading directory from file '" << dirFile << "'" << endl;
+    ifstream dir( localPath( dirFile ).asString().c_str() );
+    if ( dir.fail() ) {
+      ERR << "Unable to load '" << localPath( dirFile ) << "'" << endl;
+      return Error::E_system;
+    }
+    string line;
+    while( getline( dir, line ) ) {
+      if ( line == "directory.yast" ) continue;
+      if ( !dots && *line.begin() == '.' ) continue;
+      if ( line == "." ) continue;
+      retlist.push_back( line );
+    }
+    return Error::E_ok;
+  }
 
   return getDirInfo( retlist, dirname.absolutename(), dots );
 }
