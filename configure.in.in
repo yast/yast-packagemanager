@@ -14,6 +14,18 @@ if [[ "$yast_found_libcurl" = "no" ]]; then
  AC_MSG_ERROR(Headers for libcurl are missing. Please install the package curl-devel.)
 fi
 
+yast_found_libpopt=no
+AC_CHECK_HEADER(popt.h,[yast_found_libpopt=yes])
+if [[ "$yast_found_libpopt" = "no" ]]; then
+ AC_MSG_ERROR(Headers for libpopt are missing. Please install the package popt-devel.)
+fi
+
+yast_found_librpm=no
+AC_CHECK_HEADER(rpm/rpmio.h,[yast_found_librpm=yes])
+if [[ "$yast_found_librpm" = "no" ]]; then
+ AC_MSG_ERROR(Headers for librpm are missing. Please install the package rpm-devel.)
+fi
+
 ## and generate the output
 #AC_CONFIG_FILES(doc/Y2-access.html doc/Y2-components.html)
 @YAST2-OUTPUT@
