@@ -19,7 +19,7 @@ pkginclude_HEADERS =	\
 	PMManager.h	\
 	PMObjectContainerIter.h	\
 	\
-	PMSelectable.h PMSelectablePtr.h	\
+	PMSelectable.h PMSelectablePtr.h SelState.h	\
 	\
 	PMDataProvider.h PMDataProviderPtr.h
 
