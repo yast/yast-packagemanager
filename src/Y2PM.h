@@ -80,6 +80,7 @@ class Y2PM {
 
     static PMError rcInit();
     static PMError rcSave();
+    static PMError rcCopyTo();
 
   private:
 

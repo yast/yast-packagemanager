@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr  6 22:38:59 CEST 2004 - ma@suse.de
+
+- Install y2pmrc in system after installation/update.
+
+-------------------------------------------------------------------
 Mon Apr  5 21:13:53 CEST 2004 - ma@suse.de
 
 - Include source packages to install in disk usage
