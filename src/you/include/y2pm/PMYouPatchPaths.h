@@ -97,6 +97,8 @@ class PMYouPatchPaths : virtual public Rep {
 
     std::string product();
     
+    std::string distProduct();
+    
     std::string version();
     
     PkgArch baseArch();
@@ -110,6 +112,8 @@ class PMYouPatchPaths : virtual public Rep {
     std::list<Url> servers();
     
     Url defaultServer();
+
+    Url currentServer();
 
     std::string mirrorList();
 
@@ -126,6 +130,8 @@ class PMYouPatchPaths : virtual public Rep {
 
     std::string encodeUrl( const std::string &url );
 
+    void addPackageVersion( const std::string &pkgName, std::string &url );
+
   private:
     Pathname _patchPath;
     Pathname _rpmPath;
@@ -136,6 +142,8 @@ class PMYouPatchPaths : virtual public Rep {
     std::string _product;
     std::string _version;
     PkgArch _baseArch;
+
+    std::string _distProduct;
 
     std::list<PkgArch> _archs;
     
