@@ -248,9 +248,12 @@ int main( int argc, const char * argv[] ) {
   //Y2PM::noAutoInstSrcManager();
   Y2PM::instSrcManager();
 
-  //newSrc( "/schnell/CD-ARCHIVE/8.2/SuSE-8.2-DVD-i386-RC2/CD1" );
-  //newSrc( "/schnell/CD-ARCHIVE/8.1/SuSE-8.1-DVD-i386-Int-RC5" );
-  //newSrc( "/schnell/CD-ARCHIVE/8.0/suse80-dvd-de-i386-RC4" );
+  newSrc( "/schnell/CD-ARCHIVE/8.2/SuSE-8.2-DVD-i386-RC2/CD1" );
+  newSrc( "/schnell/CD-ARCHIVE/8.1/SuSE-8.1-DVD-i386-Int-RC5" );
+  newSrc( "/schnell/CD-ARCHIVE/8.0/suse80-dvd-de-i386-RC4" );
+
+  ISM.disableAllSources();
+  return 0;
 
   MIL << "ISM.getSources " << ISM.getSources() << endl;
   MIL << "ISM.instOrderSources " << ISM.instOrderSources() << endl;
