@@ -263,7 +263,7 @@ class PkgDep {
 		 * <li>if a previously satisfied requirement of an
 		 * installed package is broken by installing
 		 * (probably upgrading) this package (in this case
-		 * kind in the RelInfo is CONFLICT)</li>
+		 * kind in the RelInfo is REQUIREMENT)</li>
 		 *
 		 * <li>if an already installed package obsoletes
 		 * this one (kind = OBSOLETION, together with
