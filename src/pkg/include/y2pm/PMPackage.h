@@ -28,6 +28,7 @@
 #include <y2pm/PMPackageDataProvider.h> // should introduce all attribute data types.
 
 #include <y2pm/PMObject.h>
+#include <y2pm/PkgDu.h>
 
 class YStringTree;
 
@@ -39,6 +40,15 @@ class YStringTree;
  **/
 class PMPackage : virtual public Rep, public PMObject {
   REP_BODY(PMPackage);
+
+  private:
+
+    PkgDu _pkgdu;
+
+  public:
+
+    bool du_add( PkgDuMaster & master_r ) const { return _pkgdu.add( *this, master_r ); }
+    bool du_sub( PkgDuMaster & master_r ) const { return _pkgdu.sub( *this, master_r ); }
 
   public:
 

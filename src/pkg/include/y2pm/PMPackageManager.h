@@ -147,6 +147,24 @@ class PMPackageManager : public PMManager {
     std::string translatedRpmGroup( const YStringTreeItem * node )
 	{ return _rpmGroupsTree->translatedRpmGroup( node ); }
 
+
+    ///////////////////////////////////////////////////////////////////
+    // Disk usage calcualtion
+    ///////////////////////////////////////////////////////////////////
+  private:
+
+    PkgDuMaster _du_master;
+
+  public:
+
+    typedef PkgDuMaster::MountPoint MountPoint;
+
+    void setMountPoints( const std::set<MountPoint> & mountpoints_r ) {
+      _du_master.setMountPoints( mountpoints_r );
+    }
+
+    const std::set<MountPoint> & currentDu();
+
 };
 
 ///////////////////////////////////////////////////////////////////
