@@ -27,6 +27,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/GPGCheck.h>
+#include <y2util/SysConfig.h>
 
 #include <Y2PM.h>
 
@@ -475,8 +476,13 @@ PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
                                     bool reload, bool checkSig )
 {
     _paths = paths;
-    return readDir( paths->patchUrl(), paths->patchPath(), patches, reload,
-                    checkSig );
+
+    _paths->config()->writeEntry( "LastServer", _paths->patchUrl().asString() );
+    _paths->config()->save();
+
+    PMError error = readDir( paths->patchUrl(), paths->patchPath(), patches,
+                             reload, checkSig );
+    return error;
 }
 
 string PMYouPatchInfo::tagMultiValue( YOUPatchTagSet::Tags tagIndex,

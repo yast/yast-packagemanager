@@ -235,6 +235,16 @@ Pathname PMYouPatchPaths::localSuseServers()
   return "/etc/suseservers";
 }
 
+Pathname PMYouPatchPaths::localYouServers()
+{
+  return "/etc/youservers";
+}
+
+Pathname PMYouPatchPaths::cachedYouServers()
+{
+  return localDir() + "youservers";
+}
+
 string PMYouPatchPaths::directoryFileName()
 {
   return "directory.3";
@@ -293,6 +303,13 @@ PMError PMYouPatchPaths::requestServers( const string &u )
 {
   DBG << "url: '" << u << endl;
 
+  string lastServer = config()->readEntry( "LastServer" );
+  if ( !lastServer.empty() ) {
+    addServer( Url( lastServer ) );
+  }
+
+  readServers( localYouServers() );
+
   SysConfig cfg( "onlineupdate" );
   
   if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
@@ -322,26 +339,58 @@ PMError PMYouPatchPaths::requestServers( const string &u )
     Wget wget;
     wget.setCookiesFile( cookiesFile().asString() );
 
-    WgetStatus status = wget.getFile( Url(url), localSuseServers() );
+    WgetStatus status = wget.getFile( Url(url), cachedYouServers() );
 
     if ( status != WGET_OK ) {
       return PMError( YouError::E_get_suseservers_failed,
                       wget.error_string( status ) );
     }
+
+    // Remove obsolete file.
+    PathInfo pi( localSuseServers() );
+    if ( pi.isExist() ) {
+      PathInfo::unlink( localSuseServers() );
+    }
+  } else {
+    readServers( localSuseServers() );
+  }
+
+  readServers( cachedYouServers() );
+
+  return PMError();
+}
+
+PMError PMYouPatchPaths::readServers( const Pathname &file )
+{
+  DBG << "Reading servers from " << file << endl;
+
+  PathInfo pi( file );
+  if ( !pi.isExist() ) {
+    DBG << "File doesn't exist." << endl;
+    return PMError();
   }
 
   string line;
-  ifstream in( localSuseServers().asString().c_str() );
-  if ( in.fail() ) return PMError( YouError::E_read_suseservers_failed );
+  ifstream in( file.asString().c_str() );
+  if ( in.fail() ) {
+    return PMError( YouError::E_read_suseservers_failed, file.asString() );
+  }
   while( getline( in, line ) ) {
-    if ( *line.begin() != '#' ) {
+    if ( !line.empty() && *line.begin() != '#' ) {
       Url url( line );
-      if ( url.isValid() ) _servers.push_back( url );
-      D__ << "Mirror url: " << url.asString() << endl;
+      if ( url.isValid() ) addServer( url );
     }
   }
 
   return PMError();
+}
+
+void PMYouPatchPaths::addServer( const Url &url )
+{
+  D__ << "Mirror url: " << url << endl;
+
+  list<Url>::const_iterator it = find( _servers.begin(), _servers.end(), url );
+  if ( it == _servers.end() ) _servers.push_back( url );
 }
 
 void PMYouPatchPaths::addPackageVersion( const string &pkgName,
