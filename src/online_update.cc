@@ -19,6 +19,7 @@
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstYou.h>
+#include <y2pm/PMYouServers.h>
 
 using namespace std;
 
@@ -221,12 +222,13 @@ int main( int argc, char **argv )
         exit( -1 );
       }
     } else {
-      error = you.paths()->requestServers();
+      PMYouServers youServers( you.paths() );
+      error = youServers.requestServers();
       if ( error ) {
         cerr << "Error while requesting servers: " << error << endl;
         exit( -1 );
       }
-      url = you.paths()->currentServer();
+      url = youServers.currentServer();
     }
   }
   

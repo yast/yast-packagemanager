@@ -87,7 +87,6 @@ void PMYouPatchPaths::init( const string &product, const string &version,
   _version = version;
   _baseArch = PkgArch( baseArch );
 
-  _youUrl = defaultMirrorList();
   _businessProduct = ( product != "SuSE-Linux" );
 
   string path = baseArch + "/update/";
@@ -229,21 +228,6 @@ Pathname PMYouPatchPaths::externalRpmDir()
   return localDir() + "external/";
 }
 
-Pathname PMYouPatchPaths::localSuseServers()
-{
-  return "/etc/suseservers";
-}
-
-Pathname PMYouPatchPaths::localYouServers()
-{
-  return "/etc/youservers";
-}
-
-Pathname PMYouPatchPaths::cachedYouServers()
-{
-  return localDir() + "youservers";
-}
-
 string PMYouPatchPaths::directoryFileName()
 {
   return "directory.3";
@@ -298,175 +282,7 @@ list<PkgArch> PMYouPatchPaths::archs()
   return _archs;
 }
 
-PMError PMYouPatchPaths::requestServers( const string &u )
-{
-  DBG << "url: '" << u << "'" << endl;
-
-  string lastServer = config()->readEntry( "LastServer" );
-  if ( !lastServer.empty() ) {
-    addServer( Url( lastServer ) );
-  }
-
-  PMError error = readServers( localYouServers() );
-  if ( error ) return error;
-
-  SysConfig cfg( "onlineupdate" );
-  
-  if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
-    string url = u;
-
-    if ( url.empty() ) {
-      if ( _youUrl.empty() ) url = defaultMirrorList();
-      else url = _youUrl;
-      url += "?product=" + product();
-      url += "&version=" + version();
-      url += "&basearch=" + string( baseArch() );
-      url += "&business=";
-      if ( businessProduct() ) url += "1";
-      else url += "0";
-
-      url += "&distproduct=" + distProduct();
-
-      addPackageVersion( "yast2-online-update", url );
-      addPackageVersion( "yast2-packagemanager", url );
-      addPackageVersion( "liby2util", url );
-    }
-
-    url = encodeUrl( url );
-
-    DBG << "url: '" << url << "'" << endl;
-
-    PMError error = MediaAccess::getFile( Url( url ), cachedYouServers() );
-    if ( error ) {
-      if ( error == MediaError::E_write_error ) {
-        return PMError( YouError::E_write_youservers_failed );
-      } else {
-        return PMError( YouError::E_get_youservers_failed );
-      }
-    }
-
-    // Remove obsolete file.
-    PathInfo pi( localSuseServers() );
-    if ( pi.isExist() ) {
-      PathInfo::unlink( localSuseServers() );
-    }
-  } else {
-    error = readServers( localSuseServers() );
-    if ( error ) return error;
-  }
-
-  error = readServers( cachedYouServers() );
-
-  return error;
-}
-
-PMError PMYouPatchPaths::readServers( const Pathname &file )
-{
-  DBG << "Reading servers from " << file << endl;
-
-  PathInfo pi( file );
-  if ( !pi.isExist() ) {
-    DBG << "File doesn't exist." << endl;
-    return PMError();
-  }
-
-  string line;
-  ifstream in( file.asString().c_str() );
-  if ( in.fail() ) {
-    ERR << "Error reading " << file << endl;
-    return PMError( YouError::E_read_youservers_failed, file.asString() );
-  }
-  while( getline( in, line ) ) {
-    if ( !line.empty() && *line.begin() != '#' ) {
-      Url url( line );
-      if ( url.isValid() ) addServer( url );
-    }
-  }
-
-  return PMError();
-}
-
-void PMYouPatchPaths::addServer( const Url &url )
-{
-  D__ << "Mirror url: " << url << endl;
-
-  list<Url>::const_iterator it = find( _servers.begin(), _servers.end(), url );
-  if ( it == _servers.end() ) _servers.push_back( url );
-}
-
-void PMYouPatchPaths::addPackageVersion( const string &pkgName,
-                                         string &url )
-{
-  PMSelectablePtr selectable = Y2PM::packageManager().getItem( pkgName );
-  if ( !selectable ) {
-    WAR << pkgName << " is not installed." << endl;
-  } else {
-    PMPackagePtr pkg = selectable->installedObj();
-    if ( !pkg ) {
-      WAR << "No installed object for " << pkgName << endl;
-    } else {
-      url += "&" + pkgName + "=" + pkg->edition().asString();
-    }
-  }
-}
-
-list<Url> PMYouPatchPaths::servers()
-{
-  if ( _servers.size() == 0 ) {
-    list<Url> servers;
-    servers.push_back( defaultServer() );
-    return servers;
-  } else {
-    return _servers;
-  }
-}
-
-Url PMYouPatchPaths::defaultServer()
-{
-  if ( _servers.size() == 0 ) {
-    if ( businessProduct() ) {
-      return Url( "http://sdb.suse.de/download/" );
-    } else {
-      return Url( "ftp://ftp.suse.com/pub/suse/" );
-    }
-  } else {
-    return *_servers.begin();
-  }
-}
-
-Url PMYouPatchPaths::currentServer()
-{
-  return *(servers().begin());
-}
-
-string PMYouPatchPaths::encodeUrl( const string &url )
-{
-  D__ << url << endl;
-
-  string result;
-  
-  string::const_iterator it;
-  for( it = url.begin(); it != url.end(); ++it ) {
-    switch ( *it ) {
-      case ' ':
-        result += "%20";
-        break;
-      default:
-        result += *it;
-    }
-  }
-
-  D__ << result << endl;
-
-  return result;
-}
-
-string PMYouPatchPaths::mirrorList()
+string PMYouPatchPaths::youUrl()
 {
   return _youUrl;
-}
-
-string PMYouPatchPaths::defaultMirrorList()
-{
-  return "http://www.suse.de/cgi-bin/suseservers.cgi";
 }

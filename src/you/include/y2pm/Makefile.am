@@ -18,6 +18,7 @@ pkginclude_HEADERS =	\
 	PMYouPatchManager.h		\
 	PMYouPatchPaths.h		\
 	PMYouPatchPathsPtr.h            \
+        PMYouServers.h                  \
         YouError.h
 
 #<INSTALL-HEADER-TARGET>

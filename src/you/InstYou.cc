@@ -35,6 +35,7 @@
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/PMYouServers.h>
 
 #include <y2pm/InstYou.h>
 
@@ -84,14 +85,16 @@ PMError InstYou::initProduct()
 
 PMError InstYou::servers( list<Url> &servers )
 {
-  PMError error = _paths->requestServers();
+  PMYouServers youServers( _paths );
+
+  PMError error = youServers.requestServers();
   
   if ( error ) {
     ERR << "Error fetching servers: " << error << endl;
     return error;
   }
   
-  servers = _paths->servers();
+  servers = youServers.servers();
 
   return PMError();
 }
