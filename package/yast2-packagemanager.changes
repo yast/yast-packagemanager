@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 11 16:36:30 CEST 2002 - kkaempf@suse.de
+
+- equal buildtime is no reason to check manually during update
+- 2.6.17
+
+-------------------------------------------------------------------
 Wed Sep 11 12:19:25 CEST 2002 - kkaempf@suse.de
 
 - allow self-provides/conflicts/obsoletes but warn
