@@ -18,11 +18,8 @@ class PkgRelation {
 	// default copy constructor and assigment are ok
 
 	const PkgName& name() const { return _name; }
-	PkgName& name() { return _name; }
 	rel_op op() const { return _op; }
-	rel_op& op() { return _op; }
 	const PkgEdition& edition() const { return _edition; }
-	PkgEdition& edition() { return _edition; }
 
 	// return true if this relation holds given a package (providing itself)
 	// or another relation (which is a provides relation)
@@ -75,7 +72,7 @@ class PkgRelation {
         static std::list<PkgRelation> parseRelations( const std::string & data_tr );
 
       private:
-      
+
         static rel_op string2DepCompare( const std::string & str_tr );
 };
 
