@@ -48,7 +48,6 @@
 using namespace std;
 
 static int _verbose = 0;
-static int _maxremove = -1;
 static bool _showtimes = false;
 static bool _createbackups = false;
 
@@ -86,7 +85,8 @@ void du(vector<string>& argv);
 void showselection(vector<string>& argv);
 void installselection(vector<string>& argv);
 void order(vector<string>& argv);
-void update(vector<string>& argv);
+void upgrade(vector<string>& argv);
+void commit(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -125,7 +125,8 @@ static struct Funcs func[] = {
     { "installselection",	installselection,	1,	"mark selection for installation" },
     
     { "order",		order,		1,	"compute installation order" },
-    { "update",		update,		1,	"compute update" },
+    { "upgrade",	upgrade,	1,	"compute upgrade" },
+    { "commit",		commit,		1,	"commit changes to and actually perform installation" },
 
     { NULL,		NULL,		0,	NULL }
 };
@@ -147,9 +148,48 @@ void usage(char **argv) {
 	exit(1);
 }
 
+static int lastprogress = 0;
 void progresscallback(int p, void* nix)
 {
-    cout << p << "%" << endl;
+    if(p<0) p = 0;
+    if(p>100) p = 100;
+
+    if(p==0) lastprogress = 0;
+    
+    int num = (long)60*p/100;
+    for(int i=0; i < num-lastprogress; i++)
+    {
+	cout << "%";
+    }
+    cout.flush();
+    lastprogress = num;
+
+    if(p == 100) cout << endl;
+}
+
+void providestartcallback(const std::string& name, const FSize& s, bool, void*)
+{
+    cout << stringutil::form("Downloading %s (%s)",name.c_str(), s.asString().c_str()) << endl;
+}
+
+void donecallback(PMError error, const std::string& reason, void*)
+{
+    if(error)
+	cout << error << ": " << reason << endl;
+    else
+	cout << "ok" << endl;
+}
+
+void pkgstartcallback(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*)
+{
+    if(is_delete)
+    {
+	cout << stringutil::form("Deleting %s",name.c_str()) << endl;
+    }
+    else
+    {
+	cout << stringutil::form("Installing %s (%s) - %s ",name.c_str(),size.asString().c_str(),summary.c_str()) << endl;
+    }
 }
 
 void instlog(vector<string>& argv)
@@ -238,7 +278,6 @@ void rebuilddb(vector<string>& argv)
 {
     cout << "rebuilding database ... " << endl;
 
-    Y2PM::instTarget().setRebuildDBProgressCallback(progresscallback, NULL);
     PMError err = Y2PM::instTarget().bringIntoCleanState();
     if(err != PMError::E_ok)
     {
@@ -409,13 +448,24 @@ void init(vector<string>& argv)
     if( dbstat != InstTargetError::E_ok )
     {
 	cout << "error initializing target: " << dbstat << endl;
+	_initialized = false;
     }
     else
     {
 	Y2PM::instTarget().createPackageBackups(_createbackups);
 	Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages() );
 	Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections() );
+
+	Y2PM::setRebuildDBProgressCallback(progresscallback, NULL);
+	Y2PM::setProvideStartCallback(providestartcallback, NULL);
+	Y2PM::setProvideProgressCallback(progresscallback, NULL);
+	Y2PM::setProvideDoneCallback(donecallback, NULL);
+	Y2PM::setPackageStartCallback(pkgstartcallback, NULL);
+	Y2PM::setPackageProgressCallback(progresscallback, NULL);
+	Y2PM::setPackageDoneCallback(donecallback, NULL);
     }
+
+
 }
 
 void help(vector<string>& argv)
@@ -674,11 +724,31 @@ void order(vector<string>& argv)
 
 }
 
-void update(vector<string>& argv)
+void upgrade(vector<string>& argv)
 {
     PMUpdateStats stats;
     Y2PM::packageManager().doUpdate(stats);
     cout << stats << endl;
+}
+
+void commit(vector<string>& argv)
+{
+    std::list<std::string> errors_r;
+    std::list<std::string> remaining_r;
+    std::list<std::string> srcremaining_r;
+    
+    Y2PM::commitPackages (0,errors_r, remaining_r, srcremaining_r);
+
+    if(!remaining_r.empty())
+    {
+	cout << "failed packages:" << endl;
+	for(list<string>::iterator it=remaining_r.begin(); it!=remaining_r.end();++it)
+	{
+	    cout << *it << endl;
+	}
+    }
+
+    cout << endl << "please quit now" << endl;
 }
 
 #if 0
@@ -906,8 +976,6 @@ void rpminstall(vector<string>& argv)
     {
 	pkgs.push_back (Pathname (*it));
     }
-
-    Y2PM::instTarget().setPackageInstallProgressCallback(progresscallback, NULL);
 
     if(Y2PM::instTarget().init(_rootdir, false) != InstTarget::Error::E_ok)
     {
