@@ -100,6 +100,38 @@ InstTarget::Erase()
     return false;
 }
 
+
+/**
+ * get target base architecture
+ *
+ *
+ */
+PkgArch
+InstTarget::baseArch ()
+{
+    if (((const std::string)_base_arch).empty())
+    {
+	char *argv[3] = { "uname", "-m", 0 };
+	ExternalProgram process (argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
+	string output = process.receiveLine ();
+	if (output.length() == 0)
+	{
+	    ERR << "No output from 'uname -m'" << endl;
+	}
+	else
+	{
+	    string::size_type endpos = output.find_first_of ("\n");
+	    if (endpos != string::npos)
+		_base_arch = PkgArch (output.substr (0, endpos));
+	    else
+		_base_arch = PkgArch (output);
+	}
+	MIL << "_base_arch '" << _base_arch << "'" << endl;
+    } // _base_arch empty
+
+    return _base_arch;
+}
+
 //-----------------------------
 // target content access
 

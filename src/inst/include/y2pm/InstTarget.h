@@ -40,7 +40,7 @@
 #include <y2pm/PMError.h>
 
 #include <y2pm/MediaAccessPtr.h>	// physical media access class
-
+#include <y2pm/PkgArch.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
@@ -76,6 +76,8 @@ class InstTarget: virtual public Rep, public InstData {
         InstTarget();
         ~InstTarget();
 
+	PkgArch _base_arch;
+
     public:
 
 	/**
@@ -109,6 +111,11 @@ class InstTarget: virtual public Rep, public InstData {
 	 * It is safe to alwas use true here.
 	 * */
 	PMError init( const Pathname & rootpath, bool createnew = true );
+
+	/**
+	 * determine target system architecture
+	 */
+	PkgArch baseArch ();
 
 	/**
 	 * bring target into a clean state e.g. by calling rpm --rebuilddb
