@@ -33,7 +33,8 @@ void PkgDep::virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
     remove_package( &set, pkg, to_remove );
 }
 	
-
+//recoursive remove package pkg from PkgSet set and extend to_remove
+//with all removed packages
 void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg, SolvableList& to_remove )
 {
 	D__ << "removing package " << pkg->name() << endl;

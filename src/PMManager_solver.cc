@@ -66,12 +66,18 @@ static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
 }
 */
 
+
+/**
+ * Build a PkgSet that consists of installed packages and packages that are
+ * marked for installation
+ * */
 static void buildinstalledonly(PMManager& manager, PkgSet& installed)
 {
     for ( PMManager::PMSelectableVec::iterator it = manager.begin(); it != manager.end(); ++it )
     {
 	bool hasi = (*it)->has_installed();
 	bool toi  = (*it)->to_install();
+	// if (package is installed and not marked for deletion) or marked for installation
 	if(( hasi && !(*it)->to_delete()) || toi )
 	{
 	    PMSolvablePtr sp;
@@ -145,6 +151,9 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
 
 // set packages not from input list to auto, those that can't be set to auto
 // are added to bad list
+//
+// installed is a set of packages that are assumed to be installed,
+// used for building remove_to_solve_conflict lists
 static void setAutoState(PkgSet& installed, PkgDep::ResultList& good, PkgDep::ErrorResultList&
 bad, PkgDep::SolvableList& to_remove)
 {
@@ -184,33 +193,13 @@ bad, PkgDep::SolvableList& to_remove)
 	    }
     }
 
-//    PkgSet available; //fake
-//    PkgDep engine(installed,available);
 
+    // go through error list and search for packages that could not
+    // be set to autoinstall. For those packages, a remove list is
+    // generated
     for(PkgDep::ErrorResultList::iterator it = bad.begin();
 	    it != bad.end(); ++it)
     {
-	/* don't do that yet. would have to check consistency, alternatives and
-	 * install (add_conflict using functions)
-	 *
-	if(!it->conflicts_with.empty())
-	{
-	    PkgDep::SolvableList nix;
-	    it->remove_to_solve_conflict = nix;
-	    for(PkgDep::RelInfoList::iterator rit = it->conflicts_with.begin()
-		; rit != it->conflicts_with.end(); ++rit)
-	    {
-		PMSolvablePtr p = rit->solvable;
-		if(!p)
-		    {INT << "p is NULL" << endl; continue; }
-
-		if(p == it->solvable) continue; // do not remove the package that has the conflict
-		    
-		PkgSet fakei = installed;
-		PkgDep::remove_package(&fakei, p, it->remove_to_solve_conflict);
-	    }
-	}
-	*/
     	if(it->state_change_not_possible)
 	{
 	    PkgSet fakei = installed;
@@ -228,7 +217,7 @@ bad, PkgDep::SolvableList& to_remove)
 		PkgDep::remove_package(&fakei, p, it->remove_to_solve_conflict);
 	    }
 	}
-}
+    }
 
     for(PkgDep::SolvableList::iterator it = to_remove.begin();
 	    it != to_remove.end(); ++it)
