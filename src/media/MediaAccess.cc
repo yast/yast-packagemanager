@@ -266,6 +266,17 @@ MediaAccess::provideDir( const Pathname & dirname ) const
 }
 
 PMError
+MediaAccess::provideDirTree( const Pathname & dirname ) const
+{
+  if ( !_handler ) {
+    INT << Error::E_not_open << " on provideDirTree(" << dirname << ")" << endl;
+    return Error::E_not_open;
+  }
+
+  return _handler->provideDirTree( dirname );
+}
+
+PMError
 MediaAccess::releaseDir( const Pathname & dirname ) const
 {
   if ( !_handler )

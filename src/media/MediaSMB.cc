@@ -150,9 +150,9 @@ PMError MediaSMB::getFile (const Pathname & filename) const
 //
 //	DESCRIPTION : Asserted that media is attached.
 //
-PMError MediaSMB::getDir (const Pathname & dirname) const
+PMError MediaSMB::getDir( const Pathname & dirname, bool recurse_r ) const
 {
-  return MediaHandler::getDir( dirname );
+  return MediaHandler::getDir( dirname, recurse_r );
 }
 
 ///////////////////////////////////////////////////////////////////

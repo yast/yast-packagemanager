@@ -369,7 +369,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 //
 //	DESCRIPTION : Asserted that media is attached
 //
-PMError MediaCurl::getDir( const Pathname & dirname ) const
+PMError MediaCurl::getDir( const Pathname & dirname, bool recurse_r ) const
 {
   PathInfo::dircontent content;
   PMError err = getDirInfo( content, dirname, /*dots*/false );
@@ -385,9 +385,13 @@ PMError MediaCurl::getDir( const Pathname & dirname ) const
 	err = getFile( filename );
 	break;
       case PathInfo::T_DIR: // newer directory.yast contain at least directory info
-	res = PathInfo::assert_dir( localPath( filename ) );
-	if ( res ) {
-	  WAR << "Ignore error (" << res <<  ") on creating local directory '" << localPath( filename ) << "'" << endl;
+	if ( recurse_r ) {
+	  err = getDir( filename, recurse_r );
+	} else {
+	  res = PathInfo::assert_dir( localPath( filename ) );
+	  if ( res ) {
+	    WAR << "Ignore error (" << res <<  ") on creating local directory '" << localPath( filename ) << "'" << endl;
+	  }
 	}
 	break;
       default:

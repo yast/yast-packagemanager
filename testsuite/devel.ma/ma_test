@@ -28,8 +28,8 @@ fi
 make $PRG || exit 1
 
 export Y2SLOG_FILE=-
-# export Y2SLOG_DEBUG=
-# export Y2DEBUG=1
+export Y2SLOG_DEBUG=
+export Y2DEBUG=1
 # exec gdb ./$PRG
 #./$PRG "$@" 2> log
 ./$PRG "$@" 2> $LPIPE

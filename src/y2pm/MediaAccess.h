@@ -182,6 +182,14 @@ class MediaAccess : public CountedRep {
 	PMError provideDir( const Pathname & dirname ) const;
 
 	/**
+	 * Use concrete handler to provide directory tree denoted
+	 * by path below 'attach point' (recursive!!).
+	 * 'dirname' is interpreted relative to the
+	 * attached url and a path prefix is preserved.
+	 **/
+	PMError provideDirTree( const Pathname & dirname ) const;
+
+	/**
 	 * Remove directory tree below attach point IFF handler downloads files
 	 * to the local filesystem. Never remove anything from media.
 	 **/

@@ -157,130 +157,21 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
-void WAIT() {
-  INT << "WAIT FOR INPUT...." << endl;
-  cout << endl << "GET INPUT: " << flush;
-  string s;
-  cin >> s;
+
+ostream & dump( ostream & str, const Url & url ) {
+  str << url << endl;
+  str << url.isValid() << " - " << url.saveAsString() << endl;
+  str << "  " << "prot :" << url.protocolString() << ":" << endl;
+  str << "  " << "user :" << url.username() << ":" << endl;
+  str << "  " << "pass :" << url.password() << ":" << endl;
+  str << "  " << "host :" << url.host() << ":" << endl;
+  str << "  " << "port :" << url.port() << ":" << endl;
+  str << "  " << "path :" << url.path() << ":" << endl;
+  return str;
 }
 
-
-InstSrcDescrPtr mkddesc( const ProductIdent & p, const ProductIdent & b ) {
-  InstSrcDescrPtr ret = new InstSrcDescr;
-  ret->set_content_product( p );
-  ret->set_content_baseproduct( b );
-  return ret;
-}
-
-constInstSrcDescrPtr getChild( list<constInstSrcDescrPtr> & src_r, list<constInstSrcDescrPtr> & dst_r,
-			       constInstSrcDescrPtr base_r ) {
-  for ( list<constInstSrcDescrPtr>::iterator it = src_r.begin(); it != src_r.end(); /*++ in loop*/ ) {
-    if ( (*it)->hasBaseProduct( base_r ) ) {
-      constInstSrcDescrPtr ret = *it;
-      dst_r.splice( dst_r.end(), src_r, it );
-      return ret;
-    } else {
-      ++it;
-    }
-  }
-  return 0;
-}
-
-void getTree( list<constInstSrcDescrPtr> & src_r, list<constInstSrcDescrPtr> & dst_r,
-	      constInstSrcDescrPtr base_r )
-{
-  constInstSrcDescrPtr got;
-  while ( (got = getChild( src_r, dst_r, base_r )) ) {
-    getTree( src_r, dst_r, got );
-  }
-}
-
-
-list<constInstSrcDescrPtr> sortProdlist( const list<constInstSrcDescrPtr> & _prodlist ) {
-  list<constInstSrcDescrPtr> _sortedProdlist;
-  /////////////////////////////////////////////////////////////////////////
-  list<constInstSrcDescrPtr> scrlist = _prodlist;
-  list<constInstSrcDescrPtr> dstlist;
-  scrlist.reverse();
-
-  MIL << "SRC   " << scrlist << endl;
-  MIL << "RESLT " << dstlist << endl;
-  INT << "===================================================" << endl;
-
-  getTree( scrlist, dstlist, 0 );
-  MIL << "SRC   " << scrlist << endl;
-  MIL << "RESLT " << dstlist << endl;
-  INT << "===================================================" << endl;
-  getTree( scrlist, dstlist, 0 );
-  MIL << "SRC   " << scrlist << endl;
-  MIL << "RESLT " << dstlist << endl;
-  INT << "===================================================" << endl;
-
-  dstlist.reverse();
-  if ( scrlist.size() ) {
-    WAR << "Found products without existing baseproduct: " << scrlist << endl;
-
-    dstlist.splice( dstlist.end(), scrlist );
-  }
-
-  _sortedProdlist.swap( dstlist );
-  /////////////////////////////////////////////////////////////////////////
-  return _sortedProdlist;
-}
-
-void xx() {
-  PkgNameEd noex ( PkgName("noex"),   PkgEdition("dsf") );
-
-  PkgNameEd none ( PkgName("foo"),    PkgEdition("") );
-  PkgNameEd core ( PkgName("core"),   PkgEdition("9") );
-  PkgNameEd core8( PkgName("core"),   PkgEdition("8") );
-  PkgNameEd sls8 ( PkgName("Sles"),   PkgEdition("8") );
-  PkgNameEd sls9 ( PkgName("sles"),   PkgEdition("9") );
-  PkgNameEd sls93( PkgName("slesSP"), PkgEdition("3") );
-  PkgNameEd sld  ( PkgName("sld"),    PkgEdition("1-1") );
-
-  PkgNameEd foo   ( PkgName("foo"),   PkgEdition("1") );
-  PkgNameEd dummy ( PkgName("dummy"), PkgEdition("2") );
-  PkgNameEd dumm  ( PkgName("noba"),  PkgEdition("99") );
-
-
-  WAR << TMGR.installProduct( mkddesc( sls8, core8 ) ) << endl;
-  INT << TMGR.getProducts() << endl;
-  WAR << TMGR.installProduct( mkddesc( sls9, core ) ) << endl;
-  INT << TMGR.getProducts() << endl;
-  WAR << TMGR.removeProduct( mkddesc( sls9, core ) ) << endl;
-  INT << TMGR.getProducts() << endl;
-  return;
-  list<constInstSrcDescrPtr> prods;
-
-  prods.push_back( mkddesc( sls93,sls9 ) );
-  prods.push_back( mkddesc( sld , core ) );
-  prods.push_back( mkddesc( dumm, noex ) );
-  prods.push_back( mkddesc( sls9, core ) );
-  prods.push_back( mkddesc( sls8, core8 ) );
-  prods.push_back( mkddesc( dummy, foo ) );
-  prods.push_back( mkddesc( core, none ) );
-  prods.push_back( mkddesc( foo,  none ) );
-
-  SEC << prods << endl;
-  SEC << sortProdlist( prods ) << endl;
-}
-
-struct PMSelectionByOrder : public binary_function<PMSelectablePtr, PMSelectablePtr, bool>
-{
-  bool operator()( const PMSelectablePtr & x, const PMSelectablePtr & y ) {
-    return( PMSelection::compareByOrder( x->theObject(), y->theObject() ) < 0 );
-  }
-};
-
-void pcandlog( constPMSelectablePtr p ) {
-  INT << constPMPackagePtr( p->candidateObj() )->source() << endl;
-  INT << "   " << p->candidateObj() << endl;
-  for ( PMSelectable::PMObjectList::const_iterator it = p->av_begin();
-	it != p->av_end(); ++it ) {
-    INT << "      " << *it << endl;
-  }
-}
+#include <y2pm/InstYou.h>
+#include <y2pm/PMYouPatchManager.h>
 
 /******************************************************************
 **
@@ -303,31 +194,22 @@ int main( int argc, char * argv[] )
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
     Y2PM::instTargetInit("/");
-    //_t.start( "Launch PMPackageManager" );
-    //Y2PM::packageManager();
-    //_t.start( "Launch PMSelectionManager" );
-    //Y2PM::selectionManager();
-    //_t.start( "Launch InstSrcManager" );
-    //Y2PM::instSrcManager();
+    _t.start( "Launch PMPackageManager" );
+    Y2PM::packageManager();
+    _t.start( "Launch PMSelectionManager" );
+    Y2PM::selectionManager();
+    _t.start( "Launch InstSrcManager" );
+    Y2PM::instSrcManager();
     _t.stop();
     INT << "Total Packages "   << PMGR.size() << endl;
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  InstTargetSelDB sdb;
-  MIL << sdb.open() << endl;
-  MIL << sdb.isOpen() << endl;
-  MIL << sdb.dbPath() << endl;
-  MIL << sdb.getSelections() << endl;
-  INT << sdb.isInstalled( "/Basis-Sound.sel" ) << endl;
-  INT << sdb.isInstalled( "/Basis-Sound-1-2.i386.sel" ) << endl;
-  INT << sdb.install( "/tmp/Basis-Sound.sel" ) << endl;
-  MIL << sdb.getSelections() << endl;
-  INT << sdb.install( "/tmp/Basis-Sound-1-2.i386.sel" ) << endl;
-  MIL << sdb.getSelections() << endl;
-  INT << sdb.install( "/tmp/Basis-Sound.sel" ) << endl;
-  MIL << sdb.getSelections() << endl;
-
+  Y2PM::setNotRunningFromSystem();
+  Y2PM::instSrcManager();
+  InstSrcManager::ISrcId nid = newSrc( "ftp://schnell/CD-ARCHIVE/9.1/SuSE-9.1-FTP-i386-RC2/CD1" );
+  ISM.enableSource( nid );
+  //ISM.disableAllSources();
 
   SEC << "STOP" << endl;
   return 0;

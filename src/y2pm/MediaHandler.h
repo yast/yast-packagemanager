@@ -175,7 +175,7 @@ class MediaHandler {
 	 *
 	 * Asserted that media is attached.
 	 **/
-	virtual PMError getDir( const Pathname & dirname ) const = 0;
+	virtual PMError getDir( const Pathname & dirname, bool recurse_r ) const = 0;
 
 	/**
 	 * Call concrete handler to provide a content list of directory on media
@@ -333,6 +333,14 @@ class MediaHandler {
 	PMError provideDir( Pathname dirname ) const;
 
 	/**
+	 * Use concrete handler to provide directory tree denoted
+	 * by path below 'localRoot' (recursive!!).
+	 * dirname is interpreted relative to the
+	 * attached url and a path prefix is preserved.
+	 **/
+	PMError provideDirTree( Pathname dirname ) const;
+
+	/**
 	 * Remove filename below localRoot IFF handler downloads files
 	 * to the local filesystem. Never remove anything from media.
 	 **/
@@ -390,7 +398,7 @@ class MediaHandler {
 	virtual PMError attachTo (bool next = false);			\
 	virtual PMError releaseFrom( bool eject );			\
 	virtual PMError getFile( const Pathname & filename ) const;	\
-	virtual PMError getDir( const Pathname & dirname ) const;	\
+	virtual PMError getDir( const Pathname & dirname, bool recurse_r ) const;	\
         virtual PMError getDirInfo( std::list<std::string> & retlist,	\
 			            const Pathname & dirname, bool dots = true ) const;	\
         virtual PMError getDirInfo( PathInfo::dircontent & retlist,	\
