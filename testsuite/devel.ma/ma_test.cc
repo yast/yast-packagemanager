@@ -272,10 +272,6 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  PMError err( 12, "wrzl" );
-  ERR << err << endl;
-  return 0;
-
   wfm.init();
   INT << "START" << endl;
 
