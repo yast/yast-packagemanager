@@ -103,12 +103,12 @@ class PMSelectable : virtual public Rep {
   public:
 
     /**
-     * For state queries.
+     * PRELIMINARILY: For state queries.
      **/
     const SelState & state() const { return _state; }
 
     /**
-     *  For state manipulation.
+     * PRELIMINARILY: For state manipulation.
      **/
     SelState & state() { return _state; }
 
