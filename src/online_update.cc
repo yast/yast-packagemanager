@@ -282,6 +282,7 @@ int main( int argc, char **argv )
   settings->setDryRun( dryrun );
   settings->setNoExternalPackages( autoInstall );
   settings->setGetAll( getAll );
+  settings->setGetOnly( autoGet );
 
   list<PMYouProductPtr> products = you.settings()->products();
 
@@ -414,18 +415,9 @@ int main( int argc, char **argv )
     return 0;
   }
 
-  error = you.retrievePatches();
-  if ( error ) {
-    cerr << _("Error retrieving patches: ") << error << endl;
-    exit( -1 );
-  }
+  error = you.processPatches();
 
-  if ( getAll || ( autoGet && !autoInstall ) ) {
-    if ( verbose ) cout << _("Got patches.") << endl;
-    return 0;
-  }
-
-  bool installedPatches = you.installPatches();
+  bool installedPatches = you.installedPatches();
   if ( verbose ) {
     if ( !installedPatches ) {
       cout << _("No patches have been installed.") << endl;
@@ -433,7 +425,15 @@ int main( int argc, char **argv )
       cout << _("Patches have been installed.") << endl;
     }
   }
-  // TODO: Check for installation errors
+
+  if ( error ) {
+    cerr << _("Error processing patches: ") << error << endl;
+    exit( -1 );
+  }
+
+  if ( getAll || ( autoGet && !autoInstall ) ) {
+    if ( verbose ) cout << _("Got patches.") << endl;
+  }
 
   MIL << "online_update done" << endl;
   return 0;

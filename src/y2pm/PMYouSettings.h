@@ -266,6 +266,16 @@ class PMYouSettings : public CountedRep
     */
     bool getAll() const;
 
+    /**
+      Set if patches will only be retrived, but not installed.
+    */
+    void setGetOnly( bool );
+
+    /**
+      Get if patches will only be retrived, but not installed.
+    */
+    bool getOnly() const;
+
   protected:
     void init();
 
@@ -285,6 +295,7 @@ class PMYouSettings : public CountedRep
     bool _noExternalPackages;
     bool _dryRun;
     bool _getAll;
+    bool _getOnly;
 };
 
 #endif

@@ -99,23 +99,14 @@ class InstYou {
     PMError retrievePatchInfo();
     
     /**
-     * Download packages and scripts belonging to selected patches.
-     *
-     * @param reload    If true reload all patches from server.
-     * @param checkSig  If true check signatures of downloaded packages and
-     *                  scripts.
-     * @param noExternal If true, external packages aren't downloaded.
-     */
-    PMError retrievePatches();
-    
-    /**
-      Install patches to target system. Return true if patches have been
-      installed, return false if no patches have benn installed.
-      
-      This function uses the InstYou::Callbacks to handle error messages and
-      other events requiring information or action of the user.
+      Process selected patches. Patches are downloaded or mounted as required
+      and then installed. The settings of the PMYouSettings object are taken
+      into account.
+
+      The function uses InstYou::Callbacks to report errors, log progress and
+      handle other events which require information or action from the user.
     */
-    bool installPatches();
+    PMError processPatches();
 
     /**
      * Select Patches.

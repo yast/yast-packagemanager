@@ -361,9 +361,9 @@ PMError InstYou::attachSource()
   return error;
 }
 
-PMError InstYou::retrievePatches()
+PMError InstYou::processPatches()
 {
-  D__ << "Retrieve patches." << endl;
+  MIL << "Retrieve patches." << endl;
 
   bool hasPreInformation = false;
 
@@ -396,6 +396,7 @@ PMError InstYou::retrievePatches()
   
   if ( !patch ) {
     log( _("No patches have been selected for installation.\n") );
+    return PMError::E_ok;
   }
 
   bool skipAll = false;
@@ -474,95 +475,20 @@ PMError InstYou::retrievePatches()
     log( _("Download finished.\n\n") );
   }
 
-  return error;
-}
+  if ( _settings->getOnly() || _settings->getAll() ) return error;
 
-PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
-{
-  if ( resetProgress ) {
-    _progressCurrent = 0;
-    _progressTotal = 0;
-    std::list<PMYouPatchPtr>::const_iterator it;
-    for ( it = _patches.begin(); it != _patches.end(); ++it ) {
-      if ( (*it)->isSelected() ) _progressTotal++;
-    }
+  MIL << "Install patches." << endl;
 
-    _progressTotal *= 2;
-  }
-
-  D__ << "_progressTotal: " << _progressTotal << endl;
-
-  _selectedPatchesIt = _patches.begin();
-
-  return nextSelectedPatch();
-}
-
-PMYouPatchPtr InstYou::nextPatch( bool *ok )
-{
-  ++_selectedPatchesIt;
-  ++_progressCurrent;
-
-  int p;
-  if ( _progressTotal == 0 ) p = 0;
-  else p = _progressCurrent * 100 / _progressTotal;
-
-  PMError err = progress( p );
-
-  if ( ok ) {
-    if ( err == YouError::E_user_abort ) *ok = false;
-    else *ok = true;
-  }
-
-  return nextSelectedPatch();
-}
-
-PMYouPatchPtr InstYou::nextSelectedPatch()
-{
-  while ( _selectedPatchesIt != _patches.end() ) {
-    if ( (*_selectedPatchesIt)->isSelected() ) {
-      return *_selectedPatchesIt;
-    }
-    ++_selectedPatchesIt;
-  }
-
-  return PMYouPatchPtr();
-}
-
-PMError InstYou::installCurrentPatch()
-{
-  D__ << "Install current Patch" << endl;
-
-  if ( _selectedPatchesIt == _patches.end() ) {
-    ERR << "No more patches." << endl;
-    return PMError( YouError::E_error );
-  }
-
-  return installPatch( *_selectedPatchesIt );
-}
-
-PMError InstYou::retrieveCurrentPatch()
-{
-  if ( _selectedPatchesIt == _patches.end() ) {
-    ERR << "No more patches." << endl;
-    return PMError( YouError::E_error );
-  }
-
-  return retrievePatch( *_selectedPatchesIt );
-}
-
-bool InstYou::installPatches()
-{
-  PMYouPatchPtr patch = firstPatch();
+  patch = firstPatch();
   
   if ( !patch ) {
     log( _("No patches have been selected for installation.\n") );
+    return PMError::E_ok;
   }
 
-  bool skipAll = false;
+  skipAll = false;
 
   _installedPatches = 0;
-
-  PMError error;
 
   while ( patch ) {
     string text = stringutil::form( _("Installing %s: \"%s\" "),
@@ -649,7 +575,80 @@ bool InstYou::installPatches()
     writeLastUpdate();
   }
 
-  return _installedPatches > 0;
+  return error;
+}
+
+PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
+{
+  if ( resetProgress ) {
+    _progressCurrent = 0;
+    _progressTotal = 0;
+    std::list<PMYouPatchPtr>::const_iterator it;
+    for ( it = _patches.begin(); it != _patches.end(); ++it ) {
+      if ( (*it)->isSelected() ) _progressTotal++;
+    }
+
+    _progressTotal *= 2;
+  }
+
+  D__ << "_progressTotal: " << _progressTotal << endl;
+
+  _selectedPatchesIt = _patches.begin();
+
+  return nextSelectedPatch();
+}
+
+PMYouPatchPtr InstYou::nextPatch( bool *ok )
+{
+  ++_selectedPatchesIt;
+  ++_progressCurrent;
+
+  int p;
+  if ( _progressTotal == 0 ) p = 0;
+  else p = _progressCurrent * 100 / _progressTotal;
+
+  PMError err = progress( p );
+
+  if ( ok ) {
+    if ( err == YouError::E_user_abort ) *ok = false;
+    else *ok = true;
+  }
+
+  return nextSelectedPatch();
+}
+
+PMYouPatchPtr InstYou::nextSelectedPatch()
+{
+  while ( _selectedPatchesIt != _patches.end() ) {
+    if ( (*_selectedPatchesIt)->isSelected() ) {
+      return *_selectedPatchesIt;
+    }
+    ++_selectedPatchesIt;
+  }
+
+  return PMYouPatchPtr();
+}
+
+PMError InstYou::installCurrentPatch()
+{
+  D__ << "Install current Patch" << endl;
+
+  if ( _selectedPatchesIt == _patches.end() ) {
+    ERR << "No more patches." << endl;
+    return PMError( YouError::E_error );
+  }
+
+  return installPatch( *_selectedPatchesIt );
+}
+
+PMError InstYou::retrieveCurrentPatch()
+{
+  if ( _selectedPatchesIt == _patches.end() ) {
+    ERR << "No more patches." << endl;
+    return PMError( YouError::E_error );
+  }
+
+  return retrievePatch( *_selectedPatchesIt );
 }
 
 PMError InstYou::installPatch( const PMYouPatchPtr &patch )
