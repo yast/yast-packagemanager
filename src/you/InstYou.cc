@@ -142,7 +142,8 @@ PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
 }
 
 
-PMError InstYou::retrievePatchInfo( const Url &url, bool checkSig )
+PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
+                                    bool checkSig )
 {
   _patches.clear();
 
@@ -153,7 +154,7 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool checkSig )
   }
   _paths->setPatchUrl( u );
 
-  PMError error = _info->getPatches( _paths, _patches, checkSig );
+  PMError error = _info->getPatches( _paths, _patches, reload, checkSig );
   if ( error ) {
     ERR << "Error downloading patchinfos: " << error << endl;
     return error;

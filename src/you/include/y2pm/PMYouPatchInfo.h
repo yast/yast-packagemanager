@@ -67,11 +67,12 @@ class PMYouPatchInfo : virtual public Rep {
      *
      * @param paths     Object holding the path location information.
      * @param patches   List of patch objects where the results are stored.
+     * @param reload    If true, reload patch files from server.
      * @param checkSig  If true, check GPG signature of patch info files.
      **/
     PMError getPatches( PMYouPatchPathsPtr paths,
                         std::list<PMYouPatchPtr> &patches,
-                        bool checkSig = true );
+                        bool reload = true, bool checkSig = true );
     
     /**
      * Read patch info files from directory.
@@ -82,7 +83,8 @@ class PMYouPatchInfo : virtual public Rep {
      * @param checkSig   If true, check GPG signature of patch info files.
      **/
     PMError readDir( const Url &baseUrl, const Pathname &patchPath,
-                     std::list<PMYouPatchPtr> &patches, bool checkSig = true );
+                     std::list<PMYouPatchPtr> &patches, bool reload = true,
+                     bool checkSig = true );
 
     /**
      * Read patch info from file.
