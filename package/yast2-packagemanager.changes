@@ -2,6 +2,7 @@
 Thu Feb 17 11:01:14 CET 2005 - ma@suse.de
 
 - Fixed smb/cifs share name handling. (#26059)
+- 2.11.18
 
 -------------------------------------------------------------------
 Mon Feb 14 17:12:59 CET 2005 - mir@suse.de
