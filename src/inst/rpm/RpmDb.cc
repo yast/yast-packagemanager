@@ -649,8 +649,6 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
 const std::list<PMPackagePtr>&
 RpmDb::getPackages (void)
 {
-    MIL << "RpmDb::getPackages()" << endl;
-
     if (_packages_valid
 	|| _old_present
 	|| !_initialized)
