@@ -124,7 +124,7 @@ class Tag
 	enum ovmode { NONE, ADD, REMOVE, REPLACE };
 };
 
-DEFINE_DERIVED_POINTER(PMFakeVendorPackageDataProvider,PMPackageDataProvider,PMPackageDataProvider);
+DEFINE_DERIVED_POINTER(PMFakeVendorPackageDataProvider,PMPackageDataProvider);
 
 // default dataprovider, except returns specified vendor to avoid packages
 // beeing set to protected
@@ -150,7 +150,7 @@ class PMFakeVendorPackageDataProvider : public PMPackageDataProvider  {
 	}
 };
 
-IMPL_DERIVED_POINTER(PMFakeVendorPackageDataProvider,PMPackageDataProvider,PMPackageDataProvider);
+IMPL_DERIVED_POINTER(PMFakeVendorPackageDataProvider,PMPackageDataProvider);
 
 class DbHeader
 {
