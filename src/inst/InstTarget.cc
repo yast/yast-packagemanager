@@ -34,6 +34,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstTargetSelDB.h>
 #include <y2pm/PMYouPatchPaths.h>
 #include <y2pm/PMYouPatchInfo.h>
 
@@ -50,7 +51,8 @@ using namespace std;
 InstTarget::InstTarget ( ) :
     _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
     _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
-    _patchesInitialized( false )
+    _patchesInitialized( false ),
+    _seldb( new InstTargetSelDB )
 {
     _rpmdb = new RpmDb();
 }
@@ -70,6 +72,9 @@ InstTarget::~InstTarget()
 PMError InstTarget::init (const Pathname & rootpath, bool createnew)
 {
     _rootdir = rootpath;
+
+    _seldb->open( _rootdir, true );
+
     return _rpmdb->initDatabase(_rootdir.asString(), createnew);
 }
 
@@ -95,16 +100,6 @@ InstTarget::Erase()
 //-----------------------------
 // target content access
 
-
-/**
- * generate PMSelection objects for each selection on the target
- * @return list of PMSelectionPtr on this target
- */
-const std::list<PMSelectionPtr>&
-InstTarget::getSelections (void) const
-{
-    return InstData::getSelections();
-}
 
 /**
  * generate PMPackage objects for each Item on the target
@@ -262,3 +257,62 @@ PMError InstTarget::executeScript( const Pathname &scriptname )
 
     return PMError();
 }
+
+///////////////////////////////////////////////////////////////////
+// Selection related interface
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::getSelections
+//	METHOD TYPE : const list<PMSelectionPtr> &
+//
+//	DESCRIPTION :
+//
+const list<PMSelectionPtr> & InstTarget::getSelections() const
+{
+  // untill _seldb is ready
+  return InstData::getSelections();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::installSelection
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstTarget::installSelection( const Pathname & selfile_r )
+{
+  return _seldb->install( selfile_r );
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::isInstalledSelection
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool InstTarget::isInstalledSelection( const Pathname & selfile_r ) const
+{
+  return _seldb->isInstalled( selfile_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::removeSelection
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstTarget::removeSelection( const Pathname & selfile_r )
+{
+  return _seldb->remove( selfile_r );
+}
+

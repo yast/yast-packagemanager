@@ -11,7 +11,7 @@
 \----------------------------------------------------------------------/
 
   File:       InstTargetError.cc
-   
+
   Author:     Ludwig Nussel <lnussel@suse.de>
   Maintainer: Ludwig Nussel <lnussel@suse.de>
 
@@ -69,6 +69,14 @@ std::string InstTargetError::errtext( const unsigned e )
   // untill you found a beautifull text describing it.
   ///////////////////////////////////////////////////////////////////
 #define ENUM_OUT(V) case V: return #V
+
+  ENUM_OUT( E_SelDB_already_open );
+  ENUM_OUT( E_SelDB_open_failed );
+  ENUM_OUT( E_SelDB_not_open );
+  ENUM_OUT( E_SelDB_file_not_found );
+  ENUM_OUT( E_SelDB_file_bad_magic );
+  ENUM_OUT( E_SelDB_install_failed );
+  ENUM_OUT( E_SelDB_not_installed );
 
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////
