@@ -14,8 +14,10 @@ pkginclude_HEADERS =	\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
 	InstSrcData.h	InstSrcDataPtr.h	\
 	InstSrcDataUL.h	InstSrcDataULPtr.h	\
-	ULSelectionParser.h ULSelectionParserPtr.h \
-	ULPackagesParser.h ULPackagesParserPtr.h \
+	ULSelectionParser.h ULSelectionParserPtr.h	\
+	ULPackagesParser.h ULPackagesParserPtr.h	\
+	InstSrcDataPLAIN.h InstSrcDataPLAINPtr.h	\
+	PMPLAINPackageDataProvider.h PMPLAINPackageDataProviderPtr.h	\
 	UpdateInfParser.h			\
 	InstData.h				\
 	FileDeps.h				\

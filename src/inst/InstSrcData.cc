@@ -85,8 +85,6 @@ PMError InstSrcData::_instSrc_attach( const InstSrcPtr & instSrc_r )
 
   _instSrc = instSrc_r;
   return Error::E_ok;
-#warning Avoided loadObjects on instSrc_attach
-  return loadObjects();
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -67,7 +67,7 @@ class InstSrcData: virtual public Rep, public InstData {
     bool _propagating;
 
     /**
-     * Adjust backreferences to InstSrc. Call loadObjects().
+     * Adjust backreferences to InstSrc.
      **/
     PMError _instSrc_attach( const InstSrcPtr & instSrc_r );
 
@@ -123,16 +123,6 @@ class InstSrcData: virtual public Rep, public InstData {
   protected:
 
     /**
-     * Call concrete InstSrcData to load it's Object lists, either from
-     * media or from cache (if present). Do not propaget them yet.
-     *
-     * Return E_ok if concrete InstSrcData is able to propagate Objects.
-     *
-     * InstSrc is attached.
-     **/
-    virtual PMError loadObjects() = 0;
-
-    /**
      * Call concrete InstSrcData to propagate Objects to Manager classes.
      *
      * InstSrc is attached.
@@ -171,6 +161,11 @@ class InstSrcData: virtual public Rep, public InstData {
      * Default for concrete InstSrcData providing no Patches
      **/
     virtual const std::list<PMYouPatchPtr> &  getPatches()    const { return InstData::getPatches(); }
+
+    /**
+     * Backreference to InstSrc (provided on attach, NULL after detach)
+     **/
+    constInstSrcPtr attachedToInstSrc() const { return _instSrc; }
 
   public:
 

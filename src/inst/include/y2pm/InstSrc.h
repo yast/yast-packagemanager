@@ -80,6 +80,7 @@ class InstSrc: virtual public Rep {
       T_UNKNOWN,
       // :first entry
       T_UnitedLinux,
+      T_PlainDir,
       // last entry:
       T_AUTODETECT
     };
@@ -157,6 +158,11 @@ class InstSrc: virtual public Rep {
      * Public, but for internal use by PMUlDataProvider only.
      **/
     bool specialCache() const;
+
+    /**
+     * Don't use it except....
+     **/
+    void rememberPreviouslyDnlPackage( const Pathname & newpath_r ) const;
 
     /**
      * Full path of cache_dir.

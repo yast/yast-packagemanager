@@ -33,6 +33,8 @@ liby2pminstsrc_la_SOURCES = \
 	ULPackagesParser.cc		\
 	PMULPackageDataProvider.cc	\
 	PMULSelectionDataProvider.cc	\
+	InstSrcDataPLAIN.cc		\
+	PMPLAINPackageDataProvider.cc	\
 	\
 	InstTarget.cc			\
 	InstTargetError.cc		\
