@@ -304,8 +304,10 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     p->setPostScript( tagValue( YOUPatchTagSet::POSTSCRIPT, patchstream ) );
 
     value = tagValue( YOUPatchTagSet::UPDATEONLYINSTALLED, patchstream );
-    if ( value == "true" ) { p->setUpdateOnlyInstalled( true ); }
-    else { p->setUpdateOnlyInstalled( false ); }
+    p->setUpdateOnlyInstalled( value == "true" );
+
+    value = tagValue( YOUPatchTagSet::UPDATEONLYNEW, patchstream );
+    p->setUpdateOnlyNew( value == "true" );
 
     value = tagMultiValue( YOUPatchTagSet::PACKAGES, patchstream );
     PMError error = parsePackages( value, p );

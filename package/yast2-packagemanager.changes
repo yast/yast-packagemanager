@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar  2 17:54:31 CET 2004 - cschum@suse.de
+
+- YOU: Implemented "UpdateOnlyNew" flag.
+
+-------------------------------------------------------------------
 Tue Mar  2 14:09:24 CET 2004 - cschum@suse.de
 
 - YOU: Implemented "ForceInstall" flag.

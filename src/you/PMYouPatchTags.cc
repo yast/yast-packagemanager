@@ -37,6 +37,7 @@ YOUPatchTagSet::YOUPatchTagSet()
   addTag( "Prescript",           PRESCRIPT,           TaggedFile::SINGLE );
   addTag( "Postscript",          POSTSCRIPT,          TaggedFile::SINGLE );
   addTag( "Files",               FILES,               TaggedFile::MULTIOLD );
+  addTag( "UpdateOnlyNew",       UPDATEONLYNEW,       TaggedFile::SINGLE );
 }
 
 YOUPackageTagSet::YOUPackageTagSet() : TagSet()
