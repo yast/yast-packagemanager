@@ -221,6 +221,36 @@ struct WFM {
     YCPValue ret = _pkgmod->SourceSetEnabled( args );
     OUT << " --> " << ret << endl;
   }
+  void SourceEditGet() {
+    YCPList args;
+    OUT << "SourceEditGet" << args;
+    YCPValue ret = _pkgmod->SourceEditGet( args );
+    OUT << " --> " << ret << endl;
+  }
+  void SourceEditSet( const InstSrcManager::SrcStateVector & source_states,
+		      const InstSrcManager::SrcDelSet & source_todel ) {
+    YCPList args;
+
+    YCPList a1;
+    for ( InstSrcManager::SrcStateVector::const_iterator it = source_states.begin();
+	  it != source_states.end(); ++it ) {
+      YCPMap el;
+      el->add( YCPString("SrcId"),	YCPInteger( it->first ) );
+      el->add( YCPString("enabled"),	YCPBoolean( it->second ) );
+      a1->add( el );
+    }
+    YCPList a2;
+    for ( InstSrcManager::SrcDelSet::const_iterator it = source_todel.begin();
+	  it != source_todel.end(); ++it ) {
+      a2->add( YCPInteger( *it ) );
+    }
+
+    args->add( a1 );
+    args->add( a2 );
+    OUT << "SourceEditSet" << args;
+    YCPValue ret = _pkgmod->SourceEditSet( args );
+    OUT << " --> " << ret << endl;
+  }
 };
 
 static WFM wfm;
@@ -269,17 +299,17 @@ int main()
   INT << "START" << endl;
   wfm.SourceStartManager( false );
   wfm.SourceGetCurrent( false );
-
+  wfm.SourceEditGet();
 
   InstSrcManager::SrcStateVector keep;
   InstSrcManager::SrcDelSet      del;
 
-  keep.push_back( InstSrcManager::SrcState( 3, false ) );
-  keep.push_back( InstSrcManager::SrcState( 2, false ) );
   keep.push_back( InstSrcManager::SrcState( 1, true ) );
-  del.insert( 4 );
+  keep.push_back( InstSrcManager::SrcState( 2, true ) );
+  keep.push_back( InstSrcManager::SrcState( 3, true ) );
 
-  INT << ISM.adjustSources( keep, del ) << endl;
+  wfm.SourceEditSet( keep, del );
+  wfm.SourceEditGet();
 
   SEC << "STOP" << endl;
   wfm.close();
