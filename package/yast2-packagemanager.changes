@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep  9 15:52:29 CEST 2002 - lnussel@suse.de
+
+- remove proxy settings from wget class, works automatically through ~/.wgetrc
+
+-------------------------------------------------------------------
 Sun Sep  8 23:07:37 CEST 2002 - ma@suse.de
 
 - fixes for update (handle splitprovides/obsoletes similar to

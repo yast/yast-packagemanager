@@ -100,19 +100,12 @@ PMError MediaWget::getFile( const Pathname & filename ) const {
 
     Wget wget;
     string tmp;
-
-    wget.setProxyUser(_url.getOption("proxyuser"), _url.getOption("proxypassword"));
-
-    Pathname path = "/";
-    path += _url.getPath();
+    
+    Pathname path = _url.getPath();
     path += filename;
 
-    // let url assemble the username&password part, then append the path
-    // manually
-    string url=_url.asString(false);
-    url += path.asString();
-
-    D__ << url << endl;
+    Url url(_url);
+    url.setPath(path.asString());
 
     // TODO: recreate fs structure
     Pathname dest = attachPoint()+filename;
@@ -122,7 +115,7 @@ PMError MediaWget::getFile( const Pathname & filename ) const {
 	return Error::E_system;
     }
 
-    WgetStatus status = wget.getFile( url, dest.asString() );
+    WgetStatus status = wget.getFile( url, dest );
     if(status == WGET_OK)
 	return Error::E_ok;
     else

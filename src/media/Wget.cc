@@ -18,6 +18,11 @@
 
 /*
  * $Log$
+ * Revision 1.9  2002/09/09 13:56:12  lnussel
+ * - remove proxy settings from wget class, works automatically through ~/.wgetrc
+ * - make wget function that only accepts strings private, adapt PMYouPatchPaths.cc
+ * - use saveAsString in InstSrcDescr
+ *
  * Revision 1.8  2002/09/05 12:57:04  cschum
  * Add optional Cookie support to Wget class.
  * Support Cookies when getting the server list from www.suse.de.
@@ -108,8 +113,6 @@ create_directories(string name)
 /*-------------------------------------------------------------*/
 Wget::Wget()
 {
-    proxyUser = "";
-    proxyPassword = "";
     process = 0;
     exit_code = -1;
 }
@@ -167,30 +170,29 @@ string Wget::error_string ( WgetStatus status )
     return ret;
 }
 
-/*--------------------------------------------------------------*/
-/* Set password and user of a proxy				*/
-/*--------------------------------------------------------------*/
-void Wget::setProxyUser( const string username,
-			 const string passwd )
-{
-    proxyUser = username;
-    proxyPassword = passwd;
-}
-
 void Wget::setCookiesFile( const string &filename )
 {
     _cookiesFile = filename;
 }
 
-WgetStatus Wget::getFile( const Url &url, const Pathname &destination )
+WgetStatus Wget::getFile( const Url &url_i, const Pathname &destination )
 {
+    Url url(url_i);
     if ( !url.isValid() ) return WGET_ERROR_INVALID_URL;
 
     string username = url.getUsername();
     string password = url.getPassword();
+
+    // *ugh* wget treats path as relative with only one slash and prepends the
+    // users home dir on the ftp server for non-anonymous connections
+    url.setPath(string("/") + url.getPath());
     
     if ( !username.empty() && !password.empty() ) {
         string host = url.getHost();
+
+	// clear username and password to make them not appear in command line
+	url.setUsername(string());
+	url.setPassword(string());
 
         string home = getenv( "HOME" );
 
@@ -220,7 +222,7 @@ WgetStatus Wget::getFile( const Url &url, const Pathname &destination )
 /*--------------------------------------------------------------*/
 /* Retrieving a file 						*/
 /*--------------------------------------------------------------*/
-WgetStatus Wget::getFile ( const string url, const string destFilename )
+WgetStatus Wget::getFile ( const string& url, const string& destFilename )
 {
    WgetStatus ok = WGET_OK;
 
@@ -343,8 +345,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
 		       ExternalProgram::Stderr_Disposition disp)
 {
   exit_code = -1;
-  int argc = n_opts + 5 /*  --proxy-user=user  --porxy-passwd=password */
-             + 1 /* NULL */;
+  int argc = n_opts + 1 /** wget */ + 2  /* tries, waitretry */ + 1 /** 0 */;
 
   if ( !_cookiesFile.empty() ) {
       argc += 2;
@@ -353,8 +354,6 @@ void Wget::run_wget(int n_opts, const char *const *options,
   // Create the argument array
   const char *argv[argc];
   int i = 0;
-  string proxyUsr = "--proxy-user=" + proxyUser;
-  string proxyPasswd = "--proxy-passwd=" + proxyPassword;
   string loadCookies;
   string saveCookies;
 
@@ -362,22 +361,6 @@ void Wget::run_wget(int n_opts, const char *const *options,
 
   argv[i++] = "--tries=3";
   argv[i++] = "--waitretry=2";
-  if ( proxyUser != "" )
-  {
-      argv[i++] = proxyUsr.c_str();
-  }
-  else
-  {
-      argv[i++] = "";
-  }
-  if ( proxyPassword != "" )
-  {
-      argv[i++] = proxyPasswd.c_str();
-  }
-  else
-  {
-      argv[i++] = "";
-  }
 
   if ( !_cookiesFile.empty() ) {
       loadCookies = "--load-cookies=" + _cookiesFile;
@@ -397,7 +380,11 @@ void Wget::run_wget(int n_opts, const char *const *options,
   {
      output = output + " " + argv[k];
   }
-  argv[i] = 0;
+  argv[i++] = 0;
+
+  if(i>argc)
+      INT << "argument count exceeded" << endl;
+
   D__ << "wget command: " << output << endl;
 
   if ( process != NULL )
