@@ -21,6 +21,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/LangCode.h>
+
 #include <Y2PM.h>
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/InstTarget.h>
@@ -82,237 +83,123 @@ ostream & operator<<( ostream & str, const PMSelectionManager & obj )
     return str;
 }
 
-/******************************************************************
-**
-**
-**	FUNCTION NAME : getAlternativeSelectable
-**	FUNCTION TYPE : PMSelectablePtr
-**
-**	DESCRIPTION : get first matching alternative selection of given
-**		      "pack (alt1, alt2, ...)" string
-*/
-PMSelectablePtr
-PMSelectionManager::getAlternativeSelectable (std::string pkgstr,
-					 PMPackageManager & package_mgr)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::setLast
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectionManager::setLast( const PMSelectablePtr & sel_r, int val_r )
 {
-    PMSelectablePtr selectable;
-    string::size_type startpos = pkgstr.find_first_of (" ");
-    if (startpos == string::npos)
-	return selectable;
-
-    // try initial pack
-    selectable = package_mgr.getItem (pkgstr.substr (0, startpos));
-    if (!selectable)
-    {
-	// nope, try "(alt1, ...)"
-	startpos = pkgstr.find_first_of ("(");
-	string::size_type endpos = pkgstr.find_first_of (")");
-	if ((startpos != string::npos)
-	    && (endpos != string::npos))
-	{
-	    startpos++;
-	    while (startpos < endpos)
-	    {
-		// find first comma or blank after startpos
-		string::size_type commapos = pkgstr.find_first_of (", ", startpos);
-		if (commapos == string::npos)
-		    commapos = endpos;
-		selectable = package_mgr.getItem (pkgstr.substr (startpos, commapos-startpos));
-		if (selectable)
-		    break;			// found it !
-		startpos = commapos + 1;
-	    }
-	}
-    }
-    return selectable;
+  if ( val_r )
+    _last_active[sel_r] = val_r < 0 ? -1 : 1;
+  else
+    _last_active[sel_r] = 0;
 }
 
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : setSelectionPackages
-**	FUNCTION TYPE : void
-**
-**	DESCRIPTION : set all packages of the given list to "auto install"
-**
-**		if these_are_delpacks == true, the package list is an
-**		'delpacks' list and the selection just got de-activated.
-**		In this case reset auto-delete packages to "unmodified"
-*/
-void
-PMSelectionManager::setSelectionPackages (const std::list<std::string> packages,
-					 bool these_are_delpacks,
-					 PMPackageManager & package_mgr)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::lastState
+//	METHOD TYPE : int
+//
+//	DESCRIPTION :
+//
+int PMSelectionManager::lastState( const PMSelectablePtr & sel_r ) const
 {
-    for (std::list<std::string>::const_iterator it = packages.begin();
-	 it != packages.end(); ++it)
-    {
-	// get selectable by name
+  ActiveMap::const_iterator it( _last_active.find( sel_r ) );
+  return( it == _last_active.end() ? 0 : it->second);
+}
 
-	PMSelectablePtr selectable = package_mgr.getItem (*it);
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::getState
+//	METHOD TYPE : int
+//
+//	DESCRIPTION :
+//
+int PMSelectionManager::getState( const PMSelectablePtr & sel_r ) const
+{
+  if ( sel_r->to_modify() ) {
+    return( sel_r->to_delete() ? -1 : 1 );
+  }
+  return 0;
+}
 
-	if (!selectable)
-	{
-	    // not found, try alternative packages
-	    selectable = getAlternativeSelectable (*it, package_mgr);
-	}
-
-	if (selectable)
-	{
-	    if (these_are_delpacks)
-	    {
-		// de-activate delpacks
-		// only 'to_delete' packages not 'by_user'
-		selectable->appl_set_delete();
-	    }
-	    else
-	    {
-	      if ( !selectable->has_both_objects()
-		   || selectable->installedObj()->edition() != selectable->candidateObj()->edition() )
-	      {
-		selectable->appl_set_install();
-	      }
-	    }
-	}
-    }
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::resetSelectionPackages
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectionManager::resetSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr )
+{
+  if ( !sel_r )
     return;
+
+  std::set<PMSelectablePtr> packs( sel_r->delpacks_ptrs() );
+  for ( std::set<PMSelectablePtr>::const_iterator it = packs.begin(); it != packs.end(); ++it ) {
+    (*it)->appl_unset();
+  }
+
+  packs = sel_r->inspacks_ptrs();
+  for ( std::set<PMSelectablePtr>::const_iterator it = packs.begin(); it != packs.end(); ++it ) {
+    (*it)->appl_unset();
+  }
 }
 
-/******************************************************************
-**
-**
-**	FUNCTION NAME : resetSelectionPackages
-**	FUNCTION TYPE : void
-**
-**	DESCRIPTION : set all packages of the given list to "delete"
-**		if their status is "auto" (i.e. not explicitly requested
-**		by the user).
-**
-**		if these_are_inspacks == true, the package list is an
-**		'inspacks' list and the selection just got de-activated.
-**		In this case reset auto-install packages to "unmodified"
-*/
-void
-PMSelectionManager::resetSelectionPackages (const std::list<std::string> packages,
-					bool these_are_inspacks,
-					PMPackageManager & package_mgr)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::setSelectionPackages
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectionManager::setSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr )
 {
-    for (std::list<std::string>::const_iterator it = packages.begin();
-	 it != packages.end(); ++it)
-    {
-	// get selectable by name
-
-	PMSelectablePtr selectable = package_mgr.getItem (*it);
-
-	if (!selectable)
-	{
-	    // not found, try alternative packages
-	    selectable = getAlternativeSelectable (*it, package_mgr);
-	}
-
-	if (selectable)
-	{
-	    selectable->appl_unset();
-	}
-    }
+  if ( !sel_r )
     return;
+
+  std::set<PMSelectablePtr> packs( sel_r->delpacks_ptrs() );
+  for ( std::set<PMSelectablePtr>::const_iterator it = packs.begin(); it != packs.end(); ++it ) {
+    (*it)->appl_set_delete();
+  }
+
+  packs = sel_r->inspacks_ptrs();
+  for ( std::set<PMSelectablePtr>::const_iterator it = packs.begin(); it != packs.end(); ++it ) {
+    (*it)->appl_set_install();
+  }
 }
 
-/******************************************************************
-**
-**
-**	FUNCTION NAME : setSelection
-**	FUNCTION TYPE : void
-**
-**	DESCRIPTION : set all packages of this selection to "auto"
-*/
-void
-PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & package_mgr)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::removeSelectionPackages
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectionManager::removeSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr )
 {
-    if (!selection)
-	return;
-MIL << "setSelection " << selection->name() << "." << _currently_preferred_locale << endl;
-    // first, the delpacks
-    setSelectionPackages (selection->delpacks(), true, package_mgr);
-    if (!((const std::string &)_currently_preferred_locale).empty())
-    {
-	setSelectionPackages (selection->delpacks(_currently_preferred_locale), true, package_mgr);
-    }
-    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
-	 it != _currently_requested_locales.end(); ++it)
-    {
-	setSelectionPackages (selection->delpacks(*it),
-			true,		// these_are_delpacks
-			package_mgr);
-    }
-
-    // then, the inspacks
-    setSelectionPackages (selection->inspacks(), false, package_mgr);
-    if (!((const std::string &)_currently_preferred_locale).empty())
-    {
-	setSelectionPackages (selection->inspacks(_currently_preferred_locale), false, package_mgr);
-    }
-    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
-	 it != _currently_requested_locales.end(); ++it)
-    {
-	setSelectionPackages (selection->inspacks(*it),
-			false,		// !these_are_delpacks
-			package_mgr);
-    }
+  if ( !sel_r )
     return;
+
+  std::set<PMSelectablePtr> packs( sel_r->delpacks_ptrs() );
+  for ( std::set<PMSelectablePtr>::const_iterator it = packs.begin(); it != packs.end(); ++it ) {
+    (*it)->appl_unset();
+  }
+
+  packs = sel_r->inspacks_ptrs();
+  for ( std::set<PMSelectablePtr>::const_iterator it = packs.begin(); it != packs.end(); ++it ) {
+    (*it)->appl_set_delete();
+  }
 }
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : resetSelection
-**	FUNCTION TYPE : void
-**
-**	DESCRIPTION : set all packages of this selection to "don't install"
-**		if their status is "auto" (i.e. not explicitly requested
-**		by the user).
-*/
-void
-PMSelectionManager::resetSelection (PMSelectionPtr selection, PMPackageManager & package_mgr)
-{
-    if (!selection)
-	return;
-
-MIL << "resetSelection " << selection->name() << "." << _currently_preferred_locale << endl;
-
-    // get list of requested locales
-
-    // first, the inspacks
-    resetSelectionPackages (selection->delpacks(), true, package_mgr);
-    if (!((const std::string &)_currently_preferred_locale).empty())
-    {
-	resetSelectionPackages (selection->delpacks(_currently_preferred_locale), true, package_mgr);
-    }
-    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
-	 it != _currently_requested_locales.end(); ++it)
-    {
-	resetSelectionPackages (selection->delpacks(*it),
-			true,		// these_are_inspacks
-			package_mgr);
-    }
-
-    // then, the inspacks
-    resetSelectionPackages (selection->inspacks(), false, package_mgr);
-    if (!((const std::string &)_currently_preferred_locale).empty())
-    {
-	resetSelectionPackages (selection->inspacks(_currently_preferred_locale), false, package_mgr);
-    }
-    for (std::list<LangCode>::iterator it = _currently_requested_locales.begin();
-	 it != _currently_requested_locales.end(); ++it)
-    {
-	resetSelectionPackages (selection->inspacks(*it),
-			false,		// !these_are_delpacks
-			package_mgr);
-    }
-    return;
-}
-
 
 /******************************************************************
 **
@@ -327,44 +214,50 @@ MIL << "resetSelection " << selection->name() << "." << _currently_preferred_loc
 PMError
 PMSelectionManager::activate (PMPackageManager & package_mgr)
 {
-    MIL << "PMSelectionManager::activate()" << endl;
-    if (_currently_actives.size() > 0)
-    {
-	MIL << "resetting " << _currently_actives.size() << " active selections" << endl;
-	// we currently have active selections.
-	// loop through all of them and de-select packages
-	// which aren't in the new set
+  for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
+    const PMSelectablePtr & sptr( *it );
 
-	for (std::list<PMSelectablePtr>::iterator active = _currently_actives.begin();
-	     active != _currently_actives.end(); ++active)
-	{
-	    if (!(*active)->to_install())
-	    {
-		// this one isn't active any more
+    int lstate = lastState( sptr );
+    int nstate = getState( sptr );
+    if ( lstate != nstate ) {
 
-		resetSelection ((*active)->candidateObj(), package_mgr);
-	    }
-	}
-	_currently_actives.clear();
+      // Reset last state to unmodified
+      switch ( lstate ) {
+      case -1:
+	// was to delete
+	resetSelectionPackages( sptr->installedObj(), package_mgr );
+	break;
+      case 0:
+	// nothing to do
+	break;
+      case 1:
+	// was to install
+	resetSelectionPackages( sptr->candidateObj(), package_mgr );
+	break;
+      }
+
+
+      // Now adjust new state
+      switch ( nstate ) {
+      case -1:
+	// set to delete
+	removeSelectionPackages( sptr->installedObj(), package_mgr );
+	break;
+      case 0:
+	// nothing to do
+	break;
+      case 1:
+	// set to install
+	setSelectionPackages( sptr->candidateObj(), package_mgr );
+	break;
+      }
+
+      // remember new state
+      setLast( sptr, nstate );
     }
+  }
 
-    // now activate the new set of selections
-
-    _currently_preferred_locale = Y2PM::getPreferredLocale();
-    _currently_requested_locales = Y2PM::getRequestedLocales();
-
-    for (PMSelectableVec::const_iterator it = begin();
-	 it != end(); ++it)
-    {
-	if ((*it)->to_install())
-	{
-	    setSelection ((*it)->candidateObj(), package_mgr);
-	    _currently_actives.push_back (*it);
-	}
-    }
-    MIL << _currently_actives.size() << " are active now" << endl;
-
-    return installOnTarget();
+  return PMError::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -375,8 +268,69 @@ PMSelectionManager::activate (PMPackageManager & package_mgr)
 //
 //	DESCRIPTION :
 //
-PMError PMSelectionManager::installOnTarget() const
+PMError PMSelectionManager::installOnTarget()
 {
-  return PMError::E_ok;
+  if ( ! Y2PM::instTarget().mayAccessSelections() ) {
+    ERR << InstTarget::Error::E_SelDB_not_open << endl;
+    return InstTarget::Error::E_SelDB_not_open;
+  }
+
+  PMError err;
+  bool must_reload = false;
+
+  for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
+    const PMSelectablePtr & sptr( *it );
+
+    switch ( getState( sptr ) ) {
+    case -1:
+      // is to delete
+      must_reload = true;
+      {
+	Pathname selfile;
+	err = PMSelectionPtr( sptr->installedObj() )->provideSelToInstall( selfile );
+	if ( err ) {
+	  ERR << sptr->name() << ": can't get selfile to remove: " << err << endl;
+	  break;
+	}
+	err = Y2PM::instTarget().removeSelection( selfile );
+	if ( err ) {
+	  ERR << sptr->name() << ": can't remove selfile: " << err << endl;
+	  break;
+	}
+      }
+      break;
+    case 0:
+      // nothing to do
+      break;
+    case 1:
+      // is to install
+      must_reload = true;
+      {
+	Pathname selfile;
+	err = PMSelectionPtr( sptr->candidateObj() )->provideSelToInstall( selfile );
+	if ( err ) {
+	  ERR << sptr->name() << ": can't get selfile to install: " << err << endl;
+	  break;
+	}
+	err = Y2PM::instTarget().installSelection( selfile );
+	if ( err ) {
+	  ERR << sptr->name() << ": can't install selfile: " << err << endl;
+	  break;
+	}
+      }
+      break;
+    }
+  }
+
+  if ( must_reload ) {
+    // reload from InstTarget and reset all active selections
+    _last_active.clear();
+    poolSetInstalled( Y2PM::instTarget().getSelections() );
+    for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
+      (*it)->user_unset();
+    }
+  }
+
+  return err ? PMError::E_error : PMError::E_ok;
 }
 

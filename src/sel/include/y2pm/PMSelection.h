@@ -74,13 +74,25 @@ class PMSelection : virtual public Rep, public PMObject {
     std::list<std::string>	recommends()       const;
     std::list<PMSelectionPtr>	recommends_ptrs();
     std::list<std::string>	inspacks     ( const LangCode& locale = LangCode("") ) const;
-    std::list<PMSelectablePtr>	inspacks_ptrs( const LangCode& locale = LangCode("") );
     std::list<std::string>	delpacks     ( const LangCode& locale = LangCode("") ) const;
-    std::list<PMSelectablePtr>	delpacks_ptrs( const LangCode& locale = LangCode("") );
     FSize			archivesize()      const;
     std::string			order()            const;
 
     const bool			isBase()           const;
+
+    /**
+     * <code>PackageManager</code>s list of Selectables included in
+     * this Selection for a given locale. This is probaeely <b>not</b>,
+     * what you want. See <code>inspacks_ptrs()</code>.
+     **/
+    std::set<PMSelectablePtr>	inspacks_ptrs( const LangCode& locale );
+    /**
+     * <code>PackageManager</code>s list of Selectables included in
+     * this Selection for a given locale. This is probaeely <b>not</b>,
+     * what you want. See <code>delpacks_ptrs()</code>.
+     **/
+    std::set<PMSelectablePtr>	delpacks_ptrs( const LangCode& locale );
+
 
     // physical access to the sel file.
     PMError provideSelToInstall( Pathname & ) const;
@@ -103,6 +115,20 @@ class PMSelection : virtual public Rep, public PMObject {
 		 PMSelectionDataProviderPtr dataProvider_r );
 
     virtual ~PMSelection();
+
+    /**
+     * <code>PackageManager</code>s list of Selectables included in
+     * this Selection. This is the list of inspacks the SelectionManger
+     * operates with.
+     **/
+    std::set<PMSelectablePtr>	inspacks_ptrs();
+
+    /**
+     * <code>PackageManager</code>s list of Selectables included in
+     * this Selection. This is the list of delpacks the SelectionManger
+     * operates with.
+     **/
+    std::set<PMSelectablePtr>	delpacks_ptrs();
 
   public:
 

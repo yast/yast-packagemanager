@@ -186,7 +186,7 @@ PMError InstTargetSelDB::check_file( const Pathname & selfile_r ) const
     return Error::E_SelDB_file_not_found;
   }
 
-#warning should test file magic
+#warning should test file magic and selection name
   string base = selfile_r.basename();
   if ( base.size() <= 4 || base.rfind( ".sel" ) != base.size() - 4 )
     return Error::E_SelDB_file_bad_magic;

@@ -189,16 +189,16 @@ PMULSelectionDataProvider::sellist2strlist (const std::list<PMSelectionPtr>& sel
 //	METHOD NAME : slclist2strlist
 //	METHOD TYPE : std::list<std::string>
 //
-//	DESCRIPTION : convert list of selectable pointers to list of
+//	DESCRIPTION : convert set of selectable pointers to list of
 //		selection names
 //
 std::list<std::string>
-PMULSelectionDataProvider::slclist2strlist (const std::list<PMSelectablePtr>& slclist) const
+PMULSelectionDataProvider::slclist2strlist (const std::set<PMSelectablePtr>& slclist) const
 {
     std::list<std::string> strlist;
-    for (std::list<PMSelectablePtr>::const_iterator it = slclist.begin(); it != slclist.end(); ++it)
+    for (std::set<PMSelectablePtr>::const_iterator it = slclist.begin(); it != slclist.end(); ++it)
     {
-	strlist.push_back ((const std::string &)((*it)->name()));
+	strlist.push_back ((*it)->name().asString());
     }
     return strlist;
 }
@@ -211,14 +211,14 @@ PMULSelectionDataProvider::slclist2strlist (const std::list<PMSelectablePtr>& sl
 //	METHOD TYPE : std::list<std::string>
 //
 //	DESCRIPTION : lookup INSPACKS or DELPACKS string list
-//		if corresponding pointer list is non-empty,
-//		create string list on-demand from pointer list
+//		if corresponding pointer set is non-empty,
+//		create string list on-demand from pointer set
 //		else retrieve string list
 //
 std::list<std::string>
 PMULSelectionDataProvider::pkgsList (const LangCode& locale, bool is_delpacks) const
 {
-    std::list<PMSelectablePtr> slclist;
+    std::set<PMSelectablePtr> slclist;
 
     // prefer cached pointer list over string list retrieval
 
@@ -247,23 +247,20 @@ PMULSelectionDataProvider::pkgsList (const LangCode& locale, bool is_delpacks) c
 // private
 //
 //	METHOD NAME : pkgsPointers
-//	METHOD TYPE : std::list<PMSelectablePtr>
+//	METHOD TYPE : std::set<PMSelectablePtr>
 //
 //	DESCRIPTION : lookup INSPACKS or DELPACKS pointer list
 //		if pointer list empty, create on-demand from string list
 //		and delete string list
-//		This on-demand functionality requires a non-const
-//		pointer to 'this' as an argument
 //
-
-std::list<PMSelectablePtr>
-PMULSelectionDataProvider::pkgsPointers (PMULSelectionDataProviderPtr prv, const LangCode & locale, bool is_delpacks) const
+std::set<PMSelectablePtr>
+PMULSelectionDataProvider::pkgsPointers (const LangCode & locale, bool is_delpacks) const
 {
     slcmaptype slcmap;
     if (is_delpacks)
-	slcmap = prv->_ptrs_attr_DELPACKS;
+	slcmap = _ptrs_attr_DELPACKS;
     else
-	slcmap = prv->_ptrs_attr_INSPACKS;
+	slcmap = _ptrs_attr_INSPACKS;
 
     slcmapIT slcpos = slcmapFind (slcmap, locale, false);		// already set ?
 
@@ -277,73 +274,57 @@ PMULSelectionDataProvider::pkgsPointers (PMULSelectionDataProviderPtr prv, const
     posmapIT it;			// find retrieval pointer
     if (is_delpacks)
     {
-	it = posmapFind (prv->_attr_DELPACKS, locale, false);
-	if (it == prv->_attr_DELPACKS.end())		// no retrieval pointer
+	it = posmapFind (_attr_DELPACKS, locale, false);
+	if (it == _attr_DELPACKS.end())		// no retrieval pointer
 	{
-	    return std::list<PMSelectablePtr>();
+	    return std::set<PMSelectablePtr>();
 	}
     }
     else
     {
-	it = posmapFind (prv->_attr_INSPACKS, locale, false);
-	if (it == prv->_attr_INSPACKS.end())		// no retrieval pointer
+	it = posmapFind (_attr_INSPACKS, locale, false);
+	if (it == _attr_INSPACKS.end())		// no retrieval pointer
 	{
-	    return std::list<PMSelectablePtr>();
+	    return std::set<PMSelectablePtr>();
 	}
     }
     _selection_retrieval->retrieveData (it->second, strlist);
 
     //-----------------------------------------------------
     // now we have the string list and it's position
-    // convert the string list to a PMSelectable list
+    // convert the string list to a PMSelectable set
 
-    std::list<PMSelectablePtr> slclist;
+    std::set<PMSelectablePtr> slclist;
     for (std::list<std::string>::const_iterator strpos = strlist.begin();
 	 strpos != strlist.end(); ++strpos)
     {
-	PMSelectablePtr selectable = Y2PM::packageManager().getItem (*strpos);
-	while (!selectable)
-	{
-	    string::size_type altbeg = strpos->find (" ");
-	    if (altbeg == string::npos)
-		break;
+	PMSelectablePtr selectable = Y2PM::packageManager().getItem( *strpos );
 
-	    selectable = Y2PM::packageManager().getItem (strpos->substr (0, altbeg));
-	    if (selectable)
-		break;
-
-	    altbeg = strpos->find ("(", altbeg);
-	    string::size_type altend = strpos->find (")");
-	    if ((altbeg != string::npos)
-		&& (altend != string::npos))
-	    {
-		while (++altbeg < altend)
-		{
-		    while ((*strpos)[altbeg] == ' ') ++altbeg;
-		    string::size_type comma = strpos->find(",", altbeg);
-		    if (comma == string::npos)
-			comma = altend;
-		    selectable = Y2PM::packageManager().getItem (strpos->substr(altbeg, (comma-altbeg)));
-		    if (selectable)
-			break;
-		    altbeg = comma;
-		}
-	    }
-	    break;
+	if ( !selectable && strpos->find_first_of( " (,)" ) != string::npos ) {
+	  // Scan for alternates: name(alternative [,alternative ...])
+	  // Additional catches names surrounded by whitespace
+	  vector<string> names;
+	  stringutil::split( *strpos, names, " (,)" );
+	  for ( unsigned i = 0; i < names.size(); ++i ) {
+	    selectable = Y2PM::packageManager().getItem( names[i] );
+	    if ( selectable )
+	      break;
+	  }
 	}
+
 	if (selectable)
-	    slclist.push_back (selectable);
+	    slclist.insert(selectable);
     }
 
     // cache list for next time
 
     if (is_delpacks)
     {
-	prv->_ptrs_attr_DELPACKS[locale] = slclist;
+	_ptrs_attr_DELPACKS[locale] = slclist;
     }
     else
     {
-	prv->_ptrs_attr_INSPACKS[locale] = slclist;
+	_ptrs_attr_INSPACKS[locale] = slclist;
     }
 
     return slclist;
@@ -428,22 +409,22 @@ PMULSelectionDataProvider::inspacks(const PMSelection & sel_r, const LangCode& l
     return pkgsList (locale, false);
 }
 
-std::list<PMSelectablePtr>
-PMULSelectionDataProvider::inspacks_ptrs(const PMSelection & sel_r, const LangCode& locale) const
-{
-    return pkgsPointers (PMULSelectionDataProviderPtr::cast_away_const(this), locale, false);
-}
-
 std::list<std::string>
 PMULSelectionDataProvider::delpacks(const PMSelection & sel_r, const LangCode& locale) const
 {
     return pkgsList (locale, true);
 }
 
-std::list<PMSelectablePtr>
+std::set<PMSelectablePtr>
+PMULSelectionDataProvider::inspacks_ptrs(const PMSelection & sel_r, const LangCode& locale) const
+{
+    return pkgsPointers (locale, false);
+}
+
+std::set<PMSelectablePtr>
 PMULSelectionDataProvider::delpacks_ptrs(const PMSelection & sel_r, const LangCode& locale) const
 {
-    return pkgsPointers (PMULSelectionDataProviderPtr::cast_away_const(this), locale, true);
+    return pkgsPointers (locale, true);
 }
 
 FSize
