@@ -89,6 +89,8 @@ class PMPackageDataProvider : virtual public Rep {
     static unsigned int           medianr()     { return 0; }
     static std::list<std::string> keywords()    { return std::list<std::string>(); }
 
+    static std::list<std::string> du()		{ return std::list<std::string>(); }
+
   protected:
 
     PMPackageDataProvider();
@@ -140,6 +142,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::string            location    ( const PMPackage & pkg_r ) const { return location(); }
     virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const { return medianr(); }
     virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const { return keywords(); }
+    virtual std::list<std::string> du	       ( const PMPackage & pkg_r ) const { return du(); }
 
 };
 
