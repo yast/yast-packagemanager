@@ -54,9 +54,9 @@ struct PkgNameEd {
 		return !operator==( ne2 );
 	}
 
-	/** somewhat fake to be usable in map */
 	bool operator<( const PkgNameEd & ne2 ) const {
-	    return (edition < ne2.edition);
+	  return( name < ne2.name
+		  || ( name == ne2.name && edition < ne2.edition ) );
 	}
 
         std::string asString() const;
