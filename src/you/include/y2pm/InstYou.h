@@ -210,6 +210,13 @@ class InstYou {
     */
     FSize totalDownloadSize() { return _totalDownloadSize; }
 
+    /**
+      Check for updates. Returns number of new updates available or -1 on error.
+      Doesn't check for type of updates and doesn't download any update
+      information.
+    */
+    int quickCheckUpdates( const Url &url );
+
   public:
     class Callbacks
     {

@@ -425,13 +425,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       Pathname dirFile = media.localRoot() + patchPath +
                          _paths->directoryFileName();
 
-      string buffer;
-      ifstream in( dirFile.asString().c_str() );
-      while( getline( in, buffer ) ) {
-        if ( !buffer.empty() && (*buffer.begin() != '#') ) {
-          patchFiles.push_back( buffer );
-        }
-      }
+      readDirectoryFile( dirFile, patchFiles );
     }
 
     GPGCheck gpg;
@@ -649,4 +643,18 @@ string PMYouPatchInfo::translateLangCode( const LangCode &lang )
 PMYouPackageDataProviderPtr PMYouPatchInfo::packageDataProvider() const
 {
   return _packageDataProvider;
+}
+
+PMError PMYouPatchInfo::readDirectoryFile( const Pathname &file,
+                                           list<string> &patchFiles )
+{
+  string buffer;
+  ifstream in( file.asString().c_str() );
+  while( getline( in, buffer ) ) {
+    if ( !buffer.empty() && (*buffer.begin() != '#') ) {
+      patchFiles.push_back( buffer );
+    }
+  }
+
+  return PMError();
 }

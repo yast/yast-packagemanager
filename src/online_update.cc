@@ -37,6 +37,8 @@ void usage()
        << "-g          Only download patches, don't install." << endl
        << "-i          Install downloaded patches, don't download." << endl
        << endl
+       << "-q          Quick check for new updates. Doesn't check for types" << endl
+       << "            of updates." << endl
        << "-k          Check for new updates." << endl
        << endl
        << "-c          Show configuration. Don't do anything." << endl
@@ -85,10 +87,11 @@ int main( int argc, char **argv )
   bool reload = false;
   bool showConfig = false;
   bool checkUpdates = false;
+  bool quickCheckUpdates = false;
   
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "krcgihdnsVDu:p:v:a:l:" );
+    c = getopt( argc, argv, "qkrcgihdnsVDu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
@@ -132,6 +135,9 @@ int main( int argc, char **argv )
         break;
       case 'k':
         checkUpdates = true;
+        break;
+      case 'q':
+        quickCheckUpdates = true;
         break;
       case 'r':
         reload = true;
@@ -241,6 +247,23 @@ int main( int argc, char **argv )
   
   cout << "URL: " << url.asString() << endl;
   cout << "Path: " << you.paths()->patchPath() << endl;
+
+  if ( quickCheckUpdates ) {
+    int updates = you.quickCheckUpdates( url );
+    if ( updates < 0 ) {
+      cerr << "Unable to check for updates." << endl;
+      return -1;
+    } else if ( updates == 0 ) {
+      cout << "No new updates available." << endl;
+      return 0;
+    } else if ( updates == 1 ) {
+      cout << "1 new update available." << endl;
+      return 1;
+    } else {
+      cout << updates << " new updates available." << endl;
+      return 1;
+    }
+  }
 
   error = you.retrievePatchInfo( url, reload, checkSig );
   if ( error ) {

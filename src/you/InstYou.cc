@@ -938,8 +938,58 @@ PMError InstYou::writeLastUpdate()
   _paths->config()->writeEntry( "LastUpdate", Date::toSECONDS( Date::now() ) );
   _paths->config()->save();
 
-#warning Settings should probably written elsewhere (PMManager destructor?)
+#warning Settings should probably written elsewhere
+  // Settings can't be written in destructor, because writeSettings relies on
+  // virtual methods.
   Y2PM::youPatchManager().writeSettings();
 
   return PMError();
+}
+
+int InstYou::quickCheckUpdates( const Url &u )
+{
+  Url url = u;
+
+  D__ << "InstYou::quickCheckUpdates(): " << url << endl;
+
+  _info->processMediaDir( url );
+  
+  Pathname path = url.getPath();
+  path += _paths->patchPath() + _paths->directoryFileName();
+  url.setPath( path.asString() );
+  
+  Pathname dest = _paths->localDir() + "quickcheck";
+  
+  PMError error = MediaAccess::getFile( url, dest );
+  if ( error ) {
+    ERR << "Quick check Updates: " << error << endl;
+    return -1;
+  }
+
+  list<string> newPatchFiles;
+  _info->readDirectoryFile( dest, newPatchFiles );
+
+  Pathname dirFile = _paths->attachPoint() + _paths->patchPath() +
+                     _paths->directoryFileName();
+
+  DBG << "Old directory file: " << dirFile << endl;
+
+  list<string> oldPatchFiles;
+  _info->readDirectoryFile( dirFile, oldPatchFiles );
+
+  int patchCount = 0;
+  list<string>::const_iterator newIt;
+  for( newIt = newPatchFiles.begin(); newIt != newPatchFiles.end(); ++newIt ) {
+    D__ << "newIt: " << *newIt << endl;
+    list<string>::const_iterator oldIt;
+    for( oldIt = oldPatchFiles.begin(); oldIt != oldPatchFiles.end(); ++oldIt ) {
+      D__ << "oldIt: " << *oldIt << endl;
+      if ( *newIt == *oldIt ) {
+        break;
+      }
+    }
+    if ( oldIt == oldPatchFiles.end() ) patchCount++;
+  }
+
+  return patchCount;
 }
