@@ -19,3 +19,4 @@ depcomp
 autom4te.cache
 ltmain.sh
 install-sh
+Makefile.am.common
