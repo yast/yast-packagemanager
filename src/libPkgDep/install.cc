@@ -81,7 +81,6 @@ bool PkgDep::install( PkgSet& in_candidates,
 			{
 				PkgName oname = obs->name();
 				PMSolvablePtr p = vinstalled.lookup(oname);
-				DBG << *obs << endl;
 				if (p && obs->matches( p->self_provides() )) {
 					WAR << "installed " << oname << " obsoleted by " << candname << endl;
 					vinstalled.remove( oname );
