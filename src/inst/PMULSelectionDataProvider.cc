@@ -103,10 +103,17 @@ typedef map <std::string,std::list<PMPackagePtr> >::const_iterator pkgsmapIT;
 const std::string
 PMULSelectionDataProvider::summary(const std::string& lang) const
 {
+    MIL << "PMULSelectionDataProvider::summary()" << endl;
     std::string value;
     tagmapIT it = _attr_SUMMARY.find(lang);
-    if (it != _attr_SUMMARY.end())
+    if (it == _attr_SUMMARY.end())
+    {
+	MIL << "No summary for language '" << lang << "' available" << endl;
+    }
+    else
+    {
 	_selection_retrieval->retrieveData (it->second, value);
+    }
     return value;
 }
 

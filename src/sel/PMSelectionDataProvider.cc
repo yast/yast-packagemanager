@@ -19,6 +19,7 @@
 
 /-*/
 
+#include <y2util/Y2SLog.h>
 #include <iostream>
 
 #include <y2pm/PMSelectionDataProvider.h>
@@ -60,6 +61,7 @@ PMSelectionDataProvider::~PMSelectionDataProvider()
 const std::string
 PMSelectionDataProvider::summary(const std::string& lang) const
 {
+    MIL << "PMSelectionDataProvider::summary()" << endl;
     return "";
 }
 

@@ -70,10 +70,9 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
 void
 PMULPackageDataProvider::startRetrieval() const
 {
-#if 0
     _package_retrieval->startRetrieval();
-    _language_retrieval->startRetrieval();
-#endif
+    if (_language_retrieval)
+	_language_retrieval->startRetrieval();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -87,10 +86,9 @@ PMULPackageDataProvider::startRetrieval() const
 void
 PMULPackageDataProvider::stopRetrieval() const
 {
-#if 0
     _package_retrieval->stopRetrieval();
-    _language_retrieval->stopRetrieval();
-#endif
+    if (_language_retrieval)
+	_language_retrieval->stopRetrieval();
 }
 
 #define FALLBACK(attr,func) \

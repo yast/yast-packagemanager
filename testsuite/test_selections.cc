@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
     {
 	cerr << "[--url <media_url>]" << endl;
 	cerr << "[--dir <product_dir>]" << endl;
+	cerr << "[--short]		// short output, only cached values" << endl;
 	cerr << "[--version <selection_version>]" << endl;
 	cerr << "[--release <selection_release>]" << endl;
 	cerr << "[--arch <selection_arch>]" << endl;
@@ -47,6 +48,7 @@ int main(int argc, char* argv[])
     unsigned argpos = 0;
     string media_url = "dir:///";
     string product_dir = "/";
+    bool short_output = false;
     string selection_version = "";
     string selection_release = "";
     string selection_arch = "";
@@ -80,6 +82,16 @@ int main(int argc, char* argv[])
 	    return 1;
 
 	if (argnum > argpos)
+	    command = args[argpos++];
+	else
+	    command = "";
+    }
+
+    if (command == "--short")
+    {
+	short_output = true;
+
+	if(argnum>argpos)
 	    command = args[argpos++];
 	else
 	    command = "";

@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
     {
 	cerr << "[--url <media_url>]" << endl;
 	cerr << "[--dir <product_dir>]" << endl;
+	cerr << "[--short]		// short output, only cached values" << endl;
 	cerr << "[--version <package_version>]" << endl;
 	cerr << "[--release <package_release>]" << endl;
 	cerr << "[--arch <package_arch>]" << endl;
@@ -57,6 +58,7 @@ int main(int argc, char* argv[])
     unsigned argpos = 0;
     string media_url = "dir:///";
     string product_dir = "/";
+    bool short_output = false;
     string package_version = "";
     string package_release = "";
     string package_arch = "";
@@ -90,6 +92,16 @@ int main(int argc, char* argv[])
 	    return 1;
 
 	if (argnum > argpos)
+	    command = args[argpos++];
+	else
+	    command = "";
+    }
+
+    if (command == "--short")
+    {
+	short_output = true;
+
+	if(argnum>argpos)
 	    command = args[argpos++];
 	else
 	    command = "";
@@ -133,7 +145,6 @@ int main(int argc, char* argv[])
 	else
 	    command = "";
     }
-
     InstSrcPtr nsrc;
 
     Pathname cache   ( "/tmp/tcache" ); // cachedir (must not exist)
@@ -191,15 +202,22 @@ int main(int argc, char* argv[])
 		for (std::list<PMPackagePtr>::const_iterator p_it = pacs.begin();
 			p_it != pacs.end(); ++p_it)
 		{
-		    show_pmpackage (*p_it);
+		    cout << "++++" << endl;
+		    show_pmpackage (*p_it, short_output);
+		    cout << "----" << endl;
+		    cout << "++++" << endl;
+		    show_pmpackage (*p_it, short_output);
+		    cout << "----" << endl;
 		}
 	    }
 	}
+	cout << "All queries done" << endl;
     }
     else
     {
 	cout << "unkown command " << command << endl;
     }
+    cout << "Finished" << endl;
     return 0;
 }
 

@@ -105,7 +105,13 @@ show_pmobject (PMObjectPtr p, bool only_cached)
 void
 show_pmpackage (PMPackagePtr p, bool only_cached)
 {
+    cout << "-- Package --" << endl;
+
+    if (!p)
+	return;
+
     p->startRetrieval();
+
     show_pmobject ((PMObjectPtr)p, only_cached);
 
     cout << "Buildtime: " << p->buildtime() << endl;
@@ -138,8 +144,8 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     cout << "Location: '" << p->location() << "'" << endl;
     cout << "MediaNr: " << p->medianr () << endl;
     cout << "Keywords: " << strlist2string(p->keywords()) << endl;
-    cout << "========" << endl;
     p->stopRetrieval();
+    cout << "========" << endl;
     return;
 }
 
