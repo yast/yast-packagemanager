@@ -42,6 +42,7 @@ void usage()
        << "-v version  Version of product to get patches for." << endl
        << "-a arch     Base architecture of product to get patches for." << endl
        << endl
+       << "-r          Reload patches from server." << endl
        << "-d          Dry run. Only get patches, don't install them." << endl
        << "-n          No signature check of downloaded files." << endl
        << endl
@@ -84,7 +85,7 @@ int main( int argc, char **argv )
   
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "kcgihdnsVDu:p:v:a:l:" );
+    c = getopt( argc, argv, "krcgihdnsVDu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
@@ -128,6 +129,9 @@ int main( int argc, char **argv )
         break;
       case 'k':
         checkUpdates = true;
+        break;
+      case 'r':
+        reload = true;
         break;
       default:
         cerr << "Error parsing command line." << endl;
