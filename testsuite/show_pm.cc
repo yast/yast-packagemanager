@@ -168,7 +168,8 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     cout << "PostIn: " << strlist2string(p->postin(), "\n") << endl;
     cout << "PreUn: " << strlist2string(p->preun(), "\n") << endl;
     cout << "PostUn: " << strlist2string(p->postun(), "\n") << endl;
-    cout << "Source: " << p->sourcerpm() << endl;
+    cout << "SourceLoc: " << p->sourceloc() << endl;
+    cout << "SourceSize: " << p->sourcesize() << endl;
     cout << "Archivesize: " << p->archivesize() << endl;
     cout << "Authors: " << strlist2string(p->authors(), ", ") << endl;
     cout << "Files: " << strlist2string(p->filenames(), "\n") << endl;
