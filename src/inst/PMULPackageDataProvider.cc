@@ -22,17 +22,14 @@
 #include <iostream>
 
 #include <y2pm/PMULPackageDataProvider.h>
-#include <y2pm/PMULPackageDataProviderPtr.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : PMULPackageDataProvider
-//
+//	CLASS NAME : PMULPackageDataProviderPtr
+//	CLASS NAME : constPMULPackageDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-
-IMPL_DERIVED_POINTER(PMULPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
+IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMDataProvider);
 
 ///////////////////////////////////////////////////////////////////
 //
