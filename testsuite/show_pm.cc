@@ -104,6 +104,7 @@ show_pmselection (PMSelectionPtr s)
     show_pmobject ((PMObjectPtr)s);
 
     cout << "Category: " << s->category () << endl;
+    cout << "IsBase: " << s->isBase () << endl;
     cout << "Visible: " << s->visible () << endl;
     cout << "Order: " << s->order() << endl;
     cout << "Suggests: " << list2string(s->suggests()) << endl;
