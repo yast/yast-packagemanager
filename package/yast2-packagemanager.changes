@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 15 09:01:06 CEST 2003 - arvin@suse.de
+
+- fixed memory corruption (bug #28373 and #28763)
+
+-------------------------------------------------------------------
 Tue Aug 12 18:37:50 CEST 2003 - ma@suse.de
 
 - Adapt to changes in liby2util.

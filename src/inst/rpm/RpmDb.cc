@@ -1285,7 +1285,7 @@ RpmDb::run_rpm(const RpmArgVec& options,
     return;
   }
 
-  RpmArgVec args(5);
+  RpmArgVec args (6);
   unsigned argc = 0;
 
   // always set root and dbpath
