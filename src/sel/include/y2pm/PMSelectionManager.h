@@ -25,6 +25,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
 #include <y2pm/PMSelection.h>
+#include <y2pm/PMPackageManager.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -45,6 +46,15 @@ class PMSelectionManager : public PMManager {
     PMSelectionManager();
     virtual ~PMSelectionManager();
 
+    /**
+     * list of currently active selections
+     * used to determine which (packages of) selections to
+     * de-select when activate() is called.
+     *
+     * see activate()
+     */
+    std::list<PMSelectablePtr> _currently_actives;
+
   private:
 
     /**
@@ -53,8 +63,40 @@ class PMSelectionManager : public PMManager {
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
-  public:
+    /**
+     * get first matching alternative selection of given
+     * "pack (alt1, alt2, ...)" string
+     */
+    PMSelectablePtr getAlternativeSelectable (std::string pkgstr, PMPackageManager & package_mgr);
 
+    /**
+     * set all packages of the given list to "auto"
+     */
+    void setSelectionPackages (const std::list<std::string> packages, bool these_are_delpacks, PMPackageManager & package_mgr);
+
+    /**
+     * set all packages of this selection to "don't install"
+     * if their status is "auto" (i.e. not explicitly requested
+     * by the user).
+     */
+    void resetSelectionPackages (const std::list<std::string> packages, bool these_are_inspacks, PMPackageManager & package_mgr);
+
+    /**
+     * activate given selection
+     * set all packages of this selection to "auto"
+     */
+    void setSelection (PMSelectionPtr selection, PMPackageManager & package_mgr);
+
+    /**
+     * de-activate given selection
+     * set all packages of this selection to "don't install"
+     * if their status is "auto" (i.e. not explicitly requested
+     * by the user).
+     */
+    void resetSelection (PMSelectionPtr selection, PMPackageManager & package_mgr);
+
+  public:
+    PMError activate (PMPackageManager & package_mgr);
 };
 
 ///////////////////////////////////////////////////////////////////
