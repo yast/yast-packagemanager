@@ -78,9 +78,12 @@ class InstYou {
     PMError attachSource();
     
     /**
-     * Download packages belonging to selected patches.
+     * Download packages and scripts belonging to selected patches.
+     *
+     * @param checkSig  If true check signatures of downloaded packages and
+     *                  scripts.
      */
-    PMError retrievePatches();
+    PMError retrievePatches( bool checkSig = true );
     
     /**
      * Get first selected patch.
@@ -94,8 +97,11 @@ class InstYou {
 
     /**
      * Download next patch in list of selected patches.
+     *
+     * @param checkSig  If true check signatures of downloaded packages and
+     *                  scripts.
      */
-    PMError retrieveCurrentPatch();
+    PMError retrieveCurrentPatch( bool checkSig = true );
 
     /**
      * Install next patch in list of selected patches to target system.
@@ -139,7 +145,7 @@ class InstYou {
 
   protected:
     PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
-    PMError retrievePatch( const PMYouPatchPtr & );
+    PMError retrievePatch( const PMYouPatchPtr &, bool checkSig = true );
 
   private:
     PMYouPatchPtr nextSelectedPatch();
