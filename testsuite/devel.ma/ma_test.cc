@@ -185,8 +185,9 @@ struct WFM {
     YCPValue ret = _pkgmod->SourceStartCache( args );
     OUT << " --> " << ret << endl;
   }
-  void SourceGetCurrent() {
+  void SourceGetCurrent( bool ena ) {
     YCPList args;
+    args->add( YCPBoolean(ena) );
     OUT << "SourceGetCurrent" << args;
     YCPValue ret = _pkgmod->SourceGetCurrent( args );
     OUT << " --> " << ret << endl;
@@ -267,14 +268,18 @@ int main()
   wfm.init();
   INT << "START" << endl;
   wfm.SourceStartManager( false );
-  wfm.SourceSetEnabled( 4, false );
-  wfm.SourceSetEnabled( 4, true );
-  wfm.SourceSetEnabled( 5, true );
+  wfm.SourceGetCurrent( false );
 
-  //wfm.SourceStartCache( false );
-  //wfm.SourceGetCurrent();
-  //wfm.SourceGeneralData( 0 );
-  //wfm.SourceGeneralData( 1 );
+
+  InstSrcManager::SrcStateVector keep;
+  InstSrcManager::SrcDelSet      del;
+
+  keep.push_back( InstSrcManager::SrcState( 3, false ) );
+  keep.push_back( InstSrcManager::SrcState( 2, false ) );
+  keep.push_back( InstSrcManager::SrcState( 1, true ) );
+  del.insert( 4 );
+
+  INT << ISM.adjustSources( keep, del ) << endl;
 
   SEC << "STOP" << endl;
   wfm.close();
