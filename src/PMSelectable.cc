@@ -231,6 +231,9 @@ bool PMSelectable::clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & r
   if ( !rhs )
     return true; // anything better than nothing
 
+  if ( lhs->prefererCandidate() )
+    return true; // lhs always best.
+
   if ( rhs->prefererCandidate() )
     return false; // rhs always best.
 

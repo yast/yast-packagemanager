@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep 16 19:28:33 CEST 2003 - ma@suse.de
+
+- Fixed candiadate selection to prefer packages introduced by
+  'yast2 -i' (#30456)
+- 2.8.21
+
+-------------------------------------------------------------------
 Tue Sep 16 18:10:53 CEST 2003 - kkaempf@suse.de
 
 - do not take obsoletes of installed packages into account
