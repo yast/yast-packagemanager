@@ -316,16 +316,17 @@ InstSrc::getPackages() const
  * find list of packages
  * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
  */
-const std::list<PMPackagePtr> *
-InstSrc::findPackages (const string& name, const string& version, const string& release, const string& arch) const
+const std::list<PMPackagePtr>
+InstSrc::findPackages (const std::list<PMPackagePtr> *packages, const string& name, const string& version, const string& release, const string& arch) const
 {
     D__ << __FUNCTION__ << std::endl;
     if (!_data)
     {
 	cerr << "InstSrc::findPackages() no _data" << endl;
-	return 0;
+	return std::list<PMPackagePtr>();
     }
-    return _data->findPackages (name, version, release, arch);
+cerr << _data << "->findPackages()" << endl;
+    return _data->findPackages (packages, name, version, release, arch);
 }
 
 ///////////////////////////////////////////////////////////////////
