@@ -1319,62 +1319,6 @@ bool RpmDb::checkPackage( string packagePath, string version )
 }
 
 
-#if 0
-/*--------------------------------------------------------------*/
-/* Query Version of a package.					*/
-/* Returns "" if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-string RpmDb::queryPackageVersion( string packageName )
-{
-  return queryPackage("%{RPMTAG_VERSION}-%{RPMTAG_RELEASE} ", packageName );
-}
-
-
-/*--------------------------------------------------------------*/
-/* Query Release of a package.					*/
-/* Returns "" if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-string RpmDb::queryPackageRelease( string packageName )
-{
-  return queryPackage("%{RPMTAG_RELEASE} ", packageName );
-}
-
-
-/*--------------------------------------------------------------*/
-/* Query installation-time of a package.			*/
-/* Returns 0 if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-long RpmDb::queryPackageInstallTime( string packageName )
-{
-  string installTime = queryPackage("%{RPMTAG_INSTALLTIME} ", packageName );
-
-  return ( atol ( installTime.c_str() ) );
-}
-
-
-/*--------------------------------------------------------------*/
-/* Query build-time of a package.				*/
-/* Returns 0 if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-long RpmDb::queryPackageBuildTime( string packageName )
-{
-  string buildTime = queryPackage("%{RPMTAG_BUILDTIME} ", packageName );
-
-  return ( atol ( buildTime.c_str() ) );
-}
-
-
-/*--------------------------------------------------------------*/
-/* Query summary of a package.					*/
-/* Returns "" if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-string RpmDb::queryPackageSummary( string packageName )
-{
-  return queryPackage("%{RPMTAG_SUMMARY} ", packageName );
-}
-
-#endif
-
 /*--------------------------------------------------------------*/
 /* Query the current package using the specified query format	*/
 /*--------------------------------------------------------------*/
@@ -1515,7 +1459,7 @@ void RpmDb::run_rpm(int n_opts, const char *const *options,
      output = output + " " + argv[k];
   }
   argv[i] = 0;
-  DBG << "rpm command: " << output << endl;
+  D__ << "rpm command: " << output << endl;
 
   if ( process != NULL )
   {
@@ -1548,7 +1492,6 @@ bool RpmDb::systemReadLine(string &line)
 /*--------------------------------------------------------------*/
 int RpmDb::systemStatus()
 {
-   DBG << endl;
    if ( process == NULL )
       return -1;
 

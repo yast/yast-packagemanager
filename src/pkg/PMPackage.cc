@@ -107,9 +107,14 @@ std::string PMPackage::getAttributeValue(PMPackageAttribute attr)
     return _dataProvider->getAttributeValue(this,attr);
 }
 
+std::string PMPackage::getAttributeName(PMObjectAttribute attr)
+{
+    return PMObject::getAttributeName(attr);
+}
+
 std::string PMPackage::getAttributeName(PMPackageAttribute attr)
 {
-    const char* str;
+    const char* str = NULL;
     switch(attr)
     {
 	case PMPackage::PKG_BUILDTIME:

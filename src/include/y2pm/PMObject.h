@@ -67,7 +67,7 @@ class REP_CLASS(PMObject), public PMSolvable {
      * @param attr Attribute number
      * @return Attribute name
      * */
-    std::string getAttributeName(PMObjectAttribute attr);
+    virtual std::string getAttributeName(PMObjectAttribute attr);
 
   public:
 

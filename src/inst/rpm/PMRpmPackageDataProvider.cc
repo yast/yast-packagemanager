@@ -81,59 +81,59 @@ string PMRpmPackageDataProvider::getAttributeValue(PMPackagePtr pkg,
     switch(attr)
     {
 	case PMPackage::PKG_BUILDTIME:
-	    queryformat = "%{BUILDTIME}\n";
+	    queryformat = "%{BUILDTIME}";
 	    break;
 	case PMPackage::PKG_BUILDHOST:
-	    queryformat = "%{BUILDHOST}\n";
+	    queryformat = "%{BUILDHOST}";
 	    break;
 	case PMPackage::PKG_INSTALLTIME:
-	    queryformat = "%{INSTALLTIME}\n";
+	    queryformat = "%{INSTALLTIME}";
 	    break;
 	case PMPackage::PKG_DISTRIBUTION:
-	    queryformat = "%{DISTRIBUTION}\n";
+	    queryformat = "%{DISTRIBUTION}";
 	    break;
 	case PMPackage::PKG_VENDOR:
-	    queryformat = "%{VENDOR}\n";
+	    queryformat = "%{VENDOR}";
 	    break;
 	case PMPackage::PKG_LICENSE:
-	    queryformat = "%{LICENSE}\n";
+	    queryformat = "%{LICENSE}";
 	    break;
 	case PMPackage::PKG_PACKAGER:
-	    queryformat = "%{PACKAGER}\n";
+	    queryformat = "%{PACKAGER}";
 	    break;
 	case PMPackage::PKG_GROUP:
-	    queryformat = "%{GROUP}\n";
+	    queryformat = "%{GROUP}";
 	    break;
 	case PMPackage::PKG_CHANGELOG:
 	    queryformat =
-    "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\n\n%{CHANGELOGTEXT}\n\n]\n";
+    "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\n\n%{CHANGELOGTEXT}\n\n]";
 	    break;
 	case PMPackage::PKG_URL:
-	    queryformat = "%{URL}\n";
+	    queryformat = "%{URL}";
 	    break;
 	case PMPackage::PKG_OS:
-	    queryformat = "%{OS}\n";
+	    queryformat = "%{OS}";
 	    break;
 	case PMPackage::PKG_ARCH:
-	    queryformat = "%{ARCH}\n";
+	    queryformat = "%{ARCH}";
 	    break;
 	case PMPackage::PKG_PREIN:
-	    queryformat = "%{PREIN}\n";
+	    queryformat = "%{PREIN}";
 	    break;
 	case PMPackage::PKG_POSTIN:
-	    queryformat = "%{POSTIN}\n";
+	    queryformat = "%{POSTIN}";
 	    break;
 	case PMPackage::PKG_PREUN:
-	    queryformat = "%{PREUN}\n";
+	    queryformat = "%{PREUN}";
 	    break;
 	case PMPackage::PKG_POSTUN:
-	    queryformat = "%{POSTUN}\n";
+	    queryformat = "%{POSTUN}";
 	    break;
 	case PMPackage::PKG_SOURCERPM:
-	    queryformat = "%{SOURCERPM}\n";
+	    queryformat = "%{SOURCERPM}";
 	    break;
 	case PMPackage::PKG_ARCHIVESIZE:
-	    queryformat = "%{ARCHIVESIZE}\n";
+	    queryformat = "%{ARCHIVESIZE}";
 	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid

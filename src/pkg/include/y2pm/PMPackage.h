@@ -100,6 +100,8 @@ class REP_CLASS(PMPackage), public PMObject {
      * @return Attribute name
      * */
     std::string getAttributeName(PMPackageAttribute attr);
+    
+    std::string getAttributeName(PMObjectAttribute attr);
 
     /** assign a data provider
      * @param dataprovider the dataprovider

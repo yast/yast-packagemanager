@@ -45,8 +45,27 @@ int main(int argc, char* argv[])
 	    else
 	    {
 		cout << "query of " << argv[i] << endl;
-		cout << (*p)->getAttributeValue(PMPackage::PKG_LICENSE) << endl;
-		cout << (*p)->getAttributeValue(PMPackage::PMOBJ_DESCRIPTION) << endl;
+		for (unsigned attr = 0; attr < PMPackage::PKG_NUM_ATTRIBUTES; attr++)
+		{
+		    if(attr<PMObject::PMOBJ_NUM_ATTRIBUTES)
+		    {
+			cout
+			    << (*p)->getAttributeName(PMObject::PMObjectAttribute(attr))
+			    << ": "
+			    << (*p)->getAttributeValue(PMObject::PMObjectAttribute(attr))
+			    << endl;
+		    }
+		    else
+		    {
+			cout
+			    << (*p)->getAttributeName(PMPackage::PMPackageAttribute(attr))
+			    << ": "
+			    << (*p)->getAttributeValue(PMPackage::PMPackageAttribute(attr))
+			    << endl;
+//		    cout << (*p)->getAttributeValue(PMPackage::PKG_LICENSE) << endl;
+//		    cout << (*p)->getAttributeValue(PMPackage::PMOBJ_DESCRIPTION) << endl;
+		    }
+		}
 	    }
 	}
     }
