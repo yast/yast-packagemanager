@@ -10,7 +10,7 @@
 |                                                     (C) 2002 SuSE AG |
 \----------------------------------------------------------------------/
 
-   File:       CommonPkdParser.cc
+   File:       PkgRevRel.cc
    Purpose:    Implements reverse relation
    Author:     Ludwig Nussel <lnussel@suse.de>
    Maintainer: Ludwig Nussel <lnussel@suse.de>
