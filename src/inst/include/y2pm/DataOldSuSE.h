@@ -15,7 +15,14 @@
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
-    Purpose:	Handle media content in common.pkd format
+    Purpose:	helper calls for InstSrcData
+		is able to read and parse 'old format' SuSE media
+		content descriptions
+		namely suse/setup/descr/common.pkd for packages
+		and suse/setup/descr/ *.sel for selections
+
+		a possibly extension is reading
+		update/<arch>/<product>/<version>/ * from an ftp patch repository
 
 /-*/
 #ifndef DataOldSuSE_h
@@ -28,7 +35,7 @@
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackage.h>
 
-#include <y2pm/DataOldSuSEPtr.h>
+#include <y2pm/DataOldSuSE.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -36,55 +43,41 @@
 /**
  *
  **/
-class DataOldSuSE: virtual public Rep {
+class DataOldSuSE {
   REP_BODY(DataOldSuSE)
 
   private:
-    const MediaAccess *media;
+    std::list<PMSolvablePtr> *_selections;
+    std::list<PMPackagePtr>  *_packages;
+    std::list<PMSolvablePtr> *_patches;
 
   public:
 
-    DataOldSuSE (const MediaAccess *media);
+    /**
+     * constructor
+     * read content data from media and
+     *   fill _selections, _packages, and _patches
+     */
+    DataOldSuSE (MediaAccess *media);
 
     virtual ~DataOldSuSE();
 
   public:
 
-    //-----------------------------
-    // source content access
-
     /**
-     * return the number of selections on this source
+     * @return ptr to list of selections on old SuSE source
      */
-    int numSelections() const;
-
-    /**
-     * return the number of packages on this source
-     */
-    int numPackages() const;
-
-    /**
-     * return the number of patches on this source
-     */
-    int numPatches() const;
-
-    /**
-     * generate PMSolvable objects for each selection on the source
-     * @return list of PMSolvablePtr on this source
-     */
-    std::list<PMSolvablePtr> getSelections();
+    const std::list<PMSolvablePtr> *getSelections (void) const;
     
     /**
-     * generate PMPackage objects for each Item on the source
-     * @return list of PMPackagePtr on this source
+     * @return ptr to list of packages on old SuSE source
      * */
-    std::list<PMPackagePtr> getPackages();
+    const std::list<PMPackagePtr> *getPackages (void) const;
 
     /**
-     * generate PMSolvable objects for each patch on the source
-     * @return list of PMSolvablePtr on this source
+     * @return ptr to list of packages on old SuSE source
      */
-    std::list<PMSolvablePtr> getPatches();
+    const std::list<PMSolvablePtr> *getPatches (void) const;
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 };

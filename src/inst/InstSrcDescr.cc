@@ -43,10 +43,10 @@ IMPL_HANDLES(InstSrcDescr);
 //
 //	DESCRIPTION : initialization with new media
 //
-InstSrcDescr::InstSrcDescr (MediaAccessPtr media)
+InstSrcDescr::InstSrcDescr (MediaAccess *media)
 {
-    MediaHandler _handler = media.handler;
-    if (_handler)
+    MediaHandler _handler = media->handler;
+    if (_handler != 0)
     {
 	Pathname mountpoint = _handler->getAttachPoint();
 
@@ -79,10 +79,9 @@ InstSrcDescr::InstSrcDescr (MediaAccessPtr media)
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION : initialization with known media
-int
 InstSrcDescr::InstSrcDescr (const Pathname & contentfile)
 {
-    return 0;
+    return;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -102,8 +101,8 @@ void
 InstSrcDescr::parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile, bool new_media)
 {
     char buf[101];
-    char *sptr = susefile.asString().c_str();
-    chat *dot;
+    const char *sptr = susefile.asString().c_str();
+    char *dot;
 
     sptr += 14;		// skip ".S.u.S.E-disk-"
 
@@ -120,7 +119,7 @@ InstSrcDescr::parseSuSEFile (const Pathname & mountpoint, const Pathname & susef
     if (*sptr != '.')		// '.' is separator between number and ID
 	return;
     sptr++;
-    _ID = string (sptr);
+    _id = string (sptr);
 
     if (!new_media)
 	return;
@@ -186,7 +185,7 @@ fprintf (stderr, "parseSuSEFile(%s) = %p\n", filename.asString().c_str(), info);
 	}
 	else if (strcmp (key, "DISTRIBUTION_RELEASE") == 0)
 	{
-	    _release = value;
+	    _release = atoi (value);
 	}
 	else if (strcmp (key, "DIST_STRING") == 0)
 	{
@@ -210,7 +209,7 @@ fprintf (stderr, "parseSuSEFile(%s) = %p\n", filename.asString().c_str(), info);
  * @return pathname of written cache
  * writes private data to an ascii file
  */
-Pathname
+const Pathname
 InstSrcDescr::writeCache (void)
 {
     return Pathname ("");	// empty == error

@@ -38,13 +38,18 @@
 class InstSrcData: virtual public Rep {
   REP_BODY(InstSrcData)
 
+  private:
+    const std::list<PMSolvablePtr> *_selections;
+    const std::list<PMPackagePtr>  *_packages;
+    const std::list<PMSolvablePtr> *_patches;
+
   public:
 
     /**
      * constructor
      * initialization with new media
      */
-    InstSrcData (const MediaAccess *media);
+    InstSrcData (MediaAccess *media);
 
     /**
      * constructor
@@ -88,19 +93,19 @@ class InstSrcData: virtual public Rep {
      * generate PMSolvable objects for each selection on the source
      * @return list of PMSolvablePtr on this source
      */
-    std::list<PMSolvablePtr> getSelections();
+    const std::list<PMSolvablePtr> *getSelections (void) const;
     
     /**
      * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source
      * */
-    std::list<PMPackagePtr> getPackages();
+    const std::list<PMPackagePtr> *getPackages (void) const;
 
     /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source
      */
-    std::list<PMSolvablePtr> getPatches();
+    const std::list<PMSolvablePtr> *getPatches (void) const;
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 };

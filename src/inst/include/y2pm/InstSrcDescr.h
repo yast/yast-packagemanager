@@ -33,6 +33,8 @@
 #include <list>
 
 #include <y2util/Pathname.h>
+#include <y2pm/MediaAccess.h>
+
 #include <y2pm/InstSrcDescrPtr.h>	// pointer to self
 
 ///////////////////////////////////////////////////////////////////
@@ -80,7 +82,8 @@ class REP_CLASS(InstSrcDescr) {
     std::string _name;
     std::string _product;
     std::string _type;
-    int _numparts;
+    std::string _label;
+    int _count;
     std::list<std::string> _architectures;
 
     // internal helper function
@@ -118,7 +121,7 @@ class REP_CLASS(InstSrcDescr) {
     const std::string& Name() const { return _name; }
     const std::string& Product() const { return _product; }
     const std::string& Id() const { return _id; }
-    int NumParts() const { return _numparts; }
+    int Count() const { return _count; }
     const std::list<std::string>& Architectures() const { return _architectures; }
 
     bool operator==(const InstSrcDescr& d) {return (_id == d._id); }

@@ -9,7 +9,7 @@ pkgincludedir = $(includedir)/y2pm
 pkginclude_HEADERS =	\
 	InstSrc.h InstSrcPtr.h	\
 	InstSrcData.h InstSrcDataPtr.h	\
-	DataCommonPkd.h CommonPkdPtr.h	\
+	DataOldSuSE.h	\
 	InstSrcDescr.h	InstSrcDescrPtr.h
 
 #<INSTALL-HEADER-TARGET>

@@ -145,19 +145,19 @@ class InstSrc: virtual public Rep {
      * generate PMSolvable objects for each selection on the source
      * @return list of PMSolvablePtr on this source
      */
-    std::list<PMSolvablePtr> getSelections();
+    const std::list<PMSolvablePtr> *getSelections() const;
     
     /**
      * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source
      * */
-    std::list<PMPackagePtr> getPackages();
+    const std::list<PMPackagePtr> *getPackages() const;
 
     /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source
      */
-    std::list<PMSolvablePtr> getPatches();
+    const std::list<PMSolvablePtr> *getPatches() const;
 
     std::ostream & dumpOn( std::ostream & str ) const;
 };

@@ -21,6 +21,8 @@
 
 #include <y2pm/InstSrcData.h>
 
+#include <y2pm/DataOldSuSE.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -43,8 +45,24 @@ IMPL_HANDLES(InstSrcData);
      * constructor
      * initialization with new media
      */
-InstSrcData::InstSrcData (const MediaAccess *media)
+InstSrcData::InstSrcData (MediaAccess *media)
 {
+    // try to determine media kind
+
+    DataOldSuSE oldsuse (media);
+
+    if (oldsuse.getPackages() != 0)
+    {
+	// found packages in old suse format -> correct media type
+
+	_selections = oldsuse.getSelections ();
+	_packages = oldsuse.getPackages ();
+	_patches = oldsuse.getPatches ();
+
+        return;		// destroy DataOldSuSE object
+    }
+
+    return;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -98,7 +116,7 @@ InstSrcData::writeCache (const Pathname &descrpathname)
 int
 InstSrcData::numSelections() const
 {
-    return 0;
+    return _selections->size();
 }
 
 
@@ -108,7 +126,7 @@ InstSrcData::numSelections() const
 int
 InstSrcData::numPackages() const
 {
-    return 0;
+    return _packages->size();
 }
 
 
@@ -118,7 +136,7 @@ InstSrcData::numPackages() const
 int
 InstSrcData::numPatches() const
 {
-    return 0;
+    return _patches->size();
 }
 
 
@@ -126,23 +144,21 @@ InstSrcData::numPatches() const
  * generate PMSolvable objects for each selection on the source
  * @return list of PMSolvablePtr on this source
  */
-std::list<PMSolvablePtr>
-InstSrcData::getSelections()
+const std::list<PMSolvablePtr> *
+InstSrcData::getSelections() const
 {
-    std::list<PMSolvablePtr> x;
-    return x;
+    return _selections;
 }
 
 
 /**
  * generate PMPackage objects for each Item on the source
  * @return list of PMPackagePtr on this source
- * */
-std::list<PMPackagePtr>
-InstSrcData::getPackages()
+ */
+const std::list<PMPackagePtr> *
+InstSrcData::getPackages() const
 {
-    std::list<PMPackagePtr> x;
-    return x;
+    return _packages;
 }
 
 
@@ -150,11 +166,10 @@ InstSrcData::getPackages()
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
  */
-std::list<PMSolvablePtr>
-InstSrcData::getPatches()
+const std::list<PMSolvablePtr> *
+InstSrcData::getPatches() const
 {
-    std::list<PMSolvablePtr> x;
-    return x;
+    return _patches;
 }
 
 

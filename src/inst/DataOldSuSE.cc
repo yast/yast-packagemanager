@@ -10,11 +10,19 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       DataCommonPkd.cc
+   File:       DataOldSuSE.cc
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
+    Purpose:	helper calls for InstSrcData
+		is able to read and parse 'old format' SuSE media
+		content descriptions
+		namely suse/setup/descr/common.pkd for packages
+		and suse/setup/descr/ *.sel for selections
+
+		a possibly extension is reading
+		update/<arch>/<product>/<version>/ from an ftp patch repository
 /-*/
 
 #include <iostream>
@@ -23,7 +31,7 @@
 
 #include <y2util/CommonPkdParser.h>
 #include <y2util/Y2SLog.h>
-#include <y2pm/DataCommonPkd.h>
+#include <y2pm/DataOldSuSE.h>
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRelation.h>
@@ -32,6 +40,7 @@
 using namespace std;
 
 //--------------------------------------------------------------------
+// suse/setup/descr/common.pkd handling
 
 #define CREATETAG(tagname,num) \
 t = new CommonPkdParser::Tag(tagname,CommonPkdParser::Tag::ACCEPTONCE); \
@@ -150,7 +159,8 @@ string2DepCompare( const string & str_tr )
 /** parse dep string as found in common.pkd
  * e.g. groff >= 1.17 less /bin/sh
  * */
-static PMSolvable::PkgRelList_type asDependList( const string & data_tr )
+static PMSolvable::PkgRelList_type
+asDependList( const string & data_tr )
 {
   PMSolvable::PkgRelList_type ret_VCi;
   vector<string> data_Vti( TagParser::split2words( data_tr ) );
@@ -214,7 +224,11 @@ static PMSolvable::PkgRelList_type asDependList( const string & data_tr )
   return ret_VCi;
 }
 
-static inline PMPackagePtr createPMPackageFromTagset( CommonPkdParser::TagSet* t)
+
+// *** comment missing
+
+static inline PMPackagePtr
+createPMPackageFromTagset( CommonPkdParser::TagSet* t)
 {
   //FIXME error checking
   PkgName name = t->getTagByIndex(CommonPkdTagSet::RPMNAME)->Data();
@@ -242,22 +256,24 @@ static inline PMPackagePtr createPMPackageFromTagset( CommonPkdParser::TagSet* t
   return p;
 }
 
-std::list<PMPackagePtr> DataCommonPkd::getPackages()
+
+/*
+ * read suse/setup/descr/common.pkd and parse files
+ */
+std::list<PMPackagePtr> *
+readCommonPkd (const Pathname &commonpkdpath)
 {
-    std::list<PMPackagePtr> pkglist;
-    //FIXME get path somehow
-    std::string commonpkd("common.pkd");
+    std::list<PMPackagePtr> *pkglist = new std::list<PMPackagePtr>;
 
     TagParser parser;
     std::string tagstr;
 
-    MIL << "open " << commonpkd << std::endl;
-    std::ifstream commonpkdstream(commonpkd.c_str());
+    MIL << "open " << commonpkdpath.asString() << std::endl;
+    std::ifstream commonpkdstream(commonpkdpath.asString().c_str());
     if(!commonpkdstream)
     {
-	ERR << commonpkd << ": file not found" << std::endl;
-	// FIXME error
-	return pkglist;
+	ERR << commonpkdpath.asString() << ": file not found" << std::endl;
+	return 0;
     }
 
     CommonPkdParser::TagSet* tagset;
@@ -288,7 +304,7 @@ std::list<PMPackagePtr> DataCommonPkd::getPackages()
 		    {
 		      PMPackagePtr p = createPMPackageFromTagset(tagset);
 		      if(p != NULL)
-			pkglist.push_back(p);
+			pkglist->push_back(p);
 		    }
 		    tagset->clear();
 		    repeatassign = true;
@@ -308,44 +324,101 @@ std::list<PMPackagePtr> DataCommonPkd::getPackages()
       MIL << "parsing finished" << std::endl;
       PMPackagePtr p = createPMPackageFromTagset(tagset);
       if(p != NULL)
-	pkglist.push_back(p);
+	pkglist->push_back(p);
     }
 
     return pkglist;
 }
+
 //--------------------------------------------------------------------
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : DataCommonPkd
 //
-///////////////////////////////////////////////////////////////////
-
-IMPL_HANDLES(DataCommonPkd);
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : DataCommonPkd::DataCommonPkd
+//	METHOD NAME : DataOldSuSE::DataOldSuSE
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
+//	DESCRIPTION : read content data from media and
+//			fill _selections, _packages, and _patches
 //
-DataCommonPkd::DataCommonPkd (const MediaAccess *media)
-	:_media (media)
+DataOldSuSE::DataOldSuSE (MediaAccess *media)
 {
+    bool we_attached = false;
+
+    // attach media at /var/adm/mount, if not already done
+
+    Pathname attachpoint = media->getAttachPoint();
+    if (attachpoint.empty())
+    {
+	attachpoint = Pathname ("/var/adm/mount");
+	media->attachTo (attachpoint);
+	we_attached = true;
+    }
+
+    /*
+     * retrieve package data
+     */
+
+    Pathname commonpkdpath = Pathname ("suse/setup/descr/common.pkd");
+
+    // provide file below attachpoint
+
+    if (media->provideFile (commonpkdpath) == 0)
+    {
+	// read and parse local file copy
+	_packages = readCommonPkd (attachpoint + commonpkdpath);
+	// clean up local copy
+	media->cleanUp (commonpkdpath);
+    }
+
+    /*
+     * retrieve selections
+     */
+
+    Pathname seldirpath = Pathname ("suse/setup/descr");
+    const std::list<std::string> *seldirnames = media->dirInfo (seldirpath);
+
+    _selections = 0;
+
+    for (std::list<std::string>::const_iterator name = seldirnames->begin();
+	 name != seldirnames->end();
+	 name++)
+    {
+	// check if name matches *.sel
+
+	// parse files matching to PmSolvable
+
+	// fill _selections
+    }
+    delete seldirnames;	// clean up memory
+
+    /*
+     * retrieve patches
+     */
+
+    // to be implemented
+
+    _patches = 0;
+
+    // release media if we attached it
+
+    if (we_attached)
+    {
+	media->release ();
+    }
+
     D__ << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : DataCommonPkd::~DataCommonPkd
+//	METHOD NAME : DataOldSuSE::~DataOldSuSE
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-DataCommonPkd::~DataCommonPkd()
+DataOldSuSE::~DataOldSuSE()
 {
 }
 
@@ -353,45 +426,13 @@ DataCommonPkd::~DataCommonPkd()
 // source content access
 
 /**
- * return the number of selections on this source
- */
-int
-DataCommonPkd::numSelections() const
-{
-    // no selections in common.pkd
-    return 0;
-}
-
-
-/**
- * return the number of packages on this source
- */
-int
-DataCommonPkd::numPackages() const
-{
-    return 0;
-}
-
-
-/**
- * return the number of patches on this source
- */
-int
-DataCommonPkd::numPatches() const
-{
-    return 0;
-}
-
-
-/**
  * generate PMSolvable objects for each selection on the source
  * @return list of PMSolvablePtr on this source
  */
-std::list<PMSolvablePtr>
-DataCommonPkd::getSelections()
+const std::list<PMSolvablePtr> *
+DataOldSuSE::getSelections() const
 {
-    std::list<PMSolvablePtr> x;
-    return x;
+    return _selections;
 }
 
 
@@ -399,11 +440,10 @@ DataCommonPkd::getSelections()
  * generate PMPackage objects for each Item on the source
  * @return list of PMPackagePtr on this source
  * */
-std::list<PMPackagePtr>
-DataCommonPkd::getPackages()
+const std::list<PMPackagePtr> *
+DataOldSuSE::getPackages() const
 {
-    std::list<PMPackagePtr> x;
-    return x;
+    return _packages;
 }
 
 
@@ -411,25 +451,25 @@ DataCommonPkd::getPackages()
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
  */
-std::list<PMSolvablePtr>
-DataCommonPkd::getPatches()
+const std::list<PMSolvablePtr> *
+DataOldSuSE::getPatches() const
 {
-    std::list<PMSolvablePtr> x;
-    return x;
+    return _patches;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : DataCommonPkd::dumpOn
+//	METHOD NAME : DataOldSuSE::dumpOn
 //	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-ostream & DataCommonPkd::dumpOn( ostream & str ) const
+ostream &
+DataOldSuSE::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str );
-  return str;
+    str << "DataOldSuSE::dumpOn()" << endl;
+    return str;
 }
 
