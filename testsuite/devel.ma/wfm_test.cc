@@ -262,6 +262,23 @@ struct WFM {
     YCPValue ret = _pkgmod->PkgGetLicensesToConfirm(a1);
     OUT << " --> " << ret << endl;
   }
+  void PkgGetFilelist( const string & name_r ) {
+    YCPList args;
+    args->add( YCPString(name_r) );
+    OUT << "PkgGetFilelist" << args;
+    YCPValue ret = _pkgmod->PkgGetFilelist(YCPString(name_r),YCPSymbol("installed"));
+    OUT << "i --> " << ret << endl;
+    ret = _pkgmod->PkgGetFilelist(YCPString(name_r),YCPSymbol("candidate"));
+    OUT << "c --> " << ret << endl;
+    ret = _pkgmod->PkgGetFilelist(YCPString(name_r),YCPSymbol("XXX"));
+    OUT << "X --> " << ret << endl;
+  }
+  void PkgSolveCheckTargetOnly() {
+    YCPList args;
+    OUT << "PkgSolveCheckTargetOnly" << args;
+    YCPValue ret = _pkgmod->PkgSolveCheckTargetOnly();
+    OUT << " --> " << ret << endl;
+  }
 };
 
 static WFM wfm;
@@ -271,19 +288,9 @@ void WFMtest() {
   INT << "WFM START" << endl;
   wfm.SourceStartManager( false );
   wfm.SourceStartCache( true );
+  Y2PM::instTargetInit("/");
 
-  list<string> l;
-  l.push_back( "3d_chess" );
-  l.push_back( "3ddiag" );
-  l.push_back( "3dpong" );
-  l.push_back( "wrzl" );
-  l.push_back( "" );
-
-  for ( list<string>::const_iterator it = l.begin(); it != l.end(); ++it ) {
-    wfm.PkgGetLicenseToConfirm( *it );
-  }
-  wfm.PkgGetLicensesToConfirm( list<string>() );
-  wfm.PkgGetLicensesToConfirm( l );
+  wfm.PkgSolveCheckTargetOnly();
 
   INT << "WFM STOP" << endl;
   wfm.close();

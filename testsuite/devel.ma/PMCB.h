@@ -190,4 +190,26 @@ struct RemovePkgCallback : public RpmDbCallbacks::RemovePkgCallback {
 
 RemovePkgCallback removePkgCallback;
 
+///////////////////////////////////////////////////////////////////
+// Reporting progress of download
+///////////////////////////////////////////////////////////////////
+struct DownloadProgressCallback : public MediaCallbacks::DownloadProgressCallback {
+  virtual void reportbegin() { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  virtual void start( const Url & url_r, const Pathname & localpath_r ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << url_r << YYY << localpath_r << YYY << endl;
+  }
+  virtual void progress( const ProgressData & prg ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << prg << YYY << endl;
+  }
+  virtual void stop( PMError error ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << endl;
+  }
+  DownloadProgressCallback() {
+    MediaCallbacks::downloadProgressReport.redirectTo( this );
+  }
+};
+
+DownloadProgressCallback downloadProgressCallback;
+
 #endif // PMCB_h

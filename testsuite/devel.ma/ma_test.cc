@@ -177,14 +177,14 @@ int main()
   set_log_filename( "-" );
   MIL << "START" << endl;
 
-  Y2PM::setNotRunningFromSystem();
-  Y2PM::setCacheToRamdisk( false );
+  //Y2PM::setNotRunningFromSystem();
+  //Y2PM::setCacheToRamdisk( false );
 
   if ( 1 ) {
     //Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
-    //_t.start( "Launch InstTarget" );
-    //Y2PM::instTargetInit("/");
+    _t.start( "Launch InstTarget" );
+    Y2PM::instTargetInit("/");
     _t.start( "Launch PMPackageManager" );
     Y2PM::packageManager();
     _t.start( "Launch PMSelectionManager" );
@@ -196,23 +196,12 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  InstSrcManager::ISrcId nid = newSrc( "/schnell/CD-ARCHIVE/9.0/SuSE-9.0-DVD-i386-RC5/CD1" );
-  ISM.enableSource( nid );
+  //PMGR["3d_chess"]->user_set_install();
+  //PMGR.updateDu();
 
-  SEC << Y2PM::getPreferredLocale() << endl;
-  xx();
-
-  SEC << Y2PM::setPreferredLocale( LangCode("de_AT") ) << endl;
-  SEC << Y2PM::getPreferredLocale() << endl;
-  xx();
-
-  SEC << Y2PM::setPreferredLocale( LangCode("") ) << endl;
-  SEC << Y2PM::getPreferredLocale() << endl;
-  xx();
-
-  SEC << Y2PM::setPreferredLocale( LangCode("en_US") ) << endl;
-  SEC << Y2PM::getPreferredLocale() << endl;
-  xx();
+  //InstSrcManager::ISrcId nid = newSrc( "ftp://schnell/CD-ARCHIVE/9.0/SuSE-9.0-DVD-i386-RC5/CD1" );
+  //ISM.enableSource( nid );
+  //ISM.deleteSource( nid );
 
 #if 0
   MIL << Y2PM::getRequestedLocales() << endl;
