@@ -103,6 +103,8 @@ void PkgDep::add_package( PMSolvablePtr cand )
 
 	bool error = false;
 	bool delay = false;
+	bool short_errors = false; // activate eary error exit
+
 	ErrorResult res(*this,cand);
 	D__ << "Checking candidate " << candname << endl;
 
@@ -142,7 +144,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		}
 	}
 
-	if (error)
+	if (error && short_errors)
 	{
 	    // ln -- added more error outputs, should avoid e.g. prompting the
 	    // user to choose alternatives while it would not be necessary when
@@ -211,7 +213,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			}
 		}
 	}
-	if (error)
+	if (error && short_errors)
 	{
 	    goto add_package_error_out;
 	}
@@ -263,7 +265,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			return;
 		}
 	}
-	if (error)
+	if (error && short_errors)
 	{
 	    goto add_package_error_out;
 	}
@@ -277,7 +279,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		if (!check_for_broken_reqs( vinstalled[candname], cand, res ))
 			error = true;
 	}
-	if (error)
+	if (error && short_errors)
 	{
 	    goto add_package_error_out;
 	}
