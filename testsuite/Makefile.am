@@ -22,14 +22,12 @@ noinst_PROGRAMS = \
 	test_rpmdb	\
 	test_tofromString.exe	\
 	testinstall	\
-	test_patchinfo	\
 	test_content	\
 	test_packages	\
 	test_selections	\
 	test_query	\
 	order		\
 	gs_test		\
-        test_you	\
 	media_test	\
 	test_updateinf  \
         checkpatch
@@ -54,10 +52,6 @@ testinstall_SOURCES = testinstall.cc show_pm.cc
 testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline -lncurses
 testinstall_LDFLAGS = -static
 
-test_patchinfo_SOURCES = test_patchinfo.cc
-test_patchinfo_LDADD = $(top_builddir)/src/liby2pm.la
-test_patchinfo_LDFLAGS = -static
-
 test_content_SOURCES = test_content.cc show_pm.cc
 test_content_LDADD = $(top_builddir)/src/liby2pm.la
 test_content_LDFLAGS = -static
@@ -77,10 +71,6 @@ test_query_LDFLAGS = -static
 order_SOURCES = order.cc
 order_LDADD = $(top_builddir)/src/liby2pm.la
 order_LDFLAGS = -static
-
-test_you_SOURCES = test_you.cc
-test_you_LDADD = $(top_builddir)/src/liby2pm.la
-test_you_LDFLAGS = -static
 
 media_test_SOURCES = media_test.cc
 media_test_LDADD = $(top_builddir)/src/liby2pm.la

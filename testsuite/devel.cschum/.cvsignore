@@ -6,3 +6,5 @@ Makefile.in
 cschum_test
 test_libcurl
 err_test
+test_patchinfo
+callback_test
