@@ -58,6 +58,7 @@ class MediaError {
       E_bad_filename,
       E_already_attached,
       E_not_attached,
+      E_bad_attachpoint,
       E_not_open,
       E_no_destination,
       E_no_source,

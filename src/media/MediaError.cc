@@ -49,6 +49,8 @@ std::string MediaError::errtext( const unsigned e )
   case E_ok:	return PMError::OKstring;
   case E_error:	return PMError::ERRORstring;
   ///////////////////////////////////////////////////////////////////
+  // Error messages for media access in package manager
+  //
   // more specific errors start here:
   // case E_some_err:	return N_("some text");
   ///////////////////////////////////////////////////////////////////
@@ -62,6 +64,7 @@ std::string MediaError::errtext( const unsigned e )
   case E_bad_filename:		return N_("invalid filename");
   case E_already_attached:	return N_("already attached");
   case E_not_attached:		return N_("not attached");
+  case E_bad_attachpoint:	return N_("bad attach point");
   case E_not_open:		return N_("not opened");
   case E_no_destination:	return N_("no destination");
   case E_no_source:		return N_("no source");
