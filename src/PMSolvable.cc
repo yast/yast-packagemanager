@@ -33,7 +33,8 @@ using namespace std;
 **
 **	DESCRIPTION :
 */
-inline PkgAttributeValue PkgRelList2AttributeValue( const PMSolvable::PkgRelList_type & rellist_r )
+PkgAttributeValue
+PMSolvable::PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const
 {
   PkgAttributeValue ret;
   for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
