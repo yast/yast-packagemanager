@@ -866,9 +866,11 @@ bool InstYou::hasNewPackages( const PMYouPatchPtr &patch,
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
     PkgEdition candEd = (*itPkg)->edition();
-    D__ << "  PKG: " << (*itPkg)->name() << "-" << candEd << endl;
+    D__ << "  PKG-CAND: " << (*itPkg)->name() << "-" << candEd << endl;
     if ( (*itPkg)->hasInstalledObj() ) {
-      PkgEdition instEd = (*itPkg)->getInstalledObj()->edition();
+      PMPackagePtr installed = (*itPkg)->getInstalledObj();
+      PkgEdition instEd = installed->edition();
+      D__ << "  PKG-INST: " << installed->name() << "-" << instEd << endl;
       if ( instEd > candEd ) {
         install = false;
         break;
