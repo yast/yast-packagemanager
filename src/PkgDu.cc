@@ -84,20 +84,27 @@ void PkgDu::addFrom( const std::list<std::string> & dudata_r )
 {
   for ( list<string>::const_iterator it = dudata_r.begin(); it != dudata_r.end(); ++it ) {
 
-    vector<string> tdata;
-    if ( stringutil::split( *it, tdata ) == 5 && tdata[0].size() ) {
-      // add leading '/' if missing
-      if ( tdata[0][0] != '/' )
-	tdata[0].insert( 0, 1, '/' );
-      FSize    sze( atoi( tdata[1].c_str() ), FSize::K );
-      unsigned num( atoi( tdata[3].c_str() ) );
-      if ( sze || num ) {
-	add( tdata[0], sze, num );
-      }
-    } else {
-      stringutil::dumpOn( WAR << "Illegal DU entry: ", tdata, true ) << endl;
+    string::size_type sep = it->rfind( '/' );
+    if ( sep == string::npos ) {
+      WAR << "Illegal DU entry: " << *it << endl;
+      continue;
     }
 
+    string dir( it->substr( 0, sep+1 ) );
+    // add leading '/' if missing
+    if ( dir[0] != '/' )
+      dir.insert( 0, 1, '/' );
+
+    vector<string> tdata;
+    if ( stringutil::split( it->substr( sep+1 ), tdata ) == 4 ) {
+      FSize    sze( atoi( tdata[0].c_str() ), FSize::K );
+      unsigned num( atoi( tdata[2].c_str() ) );
+      if ( sze || num ) {
+	add( dir, sze, num );
+      }
+    } else {
+      WAR << "Illegal DU entry: " << *it << endl;
+    }
   }
 }
 
