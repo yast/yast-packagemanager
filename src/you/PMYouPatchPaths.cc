@@ -109,7 +109,7 @@ PMError PMYouPatchPaths::initProduct()
   std::list<constInstSrcDescrPtr>::const_iterator it = products.begin();
 
   if ( it == products.end() ) {
-    E__ << "No products installed." << endl;
+    ERR << "No products installed." << endl;
     return YouError::E_error;
   }
 
@@ -124,12 +124,12 @@ PMError PMYouPatchPaths::initProduct()
   string youType = descr->content_youtype();
   string youPath = descr->content_youpath();
 
-  D__ << "PRODUCT NAME: " << product << endl;
-  D__ << "PRODUCT VERSION: " << version << endl;
-  D__ << "BASEARCH: " << baseArch << endl;
-  D__ << "YOUURL: " << youUrl << endl;
-  D__ << "YOUTYPE: " << youType << endl;
-  D__ << "YOUPATH: " << youPath << endl;
+  DBG << "Product Name: " << product << endl;
+  DBG << "Prpduct Version: " << version << endl;
+  DBG << "BaseArch: " << baseArch << endl;
+  DBG << "YouUrl: " << youUrl << endl;
+  DBG << "YouType: " << youType << endl;
+  DBG << "YouPatch: " << youPath << endl;
 
   if ( youPath.empty() ) {
     init( product, version, baseArch );
@@ -192,7 +192,7 @@ Pathname PMYouPatchPaths::scriptPath( const string &scriptName )
 
 Pathname PMYouPatchPaths::localScriptPath( const std::string &scriptName )
 {
-  return "/var/lib/YaST2/you-scripts/" + scriptName;
+  return localDir() + "scripts/" + scriptName;
 }
 
 Pathname PMYouPatchPaths::localDir()
@@ -200,14 +200,19 @@ Pathname PMYouPatchPaths::localDir()
   return "/var/lib/YaST2/you/";
 }
 
+Pathname PMYouPatchPaths::attachPoint()
+{
+  return localDir() + "mnt/";
+}
+
 Pathname PMYouPatchPaths::installDir()
 {
-  return "/var/lib/YaST2/you-installed/";
+  return localDir() + "installed/";
 }
 
 Pathname PMYouPatchPaths::externalRpmDir()
 {
-  return "/var/lib/YaST2/you-external/";
+  return localDir() + "external/";
 }
 
 Pathname PMYouPatchPaths::localSuseServers()
@@ -252,7 +257,7 @@ list<PkgArch> PMYouPatchPaths::archs()
 
 PMError PMYouPatchPaths::requestServers( const string &u )
 {
-  D__ << "url: '" << u << endl;
+  DBG << "url: '" << u << endl;
 
   SysConfig cfg( "onlineupdate" );
   
@@ -272,7 +277,7 @@ PMError PMYouPatchPaths::requestServers( const string &u )
 
     url = encodeUrl( url );
 
-    D__ << "url: '" << url << endl;
+    DBG << "url: '" << url << endl;
 
     Wget wget;
     wget.setCookiesFile( cookiesFile().asString() );

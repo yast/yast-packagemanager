@@ -87,7 +87,7 @@ PMError InstYou::servers( list<Url> &servers )
   PMError error = _paths->requestServers();
   
   if ( error ) {
-    E__ << "Error fetching servers." << endl;
+    ERR << "Error fetching servers." << endl;
     return error;
   }
   
@@ -113,6 +113,13 @@ PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
   D__ << path << endl;
   u.setPath( path );
 
+  int err = PathInfo::assert_dir( _paths->localDir() );
+  if ( err ) {
+    ERR << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
+        << endl;
+    return PMError( InstSrcError::E_error );
+  }
+
   Pathname dummyFile = _paths->localDir() + "dummy";
 
   D__ << dummyFile << endl;
@@ -128,7 +135,7 @@ PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
     return PMError();
   } else {
     if ( status == WGET_ERROR_LOGIN ) return YouError::E_auth_failed;
-    else W__ << wget.error_string( status ) << endl;
+    else WAR << wget.error_string( status ) << endl;
   }
 
   return YouError::E_error;
@@ -148,7 +155,7 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool checkSig )
 
   PMError error = _info->getPatches( _paths, _patches, checkSig );
   if ( error ) {
-    E__ << "Error downloading patchinfos: " << error << endl;
+    ERR << "Error downloading patchinfos: " << error << endl;
     return error;
   }
 
@@ -245,21 +252,21 @@ void InstYou::updatePackageStates()
 
 PMError InstYou::attachSource()
 {
-  int err = PathInfo::assert_dir( _paths->localDir() );
+  int err = PathInfo::assert_dir( _paths->attachPoint() );
   if ( err ) {
-    E__ << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
+    ERR << "Can't create " << _paths->attachPoint() << " (errno: " << err << ")"
         << endl;
     return PMError( InstSrcError::E_error );
   }
 
-  PMError error = _media.open( _paths->patchUrl(), _paths->localDir() );
+  PMError error = _media.open( _paths->patchUrl(), _paths->attachPoint() );
   if ( error ) {
-    E__ << "Error opening URL '" << _paths->patchUrl() << "'" << endl;
+    ERR << "Error opening URL '" << _paths->patchUrl() << "'" << endl;
     return error;
   }
   error = _media.attach();
   if ( error ) {
-    E__ << "Error attaching media." << endl;
+    ERR << "Error attaching media." << endl;
   }
 
   return error;
@@ -482,7 +489,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
       }
       unsigned result = rpm.checkPackage( localRpm );
       if ( result != 0 ) {
-        E__ << "Signature check failed for " << localRpm << endl;
+        ERR << "Signature check failed for " << localRpm << endl;
         return PMError( YouError::E_bad_sig_rpm );
       }
     }
@@ -522,14 +529,14 @@ PMError InstYou::retrieveScript( const string &script, bool checkSig )
   Pathname scriptPath = _paths->scriptPath( script );
   PMError error = _media.provideFile( scriptPath );
   if ( error ) {
-    E__ << "Error downloading script from '"
+    ERR << "Error downloading script from '"
         << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
     return error;
   }
 
   int e = PathInfo::assert_dir( _paths->localScriptPath( "" ) );
   if ( e ) {
-    E__ << "Can't create " << _paths->localScriptPath( "" ) << " (errno: "
+    ERR << "Can't create " << _paths->localScriptPath( "" ) << " (errno: "
         << e << ")" << endl;
     return PMError( InstSrcError::E_error );
   }
@@ -541,7 +548,7 @@ PMError InstYou::retrieveScript( const string &script, bool checkSig )
   bool ok = gpg.check_file( sourceScript, destScript );
 
   if ( checkSig && !ok ) {
-    E__ << "Signature check failed for script " << sourceScript << endl;
+    ERR << "Signature check failed for script " << sourceScript << endl;
     return PMError( YouError::E_bad_sig_file );
   }
   
@@ -550,7 +557,7 @@ PMError InstYou::retrieveScript( const string &script, bool checkSig )
 
 PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
 {
-  D__ << "InstYou::retrievePackage: '" << pkg->name() << "'" << endl;
+  DBG << "InstYou::retrievePackage: '" << pkg->name() << "'" << endl;
 
   string externalUrl = pkg->externalUrl();
 
@@ -563,7 +570,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
 
     int e = PathInfo::assert_dir( _paths->externalRpmDir() );
     if ( e ) {
-      E__ << "Can't create " << _paths->externalRpmDir() << " (errno: "
+      ERR << "Can't create " << _paths->externalRpmDir() << " (errno: "
           << e << ")" << endl;
       return PMError( InstSrcError::E_error );
     }
@@ -641,12 +648,12 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
     // If download was successful store path to RPM and return.
     if ( !error ) {
       _info->packageDataProvider()->setLocation( pkg, rpmPath.asString() );
-      D__ << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
+      DBG << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
       return PMError();
     }
   }
 
-  E__ << "Error downloading RPM " << pkg->name() << endl;
+  ERR << "Error downloading RPM " << pkg->name() << endl;
   return error;
 }
 
@@ -661,7 +668,7 @@ PMError InstYou::removePackages()
       if ( externalUrl.empty() ) {
         PMError error = _media.releaseFile( (*itPkg)->location() );
         if ( error ) {
-          E__ << "Can't release " << (*itPkg)->location() << endl;
+          ERR << "Can't release " << (*itPkg)->location() << endl;
           return error;
         }
       } else {
@@ -672,7 +679,7 @@ PMError InstYou::removePackages()
       Pathname scriptPath = _paths->scriptPath( patch->preScript() );
       PMError error = _media.releaseFile( scriptPath );
       if ( error ) {
-        E__ << "Can't release " << scriptPath.asString() << endl;
+        ERR << "Can't release " << scriptPath.asString() << endl;
         return error;
       }
       PathInfo::unlink( _paths->localScriptPath( patch->preScript() ) );
@@ -681,7 +688,7 @@ PMError InstYou::removePackages()
       Pathname scriptPath = _paths->scriptPath( patch->postScript() );
       PMError error = _media.releaseFile( scriptPath );
       if ( error ) {
-        E__ << "Can't release " << scriptPath.asString() << endl;
+        ERR << "Can't release " << scriptPath.asString() << endl;
         return error;
       }
       PathInfo::unlink( _paths->localScriptPath( patch->postScript() ) );
