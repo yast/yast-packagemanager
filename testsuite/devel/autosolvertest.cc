@@ -697,7 +697,7 @@ static void read_test_file( string filename, TestList& tests )
 			}
 			continue;
 		}
-		if (word.substr(0,10) == "ALTHANDLING=") {
+		if (word.substr(0,12) == "ALTHANDLING=") {
 			is >> word;
 		}
 
