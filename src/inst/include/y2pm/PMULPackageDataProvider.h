@@ -45,11 +45,8 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
     private:
 
 	// save file position and size data for multi line attributes
-	TagCacheRetrieval::retrieval_t attr_REQUIRES;
-	TagCacheRetrieval::retrieval_t attr_PREREQUIRES;
-	TagCacheRetrieval::retrieval_t attr_PROVIDES;
-	TagCacheRetrieval::retrieval_t attr_CONFLICTS;
-	TagCacheRetrieval::retrieval_t attr_OBSOLETES;
+
+	TagCacheRetrieval::retrieval_t attr_SUMMARY;
 
 	TagCacheRetrieval::retrieval_t attr_RECOMMENDS;
 	TagCacheRetrieval::retrieval_t attr_SUGGESTS;
@@ -61,13 +58,6 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	TagCacheRetrieval::retrieval_t attr_DELNOTIFY;
 
 	// save PkgAttributeValue for single line attributes
-
-	PkgAttributeValue attr_NAME;
-	PkgAttributeValue attr_VERSION;
-	PkgAttributeValue attr_RELEASE;
-	PkgAttributeValue attr_ARCH;
-
-	PkgAttributeValue attr_SUMMARY;
 
 	PkgAttributeValue attr_LOCATION;
 	PkgAttributeValue attr_ARCHIVESIZE;
