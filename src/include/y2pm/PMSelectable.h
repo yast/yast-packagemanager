@@ -225,18 +225,18 @@ class PMSelectable : virtual public Rep {
     // sh@suse.de
 
     enum UI_Status {
-      S_Keep,                // Keep this unmodified ( have installedObj && S_Keep )
+      S_Protected,           // Keep this unmodified ( have installedObj && S_Protected )
       S_Taboo,               // Keep this unmodified ( have no installedObj && S_Taboo)
       // requested by user:
-      S_Del,                 // delete  installedObj ( clears S_Keep if set )
-      S_Update,              // install candidateObj ( have installedObj, clears S_Keep if set )
+      S_Del,                 // delete  installedObj ( clears S_Protected if set )
+      S_Update,              // install candidateObj ( have installedObj, clears S_Protected if set )
       S_Install,             // install candidateObj ( have no installedObj, clears S_Taboo if set )
       // not requested by user:
       S_AutoDel,             // delete  installedObj
       S_AutoUpdate,          // install candidateObj ( have installedObj )
       S_AutoInstall,         // install candidateObj ( have no installedObj )
       // no modification:
-      S_KeepInstalled,       // no modification      ( have installedObj && !S_Keep, clears S_Keep if set )
+      S_KeepInstalled,       // no modification      ( have installedObj && !S_Protected, clears S_Protected if set )
       S_NoInst,              // no modification      ( have no installedObj && !S_Taboo, clears S_Taboo if set )
     };
 
