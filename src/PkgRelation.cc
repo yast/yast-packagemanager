@@ -63,19 +63,40 @@ bool PkgRelation::matches( const PkgRelation& rel2 ) const
 	return e2.compare( op, e1 );
 }
 
-ostream& operator<<( ostream& os, const PkgRelation& rel ) {
-	os << rel._name;
-	switch( rel._op ) {
-	  case LT: os << " < "; break;
-	  case LE: os << " <= "; break;
-	  case EQ: os << " = "; break;
-	  case GE: os << " >= "; break;
-	  case GT: os << " > "; break;
-	  case NE: os << " != "; break;
-	  case NONE: return os;
-	}
-	os << rel._edition.as_string();
-	return os;
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgRelation::asString
+//	METHOD TYPE : string
+//
+//	DESCRIPTION :
+//
+string PkgRelation::asString() const
+{
+  string ret( _name );
+  switch( _op ) {
+  case LT: ret += " < ";  break;
+  case LE: ret += " <= "; break;
+  case EQ: ret += " = ";  break;
+  case GE: ret += " >= "; break;
+  case GT: ret += " > ";  break;
+  case NE: ret += " != "; break;
+  case NONE: return ret;
+  }
+  return( ret + _edition.as_string() );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream&
+**
+**	DESCRIPTION :
+*/
+ostream& operator<<( ostream& os, const PkgRelation& rel )
+{
+  return os << rel.asString();
 }
 
 // Local Variables:

@@ -55,7 +55,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	typedef std::map<PMPackagePtr,AttrVec> PkgMap;
 
 	PkgMap _pkgmap;
-	
+
 	/** compute vector position from attribute
 	 *
 	 * @return position or AV_POS_INVALID if this item is not to be cached
@@ -72,14 +72,28 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 
 	virtual ~PMRpmPackageDataProvider();
 
-	/** see PMObject */
-	virtual std::string getAttributeValue(
-	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr);
-	/** see PMObject */
-	virtual std::string getAttributeValue(
-	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr);
+	/**
+	 * Object attribute retrieval. (DataProvider interface)
+	 * @see PMDataProvider
+	 * @see PMObject
+	 **/
+	virtual PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
+						     PMObject::PMObjectAttribute attr_r );
+	/**
+	 * Package attribute retrieval. (PackageDataProvider interface)
+	 * @see PMPackageDataProvider
+	 * @see PMPackage
+	 **/
+	virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
+						     PMPackage::PMPackageAttribute attr_r );
 
-	/** inject attibute to cache */
+
+	std::string PMRpmPackageDataProvider::OLD_getAttributeValue( PMPackagePtr pkg,
+								     PMObject::PMObjectAttribute attr );
+	std::string PMRpmPackageDataProvider::OLD_getAttributeValue( PMPackagePtr pkg,
+								     PMPackage::PMPackageAttribute attr );
+
+        /** inject attibute to cache */
 	virtual void setAttributeValue(
 	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
 	    const std::string& value);

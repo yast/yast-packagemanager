@@ -10,10 +10,12 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMDataProvider.cc
+  File:       PMDataProvider.cc
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Common interface to be realized by all DataProvider.
 
 /-*/
 
@@ -52,19 +54,3 @@ PMDataProvider::PMDataProvider()
 PMDataProvider::~PMDataProvider()
 {
 }
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMDataProvider::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & PMDataProvider::dumpOn( ostream & str ) const
-{
-  Rep::dumpOn( str );
-  return str;
-}
-
-

@@ -71,6 +71,7 @@ int main()
   PMPackagePtr P = p->installedObj();
   INT << P->getAttributeValue(P->ATTR_DESCRIPTION) << endl;
   INT << P->getAttributeValue(P->ATTR_INSTALLTIME) << endl;
+  INT << P->getAttributeValue(P->ATTR_NAME) << endl;
   INT << p << endl;
 
   SEC << "=================================" << endl;

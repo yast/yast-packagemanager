@@ -8,6 +8,7 @@ pkgincludedir = $(includedir)/y2pm
 
 pkginclude_HEADERS =	\
 	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgArch.h	\
+	PkgAttributeValue.h	\
 	\
 	PMError.h	\
 	\

@@ -39,8 +39,10 @@ class PMPackage : virtual public Rep, public PMObject {
 
   public:
 
-  enum PMPackageAttribute
-  {
+    /**
+     * Attributes provided by PMPackage
+     **/
+    enum PMPackageAttribute {
       PKG_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
       ATTR_BUILDTIME = PKG_ATTR_BEGIN,
       ATTR_BUILDHOST,
@@ -62,15 +64,42 @@ class PMPackage : virtual public Rep, public PMObject {
       ATTR_ARCHIVESIZE,
       ATTR_AUTHOR,
       ATTR_FILENAMES,
-
+      // last entry:
       PKG_NUM_ATTRIBUTES
-  };
+    };
+
+    /**
+     * Get attribute name as string.
+     **/
+    std::string getAttributeName(PMPackageAttribute attr) const;
+
+    /**
+     * Access to base class getAttributeName
+     **/
+    PMObject::getAttributeName;
+
+    /**
+     * Get attribute value
+     **/
+    PkgAttributeValue getAttributeValue(PMPackageAttribute attr) const;
+
+    /**
+     * Access to base class getAttributeValue
+     **/
+    PMObject::getAttributeValue;
 
   protected:
 
     PkgArch _arch;
 
     PMPackageDataProviderPtr _dataProvider;
+
+  protected:
+
+    /**
+     * Provide DataProvider access to the underlying Object
+     **/
+    virtual PMDataProviderPtr dataProvider() const { return _dataProvider; }
 
   public:
 
@@ -85,30 +114,6 @@ class PMPackage : virtual public Rep, public PMObject {
     const PkgArch& arch() const { return _arch; }
 
   public:
-
-//    virtual std::string Summary() const;
-
-    /** get attributes like Summary, Description, Group etc.
-     *
-     * @param attr Attribute number
-     * @return Attribute value
-     * */
-    std::string getAttributeValue(PMPackageAttribute attr);
-
-    std::string getAttributeValue(PMObjectAttribute attr);
-    
-    std::string getAttributeValue(PMSolvableAttribute attr);
-
-    /** get the name of an attribute
-     *
-     * @param attr Attribute number
-     * @return Attribute name
-     * */
-    std::string getAttributeName(PMPackageAttribute attr);
-
-    std::string getAttributeName(PMObjectAttribute attr);
-    
-    std::string getAttributeName(PMSolvableAttribute attr);
 
     /** assign a data provider
      * @param dataprovider the dataprovider

@@ -10,10 +10,12 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMPackageDataProvider.h
+  File:       PMPackageDataProvider.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Common interface to be realized by all PackageDataProvider.
 
 /-*/
 #ifndef PMPackageDataProvider_h
@@ -22,32 +24,38 @@
 #include <iosfwd>
 #include <string>
 
-#include <y2pm/PMPackage.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
-
 #include <y2pm/PMDataProvider.h>
+
+#include <y2pm/PMPackage.h>
 
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMPackageDataProvider
 /**
- *
+ * @short Common interface to be realized by all PackageDataProvider.
+ * @see DataProvider
  **/
 class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
   REP_BODY(PMPackageDataProvider);
 
-  public:
+  protected:
 
     PMPackageDataProvider();
 
     virtual ~PMPackageDataProvider();
 
-    /** see PMObject */
-    virtual std::string getAttributeValue(
-	PMPackagePtr pkg, PMObject::PMObjectAttribute attr) = 0;
-    /** see PMObject */
-    virtual std::string getAttributeValue(
-	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr) = 0;
+  public:
+
+    /**
+     * Package attribute retrieval.
+     * @see PMPackage
+     **/
+    virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
+						 PMPackage::PMPackageAttribute attr_r ) = 0;
+
+#if 0
+  public: // most probabely this should not be here
 
     /** inject some object attribute. The actual implementation may or may not
      * choose to store the value in a cache for faster access.
@@ -62,10 +70,7 @@ class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
     virtual void setAttributeValue(
 	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
 	const std::string& value) = 0;
-
-  public:
-
-    virtual std::ostream & dumpOn( std::ostream & str ) const;
+#endif
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -5,17 +5,24 @@ function Warn() {
 }
 function Err() {
 	Warn "$@"
-	echo "Usage: genPtrClass CLASSNAME" >&2
+	echo "Usage: genPtrClass CLASSNAME [ FROMNAME BASENAME ]" >&2
 	exit 1
 }
 
-test $# != 1 && Err "Too may arguments $#:'$@'"
-test -z "$1" && Err "Missing CLASSNAME"
-
 CLASS=$1
+FROM=$2
+BASE=$3
 CH="${CLASS}.h"
 CC="${CLASS}.cc"
 PH="${CLASS}Ptr.h"
+
+if [ $# == 1 ]; then
+	DERIVED=
+elif [ $# == 3 ]; then
+	DERIVED=1
+else
+	Err "Incorrect number of arguments $#:'$@'"
+fi
 
 DOEXIT=
 for f in "$CH" "$CC" "$PH"; do
@@ -51,13 +58,55 @@ EOF
 ## ---------------------------------------------------------------------
 ## ---------------------------------------------------------------------
 
+function H_include () {
+	if [ -n "$DERIVED" ]; then
+		echo -ne "\n#include <y2pm/${FROM}.h>"
+	fi
+}
+
+function H_derived () {
+	if [ -n "$DERIVED" ]; then
+		echo -ne ", public ${FROM}"
+	fi
+}
+
+function PTR_include () {
+	if [ -z "$DERIVED" ]; then
+		echo -ne "#include <y2util/RepDef.h>"
+	else
+		echo -ne "#include <y2pm/${FROM}Ptr.h>"
+	fi
+}
+
+function PTR_def () {
+	if [ -z "$DERIVED" ]; then
+		echo -ne "DEFINE_BASE_POINTER(${CLASS});"
+	else
+		echo -ne "DEFINE_DERIVED_POINTER(${CLASS},${FROM},${BASE});"
+	fi
+}
+
+function PTR_impl () {
+	if [ -z "$DERIVED" ]; then
+		echo -ne "IMPL_BASE_POINTER(${CLASS});"
+	else
+		echo -ne "IMPL_DERIVED_POINTER(${CLASS},${FROM},${BASE});"
+	fi
+}
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
 cat <<EOF >"$CH"
 $(catLogo)
 
-   File:       ${CLASS}.h
+  File:       ${CLASS}.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose:
 
 /-*/
 #ifndef ${CLASS}_h
@@ -65,7 +114,7 @@ $(catLogo)
 
 #include <iosfwd>
 
-#include <y2pm/${CLASS}Ptr.h>
+#include <y2pm/${CLASS}Ptr.h>$(H_include)
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -73,8 +122,8 @@ $(catLogo)
 /**
  *
  **/
-class REP_CLASS(${CLASS}) {
-  REP_BODY(${CLASS})
+class ${CLASS} : virtual public Rep$(H_derived) {
+  REP_BODY(${CLASS});
 
   public:
 
@@ -100,10 +149,12 @@ EOF
 cat <<EOF >"$CC"
 $(catLogo)
 
-   File:       ${CLASS}.cc
+  File:       ${CLASS}.cc
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose:
 
 /-*/
 
@@ -114,12 +165,10 @@ $(catLogo)
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : ${CLASS}
-//
+//	CLASS NAME : ${CLASS}Ptr
+//	CLASS NAME : const${CLASS}Ptr
 ///////////////////////////////////////////////////////////////////
-
-IMPL_HANDLES(${CLASS});
+$(PTR_impl)
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -168,25 +217,24 @@ EOF
 cat <<EOF >"$PH"
 $(catLogo)
 
-   File:       ${CLASS}Ptr.h
+  File:       ${CLASS}Ptr.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Declaration of pointer classes const${CLASS}Ptr and ${CLASS}Ptr.
 
 /-*/
 #ifndef ${CLASS}Ptr_h
 #define ${CLASS}Ptr_h
 
-#include <y2util/RepDef.h>
+$(PTR_include)
 
 ///////////////////////////////////////////////////////////////////
-//
 //	CLASS NAME : ${CLASS}Ptr
 //	CLASS NAME : const${CLASS}Ptr
-/**
- *
- **/
-DEFINE_BASIC_HANDLES(${CLASS});
+///////////////////////////////////////////////////////////////////
+$(PTR_def)
 
 #endif // ${CLASS}Ptr_h
 

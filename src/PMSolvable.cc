@@ -17,9 +17,30 @@
 
 /-*/
 
+#include <iostream>
+#include <sstream>
+
+#include <y2util/Y2SLog.h>
 #include <y2pm/PMSolvable.h>
 
 using namespace std;
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : PkgRelList2AttributeValue
+**	FUNCTION TYPE : PkgAttributeValue
+**
+**	DESCRIPTION :
+*/
+inline PkgAttributeValue PkgRelList2AttributeValue( const PMSolvable::PkgRelList_type & rellist_r )
+{
+  PkgAttributeValue ret;
+  for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
+    ret.push_back( it->asString() );
+  }
+  return ret;
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -65,6 +86,98 @@ PMSolvable::PMSolvable( const PkgName& name,
 //
 PMSolvable::~PMSolvable()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSolvable::getAttributeName
+//	METHOD TYPE : string
+//
+//	DESCRIPTION :
+//
+string PMSolvable::getAttributeName( PMSolvableAttribute attr ) const
+{
+  switch ( attr ) {
+
+#define ENUM_OUT(V) case ATTR_##V: return #V; break
+    ENUM_OUT( NAME );
+    ENUM_OUT( VERSION );
+    ENUM_OUT( RELEASE );
+    ENUM_OUT( REQUIRES );
+    ENUM_OUT( PREREQUIRES );
+    ENUM_OUT( PROVIDES );
+    ENUM_OUT( OBSOLETES );
+    ENUM_OUT( CONFLICTS );
+#undef ENUM_OUT
+
+  ///////////////////////////////////////////////////////////////////
+  // no default: let compiler warn '... not handled in switch'
+  ///////////////////////////////////////////////////////////////////
+  case PMSLV_NUM_ATTRIBUTES:
+    // illegal attr value
+    break;
+  }
+  // HERE: illegal attr value or forgott do adjust switch.
+  ERR << "Illegal PMSolvableAttribute(" << attr << ')' << endl;
+  return "";
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSolvable::getAttributeValue
+//	METHOD TYPE : PkgAttributeValue
+//
+//	DESCRIPTION :
+//
+PkgAttributeValue PMSolvable::getAttributeValue( PMSolvableAttribute attr ) const
+{
+  switch ( attr ) {
+
+  case ATTR_NAME:
+    return PkgAttributeValue( name() );
+    break;
+
+  case ATTR_VERSION:
+    return PkgAttributeValue( edition().version() );
+    break;
+
+  case ATTR_RELEASE:
+    return PkgAttributeValue( edition().release() );
+    break;
+
+  case ATTR_REQUIRES:
+    return PkgRelList2AttributeValue( requires() );
+    break;
+
+  case ATTR_PREREQUIRES:
+    return PkgRelList2AttributeValue( prerequires() );
+    break;
+
+  case ATTR_PROVIDES:
+    return PkgRelList2AttributeValue( provides() );
+    break;
+
+  case ATTR_CONFLICTS:
+    return PkgRelList2AttributeValue( conflicts() );
+    break;
+
+  case ATTR_OBSOLETES:
+    return PkgRelList2AttributeValue( obsoletes() );
+    break;
+
+  ///////////////////////////////////////////////////////////////////
+  // no default: let compiler warn '... not handled in switch'
+  ///////////////////////////////////////////////////////////////////
+  case PMSLV_NUM_ATTRIBUTES:
+    // illegal attr value
+    break;
+  }
+  // HERE: illegal attr value or forgott do adjust switch.
+  ERR << "Illegal PMSolvableAttribute " << attr << endl;
+  return PkgAttributeValue();
 }
 
 ///////////////////////////////////////////////////////////////////

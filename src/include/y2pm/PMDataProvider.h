@@ -10,10 +10,12 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       PMDataProvider.h
+  File:       PMDataProvider.h
 
-   Author:     Michael Andres <ma@suse.de>
-   Maintainer: Michael Andres <ma@suse.de>
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Common interface to be realized by all DataProvider.
 
 /-*/
 #ifndef PMDataProvider_h
@@ -23,16 +25,18 @@
 
 #include <y2pm/PMDataProviderPtr.h>
 
+#include <y2pm/PMObject.h>
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMDataProvider
 /**
- * @short Interface class for stuff common to all DataProvider
+ * @short Common interface to be realized by all DataProvider.
  **/
 class PMDataProvider : virtual public Rep {
   REP_BODY(PMDataProvider);
 
-  public:
+  protected:
 
     PMDataProvider();
 
@@ -40,7 +44,12 @@ class PMDataProvider : virtual public Rep {
 
   public:
 
-    virtual std::ostream & dumpOn( std::ostream & str ) const;
+    /**
+     * Object attribute retrieval.
+     * @see PMObject
+     **/
+    virtual PkgAttributeValue getAttributeValue( constPMObjectPtr obj_r,
+						 PMObject::PMObjectAttribute attr_r ) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////
