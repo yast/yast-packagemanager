@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  4 17:20:35 CET 2003 - lnussel@suse.de
+
+- don't generate error when a package is obsoleted and breaks another package
+  which is obsoleted by a candidate (#24115)
+
+-------------------------------------------------------------------
 Tue Mar  4 16:44:32 CET 2003 - ma@suse.de
 
 - Y2PM interface to save and restore package selection state (package and
