@@ -249,6 +249,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     {
 	unsigned int before = pkglist.size();
 	// filter splitprovides out
+#warning Filtering splitprovides is not job of InstSrc! Solvable itself should handle this.
 	for (std::list<std::string>::iterator it = pkglist.begin();
 	      it != pkglist.end(); /*advanc inside*/)
 	{
