@@ -24,6 +24,7 @@
 #include <iosfwd>
 #include <string>
 #include <fstream>
+#include <map>
 
 #include <y2util/FSize.h>
 #include <y2util/Pathname.h>
@@ -46,6 +47,9 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
     REP_BODY(PMULSelectionDataProvider);
 
     friend class ParseDataUL;
+	std::list<PMSelectionPtr> lookupSelections (const std::list<std::string>& selections);
+	std::list<PMPackagePtr> lookupPackages (const std::list<std::string>& packages);
+
     protected:
 
 	// the data belongs to this selection
@@ -53,17 +57,24 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 
 	// PMObject
 
-	TagCacheRetrievalPos _attr_SUMMARY;
+	map <std::string,TagCacheRetrievalPos> _attr_SUMMARY;
 	TagCacheRetrievalPos _attr_DESCRIPTION;
 	TagCacheRetrievalPos _attr_INSNOTIFY;
 	TagCacheRetrievalPos _attr_DELNOTIFY;
 	FSize _attr_SIZE;
 
 	std::string _attr_CATEGORY;	// "base", ...
+	bool _attr_ISBASE;
+
 	bool _attr_VISIBLE;
 	TagCacheRetrievalPos _attr_SUGGESTS;
-	TagCacheRetrievalPos _attr_INSPACKS;
-	TagCacheRetrievalPos _attr_DELPACKS;
+	std::list<PMSelectionPtr> _ptrs_attr_SUGGESTS;
+	TagCacheRetrievalPos _attr_RECOMMENDS;
+	std::list<PMSelectionPtr> _ptrs_attr_RECOMMENDS;
+	map <std::string,TagCacheRetrievalPos> _attr_INSPACKS;
+	map <std::string,std::list<PMPackagePtr> > _ptrs_attr_INSPACKS;
+	map <std::string,TagCacheRetrievalPos> _attr_DELPACKS;
+	map <std::string,std::list<PMPackagePtr> > _ptrs_attr_DELPACKS;
 	FSize _attr_ARCHIVESIZE;
 	std::string _attr_ORDER;
 
@@ -87,8 +98,8 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 
 	const std::string summary() const { return summary(""); }
 	const std::list<std::string> description() const { return description(""); }
-	const std::list<std::string> insnotify() const { return insnotify(); }
-	const std::list<std::string> delnotify() const { return delnotify(); }
+	const std::list<std::string> insnotify() const { return insnotify(""); }
+	const std::list<std::string> delnotify() const { return delnotify(""); }
 	const FSize size() const;
 
 	const std::string summary(const std::string& lang) const;
@@ -103,10 +114,20 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	const std::string category () const;
 	const bool visible () const;
 	const std::list<std::string> suggests() const;
+	const std::list<PMSelectionPtr> suggests_ptrs();
+	const std::list<std::string> recommends() const;
+	const std::list<PMSelectionPtr> recommends_ptrs();
 	const std::list<std::string> inspacks(const std::string& lang = "") const;
+	const std::list<PMPackagePtr> inspacks_ptrs (const std::string& lang = "");
 	const std::list<std::string> delpacks(const std::string& lang = "") const;
+	const std::list<PMPackagePtr> delpacks_ptrs (const std::string& lang = "");
 	const FSize archivesize() const;
 	const std::string order() const;
+
+	/**
+	 * helper functions
+	 */
+	const bool isBase () const;
 
     public:
 

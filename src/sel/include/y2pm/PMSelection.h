@@ -26,6 +26,7 @@
 
 #include <y2pm/PMSelectionDataProviderPtr.h>
 #include <y2pm/PMSelectionPtr.h>
+#include <y2pm/PMPackagePtr.h>
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PkgArch.h>
@@ -49,6 +50,7 @@ class PMSelection : virtual public Rep, public PMObject {
       ATTR_CATEGORY = PMSEL_ATTR_BEGIN,
       ATTR_VISIBLE,
       ATTR_SUGGESTS,
+      ATTR_RECOMMENDS,
       ATTR_INSPACKS,
       ATTR_DELPACKS,
       ATTR_ARCHIVESIZE,
@@ -74,10 +76,20 @@ class PMSelection : virtual public Rep, public PMObject {
 	const std::string category () const;
 	const bool visible () const;
 	const std::list<std::string> suggests() const;
-	const std::list<std::string> inspacks(const std::string& lang = "") const;
-	const std::list<std::string> delpacks(const std::string& lang = "") const;
+	const std::list<PMSelectionPtr> suggests_ptrs() const;
+	const std::list<std::string> recommends() const;
+	const std::list<PMSelectionPtr> recommends_ptrs() const;
+	const std::list<std::string> inspacks (const std::string& lang = "") const;
+	const std::list<PMPackagePtr> inspacks_ptrs (const std::string& lang = "") const;
+	const std::list<std::string> delpacks (const std::string& lang = "") const;
+	const std::list<PMPackagePtr> delpacks_ptrs (const std::string& lang = "") const;
 	const FSize archivesize() const;
 	const std::string order() const;
+
+	/**
+	 * helper functions
+	 */
+	const bool isBase () const;
 
   protected:
 

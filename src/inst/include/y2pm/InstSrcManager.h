@@ -45,6 +45,7 @@ class InstSrcManager {
      **/
     typedef InstSrcError Error;
 
+
   private:
 
     friend class Y2PM;

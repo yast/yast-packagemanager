@@ -99,16 +99,46 @@ PMSelectionDataProvider::suggests() const
     return std::list<std::string>();
 }
 
+const std::list<PMSelectionPtr>
+PMSelectionDataProvider::suggests_ptrs()
+{
+    return std::list<PMSelectionPtr>();
+}
+
+const std::list<std::string>
+PMSelectionDataProvider::recommends() const
+{
+    return std::list<std::string>();
+}
+
+const std::list<PMSelectionPtr>
+PMSelectionDataProvider::recommends_ptrs()
+{
+    return std::list<PMSelectionPtr>();
+}
+
 const std::list<std::string>
 PMSelectionDataProvider::inspacks(const std::string& lang) const
 {
     return std::list<std::string>();
 }
 
+const std::list<PMPackagePtr>
+PMSelectionDataProvider::inspacks_ptrs(const std::string& lang)
+{
+    return std::list<PMPackagePtr>();
+}
+
 const std::list<std::string>
 PMSelectionDataProvider::delpacks(const std::string& lang) const
 {
     return std::list<std::string>();
+}
+
+const std::list<PMPackagePtr>
+PMSelectionDataProvider::delpacks_ptrs(const std::string& lang)
+{
+    return std::list<PMPackagePtr>();
 }
 
 const FSize
@@ -123,4 +153,8 @@ PMSelectionDataProvider::order() const
     return "000";
 }
 
-
+const bool
+PMSelectionDataProvider::isBase() const
+{
+    return false;
+}

@@ -64,11 +64,20 @@ class PMSelectionDataProvider : virtual public Rep, public PMDataProvider  {
 	virtual const std::string category () const = 0;
 	virtual const bool visible () const = 0;
 	virtual const std::list<std::string> suggests() const = 0;
+	virtual const std::list<PMSelectionPtr> suggests_ptrs() = 0;
+	virtual const std::list<std::string> recommends() const = 0;
+	virtual const std::list<PMSelectionPtr> recommends_ptrs() = 0;
 	virtual const std::list<std::string> inspacks(const std::string& lang = "") const = 0;
+	virtual const std::list<PMPackagePtr> inspacks_ptrs (const std::string& lang = "") = 0;
 	virtual const std::list<std::string> delpacks(const std::string& lang = "") const = 0;
+	virtual const std::list<PMPackagePtr> delpacks_ptrs (const std::string& lang = "") = 0;
 	virtual const FSize archivesize() const = 0;
 	virtual const std::string order() const = 0;
 
+	/**
+	 * helper functions
+	 */
+	virtual const bool isBase () const = 0;
 };
 
 ///////////////////////////////////////////////////////////////////
