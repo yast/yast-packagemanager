@@ -248,6 +248,7 @@ int main( int argc, const char * argv[] ) {
   }
 
   Y2PM::instTargetUpdate();
+  Y2PM::instSrcManager();
   //SEC << Y2PM::instTargetInit("/") << endl;
   //SEC << TMGR.bringIntoCleanState() << endl;
 
