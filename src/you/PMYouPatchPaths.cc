@@ -304,5 +304,6 @@ PkgArch PMYouPatchPaths::arch()
 
 string PMYouPatchPaths::youUrl()
 {
-  return _youUrl;
+  if ( _youUrl.empty() ) return "http://www.suse.de/cgi-bin/suseservers.cgi";
+  else return _youUrl;
 }

@@ -73,7 +73,7 @@ class PMYouServers : virtual public Rep {
     /**
       Get list of YOU servers from CGI script on the master server.
     */
-    PMError requestServers( const std::string &url = std::string() );
+    PMError requestServers();
 
     /**
       Return list of known servers.
@@ -89,12 +89,6 @@ class PMYouServers : virtual public Rep {
       Return server which is currently used for getting updates.
     */
     Url currentServer();
-
-    /**
-      Return default URL where list of YOU servers is read from, if the
-      information can't be read from the product information.
-    */
-    std::string defaultMirrorList();
 
   protected:
     std::string encodeUrl( const std::string &url );

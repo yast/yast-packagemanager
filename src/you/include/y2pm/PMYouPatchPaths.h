@@ -239,7 +239,10 @@ class PMYouPatchPaths : virtual public Rep {
     SysConfig *config();
 
     /**
-      Return base URL for YOU.
+      Return base URL where list of YOU servers is read from.
+
+      Return default URL, if the information can't be read from the product
+      information.
     */
     std::string youUrl();
 

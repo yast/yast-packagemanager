@@ -72,10 +72,8 @@ Pathname PMYouServers::cachedYouServers()
   return _patchPaths->localDir() + "youservers";
 }
 
-PMError PMYouServers::requestServers( const string &u )
+PMError PMYouServers::requestServers()
 {
-  DBG << "url: '" << u << "'" << endl;
-
   string lastServer = _patchPaths->config()->readEntry( "LastServer" );
   if ( !lastServer.empty() ) {
     addServer( Url( lastServer ) );
@@ -87,25 +85,20 @@ PMError PMYouServers::requestServers( const string &u )
   SysConfig cfg( "onlineupdate" );
   
   if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
-    string url = u;
+    string url = _patchPaths->youUrl();
+    url += "?product=" + _patchPaths->product();
+    url += "&version=" + _patchPaths->version();
+    url += "&basearch=" + string( _patchPaths->baseArch() );
+    url += "&arch=" + string( _patchPaths->arch() );
+    url += "&business=";
+    if ( _patchPaths->businessProduct() ) url += "1";
+    else url += "0";
 
-    if ( url.empty() ) {
-      if ( _patchPaths->youUrl().empty() ) url = defaultMirrorList();
-      else url = _patchPaths->youUrl();
-      url += "?product=" + _patchPaths->product();
-      url += "&version=" + _patchPaths->version();
-      url += "&basearch=" + string( _patchPaths->baseArch() );
-      url += "&arch=" + string( _patchPaths->arch() );
-      url += "&business=";
-      if ( _patchPaths->businessProduct() ) url += "1";
-      else url += "0";
+    url += "&distproduct=" + _patchPaths->distProduct();
 
-      url += "&distproduct=" + _patchPaths->distProduct();
-
-      addPackageVersion( "yast2-online-update", url );
-      addPackageVersion( "yast2-packagemanager", url );
-      addPackageVersion( "liby2util", url );
-    }
+    addPackageVersion( "yast2-online-update", url );
+    addPackageVersion( "yast2-packagemanager", url );
+    addPackageVersion( "liby2util", url );
 
     url = encodeUrl( url );
 
@@ -116,7 +109,7 @@ PMError PMYouServers::requestServers( const string &u )
       if ( error == MediaError::E_write_error ) {
         return PMError( YouError::E_write_youservers_failed );
       } else {
-        return PMError( YouError::E_get_youservers_failed );
+        return PMError( YouError::E_get_youservers_failed, error.details() );
       }
     }
 
@@ -234,9 +227,4 @@ string PMYouServers::encodeUrl( const string &url )
   D__ << result << endl;
 
   return result;
-}
-
-string PMYouServers::defaultMirrorList()
-{
-  return "http://www.suse.de/cgi-bin/suseservers.cgi";
 }
