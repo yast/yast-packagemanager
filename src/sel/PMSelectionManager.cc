@@ -201,18 +201,28 @@ void PMSelectionManager::removeSelectionPackages( const PMSelectionPtr & sel_r, 
   }
 }
 
-/******************************************************************
-**
-**
-**	FUNCTION NAME : activate
-**	FUNCTION TYPE : PMError
-**
-**	DESCRIPTION : activate all "selected" selections by
-**			going through all their packages and
-**			setting them to "selected"
-*/
-PMError
-PMSelectionManager::activate (PMPackageManager & package_mgr)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::activate
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError PMSelectionManager::activate()
+{
+  return activate( Y2PM::packageManager() );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectionManager::activate
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
 {
   for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
     const PMSelectablePtr & sptr( *it );

@@ -44,17 +44,37 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////
 IMPL_BASE_POINTER(PMPackageImEx);
 
+///////////////////////////////////////////////////////////////////
+
+typedef PMPackageImEx::NameSet   NameSet;
+typedef PMPackageImEx::NameEdSet NameEdSet;
+
+///////////////////////////////////////////////////////////////////
+
 /******************************************************************
 **
 **
-**	FUNCTION NAME : pkgNameEd
-**	FUNCTION TYPE : PkgNameEd
+**	FUNCTION NAME : insert
+**	FUNCTION TYPE : inline void
 **
 **	DESCRIPTION :
 */
-inline PkgNameEd pkgNameEd( const constPMObjectPtr & obj_r )
+inline void insert( NameSet & data, const constPMSelectablePtr & sel_r )
 {
-  return PkgNameEd( obj_r->name(), obj_r->edition() );
+  data.insert( sel_r->name() );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : insert
+**	FUNCTION TYPE : inline void
+**
+**	DESCRIPTION :
+*/
+inline void insert( NameEdSet & data, const constPMObjectPtr & obj_r )
+{
+  data[obj_r->name()] = obj_r->edition();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -210,19 +230,19 @@ bool PMPackageImEx::collect_Sel( const constPMSelectablePtr & sel_r )
     return false;
 
   if ( sel_r->to_delete() ) {
-    _offSystemSel.insert( sel_r->name() );
+    insert( _offSystemSel, sel_r );
     return true;
   }
 
   if ( sel_r->to_install() ) {
-    _onSystemSel.insert( pkgNameEd( sel_r->candidateObj() ) );
+    insert( _onSystemSel, sel_r->candidateObj() );
     return true;
   }
 
   // unmodified selections:
 
   if ( sel_r->has_installed() ) {
-    _onSystemSel.insert( pkgNameEd( sel_r->installedObj() ) );
+    insert( _onSystemSel, sel_r->installedObj() );
     return true;
   }
 
@@ -247,23 +267,23 @@ inline bool PMPackageImEx::collect_Pkg( const constPMSelectablePtr & sel_r )
   }
 
   if ( sel_r->to_delete() ) {
-    _offSystemPkg.insert( sel_r->name() );
+    insert( _offSystemPkg, sel_r );
     return true;
   }
 
   if ( sel_r->to_install() ) {
-    _onSystemPkg.insert( pkgNameEd( sel_r->candidateObj() ) );
+    insert( _onSystemPkg, sel_r->candidateObj() );
     return true;
   }
 
   // unmodified packages:
 
   if ( sel_r->has_installed() ) {
-    (sel_r->is_taboo() ? _onSystemTabooPkg : _onSystemPkg).insert( pkgNameEd( sel_r->installedObj() ) );
+    insert( (sel_r->is_taboo() ? _onSystemTabooPkg : _onSystemPkg), sel_r->installedObj() );
     return true;
   }
   if ( sel_r->is_taboo() ) {
-    _offSystemTabooPkg.insert( sel_r->name() );
+    insert( _offSystemTabooPkg, sel_r );
     return true;
   }
 
@@ -294,6 +314,152 @@ void PMPackageImEx::getPMState()
   }
 }
 
+/******************************************************************
+**
+**
+**	FUNCTION NAME : onSystem
+**	FUNCTION TYPE : inline bool
+**
+**	DESCRIPTION :
+*/
+inline bool onSystem( const constPMSelectablePtr & sel_r )
+{
+  if ( sel_r ) {
+    if ( sel_r->has_installed() )
+      return( ! sel_r->to_delete() );
+    else
+      return( sel_r->to_install() );
+  }
+  return false;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : offSystem
+**	FUNCTION TYPE : inline bool
+**
+**	DESCRIPTION :
+*/
+inline bool offSystem( const constPMSelectablePtr & sel_r )
+{
+  return( ! onSystem( sel_r ) );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : user_set_onSystem
+**	FUNCTION TYPE : inline bool
+**
+**	DESCRIPTION :
+*/
+inline bool user_set_onSystem( const PMSelectablePtr & sel_r )
+{
+  if ( sel_r ) {
+    if ( sel_r->has_installed() ) {
+      if ( ! sel_r->to_delete() )
+	return true; // already onSystem
+      return sel_r->user_unset();
+    } else {
+      if ( sel_r->to_install() )
+	return true; // already onSystem
+      return sel_r->user_set_install();
+    }
+  }
+  return false;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : user_set_offSystem
+**	FUNCTION TYPE : inline bool
+**
+**	DESCRIPTION :
+*/
+inline bool user_set_offSystem( const PMSelectablePtr & sel_r )
+{
+  if ( sel_r ) {
+    if ( sel_r->has_installed() ) {
+      if ( sel_r->to_delete() )
+	return true; // already offSystem
+      return sel_r->user_set_delete();
+    } else {
+      if ( ! sel_r->to_install() )
+	return true; // already offSystem
+      return sel_r->user_unset();
+    }
+  }
+  return true;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : bring_onSystem
+**	FUNCTION TYPE : inline void
+**
+**	DESCRIPTION :
+*/
+inline void bring_onSystem( const PMSelectablePtr & sel, const PkgName & name ) {
+#warning what about user update pkg instead of just bring_onSystem
+  if ( onSystem( sel ) ) {
+    D__ << "Want and have: " << sel << endl;
+  } else {
+    if ( sel ) {
+      if ( user_set_onSystem( sel ) ) {
+	DBG << "Want and got: " << sel << endl;
+      } else {
+	WAR << "Want but failed user_set_onSystem: " << sel << endl;
+      }
+    } else {
+      WAR << "Want but missing: " << name << endl;
+    }
+  }
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : bring_offSystem
+**	FUNCTION TYPE : inline void
+**
+**	DESCRIPTION :
+*/
+inline void bring_offSystem( const PMSelectablePtr & sel, const PkgName & name ) {
+  if ( offSystem( sel ) ) {
+    D__ << "Want not and have not: " << name << endl;
+  } else {
+    if ( user_set_offSystem( sel ) ) {
+      DBG << "Want not and user_set_offSystem: " << sel << endl;
+    } else {
+      WAR << "Want not failed user_set_offSystem: " << sel << endl;
+    }
+  }
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : handle_unmentioned
+**	FUNCTION TYPE : inline void
+**
+**	DESCRIPTION :
+*/
+inline void handle_unmentioned( const PMSelectablePtr & sel, bool remove_unmentioned )
+{
+  if ( remove_unmentioned ) {
+    if ( user_set_offSystem( sel ) ) {
+      DBG << "Unmentioned and user_set_offSystem: " << sel << endl;
+    } else {
+      WAR << "Unmentioned failed user_set_offSystem: " << sel << endl;
+    }
+  } else {
+    D__ << "Unmentioned but kept: " << sel << endl;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -304,7 +470,85 @@ void PMPackageImEx::getPMState()
 //
 void PMPackageImEx::setPMState()
 {
-  INT << "TBD" << endl;
+  bool remove_unmentioned = true;
+#warning Restore requested locales?
+
+  MIL << "PackageManager: setNothingSelected..." << endl;
+  Y2PM::packageManager().setNothingSelected();
+
+  MIL << "SelectionManager: adjust settigns..." << endl;
+  S__ << "SELECTIONS========================================" << endl;
+
+  for ( NameEdSet::const_iterator it = _onSystemSel.begin(); it != _onSystemSel.end(); ++it ) {
+    const PkgName & name( it->first );
+    bring_onSystem( Y2PM::selectionManager()[name], name );
+  }
+
+  for ( NameSet::const_iterator it = _offSystemSel.begin(); it != _offSystemSel.end(); ++it ) {
+    const PkgName & name( *it );
+    bring_offSystem( Y2PM::selectionManager()[name], name );
+  }
+
+  S__ << "UNMENTIONED SELECTIONS============================" << endl;
+
+  for ( PMManager::PMSelectableVec::const_iterator it = Y2PM::selectionManager().begin(); it != Y2PM::selectionManager().end(); ++it ) {
+    const PMSelectablePtr & sel( *it );
+    if ( offSystem( sel ) )
+      continue;
+    const PkgName & name( sel->name() );
+    if ( _onSystemSel.find( name ) == _onSystemSel.end()
+	 && _offSystemSel.find( name ) == _offSystemSel.end() ) {
+      handle_unmentioned( sel, remove_unmentioned );
+    }
+  }
+
+#warning what about solving selections?
+  MIL << "SelectionManager: activate..." << endl;
+  Y2PM::selectionManager().activate();
+
+
+  MIL << "PackageManager: adjust settigns..." << endl;
+  S__ << "PACKAGES==========================================" << endl;
+
+  for ( NameEdSet::const_iterator it = _onSystemPkg.begin(); it != _onSystemPkg.end(); ++it ) {
+    const PkgName & name( it->first );
+    bring_onSystem( Y2PM::packageManager()[name], name );
+  }
+
+  for ( NameSet::const_iterator it = _offSystemPkg.begin(); it != _offSystemPkg.end(); ++it ) {
+    const PkgName & name( *it );
+    bring_offSystem( Y2PM::packageManager()[name], name );
+  }
+
+  S__ << "TABOO PACKAGES====================================" << endl;
+
+  for ( NameEdSet::const_iterator it = _onSystemTabooPkg.begin(); it != _onSystemTabooPkg.end(); ++it ) {
+    const PkgName & name( it->first );
+    bring_onSystem( Y2PM::packageManager()[name], name );
+  }
+
+  for ( NameSet::const_iterator it = _offSystemTabooPkg.begin(); it != _offSystemTabooPkg.end(); ++it ) {
+    const PkgName & name( *it );
+    bring_offSystem( Y2PM::packageManager()[name], name );
+  }
+
+  S__ << "UNMENTIONED PACKAGES==============================" << endl;
+
+  for ( PMManager::PMSelectableVec::const_iterator it = Y2PM::packageManager().begin(); it != Y2PM::packageManager().end(); ++it ) {
+    const PMSelectablePtr & sel( *it );
+    if ( offSystem( sel ) )
+      continue;
+    const PkgName & name( sel->name() );
+    if ( _onSystemPkg.find( name ) == _onSystemPkg.end()
+	 && _onSystemTabooPkg.find( name ) == _onSystemTabooPkg.end()
+	 && _offSystemPkg.find( name ) == _offSystemPkg.end()
+	 && _offSystemTabooPkg.find( name ) == _offSystemTabooPkg.end() ) {
+      handle_unmentioned( sel, remove_unmentioned );
+    }
+  }
+
+  S__ << "==================================================" << endl;
+  MIL << "Done." << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -526,14 +770,15 @@ void doSet( std::list<LangCode> & data, const std::list<std::string> & values )
     data.push_back( LangCode(*i) );
   }
 }
-void doSet( std::set<PkgNameEd> & data, const std::list<std::string> & values )
+void doSet( NameEdSet & data, const std::list<std::string> & values )
 {
   data.clear();
   for ( std::list<std::string>::const_iterator i = values.begin(); i != values.end(); ++i ) {
-    data.insert( PkgNameEd::fromString( *i ) );
+    PkgNameEd ne( PkgNameEd::fromString( *i ) );
+    data[ne.name] = ne.edition;
   }
 }
-void doSet( std::set<PkgName> & data, const std::list<std::string> & values )
+void doSet( NameSet & data, const std::list<std::string> & values )
 {
   data.clear();
   for ( std::list<std::string>::const_iterator i = values.begin(); i != values.end(); ++i ) {
@@ -604,18 +849,18 @@ void doWrite( std::ostream & str, const TagDescr & tag, const std::list<LangCode
   }
   tag.writeEnd( str );
 }
-void doWrite( std::ostream & str, const TagDescr & tag, const std::set<PkgNameEd> & data )
+void doWrite( std::ostream & str, const TagDescr & tag, const NameEdSet & data )
 {
   tag.writeStart( str );
-  for ( std::set<PkgNameEd>::const_iterator i = data.begin(); i != data.end(); ++i ) {
-    str << PkgNameEd::toString( *i ) << endl;
+  for ( NameEdSet::const_iterator i = data.begin(); i != data.end(); ++i ) {
+    str << PkgNameEd::toString( PkgNameEd(i->first,i->second) ) << endl;
   }
   tag.writeEnd( str );
 }
-void doWrite( std::ostream & str, const TagDescr & tag, const std::set<PkgName> & data )
+void doWrite( std::ostream & str, const TagDescr & tag, const NameSet & data )
 {
   tag.writeStart( str );
-  for ( std::set<PkgName>::const_iterator i = data.begin(); i != data.end(); ++i ) {
+  for ( NameSet::const_iterator i = data.begin(); i != data.end(); ++i ) {
     str << (*i) << endl;
   }
   tag.writeEnd( str );

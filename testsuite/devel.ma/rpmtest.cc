@@ -139,9 +139,14 @@ int main()
   INT << "Total Selections " << SMGR.size() << endl;
 
   PMPackageImEx P;
-
   P.getPMState();
+  P.doImport( "/tmp/yy" );
+  P.doImport( "/tmp/zz" );
+  P.doImport( "/tmp/xx" );
+  P.setPMState();
 
+  dumpSelWhatIf( DBG );
+  dumpPkgWhatIf( MIL );
 
   SEC << "STOP" << endl;
   return 0;
