@@ -59,14 +59,8 @@ class Y2PM {
 
     static bool _cache_to_ramdisk;
 
-    // preferred locale (i.e. user interface and default system locale)
-    // used in retrieval of locale-dependant data
-    static LangCode _preferred_locale;
-
-    // list of requested locales (must include _preferred_locale !)
-    // used when selecting/deselecting locale dependant
-    // packages of selections
-    static std::list<LangCode> _requested_locales;
+    class LocaleSettings;
+    static LocaleSettings & localeSettings();
 
     // the current base architecture of the target
     static PkgArch _base_arch;
@@ -93,18 +87,63 @@ class Y2PM {
 
   public:
 
-    /**
-     * Access to the preferred locale
-     **/
-
-    static const LangCode & getPreferredLocale () { return _preferred_locale; }
-    static void setPreferredLocale (const LangCode & preferred_locale) { _preferred_locale = preferred_locale; }
+    typedef std::set<LangCode> LocaleSet;
+    typedef std::list<LangCode> LocaleFallback;
 
     /**
-     * Access to the requested localed
+     * Return an ordered list of locales to try. For 'de_DE' you may for
+     * example get a list like: { de_DE, de, en }
      **/
-    static const std::list<LangCode> & getRequestedLocales () { return _requested_locales; }
-    static void setRequestedLocales (const std::list<LangCode> & requested_locales) { _requested_locales = requested_locales; }
+    static LocaleFallback getLocaleFallback( const LangCode & locale_r );
+
+    /**
+     * Return the preferred locale. The preferred language for labels,
+     * descritions, etc. passed to the UI.
+     **/
+    static const LangCode & getPreferredLocale();
+
+    /**
+     * Change the preferred locale.
+     **/
+    static PMError setPreferredLocale( const LangCode & preferred_locale_r );
+
+    /**
+     * Return requested locales. Languages to be supported by the system, i.e.
+     * language specific packages to be installed by e.g. selections.
+     **/
+    static const LocaleSet & getRequestedLocales();
+
+    /**
+     * Change requested locales.
+     **/
+    static PMError setRequestedLocales( const LocaleSet & requested_locales_r );
+    static PMError setRequestedLocales( const LangCode & requested_locale_r ) {
+      LocaleSet tmpset;
+      tmpset.insert( requested_locale_r );
+      return setRequestedLocales( tmpset );
+    }
+
+    /**
+     * Add locales to requested locales.
+     **/
+    static PMError addRequestedLocales( const LocaleSet & requested_locales_r );
+    static PMError addRequestedLocales( const LangCode & requested_locale_r ) {
+      LocaleSet tmpset;
+      tmpset.insert( requested_locale_r );
+      return addRequestedLocales( tmpset );
+    }
+
+    /**
+     * Remove locales from requested locales.
+     **/
+    static PMError delRequestedLocales( const LocaleSet & requested_locales_r );
+    static PMError delRequestedLocales( const LangCode & requested_locale_r ) {
+      LocaleSet tmpset;
+      tmpset.insert( requested_locale_r );
+      return delRequestedLocales( tmpset );
+    }
+
+  public:
 
     /**
      * Access to the (target) base architecture

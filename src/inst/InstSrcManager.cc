@@ -291,26 +291,6 @@ InstSrcPtr InstSrcManager::lookupSourceByID( InstSrc::UniqueID srcID_r ) const
   // not found
   return 0;
 }
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcManager::lookupInstSrc
-//	METHOD TYPE : InstSrcPtr
-//
-//	DESCRIPTION :
-//
-InstSrcPtr InstSrcManager::lookupInstSrc( const InstSrcPtr & isrc_r ) const
-{
-  if ( ! ( isrc_r && isrc_r->descr() ) )
-    return 0;
-
-  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
-    if ( InstSrcDescr::sameInstSource( (*it)->descr(), isrc_r->descr() ) ) {
-      return *it;
-    }
-  }
-  return 0;
-}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -329,12 +309,6 @@ InstSrcManager::ISrcId InstSrcManager::poolAdd( InstSrcPtr nsrc_r, bool rankchec
 
   if ( ! nsrc_r->descr() ) {
     INT << "Try to add InstSrc without InstSrcDescr" << endl;
-    return 0;
-  }
-
-  InstSrcPtr gotsrc = lookupInstSrc( nsrc_r );
-  if ( gotsrc ) {
-    WAR << "Try to add duplicate InstSrc: " << nsrc_r << " (have " << gotsrc << ")" << endl;
     return 0;
   }
 
@@ -1050,14 +1024,6 @@ PMError InstSrcManager::intern_cacheCopyTo()
   _knownSources.clear();
   initSrcPool( /*autoEnable*/false );
   if ( _knownSources.size() ) {
-
-    // delete already existing oSources
-    for ( ISrcPool::const_iterator it = oSources.begin(); it != oSources.end(); ++it ) {
-      InstSrcPtr gotsrc = lookupInstSrc( *it );
-      if ( gotsrc ) {
-	gotsrc->_cache_deleteOnExit = true;
-      }
-    }
 
     for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
       (*it)->descr()->set_default_rank( (*it)->descr()->default_rank() + rankOffset );
