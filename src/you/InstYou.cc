@@ -385,8 +385,13 @@ PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
 PMYouPatchPtr InstYou::nextPatch( bool *ok )
 {
   ++_selectedPatchesIt;
+  ++_progressCurrent;
 
-  PMError err = progress( ++_progressCurrent * 100 / _progressTotal );
+  int p;
+  if ( _progressTotal == 0 ) p = 0;
+  else p = _progressCurrent * 100 / _progressTotal;
+
+  PMError err = progress( p );
 
   if ( ok ) {
     if ( err == YouError::E_user_abort ) *ok = false;
