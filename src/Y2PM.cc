@@ -533,6 +533,9 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 	}
 
 	bool is_remote = (*it)->isRemote();		// if current package source is remote
+
+	string pkgname = (*it)->name() + ".spm";
+
         Pathname path;
 
 	//---------------------------------------------------
@@ -547,7 +550,7 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 	    if (is_remote
 		&& (_callbacks._provide_start_func != 0))
 	    {
-		(*_callbacks._provide_start_func)(srcloc, (*it)->sourcesize(), true, _callbacks._provide_start_data);
+		(*_callbacks._provide_start_func)(pkgname, (*it)->sourcesize(), true, _callbacks._provide_start_data);
 	    }
 
 	    err = (*it)->provideSrcPkgToInstall(path);
@@ -589,7 +592,7 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 
 	    if (_callbacks._package_start_func)
 	    {
-		go_on = (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
+		go_on = (*_callbacks._package_start_func) (pkgname, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
 		if (!go_on)
 		{
 		    break;
@@ -597,6 +600,7 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 	    }
 
 	    err = instTarget().installPackage (path);
+
 	    if ( ! err ) {
 	      commitSrcSucceeded( *it );
 	    }
@@ -943,30 +947,65 @@ int Y2PM::commitPackages( unsigned int media_nr,
 
 
     // all binary packages installed
-    // install remaining sources
+
+    //---------------------------------------------------------------
+    // now loop over srclist and install remaining sources
+    // start with the currently attached media, if any and loop through
+    // all allowed media numbers (limited by media_nr), this effectively
+    // sorts the list of source rpms to install by media number
+
+    unsigned int next_src_media = current_src_media;			// number of currently attached media, if any
 
     while (go_on)
     {
-	// peek to first package in source list to determine which is the next medium
+	if (srclist.size() == 0)			// we're done
+	    break;
 
-	PMPackagePtr spm = srclist.front();
+	// find first package in source list which matches next medium
 
-	if ((spm->source() != current_src_ptr)		// source or media change ?
-	    || (spm->medianr() != current_src_media))
+	std::list<PMPackagePtr>::iterator it = srclist.begin();
+	for (; it != srclist.end(); ++it)
 	{
-	    if ((spm->source() != current_src_ptr)	// source change -> release old source media
+	    string srcloc = (*it)->sourceloc();
+	    if (srcloc.empty())
+	    {
+		continue;
+	    }
+	    pkgmedianr = atoi (srcloc.c_str());
+
+	    if (  ((next_src_media > 0)				// if we already have an attached/wanted media number
+		    && (pkgmedianr != next_src_media))	// and the current package is not on this media
+	        ||((media_nr > 0)				// or we only want a specific media number
+		    && (pkgmedianr != media_nr)))		// and the current package is not on this media
+	    {
+		continue;					// keep on searching
+	    }
+	    break;
+	}
+
+	if (it == srclist.end())				// no matching package found
+	{
+	    break;
+	}
+
+	// ok, we have a matching package
+
+	if (((*it)->source() != current_src_ptr)		// source or media change ?
+	    || (pkgmedianr != current_src_media))
+	{
+	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
 		&& (current_src_ptr != 0))		// if we have an old media attached
 	    {
 		InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
 		ptr->releaseMedia (true);	// release if removable (CD/DVD)
 	    }
 
-	    current_src_ptr = spm->source();
-	    current_src_media = spm->medianr();
+	    current_src_ptr = (*it)->source();
+	    current_src_media = pkgmedianr;
 
 	    if (_callbacks._source_change_func != 0)
 	    {
-		(*_callbacks._source_change_func)(current_src_ptr, pkgmedianr, _callbacks._source_change_data);
+		(*_callbacks._source_change_func)(current_src_ptr, current_src_media, _callbacks._source_change_data);
 	    }
 	}
 
@@ -977,8 +1016,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	if (media_nr > 0)				// if a specific media number is requested
 	    break;
 
-	if (srclist.size() == 0)			// we're done
-	    break;
+	next_src_media++;				// go on with loop and next medium
     }
 
     if (current_src_ptr != 0)
