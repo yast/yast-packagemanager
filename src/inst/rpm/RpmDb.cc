@@ -2054,7 +2054,7 @@ RpmDb::backupPackage(const string& packageName)
 {
     bool ret = true;
     Pathname backupFilename;
-    Pathname filestobackupfile = _backuppath+FILEFORBACKUPFILES;
+    Pathname filestobackupfile = _rootdir+_backuppath+FILEFORBACKUPFILES;
 
     if (_backuppath.empty())
     {
@@ -2095,7 +2095,7 @@ RpmDb::backupPackage(const string& packageName)
 	int num = 0;
 	do
 	{
-	    backupFilename = _backuppath
+	    backupFilename = _rootdir + _backuppath
 		+ stringutil::form("%s-%d-%d.tar.gz",packageName.c_str(), date, num);
 
 	}
