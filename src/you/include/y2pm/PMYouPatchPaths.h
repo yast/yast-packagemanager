@@ -249,6 +249,11 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname configFile();
 
     /**
+      Return path to file used for storing passwords.
+    */
+    Pathname passwordFile();
+
+    /**
       Return configuration object for file at configFile().
     */
     SysConfig *config();

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 16 14:54:29 CEST 2003 - cschum@suse.de
+
+- Rewrote YOU authentification code.
+
+-------------------------------------------------------------------
 Tue Apr 22 16:45:54 CEST 2003 - ma@suse.de
 
 - Plain RPM InstSources are now able to work on gzipped cachefiles

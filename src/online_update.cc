@@ -20,6 +20,7 @@
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstYou.h>
 #include <y2pm/PMYouServers.h>
+#include <y2pm/YouError.h>
 
 using namespace std;
 
@@ -206,8 +207,8 @@ int main( int argc, char **argv )
   if ( archStr ) arch = archStr;
   else arch = "i386";
 
-  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( lang );
   PMYouPatchPathsPtr patchPaths = new PMYouPatchPaths( product, version, arch );
+  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( patchPaths, lang );
 
   InstYou you( patchInfo, patchPaths );
 
@@ -254,6 +255,8 @@ int main( int argc, char **argv )
     }
   }
 
+  patchPaths->setPatchUrl( url );
+
   if ( verbose ) {
     cout << "URL: " << url.asString() << endl;
     cout << "Path: " << you.paths()->patchPath() << endl;
@@ -273,6 +276,22 @@ int main( int argc, char **argv )
     } else {
       cout << updates << " new updates available." << endl;
       return 1;
+    }
+  }
+
+  error = you.retrievePatchDirectory( url );
+  if ( error ) {
+    if ( error == MediaError::E_login_failed ) {
+      cerr << "Need authorization" << endl;
+      you.readUserPassword();
+      error = you.retrievePatchDirectory( url );
+      if ( error ) {
+        cerr << error << endl;
+        exit( -1 );
+      }
+    } else {
+      cerr << error << endl;
+      exit( -1 );
     }
   }
 

@@ -196,12 +196,12 @@ const std::list<PMYouPatchPtr>&
 InstTarget::getPatches (void) const
 {
     if ( !_patchesInitialized ) {
-        PMYouPatchPaths paths;
-        PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo );
+        PMYouPatchPathsPtr paths( new PMYouPatchPaths );
+        PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo( paths ) );
 
-        Url u( "dir://" + ( getRoot() + paths.installDir() ).asString() );
-        Pathname path;
-        PMError error = patchInfo->readDir( u, path, _patches, false, false );
+        Url u( "dir://" + ( getRoot() + paths->installDir() ).asString() );
+        paths->setPatchUrl( u );
+        PMError error = patchInfo->readDir( _patches, false, false );
         if ( error ) {
             E__ << "Error reading patch info for installed patches." << endl;
         }

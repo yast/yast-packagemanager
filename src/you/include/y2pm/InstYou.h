@@ -70,10 +70,27 @@ class InstYou {
     PMError servers( std::list<Url> & );
 
     /**
-     * Check authorization for server access.
-     */
-    PMError checkAuthorization( const Url &url, const std::string &regcode,
-                                const std::string &password );
+      Read user name and password needed for authentification from configuration
+      file.
+    */
+    PMError readUserPassword();
+
+    /**
+      Write user name and password to configuration file.
+      
+      @param username    username
+      @param password    password
+      @param persistent  if true, write username/password to disk
+    */
+    PMError setUserPassword( const std::string &username,
+                             const std::string &password, bool persistent );
+
+    /**
+      Read list of all available patches.
+
+      @param url  URL of patch server
+    */
+    PMError retrievePatchDirectory( const Url &url );
 
     /**
      * Read patch information files.
@@ -215,6 +232,16 @@ class InstYou {
     */
     int quickCheckUpdates( const Url &url );
 
+    /*
+      Return currently set username used for authentificaton to the server.
+    */
+    std::string username() const { return _username; }
+
+    /*
+      Return currently set password used for authentificaton to the server.
+    */
+    std::string password() const { return _password; }
+
   public:
     class Callbacks
     {
@@ -271,7 +298,7 @@ class InstYou {
     
     MediaAccess _media;
 
-    std::string _regcode;
+    std::string _username;
     std::string _password;
 
     FSize _totalDownloadSize;

@@ -288,6 +288,11 @@ Pathname PMYouPatchPaths::configFile()
   return localDir() + "config";
 }
 
+Pathname PMYouPatchPaths::passwordFile()
+{
+  return localWriteDir() + "password";
+}
+
 SysConfig *PMYouPatchPaths::config()
 {
   if ( !_config ) {

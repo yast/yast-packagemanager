@@ -53,7 +53,7 @@ InstYou::Callbacks *InstYou::_callbacks = 0;
 InstYou::InstYou()
 {
   _paths = new PMYouPatchPaths();
-  _info = new PMYouPatchInfo();
+  _info = new PMYouPatchInfo( _paths );
 
   init();
 }
@@ -102,47 +102,54 @@ PMError InstYou::servers( list<Url> &servers )
   return PMError();
 }
 
-PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
-                                     const string &password )
+PMError InstYou::readUserPassword()
 {
-  Url u( url );
+  SysConfig cfg( _paths->passwordFile() );
+  _username = cfg.readEntry( "USERNAME" );
+  _password = cfg.readEntry( "PASSWORD" );
 
-  D__ << u << endl;
-  
-  u.setUsername( regcode );
-  u.setPassword( password );
+  Url url = _paths->patchUrl();
+  url.setUsername( _username );
+  url.setPassword( _password );
+  _paths->setPatchUrl( url );
 
-  string path = u.getPath();
-  D__ << path << endl;
-  if ( path.empty() ) path = "/";
-  else if ( *(path.rbegin()) != '/' ) path += "/";
-  D__ << path << endl;
-  u.setPath( path );
-
-  int err = PathInfo::assert_dir( _paths->localWriteDir() );
-  if ( err ) {
-    ERR << "Can't create " << _paths->localWriteDir() << " (errno: " << err << ")"
-        << endl;
-    return PMError( InstSrcError::E_error );
-  }
-
-  Pathname dummyFile = _paths->localWriteDir() + "dummy";
-
-  PMError error = MediaAccess::getFile( u, dummyFile );
-
-  if ( !error ) {
-    _regcode = regcode;
-    _password = password;
-    PathInfo::unlink( dummyFile );
-    return PMError();
-  } else {
-    if ( error == MediaError::E_login_failed ) return YouError::E_auth_failed;
-    else WAR << error << endl;
-  }
-
-  return YouError::E_error;
+  return PMError();
 }
 
+PMError InstYou::setUserPassword( const string &username,
+                                  const string &password,
+                                  bool persistent )
+{
+  _username = username;
+  _password = password;
+
+  string u,p;
+  if ( persistent ) {
+    u = _username;
+    p = _password;
+  }
+
+  SysConfig cfg( _paths->passwordFile() );
+  cfg.writeEntry( "USERNAME", _username );
+  cfg.writeEntry( "PASSWORD", _password );
+  cfg.save();
+
+  return PMError();
+}
+
+PMError InstYou::retrievePatchDirectory( const Url &url )
+{
+  Url u( url );
+  if ( !_username.empty() && !_password.empty() ) {
+    u.setUsername( _username );
+    u.setPassword( _password );
+  }
+  _paths->setPatchUrl( u );
+
+  PMError error = _info->getDirectory();
+
+  return error;
+}
 
 PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
                                     bool checkSig )
@@ -150,13 +157,13 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
   _patches.clear();
 
   Url u( url );
-  if ( !_regcode.empty() && !_password.empty() ) {
-    u.setUsername( _regcode );
+  if ( !_username.empty() && !_password.empty() ) {
+    u.setUsername( _username );
     u.setPassword( _password );
   }
   _paths->setPatchUrl( u );
 
-  PMError error = _info->getPatches( _paths, _patches, reload, checkSig );
+  PMError error = _info->getPatches( _patches, reload, checkSig );
   if ( error ) {
     ERR << "Error downloading patchinfos: " << error << endl;
     return error;
@@ -979,7 +986,8 @@ int InstYou::quickCheckUpdates( const Url &u )
 
   D__ << "InstYou::quickCheckUpdates(): " << url << endl;
 
-  _info->processMediaDir( url );
+  _paths->setPatchUrl( url );
+  _info->processMediaDir();
   
   Pathname path = url.getPath();
   path += _paths->patchPath() + _paths->directoryFileName();
