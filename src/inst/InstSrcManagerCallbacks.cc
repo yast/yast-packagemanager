@@ -37,7 +37,8 @@ namespace InstSrcManagerCallbacks {
   bool MediaChangeCallback::isSet() {
     return false;
   }
-  string MediaChangeCallback::changeMedia( const string & error,
+  string MediaChangeCallback::changeMedia( constInstSrcPtr instSrc,
+					   const string & error,
 					   const string & url,
 					   const string & product,
 					   int expected,
