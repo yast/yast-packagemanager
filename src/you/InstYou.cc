@@ -447,8 +447,18 @@ PMError InstYou::processPatches()
 
       error = verifyMediaNumber( _currentMediaNumber, lastMediaNumber );
       if ( error ) {
-        ERR << "Media not found: " << _currentMediaNumber << endl;
-        return error;
+        ERR << "Media not found: " << _currentMediaNumber << " " << error
+            << endl;
+        if ( error = YouError::E_user_skip ) {
+          int skipMediaNumber = _currentMediaNumber;
+          while( patch && ( skipMediaNumber == _currentMediaNumber ) ) {
+            patch->setSkipped( true );
+            patch = nextPatch();
+          }
+          continue;
+        } else {
+          return error;
+        }
       }
 
       lastMediaNumber = _currentMediaNumber;
