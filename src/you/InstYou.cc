@@ -673,7 +673,7 @@ PMError InstYou::processPatches()
   } else if ( error ) {
     log( string(_("Download failed.")) + "\n" );
   } else {
-    log( string(_("Download finished. You may disconnect from the internet now.")) + "\n" );
+    log( string(_("Download finished. You may disconnect from the Internet now.")) + "\n" );
   }
   log( "\n" );
 
