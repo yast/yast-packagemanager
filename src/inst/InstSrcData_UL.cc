@@ -171,17 +171,16 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
 //MIL << "Share " << package->name() << "-" << package->version() << "-" << package->release() << "." << package->arch() << endl;
 	stringutil::split (sharewith, splitted, " ", false);
 //MIL << "With " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
-	const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
+	const std::list<PMPackagePtr> candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
 
-	if (!candidates
-	    || candidates->size() != 1)
+	if (candidates.size() != 1)
 	{
 	    ERR << "No shared package " << sharewith << endl;
 	}
 	else
 	{
 	    // MIL << "Share " << single << " with " << sharewith << endl;
-	    dataprovider->setShared (candidates->front()->dataProvider());
+	    dataprovider->setShared (candidates.front()->dataProvider());
 	}
     }
 
@@ -209,16 +208,15 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
     stringutil::split (single, splitted, " ", false);
 //MIL << "Lang for " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
-    const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
+    const std::list<PMPackagePtr> candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
 
-    if (!candidates
-	|| candidates->size() != 1)
+    if (candidates.size() != 1)
     {
 	ERR << "Ambiguous package " << single << endl;
 	return;
     }
 
-    PMPackagePtr package = candidates->front();
+    PMPackagePtr package = candidates.front();
     PMULPackageDataProviderPtr dataprovider = package->dataProvider();
 
     CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
@@ -853,6 +851,7 @@ MIL << "Reading " << selectionname << endl;
     if ( !err )
     {
 	ndata_r = ndata;
+	MIL << "tryGetDataUL sucessful" << endl;
     }
     else
     {
