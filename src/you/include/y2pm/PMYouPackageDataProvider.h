@@ -41,8 +41,18 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 
     public:
         /**
-         * Set size value for given package.
-         */
+          Set label describing the package source.
+        */
+        void setSrcLabel( const PMPackagePtr &pkg, const std::string &label );
+
+        /**
+          Get label of package source.
+        */
+        std::string instSrcLabel( const PMPackage & pkg_r ) const;
+
+        /**
+          Set size value for given package.
+        */
         void setSize( const PMPackagePtr &pkg, const FSize & );
 
         /**
@@ -76,8 +86,8 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         void setRpmGroup( const PMPackagePtr &, const std::string &group );
 
         /**
-         * Set external url for given package.
-         */
+          Set external url for given package.
+        */
         void setExternalUrl( const PMPackagePtr &pkg, const std::string &str );
 
         /**
@@ -86,8 +96,8 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         const std::string externalUrl( const PMPackagePtr & ) const;
 
         /**
-         * Set base versions for patch RPM.
-         */
+          Set base versions for patch RPM.
+        */
         void setPatchRpmBaseVersions( const PMPackagePtr &pkg,
                                       const std::list<PkgEdition> &editions );
 
@@ -97,6 +107,7 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         const std::list<PkgEdition> patchRpmBaseVersions( const PMPackagePtr & ) const;
 
     private:
+        std::map<PMPackagePtr,std::string> _srcLabels;
         std::map<PMPackagePtr,FSize> _sizes;
         std::map<PMPackagePtr,std::string> _locations;
         std::map<PMPackagePtr,std::string> _externalUrls;

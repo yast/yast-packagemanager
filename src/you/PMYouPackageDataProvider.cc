@@ -58,6 +58,23 @@ PMYouPackageDataProvider::~PMYouPackageDataProvider()
 {
 }
 
+void PMYouPackageDataProvider::setSrcLabel( const PMPackagePtr &pkg, const std::string &label )
+{
+  _srcLabels[ pkg ] = label;
+}
+
+string PMYouPackageDataProvider::instSrcLabel( const PMPackage & pkg ) const
+{
+  string label = "YOU";
+
+  map<PMPackagePtr,string>::const_iterator it = _srcLabels.find( mkPtr( pkg ) );
+  if ( it != _srcLabels.end() ) {
+    label += ": " + it->second;
+  }
+
+  return label;
+}
+
 FSize PMYouPackageDataProvider::size( const PMPackage &pkg ) const
 {
   map<PMPackagePtr,FSize>::const_iterator it = _sizes.find( mkPtr( pkg ) );
