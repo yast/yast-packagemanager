@@ -93,7 +93,10 @@ class SelState {
   public:
 
     /**
-     * Set whether an installed object is present
+     * Set whether an installed object is present.
+     * <b>Clears taboo if an installed object occurs or vanishes.</b>
+     * Otherwise an e.g. formerly unwanted package that got somehow installed,
+     * would become protected. Thats not what we want per default.
      **/
     void set_has_installed( bool b = true );
 

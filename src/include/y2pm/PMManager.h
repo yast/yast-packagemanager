@@ -101,6 +101,33 @@ class PMManager {
     virtual PMSelectablePtr newSelectable( const PkgName & name_r ) const;
 
     /**
+     * Pre poolSetInstalled hook
+     **/
+    virtual void prePSI() {;}
+    /**
+     * Post poolSetInstalled hook
+     **/
+    virtual void postPSI() {;}
+    /**
+     * Pre poolAddCandidates hook
+     **/
+    virtual void prePAC() {;}
+    /**
+     * Post poolAddCandidates hook
+     **/
+    virtual void postPAC() {;}
+    /**
+     * Pre poolRemoveCandidates hook
+     **/
+    virtual void prePRC() {;}
+    /**
+     * Post poolRemoveCandidates hook
+     **/
+    virtual void postPRC() {;}
+
+  private:
+
+    /**
      * Lookup Selectable by name.
      **/
     PMSelectablePtr poolLookup( const std::string & name_r ) const;
@@ -117,7 +144,6 @@ class PMManager {
      * This clears any saved state!
      **/
     void poolAdjust();
-
 
     void clearAll();
 

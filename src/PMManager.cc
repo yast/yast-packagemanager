@@ -151,6 +151,7 @@ PMSelectablePtr PMManager::poolProvide( const std::string & name_r )
 void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
 {
   MIL << "Going to set " << iter_r.size() << " installed objects..." << endl;
+  prePSI();
 
   ///////////////////////////////////////////////////////////////////
   // set nothing installed
@@ -188,6 +189,7 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
   }
   DBG << "installed objects set!" << endl;
   poolAdjust();
+  postPSI();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -205,6 +207,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
     return;
   }
   MIL << "Going to add " << iter_r.size() << " objects..." << endl;
+  prePAC();
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
     //D__ << "--add object " << *iter_r << endl;
@@ -235,6 +238,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
   }
   DBG << "objects added!" << endl;
   poolAdjust();
+  postPAC();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -253,6 +257,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
   }
 
   MIL << "Going to remove " << iter_r.size() << " objects..." << endl;
+  prePRC();
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
     //D__ << "--remove object " << *iter_r << endl;
@@ -284,6 +289,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
   }
   DBG << "objects removed!" << endl;
   poolAdjust();
+  postPRC();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -576,7 +582,7 @@ PMManager::updateAllInstalled (bool only_newer)
 void PMManager::readSettings()
 {
   Pathname file = settingsFile();
-  
+
   if ( file.empty() ) return;
 
   PathInfo pi( file );
