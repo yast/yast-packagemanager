@@ -180,7 +180,8 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
 
     PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, localecache, ducache));
-    PMPackagePtr package (new PMPackage (name, edition, arch, dataprovider, _source));
+#warning STORE InstSrcPtr in DataProvider
+    PMPackagePtr package (new PMPackage (name, edition, arch, dataprovider));
 
     //---------------------------------------------------------------
     // enter package to map for faster "=Shr:" (share) and packages.local lookup
@@ -716,7 +717,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 	    if (!err)
 		break;
 	}
-	
+
 	localename = filename.extend (".en");		// fallback to packages.en
 	err = media_r->provideFile ( localename );
 	{

@@ -244,6 +244,8 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    remaining.push_back ((*it)->name());
 	    continue;
 	}
+#warning commitPackages NEEDS REVIEW
+#if 0
 	if ((*it)->source() == 0)
 	{
 	    ERR << "No source for " << *it << endl;
@@ -274,6 +276,16 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    ret = false;
 	    continue;
 	}
+#else
+	Pathname path = (*it)->providePkgToInstall();
+	if (path.empty())
+	{
+	    ERR << "Media can't provide package to install for " << (*it) << endl;
+	    remaining.push_back ((*it)->name());
+	    ret = false;
+	    continue;
+	}
+#endif
 	PMError err = instTarget().installPackage (path);
 	if (err)
 	{

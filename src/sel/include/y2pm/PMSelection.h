@@ -93,8 +93,7 @@ class PMSelection : virtual public Rep, public PMObject {
     PMSelection (const PkgName &    name_r,
 		 const PkgEdition & edition_r,
 		 const PkgArch &    arch_r,
-		 PMSelectionDataProviderPtr dataProvider_r,
-		 constInstSrcPtr source = 0);
+		 PMSelectionDataProviderPtr dataProvider_r );
 
     virtual ~PMSelection();
 

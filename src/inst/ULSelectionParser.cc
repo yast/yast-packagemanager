@@ -124,7 +124,8 @@ ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
     PkgEdition edition;			// empty edition
     PkgArch arch ("noarch");		// selections are "noarch" objects for now
 
-    PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider, _source));
+#warning STORE InstSrcPtr in DataProvider
+    PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
     TagCacheRetrievalPtr selcache = dataprovider->getCacheRetrieval();
     if (!selcache)
     {

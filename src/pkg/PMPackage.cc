@@ -24,7 +24,6 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageDataProvider.h>
 
 using namespace std;
 
@@ -54,7 +53,7 @@ Date                   PMPackage::buildtime()    const { DP_GET( buildtime ); }
 std::string            PMPackage::buildhost()    const { DP_GET( buildhost ); }
 Date                   PMPackage::installtime()  const { DP_GET( installtime ); }
 std::string            PMPackage::distribution() const { DP_GET( distribution ); }
-std::string            PMPackage::vendor()       const { DP_GET( vendor ); }
+Vendor                 PMPackage::vendor()       const { DP_GET( vendor ); }
 std::string            PMPackage::license()      const { DP_GET( license ); }
 std::string            PMPackage::packager()     const { DP_GET( packager ); }
 std::string            PMPackage::group()        const { DP_GET( group ); }
@@ -77,6 +76,8 @@ std::string            PMPackage::location()     const { DP_GET( location ); }
 unsigned int           PMPackage::medianr()      const { DP_GET( medianr ); }
 std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
 std::list<std::string> PMPackage::du()	         const { DP_GET( du ); }
+// physical access to the rpm file.
+Pathname               PMPackage::providePkgToInstall() const { DP_GET( providePkgToInstall ); }
 #undef DP_GET
 ///////////////////////////////////////////////////////////////////
 
@@ -91,9 +92,8 @@ std::list<std::string> PMPackage::du()	         const { DP_GET( du ); }
 PMPackage::PMPackage( const PkgName &    name_r,
 		      const PkgEdition & edition_r,
 		      const PkgArch &    arch_r,
-		      PMPackageDataProviderPtr dataProvider_r,
-		      constInstSrcPtr source )
-    : PMObject( name_r, edition_r, arch_r, source )
+		      PMPackageDataProviderPtr dataProvider_r )
+    : PMObject( name_r, edition_r, arch_r )
     , _dataProvider( dataProvider_r )
 {
   if ( !_dataProvider ) {

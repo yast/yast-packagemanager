@@ -49,10 +49,10 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	// !!! RpmDb uses a per Package DataProvider, so it's always the
 	//     same PMPackage that calls the inteface. So it makes sense to
 	//     store data here.
-	std::string _attr_SUMMARY;
-	FSize _attr_SIZE;
-	YStringTreeItem *_attr_GROUP;
-	Vendor _attr_VENDOR;
+	std::string       _attr_SUMMARY;
+	FSize             _attr_SIZE;
+	YStringTreeItem * _attr_GROUP;
+	Vendor            _attr_VENDOR;
 
 	/**
 	 * single package cache for _cachedPkg
@@ -89,7 +89,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
     virtual std::string            buildhost   ( const PMPackage & pkg_r ) const;
     virtual Date                   installtime ( const PMPackage & pkg_r ) const;
     virtual std::string            distribution( const PMPackage & pkg_r ) const;
-    virtual std::string            vendor      ( const PMPackage & pkg_r ) const;
+    virtual Vendor                 vendor      ( const PMPackage & pkg_r ) const;
     virtual std::string            license     ( const PMPackage & pkg_r ) const;
     virtual std::string            packager    ( const PMPackage & pkg_r ) const;
     virtual std::string            group       ( const PMPackage & pkg_r ) const;

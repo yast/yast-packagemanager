@@ -24,12 +24,8 @@
 #include <iosfwd>
 #include <string>
 
-#include <y2util/Date.h>
-#include <y2util/FSize.h>
-#include <y2util/YRpmGroupsTree.h>
-
-#include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMPackageDataProvider.h> // should introduce all attribute data types.
 
 #include <y2pm/PMObject.h>
 
@@ -67,7 +63,7 @@ class PMPackage : virtual public Rep, public PMObject {
     std::string            buildhost()    const;
     Date                   installtime()  const;
     std::string            distribution() const;
-    std::string            vendor()       const;
+    Vendor                 vendor()       const;
     std::string            license()      const;
     std::string            packager()     const;
     std::string            group()        const;
@@ -93,6 +89,9 @@ class PMPackage : virtual public Rep, public PMObject {
     // from packages.DU
     std::list<std::string> du()		  const;
 
+    // physical access to the rpm file.
+    Pathname providePkgToInstall()        const;
+
   protected:
 
     /**
@@ -108,8 +107,7 @@ class PMPackage : virtual public Rep, public PMObject {
     PMPackage ( const PkgName &    name_r,
 		const PkgEdition & edition_r,
 		const PkgArch &    arch_r,
-		PMPackageDataProviderPtr dataProvider_r,
-		constInstSrcPtr source = 0 );
+		PMPackageDataProviderPtr dataProvider_r );
 
     virtual ~PMPackage();
 
