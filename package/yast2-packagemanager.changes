@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 14 16:46:41 CET 2003 - kkaempf@suse.de
+
+- Correctly install source rpms, from current and other
+  medias (#25380)
+
+-------------------------------------------------------------------
 Fri Mar 14 13:56:58 CET 2003 - ma@suse.de
 
 - Filter cdroms and other unwanted mountpoints (e.g. /mnt,/media)

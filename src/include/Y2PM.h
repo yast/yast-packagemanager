@@ -203,6 +203,10 @@ class Y2PM {
 
   private:
 
+    static bool installSpmFromMedia (unsigned int current_src_media,
+				     constInstSrcPtr current_src_ptr,
+				     std::list<PMPackagePtr>& srclist);
+
     ///////////////////////////////////////////////////////////////////
     // CallBacks
     ///////////////////////////////////////////////////////////////////
