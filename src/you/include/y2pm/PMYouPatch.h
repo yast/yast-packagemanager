@@ -189,7 +189,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
     std::string fullName() const;
 
     /**
-      Set flag indicating, if the patch contains packages which are alread
+      Set flag indicating, if the patch contains packages which are already
       installed in some version.
     */
     void setPackagesInstalled( bool installed ) { _packagesInstalled = installed; }
@@ -198,6 +198,12 @@ class PMYouPatch : virtual public Rep, public PMObject {
       Return, if patch contains installed patches.
     */
     bool packagesInstalled() const { return _packagesInstalled; }
+
+
+    /**
+      Return, if patch is installable on current system.
+    */
+    bool installable() const;
 
 
     /**
