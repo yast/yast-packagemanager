@@ -146,15 +146,6 @@ bad, PkgDep::SolvableList& to_remove)
 	if(selp == NULL)
 	    { ERR << "good result with NULL selectable: " << it->name << endl; continue; }
 
-	if(it->pertains == PkgDep::Result::Res_IsInstalled)
-	{
-	    if(selp->status() != PMSelectable::S_KeepInstalled)
-	    {
-		INT << "PkgDep said " << it->name << " is installed, but it isn't" << endl;
-	    }
-	    continue;
-	}
-
 	if(!selp->auto_set_install())
 	    {
 		ERR << "could not set " << it->name <<

@@ -8,8 +8,6 @@ ostream& operator<<( ostream& os, const PkgDep::Result& res )
 {
 	os << "Name: " << res.name << endl;
 	os << "Edition: " << res.edition << endl;
-	if (res.pertains == PkgDep::Result::Res_IsInstalled)
-		os << "Broken Installed Package available: yes" << endl;
 	if (res.from_input_list)
 		os << "From-Input-List: yes\n";
 	if (!res.referers.empty())
