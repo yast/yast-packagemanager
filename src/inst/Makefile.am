@@ -1,8 +1,10 @@
 #
-# Makefile.am for packagemanager/src/media/instance
+# Makefile.am for packagemanager/src/instsrc
 #
 
 SUBDIRS = include
+
+CPPFLAGS = -DY2LOG=__FILE__
 
 INCLUDES = -I$(QTDIR)/include -I$(includedir) -I$(top_srcdir)/src/include \
 	-I$(top_srcdir)/src/instsrc/include \
