@@ -1500,8 +1500,8 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 
 	if (!_rootdir.empty() && _rootdir != "/")
 	{
-	    file1 = _rootdir + msg.substr (0, pos1);
-	    file2 = _rootdir + msg.substr (pos2);
+	    file1 = _rootdir.asString() + msg.substr (0, pos1);
+	    file2 = _rootdir.asString() + msg.substr (pos2);
 	}
 	else
 	{
