@@ -102,6 +102,7 @@ constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r )
   }
 
   rpmts ts = ::rpmtsCreate();
+  ::rpmtsSetVSFlags( ts, rpmVSFlags( _RPMVSF_NOSIGNATURES | _RPMVSF_NODIGESTS ) );
   Header nh = 0;
   int res = ::rpmReadPackageFile( ts, fd, path_r.asString().c_str(), &nh );
   ts = ::rpmtsFree(ts);

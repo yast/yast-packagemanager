@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Sep 23 20:43:24 CEST 2003 - ma@suse.de
+
+- Provide a symlink to slideshow data during install or upadte.
+  Otherwise the slideshow is in need to predict where an InstSrc
+  cache is going to be created. (#31491)
+- Prevent librpm from writing error messages to the console during
+  update. They destroy the ncurses screen. (#30379)
+- 2.8.32
+
+-------------------------------------------------------------------
 Tue Sep 23 11:39:40 CEST 2003 - ma@suse.de
 
 - Prevent installation of source rpms from accessing a media, which
