@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 15 22:28:54 CET 2005 - ma@suse.de
+
+- Workaround broken tell/seek in plain installation sources cachfile.
+  (#72424)
+- 2.11.27
+
+-------------------------------------------------------------------
 Tue Mar 15 12:41:05 CET 2005 - ma@suse.de
 
 - Take care that the original error leading to a media change
