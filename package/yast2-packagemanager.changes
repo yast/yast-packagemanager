@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 10 17:11:43 CEST 2003 - sh@suse.de
+
+- Fixed bug #25804: FTP download shows pkg build no. 
+
+-------------------------------------------------------------------
 Tue Mar 18 13:34:21 CET 2003 - ma@suse.de
 
 - SelectionManager missed to save/restore it's internal list of

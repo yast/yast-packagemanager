@@ -702,7 +702,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
     for (std::list<PMPackagePtr>::iterator it = dellist.begin();
 	 it != dellist.end(); ++it)
     {
-	string fullname = (*it)->nameEd();
+	string fullname = (*it)->name().asString() + "-" + (*it)->version();
 
 	do		// retry loop for package deletion
 	{
@@ -781,7 +781,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	}
 
 	bool is_remote = (*it)->isRemote();		// if current package source is remote
-	string fullname = (*it)->nameEd();
+	string fullname = (*it)->name().asString() + "-" + (*it)->version();
 
 	//-----------------------------------------------------------
 	// check if we need a new media
