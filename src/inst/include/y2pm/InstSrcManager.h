@@ -170,6 +170,16 @@ class InstSrcManager {
     ISrcId poolAdd( InstSrcPtr nsrc_r, bool rankcheck_r = true );
 
     /**
+     * Enable/disable isrc_r according to yesno_r.
+     **/
+    PMError activateSource( const InstSrcPtr & isrc_r, bool yesno_r );
+
+    /**
+     * Enable/disable isrc_r according to yesno_r.
+     **/
+    PMError activateSource( const ISrcId & isrc_r, bool yesno_r );
+
+    /**
      * helper for cacheCopyTo fake
      **/
     PMError intern_cacheCopyTo();
@@ -196,12 +206,12 @@ class InstSrcManager {
     /**
      * Enable InstSrc. Let it provide it's Objects to the Manager classes.
      **/
-    PMError enableSource( const ISrcId & isrc_r );
+    PMError enableSource( const ISrcId & isrc_r ) { return activateSource( isrc_r, true ); }
 
     /**
      * Disable InstSrc. Provided Objects are withdrawn from Manager classes.
      **/
-    PMError disableSource( const ISrcId & isrc_r );
+    PMError disableSource( const ISrcId & isrc_r ) { return activateSource( isrc_r, false ); }
 
   public:
 
@@ -277,6 +287,12 @@ class InstSrcManager {
      * Disable all InstSrc'es.
      **/
     void disableAllSources();
+
+    /**
+     * Enable/disable all InstSrc'es according to their default state
+     * (see @ref setAutoenable).
+     **/
+    void enableDefaultSources();
 
     /**
      * Let a certain InstSrc release it's media.
