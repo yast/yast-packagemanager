@@ -70,6 +70,7 @@ void instlog(vector<string>& argv);
 void setroot(vector<string>& argv);
 void source(vector<string>& argv);
 void deselect(vector<string>& argv);
+void upgrade(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -92,6 +93,7 @@ static struct Funcs func[] = {
     { "setroot",    setroot,    "set root directory for operation" },
     { "source",     source,     "scan media for inst sources" },
     { "deselect",   deselect,   "deselect packages marked for installation" },
+    { "upgrade",    upgrade,    "upgrade whole system" },
     { NULL,         NULL,       NULL }
 };
 
@@ -728,6 +730,84 @@ void rpminstall(vector<string>& argv)
     }
     else
 	Y2PM::instTarget().installPackages(pkgs);
+}
+
+void upgrade(vector<string>& argv)
+{
+    DOINIT
+
+    PkgDep::ResultList good;
+    PkgDep::ErrorResultList bad;
+    PkgDep::SolvableList to_remove;
+
+    int numinst=0,numrem=0,numbad=0;
+    bool success = false;
+
+    for (unsigned i=1; i < argv.size() ; i++) {
+	string pkg = stringutil::trim(argv[i]);
+
+	if(pkg.empty()) continue;
+	
+	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
+	if(!selp || !selp->has_candidate())
+	{
+	    std::cout << "package " << pkg << " is not available.\n";
+	    continue;
+	}
+	PMSelectable::UI_Status s = PMSelectable::S_Install;
+
+	if(selp->has_installed())
+	{
+	    s = PMSelectable::S_Update;
+	}
+	if(!selp->set_status(s))
+	{
+	    cout << stringutil::form("coult not mark %s for %s", pkg.c_str(),
+		(s==PMSelectable::S_Install?"installation":"update")) << endl;
+	}
+    }
+
+    TimeClass t;
+    t.startTimer();
+
+    success = Y2PM::packageManager().solveUpgrade(good, bad, to_remove);
+
+    t.stopTimer();
+
+    if (!success) {
+	// if it failed, print problems
+	cout << "*** Conflicts ***" << endl;
+	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
+	     p != bad.end(); ++p ) {
+	    cout << *p << endl;
+	    numbad++;
+	}
+    }
+
+    cout << "*** Packages to install ***" << endl;
+
+    // otherwise, print what should be installed and what removed
+    for(PkgDep::ResultList::const_iterator p=good.begin();p!=good.end();++p) {
+	switch (_verbose) {
+	case 0: cout << "install " << p->name << endl;break;
+	case 1: cout << "install " << p->name << "-" << p->edition << endl;break;
+	default: cout << "install " << *p << endl;break;
+	}
+	numinst++;
+
+    }
+    cout << "*** Packages to remove ***" << endl;
+    for(PkgDep::SolvableList::const_iterator q=to_remove.begin();q!=to_remove.end();++q) {
+	switch (_verbose) {
+	case 0: cout << "remove " << (*q)->name() << endl;break;
+	case 1: cout << "remove " << (*q)->name() << "-" << (*q)->edition() << endl;break;
+	default: cout << "remove " << *q << endl;break;
+	}
+	numrem++;
+    }
+    cout << "***" << endl;
+    cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
+    cout << "Time consumed: " << t.getTimer() << endl;
 }
 
 int main( int argc, char *argv[] )
