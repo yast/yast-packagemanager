@@ -231,7 +231,10 @@ class InstSrcManager {
     /**
      * Delete InstSrc. Erase it together with all cached info.
      *
-     * <B>Note:</B> the ISrcId passed will be set to NULL.
+     * <B>Note:</B> The ISrcId passed will be set to NULL. It
+     * should be the last ISrcId remembered somewhere. Otherwise
+     * deletion is delayed untill all autstanding references were
+     * cleared.
      **/
     PMError deleteSource( ISrcId & isrc_r );
 
