@@ -114,6 +114,13 @@ class InstTarget: virtual public Rep, public InstData {
 
 	//-----------------------------
 	// general functions
+	
+	/**
+	 * set log file for installation
+	 *
+	 * @return false if opening the file failed
+	 * */
+	bool setInstallationLogfile(const std::string& logfile);
 
 	/**
 	 * clean up, e.g. remove all caches
@@ -251,7 +258,6 @@ class InstTarget: virtual public Rep, public InstData {
 
 	/** rpm database */
 	RpmDbPtr _rpmdb;
-
 };
 
 ///////////////////////////////////////////////////////////////////

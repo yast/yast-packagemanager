@@ -25,6 +25,7 @@
 #include <cstdlib>
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <list>
 #include <vector>
@@ -36,6 +37,7 @@
 #include <y2util/Pathname.h>
 #include <y2util/PathInfo.h>
 #include <y2util/ExternalDataSource.h>
+#include <y2util/diff.h>
 
 #include <y2pm/RpmDb.h>
 #include <y2pm/PkgEdition.h>
@@ -57,8 +59,7 @@ IMPL_BASE_POINTER(RpmDb);
 #define FAILIFNOTINITIALIZED \
 	if(!_initialized) return Error::E_RpmDB_not_initialized;
 
-
-#define PROGRESSSSTREAM MIL
+#define WARNINGMAILPATH "/var/adm/notify/warnings"
 
 /****************************************************************/
 /* public member-functions					*/
@@ -1358,6 +1359,74 @@ RpmDb::systemKill()
 }
 
 
+// generate diff mails for config files
+void RpmDb::processConfigFiles(const string& line, const string& name, const char* typemsg, const char* difffailmsg, const char* diffgenmsg)
+{
+    string msg = line.substr(9);
+    string::size_type pos1 = string::npos;
+    string::size_type pos2 = string::npos;
+    string file1;
+    string file2;
+
+    pos1 = msg.find(typemsg);
+    for(;;)
+    {
+	if( pos1 == string::npos )
+	    break;
+
+	pos2=pos1+strlen(typemsg);
+
+	if( pos2 >= msg.length() )
+	    break;
+	
+	file1 = msg.substr(0,pos1);
+	file2 = msg.substr(pos2);
+	string out;
+	int ret = Diff::differ(file1,file2,out,25);
+	if(ret)
+	{
+	    Pathname notifydir = Pathname(_rootdir) + WARNINGMAILPATH;
+	    if(PathInfo::assert_dir(notifydir) != 0)
+	    {
+		ERR << "Could not create " << notifydir.asString() << endl;
+		break;
+	    }
+	    string file = name + '_' + file1;
+	    for(string::size_type pos = file.find('/'); pos != string::npos; pos = file.find('/'))
+	    {
+		file[pos] = '_';
+	    }
+	    file = (notifydir + file).asString();
+	    ofstream notify(file.c_str());
+	    if(!notify)
+	    {
+		ERR << "Could not open " <<  file << endl;
+		break;
+	    }
+
+	    notify << name << endl;
+	    if(ret>1)
+	    {
+		ERR << "diff failed" << endl;
+		notify << stringutil::form(difffailmsg,
+		    file1.c_str(), file2.c_str()) << endl;
+	    }
+	    else
+	    {
+		notify << stringutil::form(diffgenmsg,
+		    file1.c_str(), file2.c_str()) << endl;
+		notify << out << endl;
+	    }
+	    notify.close();
+	}
+	else
+	{
+	    WAR << "rpm created " << file2 << " but it is not different from " << file2 << endl;
+	}
+	break;
+    }
+}
+
 // inststall package filename with flags iflags
 PMError
 RpmDb::installPackage(const string& filename, unsigned flags)
@@ -1385,7 +1454,8 @@ RpmDb::installPackage(const string& filename, unsigned flags)
 
     opts.push_back(filename.c_str());
 
-    PROGRESSSSTREAM << "Installing " << Pathname::basename(filename) << endl;
+    // %s = filename of rpm package
+    _progresslogstream << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
 
     run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
 
@@ -1407,15 +1477,36 @@ RpmDb::installPackage(const string& filename, unsigned flags)
 	}
 	else
 	    rpmmsg += line+'\n';
+
+	if( line.substr(0,8) == "warning:" )
+	{
+	    processConfigFiles(line, Pathname::basename(filename), " saved as ",
+		// %s = filenames
+		_("rpm saved %s as %s, but it was impossible to generate a diff"),
+		// %s = filenames
+		_("rpm saved %s as %s.\nHere are the first 25 lines of difference:\n"));
+	    processConfigFiles(line, Pathname::basename(filename), " created as ",
+		// %s = filenames
+		_("rpm created %s as %s, but it was impossible to generate a diff"),
+		// %s = filenames
+		_("rpm created %s as %s.\nHere are the first 25 lines of difference:\n"));
+	}
     }
     int rpm_status = systemStatus();
     if (rpm_status != 0)
     {
-	PROGRESSSSTREAM << Pathname::basename(filename) << " failed" << endl;
+	// %s = filename of rpm package
+	_progresslogstream << stringutil::form(_("%s failed"), Pathname::basename(filename).c_str()) << endl;
 	ERR << "rpm failed, message was: " << rpmmsg << endl;
+	_progresslogstream << _("rpm output:") << endl << rpmmsg << endl;
 	return Error::E_RpmDB_subprocess_failed;
     }
-    PROGRESSSSTREAM << Pathname::basename(filename) << " ok" << endl;
+    // %s = filename of rpm package
+    _progresslogstream << stringutil::form(_("%s ok"), Pathname::basename(filename).c_str()) << endl;
+    if(!rpmmsg.empty())
+    {
+	_progresslogstream << _("Additional rpm output:") << endl << rpmmsg << endl;
+    }
     return Error::E_ok;
 }
 
@@ -1518,6 +1609,27 @@ RpmDb::checkPackageResult2string(unsigned code)
     }
 
     return msg;
+}
+
+bool RpmDb::setInstallationLogfile( const std::string& filename )
+{
+    if(_progresslogstream.is_open())
+    {
+	_progresslogstream.clear();
+	_progresslogstream.close();
+    }
+
+    if(filename.empty())
+	return true;
+
+    _progresslogstream.clear();
+    _progresslogstream.open(filename.c_str());
+    if(!_progresslogstream)
+    {
+	ERR << "Could not open " << filename << endl;
+	return false;
+    }
+    return true;
 }
 
 #if 0

@@ -253,6 +253,11 @@ void InstTarget::setPackageInstallProgressCallback(void (*func)(int,void*), void
     _rpmdb->setProgressCallback(func,data);
 }
 
+bool InstTarget::setInstallationLogfile(const std::string& logfile)
+{
+    return _rpmdb->setInstallationLogfile(logfile);
+}
+
 PMError InstTarget::installPatch( const Pathname &filename )
 {
 #warning FIXME: Get product info from InstTarget::descr    
