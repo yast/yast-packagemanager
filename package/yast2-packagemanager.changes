@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 19 13:09:03 CEST 2003 - cschum@suse.de
+
+- Fixed -s option of online_update (#28138).
+
+-------------------------------------------------------------------
 Fri Aug 15 09:01:06 CEST 2003 - arvin@suse.de
 
 - fixed memory corruption (bug #28373 and #28763)
