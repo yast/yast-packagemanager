@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar  1 13:59:03 CET 2004 - lnussel@suse.de
+
+- always try to fix inconsistent packages by reinstalling them
+
+-------------------------------------------------------------------
 Mon Mar  1 12:33:13 CET 2004 - cschum@suse.de
 
 - Added YOU callback for showing patch messages.
