@@ -729,18 +729,19 @@ PMError InstSrcManager::rewriteUrl( const ISrcId isrc_r, const Url & newUrl_r )
 //
 //
 //	METHOD NAME : InstSrcManager::getSources
-//	METHOD TYPE : void
+//	METHOD TYPE : ISrcIdList
 //
 //	DESCRIPTION :
 //
-void InstSrcManager::getSources( ISrcIdList & idlist_r, const bool enabled_only ) const
+InstSrcManager::ISrcIdList InstSrcManager::getSources( const bool enabled_only ) const
 {
-  idlist_r.clear();
+  ISrcIdList ret;
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
     if ( !enabled_only || (*it)->enabled() ) {
-      idlist_r.push_back( *it );
+      ret.push_back( *it );
     }
   }
+  return ret;
 }
 
 /******************************************************************
