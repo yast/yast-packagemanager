@@ -37,13 +37,36 @@
 class SysConfig;
 
 /**
-  This struct represents a YOU server.
+  This class provides information about a YOU server.
 */
-struct PMYouServer
+class PMYouServer
 {
-  std::string url;
-  std::string name;
-  std::string directory;
+  public:
+    PMYouServer() {}
+    PMYouServer( const std::string & );
+    PMYouServer( const Url &url, const std::string &name,
+                 const std::string &directory )
+      : _url( url ), _name( name ), _directory( directory ) {}
+
+    void setUrl( const Url &url ) { _url = url; }
+    void setUrl( const std::string &url ) { _url = Url( url ); }
+    Url url() const { return _url; }
+  
+    void setName( const std::string &name ) { _name = name; }
+    std::string name() const { return _name; }
+    
+    void setDirectory( const std::string &dir ) { _directory = dir; }
+    std::string directory() const { return _directory; }
+
+    bool operator==( const PMYouServer &server ) const;
+
+    bool fromString( const std::string & );
+    std::string toString() const;
+
+  private:
+    Url _url;
+    std::string _name;
+    std::string _directory;
 };
 
 /**
@@ -109,8 +132,6 @@ class PMYouServers : virtual public Rep {
 
     PMError readServers( const Pathname & );
     void addServer( const PMYouServer & );
-
-    PMYouServer parseServerLine( const std::string & );
 
   private:
     PMYouPatchPathsPtr _patchPaths;

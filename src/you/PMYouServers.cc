@@ -42,6 +42,53 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
+//	CLASS NAME : PMYouServer
+//
+///////////////////////////////////////////////////////////////////
+
+PMYouServer::PMYouServer( const std::string &line )
+{
+  fromString( line );
+}
+
+bool PMYouServer::operator==( const PMYouServer &server ) const
+{
+  return _url == server._url && _name == server._name &&
+         _directory == server._directory;
+}
+
+bool PMYouServer::fromString( const std::string &line )
+{
+  _url = Url();
+  _name = "";
+  _directory = "";
+
+  vector<string> splitted;
+  stringutil::split( line, splitted, ";", true );
+
+  if ( splitted.size() >= 1 ) {
+    _url = Url( splitted[ 0 ] );
+    if ( !_url.isValid() ) return false;
+  } else {
+    return false;
+  }
+  if ( splitted.size() >= 2 ) _name = splitted[ 1 ];
+  if ( splitted.size() >= 3 ) _directory = splitted[ 2 ];
+
+  return true;
+}
+
+std::string PMYouServer::toString() const
+{
+  Url u = _url;
+  u.setUsername( "" );
+  u.setPassword( "" );
+  return _url.asString() + ";" + _name + ";" + _directory;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
 //	CLASS NAME : PMYouServers
 //
 ///////////////////////////////////////////////////////////////////
@@ -75,8 +122,11 @@ Pathname PMYouServers::cachedYouServers()
 PMError PMYouServers::requestServers( bool check )
 {
   string lastServer = _patchPaths->config()->readEntry( "LastServer" );
+
+  D__ << "Last Server: " << lastServer << endl;
+
   if ( !lastServer.empty() ) {
-    addServer( parseServerLine( lastServer ) );
+    addServer( PMYouServer( lastServer ) );
   }
 
   PMError error = readServers( localYouServers() );
@@ -158,9 +208,8 @@ PMError PMYouServers::readServers( const Pathname &file )
   }
   while( getline( in, line ) ) {
     if ( !line.empty() && *line.begin() != '#' ) {
-      PMYouServer server = parseServerLine( line );
-      Url url( server.url );
-      if ( url.isValid() ) addServer( server );
+      PMYouServer server;
+      if ( server.fromString( line ) ) addServer( server );
     }
   }
 
@@ -169,18 +218,19 @@ PMError PMYouServers::readServers( const Pathname &file )
 
 void PMYouServers::addServer( const PMYouServer &server )
 {
-  D__ << "Add server: " << server.name << " (" << server.url << ")" << endl;
+  D__ << "Add server: " << server.name() << " (" << server.url();
+  if ( !server.directory().empty() )
+    D__ << ", directory: " << server.directory() << endl;
+  D__ << ")" << endl;
 
   list<PMYouServer>::const_iterator it;
   for( it = _servers.begin(); it != _servers.end(); ++it ) {
-    if ( it->url == server.url && it->name == server.name &&
-         it->directory == server.directory ) break;
+    if ( *it == server ) break;
   }
   if ( it == _servers.end() ) _servers.push_back( server );
 }
 
-void PMYouServers::addPackageVersion( const string &pkgName,
-                                         string &url )
+void PMYouServers::addPackageVersion( const string &pkgName, string &url )
 {
   PMSelectablePtr selectable = Y2PM::packageManager().getItem( pkgName );
   if ( !selectable ) {
@@ -211,9 +261,9 @@ PMYouServer PMYouServers::defaultServer()
   if ( _servers.size() == 0 ) {
     PMYouServer server;
     if ( _patchPaths->businessProduct() ) {
-      server.url = "http://sdb.suse.de/download/";
+      server.setUrl( "http://sdb.suse.de/download/" );
     } else {
-      server.url = "ftp://ftp.suse.com/pub/suse/";
+      server.setUrl( "ftp://ftp.suse.com/pub/suse/" );
     }
     return server;
   } else {
@@ -246,11 +296,4 @@ string PMYouServers::encodeUrl( const string &url )
   D__ << result << endl;
 
   return result;
-}
-
-PMYouServer PMYouServers::parseServerLine( const string &line )
-{
-  PMYouServer server;
-  server.url = line;
-  return server;
 }

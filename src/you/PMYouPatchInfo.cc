@@ -496,6 +496,8 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
 
   Pathname directoryFile = patchPath + _paths->directoryFileName();
 
+  DBG << "Directory file: " << directoryFile << endl;
+
   error = media.provideFile( directoryFile );
   if ( error ) {
     WAR << "Unable to get file " << _paths->directoryFileName() << endl;
@@ -552,13 +554,14 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
 PMError PMYouPatchInfo::getPatches( list<PMYouPatchPtr> &patches,
                                     bool reload, bool checkSig )
 {
-    Url url = _paths->patchUrl();
+    PMYouServer server = _paths->patchServer();
 
-    Url saveUrl = url;
-    saveUrl.setUsername( "" );
-    saveUrl.setPassword( "" );
+    Url url = server.url();
+    url.setUsername( "" );
+    url.setPassword( "" );
+    server.setUrl( url );
 
-    _paths->config()->writeEntry( "LastServer", saveUrl.saveAsString() );
+    _paths->config()->writeEntry( "LastServer", server.toString() );
     _paths->config()->save();
 
     if ( !_doneMediaDir ) {

@@ -106,9 +106,9 @@ void PMYouPatchPaths::init( const string &path )
   _config = 0;
 
   if ( _businessProduct  ) {
-    _patchUrl = Url( "http://support.suse.de/" );
+    _patchServer = PMYouServer( "http://support.suse.de/" );
   } else {
-    _patchUrl = Url( "ftp://ftp.suse.com/pub/suse/" );
+    _patchServer = PMYouServer( "ftp://ftp.suse.com/pub/suse/" );
   }
 
   _patchPath = path + "/patches/";
@@ -182,14 +182,19 @@ Pathname PMYouPatchPaths::patchPath()
   return _pathPrefix + _patchPath;
 }
 
-void PMYouPatchPaths::setPatchUrl( const Url &url )
+void PMYouPatchPaths::setPatchServer( const PMYouServer &server )
 {
-  _patchUrl = url;
+  _patchServer = server;
+}
+
+PMYouServer PMYouPatchPaths::patchServer()
+{
+  return _patchServer;
 }
 
 Url PMYouPatchPaths::patchUrl()
 {
-  return _patchUrl;
+  return _patchServer.url();
 }
 
 Pathname PMYouPatchPaths::mediaPatchesFile()
@@ -280,7 +285,9 @@ Pathname PMYouPatchPaths::filesDir()
 
 string PMYouPatchPaths::directoryFileName()
 {
-  return "directory.3";
+  string dir = _patchServer.directory();
+  if ( dir.empty() ) return "directory.3";
+  else return dir;
 }
 
 Pathname PMYouPatchPaths::cookiesFile()
