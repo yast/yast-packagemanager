@@ -67,8 +67,8 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr startpkg, SolvableList& 
 	tocheck.pop_front();
 	removeset.insert(pkg);
 
-	D__ << "removing package " << pkg->name() << endl;
-	set->remove( pkg );
+	D__ << "removing package " << pkg->name() << " " << (const void*)pkg << endl;
+	set->remove( pkg->name() ); // must be name as pkg could be a reinstalled one, e.g. inconsistent
 
 	// the package itself must also be checked, not only the explicit provides!
 	D__ << " need to check " << pkg->provides().size()+1 << " provides" << endl;

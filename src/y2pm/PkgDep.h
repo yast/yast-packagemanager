@@ -288,6 +288,13 @@ class PkgDep {
 		 * */
 		SolvableList remove_to_solve_conflict;
 
+		/** similar list to refers, but recursively resolved. You'll
+		 * have to remove all of them if the affected package should
+		 * not be installed. This is currently computed in PMManager,
+		 * not PkgDep.
+		 * */
+		SolvableList remove_referers;
+
 		ErrorResult(const PkgDep& pkgdep, PMSolvablePtr pkg)
 			: Result(pkgdep,pkg), not_available(false), state_change_not_possible(false) {}
 		ErrorResult(const PkgDep& pkgdep, const PkgName& name)
