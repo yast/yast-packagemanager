@@ -21,12 +21,15 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/InstSrcError.h>
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/MediaAccess.h>
+#include <y2pm/PMYouPackageDataProvider.h>
+#include <y2pm/PMPackage.h>
 
 #include <y2pm/PMYouPatchInfo.h>
 
@@ -40,6 +43,7 @@ using namespace std;
 
 PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
                                   const string &arch )
+  : _arch( arch )
 {
   _patchPath = arch + "/update/";
   if ( product != "SuSE-Linux" ) {
@@ -78,18 +82,120 @@ Url PMYouPatchPaths::patchUrl()
 ///////////////////////////////////////////////////////////////////
 
 PMYouPatchInfo::PMYouPatchInfo( const string &lang )
+  : _paths( 0 )
 {
-    _tagset = new YOUPatchTagSet( lang );
-    _tagset->setEncoding(CommonPkdParser::Tag::UTF8);
+    _patchtagset = new YOUPatchTagSet( lang );
+    _patchtagset->setEncoding(CommonPkdParser::Tag::UTF8);
+
+    _packagetagset = new YOUPackageTagSet();
 
     _patchFiles = new list<string>;
+    
+    _packageProvider = new PMYouPackageDataProvider();
+//    _packageProvider = PMYouPackageDataProviderPtr( new PMYouPackageDataProvider() );
 }
 
 PMYouPatchInfo::~PMYouPatchInfo()
 {
     delete _patchFiles;
-    delete _tagset;
+    delete _packagetagset;
+    delete _patchtagset;
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMYouPatchInfo::createPackage
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
+{
+  string value = tagValue( YOUPackageTagSet::FILENAME );
+  unsigned int pos = value.find( ".rpm" );
+  if ( pos < 0 ) {
+    E__ << "No '.rpm' in '" << value << "'" << endl;
+    return PMError( InstSrcError::E_error );
+  }
+  PkgName name( value.substr( 0, pos ) );
+
+  value = tagValue( YOUPackageTagSet::VERSION );
+  PkgEdition edition( value );
+
+  string archValue;
+  if ( _paths ) archValue = _paths->arch();
+  PkgArch arch( archValue );  
+
+  PMPackagePtr pkg( new PMPackage( name, edition, arch, _packageProvider ) );
+  patch->addPackage( pkg );
+
+  return PMError();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMYouPatchInfo::parsePackages
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError PMYouPatchInfo::parsePackages( const string &packages,
+                                       const PMYouPatchPtr &patch  )
+{
+    TagParser parser;
+    string tagstr;
+
+    _packagetagset->clear();
+
+    std::stringstream commonpkdstream;
+    commonpkdstream << packages;
+
+    bool repeatassign = false;
+    bool parse = true;
+    while( parse && parser.lookupTag(commonpkdstream))
+    {
+	tagstr = parser.startTag();
+
+	do
+	{
+	    switch(_packagetagset->assign(tagstr.c_str(),parser,commonpkdstream))
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    if( tagstr != "Filename" )
+		    {
+			E__ << "syntax error" << std::endl;
+			parse = false;
+		    }
+                    createPackage( patch );
+		    _packagetagset->clear();
+		    repeatassign = true;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	} while( repeatassign );
+    }
+
+    if ( !parse ) {
+        E__ << "Parse Error" << endl;
+        return PMError( InstSrcError::E_error );
+    }
+
+    createPackage( patch );
+
+    return PMError();
+}
+
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -107,7 +213,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     TagParser parser;
     string tagstr;
 
-    _tagset->clear();
+    _patchtagset->clear();
 
     std::ifstream commonpkdstream( ( path + fileName ).asString().c_str() );
     if(!commonpkdstream)
@@ -124,13 +230,12 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
 	do
 	{
-	    switch(_tagset->assign(tagstr.c_str(),parser,commonpkdstream))
+	    switch(_patchtagset->assign(tagstr.c_str(),parser,commonpkdstream))
 	    {
 		case CommonPkdParser::Tag::ACCEPTED:
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-//		    std::cerr << "unknown tag " << tagstr << std::endl;
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
@@ -139,8 +244,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 			E__ << "syntax error" << std::endl;
 			parse = false;
 		    }
-//		    std::cerr << "tagset already has " << tagstr << std::endl;
-		    _tagset->clear();
+		    _patchtagset->clear();
 		    repeatassign = true;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
@@ -190,6 +294,12 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     if ( value == "true" ) { p->setUpdateOnlyInstalled( true ); }
     else { p->setUpdateOnlyInstalled( false ); }
 
+    value = tagValue( YOUPatchTagSet::PACKAGES );
+    PMError error = parsePackages( value, p );
+    if ( error != PMError::E_ok ) {
+      return error;
+    }
+
     patches.push_back( p );
 
     return PMError();
@@ -209,12 +319,18 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
     MediaAccessPtr media( new MediaAccess );
 
     PMError error = media->open( baseUrl );
-    if ( error != PMError::E_ok ) return error;
+    if ( error != PMError::E_ok ) {
+      E__ << "MediaAccess::open() failed." << endl;
+      return error;
+    }
 
     error = media->attach( );
     if ( error != PMError::E_ok ) {
+      E__ << "MediaAccess::attach() failed." << endl;
       return error;
     }
+
+    D__ << "Attach point: " << media->getAttachPoint() << endl;
 
     const list<string> *patchFiles = media->dirInfo ( patchPath );
 
@@ -268,12 +384,33 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 PMError PMYouPatchInfo::getPatches( PMYouPatchPaths *paths,
                                     list<PMYouPatchPtr> &patches )
 {
+    _paths = paths;
     return readDir( paths->patchUrl(), paths->patchPath(), patches );
 }
 
 string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex )
 {
-    CommonPkdParser::Tag *tag = _tagset->getTagByIndex( tagIndex );
+    CommonPkdParser::Tag *tag = _patchtagset->getTagByIndex( tagIndex );
+    if ( !tag ) {
+        return "";
+    }
+
+    list<string> data = tag->MultiData();
+
+    if ( data.size() <= 1 ) return tag->Data();
+
+    string result;
+    list<string>::const_iterator it;
+    for( it = data.begin(); it != data.end(); ++it ) {
+      result += *it;
+      result += '\n';
+    }
+    return result;
+}
+
+string PMYouPatchInfo::tagValue( YOUPackageTagSet::Tags tagIndex )
+{
+    CommonPkdParser::Tag *tag = _packagetagset->getTagByIndex( tagIndex );
     if ( !tag ) {
         return "";
     }

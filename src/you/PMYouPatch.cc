@@ -160,3 +160,16 @@ string PMYouPatch::kindLabel( Kind kind )
       return "unknown";
    }
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMYouPatch::kindLabel
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+void PMYouPatch::addPackage( const PMPackagePtr &pkg )
+{
+  _packages.push_back( pkg );
+}
