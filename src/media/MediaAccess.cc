@@ -67,6 +67,8 @@ MediaAccess::open (const Url& url)
     if(!url.isValid())
 	return E_bad_url;
 
+    this->close();
+
     D__ << url.asString() << endl;
 
     string protocol = url.getProtocol();
