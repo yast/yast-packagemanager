@@ -27,6 +27,7 @@
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/InstSrcData.h>
 
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMPackageManager.h>
@@ -236,7 +237,11 @@ PMError InstSrcManager::scanSrcCache( const Pathname & srccache_r )
   if ( ! nid ) {
     WAR << "Duplicate InstSrc cache at " << srccache_r << endl;
     return Error::E_isrc_cache_duplicate;
+  } else {
+#warning scanSrcCache autoenables
+    err = enableSource( nid );
   }
+
 
   return err;
 }
@@ -377,7 +382,113 @@ void InstSrcManager::getSources( ISrcIdList & idlist_r, const bool enabled_only 
 //
 PMError InstSrcManager::cacheCopyTo( const Pathname & newRoot_r )
 {
-  return Error::E_error;
+  if ( newRoot_r.empty() || newRoot_r == "/" ) {
+    ERR << "Invalid newRoot '" << newRoot_r << "'" << endl;
+    return Error::E_error;
+  }
+
+  PathInfo npath( newRoot_r );
+  if ( !npath.isDir() ) {
+    ERR << "newRoot is not directory: " << npath << "'" << endl;
+    return Error::E_error;
+  }
+
+  Pathname old_cache_root_dir = _cache_root_dir;
+  _cache_root_dir = newRoot_r + _cache_root_dir;
+
+  PMError err = intern_cacheCopyTo( newRoot_r );
+
+  _cache_root_dir = old_cache_root_dir;
+
+  if ( err ) {
+    ERR << "cacheCopyTo '" << newRoot_r << "' failed " << err << endl;
+  } else {
+    MIL << "cacheCopyTo '" << newRoot_r << "' done" << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::intern_cacheCopyTo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::intern_cacheCopyTo( const Pathname & newRoot_r )
+{
+  int res = PathInfo::assert_dir( cache_tmp_dir(), 0700 );
+  if ( res ) {
+    ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
+    return Error::E_error;
+  }
+
+  // iterate all enabled sources and copy caches
+
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    if ( ! (*it)->enabled() )
+      continue;
+
+    Pathname  srccache( genSrcCacheName() );
+    DBG << "Use " << srccache << " for " << (*it) << endl;
+
+    ///////////////////////////////////////////////////////////////////
+    // first prepare cache
+    // cachedir must not exist, but parent dir must.
+    ///////////////////////////////////////////////////////////////////
+    PathInfo cpath( srccache );
+
+    if ( cpath.isExist() ) {
+      ERR << "Cache dir already exists " << cpath << endl;
+      return Error::E_cache_dir_exists;
+    }
+
+    int res = PathInfo::mkdir( cpath.path(), 0700 );
+    if ( res ) {
+      ERR << "Unable to create cache dir " << cpath << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // create media_dir. descr/data dir
+    ///////////////////////////////////////////////////////////////////
+    Pathname ndesc( srccache + InstSrc::_c_descr_dir );
+    Pathname ndata( srccache + InstSrc::_c_data_dir );
+    Pathname nmedi( srccache + InstSrc::_c_media_dir );
+
+    res = PathInfo::assert_dir( ndesc, 0700 );
+    if ( res ) {
+      ERR << "Unable to create descr_dir " << ndesc << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
+
+    res = PathInfo::assert_dir( ndata, 0700 );
+    if ( res ) {
+      ERR << "Unable to create data_dir " << ndata << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
+
+    res = PathInfo::assert_dir( nmedi, 0700 );
+    if ( res ) {
+      ERR << "Unable to create media_dir " << nmedi << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // write cache to ...
+    ///////////////////////////////////////////////////////////////////
+
+    if ( (*it)->descr() ) {
+      (*it)->descr()->writeCache( ndesc );
+    }
+    if ( (*it)->data() ) {
+      (*it)->data()->writeCache( ndata );
+    }
+  }
+
+  return Error::E_ok;
 }
 
 /******************************************************************

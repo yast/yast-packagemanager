@@ -175,6 +175,13 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
   public:
 
     /**
+     * Write data to cache, if necessary
+     **/
+    virtual PMError writeCache( const Pathname & cache_dir_r ) const;
+
+  public:
+
+    /**
      * Any concrete InstSrcData must realize this, as it knows the expected
      * layout on the media. Expect MediaAccessPtr to be open and attached.
      *

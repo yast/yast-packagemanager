@@ -145,6 +145,11 @@ class InstSrcManager {
      **/
     PMError scanSrcCache( const Pathname & srccache_r );
 
+    /**
+     * helper for cacheCopyTo fake
+     **/
+    PMError intern_cacheCopyTo( const Pathname & newRoot_r );
+
   public:
 
     /**
