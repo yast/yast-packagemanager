@@ -16,6 +16,7 @@ test_content
 test_packages
 test_selections
 test_you
+test_query
 gs_test
 cschum_test
 order
