@@ -58,7 +58,7 @@ static bool _initialized = false;
 
 static vector<string> nullvector;
 
-static const char* statestr[] = { "= ", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
+static const char* statestr[] = { "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
     
 
 //void installold(vector<string>& argv);
@@ -74,6 +74,7 @@ void rpminstall(vector<string>& argv);
 void instlog(vector<string>& argv);
 void setroot(vector<string>& argv);
 void source(vector<string>& argv);
+void showsources(vector<string>& argv);
 void deselect(vector<string>& argv);
 void showpackage(vector<string>& argv);
 //void setmaxremove(vector<string>& argv);
@@ -83,6 +84,8 @@ void createbackups(vector<string>& argv);
 void rebuilddb(vector<string>& argv);
 void du(vector<string>& argv);
 void showselection(vector<string>& argv);
+void setsel(vector<string>& argv);
+void solvesel(vector<string>& argv);
 void setappl(vector<string>& argv);
 void order(vector<string>& argv);
 void upgrade(vector<string>& argv);
@@ -109,6 +112,7 @@ static struct Funcs func[] = {
     { "instlog",	instlog,	1,	"set installation log file" },
     { "setroot",	setroot,	0,	"set root directory for operation" },
     { "source",		source,		1,	"scan media for inst sources" },
+    { "showsources",	showsources,	1,	"show known sources" },
     { "deselect",	deselect,	1,	"deselect packages marked for installation" },
 //    { "setmaxremove",	setmaxremove,	1,	"set maximum number of packages that will be removed on upgrade" },
     { "solve",		solve,		1,	"solve" },
@@ -117,36 +121,21 @@ static struct Funcs func[] = {
     { "rebuilddb",	rebuilddb,	1,	"rebuild rpm db" },
     { "du",		du,		1,	"display disk space forecast" },
     
-    { "showselection",	showselection,	1,
-	"show state of selection (all if none specified. Not installed will be suppressed if verbose=0)" },
-    { "showpackage",	showpackage,	1,
-	"show state of package (all if none specified. Not installed will be suppressed if verbose=0)" },
+    { "selstate",	showselection,	1,
+	"show state of selection (all if none specified. -a to show also not installed" },
+    { "pkgstate",	showpackage,	1,
+	"show state of package (all if none specified. -a to show also not installed" },
 
     { "setappl",	setappl,	1,	"set package to installed like a selection would do" },
     
     { "order",		order,		1,	"compute installation order" },
     { "upgrade",	upgrade,	1,	"compute upgrade" },
     { "commit",		commit,		1,	"commit changes to and actually perform installation" },
+    { "setsel",		setsel,		1,	"mark selection for installation, need to call solvesel" },
+    { "solvesel",	solvesel,	1,	"solve selection dependencies" },
 
     { NULL,		NULL,		0,	NULL }
 };
-
-void usage(char **argv) {
-	cout <<
-"Do PHI dependency completion on a set of RPMS or the installed database.\n\n"
-"Usage: " << argv[0] << " -v for increasing verbose output\n"
-"	-h --help		print this help\n"
-"	--from path-to-rpms	Specifies the path to the RPMs set.\n"
-"				If not specified, use the installed set of RPMs\n"
-"	<packagenames>		packagenames to resolve\n"
-"		(if none specified, read from stdin)\n"
-"\n\n"
-"Output is a list of lines of the form:\n\n"
-"	install <pkgname>		Install this package.\n"
-"	remove <pkgname>		Remove this package.\n"
-	    ;
-	exit(1);
-}
 
 static int lastprogress = 0;
 void progresscallback(int p, void* nix)
@@ -343,7 +332,23 @@ void show(vector<string>& argv)
     }
 }
 
+/********************/
 static InstSrcManager::ISrcIdList _isrclist;
+
+void showsources(vector<string>& argv)
+{
+    _isrclist.erase(_isrclist.begin(), _isrclist.end());
+    Y2PM::instSrcManager().getSources(_isrclist);
+
+    cout << "Known sources:" << endl;
+    unsigned count = 0;
+    for(InstSrcManager::ISrcIdList::iterator it = _isrclist.begin();
+	it != _isrclist.end(); ++it, count++)
+    {
+	cout << count << ": " << *it << endl;
+    }
+}
+
 
 void source(vector<string>& argv)
 {
@@ -681,7 +686,13 @@ void setappl(vector<string>& argv)
     install_internal(Y2PM::packageManager(), argv, true);
 }
 
-void solve(vector<string>& argv)
+void setsel(vector<string>& argv)
+{
+    install_internal(Y2PM::selectionManager(), argv);
+}
+
+
+static bool solve_internal(PMManager& manager, vector<string>& argv)
 {
     int numinst=0,numbad=0;
     bool success = false;
@@ -699,7 +710,7 @@ void solve(vector<string>& argv)
     PkgDep::ResultList good;
     PkgDep::ErrorResultList bad;
 
-    success = Y2PM::packageManager().solveInstall(good, bad, filter);
+    success = manager.solveInstall(good, bad, filter);
 
 
     numbad = printbadlist(bad);
@@ -707,8 +718,24 @@ void solve(vector<string>& argv)
 
     cout << "***" << endl;
     cout << numbad << " bad, " << numinst << " to install" << endl;
+
+    return success;
 }
 
+void solve(vector<string>& argv)
+{
+    solve_internal(Y2PM::packageManager(), argv);
+}
+
+void solvesel(vector<string>& argv)
+{
+    bool ok = solve_internal(Y2PM::selectionManager(), argv);
+    if(ok)
+    {
+	cout << "solve ok, activation selection" << endl;
+	Y2PM::selectionManager().activate(Y2PM::packageManager());
+    }
+}
 
 void order(vector<string>& argv)
 {
@@ -1045,6 +1072,8 @@ void upgrade(vector<string>& argv)
 */
 static void showstate_internal(PMManager& manager, vector<string>& argv)
 {
+    bool nonone = true;
+    bool showall = true;
 
     PMManager::PMSelectableVec selectables;
     PMManager::PMSelectableVec::const_iterator begin, end;
@@ -1054,21 +1083,31 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 	    string pkg = stringutil::trim(argv[i]);
 
 	    if(pkg.empty()) continue;
+
+	    if(pkg == "-a")
+	    {
+		nonone = false;
+		continue;
+	    }
 	    
 	    PMSelectablePtr selp = manager.getItem(pkg);
 	    if(!selp)
 	    {
 		std::cout << "package " << pkg << " is not available.\n";
+		showall = false;
 	    }
 	    else
 	    {
+		nonone = false;
+		showall = false;
 		selectables.insert(selp);
 	    }
 	}
 	begin = selectables.begin();
 	end = selectables.end();
     }
-    else
+    
+    if(showall)
     {
 	begin = manager.begin();
 	end = manager.end();
@@ -1078,7 +1117,7 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 	cit != end; ++cit)
     {
 	PMSelectable::UI_Status s = (*cit)->status();
-	if(!_verbose && s == PMSelectable::S_NoInst)
+	if(nonone && s == PMSelectable::S_NoInst)
 	    continue;
 	switch(s)
 	{
