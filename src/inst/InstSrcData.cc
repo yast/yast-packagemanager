@@ -74,7 +74,7 @@ InstSrcData::~InstSrcData()
 //
 //	DESCRIPTION :
 //
-void InstSrcData::_instSrc_atach( const InstSrcPtr & instSrc_r )
+void InstSrcData::_instSrc_attach( const InstSrcPtr & instSrc_r )
 {
   if ( _instSrc || _propagating ) {
     INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
@@ -148,12 +148,15 @@ void InstSrcData::_instSrc_withdraw()
 //
 void InstSrcData::propagateObjects()
 {
-    const std::list<PMPackagePtr>& packages = getPackages();
-    Y2PM::packageManager().poolAddCandidates( packages );
-    const std::list<PMSelectionPtr>& selections = getSelections();
-    Y2PM::selectionManager().poolAddCandidates( selections );
-    const std::list<PMYouPatchPtr>& patches = getPatches();
-    Y2PM::youPatchManager().poolAddCandidates( patches );
+  if ( getPackages().size() ) {
+    Y2PM::packageManager().poolAddCandidates( getPackages() );
+  }
+  if ( getSelections().size() ) {
+    Y2PM::selectionManager().poolAddCandidates( getSelections() );
+  }
+  if ( getPatches().size() ) {
+    Y2PM::youPatchManager().poolAddCandidates( getPatches() );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -166,7 +169,15 @@ void InstSrcData::propagateObjects()
 //
 void InstSrcData::withdrawObjects()
 {
-
+  if ( getPackages().size() ) {
+    Y2PM::packageManager().poolRemoveCandidates( getPackages() );
+  }
+  if ( getSelections().size() ) {
+    Y2PM::selectionManager().poolRemoveCandidates( getSelections() );
+  }
+  if ( getPatches().size() ) {
+    Y2PM::youPatchManager().poolRemoveCandidates( getPatches() );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -340,8 +340,8 @@ void PMSelectable::chooseCandidateObj()
   if ( _candidateObj != newcand ) {
     DBG << "chooseCandidate: old " << _candidateObj << " -> new " << newcand << endl;
     _candidateObj = newcand;
-    _state.set_has_candidate( _candidateObj );
   }
+  _state.set_has_candidate( _candidateObj );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -354,11 +354,11 @@ void PMSelectable::chooseCandidateObj()
 //
 void PMSelectable::clearCandidateObj()
 {
-   if ( _candidateObj ) {
-     DBG << "clearCandidate " << _candidateObj << endl;
-     _candidateObj = 0;
-     _state.set_has_candidate( false );
+  if ( _candidateObj ) {
+    DBG << "clearCandidate " << _candidateObj << endl;
+    _candidateObj = 0;
   }
+  _state.set_has_candidate( false );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -593,9 +593,9 @@ void PMSelectable::check() const
 {
   bool goterr = false;
 
-#define CHKLOG(X) do {                                                       \
-  if ( !goterr ) { goterr = true; INT << "CHECK FAILED: " << this << endl; } \
-  INT << "    " << X << endl;                                                \
+#define CHKLOG(X) do {                                                        \
+  if ( !goterr ) { goterr = true; INT << "CHECK FAILED: " << *this << endl; } \
+  INT << "    " << X << endl;                                                 \
 } while( 0 )
 
   if ( isEmpty() )

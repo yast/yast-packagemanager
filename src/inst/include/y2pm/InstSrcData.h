@@ -34,7 +34,7 @@
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSolvablePtr.h>
 
-#include <y2pm/InstSrcPtr.h>
+#include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescrPtr.h>
 #include <y2pm/MediaAccessPtr.h>
 
@@ -62,11 +62,6 @@ class InstSrcData: virtual public Rep, public InstData {
     friend class InstSrc;
 
     /**
-     * Backreference to InstSrc
-     **/
-    InstSrcPtr _instSrc;
-
-    /**
      * True after _instSrc_propagate, false after _instSrc_withdraw
      **/
     bool _propagating;
@@ -74,7 +69,7 @@ class InstSrcData: virtual public Rep, public InstData {
     /**
      * Adjust backreferences to InstSrc.
      **/
-    void _instSrc_atach( const InstSrcPtr & instSrc_r );
+    void _instSrc_attach( const InstSrcPtr & instSrc_r );
 
     /**
      * Clear backreferences to InstSrc.
@@ -100,12 +95,31 @@ class InstSrcData: virtual public Rep, public InstData {
   protected:
 
     /**
+     * True if attached to an InstSrc
+     **/
+    bool attached() const { return _instSrc; }
+
+    /**
+     * Backreference to InstSrc (provided on attach, NULL after detach)
+     **/
+    InstSrcPtr _instSrc;
+
+  protected:
+
+    /**
      * Call concrete InstSrcData to propagate Objects to Manager classes.
+     *
+     * InstSrc is attached. If data are not yet present, get them from cache
+     * (if there is one) or media.
      **/
     virtual void propagateObjects();
 
     /**
      * Call concrete InstSrcData to withdraw Objects from Manager classes.
+     *
+     * Sync to cache (if there is one), clear all lists, and whatever is
+     * necessary to go out of scope. InstSrc will detach immediately after
+     * this.
      **/
     virtual void withdrawObjects();
 

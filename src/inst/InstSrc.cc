@@ -50,6 +50,7 @@ IMPL_BASE_POINTER(InstSrc);
 ///////////////////////////////////////////////////////////////////
 
 const Pathname InstSrc::_c_descr_dir( "DESCRIPTION" );
+const Pathname InstSrc::_c_data_dir ( "DATA" );
 const Pathname InstSrc::_c_media_dir( "MEDIA" );
 
 ///////////////////////////////////////////////////////////////////
@@ -158,8 +159,8 @@ PMError InstSrc::enableSource()
   ///////////////////////////////////////////////////////////////////
   if ( !err ) {
     _data = ndata;
-    _data->_instSrc_atach( this ); // adjust backreferences to InstSrc.
-    _data->_instSrc_propagate();   // propagate Objects to Manager classes.
+    _data->_instSrc_attach( this ); // adjust backreferences to InstSrc.
+    _data->_instSrc_propagate();    // propagate Objects to Manager classes.
   }
 
   return err;
@@ -340,13 +341,28 @@ PMError InstSrc::_init_openCache( const Pathname & cachedir_r )
 
   ///////////////////////////////////////////////////////////////////
   // check cache
-  // cache_descr_dir must exist, media_dir is created if missing.
+  // cache_descr_dir must exist, cache_data_dir/cache_media_dir
+  // are created if missing.
   ///////////////////////////////////////////////////////////////////
   cpath( cache_descr_dir() );
 
   if ( ! cpath.isDir() ) {
     ERR << "No cache description " << cpath << endl;
     return Error::E_bad_cache_descr;
+  }
+
+  cpath( cache_data_dir() );
+  if ( cpath.isExist() ) {
+    if ( !cpath.isDir() ) {
+      ERR << "data_dir is not a directory " << cpath << endl;
+      return Error::E_cache_dir_create;
+    }
+  } else {
+    int res = PathInfo::assert_dir( cpath.path(), 0700 );
+    if ( res ) {
+      ERR << "Unable to create data_dir " << cpath << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
   }
 
   cpath( cache_media_dir() );
@@ -424,8 +440,20 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
   _cache_deleteOnExit = true; // preliminarily
 
   ///////////////////////////////////////////////////////////////////
-  // create media_dir
+  // create descr/data/media_dir
   ///////////////////////////////////////////////////////////////////
+
+  res = PathInfo::assert_dir( cache_descr_dir(), 0700 );
+  if ( res ) {
+    ERR << "Unable to create descr_dir " << cache_descr_dir() << " (errno " << res << ")" << endl;
+    return Error::E_cache_dir_create;
+  }
+
+  res = PathInfo::assert_dir( cache_data_dir(), 0700 );
+  if ( res ) {
+    ERR << "Unable to create data_dir " << cache_data_dir() << " (errno " << res << ")" << endl;
+    return Error::E_cache_dir_create;
+  }
 
   res = PathInfo::assert_dir( cache_media_dir(), 0700 );
   if ( res ) {
