@@ -248,6 +248,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		// candidate) consider the requirement is satisfied for now.
 		// (Candidates must be checked first, because they can replace
 		// installed packages.)
+		// FIXME: what if multiple candidates provide it? add to alternatives?
 		RevRel_for( candidates->provided()[reqname], prov ) {
 			if (req->matches( prov->relation() )) {
 				D__ << "Candidate " << prov->pkg()->name() << " provides "
