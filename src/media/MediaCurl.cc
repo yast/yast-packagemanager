@@ -23,6 +23,8 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/ExternalProgram.h>
+#include <y2util/SysConfig.h>
+
 #include <y2pm/MediaCurl.h>
 #include <y2pm/Wget.h>
 
@@ -79,14 +81,40 @@ PMError MediaCurl::attachTo (bool next)
 
   ret = curl_easy_setopt( _curl, CURLOPT_ERRORBUFFER, _curlError );
   if ( ret != 0 ) {
-    ERR << "curl setopt failed" << endl;
-    return Error::E_error;
+    return PMError( Error::E_curl_setopt_failed, "Error setting error buffer" );
   }
 
   ret = curl_easy_setopt( _curl, CURLOPT_FAILONERROR, true );
   if ( ret != 0 ) {
-    ERR << "curl setopt failed" << endl;
-    return Error::E_error;
+    return PMError( Error::E_curl_setopt_failed, _curlError );
+  }
+
+  SysConfig cfg( "proxy" );
+
+  if ( _url.getProtocol() == "ftp" ) {
+    _proxy = cfg.readEntry( "FTP_PROXY" );
+  } else if ( _url.getProtocol() == "http" ){
+     _proxy = cfg.readEntry( "HTTP_PROXY" );
+  } else {
+    _proxy = "";
+  }
+
+  if ( !_proxy.empty() ) {
+    ret = curl_easy_setopt( _curl, CURLOPT_PROXY, _proxy.c_str() );
+    if ( ret != 0 ) {
+      return PMError( Error::E_curl_setopt_failed, _curlError );
+    }
+    
+    string user = cfg.readEntry( "PROXY_USER" );
+    string password = cfg.readEntry( "PROXY_PASSWORD" );
+    if ( !user.empty() && !password.empty() ) {
+      _proxyuserpwd = user + ":" + password;
+      ret = curl_easy_setopt( _curl, CURLOPT_PROXYUSERPWD,
+                              _proxyuserpwd.c_str() );
+      if ( ret != 0 ) {
+        return PMError( Error::E_curl_setopt_failed, _curlError );
+      }
+    }
   }
 
   return Error::E_ok;
@@ -121,7 +149,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     D__ << filename.asString() << endl;
 
     if(!_url.isValid())
-	return Error::E_bad_url;
+	return PMError( Error::E_bad_url, _url.asString() );
 
     if(_url.getHost().empty())
 	return Error::E_no_host_specified;
@@ -148,8 +176,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     CURLcode ret = curl_easy_setopt( _curl, CURLOPT_URL,
                                      url.asString( true, true, true ).c_str() );
     if ( ret != 0 ) {
-      E__ << "curl set opt failed " << endl;
-      return Error::E_error;
+      return PMError( Error::E_curl_setopt_failed, _curlError );
     }
 
     FILE *file = fopen( dest.asString().c_str(), "w" );
@@ -161,8 +188,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     ret = curl_easy_setopt( _curl, CURLOPT_WRITEDATA, file );
     if ( ret != 0 ) {
       fclose( file );
-      E__ << "curl set opt failed " << endl;
-      return Error::E_error;
+      return PMError( Error::E_curl_setopt_failed, _curlError );
     }
 
     ret = curl_easy_perform( _curl );
@@ -204,8 +230,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
           err = Error::E_connection_failed;
           break;
         case CURLE_WRITE_ERROR:
-          ERR << "Couldn't write file." << endl;
-          err = Error::E_error;
+          err = Error::E_write_error;
           break;
         case CURLE_SSL_PEER_CERTIFICATE:
         default:

@@ -83,6 +83,9 @@ std::string MediaError::errtext( const unsigned e )
 
   case E_attachpoint_fixed:	return N_("attach point can not be changed");
   case E_not_supported_by_media:return N_("operation is not supported by media");
+  // libcurl
+  case E_curl_setopt_failed:    return N_("curl_setopt() failed");
+  case E_write_error:           return N_("unable to write file");
 
   ///////////////////////////////////////////////////////////////////
   // In a hurry? Write:

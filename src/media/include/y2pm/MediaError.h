@@ -76,7 +76,10 @@ class MediaError {
       E_busy,
       //
       E_attachpoint_fixed,
-      E_not_supported_by_media
+      E_not_supported_by_media,
+      // libcurl errors
+      E_curl_setopt_failed,
+      E_write_error
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
