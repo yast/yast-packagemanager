@@ -139,7 +139,7 @@ PMError MediaCurl::releaseFrom( bool eject )
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaCD::getFile
+//	METHOD NAME : MediaCurl::getFile
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION : Asserted that media is attached.
@@ -154,9 +154,6 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     if(_url.getHost().empty())
 	return Error::E_no_host_specified;
 
-    Wget wget;
-    string tmp;
-    
     Pathname path = _url.getPath();
     path += filename;
 
@@ -178,8 +175,10 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 
     DBG << "URL: " << url.asString().c_str() << endl;
 
+    string urlBuffer = url.saveAsString();
+
     CURLcode ret = curl_easy_setopt( _curl, CURLOPT_URL,
-                                     url.asString( true, true, true ).c_str() );
+                                     urlBuffer.c_str() );
     if ( ret != 0 ) {
       return PMError( Error::E_curl_setopt_failed, _curlError );
     }
