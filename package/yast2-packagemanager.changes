@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 25 14:30:12 CEST 2003 - sh@suse.de
+
+- First part of fix for bug #19603: RPM groups not translated
+  Moved gettext initialization out to YRpmGroupsTree.cc in liby2util
+
+-------------------------------------------------------------------
 Fri Aug 22 14:06:04 CEST 2003 - ma@suse.de
 
 - Invalidate all outstanding database handles after conversion.
