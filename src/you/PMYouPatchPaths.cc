@@ -196,7 +196,7 @@ Pathname PMYouPatchPaths::localDir()
 
 Pathname PMYouPatchPaths::installDir()
 {
-  return localDir() + "installed/";
+  return "/var/lib/YaST2/you-installed/";
 }
 
 Pathname PMYouPatchPaths::localSuseServers()
