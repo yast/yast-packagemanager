@@ -172,7 +172,7 @@ class PMObject : virtual public Rep, public PMSolvable {
     /**
      * Convenience method: Check if there is any candidate instance of this
      * selectable - this instance or any of its brothers.
-     * Not to be confused with isInstalledObj() !
+     * Not to be confused with isCandidateObj() !
      **/
     bool hasCandidateObj() const;
     
