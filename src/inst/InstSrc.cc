@@ -657,7 +657,7 @@ InstSrc::provideMedia (int medianr) const
 {
     PMError err;
 
-    int reply = 0;
+    string reply;
 
     // if the url ends with digits, try re-opening with
     // digits replaced by medianr
@@ -694,7 +694,7 @@ InstSrc::provideMedia (int medianr) const
 		{
 		    reply = (*_mediaerrorfunc) (err, _mediaerrordata);
 		}
-		if (reply != 0)
+		if (reply != "")
 		    break;
 	    }
 	}
@@ -742,15 +742,17 @@ InstSrc::provideMedia (int medianr) const
 	    break;
 	}
 
-#warning TBD use gettext
-	reply = (*_mediachangefunc) ("", url, _medianr, medianr, _mediachangedata);
-	if (reply != 0)
+#warning TBD content_label(LangCode)
+	string product = _descr->content_label();
+	string changereply = (*_mediachangefunc) (product, err.errstr(), _medianr, medianr, _mediachangedata);
+#warning TBD check reply
+	if (reply != "")
 	{
 	    break;
 	}
     }
 
-    if (reply != 0)
+    if (reply != "")
 	return InstSrcError::E_no_media;
 
     return InstSrcError::E_ok;
