@@ -483,13 +483,8 @@ class PkgDep {
 public:
 	PkgDep( PkgSet& instd, const PkgSet& avail,
 			AlternativesCallback alternatives_callback = default_alternatives_callback,
-			alternatives_mode m = default_alternatives_mode )
-		: alt_mode(m), installed(instd), available(avail),
-		_alternatives_callback(alternatives_callback)
-		{
-		    _unresolvable_callback = default_unresolvable_callback;
-		}
-
+			alternatives_mode m = default_alternatives_mode );
+		
 //	PkgDep(  const PkgSet& instd, alternatives_mode m=default_alternatives_mode)
 //		: alt_mode(m), installed(instd), available(*default_avail), _pool(pool) {}
 /*	PkgDep( alternatives_mode m = default_alternatives_mode )

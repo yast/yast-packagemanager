@@ -17,6 +17,8 @@
 
 /-*/
 
+#include <malloc.h>
+
 #include <y2util/Y2SLog.h>
 #include <y2util/stringutil.h>
 #include <y2util/timeclass.h>
@@ -25,48 +27,6 @@
 #include <y2pm/PkgSet.h>
 
 using namespace std;
-
-/*
-#warning file dependencies
-static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
-    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p)
-{
-
-    if(rel.name()->find("rpmlib(") != std::string::npos)
-	return PkgDep::UNRES_IGNORE;
-
-    if(rel.name() == "/bin/bash" || rel.name() == "/bin/sh")
-    {
-	const PkgSet set = solver->current_installed();
-	p = set.lookup(PkgName("bash"));
-	if(p==NULL)
-	{
-	    const PkgSet set = solver->current_available();
-	    p = set.lookup(PkgName("bash"));
-	}
-	return PkgDep::UNRES_TAKETHIS;
-    }
-    if(rel.name() == "/usr/bin/perl")
-    {
-	const PkgSet set = solver->current_installed();
-	p = set.lookup(PkgName("perl"));
-	if(p==NULL)
-	{
-	    const PkgSet set = solver->current_available();
-	    p = set.lookup(PkgName("perl"));
-	}
-	return PkgDep::UNRES_TAKETHIS;
-    }
-    if(rel.name()->operator[](0)=='/')
-    {
-	DBG << "ignoring file requirement " << rel.name() << endl;
-	return PkgDep::UNRES_IGNORE;
-    }
-
-    return PkgDep::UNRES_FAIL;
-}
-*/
-
 
 /**
  * Build a PkgSet that consists of installed packages and packages that are
@@ -108,13 +68,6 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
 	    (*it)->auto_unset();
 	}
 
-/*
-	if ( (*it)->to_delete() )
-	{
-	    DBG << "skip " << (*it)->name() << endl;
-	    continue;
-	}
-*/
 	// installed into installed set
 	if((*it)->has_installed() && !(*it)->to_delete())
 	{
@@ -266,6 +219,12 @@ bad, PkgDep::ErrorResultList& obsolete)
     }
 }
 
+static ostream& operator<<( ostream& os, const struct mallinfo& i )
+{
+    os << "Memory from system: " << (i.arena >> 10) << "k, used: " << (i.uordblks >> 10) << "k";
+    return os;
+}
+
 bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad,
 	bool filter_conflicts_with_installed)
 {
@@ -276,28 +235,41 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 
     do
     {
+	PkgSet* installed = new PkgSet(); // already installed
+	PkgSet* available = new PkgSet(); // available for installation
+	PkgSet* toinstall = new PkgSet(); // user selected for installion
+	PkgSet* nowinstalled = new PkgSet(); // assumed state after operation
+	if(!installed || !available || !toinstall || !nowinstalled )
+	{
+	    INT << "memory exhausted" << endl;
+	    return false;
+	}
 	repeat = false;
-	PkgSet installed; // already installed
-	PkgSet available; // available for installation
-	PkgSet toinstall; // user selected for installion
-	TimeClass t;
 
-	t.startTimer();
-	buildSets(installed, available, toinstall);
-	MIL << "building sets took " << t.stopTimer() << "seconds" << endl;
+	MIL << mallinfo() << endl;
 
-	t.startTimer();
-	PkgDep engine( installed, available ); // TODO alternative_default
-	MIL << "constructing engine took " << t.stopTimer() << "seconds" << endl;
+	buildSets(*installed, *available, *toinstall);
+	MIL << mallinfo() << " (after set contruction)" << endl;
 
-	t.startTimer();
-	success = engine.solvesystemnoauto( toinstall, good, bad, obsolete);
-	MIL << "solving took " << t.stopTimer() << "seconds" << endl;
+	PkgDep* engine = new PkgDep( *installed, *available ); // TODO alternative_default
+	if(!engine)
+	{
+	    INT << "memory exhausted" << endl;
+	    return false;
+	}
+	MIL  << mallinfo() << " (after engine construction)" << endl;
+	success = engine->solvesystemnoauto( *toinstall, good, bad, obsolete);
+	MIL << mallinfo() << " (after solver run)" << endl;
+	delete engine;
+	delete installed;
+	delete available;
+	delete toinstall;
+	engine = NULL;
+	installed = available = toinstall = NULL;
+	MIL << mallinfo() << endl;
 
-	t.startTimer();
-	PkgSet nowinstalled; // assumed state after operation
-	buildinstalledonly(*this,nowinstalled);
-	MIL << "building nowinstallset took " << t.stopTimer() << "seconds" << endl;
+	buildinstalledonly(*this,*nowinstalled);
+	MIL << mallinfo() << endl;
 	
 	if(!success && filter_conflicts_with_installed)
 	{
@@ -339,8 +311,11 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 	}
 	else
 	{
-	    setAutoState(nowinstalled, good, bad, obsolete);
+	    setAutoState(*nowinstalled, good, bad, obsolete);
 	}
+
+	delete nowinstalled;
+	nowinstalled = NULL;
 
 	count--;
     } while(repeat && count > 0);

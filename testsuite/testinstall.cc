@@ -25,6 +25,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <malloc.h>
 
 // readline
 #include <cstdio>
@@ -62,7 +63,7 @@ static bool _initialized = false;
 
 static vector<string> nullvector;
 
-static const char* statestr[] = { "--", "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
+static const char* statestr[] = { "@i", "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
 
 
 //void installold(vector<string>& argv);
@@ -95,6 +96,9 @@ void setappl(vector<string>& argv);
 void order(vector<string>& argv);
 void upgrade(vector<string>& argv);
 void commit(vector<string>& argv);
+void mem(vector<string>& argv);
+
+void testset(vector<string>& argv);
 
 void cdattach(vector<string>& argv);
 
@@ -142,9 +146,19 @@ static struct Funcs func[] = {
     { "delsel",		delsel,		1,	"delete selection from installation, need to call solvesel" },
     { "solvesel",	solvesel,	1,	"solve selection dependencies" },
     { "cdattach",	cdattach,	0,	"cdattach" },
+    { "mem",		mem,		0,	"memory statistics" },
+
+    { "testset",	testset,		0,	"test memory consumption of PkgSet" },
 
     { NULL,		NULL,		0,	NULL }
 };
+
+static ostream& operator<<( ostream& os, const struct mallinfo& i )
+{
+    os << "Memory from system: " << (i.arena >> 10) << "k, used: " << (i.uordblks >> 10) << "k";
+    return os;
+}
+
 
 static int lastprogress = 0;
 void progresscallback(int p, void* nix)
@@ -1260,6 +1274,10 @@ void remove(vector<string>& argv)
 	}
     }
 }
+void mem(vector<string>& argv)
+{
+    cout << mallinfo() << endl;
+}
 
 void cdattach(vector<string>& argv)
 {
@@ -1339,7 +1357,6 @@ int main( int argc, char *argv[] )
     string historyfile;
 
     cout << "type help for help, ^D to exit" << endl << endl;
-
 
     {
 	struct passwd* pwd = getpwuid(getuid());
@@ -1433,6 +1450,62 @@ int main( int argc, char *argv[] )
     }
 
     return 0;
+}
+
+void testset(vector<string>& argv)
+{
+    int i = 0;
+    cout << mallinfo() << endl;
+    PkgSet* testset = new PkgSet;
+    cout << mallinfo() << endl;
+    
+    if(!testset)
+    {
+	ERR << "out of memory" << endl;
+	exit(EXIT_FAILURE);
+    }
+
+    PMManager::PMSelectableVec::const_iterator it, end;
+    it = Y2PM::packageManager().begin();
+    end = Y2PM::packageManager().end();
+    for (;it!=end;++it)
+    {
+	PMSelectablePtr selp = *it;
+	if(!selp)
+	{
+	    std::cerr << "invalid pointer" << endl;
+	    continue;
+	}
+
+	PMSolvablePtr solp;
+	if(selp->has_installed())
+	{
+	    solp = selp->installedObj();
+	}
+	else if(selp->has_candidate())
+	{
+	    solp = selp->candidateObj();
+	}
+	if(!solp)
+	{
+	    std::cout << "no solvable" << endl;
+	    continue;
+	}
+
+	testset->add(solp);
+	if(i<5) 
+	{
+	    cout << mallinfo() << endl;
+	}
+	++i;
+    }
+
+    cout << mallinfo() << endl;
+
+    delete testset;
+    testset = NULL;
+    
+    cout << mallinfo() << endl;
 }
 
 // vim:sw=4
