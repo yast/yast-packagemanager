@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
 #include <y2pm/MediaHandler.h>
 
 using namespace std;
@@ -40,10 +41,11 @@ using namespace std;
 //	DESCRIPTION :
 //
 MediaHandler::MediaHandler (const string & device, const string & path)
-    : _device (device)
-    , _path (path)
-    , _attachPoint (string (""))
+	: _device(device),
+	_path(path),
+	_attachPoint(string())
 {
+	D__ << _device << _path << endl;
 }
 
 ///////////////////////////////////////////////////////////////////

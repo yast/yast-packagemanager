@@ -21,7 +21,10 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
+#include <y2util/ExternalProgram.h>
 #include <y2pm/MediaFTP.h>
+#include <y2pm/Wget.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -47,8 +50,7 @@ using namespace std;
 MediaFTP::MediaFTP (const string & server, const string & path, const string & options)
     : MediaHandler (server, path)
 {
-    // parse options to _mountflags
-    // options = "user=<username>,pass=<password>,proxy=<proxy>,port=<proxyport>,type=<proxytype>"
+	DBG << server << path <<endl;	
 }
 
 
@@ -62,7 +64,7 @@ MediaFTP::MediaFTP (const string & server, const string & path, const string & o
 //
 MediaFTP::~MediaFTP()
 {
-    if (_attachPoint != "") {
+    if (!_attachPoint.empty()) {
 	release ();
     }
 }
@@ -102,6 +104,8 @@ MediaFTP::attachTo (const Pathname & to)
     // copy files to '_attachPoint' later
 
     _attachPoint = to;
+    D__ << _attachPoint.asString() << endl;
+    D__ << "device " << _device << endl;
 
     return E_none;
 }
@@ -121,7 +125,7 @@ MediaFTP::release (void)
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
     }
-    _attachPoint = "";
+    _attachPoint = string();
     return E_none;
 }
 
@@ -139,7 +143,28 @@ MediaFTP::release (void)
 MediaResult
 MediaFTP::provideFile (const Pathname & filename) const
 {
-    // FIXME: retrieve file from server, save below _attacedTo
+    // TODO: retrieve file from server, save below _attacedTo
+
+    D__ << filename.asString() << endl;
+
+    Wget wget;
+
+    wget.setUser(_user,_pass);
+    wget.setProxyUser(_proxyuser, _proxypass);
+
+    Pathname path = "/";
+    path += _path;
+    path += filename;
+
+    string url="ftp://"+_device;
+    url += path.asString();
+
+    D__ << url << endl;
+
+    // TODO: recreate fs structure
+    Pathname dest = _attachPoint+filename.basename();
+    
+    WgetStatus status = wget.getFile( url, dest.asString() );
     return E_none;
 }
 

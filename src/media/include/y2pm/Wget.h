@@ -17,6 +17,9 @@
    
 /*
  * $Log$
+ * Revision 1.2  2002/07/02 15:32:45  lnussel
+ * added testprogram for ftp method, can already retreive files
+ *
  * Revision 1.1  2002/07/02 09:27:25  lnussel
  * fix namespaces to make it compile
  *
@@ -41,7 +44,9 @@
 #ifndef wget_h
 #define wget_h
 #include <set>
-#include <y2/ExternalProgram.h>
+#include <string>
+
+#include <y2util/ExternalProgram.h>
 
 /**
  * @short Interface to the wget program
@@ -69,24 +74,24 @@ public:
    * Retrieving a file 
    */
    
-  WgetStatus getFile ( const string url, const string destFilename );
+  WgetStatus getFile ( const std::string url, const std::string destFilename );
    
   /**
    * Set password and user
    */
     
-  void setUser( const string username, const string passwd);
+  void setUser( const std::string username, const std::string passwd);
 
   /**
    * Set password and user of the proxy
    */
     
-  void setProxyUser( const string username, const string passwd);
+  void setProxyUser( const std::string username, const std::string passwd);
     
   /**
    * Error status to string
    */
-  string error_string ( WgetStatus status );
+  std::string error_string ( WgetStatus status );
     
 private:
 
@@ -94,14 +99,14 @@ private:
   /** 
    * user
    */
-    string user;
-    string password;
+    std::string user;
+    std::string password;
 
   /** 
    * proxy user 
    */
-    string proxyUser;
-    string proxyPassword;
+    std::string proxyUser;
+    std::string proxyPassword;
 
     
   /**
@@ -123,7 +128,7 @@ private:
   /**
    * Read a line from the general rpm query
    */
-  bool systemReadLine(string &line);
+  bool systemReadLine(std::string &line);
 
   /**
    * Return the exit status of the general rpm process,

@@ -18,6 +18,9 @@
    
 /*
  * $Log$
+ * Revision 1.2  2002/07/02 15:32:45  lnussel
+ * added testprogram for ftp method, can already retreive files
+ *
  * Revision 1.1  2002/07/02 09:27:25  lnussel
  * fix namespaces to make it compile
  *
@@ -38,16 +41,18 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
-#include <iostream.h>
-#include <string.h>
+#include <iostream>
+#include <string>
 #include <fstream>
 
-#include "Wget.h"
-#include <y2/ExternalDataSource.h>
-#include <ycp/y2log.h>
+#include <y2util/ExternalDataSource.h>
+#include <y2util/Y2SLog.h>
+#include <y2pm/Wget.h>
 
 #define WRONGUSER "401 Unauthorized"
 #define NOTFOUND "404 Not Found"
+
+using namespace std;
 
 /*-------------------------------------------------------------*/
 /* Create all parent directories of @param name, as necessary  */	
@@ -85,14 +90,14 @@ Wget::Wget()
 /*--------------------------------------------------------------*/
 Wget::~Wget()
 {
-   y2milestone ( "~Wget()" );
+   M__ <<  "~Wget()" << endl;
 
    if ( process )
       delete process;
 
    process = NULL;
 
-   y2milestone ( "~Wget() end" );   
+   M__ << "~Wget() end" << endl;   
 }
 
 /*--------------------------------------------------------------*/
@@ -181,7 +186,7 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
 	 value = output;
       }
 
-      y2debug ( "stdout: %s", value.c_str() );
+      D__ << "stdout: " << value << endl;
 
       if  ( value.find ( WRONGUSER ) != string::npos )
       {
@@ -286,7 +291,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
      output = output + " " + argv[k];
   }
   argv[i] = 0;
-  y2debug("wget command: %s", output.c_str() );
+  D__ << "wget command: " << output << endl;
 
   if ( process != NULL )
   {
@@ -327,7 +332,7 @@ int Wget::systemStatus()
    delete process;
    process = 0;
    
-   y2debug( "exit code: %d", exit_code );
+   D__ << "exit code: " << exit_code << endl;
 
    return exit_code;
 }

@@ -30,13 +30,17 @@ class MediaFTP : public MediaHandler {
 
 	std::string _user;		// username
 	std::string _pass;		// password
-	std::string _proxy;		// proxy server
-	std::string _port;		// proxy port
+	std::string _proxyhost;	// proxy server
+	std::string _proxyport;		// proxy port
+	std::string _proxyuser;		// proxy user
+	std::string _proxypass;		// proxy pass
 	std::string _proxytype;	// proxy type ("ftp", "http")
 
     public:
-	// constructor
-
+	/** constructor
+	 *
+	 * @param options user, pass, proxyhost, proxyport, proxytype (ftp,http), proxyuser, proxypass
+	 * */
 	MediaFTP (const std::string & server, const std::string & path, const std::string & options);
 
 	MEDIA_HANDLER_API

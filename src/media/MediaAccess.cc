@@ -19,8 +19,11 @@
 
 /-*/
 
+#include <ctype.h>
+
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
 #include <y2pm/MediaAccess.h>
 
 #include <y2pm/MediaCD.h>
@@ -33,6 +36,8 @@
 
 using namespace std;
 
+IMPL_HANDLES(MediaAccess);
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaAccess
@@ -43,6 +48,7 @@ MediaAccess::MediaAccess ()
     : _type (Unknown)
     , _handler (0)
 {
+    DBG << endl;
 }
 
 // destructor
@@ -59,72 +65,91 @@ MediaAccess::~MediaAccess()
 MediaResult
 MediaAccess::open (const string & url)
 {
-    char *sptr = strdup (url.c_str());
-    char *device, *path, *options = 0;
-    char *colon;
+//    char *device, *path, *options = 0;
+    string::size_type colon;
+    string protocol;
+    string device;
+    string path;
+    string options;
 
     // parse url
 
-    colon = strchr (sptr, ':');		// first colon
-    if (colon == 0)
+    DBG << url << endl;
+
+    colon = url.find(':');		// first colon
+    if (colon == string::npos)
 	return E_bad_url;
-    *colon = 0;
+
+    protocol=url.substr(0,colon);
+    DBG << "protocol: " << protocol << endl;
 
     // set device
-    device = colon + 1;
+    device = url.substr(colon+1);
 
-    colon = strchr (device, ':');
-    if (colon == 0)
+    colon = device.find(':');
+    if (colon == string::npos)
     {
 	return E_bad_url;
     }
-    *colon = 0;
 
-    // set path
-    path = colon + 1;
+    // seperate path and device
+    path = device.substr(colon+1);
+    device = device.substr(0,colon);
 
-    options = strchr (path, ':');
-    if (colon != 0)
+    DBG << "device: " << device << endl;
+    DBG << "path: " << path << endl;
+
+    // if another colon is found, everything behind it are options
+    colon = path.find(':');
+    if (colon != string::npos)
     {
-	options = colon + 1;
+	options = path.substr(colon + 1);
+	path = path.substr(0,colon);
+	DBG << "options: " << options << endl;
+	DBG << "path: " << path << endl;
     }
 
-    if (strcasecmp (sptr, "cd") == 0)
+    for(unsigned i=0;i<protocol.length();i++)
+    {
+	protocol[i]=tolower(protocol[i]);
+    }
+
+    if ( protocol == "cd" )
     {
 	_type = CD;
 	_handler = new MediaCD (device, path, options);
     }
-    else if (strcasecmp (sptr, "dvd") == 0)
+    else if ( protocol == "dvd" )
     {
 	_type = DVD;
 	_handler = new MediaCD (device, path, options, true);
     }
-    else if (strcasecmp (sptr, "nfs") == 0)
+    else if ( protocol == "nfs" )
     {
 	_type = NFS;
 	_handler = new MediaNFS (device, path, options);
     }
-    else if (strcasecmp (sptr, "dir") == 0)
+    else if ( protocol == "dir" )
     {
 	_type = DIR;
 	_handler = new MediaDIR (device, path, options);
     }
-    else if (strcasecmp (sptr, "disc") == 0)
+    else if ( protocol == "disk" )
     {
 	_type = DISK;
 	_handler = new MediaDISK (device, path, options);
     }
-    else if (strcasecmp (sptr, "ftp") == 0)
+    else if ( protocol == "ftp" )
     {
 	_type = FTP;
 	_handler = new MediaFTP (device, path, options);
     }
-    else if (strcasecmp (sptr, "smb") == 0)
+    else if ( protocol == "smb" )
     {
 	_type = SMB;
 	_handler = new MediaSMB (device, path, options);
     }
-    else if (strcasecmp (sptr, "http") == 0)
+    else if ( protocol == "http" )
     {
 	_type = HTTP;
 	_handler = new MediaHTTP (device, path, options);
@@ -216,11 +241,12 @@ MediaAccess::release (void)
 MediaResult
 MediaAccess::provideFile (const Pathname & filename) const
 {
+    D__ << filename.asString() << endl;
     if (_handler == 0)
     {
 	return E_not_open;
     }
-    if (_destination == "")
+    if (_destination.empty())
     {
 	return E_no_destination;
     }
@@ -240,7 +266,7 @@ MediaAccess::findFile (const Pathname & dirname, const string & pattern) const
     {
 	return 0;
     }
-    if (pattern == "")
+    if (pattern.empty())
     {
 	return 0;
     }
@@ -256,7 +282,7 @@ MediaAccess::dirInfo (const Pathname & filename) const
     {
 	return 0;
     }
-    if (_destination == "")
+    if (_destination.empty())
     {
 	return 0;
     }
@@ -271,7 +297,7 @@ MediaAccess::fileInfo (const Pathname & filename) const
     {
 	return 0;
     }
-    if (_destination == "")
+    if (_destination.empty())
     {
 	return 0;
     }

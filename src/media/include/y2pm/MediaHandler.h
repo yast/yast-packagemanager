@@ -40,8 +40,8 @@ class MediaHandler {
 
     protected:
 
-	const std::string & _device;	// which device
-	const std::string & _path;	// path on device
+	const std::string _device;	// which device
+	const std::string _path;	// path on device
 
 	Pathname _attachPoint;		// attached at
 
