@@ -660,6 +660,8 @@ static std::list<PMPackagePtr> read_package_list(string file)
 }
 
 struct Test {
+	Test() : altmode(PkgDep::ASK_ALWAYS) {};
+	PkgDep::alternatives_mode altmode;
 	list<PkgName> cand_names;
 };
 
@@ -698,6 +700,12 @@ static void read_test_file( string filename, TestList& tests )
 			continue;
 		}
 		if (word.substr(0,12) == "ALTHANDLING=") {
+			word = word.substr(12);
+			if(word == "ask-always") tst.altmode = PkgDep::ASK_ALWAYS;
+			else if(word == "ask-no-default") tst.altmode = PkgDep::ASK_IF_NO_DEFAULT;
+			else if(word == "auto-no-default") tst.altmode = PkgDep::AUTO_IF_NO_DEFAULT;
+			else if(word == "auto-always") tst.altmode = PkgDep::AUTO_ALWAYS;
+
 			is >> word;
 		}
 
@@ -779,6 +787,8 @@ int main(int argc, char* argv[])
 	PkgDep::ErrorResultList bad;
 
 	setPkgStates(*p);
+
+	PkgDep::set_default_alternatives_mode(p->altmode);
 
 	Y2PM::packageManager().solveInstall(good, bad, false);
 
