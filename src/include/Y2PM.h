@@ -51,7 +51,14 @@ class Y2PM {
 
     static Pathname _system_rootdir;
 
+    // preferred locale (i.e. user interface and default system locale)
+    // used in retrieval of locale-dependant data
     static LangCode _preferred_locale;
+
+    // list of requested locales (must include _preferred_locale !)
+    // used when selecting/deselecting locale dependant
+    // packages of selections
+    static std::list<LangCode> _requested_locales;
 
   private:
 
@@ -77,6 +84,11 @@ class Y2PM {
     static LangCode & getPreferredLocale () { return _preferred_locale; }
     static void setPreferredLocale (LangCode & preferred_locale) { _preferred_locale = preferred_locale; }
 
+    /**
+     * Access to the requested localed
+     **/
+    static std::list<LangCode> & getRequestedLocales () { return _requested_locales; }
+    static void setRequestedLocales (std::list<LangCode> & requested_locales) { _requested_locales = requested_locales; }
 
     /**
      * The local machine's rootdir. "/" if running from system.
