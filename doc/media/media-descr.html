@@ -236,7 +236,7 @@ Mandatory key strings
 <tr><td>O</td><td><tt>BASEPRODUCT</tt></td><td>name of base product if different from PRODUCT</td></tr>
 <tr><td>O</td><td><tt>BASEVERSION</tt></td><td>version of BASEPRODUCT, mandatory if BASEPRODUCT is defined<BR><tt>&lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</tt></td></tr>
 <tr><td>M</td><td><tt>VENDOR</tt></td><td>vendor name (free form)</td></tr>
-<tr><td>M</td><td><tt>ARCH.&lt;base&gt;</tt></td><td>space separated list of architecture directories under <tt>DATADIR</tt><br>
+<tr><td>M</td><td><tt>ARCH.&lt;base&gt;</tt></td><td>space separated list of allowed architectures for <tt>&lt;base&gt;</tt><br>
 (see below for further explanation)
 </td></tr>
 <tr><td>M</td><td><tt>DEFAULTBASE</tt></td><td>Minimal architecture base supported by this product.<br>
@@ -265,15 +265,22 @@ The <tt>ARCH.&lt;base&gt;</tt> line needs a bit more explanation:<br>
 Supporting bi-arch architectures and optimized packages requires multiple
 (architecture optimized) occurances of a package (under the same name and version).<BR>
 In order to determine which the 'right' occurance is, YaST needs a fallback
-strategy (a search order). This is given as a list of directories on the
-right side of <tt>ARCH.&lt;base&gt;</tt>. These directories must exist below
-the <tt>DATADIR</tt> directory specified in the <tt>content</tt> file.
+strategy (a search order).<br>
+The <tt>&lt;base&gt;</tt> tag is used as a starting point
+and determines 'the' architecture of the system. This is determined by
+running <tt>uname -m</tt> (and looking at /proc/cpuinfo).<br>
+For this <tt>&lt;base&gt;</tt>, a matching <tt>ARCH.&lt;base&gt;</tt> must exist.
+If it isn't found, <tt>&lt;base&gt;</tt> gets the value of <tt>DEFAULTBASE</tt>
+for which a matching <tt>ARCH.&lt;base&gt;</tt> is guaranteed.<br>
+The value of the <tt>ARCH.&lt;base&gt;</tt> line is the search order for packages.
+The first package matching the architecture is taken as the preferred candidate.<br>
+Packages with architectures not in this list are discarded and do not appear
+for selection. Packages with 'lower' architectures are still available for selection,
+so the user can manually choose such a package.<br>
 <br>
-The <tt>&lt;base&gt;</tt> part of the left side is used as a starting point
-and determines 'the' architecture of the system. It especially serves as
-the base directory when looking for updates/patches on an update media.<br>
-<br>
-The <tt>&lt;base&gt;</tt> part is determined by <i>hwinfo</i>.
+The location of the rpm file for a package on the installation media
+is determined by the <tt>=Loc:</tt> line
+in the <A HREF="package-descr.html"><tt>packages</tt></A> file.
 <br>
 
 <H3>Example</H3>
