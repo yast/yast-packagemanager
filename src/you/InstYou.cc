@@ -80,13 +80,13 @@ PMError InstYou::servers( list<Url> &servers )
   return PMError();
 }
 
-PMError InstYou::retrievePatchInfo( const Url &url )
+PMError InstYou::retrievePatchInfo( const Url &url, bool checkSig )
 {
   _patches.clear();
 
   _paths->setPatchUrl( url );
 
-  PMError error = _info->getPatches( _paths, _patches );
+  PMError error = _info->getPatches( _paths, _patches, checkSig );
   if ( error ) {
     E__ << "Error downloading patchinfos: " << error << endl;
     return error;

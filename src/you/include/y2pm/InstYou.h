@@ -66,9 +66,10 @@ class InstYou {
     /**
      * Read patch information files.
      *
-     * @param url URL of patch server.
+     * @param url       URL of patch server.
+     * @param checkSig  If true check signatures of patch info files.
      */
-    PMError retrievePatchInfo( const Url &url );
+    PMError retrievePatchInfo( const Url &url, bool checkSig = true );
     
     /**
      * Attach source of patches.
