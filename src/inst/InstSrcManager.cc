@@ -800,7 +800,7 @@ PMError InstSrcManager::releaseAllMedia( bool if_removable_r ) const
 {
   PMError ret;
 
-  MIL << "Going to release all InstSrc'es media..." << endl;
+  MIL << "Going to release all InstSrc'es " << (if_removable_r?"removable ":"") << "media..." << endl;
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
     PMError err = (*it)->releaseMedia( if_removable_r );
     if ( err ) {
