@@ -46,7 +46,8 @@ IMPL_DERIVED_POINTER( PMYouPatch, PMObject, PMSolvable );
 //
 PMYouPatch::PMYouPatch( const PkgName &    name_r,
 			const PkgEdition & edition_r )
-    : PMObject( name_r, edition_r )
+    : PMObject( name_r, edition_r ),
+      _kind( kind_invalid ), _updateOnlyInstalled( false )
 {
 }
 
@@ -72,6 +73,7 @@ PMYouPatch::~PMYouPatch()
 //
 string PMYouPatch::getAttributeName( PMYouPatchAttribute attr ) const
 {
+#if 0
   switch ( attr ) {
 
 #define ENUM_OUT(V) case ATTR_##V: return #V; break
@@ -87,6 +89,7 @@ string PMYouPatch::getAttributeName( PMYouPatchAttribute attr ) const
   }
   // HERE: illegal attr value or forgott do adjust switch.
   ERR << "Illegal YouPatchAttribute(" << attr << ')' << endl;
+#endif
   return "";
 }
 
@@ -118,6 +121,39 @@ PkgAttributeValue PMYouPatch::getAttributeValue( PMYouPatchAttribute attr ) cons
 ostream & PMYouPatch::dumpOn( ostream & str ) const
 {
   PMObject::dumpOn( str );
+
+  str << "Kind: " << kindLabel( _kind ) << endl;
+  str << "ShortDescription: " << _shortDescription << endl;
+  str << "LongDescription:" << endl << _longDescription << endl;
+  str << "PreInformation:" << endl << _preInformation << endl;
+  str << "PostInformation:" << endl << _postInformation << endl;
+  str << "UpdateOnlyInstalled:" << ( _updateOnlyInstalled ? "true" : "false" ) << endl;
+
   return str;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMYouPatch::kindLabel
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+string PMYouPatch::kindLabel( Kind kind )
+{
+  switch ( kind ) {
+    case kind_recommended:
+      return "Recommended";
+    case kind_security:
+      return "Security";
+    case kind_optional:
+      return "Optional";
+    case kind_document:
+      return "Document";
+    case kind_yast:
+      return "YaST2";
+    default:
+      return "unknown";
+   }
+}

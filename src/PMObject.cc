@@ -119,9 +119,8 @@ PkgAttributeValue PMObject::getAttributeValue( PMObjectAttribute attr ) const
 //
 ostream & PMObject::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str )
-    << '(' << (_selectable ? "MANAGED" : "unmanaged" ) << ')'
-    << '(' << _name << '-' << _edition.version() << '-' << _edition.release() << ')';
+  PMSolvable::dumpOn( str );
+  str << '(' << (_selectable ? "MANAGED" : "unmanaged" ) << ')' << endl;
   return str;
 }
 
