@@ -715,7 +715,6 @@ InstSrc::provideMedia (int medianr) const
 
 			if (changereply != "E")		// eject
 			    break;
-			_media->attach();
 			_media->release(true);
 		    }					// re-prompt after eject
 
@@ -805,7 +804,6 @@ InstSrc::provideMedia (int medianr) const
 
 	    if (changereply != "E")		// eject
 		break;
-	    _media->attach();
 	    _media->release(true);
 	}					// re-prompt after eject
 

@@ -240,6 +240,35 @@ PMError MediaCD::releaseFrom( bool eject )
     return Error::E_ok;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaCD::forceEject
+//	METHOD TYPE : void
+//
+// Asserted that media is not attached.
+//
+void MediaCD::forceEject()
+{
+  if (_mounteddevice.empty())		// no device mounted
+  {
+      for (DeviceList::iterator it = _devices.begin()
+	    ; it != _devices.end()
+	    ; ++it )
+      {
+	int fd;
+	MIL << "eject " << (*it) << endl;
+	fd = ::open ((*it).c_str(), O_RDONLY|O_NONBLOCK);
+	if (fd != -1)
+	{
+	  int res = ::ioctl (fd, CDROMEJECT);
+	  ::close (fd);
+	  if ( res >= 0 )
+	    return; // 1st success
+	}
+      }
+  }
+}
 
 ///////////////////////////////////////////////////////////////////
 //

@@ -65,7 +65,7 @@ struct MediaChangeReceive : public InstSrcManagerCallbacks::MediaChangeCallback
 			      int current,
 			      int expected ) {
     string ret = MediaChangeCallback::changeMedia( instSrc, error, url, product, current, expected );
-    ret = "S";
+    ret = "C";
     INT << "MediaChange return '" << ret << "' on " << error << " exp " << expected << " (" << current << ")" << endl;
     return ret;
   }
@@ -274,11 +274,69 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  //Y2PM::instSrcManager();
-  //Y2PM::instTargetUpdate();
+  #define WHICH(err) (err?ERR:INT)
 
-  ISM.enableSource( newSrc( "/mounts/machcd4/CDs/SuSE-9.0-Pers-i386-RC1/CD1" ) );
-  sleep( 10 );
+  PMError err;
+  Url mediaurl( "cd:///" );
+  MediaAccessPtr media( new MediaAccess );
+
+  err = media->open( mediaurl );
+  WHICH(err) << "open media:" << mediaurl << " " << err << endl;
+
+  err = media->attach();
+  WHICH(err) << "attach media: " << err << endl;
+
+  err = media->release();
+  WHICH(err) << "release media: " << err << endl;
+
+  err = media->release( true );
+  WHICH(err) << "release and eject media: " << err << endl;
+
+
+#if 0
+  set<string> allpks;
+  //allpks.insert( "aaa_base" );
+  allpks.insert( "test" );
+  allpks.insert( "test1" );
+  allpks.insert( "test2" );
+  allpks.insert( "test3" );
+  allpks.insert( "test11" );
+  allpks.insert( "test22" );
+  allpks.insert( "test33" );
+  allpks.insert( "test111" );
+  allpks.insert( "test222" );
+  allpks.insert( "test333" );
+#define forall for ( set<string>::const_iterator it = allpks.begin(); it != allpks.end(); ++it )
+
+  Y2PM::instSrcManager();
+  forall {
+    DBG << "  " << PMGR[*it]->user_set_install() << endl;
+    DBG << "  " << PMGR[*it]->providesSources() << endl;
+    DBG << "  " << PMGR[*it]->set_source_install( true ) << endl;
+    SEC << PMGR[*it] << endl;
+  }
+
+  Y2PM::instTargetUpdate();
+  forall {
+    //DBG << "  " << PMGR[*it]->user_set_install() << endl;
+    SEC << PMGR[*it] << endl;
+  }
+
+  InstSrcManagerCallbacks::mediaChangeReport.redirectTo( mediaChangeReceive );
+
+  Y2PMCallbacks::commitProvideReport.redirectTo( commitProvideReceive );
+  InstSrcManagerCallbacks::mediaChangeReport.redirectTo( mediaChangeReceive );
+
+  forall {
+    SEC << PMGR[*it] << endl;
+  }
+
+  list<string> errors;
+  list<string> remaining;
+  list<string> srcremaining;
+  Y2PM::commitPackages( 0, errors, remaining, srcremaining );
+#endif
+
   SEC << "STOP -> " << ret << endl;
   return ret;
 }

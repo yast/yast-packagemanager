@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep 24 21:33:39 CEST 2003 - ma@suse.de
+
+- MediaAccess::release: If requested, try to eject removable media
+  even if it's currently unmounted. (#29306)
+- 2.9.1
+
+-------------------------------------------------------------------
 Wed Sep 24 21:29:32 CEST 2003 - ma@suse.de
 
 - InstSrcManager::scanMedia: Assure media is immediately released after
