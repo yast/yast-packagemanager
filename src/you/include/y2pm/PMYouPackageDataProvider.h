@@ -25,6 +25,8 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMObject.h>
 
+#include <y2util/YRpmGroupsTree.h>
+
 class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvider {
 	REP_BODY(PMYouPackageDataProvider);
 
@@ -66,6 +68,7 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	const std::string license () const { return PMPackageDataProvider::license(); }
 	const std::string packager () const { return PMPackageDataProvider::packager(); }
 	const std::string group () const { return PMPackageDataProvider::group(); }
+	const YStringTreeItem * group_ptr () const { return PMPackageDataProvider::group_ptr(); }
 	const std::list<std::string> changelog () const { return PMPackageDataProvider::changelog(); }
 	const std::string url () const { return PMPackageDataProvider::url(); }
 	const std::string os () const { return PMPackageDataProvider::os(); }

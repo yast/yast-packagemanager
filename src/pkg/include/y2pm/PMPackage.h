@@ -26,6 +26,7 @@
 
 #include <y2util/Date.h>
 #include <y2util/FSize.h>
+#include <y2util/YRpmGroupsTree.h>
 
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
@@ -105,7 +106,7 @@ class PMPackage : virtual public Rep, public PMObject {
 	const std::string license() const;
 	const std::string packager() const;
 	const std::string group() const;
-        YStringTree * group_ptr() const;
+	const YStringTreeItem * group_ptr() const;
 	const std::list<std::string> changelog() const;
 	const std::string url() const;
 	const std::string os() const;

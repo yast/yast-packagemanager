@@ -24,6 +24,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PMULPackageDataProvider.h>
+#include <Y2PM.h>
 
 using namespace std;
 
@@ -43,7 +44,8 @@ IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMDataProvide
 //		      for later value retrieval on-demand
 //
 PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrievalPtr package_retrieval)
-    : _package_retrieval (package_retrieval)
+    : _attr_GROUP(0)
+    , _package_retrieval (package_retrieval)
 {
 }
 
@@ -155,11 +157,33 @@ PMULPackageDataProvider::license () const
 const std::string
 PMULPackageDataProvider::group () const
 {
-    FALLBACK(_attr_GROUP,group);
-    std::string value;
-    _package_retrieval->retrieveData (_attr_GROUP, value);
-    return value;
+    // FALLBACK
+    if (_attr_GROUP == 0)
+    {
+	if (_fallback_provider != 0)
+	{
+	    return _fallback_provider->group();
+	}
+	return "";
+    }
+    return Y2PM::packageManager().rpmGroup (_attr_GROUP);
 }
+
+const YStringTreeItem *
+PMULPackageDataProvider::group_ptr () const
+{
+    // FALLBACK
+    if (_attr_GROUP == 0)
+    {
+	if (_fallback_provider != 0)
+	{
+	    return _fallback_provider->group_ptr();
+	}
+	return 0;
+    }
+    return _attr_GROUP;
+}
+
 
 const std::string
 PMULPackageDataProvider::sourcerpm () const
