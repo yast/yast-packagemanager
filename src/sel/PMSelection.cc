@@ -88,7 +88,7 @@ string PMSelection::getAttributeName( PMSelectionAttribute attr ) const
   ///////////////////////////////////////////////////////////////////
   // no default: let compiler warn '... not handled in switch'
   ///////////////////////////////////////////////////////////////////
-  case SEL_NUM_ATTRIBUTES:
+  case PMSEL_NUM_ATTRIBUTES:
     // illegal attr value
     break;
   }
