@@ -249,12 +249,14 @@ suse_vendor (constPMPackagePtr package)
 //		Handle splitprovides
 //		Mark packages appl_delete or appl_install accordingly
 //
+//		return number of packages affected
 //		return non-suse packages for which an update candidate exists in noinstall_r
 //		return non-suse packages for which an obsolete exists in nodelete_r
 //
-void
+int
 PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r)
 {
+    int count = 0;
     noinstall_r.clear();
     nodelete_r.clear();
 
@@ -319,7 +321,10 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	    {
 		DBG << "Yes !" << endl;
 		if (suse_vendor (installed))
+		{
 		    (*it)->appl_set_install ();
+		    count++;
+		}
 		else
 		    noinstall_r.push_back (installed);
 		break;
@@ -336,7 +341,10 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	{
 	    DBG << "Edition " << PkgEdition::toString(installed->edition()) << " < " << PkgEdition::toString(candidate->edition()) << endl;
 	    if (suse_vendor (installed))
+	    {
 		(*it)->appl_set_install ();
+		count++;
+	    }
 	    else
 		noinstall_r.push_back (installed);
 	}
@@ -344,7 +352,10 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	{
 	    DBG << "Buildtime " << installed->buildtime() << " < " << candidate->buildtime() << endl;
 	    if (suse_vendor (installed))
+	    {
 		(*it)->appl_set_install ();
+		count++;
+	    }
 	    else
 		noinstall_r.push_back (installed);
 	}
@@ -378,7 +389,10 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	    DBG << "delete!" << endl;
 	    PMPackagePtr installed = obsslc->installedObj();
 	    if (suse_vendor (installed))
+	    {
 		obsslc->appl_set_delete();
+		count++;
+	    }
 	    else
 		nodelete_r.push_back (installed);
 
@@ -398,7 +412,10 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 		    DBG << "matching provides" << endl;
 
 		    if (suse_vendor (installed))
+		    {
 			(*it)->appl_set_install ();
+			count++;
+		    }
 		    else
 			noinstall_r.push_back (installed);
 		}    
@@ -408,5 +425,5 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
     } // selectable loop
 
-    return;
+    return count;
 }

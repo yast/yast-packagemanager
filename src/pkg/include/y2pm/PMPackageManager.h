@@ -72,11 +72,12 @@ class PMPackageManager : public PMManager {
      * prepare for update
      * go through all installed packages and update them
      *
+     * return number of packages affected
      * return non-suse packages for which an update candidate exists in noinstall_r
      * return non-suse packages for which an obsolete exists in nodelete_r
      *
      **/
-    void doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r);
+    int doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r);
 
     /**
      * Retrieve the internal RPM groups tree (for cloning tree items in the UI etc.).
