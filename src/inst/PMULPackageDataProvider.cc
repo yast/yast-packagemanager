@@ -313,7 +313,7 @@ PMError PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r, P
 //
 PMError PMULPackageDataProvider::provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const
 {
-    MIL << "provideSrcPkgToInstall " << pkg_r->sourcerpm() << endl;
+    MIL << "provideSrcPkgToInstall " << pkg_r.sourcerpm() << endl;
 #warning TBD provideSrcPkgToInstall
     return PMError::E_ok;
 }
