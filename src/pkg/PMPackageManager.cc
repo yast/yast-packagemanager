@@ -284,8 +284,14 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
     {
+	if (*it == 0)
+	{
+	    ERR << "Selectable NULL" << endl;
+	    ++i;
+	    continue;
+	}
 	DBG << i << ". " << (*it)->name() << ": ";
-	i++;
+	++i;
 
 	//-----------------------------------------------------------------
 	// pre check: candidate ? taboo ? user ? non-suse ?

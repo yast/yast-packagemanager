@@ -43,10 +43,12 @@ IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMPackageData
 //	DESCRIPTION : open packages stream and keep pointer to tag parser
 //		      for later value retrieval on-demand
 //
-PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrievalPtr package_retrieval,
+PMULPackageDataProvider::PMULPackageDataProvider (InstSrcPtr source,
+			TagCacheRetrievalPtr package_retrieval,
 			TagCacheRetrievalPtr locale_retrieval,
 			TagCacheRetrievalPtr du_retrieval)
     : _attr_GROUP(0)
+    , _source (source)
     , _package_retrieval (package_retrieval)
     , _locale_retrieval (locale_retrieval)
     , _du_retrieval (du_retrieval)
@@ -258,7 +260,30 @@ PMULPackageDataProvider::du ( const PMPackage & pkg_r ) const
 //
 Pathname PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r ) const
 {
-#warning MUST REALIZE providePkgToInstall
-  return PMPackageDataProvider::providePkgToInstall();
+MIL << "PMULPackageDataProvider::providePkgToInstall(" << pkg_r.name() << ")" << endl;
+
+    // determine directory and rpm name
+    Pathname rpmname = pkg_r.location();
+    Pathname dir;
+    string::size_type dirpos = rpmname.asString().find_first_of (" ");
+    if (dirpos == string::npos)
+    {
+	// directory == architecture
+	dir = Pathname ((const std::string &)(pkg_r.arch()));
+    }
+    else
+    {
+	// directory in location
+	dir = Pathname (rpmname.asString().substr (dirpos+1));
+	rpmname = Pathname (rpmname.asString().substr (0, dirpos));
+    }
+
+    if (!_source)
+    {
+	ERR << "No source for '" << dir << "/" << rpmname << "'" << endl;
+	return Pathname();
+    }
+
+    return _source->providePackage (pkg_r.medianr(), rpmname, dir);
 }
 

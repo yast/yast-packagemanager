@@ -88,21 +88,25 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	TagRetrievalPos		_attr_KEYWORDS;
 	TagRetrievalPos		_attr_DU;
 
+	// the source
+	const InstSrcPtr _source;
+
 	// retrieval pointer for packages data
-	TagCacheRetrievalPtr _package_retrieval;
+	const TagCacheRetrievalPtr _package_retrieval;
 
 	// retrieval pointer for packages.<locale> data
-	TagCacheRetrievalPtr _locale_retrieval;
+	const TagCacheRetrievalPtr _locale_retrieval;
 
 	// retrieval pointer for packages.DU data
-	TagCacheRetrievalPtr _du_retrieval;
+	const TagCacheRetrievalPtr _du_retrieval;
 
 	// fallback provider (Share entry in packages)
 	PMULPackageDataProviderPtr _fallback_provider;
 
     public:
 
-	PMULPackageDataProvider (TagCacheRetrievalPtr package_retrieval,
+	PMULPackageDataProvider (InstSrcPtr source,
+				 TagCacheRetrievalPtr package_retrieval,
 				 TagCacheRetrievalPtr locale_retrieval,
 				 TagCacheRetrievalPtr du_retrieval);
 	virtual ~PMULPackageDataProvider();
