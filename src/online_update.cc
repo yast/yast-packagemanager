@@ -199,6 +199,7 @@ int main( int argc, char **argv )
     if ( verbose || debug ) {
       cout << "Business Product: "
            << ( you.paths()->businessProduct() ? "Yes" : "No" ) << endl;
+      cout << "Distribution: " << you.paths()->distProduct() << endl;
     }
     cout << "Language:     " << you.patchInfo()->langCode() << endl;
     cout << "Directory:    " << you.paths()->directoryFileName() << endl;
