@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMPackageDataProvider_UL.h
+  File:       PMPackageDataProviderUL.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -18,12 +18,13 @@
   Purpose: Realized PackageDataProvider for UnitedLinux packages format
 
 /-*/
-#ifndef PMPackageDataProvider_UL_h
-#define PMPackageDataProvider_UL_h
+#ifndef PMPackageDataProviderUL_h
+#define PMPackageDataProviderUL_h
 
 #include <iosfwd>
 #include <string>
 
+#include <y2pm/PMPackageDataProvider.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMDataProvider.h>
 
@@ -31,19 +32,26 @@
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPackageDataProvider_UL
+//	CLASS NAME : PMPackageDataProviderUL
 /**
  * @short Realizes PackageDataProvider for UnitedLinux packages format
  * @see DataProvider
  **/
-class PMPackageDataProvider_UL : public PMPackageDataProvider  {
-  REP_BODY(PMPackageDataProvider_UL);
+class PMPackageDataProviderUL : public PMPackageDataProvider  {
+  REP_BODY(PMPackageDataProviderUL);
+  private:
+    // save file position and size data for each attribute
+    typedef struct {std::streampos pos; int size;} attrpos_t;
+    attrpos_t attrpos[PMPackage::PKG_NUM_ATTRIBUTES];
+    // cache retrieved attribute values here
+    // these are set if attrpos[<attr>].size < 0
+    PkgAttributeValue attrval[PMPackage::PKG_NUM_ATTRIBUTES];
 
   protected:
 
-    PMPackageDataProvider_UL();
+    PMPackageDataProviderUL();
 
-    ~PMPackageDataProvider_UL();
+    ~PMPackageDataProviderUL();
 
   public:
 
@@ -60,7 +68,7 @@ class PMPackageDataProvider_UL : public PMPackageDataProvider  {
      * */
     void setAttributeValue(
 	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	const std::string& value);
+	const PkgAttributeValue value);
 
     /** inject some package attribute by file offset
      * */
@@ -71,4 +79,4 @@ class PMPackageDataProvider_UL : public PMPackageDataProvider  {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMPackageDataProvider_UL_h
+#endif // PMPackageDataProviderUL_h

@@ -23,10 +23,10 @@ liby2pminstsrc_la_SOURCES = \
 	InstSrcDescr.cc 		\
 	InstSrcData.cc			\
 	InstSrcData_UL.cc		\
+	PMPackageDataProviderUL.cc	\
 	\
 	InstTarget.cc			\
 	InstTargetError.cc
 
-#	PMPackageDataProvider_UL.cc
 
 liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la

@@ -310,7 +310,6 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset )
 {
     bool ok = true;
-    std::vector<std::string> multi;
 
     // architecture
     PkgArch arch( (tagset->getTagByIndex(InstSrcMediaTags::ARCH))->Data() );
@@ -333,13 +332,14 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     ndescr->set_type( type );
 
     // media data
-    multi = (tagset->getTagByIndex(InstSrcMediaTags::MEDIA))->MultiData();
+    std::list<std::string> multi = (tagset->getTagByIndex(InstSrcMediaTags::MEDIA))->MultiData();
 
-    if ( !multi.empty() )
+    if ( multi.size() >= 3 )
     {
-	if ( !multi[0].empty() )	ndescr->set_media_vendor( multi[0] );
-	if ( !multi[1].empty() )	ndescr->set_media_id( multi[1] );
-	if ( !multi[2].empty() ) 	ndescr->set_media_count( multi[2] );
+	std::list<std::string>::iterator multi_pos = multi.begin();
+	if ( !(*multi_pos).empty() )	ndescr->set_media_vendor( *multi_pos++ );
+	if ( !(*multi_pos).empty() )	ndescr->set_media_id( *multi_pos++ );
+	if ( !(*multi_pos).empty() ) 	ndescr->set_media_count( *multi_pos++ );
     }
     else
     {
