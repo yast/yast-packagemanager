@@ -211,6 +211,16 @@ class MediaAccess : virtual public Rep {
 	virtual std::ostream & dumpOn( std::ostream & str ) const;
 
     public:
+        /**
+         * Get file from location at specified by URL and copy it to
+         * destination.
+         *
+         * @param from Source URL
+         * @param to   Destination file name
+         **/
+        static PMError getFile( const Url &from, const Pathname &to );
+
+    public:
 
       /**
        * Helper class that provides file on construction

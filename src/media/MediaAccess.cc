@@ -382,5 +382,41 @@ MediaAccess::dumpOn( std::ostream & str ) const
   return str << ")";
 }
 
+PMError MediaAccess::getFile( const Url &from, const Pathname &to )
+{
+  D__ << "From: " << from << endl << "To: " << to << endl;
+
+  Pathname path = from.getPath();
+  Pathname dir = path.dirname();
+  string base = path.basename();
+
+  Url u = from;
+  u.setPath( dir.asString() );
+
+  MediaAccess media;
+  
+  PMError error = media.open( u );
+  MIL << error << endl;
+  if ( error ) return error;
+  
+  error = media.attach();
+  MIL << error << endl;
+  if ( error ) return error;
+  
+  error = media.provideFile( base );
+  MIL << error << endl;
+  if ( error ) return error;
+
+  if ( PathInfo::copy( media.localPath( base ), to ) != 0 ) {
+    return MediaError::E_system;
+  }
+  
+  error = media.release();
+
+  MIL << error << endl;
+  
+  return error;
+}
+
 ///////////////////////////////////////////////////////////////////
 
