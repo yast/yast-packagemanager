@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMYouPatchInfo.ccIMPL_BASE_POINTER(PMSolvable);
+  File:       PMYouPatchInfo.cc
 
 
   Author:     Cornelius Schumacher <cschum@suse.de>
@@ -89,10 +89,10 @@ IMPL_BASE_POINTER(PMYouPatchInfo);
 
 PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 {
-    LangCode langCode( lang );
-    if ( lang.empty() ) langCode = Y2PM::getPreferredLocale();
+    _lang = LangCode( lang );
+    if ( lang.empty() ) _lang = Y2PM::getPreferredLocale();
 
-    _patchtagset = new YOUPatchTagSet( translateLangCode( langCode ) );
+    _patchtagset = new YOUPatchTagSet( translateLangCode( _lang ) );
     _patchtagset->setEncoding(CommonPkdParser::Tag::UTF8);
 
     _packagetagset = new YOUPackageTagSet();
