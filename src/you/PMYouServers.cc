@@ -56,7 +56,7 @@ SLPBoolean MyAttrCallback(SLPHandle hslp,
 
     if ( errcode == SLP_OK )
     {
-	string* data = reinterpret_cast<string *>(mydata);
+	string* data = static_cast<string *>(mydata);
 	*data = attrlist;
     }
 
