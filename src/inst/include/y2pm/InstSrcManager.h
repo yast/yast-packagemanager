@@ -45,6 +45,7 @@ class InstSrcManager {
      **/
     typedef InstSrcError Error;
 
+    static const unsigned NO_RANK = unsigned(-1);
 
   private:
 
@@ -167,12 +168,9 @@ class InstSrcManager {
      * Disable InstSrc. Provided Objects are withdrawn from Manager classes.
      **/
     PMError disableSource( const ISrcId & isrc_r );
-#if 0
-    /**
-     * Delete InstSrc. Erase it together with all cached info.
-     **/
-    PMError deleteSource( const ISrcId & isrc_r );
-#endif
+
+  public:
+
     /**
      * Set whether this source should be automaticaly enabled on startup.
      *
@@ -182,6 +180,38 @@ class InstSrcManager {
      * enabale/disable an InstSrc (i.e. let it provide/withdraw Objects).
      **/
     PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
+
+    /**
+     * Raise priority by one
+     **/
+    PMError rankUp( const ISrcId isrc_r );
+
+    /**
+     * Lower priority by one
+     **/
+    PMError rankDown( const ISrcId isrc_r );
+
+    /**
+     * Adjust isrc priority to be directly behind point. If point is NULL
+     * it will get least priority.
+     **/
+    PMError rankBehind( const ISrcId isrc_r, const ISrcId point_r );
+
+    /**
+     * Adjust isrc priority to be directly before point. If point is NULL
+     * it will get highest priority.
+     **/
+    PMError rankBefore( const ISrcId isrc_r, const ISrcId point_r );
+
+    /**
+     * Delete InstSrc. Erase it together with all cached info.
+     **/
+    PMError deleteSource( const ISrcId & isrc_r );
+
+    /**
+     * Set new Url for InstSrc.
+     **/
+    PMError rewriteUrl( const ISrcId isrc_r, const Url & newUrl_r );
 
   public:
 

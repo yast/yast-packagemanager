@@ -396,6 +396,84 @@ PMError InstSrcManager::setAutoenable( const ISrcId isrc_r, const bool yesno )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::Up
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::rankUp( const ISrcId isrc_r )
+{
+  return Error::E_TBD;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::rankDown
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::rankDown( const ISrcId isrc_r )
+{
+  return Error::E_TBD;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::rankBehind
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::rankBehind( const ISrcId isrc_r, const ISrcId point_r )
+{
+  return Error::E_TBD;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::rankBefore
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::rankBefore( const ISrcId isrc_r, const ISrcId point_r )
+{
+  return Error::E_TBD;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::deleteSource
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::deleteSource( const ISrcId & isrc_r )
+{
+  return Error::E_TBD;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::rewriteUrl
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::rewriteUrl( const ISrcId isrc_r, const Url & newUrl_r )
+{
+  return Error::E_TBD;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::getSources
 //	METHOD TYPE : void
 //
@@ -409,6 +487,19 @@ void InstSrcManager::getSources( ISrcIdList & idlist_r, const bool enabled_only 
       idlist_r.push_back( *it );
     }
   }
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream &
+**
+**	DESCRIPTION :
+*/
+ostream & operator<<( ostream & str, const InstSrcManager & obj )
+{
+  return str;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -528,19 +619,6 @@ PMError InstSrcManager::intern_cacheCopyTo( const Pathname & newRoot_r )
   }
 
   return Error::E_ok;
-}
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : operator<<
-**	FUNCTION TYPE : ostream &
-**
-**	DESCRIPTION :
-*/
-ostream & operator<<( ostream & str, const InstSrcManager & obj )
-{
-  return str;
 }
 
 

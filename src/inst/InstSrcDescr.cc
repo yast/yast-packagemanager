@@ -30,9 +30,9 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
 #include <y2util/ExternalProgram.h>
+#include <y2util/CommonPkdParser.h>
 
 #include <y2pm/InstSrcDescr.h>
-#include <y2util/CommonPkdParser.h>
 
 using namespace std;
 
@@ -60,6 +60,7 @@ const Pathname InstSrcDescr::_cache_file( "description" );
 InstSrcDescr::InstSrcDescr()
     : _type               ( InstSrc::T_UNKNOWN )
     , _default_activate   ( true )
+    , _default_rank       ( NO_RANK )
     , _content_product    ( PkgName(), PkgEdition() )
     , _content_baseproduct( PkgName(), PkgEdition() )
     , _content_requires   ( PkgName(), NONE, PkgEdition() )

@@ -66,6 +66,8 @@ class InstSrcDescr : virtual public Rep {
     typedef std::map<LangCode,std::string>              LabelMap;
     typedef std::list<LangCode>                         LinguasList;
 
+    static const unsigned NO_RANK = unsigned(-1);
+
   public:
 
     InstSrcDescr();
@@ -108,10 +110,19 @@ class InstSrcDescr : virtual public Rep {
      **/
     Pathname _product_dir;
 
+    ///////////////////////////////////////////////////////////////////
+    // InstSrcManager related/provided data. Can not be retrieved from media.
+    ///////////////////////////////////////////////////////////////////
+
     /**
-     * Should Instsrc be activated by default.
+     * Should InstSrc be activated by default.
      **/
     bool _default_activate;
+
+    /**
+     * Rank of this InstSrc.(0 is highest)
+     **/
+    unsigned _default_rank;
 
     ///////////////////////////////////////////////////////////////////
     // media file ( _url / media.N / media )
@@ -156,7 +167,7 @@ class InstSrcDescr : virtual public Rep {
     std::string _content_youtype;
     std::string _content_youpath;
 
-public:
+  public:
 
     ///////////////////////////////////////////////////////////////////
     // access functions
@@ -165,7 +176,9 @@ public:
     InstSrc::Type        type()                const { return _type; }
     const Url &          url()                 const { return _url; }
     const Pathname &     product_dir()         const { return _product_dir; }
+
     bool                 default_activate()    const { return _default_activate; }
+    unsigned             default_rank()        const { return _default_rank; }
 
     const Vendor &       media_vendor()        const { return _media_vendor; }
     const std::string &  media_id()            const { return _media_id; }
@@ -211,7 +224,9 @@ public:
     void set_type( InstSrc::Type val_r )                    { _type = val_r; }
     void set_url( const Url & val_r )                       { _url = val_r; }
     void set_product_dir( const Pathname & val_r )          { _product_dir = val_r; }
+
     void set_default_activate( bool val_r )                 { _default_activate = val_r; }
+    void set_default_rank( unsigned val_r )                 { _default_rank = val_r; }
 
     void set_media_vendor( const Vendor & val_r )           { _media_vendor = val_r; }
     void set_media_id( const std::string & val_r )          { _media_id = val_r; }
