@@ -196,6 +196,9 @@ class InstYou {
     std::list<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
 
     MediaAccess _media;
+
+    std::string _regcode;
+    std::string _password;
 };
 
 ///////////////////////////////////////////////////////////////////
