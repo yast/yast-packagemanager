@@ -72,19 +72,6 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	 */
 	const std::list<PMYouPatchPtr>& getPatches (void) const { return InstData::getPatches(); }
 
-    private:
-
-	/**
-	 * read media.X/media file
-	 *
-	 * @param media_r MediaAccessPtr
-	 * @param number the X in media.X
-	 * @param vendor where to store vendor
-	 * @param id where to store id
-	 * @param count where to store count
-	 * */
-	static PMError readMediaFile(MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count );
-
   public:
 
     /**
