@@ -28,6 +28,7 @@
 #include <y2pm/PMObjectContainerIter.h>
 
 #include <y2pm/PkgDep.h>
+#include <y2pm/PkgSet.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -176,6 +177,12 @@ class PMManager {
      * @return true if no conflicts where found (i.e no bad)
      * */
     bool solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad);
+    
+    bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList to_remove);
+
+  private:
+
+    void buildSets(PkgSet& installed, PkgSet& available, PkgSet& to_install);
 
 };
 

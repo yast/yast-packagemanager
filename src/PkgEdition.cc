@@ -188,7 +188,7 @@ int PkgEdition::rpmvercmp( const std::string & lhs, const std::string & rhs ) co
     int rc;
     int isnum;
 
-    D__ << lhs << " - " << rhs << endl;
+//    D__ << lhs << " - " << rhs << endl;
 
     if ( lhs == rhs )  return 0;
     // empty is less than anything else:

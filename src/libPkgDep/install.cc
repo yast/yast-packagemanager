@@ -224,8 +224,9 @@ void PkgDep::add_package( PMSolvablePtr cand )
 				D__ << "Candidate " << prov->pkg()->name() << " provides "
 					 << prov->relation() << " which is needed by "
 					 << candname << " (Requires: " << *req << ")\n";
-				// add referer only if no installed pkg can provide this
-				if (!also_provided_by_installed( *req ))
+				// add referer only if no installed pkg can
+				// provide this and it's no self-provide
+				if (!also_provided_by_installed( *req ) && prov->pkg() != cand)
 					add_referer( prov->pkg(), cand, *req );
 				goto next_requirement;
 			}
