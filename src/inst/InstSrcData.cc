@@ -29,6 +29,8 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
 
+#include <Y2PM.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -136,6 +138,33 @@ void InstSrcData::_instSrc_withdraw()
 
   withdrawObjects();
   _propagating = false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::propagateObjects
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcData::propagateObjects()
+{
+  if ( getPackages() )
+    Y2PM::packageManager().poolAddCandidates( *getPackages() );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::withdrawObjects
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcData::withdrawObjects()
+{
+
 }
 
 ///////////////////////////////////////////////////////////////////

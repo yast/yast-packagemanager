@@ -77,6 +77,12 @@ InstSrc::InstSrc()
 //
 InstSrc::~InstSrc()
 {
+#warning ****************************************
+#warning ** FORCE _cache_deleteOnExit until InstSrcMgr ready
+  INT << "FORCE _cache_deleteOnExit until InstSrcMgr ready" << endl;
+  _cache_deleteOnExit = true;
+#warning ****************************************
+
   MIL << "Delete InstSrc " << *this << "(" << (_cache_deleteOnExit ? "delete " : "keep " ) << _cache << ")" << endl;
 
   if ( _media )
@@ -550,14 +556,16 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
   ///////////////////////////////////////////////////////////////////
   // done
   ///////////////////////////////////////////////////////////////////
+  if ( !err ) {
+    // finalize data not located on media:
+    ndescr->set_type( ctype );
+    ndescr->set_url( mediaurl_r );
+    ndescr->set_product_dir( product_dir_r );
+    ndescr->set_default_activate( false );
 
-  ndescr->set_type( ctype );
-
-  MIL << "Found InstSrc " << ndescr << endl;
-
-#warning TBD finalize InstSrcDescr from media
-
-  _descr = ndescr;
+    _descr = ndescr;
+    MIL << "Found InstSrc " << _descr << endl;
+  }
 
   return err;
 }
