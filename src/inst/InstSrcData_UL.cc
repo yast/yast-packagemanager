@@ -29,9 +29,12 @@
 #include <y2util/stringutil.h>
 
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSelectionPtr.h>
 #include <y2pm/InstSrcData_UL.h>
 #include <y2pm/PMULPackageDataProvider.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
+#include <y2pm/PMULSelectionDataProvider.h>
+#include <y2pm/PMULSelectionDataProviderPtr.h>
 
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
@@ -203,8 +206,89 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
     SET_MULTI (INSNOTIFY);
     SET_MULTI (DELNOTIFY);
 
+#undef SET_VALUE
+#undef SET_POS
+#undef GET_TAG
+#undef SET_SINGLE
+#undef SET_MULTI
+
     return;
 }
+
+///////////////////////////////////////////////////////////////////
+// PRIVATE
+//
+//	METHOD NAME : InstSrcData_UL::Tag2Selection
+//	METHOD TYPE : PMSelectionPtr
+//
+//	DESCRIPTION : pass selection data from tagset to PMSelection
+
+PMSelectionPtr
+InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset)
+{
+    // SELECTION
+    string single ((tagset->getTagByIndex(InstSrcData_ULSelTags::SELECTION))->Data());
+
+    std::vector<std::string> splitted;
+
+    stringutil::split (single, splitted, " ", false);
+    if (splitted.size() < 4)
+	splitted.push_back("");
+
+//MIL << "-----------------------------" << endl;
+//MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+
+    // Pkg -> PMSelection
+    PkgName name (splitted[0]);
+    PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
+    PkgArch arch (splitted[3]);
+
+    PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selcache));
+    PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
+
+    CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
+
+#define SET_VALUE(tagname,value) \
+    if (!value.empty()) dataprovider->setAttributeValue (selection, (PMSelection::PMSelectionAttribute)PMSelection::ATTR_##tagname, value)
+#define SET_POS(tagname,begin,end) \
+    dataprovider->setAttributeValue (selection, (PMSelection::PMSelectionAttribute)PMSelection::ATTR_##tagname, begin, end)
+#define GET_TAG(tagname) \
+    tagset->getTagByIndex(InstSrcData_ULSelTags::tagname)
+#define SET_MULTI(tagname) \
+    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
+#define SET_SINGLE(tagname) \
+    SET_VALUE (tagname, (GET_TAG(tagname))->Data())
+
+    SET_VALUE (NAME, splitted[0]);
+    SET_VALUE (VERSION, splitted[1]);
+    SET_VALUE (RELEASE, splitted[2]);
+    SET_VALUE (ARCH, splitted[3]);
+
+    SET_SINGLE (SUMMARY);
+    SET_SINGLE (CATEGORY);
+    SET_SINGLE (VISIBLE);
+
+    SET_MULTI (REQUIRES);
+    SET_MULTI (PROVIDES);
+    SET_MULTI (CONFLICTS);
+    SET_MULTI (OBSOLETES);
+
+    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULSelTags::SIZE))->Data(), splitted, " ", false);
+    SET_VALUE (ARCHIVESIZE, splitted[0]);
+    SET_VALUE (SIZE, splitted[1]);
+
+    SET_MULTI (INSTALL);
+    SET_MULTI (DELETE);
+
+#undef SET_VALUE
+#undef SET_POS
+#undef GET_TAG
+#undef SET_SINGLE
+#undef SET_MULTI
+
+    return selection;
+}
+
 
 ///////////////////////////////////////////////////////////////////
 // PUBLIC
@@ -461,7 +545,6 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     {
 	return err;
     }
-
     packagesname = media_r->getAttachPoint() + packagesname;
     MIL << "fopen(" << packagesname << ")" << endl;
     TagCacheRetrieval *pkgcache = new TagCacheRetrieval (packagesname);
@@ -616,6 +699,116 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     else
 	std::cerr << "*** parsed " << count << " language entries ***" << std::endl;
 
+
+    ///////////////////////////////////////////////////////////////////
+    // parse selection data
+    ///////////////////////////////////////////////////////////////////
+
+    // --------------------------------
+    // setup selections access
+    // read <DESCRDIR>/selections to std::list<std::string> selection_names
+
+    std::list<std::string> selection_names;
+    Pathname selectionname = descr_dir_r + "/selections";
+    MIL << "provideFile (" << selectionname << ")" << endl;
+    err = media_r->provideFile (selectionname);
+    while (err == Error::E_ok)
+    {
+	std::ifstream selstream (selectionname.asString().c_str());
+	if (!selstream)
+	{
+	    ERR << "Cant open " << selectionname << ": " << Error::E_open_file << endl;
+	    break;
+	}
+
+	while (selstream.good())
+	{
+	    char lbuf[201];
+
+	    if (!selstream.getline (lbuf, 200, '\n'))
+	    {
+		if (selstream.eof())
+		    break;
+		MIL << "getline() failed" << endl;
+		break;
+	    }
+	    if ((lbuf[0] == '#')		// comment
+		|| (lbuf[0] == 0))		// empty
+		continue;
+	    selection_names.push_back (lbuf);
+	}
+	break;
+    }
+
+    std::list<PMSelectionPtr> *selectionlist = new (std::list<PMSelectionPtr>);
+
+    count = 0;
+
+    std::list<std::string>::iterator selfile = selection_names.begin();
+    std::ifstream selection_stream;
+
+    while (selfile != selection_names.end())
+    {
+	Pathname selectionname = descr_dir_r + *selfile;
+	selection_stream.open (selectionname.asString().c_str());
+
+	if( !selection_stream)
+	{
+	    ERR << "Cant open " << selectionname << ": " << Error::E_open_file << endl;
+	    ++selfile;
+	    continue;
+	}
+
+	tagset = new InstSrcData_ULSelTags ();
+	TagCacheRetrieval *selcache = new TagCacheRetrieval (selectionname);
+	parser = selcache->getParser();
+
+    MIL << "start " << *selfile << " parsing" << endl;
+
+    while( parse && parser.lookupTag (selection_stream))
+    {
+	bool repeatassign = false;
+
+	tagstr = parser.startTag();
+
+	do
+	{
+	    switch( tagset->assign (tagstr.c_str(), parser, selection_stream))
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    repeatassign = false;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    selectionlist->push_back (Tag2Selection (selcache, tagset));
+		    count++;
+		    tagset->clear();
+		    repeatassign = false;	// only single match
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	} while( repeatassign );
+    }
+
+	selection_stream.close();
+	MIL << "done " << *selfile << " parsing" << endl;
+	if (parse)
+	{
+	    selectionlist->push_back (Tag2Selection (selcache, tagset));
+	    count++;
+	}
+	tagset->clear();
+
+    } // while selfile
+
+    std::cerr << "*** parsed " << count << " selections ***" << std::endl;
 
     ///////////////////////////////////////////////////////////////////
     // done

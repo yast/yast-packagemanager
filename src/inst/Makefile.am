@@ -27,6 +27,7 @@ liby2pminstsrc_la_SOURCES = \
 	InstSrcData.cc			\
 	InstSrcData_UL.cc		\
 	PMULPackageDataProvider.cc	\
+	PMULSelectionDataProvider.cc	\
 	\
 	InstTarget.cc			\
 	InstTargetError.cc
