@@ -29,7 +29,6 @@
 #include <Y2PM.h>
 #include <y2pm/InstSrcError.h>
 #include <y2pm/PMPackage.h>
-#include <y2pm/Wget.h>
 #include <y2pm/YouError.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstSrcDescr.h>
