@@ -299,19 +299,26 @@ std::ostream &
 MediaAccess::dumpOn( std::ostream & str ) const
 {
     str << "MediaAccess (";
+
+    const char * tstr = "???"; // default for unknown types
     switch (_type)
     {
-	case CD:   str << "CD"; break;
-	case DVD:  str << "DVD"; break;
-	case NFS:  str << "NFS"; break;
-	case DIR:  str << "DIR"; break;
-	case DISK: str << "DISK"; break;
-	case FTP:  str << "FTP"; break;
-	case SMB:  str << "SMB"; break;
-	case HTTP: str << "HTTP"; break;
-	default:   str << "???"; break;
+	case CD:    tstr = "CD";    break;
+	case DVD:   tstr = "DVD";   break;
+	case NFS:   tstr = "NFS";   break;
+	case DIR:   tstr = "DIR";   break;
+	case DISK:  tstr = "DISK";  break;
+	case FTP:   tstr = "FTP";   break;
+	case SMB:   tstr = "SMB";   break;
+	case HTTP:  tstr = "HTTP";  break;
+	case HTTPS: tstr = "HTTPS"; break;
+	///////////////////////////////////////////////////////////////////
+	// no default: let compiler warn '... not handled in switch'
+        ///////////////////////////////////////////////////////////////////
+	case Unknown:
+	  break;
     }
-    str << "@" << _destination.asString() << endl;
+    str << tstr << "@" << _destination.asString() << endl;
     return str;
 }
 
