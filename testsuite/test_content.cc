@@ -43,8 +43,8 @@ int main()
 
   InstSrcPtr nsrc;
 
-  Url      url     ( "dir:///8.1" );  // media
-  Pathname proddir ( "/" );            // product dir
+  Url      url     ( "dir:///" );  // media
+  Pathname proddir ( "/8.1" );	      // product dir
   Pathname cache   ( "/tmp/tcache" ); // cachedir (must not exist)
 
   PMError err = InstSrc::vconstruct( nsrc, cache, url, proddir, InstSrc::T_UnitedLinux );
