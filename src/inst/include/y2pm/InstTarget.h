@@ -44,7 +44,7 @@
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
-
+#include <y2pm/InstTargetError.h>
 #include <y2pm/InstData.h>	// InstTarget implements InstData
 #include <y2pm/RpmDb.h>		// InstTarget is tied to RpmDb atm
 
