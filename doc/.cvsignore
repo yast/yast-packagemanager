@@ -10,3 +10,5 @@ PackageManagement
 *.pdf
 *.tex
 *.bak
+*.dvi
+*.ps
