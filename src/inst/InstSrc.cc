@@ -58,6 +58,8 @@ IMPL_BASE_POINTER(InstSrc);
 
 ///////////////////////////////////////////////////////////////////
 
+unsigned InstSrc::_SRCID( 0 );
+
 const Pathname InstSrc::_c_descr_dir( "DESCRIPTION" );
 const Pathname InstSrc::_c_data_dir ( "DATA" );
 const Pathname InstSrc::_c_media_dir( "MEDIA" );
@@ -72,7 +74,8 @@ const Pathname InstSrc::_c_media_dir( "MEDIA" );
 //
 //	DESCRIPTION :
 InstSrc::InstSrc()
-    : _cache_deleteOnExit( false )
+    : _srcID( ++_SRCID )
+    , _cache_deleteOnExit( false )
     , _may_use_cache( true )
     , _specialCache( -1 )
     , _medianr (0)
