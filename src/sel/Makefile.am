@@ -13,7 +13,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		inst/include	\
 		media/include	\
 		libPkgDep/include	\
-	   ) -I$(includedir) -I$(includedir)/y2util/qt
+	   ) -I$(includedir)
 
 noinst_LTLIBRARIES = liby2pmsel.la
 
