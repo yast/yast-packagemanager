@@ -25,7 +25,7 @@ using namespace std;
 */
 int main( int argc, char **argv )
 {
-  Y2Logging::setLogfileName( "test_patchinfo.log" );
+  Y2Logging::setLogfileName( "-" );
   MIL << "START" << endl;
 
   const char *readFile = 0;
