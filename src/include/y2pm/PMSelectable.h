@@ -214,6 +214,7 @@ class PMSelectable : virtual public Rep {
       S_NoInst,              // no modification      ( have no installedObj )
       S_KeepInstalled,       // no modification      ( have installedObj )
       S_Auto,                // like S_Install, but not requested by user, does not clear taboo
+      S_AutoDel,             // like S_Del, but not requested by user, does not clear taboo
       S_Taboo,               // hide candidateObj so it can't be installed. ( have no installedObj )
     };
 
@@ -345,6 +346,15 @@ class PMSelectable : virtual public Rep {
       if ( !_state.has_candidate_only() )
 	return false; // Otherwise UI will be confused ;(
       return _state.auto_set_install( true );
+    }
+
+    /**
+     * Auto request to delete the installed object. Fails if no
+     * installed object is present, or user requested 'install'.
+     **/
+    bool auto_set_delete() {
+#warning auto_set_delete: Any UI checks needed here ?
+      return _state.auto_set_delete( true );
     }
 
   public:
