@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<TITLE>
+SuSE language-specific package description
+</TITLE>
+</HEAD>
+<BODY>
+<H1>SuSE language-specific package description</H1>
+<H2>Requirements</H2>
+<OL>
+<LI><b>Package</b><br>
+The package identifier (<i>name</i><i>version</i><i>revision</i><i>architecture</i>)</LI>
+<LI><b>Summary</b><br>
+The package summary (aka 'Label'), a one-line description of the package</LI>
+<LI><b>Description</b><br>
+The package description, a (possible) multi-line description of the package</LI>
+<LI><b>Installation notify</b><br>
+An informal message to be shown to the user if the package is selected.<br>
+(i.e. a 'test version, don't use' warning or a commercial license.</li>
+<LI><b>Deletion notify</b><br>
+An informal message to be shown to the user if the package is de-selected.<br>
+(i.e. a 'your system will be unusable without this package' warning.</li>
+</OL>
+<br>
+<H2>Implementation</H2>
+In order to re-use existing code and infrastructure, the syntactic representation
+of the language file is identical to the <A HREF="package-descr.html">packages</A> file
+<br>
+<p></p>
+<H2>Header keywords</H2>
+The language file starts with a header defining the version.<br>
+<TABLE border>
+<tr><th>Keyword</th><th>Value</th><th>Comment</th></tr>
+<tr><td valign=top>=Ver</td><td valign=top>2.0</td><td>The old (&lt;lang&gt;.pkd) format was 1.1, this one is 2.0</td></tr>
+</table>
+<br>
+The old <tt>Encoding</tt> tag is <i>not</i> needed any more since all
+translation have to be <b>UTF-8</b> encoded now.
+<br>
+
+<p></p>
+<H2>Package entry keywords</H2>
+<TABLE border>
+<tr><th>Keyword</th><th>Value</th><th>Comment</th></tr>
+<tr><td valign=top>=Pkg</td><td valign=top><i>name</i> <i>version</i> <i>release</i> <i>architecture</i></td><td>These four values identify a package unambiguously and are used as a key</td></tr>
+<tr><td valign=top>=Sum</td><td valign=top><i>summary</i></td><td>one line summary (aka 'label')</td></tr>
+<tr><td valign=top>+Des<br>-Des</td><td valign=top><i>description</i></td><td>multi-line description</td></tr>
+<tr><td valign=top>+Ins<br>-Ins</td><td valign=top><i>installation notify</i></td><td>User notification when package is selected for installation</td></tr>
+<tr><td valign=top>+Del<br>-Del</td><td valign=top><i>deletion notify</i></td><td>User notification when package is selected for deletion</td></tr>
+<tr><td valign=top>=Shr</td><td valign=top><i>name</i> <i>version</i> <i>release</i> <i>architecture</i></td><td>of another package.<br>
+All values not explicitly set in the current package entry are shared with
+the mentioned package.<br>
+</TABLE>
+</BODY>
+</HTML>
