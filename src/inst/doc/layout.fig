@@ -1,0 +1,45 @@
+#FIG 3.2
+Landscape
+Center
+Metric
+A4      
+100.00
+Single
+-2
+1200 2
+2 2 0 1 0 7 50 0 -1 0.000 0 0 -1 0 0 5
+	 720 4140 5850 4140 5850 6255 720 6255 720 4140
+2 2 0 1 0 7 50 0 -1 0.000 0 0 -1 0 0 5
+	 720 6570 3240 6570 3240 8145 720 8145 720 6570
+2 2 0 1 0 7 50 0 -1 0.000 0 0 -1 0 0 5
+	 4005 6570 6975 6570 6975 8145 4005 8145 4005 6570
+2 2 0 1 0 7 50 0 -1 0.000 0 0 -1 0 0 5
+	 720 1170 6795 1170 6795 2970 720 2970 720 1170
+2 2 0 1 0 7 50 0 -1 0.000 0 0 -1 0 0 5
+	 4005 8505 6885 8505 6885 9585 4005 9585 4005 8505
+4 0 0 50 0 0 14 0.0000 4 195 1545 360 540 instsrc class layout\001
+4 0 0 50 0 0 12 0.0000 4 165 1140 900 1530 InstSrcManager\001
+4 0 0 50 0 0 12 0.0000 4 165 3300 900 2160 toplevel access class for all installation sources\001
+4 0 0 50 0 0 12 0.0000 4 165 5550 900 2370 provides functions for source management (register new, drop, enable/disable)\001
+4 0 0 50 0 0 12 0.0000 4 165 3060 900 2580 and source access (description and content)\001
+4 0 0 50 0 0 12 0.0000 4 120 510 855 4455 InstSrc\001
+4 0 0 50 0 0 12 0.0000 4 165 3000 855 4815 access class for a single installation source\001
+4 0 0 50 0 0 12 0.0000 4 165 4035 855 5025 transparently handles all kinds of sources (from CD with\001
+4 0 0 50 0 0 12 0.0000 4 165 3945 855 5235 defined structure to http accessible directory with bunch\001
+4 0 0 50 0 0 12 0.0000 4 165 885 855 5445 of rpm files)\001
+4 0 0 50 0 0 12 0.0000 4 165 4185 855 5655 differentiates between source description (product, version,\001
+4 0 0 50 0 0 12 0.0000 4 165 4410 855 5865 vendor, etc) and source content (packages, selections, patches)\001
+4 0 0 50 0 0 12 0.0000 4 120 930 855 6885 InstSrcDescr\001
+4 0 0 50 0 0 12 0.0000 4 120 840 4095 6885 InstSrcData\001
+4 0 0 50 0 0 12 0.0000 4 165 1965 810 7200 access to source description\001
+4 0 0 50 0 0 12 0.0000 4 165 1725 810 7410 (used to identify source)\001
+4 0 0 50 0 0 12 0.0000 4 165 2295 810 7620 id, product, version, vendor, etc.\001
+4 0 0 50 0 0 12 0.0000 4 105 1695 4095 7110 access to source content\001
+4 0 0 50 0 0 12 0.0000 4 165 2040 4095 7320 selections, packages, patches\001
+4 0 0 50 0 0 12 0.0000 4 165 2100 810 7920 automatically determines kind\001
+4 0 0 50 0 0 12 0.0000 4 120 660 810 8130 of source\001
+4 0 0 50 0 0 12 0.0000 4 165 2250 4095 7740 uses helper classes to determine\001
+4 0 0 50 0 0 12 0.0000 4 120 1020 4095 7950 kind of source\001
+4 0 0 50 0 0 12 0.0000 4 120 1005 4095 8775 DataOldSuSE\001
+4 0 0 50 0 0 12 0.0000 4 165 2130 4095 9045 helper class to access old suse\001
+4 0 0 50 0 0 12 0.0000 4 165 2715 4095 9255 media (suse/setup/descr/common.pkd)\001
