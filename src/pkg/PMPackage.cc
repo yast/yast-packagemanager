@@ -77,7 +77,11 @@ unsigned int           PMPackage::medianr()      const { DP_GET( medianr ); }
 std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
 std::list<std::string> PMPackage::du()	         const { DP_GET( du ); }
 // physical access to the rpm file.
-Pathname               PMPackage::providePkgToInstall() const { DP_GET( providePkgToInstall ); }
+PMError                PMPackage::providePkgToInstall(Pathname& path) const
+{
+    if ( _dataProvider ) return _dataProvider->providePkgToInstall( *this, path );
+    return PMPackageDataProvider::providePkgToInstall(path);
+}
 #undef DP_GET
 ///////////////////////////////////////////////////////////////////
 

@@ -30,6 +30,7 @@
 #include <y2util/Pathname.h>
 #include <y2util/YRpmGroupsTree.h>
 
+#include <y2pm/PMError.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
 
@@ -93,7 +94,7 @@ class PMPackageDataProvider : virtual public Rep {
     static std::list<std::string> du()		{ return std::list<std::string>(); }
 
     // physical access to the rpm file.
-    static Pathname providePkgToInstall()       { return Pathname(); }
+    static PMError providePkgToInstall(Pathname& path_r) { return PMError::E_ok; }
 
   protected:
 
@@ -150,7 +151,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::list<std::string> du	       ( const PMPackage & pkg_r ) const { return du(); }
 
     // physical access to the rpm file.
-    virtual Pathname providePkgToInstall( const PMPackage & pkg_r ) const { return providePkgToInstall(); }
+    virtual PMError providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return providePkgToInstall(path_r); }
 };
 
 ///////////////////////////////////////////////////////////////////

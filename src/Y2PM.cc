@@ -67,16 +67,18 @@ Y2PM::CallBacks Y2PM::_callbacks = Y2PM::CallBacks::CallBacks();
 
 Y2PM::CallBacks::CallBacks()
 {
-    _installation_provide_start_func = NULL;
-    _installation_provide_start_data = NULL;
-    _installation_provide_progress_func = NULL;
-    _installation_provide_progress_data = NULL;
-    _installation_package_start_func = NULL;
-    _installation_package_start_data = NULL;
-    _installation_package_progress_func = NULL;
-    _installation_package_progress_data = NULL;
-    _installation_package_done_func = NULL;
-    _installation_package_done_data = NULL;
+    _provide_start_func = NULL;
+    _provide_start_data = NULL;
+    _provide_progress_func = NULL;
+    _provide_progress_data = NULL;
+    _provide_done_func = NULL;
+    _provide_done_data = NULL;
+    _package_start_func = NULL;
+    _package_start_data = NULL;
+    _package_progress_func = NULL;
+    _package_progress_data = NULL;
+    _package_done_func = NULL;
+    _package_done_data = NULL;
 };
 
 
@@ -84,10 +86,10 @@ Y2PM::CallBacks::CallBacks()
  * called right before package 'name' is provided
  * */
 void
-Y2PM::setProvideStartCallback(void (*func)(const std::string& name, const FSize&, void*), void* data)
+Y2PM::setProvideStartCallback(void (*func)(const std::string& name, const FSize&, bool, void*), void* data)
 {
-    _callbacks._installation_provide_start_func = func;
-    _callbacks._installation_provide_start_data = data;
+    _callbacks._provide_start_func = func;
+    _callbacks._provide_start_data = data;
 }
 
 /**
@@ -97,18 +99,28 @@ void
 Y2PM::setProvideProgressCallback(void (*func)(int percent, void*), void* data)
 {
 #warning Pass 'provide progress' callback to Media
-    _callbacks._installation_provide_progress_func = func;
-    _callbacks._installation_provide_progress_data = data;
+    _callbacks._provide_progress_func = func;
+    _callbacks._provide_progress_data = data;
 }
 
 /**
- * called right before package 'name' is installed
+ * called right after a package was provided
  * */
 void
-Y2PM::setInstallationPackageStartCallback(void (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data)
+Y2PM::setProvideDoneCallback(void (*func)(PMError err, const std::string&, void*), void* data)
 {
-    _callbacks._installation_package_start_func = func;
-    _callbacks._installation_package_start_data = data;
+    _callbacks._provide_done_func = func;
+    _callbacks._provide_done_data = data;
+}
+
+/**
+ * called right before package 'name' is installed or deleted
+ * */
+void
+Y2PM::setPackageStartCallback(void (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data)
+{
+    _callbacks._package_start_func = func;
+    _callbacks._package_start_data = data;
 }
 
 /**
@@ -116,21 +128,21 @@ Y2PM::setInstallationPackageStartCallback(void (*func)(const std::string& name, 
  * already installed percentage
  * */
 void
-Y2PM::setInstallationPackageProgressCallback(void (*func)(int percent, void*), void* data)
+Y2PM::setPackageProgressCallback(void (*func)(int percent, void*), void* data)
 {
-    _callbacks._installation_package_progress_func = func;
-    _callbacks._installation_package_progress_data = data;
+    _callbacks._package_progress_func = func;
+    _callbacks._package_progress_data = data;
     instTarget().setPackageInstallProgressCallback (func, data);
 }
 
 /**
- * called after package 'name' got installed
+ * called after a package got installed or deleted
  * */
 void
-Y2PM::setInstallationPackageDoneCallback(void (*func)(const std::string& name, void*), void* data)
+Y2PM::setPackageDoneCallback(void (*func)(PMError, const std::string&, void*), void* data)
 {
-    _callbacks._installation_package_done_func = func;
-    _callbacks._installation_package_done_data = data;
+    _callbacks._package_done_func = func;
+    _callbacks._package_done_data = data;
 }
 
 
@@ -301,7 +313,20 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 
     packageManager().getPackagesToInsDel (dellist, inslist);	// compute order
 
-    instTarget().removePackages (dellist);			// delete first
+    for (std::list<PMPackagePtr>::iterator it = dellist.begin();
+	 it != dellist.end(); ++it)
+    {
+	string fullname = (const string &)((*it)->name()) + "-" + (*it)->edition().as_string();
+
+	if (_callbacks._package_start_func)
+	    (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), true, _callbacks._package_start_data);
+
+	PMError err = instTarget().removePackage (*it);
+
+	if (_callbacks._package_done_func)
+	    (*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+
+    }
 
     // install loop
 
@@ -319,23 +344,29 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 
 	string fullname = (const string &)((*it)->name()) + "-" + (*it)->edition().as_string();
 
-	if (_callbacks._installation_provide_start_func)
-	    (*_callbacks._installation_provide_start_func)(fullname, (*it)->archivesize(), _callbacks._installation_provide_start_data);
-	Pathname path = (*it)->providePkgToInstall();
-	if (path.empty())
+	if (_callbacks._provide_start_func)
+	    (*_callbacks._provide_start_func)(fullname, (*it)->archivesize(), true, _callbacks._provide_start_data);
+
+	Pathname path;
+	PMError err = (*it)->providePkgToInstall(path);
+
+	if (_callbacks._provide_done_func)
+	    (*_callbacks._provide_done_func)(err, "", _callbacks._provide_done_data);
+
+	if (err)
 	{
-	    ERR << "Media can't provide package to install for " << (*it) << endl;
+	    ERR << "Media can't provide package to install for " << (*it) << ":" << err.errstr() << endl;
 	    remaining.push_back ((*it)->name());
 	    continue;
 	}
 
-	if (_callbacks._installation_package_start_func)
-	    (*_callbacks._installation_package_start_func) (fullname, (*it)->summary(), (*it)->size(), false, _callbacks._installation_package_start_data);
+	if (_callbacks._package_start_func)
+	    (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), false, _callbacks._package_start_data);
 
-	PMError err = instTarget().installPackage (path);
+	err = instTarget().installPackage (path);
 
-	if (_callbacks._installation_package_done_func)
-	    (*_callbacks._installation_package_done_func) (fullname, _callbacks._installation_package_done_data);
+	if (_callbacks._package_done_func)
+	    (*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
 
 	if (err)
 	{
