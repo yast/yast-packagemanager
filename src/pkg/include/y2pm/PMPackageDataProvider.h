@@ -21,6 +21,7 @@
 
 #include <iosfwd>
 
+#include <y2pm/PMPackage.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
 
 #include <y2pm/PMDataProvider.h>
@@ -39,6 +40,13 @@ class REP_CLASS(PMPackageDataProvider), public PMDataProvider  {
     PMPackageDataProvider();
 
     virtual ~PMPackageDataProvider();
+
+    /** see PMObject */
+    virtual std::string getAttributeValue(
+	PMPackagePtr pkg, PMObject::PMObjectAttribute attr) = 0;
+    /** see PMObject */
+    virtual std::string getAttributeValue(
+	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr) = 0;
 
   public:
 

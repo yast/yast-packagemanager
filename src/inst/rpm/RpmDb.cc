@@ -35,6 +35,7 @@
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/PMRpmPackageDataProvider.h>
 
 #define ORIGINALRPMPATH "/var/lib/rpm/"
 #define RPMPATH "/var/lib/"
@@ -55,6 +56,7 @@ create_directories(string name)
 }
 
 
+IMPL_HANDLES(RpmDb);
 
 /****************************************************************/
 /* public member-functions					*/
@@ -175,6 +177,8 @@ DbStatus RpmDb::initDatabase( bool createNew )
 	  }
        }
     }
+
+    _dataprovider = new PMRpmPackageDataProvider(this);
 
     return dbStatus;
 }
@@ -652,6 +656,8 @@ bool RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 				pkgattribs[RPM_NAME],
 				edi,
 				pkgattribs[RPM_ARCH]);
+
+	    p->setDataProvider(_dataprovider);
 
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type prerequires;

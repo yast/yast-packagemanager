@@ -43,7 +43,7 @@
 /**
  *
  **/
-class DataOldSuSE {
+class DataOldSuSE: virtual public Rep {
   REP_BODY(DataOldSuSE)
 
   private:

@@ -7,7 +7,7 @@ AUTOMAKE_OPTIONS = dejagnu
 INCLUDES= -I$(QTDIR)/include -I$(top_srcdir)/src -I$(top_srcdir)/src/include -I$(includedir) \
 	 -I$(top_srcdir)/src/pkg/include \
 	 -I$(top_srcdir)/src/inst/rpm/include \
-	 -I$(top_srcdir)/src/instsrc/include 
+	 -I$(top_srcdir)/src/inst/include 
 
 noinst_PROGRAMS = test_rpmdb
 #ma_test.exe

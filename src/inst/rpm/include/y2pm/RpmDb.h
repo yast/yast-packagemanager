@@ -29,9 +29,12 @@
 #include <list>
 #include <vector>
 
+#include <y2pm/RpmDbPtr.h>
+
 #include <y2util/ExternalProgram.h>
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMRpmPackageDataProviderPtr.h>
 
 /**
  * @short Interface to the rpm program
@@ -40,8 +43,10 @@
 enum DbStatus { DB_OK, DB_NOT_FOUND, DB_OLD_VERSION , DB_NEW_CREATED,
                 DB_ERROR_CREATED, DB_ERROR_CHECK_OLD_VERSION };
 
-class RpmDb
+class RpmDb: virtual public Rep
 {
+    REP_BODY(RpmDb)
+
     public:
 
 	typedef std::set<std::string> FileList;
@@ -103,15 +108,22 @@ class RpmDb
 	 * */
 	const std::string& queryCurrentDBPath ( void ) { return dbPath; };
 
-    private:
-
 	/**
 	 * general query of a package
 	 *
 	 * @param format query format as rpm understands it
-	 * @param packagelabel full label (name-version-relase) of the package to query
+	 * @param packagelabel full label (name-version-relase)
+	 * of the package to query. If you don't use the full label
+	 * but only the name, the return value could be the result
+	 * of multiple packages with different versions installed.
 	 */
 	std::string queryPackage(const char *format, std::string packagelabel);
+
+    private:
+
+	/** dataprovider that is given to every created package
+	 * */
+	PMRpmPackageDataProviderPtr _dataprovider;
 
 	/** 
 	 * The name of the install root.

@@ -35,6 +35,18 @@
  **/
 class REP_CLASS(PMObject), public PMSolvable {
   REP_BODY(PMObject)
+  public:
+    enum PMObjectAttribute {
+      PMOBJ_SUMMARY = 0,
+      PMOBJ_DESCRIPTION,
+      PMOBJ_SIZE,
+
+      PMOBJ_NUM_ATTRIBUTES
+    };
+
+  private:
+
+      static const char* const PMObjectAttributeNames[PMOBJ_NUM_ATTRIBUTES];
 
   public:
 
@@ -45,7 +57,21 @@ class REP_CLASS(PMObject), public PMSolvable {
 
   public:
 
-    virtual std::string Summary() const { return "--not available--"; }
+//    virtual std::string Summary() const { return "--not available--"; }
+
+    /** get attributes like Summary, Description, Group etc.
+     *
+     * @param attr Attribute number
+     * @return Attribute value
+     * */
+    virtual std::string getAttributeValue(PMObjectAttribute attr) = 0;
+
+    /** get the name of an attribute
+     *
+     * @param attr Attribute number
+     * @return Attribute name
+     * */
+    std::string getAttributeName(PMObjectAttribute attr);
 
   public:
 

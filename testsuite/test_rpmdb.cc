@@ -1,10 +1,21 @@
 #include <list>
 #include <string>
-#include <y2pm/PMPackagePtr.h>
 #include <y2pm/RpmDb.h>
+#include <y2pm/PMPackage.h>
 #include <iostream>
+#include <functional>
 
 using namespace std;
+
+class PMPkg_eq : public unary_function<PMPackagePtr,bool>
+{
+	string _name;
+    public:
+	explicit PMPkg_eq(const string& s) : _name(s) {}
+	bool operator()(const PMPackagePtr& c) const
+	    { return (c->name() == _name); }
+};
+
 
 int main(int argc, char* argv[])
 {
@@ -16,17 +27,25 @@ int main(int argc, char* argv[])
 
     string package = argv[1];
 
-    RpmDb rpmdb("/");
+    RpmDbPtr rpmdb = new RpmDb("/");
 
     if(package == "-a")
     {
-	rpmdb.initDatabase();
+	rpmdb->initDatabase();
 	list<PMPackagePtr> pkglist;
-	rpmdb.getPackages(pkglist);
+	rpmdb->getPackages(pkglist);
+	for(int i = 2; i < argc; i++)
+	{
+	    typedef list<PMPackagePtr>::iterator PkgLI;
+	    PkgLI p = find_if(pkglist.begin(),pkglist.end(),PMPkg_eq(argv[i]));
+	    cout << "query of " << argv[i] << endl;
+	    cout << (*p)->getAttributeValue(PMPackage::PKG_LICENSE) << endl;
+	    cout << (*p)->getAttributeValue(PMPackage::PMOBJ_DESCRIPTION) << endl;
+	}
     }
     else
     {
-	bool ret = rpmdb.checkPackage(package);
+	bool ret = rpmdb->checkPackage(package);
 	cout << package << " is " << (ret?"ok":"corrupt") << endl;
     }
 
