@@ -66,7 +66,7 @@ ostream& operator<<( ostream& os, const PkgDep::ErrorResult& res )
 		{
 		    if(it != res.remove_to_solve_conflict.begin())
 		    {
-			cout << ", ";
+			os << ", ";
 		    }
 		    os << (*it)->name();
 		}
