@@ -362,7 +362,7 @@ PMSelectionManager & Y2PM::selectionManager()
     _selectionManager = new PMSelectionManager;
     MIL << "Created SelectionManager @" << _selectionManager << endl;
     if ( _instTarget && instTarget().initialized() ) {
-      selectionManager().poolSetInstalled( instTarget().getPackages() );
+      selectionManager().poolSetInstalled( instTarget().getSelections() );
     }
   }
   return *_selectionManager;
