@@ -53,13 +53,21 @@ class PMYouPatchPaths : virtual public Rep {
     void setPatchPath( const Pathname & );
     Pathname patchPath();
 
-    Pathname rpmPath( const PMPackagePtr &pkg );
-
     void setPatchUrl( const Url & );
     Url patchUrl();
 
+    Pathname rpmPath( const PMPackagePtr &pkg );
+
+    Pathname scriptPath( const std::string &scriptName );
+
+    /**
+      Return local base directory for you related files.
+    */
     Pathname localDir();
 
+    /**
+      Return directory where information about installed patches is stored.
+    */
     Pathname installDir();
 
     std::string product();
@@ -80,6 +88,8 @@ class PMYouPatchPaths : virtual public Rep {
   private:
     Pathname _patchPath;
     Pathname _rpmPath;
+    Pathname _scriptPath;
+    
     Url _patchUrl;
     
     std::string _product;

@@ -238,6 +238,11 @@ class InstTarget: virtual public Rep, public InstData {
          */
         PMError installPatch( const Pathname &filename );
 
+        /**
+         * Execute script.
+         */
+        PMError executeScript( const Pathname &scriptname );
+
 	// TODO: more function, like df, du etc.
 
     private:

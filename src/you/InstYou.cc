@@ -227,36 +227,54 @@ PMError InstYou::installPatches( bool dryrun )
 PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 {
   D__ << "INSTALL PATCH: " << patch->name() << endl;
-    
-  list<string> packageFileNames;
+
+  PMError error;
+
+  Pathname scriptPath;
+  if ( !patch->preScript().empty() ) {
+    scriptPath = _media.localPath( _paths->scriptPath( patch->preScript() ) );
+    if ( dryrun ) {
+      cout << "PRESCRIPT: " << scriptPath << endl;
+    } else {
+      Y2PM::instTarget().executeScript( scriptPath );
+    }
+  }
 
   list<PMPackagePtr> packages = patch->packages();
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
     Pathname fileName = _media.localPath( _paths->rpmPath( *itPkg ) );
-    packageFileNames.push_back( fileName.asString() );
-    D__ << "INSTALL PKG " << fileName << endl;      
+    D__ << "INSTALL PKG " << fileName << endl;  
     if ( dryrun ) {
       cout << "INSTALL: " << fileName << endl;
+    } else {
+      error = Y2PM::instTarget().installPackage( fileName.asString() );
+      if ( error ) {
+        E__ << "Installation of RPM " << fileName << " of patch "
+            << patch->name() << "failed" << endl;
+        return error;
+      }
     }
   }
 
   if ( !dryrun ) {
-    PMError error = Y2PM::instTarget().installPackages( packageFileNames );
-    if ( error ) {
-      E__ << "Installation of RPMs of patch " << patch->name()
-          << "failed" << endl;
-      return error;
-    }
-    
     error = Y2PM::instTarget().installPatch( patch->localFile() );
     if ( error ) {
       E__ << "Error installing patch info." << endl;
       return error;
     }
   }
+
+  if ( !patch->postScript().empty() ) {
+    scriptPath = _media.localPath( _paths->scriptPath( patch->postScript() ) );
+    if ( dryrun ) {
+      cout << "POSTSCRIPT: " << scriptPath << endl;
+    } else {
+      Y2PM::instTarget().executeScript( scriptPath );
+    }
+  }
   
-  return PMError();
+  return error;
 }
 
 PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
@@ -271,6 +289,27 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     if ( error ) {
       E__ << "Error downloading RPM '" << (*itPkg)->name() << "' from '"
           << _paths->patchUrl() << "/" << rpmPath << "'" << endl;
+      return error;
+    }
+  }
+
+  Pathname scriptPath;
+  if ( !patch->preScript().empty() ) {
+    scriptPath = _paths->scriptPath( patch->preScript() );
+    PMError error = _media.provideFile( scriptPath );
+    if ( error ) {
+      E__ << "Error downloading pre script from '"
+          << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
+      return error;
+    }
+  }
+  
+  if ( !patch->postScript().empty() ) {
+    scriptPath = _paths->scriptPath( patch->postScript() );
+    PMError error = _media.provideFile( scriptPath );
+    if ( error ) {
+      E__ << "Error downloading post script from '"
+          << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
       return error;
     }
   }
@@ -325,6 +364,22 @@ PMError InstYou::removePackages()
       PMError error = _media.releaseFile( _paths->rpmPath( *itPkg ) );
       if ( error ) {
         E__ << "Can't release " << _paths->rpmPath( *itPkg ).asString() << endl;
+        return error;
+      }
+    }
+    if ( !patch->preScript().empty() ) {
+      Pathname scriptPath = _paths->scriptPath( patch->preScript() );
+      PMError error = _media.releaseFile( scriptPath );
+      if ( error ) {
+        E__ << "Can't release " << scriptPath.asString() << endl;
+        return error;
+      }
+    }
+    if ( !patch->postScript().empty() ) {
+      Pathname scriptPath = _paths->scriptPath( patch->postScript() );
+      PMError error = _media.releaseFile( scriptPath );
+      if ( error ) {
+        E__ << "Can't release " << scriptPath.asString() << endl;
         return error;
       }
     }

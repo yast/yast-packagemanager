@@ -40,7 +40,9 @@ class YOUPatchTagSet : public CommonPkdParser::TagSet
 	    MINYAST2VERSION,
 	    UPDATEONLYINSTALLED,
 	    PACKAGES,
-	    NUM_TAGS
+	    NUM_TAGS,
+            PRESCRIPT,
+            POSTSCRIPT
 	};
     private:
 	std::string _locale;
@@ -77,6 +79,8 @@ class YOUPatchTagSet : public CommonPkdParser::TagSet
 	    t = createTag("UpdateOnlyInstalled",UPDATEONLYINSTALLED);
 	    t = createTag("Packages",PACKAGES);
 	    t->setEndTag("Segakcap");
+	    t = createTag("Prescript",PRESCRIPT);
+	    t = createTag("Postscript",POSTSCRIPT);
 	}
         
         CommonPkdParser::Tag *createTag( const std::string &tagname, int num )

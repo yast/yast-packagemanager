@@ -326,6 +326,8 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     p->setPreInformation( tagValue( YOUPatchTagSet::PREINFORMATION ) );
     p->setPostInformation( tagValue( YOUPatchTagSet::POSTINFORMATION ) );
     p->setMinYastVersion( tagValue( YOUPatchTagSet::MINYAST2VERSION ) );
+    p->setPreScript( tagValue( YOUPatchTagSet::PRESCRIPT ) );
+    p->setPostScript( tagValue( YOUPatchTagSet::POSTSCRIPT ) );
 
     value = tagValue( YOUPatchTagSet::UPDATEONLYINSTALLED );
     if ( value == "true" ) { p->setUpdateOnlyInstalled( true ); }
