@@ -29,7 +29,6 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMPackageManager_update.h>
 #include <y2pm/PkgDu.h>
-#include <y2pm/InstSrcManager.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -87,8 +86,7 @@ class PMPackageManager : public PMManager {
      **/
     void getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 			      std::list<PMPackagePtr> & instlist_r,
-			      std::list<PMPackagePtr> & srclist_r,
-			      InstSrcManager::ISrcIdList sourcerank_r = InstSrcManager::ISrcIdList() );
+			      std::list<PMPackagePtr> & srclist_r );
 
     /**
      * go through all installed packages and update them.

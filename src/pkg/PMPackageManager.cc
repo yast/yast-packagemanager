@@ -27,6 +27,7 @@
 
 #include <Y2PM.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/InstallOrder.h>
 
@@ -144,8 +145,7 @@ ostream & operator<<( ostream & str, const PMPackageManager & obj )
 //
 void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 					    std::list<PMPackagePtr> & instlist_r,
-					    std::list<PMPackagePtr> & srclist_r,
-					    InstSrcManager::ISrcIdList sourcerank_r )
+					    std::list<PMPackagePtr> & srclist_r )
 {
     dellist_r.clear();
     instlist_r.clear();
@@ -205,34 +205,33 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 
     MIL << "PackagesToInsDel: delete " << dellist_r.size() << ", install " << instlist_r.size() << ", srcinstall " << srclist_r.size() << endl;
 
-    ///////////////////////////////////////////////////////////////////
-    // sort installed list...
-    ///////////////////////////////////////////////////////////////////
     if ( instlist_r.empty() )
       return;
 
     ///////////////////////////////////////////////////////////////////
-    // Get desired sequence InstSrc'es to install from.
+    //
+    // sort installed list...
+    //
     ///////////////////////////////////////////////////////////////////
-    MIL << "PackagesToInsDel: sort install list using " << (sourcerank_r.empty()?"default":"provided") << " ranking" << endl;
-    if ( sourcerank_r.empty() ) {
-      // if not provided use InstSrcManager's default
-      Y2PM::instSrcManager().getSources( sourcerank_r, /*enabled_only*/true );
-    }
 
-#warning RankPriority fails if provided sourcerank does not cover ALL sources occurring
+    ///////////////////////////////////////////////////////////////////
+    // Get desired order of InstSrc'es to install from.
+    ///////////////////////////////////////////////////////////////////
     typedef map<unsigned,unsigned> RankPriority;
     RankPriority rankPriority;
     {
+      InstSrcManager::ISrcIdList sourcerank( Y2PM::instSrcManager().instOrderSources() );
       // map InstSrc rank to install priority
       unsigned prio = 0;
-      for ( InstSrcManager::ISrcIdList::const_iterator it = sourcerank_r.begin(); it != sourcerank_r.end(); ++it, ++prio ) {
+      for ( InstSrcManager::ISrcIdList::const_iterator it = sourcerank.begin();
+	    it != sourcerank.end(); ++it, ++prio ) {
 	rankPriority[(*it)->descr()->default_rank()] = prio;
       }
     }
 
     ///////////////////////////////////////////////////////////////////
-    // Compute install order
+    // Compute install order according to packages prereq.
+    // Try to group packages with respect to the desired install order
     ///////////////////////////////////////////////////////////////////
     // backup list for debug purpose.
     // You can as well build the set, clear the list and rebuild it in install order.

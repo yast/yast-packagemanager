@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov 24 13:07:41 CET 2003 - ma@suse.de
+
+- Removed install order argument from Y2PM::commitPackages, as we
+  may now query the InstSrcManager for this.
+- 2.9.7
+
+-------------------------------------------------------------------
 Thu Nov 20 11:50:17 CET 2003 - ma@suse.de
 
 - MediaCD: Missed to close device if CDROMEJECT/CDROMCLOSETRAY failed.

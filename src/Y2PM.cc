@@ -924,8 +924,7 @@ static PMError installSpmFromMedia( constInstSrcPtr current_src_ptr_r, unsigned 
 static int internal_commitPackages( unsigned mediaNr_r,
 				    std::list<std::string> & errors_r,
 				    std::list<std::string> & remaining_r,
-				    std::list<std::string> & srcremaining_r,
-				    InstSrcManager::ISrcIdList installrank_r )
+				    std::list<std::string> & srcremaining_r )
 {
   CommitReport::Send report( commitReport );
 
@@ -955,7 +954,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
   std::list<PMPackagePtr> dellist;
   std::list<PMPackagePtr> inslist;
   std::list<PMPackagePtr> srclist;
-  Y2PM::packageManager().getPackagesToInsDel( dellist, inslist, srclist, installrank_r );
+  Y2PM::packageManager().getPackagesToInsDel( dellist, inslist, srclist );
   if ( mediaNr_r ) {
     MIL << "Restrict to media number " << mediaNr_r << endl;
   }
@@ -1257,6 +1256,16 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
 			  std::list<std::string> & srcremaining_r,
 			  InstSrcManager::ISrcIdList installrank_r )
 {
+#warning DEPRECATED commitPackages using sourcerank
+  INT << "Call to obsolete commitPackages using sourcerank argument" << endl;
+  return commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r );
+}
+
+int Y2PM::commitPackages( unsigned mediaNr_r,
+			  std::list<std::string> & errors_r,
+			  std::list<std::string> & remaining_r,
+			  std::list<std::string> & srcremaining_r )
+{
   if ( ! ( _instTarget && instTarget().initialized() ) ) {
     ERR << "Can't commit packages: " << InstTargetError::E_not_initialized << endl;
     return -99999;
@@ -1269,7 +1278,7 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
   }
 
   MIL << "Commiting packages..." << endl;
-  int ret = internal_commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r, installrank_r );
+  int ret = internal_commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r );
 
   // Release all source media
   if ( runningFromSystem() || cacheToRamdisk() ) {

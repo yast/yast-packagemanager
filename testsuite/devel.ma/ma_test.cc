@@ -173,7 +173,7 @@ struct WFM {
 
   void SourceStartManager( bool ena ) {
     YCPList args;
-    //args->add( YCPBoolean(ena) );
+    args->add( YCPBoolean(ena) );
     OUT << "SourceStartManager" << args;
     YCPValue ret = _pkgmod->SourceStartManager( args );
     OUT << " --> " << ret << endl;
@@ -210,6 +210,14 @@ struct WFM {
     args->add( YCPString(url_r) );
     OUT << "SourceCreate" << args;
     YCPValue ret = _pkgmod->SourceCreate( args );
+    OUT << " --> " << ret << endl;
+  }
+  void SourceSetEnabled( int id, bool ena ) {
+    YCPList args;
+    args->add( YCPInteger(id) );
+    args->add( YCPBoolean(ena) );
+    OUT << "SourceSetEnabled" << args;
+    YCPValue ret = _pkgmod->SourceSetEnabled( args );
     OUT << " --> " << ret << endl;
   }
 };
@@ -258,10 +266,11 @@ int main()
 
   wfm.init();
   INT << "START" << endl;
+  wfm.SourceStartManager( false );
+  wfm.SourceSetEnabled( 4, false );
+  wfm.SourceSetEnabled( 4, true );
+  wfm.SourceSetEnabled( 5, true );
 
-  wfm.SourceCreate( "/tmp/xx" );
-
-  //wfm.SourceStartManager( false );
   //wfm.SourceStartCache( false );
   //wfm.SourceGetCurrent();
   //wfm.SourceGeneralData( 0 );
