@@ -131,8 +131,9 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 </TABLE>
 <p></p>
 The list of install and delete packages normally just lists packages by name, one per line.<br>
-An expection is the syntax <tt><i>name</i> (<i>alternative</i>)</tt> which
-gives an alternative package if the first isn't available.<br>
+An expection is the syntax <tt><i>name</i> (<i>alternative</i> [,<i>alternative</i> ...])</tt> which
+gives a list of alternative packages if the first isn't available.<br>
+The first available package of the alternative list will be choosen.<br>
 <br>
 <H2>Example</H2>
 (shortened at <tt>...</tt>)
