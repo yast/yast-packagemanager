@@ -209,9 +209,10 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  //ret = mmain( argc, argv );
+  Y2PM::instSrcManager();
   Y2PM::instTargetUpdate();
-  SEC << Y2PM::installFile( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm" ) << endl;
+
+  MIL << PMGR["aaa_base"] << endl;
 
   SEC << "STOP -> " << ret << endl;
   return ret;
@@ -237,48 +238,6 @@ int mmain( int argc, const char * argv[] )
   SEC << db << endl;
   INT << db.initDatabase( root, dbPath ) << endl;
   SEC << db << endl;
-
-  // /usr/lib/rpm/gnupg/pubring.gpg build@suse.de
-
-  MediaAccessPtr m( new MediaAccess() );
-  WAR << m->open( Url( "/tmp" ) ) << endl;
-  WAR << m->attach() << endl;
-
-  constMediaAccessPtr mm( m );
-  string prefix( "gpg-pubkey-" );
-  string ext( ".asc" );
-
-  list<string> files;
-  PMError err = mm->dirInfo( files, "/", /*dots*/false );
-  if ( err ) {
-    ERR << "Unable to read media root: " << err << endl;
-    return 0;
-  }
-  for ( list<string>::const_iterator it = files.begin(); it != files.end(); ++it ) {
-    string file = *it;
-    DBG << "    " << file << endl;
-    if ( file.find( prefix ) != 0 )
-      continue;
-    file.erase( 0, prefix.size() );
-    if ( file.size() <= ext.size() || file.rfind( ext ) != (file.size() - ext.size()) )
-      continue;
-    file.erase( file.size() - ext.size() );
-    MIL << file << endl;
-
-    MediaAccess::FileProvider pubkey( mm, *it );
-    if ( pubkey.error() ) {
-      ERR << "Media can't provide '" << *it << "' " << pubkey.error() << endl;
-       continue;
-    }
-    err = db.importPubkey( pubkey() );
-
-  }
-
-
-
-  //xx( db );
-  //INT << db.importPubkey( "/usr/lib/rpm/gnupg/pubring.gpg", "build@suse.de" ) << endl;
-  //xx( db );
 
   return 0;
 }
