@@ -99,12 +99,6 @@ PMError MediaCurl::attachTo (bool next)
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
 
-  ret = curl_easy_setopt( _curl, CURLOPT_PASSWDFUNCTION,
-                          &passwordCallback );
-  if ( ret != 0 ) {
-      return PMError( Error::E_curl_setopt_failed, _curlError );
-  }
-
   if ( _url.protocol() == Url::ftp && _url.username().empty() ) {
     string id = "yast2@";
     id += VERSION;
@@ -364,13 +358,6 @@ int MediaCurl::progressCallback( void *clientp, double dltotal, double dlnow,
     else return 1;
   }
 
-  return 0;
-}
-
-int MediaCurl::passwordCallback( void *client, char *prompt, char* buffer,
-                                 int buflen )
-{
-  *buffer = 0;
   return 0;
 }
 
