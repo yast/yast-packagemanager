@@ -261,7 +261,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 	PkgSet nowinstalled; // assumed state after operation
 	buildinstalledonly(*this,nowinstalled);
 	
-	if(filter_conflicts_with_installed)
+	if(!success && filter_conflicts_with_installed)
 	{
 	    // iterate through error list
 	    for(PkgDep::ErrorResultList::iterator it = bad.begin();
@@ -307,7 +307,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 	count--;
     } while(repeat && count > 0);
 
-    return success;
+    return bad.empty();
 }
 
 bool PMManager::solveConsistent(PkgDep::ErrorResultList& bad)
