@@ -3,6 +3,7 @@
 
 #include <list>
 #include <y2util/hash.h>
+#include <y2util/RefObject.h>
 #include <y2pm/Package.h>
 #include <y2pm/PkgRevRel.h>
 
@@ -20,6 +21,8 @@ class PkgSet {
 	typedef hash<PkgName,RevRelList_type> InvRel_type;
 	typedef InvRel_type::iterator InvRel_iterator;
 	typedef InvRel_type::const_iterator InvRel_const_iterator;
+
+	typedef RefObject<PkgSet> Ref;
 
   private:
 	// list of pointers to package contained in this set (the pointers go into
