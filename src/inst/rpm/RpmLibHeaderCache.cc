@@ -260,7 +260,9 @@ unsigned phcAddFile( FD_t fd, const PathInfo & cpath_r, const Pathname & citem_r
   int major    = 0;
   int minor    = 0;
 
-  int res = ::rpmReadPackageHeader( pkg, &h, &isSource, &major, &minor );
+  //int res = ::rpmReadPackageHeader( pkg, &h, &isSource, &major, &minor );
+#warning MISSING ::rpmReadPackageHeader
+  int res = 1;
   ::Fclose( pkg );
 
   if ( res || !h ) {

@@ -163,23 +163,6 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  SMGR["X11"]->user_set_delete();
-  SMGR.activate();
-  Y2PM::packageSelectionSaveState();
-
-  SMGR["X11"]->user_unset();
-  SMGR.activate();
-  dumpSelWhatIf( WAR );
-  dumpPkgWhatIf( WAR );
-
-  Y2PM::packageSelectionRestoreState();
-  dumpSelWhatIf( DBG );
-  dumpPkgWhatIf( DBG );
-  SMGR["X11"]->user_unset();
-  SMGR.activate();
-  dumpSelWhatIf( WAR );
-  dumpPkgWhatIf( WAR );
-
   SEC << "STOP" << endl;
   return 0;
 }

@@ -176,6 +176,7 @@ RpmDb::RpmDb() :
     _rootdir(""),
     _varlibrpm("/var/lib/rpm"),
     _varlib("/var/lib"),
+#warning LET old dbname block everything until db init, pkg install/delete are checked.
     _rpmdbname("packages.rpm"),
     _backuppath ("/var/adm/backup"),
     _packagebackups(false),
@@ -712,8 +713,9 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   // multiple entries for the same PkgName. If so we consider the last
   // one installed to be the one we're interesed in.
   ///////////////////////////////////////////////////////////////////
-
-  for ( RpmLibDb::const_iterator iter = rpmdb.begin(); iter != rpmdb.end(); ++iter ) {
+#warning HACK!
+  librpmDb::db_const_iterator iter( librpmDb::access() );
+  for ( ; *iter; ++iter ) {
 
     if ( !*iter ) {
 #warning How to handle bad record number in RpmLibDb?
@@ -750,15 +752,15 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   ///////////////////////////////////////////////////////////////////
   for( FileDeps::FileNames::iterator it = _filerequires.begin(); it != _filerequires.end(); ++it ) {
 
-    RpmLibDb::const_header_set result( rpmdb.findByFile( *it ) );
-    for ( unsigned i = 0; i < result.size(); ++i ) {
-      PMPackagePtr pptr = _packages.lookup( result[i]->tag_name() );
+    for ( iter.findByFile( *it ); *iter; ++iter ) {
+      PMPackagePtr pptr = _packages.lookup( iter->tag_name() );
       if ( !pptr ) {
-	WAR << "rpmdb.findByFile returned unpknown package " << result[i] << endl;
+	WAR << "rpmdb.findByFile returned unpknown package " << *iter << endl;
 	continue;
       }
       pptr->addProvides( *it );
     }
+
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -797,11 +799,12 @@ void RpmDb::traceFileRel( const PkgRelation & rel_r )
     return;
   }
 
-  RpmLibDb::const_header_set result( rpmdb.findByFile( rel_r.name() ) );
-  for ( unsigned i = 0; i < result.size(); ++i ) {
-    PMPackagePtr pptr = _packages.lookup( result[i]->tag_name() );
+#warning HACK!
+  librpmDb::db_const_iterator iter( librpmDb::access() );
+  for ( iter.findByFile( rel_r.name() ); *iter; ++iter ) {
+    PMPackagePtr pptr = _packages.lookup( iter->tag_name() );
     if ( !pptr ) {
-      WAR << "rpmdb.findByFile returned unpknown package " << result[i] << endl;
+      WAR << "rpmdb.findByFile returned unpknown package " << *iter << endl;
       continue;
     }
     pptr->addProvides( rel_r.name() );

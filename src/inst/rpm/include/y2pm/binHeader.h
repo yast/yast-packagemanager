@@ -54,8 +54,6 @@ class binHeader : virtual public Rep {
 
     Header _h;
 
-    bool haveHeader() const { return _h; }
-
     bool assertHeader();
 
   public:
@@ -65,6 +63,8 @@ class binHeader : virtual public Rep {
     virtual ~binHeader();
 
   public:
+
+    bool empty() const { return( _h == NULL ); }
 
     bool has_tag( tag tag_r ) const;
 

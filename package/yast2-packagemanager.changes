@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jun  9 01:05:03 CEST 2003 - ma@suse.de
+
+- Fixes to build with rpm-4. InstTarget is disabled, as lots of
+  code needs review.
+
+-------------------------------------------------------------------
 Fri May 16 14:54:29 CEST 2003 - cschum@suse.de
 
 - Rewrote YOU authentification code.
