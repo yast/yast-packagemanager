@@ -1,149 +1,164 @@
 #ifndef _PkgEdition_h
 #define _PkgEdition_h
 
+#include <ctime>
 #include <string>
-#include <iostream>
+#include <iosfwd>
 
 enum rel_op { NONE, EQ, NE, LT, LE, GT, GE };
 extern const char* op_str[];
 
 /**
- * @short PkgEdition represents  [epoch:]version-release
+ * @short PkgEdition represents <code>[epoch:]version[-release]</code>
  *
- * PkgEdition represents version, release, and epoch of a package.
- * It provides methods for comparing.
- * It can also represent the special editions MAXIMUM (greater than all real
- * editions) and UNSPEC (uncomparable).
+ * Syntax for specifying a PkgEdition:
+ * <PRE>
+ * [epoch:]version[-release]
+ *
+ *   epoch   (optional) number, with assumed default of 0 if not supplied
+ *   version (required) can contain any character except '-'
+ *   release (optional) can contain any character except '-'
+ * </PRE>
+ *
+ * PkgEdition can also represent the special editions <code>MAXIMUM</code>
+ * (greater than all real editions) and <code>UNSPEC</code> (uncomparable).
+ *
+ * PkgEdition may also contain a buildtime (optional, default of 0). On comparing
+ * PkgEditions the buildtime is taken into account, iff PkgEditions are equal and
+ * both contain a nonzero buildtime.
  **/
 class PkgEdition {
 
   public:
 
-    enum type_enum { NORMAL, EPOCH, MAXIMUM, UNSPEC };
+    enum type_enum { NORMAL, MAXIMUM, UNSPEC };
 
   private:
 
-        // Use a 'version-release' form for these strings.
-        // (i.e. exactly one '-')
-	static const std::string _str_UNSPEC;
-	static const std::string _str_MAXIMUM;
+    // Use a 'version-release' form for these strings.
+    // (i.e. exactly one '-')
+    static const std::string _str_UNSPEC;
+    static const std::string _str_MAXIMUM;
 
-	type_enum type;
-	int _epoch;
-	int _buildtime;
-	int _metahash;
-	std::string _version;
-	std::string _release;
+    type_enum   _type;
+    unsigned    _epoch;
+    std::string _version;
+    std::string _release;
+    time_t      _buildtime;
 
-	bool edition_eq( const PkgEdition& e2 ) const;
-	bool edition_lt( const PkgEdition& e2 ) const;
+    bool edition_eq( const PkgEdition& e2 ) const;
+    bool edition_lt( const PkgEdition& e2 ) const;
 
-	int rpmvercmp( const std::string & a, const std::string & b ) const;
+    /**
+     * Return -1,0,1 if versions are <,==,>
+     **/
+    int rpmvercmp( const std::string & a, const std::string & b ) const;
 
-	/**
-	 * Helper for Constructor
-	 *
-	 * String form for an edition is <code>[epoch:]version-release</code>,
-	 * where (optional) epoch is a number, and neither version nor release
-	 * may contain a '-'. This form may be passed to the version string
-	 * <code>v</code>.
-	 *
-	 * In constructors providing an 'int e' epoch value, an epoch part within
-	 * the version string <code>v</code> is not allowed (ignored).
-	 *
-	 * In constructors providing an nonempty release string <code>r</code>,
-	 * a release part within the version string <code>v</code> is
-	 *  not allowed (ignored).
-	 * <pre>
-	 * Construct PkgEdition: epoch 3, version 1.0 release 1
-	 *     PkgEdition( "3:1.0-1" )
-	 *     PkgEdition( "3:1.0", "1" )
-	 *     PkgEdition( 3, "1.0-1" )
-	 *     PkgEdition( 3, "1.0", "1" )
-	 * </pre>
-	 *
-	 * Assert _version/_release are empty srings on MAXIMUM and UNSPEC type.
-	 **/
-	void xconstruct( type_enum xtype, int buildtime, int metahash,
-			 int epoch, const std::string & v, const std::string & r );
+    /**
+     * Helper for Constructor
+     *
+     * String form for an edition is <code>[epoch:]version-release</code>,
+     * where (optional) epoch is a number, and neither version nor release
+     * may contain a '-'. This form may be passed to the version string
+     * <code>v</code>.
+     *
+     * In constructors providing an 'int e' epoch value, an epoch part within
+     * the version string <code>v</code> is not allowed (ignored).
+     *
+     * In constructors providing an nonempty release string <code>r</code>,
+     * a release part within the version string <code>v</code> is
+     *  not allowed (ignored).
+     * <pre>
+     * Construct PkgEdition: epoch 3, version 1.0 release 1
+     *     PkgEdition( "3:1.0-1" )
+     *     PkgEdition( "3:1.0", "1" )
+     *     PkgEdition( 3, "1.0-1" )
+     *     PkgEdition( 3, "1.0", "1" )
+     * </pre>
+     *
+     * Assert _version/_release are empty srings on MAXIMUM and UNSPEC type.
+     **/
+    void xconstruct( type_enum xtype,
+		     unsigned epoch, const std::string & v, const std::string & r,
+		     time_t buildtime );
 
   public:
 
-        /**
-	 * Constructor
-	 * @see #xconstruct
-	 **/
-	PkgEdition( const std::string & v = "", const std::string & r = "" ) {
-		xconstruct(NORMAL,0,0,0,v,r);
-	}
-        /**
-	 * Constructor
-	 * @see #xconstruct
-	 **/
-	PkgEdition( int e, const std::string & v, const std::string & r = "" ) {
-		xconstruct(EPOCH,0,0,e,v,r);
-	}
-        /**
-	 * Constructor
-	 * @see #xconstruct
-	 **/
-	PkgEdition( int buildtime, int metahash, const std::string & v, const std::string & r = "" ) {
-		xconstruct(NORMAL,buildtime,metahash,0,v,r);
-	}
-        /**
-	 * Constructor
-	 * @see #xconstruct
-	 **/
-	PkgEdition( int buildtime, int metahash, int e, const std::string & v, const std::string & r = "" ) {
-		xconstruct(EPOCH,buildtime,metahash,e,v,r);
-	}
-        /**
-	 * Constructor
-	 * @see #xconstruct
-	 **/
-	PkgEdition( type_enum t ) {
-		assert( t == MAXIMUM || t == UNSPEC );
-		xconstruct(t,0,0,0,"","");
-	}
-	~PkgEdition() {}
+    /**
+     * Constructor
+     * @see #xconstruct
+     **/
+    PkgEdition( type_enum t = NORMAL ) {
+      xconstruct(t,0,"","",0);
+    }
+    /**
+     * Constructor
+     * @see #xconstruct
+     **/
+    PkgEdition( const std::string & v, const std::string & r = "", time_t bt = 0 ) {
+      xconstruct(NORMAL,0,v,r,bt);
+    }
+    /**
+     * Constructor
+     * @see #xconstruct
+     **/
+    PkgEdition( const std::string & v, time_t bt ) {
+      xconstruct(NORMAL,0,v,"",bt);
+    }
+    /**
+     * Constructor
+     * @see #xconstruct
+     **/
+    PkgEdition( unsigned e, const std::string & v, const std::string & r = "", time_t bt = 0 ) {
+      xconstruct(NORMAL,e,v,r,bt);
+    }
+    /**
+     * Constructor
+     * @see #xconstruct
+     **/
+    PkgEdition( unsigned e, const std::string & v, time_t bt ) {
+      xconstruct(NORMAL,e,v,"",bt);
+    }
 
-	const std::string & version() const {
-	  switch( type ) {
-	  case MAXIMUM:
-	    return _str_MAXIMUM;
-	  case UNSPEC:
-	    return _str_UNSPEC;
-	  case NORMAL:
-	  case EPOCH:
-	    break;
-	  }
-	  return _version;
-	}
-	const std::string & release() const {
-	  return _release;
-	}
+    ~PkgEdition() {}
 
-	int epoch() const { return type == EPOCH ? _epoch : 0; }
+    const std::string & version() const {
+      switch( _type ) {
+      case MAXIMUM:
+	return _str_MAXIMUM;
+      case UNSPEC:
+	return _str_UNSPEC;
+      case NORMAL:
+	break;
+      }
+      return _version;
+    }
 
-	int buildtime() const { return type == NORMAL ? _buildtime : 0; }
+    const std::string & release() const {
+      return _release;
+    }
 
-	bool has_epoch() const { return type == EPOCH; }
+    int epoch() const { return _epoch; }
 
-	bool is_unspecified() const { return type == UNSPEC; }
-	bool is_maximum() const { return type == MAXIMUM; }
+    bool has_epoch() const { return _epoch; }
 
-	bool compare( rel_op op, const PkgEdition& e2 ) const;
-	bool operator==( const PkgEdition& e2 ) const { return compare( EQ, e2 ); }
-	bool operator!=( const PkgEdition& e2 ) const { return compare( NE, e2 ); }
-	bool operator< ( const PkgEdition& e2 ) const { return compare( LT, e2 ); }
-	bool operator<=( const PkgEdition& e2 ) const { return compare( LE, e2 ); }
-	bool operator> ( const PkgEdition& e2 ) const { return compare( GT, e2 ); }
-	bool operator>=( const PkgEdition& e2 ) const { return compare( GE, e2 ); }
+    time_t buildtime() const { return _buildtime; }
 
-	std::string as_string() const;
-	//operator std::string() const { return as_string(); }
+    bool is_unspecified() const { return _type == UNSPEC; }
 
-	friend std::ostream& operator<<( std::ostream&, const PkgEdition& );
+    bool is_maximum() const { return _type == MAXIMUM; }
+
+    bool compare( rel_op op, const PkgEdition& e2 ) const;
+    bool operator==( const PkgEdition& e2 ) const { return compare( EQ, e2 ); }
+    bool operator!=( const PkgEdition& e2 ) const { return compare( NE, e2 ); }
+    bool operator< ( const PkgEdition& e2 ) const { return compare( LT, e2 ); }
+    bool operator<=( const PkgEdition& e2 ) const { return compare( LE, e2 ); }
+    bool operator> ( const PkgEdition& e2 ) const { return compare( GT, e2 ); }
+    bool operator>=( const PkgEdition& e2 ) const { return compare( GE, e2 ); }
+
+    std::string asString() const;
+
+    friend std::ostream& operator<<( std::ostream&, const PkgEdition& );
 
   public:
 
@@ -161,9 +176,4 @@ class PkgEdition {
 
 };
 
-#endif  /* _PkgEdition_h */
-
-
-// Local Variables:
-// tab-width: 4
-// End:
+#endif  // _PkgEdition_h

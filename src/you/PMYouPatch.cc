@@ -132,6 +132,6 @@ string PMYouPatch::fullName() const
 {
   string result = name();
   result += "-";
-  result += edition().as_string();
+  result += edition().asString();
   return result;
 }

@@ -267,11 +267,11 @@ PMYouPatchManager & Y2PM::youPatchManager()
     MIL << "Launch YouPatchManager..." << endl;
 
     _youPatchManager = new PMYouPatchManager;
-    
+
     list<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
-    
+
     _youPatchManager->poolSetInstalled( patches );
-    
+
     list<PMYouPatchPtr>::const_iterator itPatch;
     for( itPatch = patches.begin(); itPatch != patches.end(); ++itPatch ) {
       Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
@@ -316,7 +316,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
     for (std::list<PMPackagePtr>::iterator it = dellist.begin();
 	 it != dellist.end(); ++it)
     {
-	string fullname = (const string &)((*it)->name()) + "-" + (*it)->edition().as_string();
+	string fullname = (*it)->nameEd();
 
 	if (_callbacks._package_start_func)
 	    (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), true, _callbacks._package_start_data);
@@ -342,7 +342,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    continue;
 	}
 
-	string fullname = (const string &)((*it)->name()) + "-" + (*it)->edition().as_string();
+	string fullname = (*it)->nameEd();
 
 	if (_callbacks._provide_start_func)
 	    (*_callbacks._provide_start_func)(fullname, (*it)->archivesize(), true, _callbacks._provide_start_data);
