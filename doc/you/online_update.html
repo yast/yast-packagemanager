@@ -184,6 +184,8 @@ like:
 Filename:      bash.rpm
 Label:         The GNU Bourne-Again Shell
 Size:          2116014 838521
+PatchRpmSize:  2116014 423212
+PatchRpmBasedOn: 2.03-17 2.04-1 2.04 35
 Buildtime:     973570238
 BuiltFrom:     zq1/bash-version-release.[no]src.rpm
 RpmGroup:      System Environment/Shells
@@ -307,8 +309,20 @@ Segakcap:
 </tr>
 <tr>
   <td>Size</td>
-  <td>integer</td>
-  <td>Size of RPM in Bytes</td>
+  <td>two integers separated by a space</td>
+  <td>The first number is the size of the installed package in bytes, the second
+  number is the size of the RPM archive file.</td>
+</tr>
+<tr>
+  <td>PatchRpmSize</td>
+  <td>two integers separated by a space</td>
+  <td>The first number is the size of the installed package in bytes, the second
+  number is the size of the patch RPM archive file.</td>
+</tr>
+<tr>
+  <td>PatchRpmBasedOn</td>
+  <td>list of version numbers separated by spaces</td>
+  <td>List of version numbers which can be updated by using the patch RPM.</td>
 </tr>
 <tr>
   <td>Buildtime</td>
