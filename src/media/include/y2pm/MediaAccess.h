@@ -41,6 +41,7 @@
 class MediaAccess : virtual public Rep {
 	REP_BODY(MediaAccess);
 
+	static int _media_count;
     public:
 
         /**
@@ -66,6 +67,11 @@ class MediaAccess : virtual public Rep {
 	 **/
 	MediaHandler * _handler;
 
+	/**
+	 * preferred attach point (passed to MediaHandler on attach())
+	 */
+	Pathname _preferred_attach_point;
+
     public:
 
        /**
@@ -75,8 +81,13 @@ class MediaAccess : virtual public Rep {
 
 	/**
 	 * open url
+	 * if preferred_attach_point is given, try to use this as
+	 * the attach point.
+	 * Caution! 
+	 * The medium can choose a different attach point.
+	 * Only getAttachPoint() knows the real attach point.
 	 **/
-	PMError open (const Url& url);
+	PMError open (const Url& url, const Pathname & preferred_attach_point = "");
 
 	/**
 	 * True if media is open
