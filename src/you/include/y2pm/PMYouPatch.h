@@ -127,15 +127,6 @@ class PMYouPatch : virtual public Rep, public PMObject {
     std::string postInformation() const { return _postInformation; }
 
     /**
-     * Set minimum yast version attribute.
-     */
-    void setMinYastVersion( const std::string &str ) { _minYastVersion = str; }
-    /**
-     * Return minimum yast version attribute.
-     */
-    std::string minYastVersion() const { return _minYastVersion; }
-
-    /**
      * Set if only installed packages should be updated.
      */
     void setUpdateOnlyInstalled( bool v ) { _updateOnlyInstalled = v; }
@@ -184,12 +175,12 @@ class PMYouPatch : virtual public Rep, public PMObject {
     /**
       Set size of patch.
     */
-    void setPatchSize( const FSize &size ) { _patchSize = size; }
+    void setPatchSize( const FSize &size );
 
     /**
       Return size of patch.
     */
-    FSize patchSize() const { return _patchSize; }
+    FSize patchSize() const;
 
     /**
      * Return full name in the format "name-version-release".
@@ -246,7 +237,6 @@ class PMYouPatch : virtual public Rep, public PMObject {
 
     std::string _shortDescription, _longDescription;
     std::string _preInformation, _postInformation;
-    std::string _minYastVersion;
     Kind _kind;
     bool _updateOnlyInstalled;
     std::string _preScript, _postScript;

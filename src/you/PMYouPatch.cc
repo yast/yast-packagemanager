@@ -129,6 +129,15 @@ void PMYouPatch::addPackage( const PMPackagePtr &pkg )
   _packages.push_back( pkg );
 }
 
+void PMYouPatch::setPatchSize( const FSize &size )
+{
+  _patchSize = size;
+}
+
+FSize PMYouPatch::patchSize() const
+{
+  return _patchSize;
+}
 
 string PMYouPatch::fullName() const
 {

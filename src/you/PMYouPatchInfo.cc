@@ -252,8 +252,6 @@ PMError PMYouPatchInfo::parsePackages( const string &packages,
 PMError PMYouPatchInfo::parseFiles( const string &files,
                                     const PMYouPatchPtr &patch )
 {
-  I__ << files << endl;
-
   vector<string> fileList;
   stringutil::split( files, fileList, "\n" );
 
@@ -342,16 +340,12 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     p->setLongDescription( tagValueLocale( YOUPatchTagSet::LONGDESCRIPTION, patchstream ) );
     p->setPreInformation( tagValueLocale( YOUPatchTagSet::PREINFORMATION, patchstream ) );
     p->setPostInformation( tagValueLocale( YOUPatchTagSet::POSTINFORMATION, patchstream ) );
-    p->setMinYastVersion( tagValue( YOUPatchTagSet::MINYAST2VERSION, patchstream ) );
     p->setPreScript( tagValue( YOUPatchTagSet::PRESCRIPT, patchstream ) );
     p->setPostScript( tagValue( YOUPatchTagSet::POSTSCRIPT, patchstream ) );
 
     value = tagValue( YOUPatchTagSet::UPDATEONLYINSTALLED, patchstream );
     if ( value == "true" ) { p->setUpdateOnlyInstalled( true ); }
     else { p->setUpdateOnlyInstalled( false ); }
-
-    value = tagValue( YOUPatchTagSet::SIZE, patchstream );
-    p->setPatchSize( atoll( value.c_str() ) * 1024 );
 
     value = tagMultiValue( YOUPatchTagSet::PACKAGES, patchstream );
     PMError error = parsePackages( value, p );
