@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 14 20:21:21 CET 2003 - kkaempf@suse.de
+
+- fix name display of source rpm
+- sort installation of source rpms by media number
+- 2.7.34
+
+-------------------------------------------------------------------
 Fri Mar 14 19:13:26 CET 2003 - kkaempf@suse.de
 
 - ensure correct media is attached before starting to install
