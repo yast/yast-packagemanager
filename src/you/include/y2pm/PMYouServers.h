@@ -37,6 +37,16 @@
 class SysConfig;
 
 /**
+  This struct represents a YOU server.
+*/
+struct PMYouServer
+{
+  std::string url;
+  std::string name;
+  std::string directory;
+};
+
+/**
   This class provides access to the list of YOU servers.
 */
 class PMYouServers : virtual public Rep {
@@ -80,17 +90,17 @@ class PMYouServers : virtual public Rep {
     /**
       Return list of known servers.
     */
-    std::list<Url> servers();
+    std::list<PMYouServer> servers();
     
     /**
       Return default server, when no server list can be read at all.
     */
-    Url defaultServer();
+    PMYouServer defaultServer();
 
     /**
       Return server which is currently used for getting updates.
     */
-    Url currentServer();
+    PMYouServer currentServer();
 
   protected:
     std::string encodeUrl( const std::string &url );
@@ -98,12 +108,14 @@ class PMYouServers : virtual public Rep {
     void addPackageVersion( const std::string &pkgName, std::string &url );
 
     PMError readServers( const Pathname & );
-    void addServer( const Url & );
+    void addServer( const PMYouServer & );
+
+    PMYouServer parseServerLine( const std::string & );
 
   private:
     PMYouPatchPathsPtr _patchPaths;
 
-    std::list<Url> _servers;
+    std::list<PMYouServer> _servers;
 };
 
 ///////////////////////////////////////////////////////////////////

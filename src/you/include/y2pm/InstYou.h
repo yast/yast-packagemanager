@@ -34,6 +34,7 @@
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/PMYouPatchPaths.h>
+#include <y2pm/PMYouServers.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -67,7 +68,7 @@ class InstYou {
     /**
      * Get list of patch servers.
      */
-    PMError servers( std::list<Url> & );
+    PMError servers( std::list<PMYouServer> & );
 
     /**
       Read user name and password needed for authentification from configuration
@@ -90,16 +91,16 @@ class InstYou {
 
       @param url  URL of patch server
     */
-    PMError retrievePatchDirectory( const Url &url );
+    PMError retrievePatchDirectory( const PMYouServer &server );
 
     /**
      * Read patch information files.
      *
-     * @param url       URL of patch server.
+     * @param server    Patch server.
      * @param reload    If true reload all patches from server.
      * @param checkSig  If true check signatures of patch info files.
      */
-    PMError retrievePatchInfo( const Url &url, bool reload = true,
+    PMError retrievePatchInfo( const PMYouServer &server, bool reload = true,
                                bool checkSig = true );
     
     /**
@@ -230,7 +231,7 @@ class InstYou {
       Doesn't check for type of updates and doesn't download any update
       information.
     */
-    int quickCheckUpdates( const Url &url );
+    int quickCheckUpdates( const PMYouServer &server );
 
     /*
       Return currently set username used for authentificaton to the server.
