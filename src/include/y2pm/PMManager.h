@@ -169,7 +169,7 @@ class PMManager {
     // solver Part
 
     /**
-     * resolve dependences for Packages marked for installation
+     * resolve dependencies for packages marked for installation
      *
      * @param good (output) list of PkgDep::Result that can be installed
      * @param bad (output) list of PkgDep::ErrorResult that have trouble
@@ -178,6 +178,14 @@ class PMManager {
      * */
     bool solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad);
     
+    /**
+     * resolve dependencies for packages marked for upgrade
+     *
+     * @param good (output) list of PkgDep::Result that can be installed
+     * @param bad (output) list of PkgDep::ErrorResult that have trouble
+     *
+     * @return true if no conflicts where found (i.e no bad)
+     * */
     bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList to_remove);
 
   private:
