@@ -15,8 +15,8 @@
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
-
+  Purpose:	parse content and packages (packages.<lang>) file
+		from an UnitedLinux compatible media
 /-*/
 
 #include <iostream>
@@ -47,6 +47,169 @@ using namespace std;
 //	CLASS NAME : constInstSrcData_ULPtr
 ///////////////////////////////////////////////////////////////////
 IMPL_DERIVED_POINTER(InstSrcData_UL,InstSrcData,InstSrcData);
+
+
+///////////////////////////////////////////////////////////////////
+// PRIVATE
+//
+//	METHOD NAME : InstSrcData_UL::PkgTag2Package
+//	METHOD TYPE : PMPackagePtr
+//
+//	DESCRIPTION : pass packages data from tagset to pgkcache
+//		 * Single line values are passed by value
+//		 * Multi line values are passed by file position (on-demand read)
+//
+//		 * langcache is only used for PMULPackageDataProvider() constructor
+//		 * packagelist is used for finding shared packages
+
+PMPackagePtr
+InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
+				TagCacheRetrieval *langcache,
+				CommonPkdParser::TagSet * tagset,
+				const std::list<PMPackagePtr>* packagelist )
+{
+    // PACKAGE
+    string single ((tagset->getTagByIndex(InstSrcData_ULPkgTags::PACKAGE))->Data());
+
+    std::vector<std::string> splitted;
+
+    stringutil::split (single, splitted, " ", false);
+//MIL << "-----------------------------" << endl;
+//MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+
+    // Pkg -> PMPackage
+    PkgName name (splitted[0]);
+    PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
+    PkgArch arch (splitted[3]);
+
+    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, langcache));
+    PMPackagePtr package( new PMPackage (name, edition, arch, dataprovider));
+
+    CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
+
+#define SET_VALUE(tagname,value) \
+    if (!value.empty()) dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
+#define SET_POS(tagname,begin,end) \
+    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
+#define GET_TAG(tagname) \
+    tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname)
+#define SET_MULTI(tagname) \
+    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
+#define SET_SINGLE(tagname) \
+    SET_VALUE (tagname, (GET_TAG(tagname))->Data())
+
+    SET_VALUE (NAME, splitted[0]);
+    SET_VALUE (VERSION, splitted[1]);
+    SET_VALUE (RELEASE, splitted[2]);
+    SET_VALUE (ARCH, splitted[3]);
+
+    SET_MULTI (REQUIRES);
+    SET_MULTI (PREREQUIRES);
+    SET_MULTI (PROVIDES);
+    SET_MULTI (CONFLICTS);
+    SET_MULTI (OBSOLETES);
+
+    SET_MULTI (RECOMMENDS);
+    SET_MULTI (SUGGESTS);
+    SET_SINGLE (LOCATION);
+
+    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SIZE))->Data(), splitted, " ", false);
+    SET_VALUE (ARCHIVESIZE, splitted[0]);
+    SET_VALUE (SIZE, splitted[1]);
+    SET_SINGLE (BUILDTIME);
+    SET_SINGLE (SOURCERPM);
+    SET_SINGLE (GROUP);
+    SET_SINGLE (LICENSE);
+    SET_MULTI (AUTHOR);
+    SET_MULTI (KEYWORDS);
+
+#undef SET_VALUE
+#undef SET_POS
+#undef GET_TAG
+#undef SET_SINGLE
+#undef SET_MULTI
+
+    // SHAREWITH, package to share data with
+    // FIXME: does not support forwared shared declarations
+
+    string sharewith ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SHAREWITH))->Data());
+    if (!sharewith.empty())
+    {
+	stringutil::split (sharewith, splitted, " ", false);
+	const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
+
+	if (!candidates
+	    || candidates->size() != 1)
+	{
+	    ERR << "No shared package " << sharewith << endl;
+	}
+	else
+	{
+	    // MIL << "Share " << single << " with " << sharewith << endl;
+	    dataprovider->setShared (candidates->front()->dataProvider());
+	}
+    }
+
+    return package;
+}
+
+
+///////////////////////////////////////////////////////////////////
+// PRIVATE
+//
+//	METHOD NAME : InstSrcData_UL::LangTag2Package
+//	METHOD TYPE : void
+//
+//	DESCRIPTION : * pass packages.lang data from tagset to langcache
+//		 * Single line values are passed by value
+//		 * Multi line values are passed by file position (on-demand read)
+
+void
+InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset)
+{
+    // PACKAGE
+    string single ((tagset->getTagByIndex(InstSrcData_ULLangTags::PACKAGE))->Data());
+
+    std::vector<std::string> splitted;
+    stringutil::split (single, splitted, " ", false);
+
+    const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
+
+    if (!candidates
+	|| candidates->size() != 1)
+    {
+	ERR << "Ambiguous package " << single << endl;
+	return;
+    }
+
+    PMPackagePtr package = candidates->front();
+    PMULPackageDataProviderPtr dataprovider = package->dataProvider();
+
+    CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
+
+#define SET_VALUE(tagname,value) \
+    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
+#define SET_POS(tagname,begin,end) \
+    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
+#define GET_TAG(tagname) \
+    tagset->getTagByIndex(InstSrcData_ULLangTags::tagname)
+#define SET_MULTI(tagname) \
+    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
+#define SET_SINGLE(tagname) \
+    SET_VALUE (tagname, (GET_TAG(tagname))->Data())
+
+    SET_SINGLE (SUMMARY);
+    SET_MULTI (DESCRIPTION);
+    SET_MULTI (INSNOTIFY);
+    SET_MULTI (DELNOTIFY);
+
+    return;
+}
+
+///////////////////////////////////////////////////////////////////
+// PUBLIC
+///////////////////////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -355,7 +518,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset ));
+		    packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset, packagelist ));
 		    count++;
 		    tagset->clear();
 		    repeatassign = true;
@@ -373,7 +536,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     {
 	// insert final package
 
-	packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset ));
+	packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset, packagelist ));
 	count++;
 
 	// =============================================================
@@ -470,136 +633,4 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     return err;
 }
 
-
-/**
- * pass packages data from tagset
- * to pgkcache
- * Single line values are passed by value
- * Multi line values are passed by file position (on-demand read)
- *
- * langcache is only used for PMULPackageDataProvider() constructor
- *
- */
-
-PMPackagePtr
-InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache, TagCacheRetrieval *langcache, CommonPkdParser::TagSet * tagset )
-{
-    // PACKAGE
-    string single ((tagset->getTagByIndex(InstSrcData_ULPkgTags::PACKAGE))->Data());
-
-    std::vector<std::string> splitted;
-
-    stringutil::split (single, splitted, " ", false);
-//MIL << "-----------------------------" << endl;
-//MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
-
-    // Pkg -> PMPackage
-    PkgName name (splitted[0]);
-    PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
-    PkgArch arch (splitted[3]);
-
-    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, langcache));
-    PMPackagePtr package( new PMPackage (name, edition, arch, dataprovider));
-
-    CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
-
-#define SET_VALUE(tagname,value) \
-    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
-#define SET_POS(tagname,begin,end) \
-    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
-#define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname)
-#define SET_MULTI(tagname) \
-    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
-#define SET_SINGLE(tagname) \
-    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname))->Data())
-
-    SET_VALUE (NAME, splitted[0]);
-    SET_VALUE (VERSION, splitted[1]);
-    SET_VALUE (RELEASE, splitted[2]);
-    SET_VALUE (ARCH, splitted[3]);
-
-    SET_MULTI (REQUIRES);
-    SET_MULTI (PREREQUIRES);
-    SET_MULTI (PROVIDES);
-    SET_MULTI (CONFLICTS);
-    SET_MULTI (OBSOLETES);
-
-    SET_MULTI (RECOMMENDS);
-    SET_MULTI (SUGGESTS);
-    SET_SINGLE (LOCATION);
-
-    stringutil::split ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SIZE))->Data(), splitted, " ", false);
-    SET_VALUE (ARCHIVESIZE, splitted[0]);
-    SET_VALUE (SIZE, splitted[1]);
-    SET_SINGLE (BUILDTIME);
-    SET_SINGLE (SOURCERPM);
-    SET_SINGLE (GROUP);
-    SET_SINGLE (LICENSE);
-    SET_MULTI (AUTHOR);
-    SET_MULTI (KEYWORDS);
-
-#undef SET_VALUE
-#undef SET_POS
-#undef GET_TAG
-#undef SET_SINGLE
-#undef SET_MULTI
-
-    // SHAREWITH, package to share data with
-    // FIXME
-    //string sharewith ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SHAREWITH))->Data());
-
-    return package;
-}
-
-
-/**
- * pass packages.lang data from tagset
- * to langcache
- * Single line values are passed by value
- * Multi line values are passed by file position (on-demand read)
- *
- */
-
-void
-InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset)
-{
-    // PACKAGE
-    string single ((tagset->getTagByIndex(InstSrcData_ULLangTags::PACKAGE))->Data());
-
-    std::vector<std::string> splitted;
-    stringutil::split (single, splitted, " ", false);
-
-    const std::list<PMPackagePtr>* candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
-
-    if (!candidates
-	|| candidates->size() != 1)
-    {
-	ERR << "Ambiguous package " << single << endl;
-	return;
-    }
-
-    PMPackagePtr package = candidates->front();
-    PMULPackageDataProviderPtr dataprovider = package->dataProvider();
-
-    CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
-
-#define SET_VALUE(tagname,value) \
-    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
-#define SET_POS(tagname,begin,end) \
-    dataprovider->setAttributeValue (package, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
-#define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcData_ULLangTags::tagname)
-#define SET_MULTI(tagname) \
-    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
-#define SET_SINGLE(tagname) \
-    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULLangTags::tagname))->Data())
-
-    SET_SINGLE (SUMMARY);
-    SET_MULTI (DESCRIPTION);
-    SET_MULTI (INSNOTIFY);
-    SET_MULTI (DELNOTIFY);
-
-    return;
-}
 

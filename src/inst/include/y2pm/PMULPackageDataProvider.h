@@ -83,6 +83,9 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// retrieval pointer for packages.<lang> data
 	TagCacheRetrieval *_language_retrieval;
 
+	// fallback provider (Share entry in packages)
+	PMULPackageDataProviderPtr _fallback_provider;
+
     private:
 	// internal attribute value provider
 	PkgAttributeValue getValue( constPMObjectPtr obj_r,
@@ -92,6 +95,8 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 
 	PMULPackageDataProvider (TagCacheRetrieval *package_retrieval = 0, TagCacheRetrieval *language_retrieval = 0);
 	virtual ~PMULPackageDataProvider();
+
+	void setShared ( PMULPackageDataProviderPtr provider_r ) { _fallback_provider = provider_r; }
 
 	/**
 	 * Object attribute retrieval. (DataProvider interface)
@@ -106,8 +111,8 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	 * @see PMPackageDataProvider
 	 * @see PMPackage
 	 **/
-	virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
-						     PMPackage::PMPackageAttribute attr_r );
+	PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
+					     PMPackage::PMPackageAttribute attr_r );
 
 	/** inject attribute to cache */
 	virtual void setAttributeValue(

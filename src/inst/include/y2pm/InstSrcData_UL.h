@@ -40,6 +40,17 @@
 class InstSrcData_UL : virtual public Rep, public InstSrcData {
   REP_BODY(InstSrcData_UL);
 
+    private:
+	/**
+	 * fill tagset from packages to PMPackage
+	 */
+	static PMPackagePtr PkgTag2Package( TagCacheRetrieval *pkgcache, TagCacheRetrieval *langcache, CommonPkdParser::TagSet * tagset, const std::list<PMPackagePtr>* packagelist );
+
+	/**
+	 * fill tagset from packages.<lang> to PMPackage
+	 */
+	static void LangTag2Package( TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset );
+
   public:
 
     /**
@@ -73,16 +84,6 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
     static PMError tryGetData( InstSrcDataPtr & ndata_r,
 				MediaAccessPtr media_r, const Pathname & descr_dir_r );
 
-    private:
-	/**
-	 * fill tagset from packages to PMPackage
-	 */
-	static PMPackagePtr PkgTag2Package( TagCacheRetrieval *pkgcache, TagCacheRetrieval *langcache, CommonPkdParser::TagSet * tagset );
-
-	/**
-	 * fill tagset from packages.<lang> to PMPackage
-	 */
-	static void LangTag2Package( TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset );
 };
 
 ///////////////////////////////////////////////////////////////////
