@@ -160,8 +160,8 @@ PMError InstSrc::enableSource()
   ///////////////////////////////////////////////////////////////////
 
   if ( _data ) {
-    ERR << "Already enabled." << endl;
-    return Error::E_src_already_enabled;
+    DBG << "Is enabled." << endl;
+    return Error::E_ok;
   }
 
   if ( !_descr ) {
@@ -263,8 +263,8 @@ PMError InstSrc::disableSource()
   ///////////////////////////////////////////////////////////////////
 
   if ( !_data ) {
-    ERR << "Not enabled." << endl;
-    return Error::E_src_not_enabled;
+    DBG << "Is disabled." << endl;
+    return Error::E_ok;
   }
 
   ///////////////////////////////////////////////////////////////////
