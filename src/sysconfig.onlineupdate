@@ -19,10 +19,19 @@ YAST2_LOADFTPSERVER="yes"
 #
 CMDLINE_OPTIONS=""
 
+## Type: yesno
+## Default: yes
 #
-# REG_CODE and REG_PASSWORD are now stored in /var/lib/YaST2/you/password.
+# If set to "no" YOU will skip the patch selection page and will automatically
+# install all security and recommended patches for packages which are installed
+# on the system.
 #
+YOU_MANUAL_SELECTION="yes"
 
+## Type: yesno
+## Default: no
 #
-# PROXY_USER and PROXY_PASSWORD are now handled by yast2-network
-# 
+# If set to "yes" YOU will delete the downloaded RPM archives after installing
+# them to the system.
+#
+YOU_REMOVE_SOURCE_PACKAGES="no"

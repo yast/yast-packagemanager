@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep  1 17:26:24 CEST 2003 - cschum@suse.de
+
+- Add missing options to sysconfig template. 
+
+-------------------------------------------------------------------
 Mon Sep 01 15:26:36 CEST 2003 - arvin@suse.de
 
 - fixed return value of commitPackages
