@@ -1,4 +1,7 @@
 Makefile
 Makefile.in
 *.html
-*.kdoc
+*.png
+*.tag
+doxygen.css
+doxygen.log
