@@ -3,6 +3,7 @@
 #
 
 noinst_PROGRAMS = maketable
+noinst_DATA = lookuptable.h
 
 maketable_SOURCES = maketable.c keywords.h
 
