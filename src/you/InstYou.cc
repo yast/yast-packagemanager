@@ -67,7 +67,11 @@ InstYou::~InstYou()
 
 void InstYou::init()
 {
+  _callbacks = 0;
+
   _selectedPatchesIt = _patches.begin();
+  _progressTotal = 0;
+  _progressCurrent = 0;
 }
 
 PMError InstYou::initProduct()
@@ -238,16 +242,40 @@ PMError InstYou::retrievePatches( bool checkSig, bool noExternal )
   return error;
 }
 
-PMYouPatchPtr InstYou::firstPatch()
+PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
 {
+  if ( resetProgress ) {
+    _progressCurrent = 0;
+    _progressTotal = 0; 
+    std::list<PMYouPatchPtr>::const_iterator it;
+    for ( it = _patches.begin(); it != _patches.end(); ++it ) {
+      PMSelectablePtr selectable = (*it)->getSelectable();
+      if ( selectable && selectable->to_install() &&
+           *it == selectable->candidateObj() ) {
+        _progressTotal++;
+      }
+    }
+    
+    _progressTotal *= 2;
+  }
+
+  D__ << "_progressTotal: " << _progressTotal << endl;
+
   _selectedPatchesIt = _patches.begin();
 
   return nextSelectedPatch();
 }
 
-PMYouPatchPtr InstYou::nextPatch()
+PMYouPatchPtr InstYou::nextPatch( bool *ok )
 {
   ++_selectedPatchesIt;
+
+  PMError err = progress( ++_progressCurrent * 100 / _progressTotal );
+
+  if ( ok ) {
+    if ( err == YouError::E_user_abort ) *ok = false;
+    else *ok = true;
+  }
 
   return nextSelectedPatch();
 }
@@ -303,7 +331,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 {
   D__ << "INSTALL PATCH: " << patch->name() << endl;
 
-  PMError error;
+  PMError error = patchProgress( 0 );
+  if ( error ) return error;
 
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
@@ -315,9 +344,17 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
   }
 
+  error = patchProgress( 1 );
+  if ( error ) return error;
+
   list<PMPackagePtr> packages = patch->packages();
+  int progressTotal = packages.size() + 2; // number of packages plus pre and post script
+  int progressCurrent = 0;
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+    error = patchProgress( ( progressCurrent++ + 1 ) * 100 /
+                           progressTotal );
+    if ( error ) return error;
     if ( patch->updateOnlyInstalled() ) {
       if ( !(*itPkg)->hasInstalledObj() ) {
         D__ << "Don't install '" << (*itPkg)->name()
@@ -345,6 +382,9 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
   }
 
+  error = patchProgress( 99 );
+  if ( error ) return error;
+
   if ( !dryrun ) {
     error = Y2PM::instTarget().installPatch( patch->localFile() );
     if ( error ) {
@@ -361,6 +401,9 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
       Y2PM::instTarget().executeScript( scriptPath );
     }
   }
+
+  error = patchProgress( 100 );
+  if ( error ) return error;
   
   return error;
 }
@@ -373,8 +416,13 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
   RpmDb rpm;
 
   list<PMPackagePtr> packages = patch->packages();
+  int progressTotal = packages.size() + 2; // number of packages plus pre and post script
+  int progressCurrent = 0;
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+    PMError error = patchProgress( progressCurrent++ * 100 /
+                                   progressTotal );
+    if ( error ) return error;
     if ( patch->updateOnlyInstalled() ) {
       if ( !(*itPkg)->hasInstalledObj() ) {
         D__ << "Don't download '" << (*itPkg)->name()
@@ -383,7 +431,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
       }
     }
 
-    PMError error = retrievePackage( *itPkg, noExternal );
+    error = retrievePackage( *itPkg, noExternal );
     if ( error ) return error;
     if ( checkSig ) {
       string localRpm;
@@ -401,6 +449,9 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
     }
   }
 
+  PMError error = patchProgress( 98 );
+  if ( error ) return error;
+  
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
     PMError error = retrieveScript( patch->preScript(), checkSig );
@@ -410,6 +461,9 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
     }
   }
   
+  error = patchProgress( 99 );
+  if ( error ) return error;
+  
   if ( !patch->postScript().empty() ) {
     PMError error = retrieveScript( patch->postScript(), checkSig );
     if ( error ) {
@@ -417,6 +471,9 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
       return error;
     }
   }
+
+  error = patchProgress( 100 );
+  if ( error ) return error;
   
   return PMError();
 }
@@ -671,4 +728,37 @@ bool InstYou::firesPackageTrigger( const PMYouPatchPtr &patch )
 bool InstYou::firesScriptTrigger( const PMYouPatchPtr &patch )
 {
   return false;
+}
+
+void InstYou::setCallbacks( InstYou::Callbacks *callbacks )
+{
+  _callbacks = callbacks;
+}
+
+PMError InstYou::progress( int i )
+{
+  bool ret = true;
+
+  if ( _callbacks ) {
+    ret = _callbacks->progress( i );
+  }
+
+  INT << "ret: " << ret << endl;
+
+  if ( ret ) return PMError();
+  else return YouError::E_user_abort;
+}
+
+PMError InstYou::patchProgress( int i, const string &pkg )
+{
+  bool ret = true;
+
+  if ( _callbacks ) {
+    ret = _callbacks->patchProgress( i, pkg );
+  }
+
+  INT << "ret: " << ret << endl;
+
+  if ( ret ) return PMError();
+  else return YouError::E_user_abort;
 }

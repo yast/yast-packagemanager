@@ -98,14 +98,19 @@ class InstYou {
     PMError retrievePatches( bool checkSig = true, bool noExternal = false );
     
     /**
-     * Get first selected patch.
-     */
-    PMYouPatchPtr firstPatch();
+      Get first selected patch.
+    
+      @param resetProgress If true reset progress indicator. 
+    */
+    PMYouPatchPtr firstPatch( bool resetProgress = true );
 
     /**
-     * Get next selected patch.
-     */
-    PMYouPatchPtr nextPatch();
+      Get next selected patch.
+     
+      @param ok Pointer to bool variable which is set to false on error and
+                true on success.
+    */
+    PMYouPatchPtr nextPatch( bool *ok = 0 );
 
     /**
      * Download next patch in list of selected patches.
@@ -166,6 +171,32 @@ class InstYou {
      */
     void showPatches( bool verbose = false );
 
+    /**
+      Show YOU progress. Calls callbacks.
+    */
+    PMError progress( int );
+
+    /**
+      Show YOU patch progress. Calls callbacks.
+    */
+    PMError patchProgress( int, const std::string &pkg = std::string() );
+
+  public:
+    class Callbacks
+    {
+        public:
+          Callbacks() {}
+          virtual ~Callbacks() {}
+    
+          virtual bool progress( int percent ) = 0;
+          virtual bool patchProgress( int percent, const std::string &str ) = 0;
+    };
+
+    void setCallbacks( Callbacks * );
+
+  private:
+    Callbacks *_callbacks;
+
   private:
     void init();
 
@@ -195,9 +226,11 @@ class InstYou {
     PMYouPatchPathsPtr _paths;
     
     std::list<PMYouPatchPtr> _patches;
-    
-    std::list<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
 
+    std::list<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
+    int _progressTotal;
+    int _progressCurrent;
+    
     MediaAccess _media;
 
     std::string _regcode;
