@@ -78,19 +78,23 @@ PMULPackageDataProvider::getValue( constPMObjectPtr obj_r,
     switch (attr)
     {
 	case PMPackage::ATTR_REQUIRES:
-	    pos_ptr = &attr_REQUIRES;
+	    return obj_r->PkgRelList2AttributeValue (obj_r->requires());
 	break;
 	case PMPackage::ATTR_PREREQUIRES:
-	    pos_ptr = &attr_PREREQUIRES;
+	    return obj_r->PkgRelList2AttributeValue (obj_r->prerequires());
 	break;
 	case PMPackage::ATTR_PROVIDES:
-	    pos_ptr = &attr_PROVIDES;
+	    return obj_r->PkgRelList2AttributeValue (obj_r->provides());
 	break;
 	case PMPackage::ATTR_CONFLICTS:
-	    pos_ptr = &attr_CONFLICTS;
+	    return obj_r->PkgRelList2AttributeValue (obj_r->conflicts());
 	break;
 	case PMPackage::ATTR_OBSOLETES:
-	    pos_ptr = &attr_OBSOLETES;
+	    return obj_r->PkgRelList2AttributeValue (obj_r->obsoletes());
+	break;
+
+	case PMPackage::ATTR_SUMMARY:
+	    pos_ptr = &attr_SUMMARY;
 	break;
 
 	case PMPackage::ATTR_RECOMMENDS:
@@ -118,25 +122,17 @@ PMULPackageDataProvider::getValue( constPMObjectPtr obj_r,
 	    retrieval = _language_retrieval;
 	    pos_ptr = &attr_DELNOTIFY;
 	break;
-#warning ATTR_NAME should come from underlying PMObject
 	case PMPackage::ATTR_NAME:
-	    return attr_NAME;
+	    return PkgAttributeValue (obj_r->name());
 	break;
-#warning ATTR_VERSION should come from underlying PMObject
 	case PMPackage::ATTR_VERSION:
-	    return attr_VERSION;
+	    return PkgAttributeValue (obj_r->edition().version());
 	break;
-#warning ATTR_RELEASE should come from underlying PMObject
 	case PMPackage::ATTR_RELEASE:
-	    return attr_RELEASE;
+	    return PkgAttributeValue (obj_r->edition(). release());
 	break;
-#warning ATTR_ARCH should come from underlying PMObject
 	case PMPackage::ATTR_ARCH:
-	    return attr_ARCH;
-	break;
-
-	case PMPackage::ATTR_SUMMARY:
-	    return attr_SUMMARY;
+	    return PkgAttributeValue (obj_r->arch());
 	break;
 
 	case PMPackage::ATTR_LOCATION:
@@ -241,12 +237,6 @@ PMULPackageDataProvider::setAttributeValue(
 
     switch (attr)
     {
-	case PMPackage::ATTR_NAME:	  attr_NAME = value; break;
-	case PMPackage::ATTR_VERSION:	  attr_VERSION = value; break;
-	case PMPackage::ATTR_RELEASE:	  attr_RELEASE = value; break;
-	case PMPackage::ATTR_ARCH:	  attr_ARCH = value; break;
-
-	case PMPackage::ATTR_SUMMARY:	  attr_SUMMARY = value; break;
 	case PMPackage::ATTR_LOCATION:	  attr_LOCATION = value; break;
 	case PMPackage::ATTR_ARCHIVESIZE: attr_ARCHIVESIZE = value; break;
 	case PMPackage::ATTR_SIZE:	  attr_SIZE = value; break;
@@ -282,11 +272,7 @@ PMULPackageDataProvider::setAttributeValue(
 
     switch (attr)
     {
-	case PMPackage::ATTR_REQUIRES:	  SET_RETRIEVAL (REQUIRES,begin,end); break;
-	case PMPackage::ATTR_PREREQUIRES: SET_RETRIEVAL (PREREQUIRES,begin,end); break;
-	case PMPackage::ATTR_PROVIDES:	  SET_RETRIEVAL (PROVIDES,begin,end); break;
-	case PMPackage::ATTR_CONFLICTS:	  SET_RETRIEVAL (CONFLICTS,begin,end); break;
-	case PMPackage::ATTR_OBSOLETES:	  SET_RETRIEVAL (OBSOLETES,begin,end); break;
+	case PMPackage::ATTR_SUMMARY:	  SET_RETRIEVAL (SUMMARY,begin,end); break;
 	case PMPackage::ATTR_RECOMMENDS:  SET_RETRIEVAL (RECOMMENDS,begin,end); break;
 	case PMPackage::ATTR_SUGGESTS:	  SET_RETRIEVAL (SUGGESTS,begin,end); break;
 	case PMPackage::ATTR_AUTHOR:	  SET_RETRIEVAL (AUTHOR,begin,end); break;
