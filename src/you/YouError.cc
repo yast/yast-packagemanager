@@ -61,6 +61,7 @@ std::string YouError::errtext( const unsigned e )
   case E_read_suseservers_failed: return N_("Error reading suseservers file.");
   case E_auth_failed: return N_("Authentification failed.");
   case E_user_abort: return N_("User aborted operation.");
+  case E_parse_error: return N_("Error parsing patch description.");
   };
 
   return stringutil::numstring( e );

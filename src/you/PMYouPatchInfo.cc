@@ -271,7 +271,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     if ( status != TaggedFile::ACCEPTED_FULL ) {
         ERR << "Parse Error" << endl;
-        return PMError( InstSrcError::E_error );
+        return PMError( YouError::E_parse_error );
     }
 
     string name = tagValue( YOUPatchTagSet::PATCHNAME, patchstream );
@@ -322,7 +322,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     value = tagMultiValue( YOUPatchTagSet::PACKAGES, patchstream );
     PMError error = parsePackages( value, p );
-    if ( error != PMError::E_ok ) {
+    if ( !error ) {
       return error;
     }
 
@@ -340,7 +340,8 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 //	DESCRIPTION :
 //
 PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
-                                 list<PMYouPatchPtr> &patches, bool checkSig )
+                                 list<PMYouPatchPtr> &patches, bool reload,
+                                 bool checkSig )
 {
     int err = PathInfo::assert_dir( _paths->attachPoint() );
     if ( err ) {
@@ -416,19 +417,25 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
         error = Y2PM::youPatchManager().instYou().progress( current++ * 100 /
                                                             total );
         if ( error ) return error;
+
         if ( *it == "." || *it == ".." ||
              (*it).substr( 0, 9 ) == "directory" ) continue;
-        error = _media.provideFile( patchPath + *it );
-        if ( error != PMError::E_ok ) {
-            ERR << "ERR: " << error << ": " << patchPath + *it << endl;
-        } else {
-            Pathname path = _media.localRoot() + patchPath;
 
+        Pathname filePath = patchPath + *it;
+        Pathname localPath = _media.localPath( filePath );
+        PathInfo pi( localPath );
+        if ( pi.isExist() && !reload ) {
+          error = PMError::E_ok;
+        } else {
+          error = _media.provideFile( filePath );
+        }
+        if ( error != PMError::E_ok ) {
+            ERR << "ERR: " << error << ": " << filePath << endl;
+        } else {
             if ( checkSig ) {
-                string filePath = ( path + *it ).asString();
-                DBG << "Check signature of '" << filePath << "'" << endl;
-                if ( !gpg.check_file( filePath ) ) {
-                    ERR << "Signature check for '" << filePath << "' failed."
+                DBG << "Check signature of '" << localPath << "'" << endl;
+                if ( !gpg.check_file( localPath ) ) {
+                    ERR << "Signature check for '" << localPath << "' failed."
                         << endl;
                     _media.release();
                     return PMError( YouError::E_bad_sig_file, "Patch: " + *it );
@@ -437,7 +444,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
             }
 
             D__ << "read patch: file: " << *it << endl;
-            error = readFile( path, *it, patches );
+            error = readFile( _media.localPath( patchPath ), *it, patches );
             if ( error != PMError::E_ok ) {
                 ERR << "Error reading patch " << *it << endl;
                 _media.release();
@@ -468,10 +475,11 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 //
 PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
                                     list<PMYouPatchPtr> &patches,
-                                    bool checkSig )
+                                    bool reload, bool checkSig )
 {
     _paths = paths;
-    return readDir( paths->patchUrl(), paths->patchPath(), patches, checkSig );
+    return readDir( paths->patchUrl(), paths->patchPath(), patches, reload,
+                    checkSig );
 }
 
 string PMYouPatchInfo::tagMultiValue( YOUPatchTagSet::Tags tagIndex,

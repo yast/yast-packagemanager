@@ -70,6 +70,7 @@ int main( int argc, char **argv )
   bool debug = false;
   bool autoGet = false;
   bool autoInstall = false;
+  bool reload = true;
 
   int c;
   while( 1 ) {
@@ -212,7 +213,7 @@ int main( int argc, char **argv )
   cout << "URL: " << url.asString() << endl;
   cout << "Path: " << you.paths()->patchPath() << endl;
 
-  error = you.retrievePatchInfo( url, checkSig );
+  error = you.retrievePatchInfo( url, reload, checkSig );
   if ( error ) {
     cerr << "Error retrieving patches: " << error << endl;
     exit( 1 );
