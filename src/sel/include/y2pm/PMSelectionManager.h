@@ -103,9 +103,14 @@ class PMSelectionManager : public PMManager {
     /**
      * activate the selection
      * (go through package list of selection and select/deselect
-     * all packages -> needs PMPackageManager)
-     */
+     * all packages in PMPackageManager)
+     **/
     PMError activate( PMPackageManager & package_mgr );
+
+    /**
+     * Same as above using Y2PM::packageManager().
+     **/
+    PMError activate();
 
     /**
      * Remember all activated selections in InstTargetSelDB. Reset all

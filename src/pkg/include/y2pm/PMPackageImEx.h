@@ -23,6 +23,7 @@
 
 #include <iosfwd>
 #include <set>
+#include <map>
 
 #include <y2util/Pathname.h>
 #include <y2util/LangCode.h>
@@ -65,17 +66,22 @@ class PMPackageImEx : virtual public Rep {
 
     static const Magic _ImExMagic;
 
+  public:
+
+    typedef std::set<PkgName>            NameSet;
+    typedef std::map<PkgName,PkgEdition> NameEdSet;
+
   private:
 
     std::list<LangCode> _requestedLocales;
 
-    std::set<PkgNameEd> _onSystemSel;
-    std::set<PkgName>   _offSystemSel;
+    NameEdSet _onSystemSel;
+    NameSet   _offSystemSel;
 
-    std::set<PkgNameEd> _onSystemPkg;
-    std::set<PkgNameEd> _onSystemTabooPkg;
-    std::set<PkgName>   _offSystemPkg;
-    std::set<PkgName>   _offSystemTabooPkg;
+    NameEdSet _onSystemPkg;
+    NameEdSet _onSystemTabooPkg;
+    NameSet   _offSystemPkg;
+    NameSet   _offSystemTabooPkg;
 
     /**
      * Froget previously remembered data.

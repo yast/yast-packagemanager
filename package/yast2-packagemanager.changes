@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Feb 21 21:14:37 CET 2003 - ma@suse.de
+
+- Able to import/export package selection. Fixes #23923, as soon as
+  UI uses the new interface.
+- 2.7.14
+
+-------------------------------------------------------------------
 Fri Feb 21 18:19:40 CET 2003 - cschum@suse.de
 
 - Correctly handle proxy settings (#21431).

@@ -293,6 +293,7 @@ class PMSelectable : virtual public Rep {
     /**
      * Downgrade condition. Returns true, iff both objects are present, and
      * installation of candidateObj would just replace or downgrade the installedObj.
+     * (except both packages are SuSE and the candidate has newer buildtime)
      * <b>Always false for non package objects!</b>
      **/
     bool downgrade_condition() const;
