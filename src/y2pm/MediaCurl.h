@@ -39,6 +39,8 @@ class MediaCurl : public MediaHandler {
     MEDIA_HANDLER_API;
 
     virtual PMError disconnectFrom();
+    virtual PMError getFileCopy( const Pathname & srcFilename, const Pathname & targetFilename) const;
+
 
   public:
 

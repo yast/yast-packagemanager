@@ -17,6 +17,7 @@
 
   Purpose: Utility class for reading the patch information
 
+  Doc-State: mir at work
 /-*/
 #ifndef PMYouPatchInfo_h
 #define PMYouPatchInfo_h
@@ -44,6 +45,14 @@
 //
 //	CLASS NAME : PMYouPatchInfo
 /**
+ * @short facilitates to read and parse patch information 
+ * and patches from a given media.
+ *
+ **/
+
+
+
+/**
  * Patch information.
  **/
 class PMYouPatchInfo : public CountedRep {
@@ -64,26 +73,25 @@ class PMYouPatchInfo : public CountedRep {
 
     /**
       Get directory file listing all available patches.
+      ???
+
+      @param useMediaDir If true, read patch file from media directory.
     */
     PMError getDirectory( bool useMediaDir );
 
     /**
-     * Get patches from specified location.
+     * same as processMediaDir()
+     * Also saves last used server in sysconfig
      *
-     * @param paths     Object holding the path location information.
-     * @param patches   List of patch objects where the results are stored.
-     * @param reload    If true, reload patch files from server.
-     * @param checkSig  If true, check GPG signature of patch info files.
+     * @param patches   Return: List of patch objects
      **/
     PMError getPatches( std::vector<PMYouPatchPtr> &patches );
     
     /**
       Read patch info files from directory.
 
-      @param baseUrl          Base of URL where patches are located.
-      @param patches          List of patch objects where the results are stored.
-      @param checkSig         If true, check GPG signature of patch info files.
-      @param processMediaDir  If true, read patch file from media directory.
+      @param patches      Return: list of patches
+      @param useMediaDir  If true, read patch file from media directory.
     **/
     PMError readDir( std::vector<PMYouPatchPtr> &patches,
                      bool useMediaDir = true );
@@ -93,13 +101,13 @@ class PMYouPatchInfo : public CountedRep {
      
       @param path     File path of package info file.
       @param fileName Name of patch file.
-      @param patch    Patch object where the results are stored.
+      @param patch    Return: patch
     */
     PMError readFile( const Pathname &path, const std::string &fileName,
                       PMYouPatchPtr &patch );
 
     /**
-     * Parse package info.
+     * Parse package info, results go into _packageTagSet
      *
      * @param packages String containing the package information.
      * @param patch    Patch the packages belong to.
@@ -108,23 +116,55 @@ class PMYouPatchInfo : public CountedRep {
                            const PMYouPatchPtr &patch );
 
     /**
-      Parse Files tag.
-    */
+     * Parse files and add them to a patch
+     *
+     * @param files  Names of files to parse (separated by \n)
+     * @param patch  All parsed files will be added to the 
+     *               target of this "ptr".
+     **/
     PMError parseFiles( const std::string &files, const PMYouPatchPtr &patch );
 
-    /** Parse Deltas tag */
+    /** 
+     * Parse Delta RPMs and add them to a patch
+     * 
+     * @param files  Names of files to parse (separated by \\n)
+     * @param patch  All parsed files will be added to the 
+     *               target of this "ptr".
+     **/     
     PMError parseDeltas( const std::string &files, const PMYouPatchPtr &patch );
 
+    /* ??? */
     PMYouPackageDataProviderPtr packageDataProvider() const;
 
+    /**
+     * reads a file and returns a list of all names except comments
+     * (should probably better be static protected ???)
+     *
+     * @param Pathname Name of the file to parse
+     * @param patchFile Return: List of names
+     **/
     PMError readDirectoryFile( const Pathname &,
                                std::list<std::string> &patchFiles );
 
+    /**
+     * reads the media file (_settings->mediaPatchesFile()
+     * updates _settings
+     * ???
+     **/
     PMError processMediaDir();
 
+    /**
+     * @return int media number from _mediaMap
+     **/
     int mediaNumber( const PMYouPatchPtr & );
 
   protected:
+
+    /**
+     * gets tag from _patchTagSet by index ???
+     * @param tagIndex Index of tag
+     * @param input ??? mir is here ???
+     **/
     std::string tagValueLocale ( YOUPatchTagSet::Tags tagIndex,
                                  std::istream &input );
 

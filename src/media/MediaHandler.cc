@@ -173,60 +173,6 @@ PMError MediaHandler::attach( bool next )
 }
 
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	INTERNAL FUNCTION
-//	NAME: limitFileNamesInPath
-//      DESCR: Looks into pathname and looks if any path component
-//             is longer than maxLen. If it is, this component
-//             is replaced by a shortened one. The shortened
-//             Pathname is returned.
-
-static Pathname limitFileNamesInPath(const Pathname &pathname, int maxLen)
-{
-    using namespace std;
-    if (maxLen > -1 && pathname.asString().length() > maxLen) {
-        string base = pathname.basename();
-        if (base.length() > maxLen) {
-            // too long. This will probably not happen very often,
-            // so this is not time critical.
-            //
-            // we will build the result as follows:
-            // first n chars + '~xxxx~' + last m chars
-            // such that total length will be below maxLen
-            // xxxx is a cheap hash of the chars cut away to
-            // guarantee (more or less ;-) uniqueness
-            // use 8 chars less to accomodate for adding the hash.
-            int cutAwayCount = base.length() - maxLen + 8;
-            int splitPos1 = maxLen / 2 - 4;
-            while ( (base[splitPos1] & 0x80) && splitPos1 > 0) {
-                // don't split within UTF8 encoding
-                --splitPos1;
-            }
-            int splitPos2 = splitPos1 + cutAwayCount;
-            while ( (base[splitPos2] & 0x80) && splitPos2 < maxLen-1) {
-                // don't split within UTF8 encoding
-                ++splitPos2;
-            }
-            int sum = 0;
-            for (int i=splitPos1; i<splitPos2; ++i) {
-                sum += base[i];
-            }
-            ostringstream os;
-            os << base.substr(0,splitPos1)
-               << "~" << hex << (sum & (unsigned) 0xffff) << "~"
-               << base.substr(splitPos2);
-            string base2 = os.str();
-            WAR << "limitFileNamesInPath: "
-                << "'" << base << "' -> '" << base2 << "'" << endl;
-            base = base2;
-        }
-        return limitFileNamesInPath(pathname.dirname(), maxLen) + base;
-    }
-    else
-        return pathname;
-}
 
 
 ///////////////////////////////////////////////////////////////////
@@ -243,9 +189,7 @@ Pathname MediaHandler::localPath( const Pathname & pathname ) const {
     // this is important for fetching the suseservers, the
     // url with all parameters can get too long (bug #42021)
 
-    int maxLen = pathconf(_localRoot.asString().c_str(),_PC_NAME_MAX);
-    WAR << "maxLen: " << maxLen << endl;
-    return _localRoot + limitFileNamesInPath(pathname.absolutename(),maxLen);
+    return _localRoot + pathname.absolutename();
 }
 
 
@@ -308,22 +252,42 @@ PMError MediaHandler::release( bool eject )
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::provideFile( Pathname filename ) const
+PMError MediaHandler::provideFileCopy( Pathname srcFilename,
+                                       Pathname targetFilename ) const
 {
   if ( !_isAttached ) {
-    INT << Error::E_not_attached << " on provideFile(" << filename << ")" << endl;
+    INT << Error::E_not_attached << " on provideFileCopy(" << srcFilename 
+        << "," << targetFilename << ")" << endl;
     return Error::E_not_attached;
   }
 
-  PMError err = getFile( filename ); // pass to concrete handler
+  PMError err = getFileCopy( srcFilename, targetFilename ); // pass to concrete handler
   if ( err ) {
-    WAR << "provideFile(" << filename << "): " << err << endl;
+      WAR << "provideFileCopy(" << srcFilename << "," << targetFilename << "): " << err << endl;
   } else {
-    MIL << "provideFile(" << filename << ")" << endl;
+      DBG << "provideFileCopy(" << srcFilename << "," << targetFilename  << ")" << endl;
   }
 
   return err;
 }
+
+PMError MediaHandler::provideFile( Pathname filename ) const
+{
+  if ( !_isAttached ) {
+      INT << Error::E_not_attached << " on provideFile(" << filename << ")" << endl;
+      return Error::E_not_attached;
+  }
+  
+  PMError err = getFile( filename ); // pass to concrete handler
+  if ( err ) {
+      WAR << "provideFile(" << filename << "): " << err << endl;
+  } else {
+      DBG << "provideFile(" << filename << ")" << endl;
+  }
+  
+  return err;
+}
+
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -559,13 +523,29 @@ ostream & operator<<( ostream & str, const MediaHandler & obj )
 //
 PMError MediaHandler::getFile( const Pathname & filename ) const
 {
-  PathInfo info( localPath( filename ) );
-  if( info.isFile() ) {
-    return Error::E_ok;
-  }
-
-  return( info.isExist() ? Error::E_not_a_file : Error::E_file_not_found );
+    PathInfo info( localPath( filename ) );
+    if( info.isFile() ) {
+        return Error::E_ok;
+    }
+    
+    return( info.isExist() ? Error::E_not_a_file : Error::E_file_not_found );
 }
+
+
+PMError MediaHandler::getFileCopy ( const Pathname & srcFilename, const Pathname & targetFilename ) const
+{
+    PMError err;
+    err = getFile(srcFilename);
+    if (err)
+        return err;
+
+    if ( PathInfo::copy( localPath( srcFilename ), targetFilename ) != 0 ) {
+        return MediaError::E_write_error;
+    }
+    return Error::E_ok;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////
 //

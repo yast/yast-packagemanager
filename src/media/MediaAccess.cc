@@ -354,11 +354,10 @@ PMError MediaAccess::getFile( const Url &from, const Pathname &to )
   error = media.attach();
   if ( error ) return error;
 
-  error = media.provideFile( base );
-  if ( error ) return error;
-
-  if ( PathInfo::copy( media.localPath( base ), to ) != 0 ) {
-    return MediaError::E_write_error;
+  error = media._handler->provideFileCopy( base, to );
+  if ( error ) {
+      media.release();
+      return error;
   }
 
   error = media.release();

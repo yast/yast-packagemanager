@@ -295,9 +295,16 @@ PMError MediaCurl::releaseFrom( bool eject )
 //	METHOD NAME : MediaCurl::getFile
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : Asserted that media is attached.
-//
+
 PMError MediaCurl::getFile( const Pathname & filename ) const
+{
+    // Use absolute file name to prevent access of files outside of the
+    // hierarchy below the attach point.
+    return getFileCopy(filename, localPath(filename).absolutename());
+}
+
+
+PMError MediaCurl::getFileCopy( const Pathname & filename , const Pathname & target) const
 {
     D__ << filename.asString() << endl;
 
@@ -325,14 +332,11 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     Url url( _url );
     url.setPath( escapedPath(path) );
 
-    // Use absolute file name to prevent access of files outside of the
-    // hierarchy below the attach point.
-    Pathname dest = localPath(filename).absolutename();
+    Pathname dest = target.absolutename();
+    string destNew = target.asString() + ".new.yast.37456";
 
-    string destNew = localPath(filename.asString() + ".new.yast.37456").absolutename().asString();
-
-    WAR << "dest: " << dest << endl;
-    WAR << "destNew: " << destNew << endl;
+    DBG << "dest: " << dest << endl;
+    DBG << "destNew: " << destNew << endl;
 
     if( PathInfo::assert_dir( dest.dirname() ) )
     {
