@@ -25,10 +25,9 @@
 
 #include <y2util/Pathname.h>
 #include <y2util/PathInfo.h>
-#include <y2util/Attribute.h>
 
-#include <MediaHandler.h>
-#include <MediaAccessPtr.h>
+#include <y2pm/MediaHandler.h>
+#include <y2pm/MediaAccessPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -72,7 +71,7 @@ class REP_CLASS(MediaAccess) {
 	const Pathname & getAttachPath (void) const;
 
 	// attach media to directory
-	MediaResult attach (const Pathname & to);
+	MediaResult attachTo (const Pathname & to);
 
 	// release attached media
 	MediaResult release (void);
@@ -80,10 +79,10 @@ class REP_CLASS(MediaAccess) {
 	// provide file denoted by path to 'destination'
 	// filename is interpreted relative to the attached url
 	// and a path prefix is preserved to destination
-	MediaResult getFile (const Pathname & filename) const;
+	MediaResult provideFile (const Pathname & filename) const;
 
 	// get file information
-	const Attribute * dirInfo (const Pathname & filename) const;
+	const std::list<std::string> * dirInfo (const Pathname & filename) const;
 
 	// get file information
 	const PathInfo * fileInfo (const Pathname & filename) const;

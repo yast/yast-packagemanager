@@ -77,7 +77,8 @@ MediaSMB::~MediaSMB()
 //
 //	DESCRIPTION :
 //
-ostream & MediaSMB::dumpOn( ostream & str ) const
+ostream &
+MediaSMB::dumpOn( ostream & str ) const
 {
     str << "MediaSMB (" << _server << "@" << _path << ")";
     return str;
@@ -87,14 +88,14 @@ ostream & MediaSMB::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaSMB::attach
+//	METHOD NAME : MediaSMB::attachTo
 //	METHOD TYPE : MediaResult
 //
-//	DESCRIPTION : attach media at path
+//	DESCRIPTION : attach media to path
 //
-MediaResult MediaSMB::attach (const Pathname & to)
+MediaResult
+MediaSMB::attachTo (const Pathname & to)
 {
-    
     const char *mountpoint = to.asString().c_str();
     if (mount (_server.c_str(), mountpoint, "smbfs", _mountflags, 0) != 0) {
 	return E_system;
@@ -113,7 +114,8 @@ MediaResult MediaSMB::attach (const Pathname & to)
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult MediaSMB::release (void)
+MediaResult
+MediaSMB::release (void)
 {
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
@@ -133,7 +135,8 @@ MediaResult MediaSMB::release (void)
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult MediaSMB::provideFile (const Pathname & filename) const
+MediaResult
+MediaSMB::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, SMB path is mounted at destination
     return E_none;

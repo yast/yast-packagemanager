@@ -148,12 +148,12 @@ MediaHandler::scanDirectory (const Pathname & dirname, const string & pattern) c
 //	  return NULL on error
 //
 const list<string> *
-MediaHandler::readDirectory (const Pathname & dirname) const
+MediaHandler::dirInfo (const Pathname & dirname) const
 {
     list<string> *dirlist = new list<string>;
 
     // prepend mountpoint to dirname
-    Pathname fullpath = _attachedTo + dirname;
+    Pathname fullpath = _attachPoint + dirname;
 
     // open mounted directory
     DIR *dir = opendir (fullpath.asString().c_str());

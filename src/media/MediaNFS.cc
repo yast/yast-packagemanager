@@ -76,7 +76,8 @@ MediaNFS::~MediaNFS()
 //
 //	DESCRIPTION :
 //
-ostream & MediaNFS::dumpOn( ostream & str ) const
+ostream &
+MediaNFS::dumpOn( ostream & str ) const
 {
     str << "MediaNFS (" << _server << "@" << _path << ")";
     return str;
@@ -86,13 +87,13 @@ ostream & MediaNFS::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaNFS::attach
+//	METHOD NAME : MediaNFS::attachTo
 //	METHOD TYPE : MediaResult
 //
-//	DESCRIPTION : attach media at path
+//	DESCRIPTION : attach media to path
 //
 MediaResult
-MediaNFS::attach (const Pathname & to)
+MediaNFS::attachTo (const Pathname & to)
 {
     
     const char *mountpoint = to.asString().c_str();

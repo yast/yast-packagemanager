@@ -180,7 +180,7 @@ MediaCD::findFile (const Pathname & dirname, const string & pattern) const
 const std::list<std::string> *
 MediaCD::dirInfo (const Pathname & dirname) const
 {
-    return readDirectory (dirname, pattern);
+    return readDirectory (dirname);
 }
 
 

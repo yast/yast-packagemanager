@@ -21,7 +21,7 @@
 #ifndef MediaFTP_h
 #define MediaFTP_h
 
-#include <MediaHandler.h>
+#include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //

@@ -21,7 +21,7 @@
 #ifndef MediaNFS_h
 #define MediaNFS_h
 
-#include <MediaHandler.h>
+#include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //

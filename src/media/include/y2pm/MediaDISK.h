@@ -21,7 +21,7 @@
 #ifndef MediaDISK_h
 #define MediaDISK_h
 
-#include <MediaHandler.h>
+#include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //

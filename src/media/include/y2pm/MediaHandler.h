@@ -23,12 +23,12 @@
 
 #include <iosfwd>
 #include <string>
+#include <list>
 
 #include <y2util/Pathname.h>
 #include <y2util/PathInfo.h>
-#include <y2util/Attribute.h>
 
-#include <MediaResult.h>
+#include <y2pm/MediaResult.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -42,10 +42,14 @@ class MediaHandler {
 
 	const string & _device;		// which device
 	const string & _path;		// path on device
-	Pathname _attachedTo;		// attached at
+
+	Pathname _attachPoint;		// attached at
 
 	// scan directory 'dirname' for first file matching pattern
 	const Pathname *scanDirectory (const Pathname & dirname, const string & pattern) const;
+
+	// read directory 'dirname' completely to string list
+	const std::list<std::string> * readDirectory (const Pathname & dirname) const;
 
     public:
 	// constructor
@@ -53,7 +57,7 @@ class MediaHandler {
 	MediaHandler (const string & device, const string & path);
 
 	// attach media at path
-	virtual MediaResult attach (const Pathname & to) = 0;
+	virtual MediaResult attachTo (const Pathname & to) = 0;
 
 	// return current attach directory
 	virtual Pathname & getAttachPoint (void);
@@ -61,17 +65,17 @@ class MediaHandler {
 	// release attached media
 	virtual MediaResult release (void) = 0;
 
-	// get file denoted by path to 'attached path'
+	// provide file denoted by path at 'attached path'
 	// filename is interpreted relative to the attached url
 	// and a path prefix is preserved to destination
-	virtual MediaResult getFile (const Pathname & filename) const = 0;
+	virtual MediaResult provideFile (const Pathname & filename) const = 0;
 
 	// find file denoted by pattern
 	// filename is interpreted relative to the attached url
 	virtual const Pathname * findFile (const Pathname & dirname, const string & pattern) const = 0;
 
-	// get directory denoted by path to Attribute::A_StringArray
-	virtual const Attribute * dirInfo (const Pathname & dirname) const = 0;
+	// get directory denoted by path to a string list
+	virtual const std::list<std::string> * dirInfo (const Pathname & dirname) const = 0;
 
 	// get file information
 	virtual const PathInfo * fileInfo (const Pathname & filename) const = 0;
@@ -86,11 +90,11 @@ class MediaHandler {
 ///////////////////////////////////////////////////////////////////
 
 #define	MEDIA_HANDLER_API						\
-	MediaResult attach (const Pathname & path);			\
+	MediaResult attachTo (const Pathname & path);			\
 	MediaResult release (void);					\
-	MediaResult getFile (const Pathname & filename) const;		\
+	MediaResult provideFile (const Pathname & filename) const;	\
 	const Pathname * findFile (const Pathname & dirname, const string & pattern) const;	\
-	const Attribute * dirInfo (const Pathname & dirname) const;\
+	const std::list<std::string> * dirInfo (const Pathname & dirname) const;\
 	const PathInfo * fileInfo (const Pathname & filename) const;
 
 

@@ -23,18 +23,21 @@
 #include <ctype.h>
 
 #include <y2pm/MediaInfo.h>
-
+#if 0
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaInfo
 
 
-MediaInfo::MediaInfo (MediaHandler *handler)
-    : _handler (handler)
+MediaInfo::MediaInfo (MediaAccess *media)
+    : _handler (media->handler())
 {
     if (_handler)
     {
 	Pathname mountpoint = _handler->getAttachPoint();
+
+	// try new-style ".media" file first
+
 	Pathinfo *info = _handler->fileInfo (".media");
 	if (info != 0)
 	{
@@ -172,44 +175,6 @@ fprintf (stderr, "MediaInfo::parseSuSEFile(%s) = %p\n", filename.asString().c_st
     return;
 }
 
-// get media info attribute
-Attribute & 
-MediaInfo::attribute (info_attr what) const
-{
-    switch (what)
-    {
-	case I_Id:
-	    return new Attribute (_ID);
-	break;
-	case I_Number:
-	    return new Attribute (_number);
-	break;
-	case I_Count:
-	    return new Attribute (_count);
-	break;
-	case I_Product:
-	    return new Attribute (_product);
-	break;
-	case I_Version:
-	    return new Attribute (_version);
-	break;
-	case I_Release:
-	    return new Attribute (_release);
-	break;
-	case I_Vendor:
-	    return new Attribute (_vendor);
-	break;
-	case I_Architectures:
-	    return new Attribute (_architectures);
-	break;
-	case I_Label:
-	    return new Attribute (_label);
-	break;
-	default:
-	break;
-    }
-    return 0;
-}
-
 ///////////////////////////////////////////////////////////////////
 
+#endif

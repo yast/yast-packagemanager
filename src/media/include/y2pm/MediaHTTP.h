@@ -21,7 +21,7 @@
 #ifndef MediaHTTP_h
 #define MediaHTTP_h
 
-#include <MediaHandler.h>
+#include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //

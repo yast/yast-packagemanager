@@ -92,7 +92,7 @@ MediaDISK::dumpOn( ostream & str ) const
 //	METHOD NAME : MediaDISK::attachTo
 //	METHOD TYPE : MediaResult
 //
-//	DESCRIPTION : attach media at path
+//	DESCRIPTION : attach media to path
 //
 MediaResult
 MediaDISK::attachTo (const Pathname & to)
@@ -141,16 +141,16 @@ MediaDISK::release (void)
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaDISK::getFile
+//	METHOD NAME : MediaDISK::provideFile
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION :
-//	get file denoted by path to 'attached path'
+//	provide file denoted by path to 'attached path'
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
 MediaResult
-MediaDISK::getFile (const Pathname & filename) const
+MediaDISK::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, NFS path is mounted at destination
     return E_none;

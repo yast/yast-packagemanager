@@ -90,7 +90,7 @@ MediaFTP::dumpOn( ostream & str ) const
 //	METHOD NAME : MediaFTP::attachTo
 //	METHOD TYPE : MediaResult
 //
-//	DESCRIPTION : attach media at path
+//	DESCRIPTION : attach media to path
 //
 MediaResult
 MediaFTP::attachTo (const Pathname & to)

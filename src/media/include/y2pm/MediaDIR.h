@@ -22,7 +22,7 @@
 #ifndef MediaDIR_h
 #define MediaDIR_h
 
-#include <MediaHandler.h>
+#include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //

@@ -76,7 +76,8 @@ MediaHTTP::~MediaHTTP()
 //
 //	DESCRIPTION :
 //
-ostream & MediaHTTP::dumpOn( ostream & str ) const
+ostream &
+MediaHTTP::dumpOn( ostream & str ) const
 {
     str << "MediaHTTP (" << _device << "@" << _path << ")";
     return str;
@@ -86,12 +87,13 @@ ostream & MediaHTTP::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaHTTP::attach
+//	METHOD NAME : MediaHTTP::attachTo
 //	METHOD TYPE : MediaResult
 //
-//	DESCRIPTION : attach media at path
+//	DESCRIPTION : attach media to path
 //
-MediaResult MediaHTTP::attach (const Pathname & to)
+MediaResult
+MediaHTTP::attachTo (const Pathname & to)
 {
     
     // FIXME

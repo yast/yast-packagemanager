@@ -118,16 +118,16 @@ MediaDIR::release (void)
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDIR::getFile
+//	METHOD NAME : MediaDIR::provideFile
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION :
-//	get file denoted by path to 'attached path'
+//	provide file denoted by path to 'attached path'
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
 MediaResult
-MediaDIR::getFile (const Pathname & filename) const
+MediaDIR::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, DIR is mounted at destination
     return E_none;

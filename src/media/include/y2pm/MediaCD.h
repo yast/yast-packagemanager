@@ -21,7 +21,7 @@
 #ifndef MediaCD_h
 #define MediaCD_h
 
-#include <MediaHandler.h>
+#include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //
