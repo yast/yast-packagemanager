@@ -205,6 +205,13 @@ struct WFM {
     YCPValue ret = _pkgmod->SourceGeneralData( args );
     OUT << " --> " << ret << endl;
   }
+  void SourceCreate( const string & url_r ) {
+    YCPList args;
+    args->add( YCPString(url_r) );
+    OUT << "SourceCreate" << args;
+    YCPValue ret = _pkgmod->SourceCreate( args );
+    OUT << " --> " << ret << endl;
+  }
 };
 
 static WFM wfm;
@@ -249,16 +256,16 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  INT << PkgModuleError( E_bad_args, __FUNCTION__ ) << endl;
-  return 0;
-
   wfm.init();
   INT << "START" << endl;
-  wfm.SourceStartManager( false );
-  wfm.SourceStartCache( false );
-  wfm.SourceGetCurrent();
-  wfm.SourceGeneralData( 0 );
-  wfm.SourceGeneralData( 1 );
+
+  wfm.SourceCreate( "/tmp/xx" );
+
+  //wfm.SourceStartManager( false );
+  //wfm.SourceStartCache( false );
+  //wfm.SourceGetCurrent();
+  //wfm.SourceGeneralData( 0 );
+  //wfm.SourceGeneralData( 1 );
 
   SEC << "STOP" << endl;
   wfm.close();
