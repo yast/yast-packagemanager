@@ -440,23 +440,12 @@ PMError InstYou::retrieveScript( const string &script, bool checkSig )
   string sourceScript = _media.localPath( scriptPath ).asString();
   string destScript = _paths->localScriptPath( script ).asString();
 
-  // TODO: use GPGCheck
+  GPGCheck gpg;
+  bool ok = gpg.check_file( sourceScript, destScript );
 
-  PathInfo::unlink( destScript );
-
-  string cmd = "/usr/bin/gpg --no-default-keyring";
-  cmd += " --keyring /usr/lib/rpm/gnupg/pubring.gpg";
-  cmd += " -o " + destScript;
-  cmd += " " + sourceScript;
-  cmd += " 2>/dev/null >/dev/null";
-
-  int ret = system( cmd.c_str() );
-
-  if ( checkSig ) {
-    if ( ret != 0 ) {
-      E__ << "Signature check failed for script " << sourceScript << endl;
-      return PMError( YouError::E_bad_sig_file );
-    }
+  if ( checkSig && !ok ) {
+    E__ << "Signature check failed for script " << sourceScript << endl;
+    return PMError( YouError::E_bad_sig_file );
   }
   
   return PMError();
