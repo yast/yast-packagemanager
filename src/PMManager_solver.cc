@@ -349,7 +349,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 
 	buildinstalledonly(*this,*nowinstalled);
 	MIL << mallinfo() << endl;
-	
+
 	// revert install request set by appl if it introduces a conflict
 	if(!success && filter_conflicts_with_installed)
 	{
@@ -389,10 +389,8 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 		}
 	    }
 	}
-	else
-	{
-	    setAutoState(*nowinstalled, good, bad, obsolete);
-	}
+
+	setAutoState(*nowinstalled, good, bad, obsolete);
 
 #ifndef KEEPSETS
 	delete nowinstalled;
