@@ -84,17 +84,10 @@ class PMSelection : virtual public Rep, public PMObject {
   public:
 
     PMSelection( const PkgName &    name_r,
-		 const PkgEdition & edition_r );
+		 const PkgEdition & edition_r,
+		 PMSelectionDataProviderPtr dataProvider_r );
 
     virtual ~PMSelection();
-
-  public:
-
-    /** assign a data provider
-     * @param dataprovider the dataprovider
-     * */
-    void setDataProvider(PMSelectionDataProviderPtr dataprovider)
-    { _dataProvider = dataprovider; }
 
   public:
 

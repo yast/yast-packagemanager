@@ -40,50 +40,51 @@ class PkgEdition {
 
 	int rpmvercmp( const std::string & a, const std::string & b ) const;
 
-	// helper for copy constructor and operator=
+	// helper for copy constructor
+	// assert _version/_release are empty srings on MAXIMUM and UNSPEC type.
 	void xconstruct( type_enum xtype, int buildtime, int metahash,
-			 int epoch, const char *v, const char *r ) {
-		type = xtype;
+			 int epoch, const std::string & v, const std::string & r ) {
+	 	type = xtype;
 		_epoch = epoch;
 		_buildtime = buildtime;
 		_metahash = metahash;
-		_version = v ? v : "";
-		_release = r ? r : "";
+		_version = v;
+		_release = r;
 	}
 
   public:
-	PkgEdition( const char *v = "", const char *r = NULL ) {
+	PkgEdition( const std::string & v = "", const std::string & r = "" ) {
 		xconstruct(NORMAL,0,0,0,v,r);
 	}
-	PkgEdition( int e, const char *v, const char *r = NULL ) {
+	PkgEdition( int e, const std::string & v, const std::string & r = "" ) {
 		xconstruct(EPOCH,0,0,e,v,r);
 	}
-	PkgEdition( int buildtime, int metahash, const char *v, const char *r = NULL ) {
+	PkgEdition( int buildtime, int metahash, const std::string & v, const std::string & r = "" ) {
 		xconstruct(NORMAL,buildtime,metahash,0,v,r);
 	}
-	PkgEdition( int buildtime, int metahash, int e, const char *v, const char *r = NULL ) {
+	PkgEdition( int buildtime, int metahash, int e, const std::string & v, const std::string & r = "" ) {
 		xconstruct(EPOCH,buildtime,metahash,e,v,r);
 	}
 	PkgEdition( type_enum t ) {
 		assert( t == MAXIMUM || t == UNSPEC );
-		xconstruct(t,0,0,0,NULL,NULL);
+		xconstruct(t,0,0,0,"","");
 	}
 	~PkgEdition() {}
 
-	const char *version() const {
-		switch( type ) {
-		  case NORMAL:
-		  case EPOCH:
-			return _version.c_str();
-		  case MAXIMUM:
-			return _str_MAXIMUM.c_str();
-		  case UNSPEC:
-			return _str_UNSPEC.c_str();
-		}
-		return "";
+	const std::string & version() const {
+	  switch( type ) {
+	  case MAXIMUM:
+	    return _str_MAXIMUM;
+	  case UNSPEC:
+	    return _str_UNSPEC;
+	  case NORMAL:
+	  case EPOCH:
+	    break;
+	  }
+	  return _version;
 	}
-	const char *release() const {
-		return (type == NORMAL || type == EPOCH) ? _release.c_str() : "";
+	const std::string & release() const {
+	  return _release;
 	}
 
 	int epoch() const { return type == EPOCH ? _epoch : 0; }
