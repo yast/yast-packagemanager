@@ -146,7 +146,7 @@ PMError InstYou::retrievePatchDirectory( const Url &url )
   }
   _paths->setPatchUrl( u );
 
-  PMError error = _info->getDirectory();
+  PMError error = _info->getDirectory( true );
 
   return error;
 }

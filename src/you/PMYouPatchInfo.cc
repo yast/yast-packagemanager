@@ -362,10 +362,10 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 //	DESCRIPTION :
 //
 PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches, bool reload,
-                                 bool checkSig )
+                                 bool checkSig, bool useMediaDir )
 {
     if ( !_doneDirectory ) {
-      PMError error = getDirectory();
+      PMError error = getDirectory( useMediaDir );
       if ( error ) return error;
     }
 
@@ -445,9 +445,9 @@ PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches, bool reload,
     return PMError();
 }
 
-PMError PMYouPatchInfo::getDirectory()
+PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
 {
-  if ( !_doneMediaDir ) {
+  if ( useMediaDir && !_doneMediaDir ) {
     PMError error = processMediaDir();
     if ( error ) return error;
   }

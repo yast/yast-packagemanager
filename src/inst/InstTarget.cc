@@ -201,7 +201,8 @@ InstTarget::getPatches (void) const
 
         Url u( "dir://" + ( getRoot() + paths->installDir() ).asString() );
         paths->setPatchUrl( u );
-        PMError error = patchInfo->readDir( _patches, false, false );
+        paths->setPatchPath( "" );
+        PMError error = patchInfo->readDir( _patches, false, false, false );
         if ( error ) {
             E__ << "Error reading patch info for installed patches." << endl;
         }
