@@ -108,6 +108,16 @@ void PkgSet::remove( PMSolvablePtr pkg )
 		_obsoleted[p->name()].remove_if( pred );
 	}
 	_provided[pkg->name()].remove_if( pred );
+
+	if(_additionalprovides_callback)
+	{
+	    PMSolvable::PkgRelList_type addprovides = _additionalprovides_callback(pkg);
+	    for(PMSolvable::PkgRelList_const_iterator p = addprovides.begin();
+		p != addprovides.end(); ++p)
+	    {
+		_provided[p->name()].remove_if( pred );
+	    }
+	}
 }
 
 
