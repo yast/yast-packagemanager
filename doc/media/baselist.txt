@@ -1,0 +1,5 @@
+List of bases for systems
+-------------------------
+
+Processor	Kernel		User		Base
+ia64		64bit		64bit		uname -a
