@@ -98,6 +98,8 @@ specific path and the </tt>patches</tt> directory. The <tt>directory</tt> file c
 list of filenames which have to be present in the same directory. Patches are downloaded
 and installed in the order of the names in this file.</p>
 
+<p>All files downloaded from the server are checked for valid signatures.</p>
+
 
 <h3>Filename of the patch description files</h3>
 
@@ -207,65 +209,38 @@ and have a older version OR the package has a flag ( "Category" ) which is a ins
 downloaded from the <tt>scripts</tt> subdirectory and stored localy before execution.</p>
 
 
-<h2>Example</h2>
+<h2>Using the online update from the command line</h2>
 
-<p>##<br>
-## Description file for  Patch ftp-1<br>
-##<br>
-<p>
-<p>Kind: document
-<p>
-<p>Shortdescription.english : Welcome to SuSE Patch Update
-<p>Shortdescription.german : Willkommen zum SuSE Patch Update
-<p>Shortdescription.french : Welcome to SuSE Patch Update
-<p>
-<p>Longdescription.english:<br>
-Welcome to SuSE Patch Update. This is only an info patch<br>
-which shows the functionality of the patch update.<br>
-Hsilgne.noitpircsedgnol:<br>
-<p>
-<p>Longdescription.french:<br>
-Welcome to SuSE Patch Update. This is only an info patch<br>
-which shows the functionality of the patch update.<br>
-There will be nothing updated.<br>
-Hcnerf.noitpircsedgnol:
-<p>
-<p>Longdescription.german:<br>
-Willkommen zum SuSE Patch Update. Dies ist nur ein<br>
-Informationspatch, um die Funktionsweise zu demonstrieren.<br>
-Es wird nichts installiert.<br>
-Namreg.noitpircsedgnol:
-<p>
-<p>Preinformation.english:
-<p>Hsilgne.noitamrofnierp:
-<p>
-<p>Preinformation.german:
-<p>Namreg.noitamrofnierp:
-<p>
-<p>Preinformation.french:
-<p>Hcnerf.noitamrofnierp:
-<p>
-<p>Postinformation.english:
-<p>Hsilgne.noitamrofnitsop:
-<p>
-<p>Postinformation.german:
-<p>Namreg.noitamrofnitsop:
-<p>
-<p>Postinformation.french:
-<p>Hcnerf.noitamrofnitsop:
-<p>
-<p>Distribution: 
-<p>
-<p>Size: 0
-<p>
-<p>## buildtime Tue Nov 14 12:46:42 UTC 2000 
-<p>Buildtime:     969475265
-<p>
-<p>MinYaST2Version: 
-<p>
-<p>Packages:
-<p>Segakcap:
-<p>
+<pre>
+online-update [-u url] [-p product] [-v version] [-a arch] [-d] [-s] [-n] [security]
+  [recommended] [document] [optional]
+
+-u url      Base URL of directory tree used to get patches from.
+
+-p product  Name of product to get patches for.
+-v version  Version of product to get patches for.
+-a arch     Base architecture of product to get patches for.
+
+-d          Dry run. Only get patches, don't install them.
+-n          No signature check of downloaded files.
+
+-s          Show list of patches.
+-V          Be verbose.
+-D          Debug output.
+
+security | recommended | document | optional   Types of patches to be installed.
+</pre>
+
+
+<h2>Using the GUI version of the online update</h2>
+
+<p>The online update can be started from the YaST2 control center by selecting the corresponding
+icon.</p>
+
+<p>The GUI version of the online update can also be started by command line: <tt>yast2
+online_update [.url &lt;url&gt;] [.nosigcheck]</tt>. With the <tt>.url</tt> argument the given
+URL is selected as source for the patches. If the argument <tt>.nosigcheck</tt> is present the
+signatures of the downloaded files aren't checked.</p>
 
 
 <h1>Patch CD Update</h1>
