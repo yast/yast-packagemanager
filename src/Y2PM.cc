@@ -448,6 +448,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 		    remaining_r.push_back ((*it)->name());
 		    ++it;
 		}
+		continue;			// go on with next package
 	    }
 	    break;
 	    default:
