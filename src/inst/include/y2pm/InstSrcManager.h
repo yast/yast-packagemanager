@@ -38,7 +38,14 @@ class InstSrcManager {
   InstSrcManager & operator=( const InstSrcManager & );
   InstSrcManager            ( const InstSrcManager & );
 
-  private:
+  public:
+
+    /**
+     * default error class
+     **/
+    typedef InstSrcError Error;
+
+  public:
 
     friend class Y2PM;
     InstSrcManager();
@@ -46,9 +53,38 @@ class InstSrcManager {
 
   private:
 
-    static std::string _cache_root_dir;
+    /**
+     * Cachedir to use.
+     **/
+    static Pathname _cache_root_dir;
 
-    static const Pa;
+    /**
+     * Subpath (below _cache_root_dir) for InstSrcManager downloads.
+     **/
+    static const Pathname _cache_tmp_dir;
+
+    /**
+     * Helper function to combine _cache_root_dir and subpaths.
+     **/
+    Pathname cachePath( const Pathname & sub_r ) const { return( _cache_root_dir + sub_r ); }
+
+  private:
+
+    /**
+     * Full path of cache_root_dir
+     **/
+    Pathname cache_root_dir() const { return _cache_root_dir; }
+
+    /**
+     * Full path of cache_tmp_dir (for downloads, etc.)
+     **/
+    Pathname cache_tmp_dir() const { return cachePath( _cache_tmp_dir ); }
+
+
+    /**
+     * Return a new (not existing) directory name in cache_root_dir
+     **/
+    Pathname genSrcCacheName() const;
 
   public:
 
@@ -82,11 +118,11 @@ class InstSrcManager {
     PMError enableSource( const ISrcId & isrc_r );
 
     PMError disableSource( const ISrcId & isrc_r );
-
+#if 0
     PMError deleteSource( const ISrcId & isrc_r );
 
     PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
-
+#endif
 };
 
 ///////////////////////////////////////////////////////////////////

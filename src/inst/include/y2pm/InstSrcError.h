@@ -49,6 +49,8 @@ class InstSrcError {
       E_ok    = PMError::E_ok,          	// no error
       E_error = PMError::C_InstSrcError,	// some error
       // more specific errors start here:
+      E_TBD,
+      //
       E_cache_dir_exists,
       E_cache_dir_create,
       E_bad_cache_dir,
@@ -57,7 +59,10 @@ class InstSrcError {
       E_create_file,
       // InstSrc creation
       E_bad_url,
-      E_no_instsrc_on_media
+      E_no_instsrc_on_media,
+      E_no_instsrcdata_on_media,
+      E_src_already_enabled,
+      E_src_no_description
     };
 };
 

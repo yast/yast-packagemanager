@@ -158,9 +158,9 @@ class InstSrcDescr : virtual public Rep {
      **/
     Pathname _content_datadir;
 
-    
+
     /**
-     * internal use - fill data from tag set into object 
+     * internal use - fill data from tag set into object
      **/
     static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset );
 
@@ -193,6 +193,20 @@ public:
     const std::string &  content_timezone()    const { return _content_timezone; }
     const Pathname &     content_descrdir()    const { return _content_descrdir; }
     const Pathname &     content_datadir()     const { return _content_datadir; }
+
+    ///////////////////////////////////////////////////////////////////
+    // convenience functions
+    ///////////////////////////////////////////////////////////////////
+
+    /**
+     * Package description directory below _url
+     **/
+    Pathname descrdir() const { return _product_dir + _content_descrdir; }
+
+    /**
+     * Package data directory below _url
+     **/
+    Pathname datadir() const { return _product_dir + _content_datadir; }
 
   public:
 

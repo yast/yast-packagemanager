@@ -87,6 +87,96 @@ InstSrc::~InstSrc()
   }
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrc::enableSource
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrc::enableSource()
+{
+  ///////////////////////////////////////////////////////////////////
+  // pre checks
+  ///////////////////////////////////////////////////////////////////
+
+  if ( _data ) {
+    ERR << "Already enabled." << endl;
+    return Error::E_src_already_enabled;
+  }
+
+  if ( !_descr ) {
+    ERR << "Cannot enable without source description" << endl;
+    return Error::E_src_no_description;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // create InstSrcData according to Type stored in InstSrcDescr
+  ///////////////////////////////////////////////////////////////////
+  PMError err;
+  InstSrcDataPtr ndata;
+
+  switch ( _descr->type() ) {
+
+    case T_UnitedLinux:
+      err = InstSrcData_UL::tryGetData( ndata, _media, _descr->descrdir() );
+
+      break;
+
+    case T_TEST_DIST:
+      err = InstSrcData::tryGetData( ndata, _media, _descr->descrdir() );
+      break;
+
+    ///////////////////////////////////////////////////////////////////
+    // no default: let compiler warn '... not handled in switch'
+    ///////////////////////////////////////////////////////////////////
+    case T_UNKNOWN:
+    case T_AUTODETECT:
+      break;
+  }
+
+  if ( err && ndata ) {
+    INT << "Note: reading InstSrcData returned data and error" << endl;
+    ndata = 0;
+  }
+
+  if ( !ndata ) {
+    ERR << "No InstSrcData type " << _descr->type() << " found on media " << _descr->url() << endl;
+    return Error::E_no_instsrcdata_on_media;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // done
+  ///////////////////////////////////////////////////////////////////
+  if ( !err ) {
+    _data = ndata;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrc::disableSource
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrc::disableSource()
+{
+  PMError err;
+
+#warning TBD save way to detach the InstSrcData
+  // back references in _data to this and _media must be cleared, otherwise we
+  // wont get zero refcounts.
+
+  _data = 0;
+
+  return err;
+}
+
 #if 0
 //-----------------------------
 // general functions
@@ -363,16 +453,14 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
   ///////////////////////////////////////////////////////////////////
   _media = new MediaAccess;
 
-  if ( (err = _media->open( mediaurl_r )) ) {
+  if ( (err = _media->open( mediaurl_r, cache_media_dir() )) ) {
     ERR << "Failed to open " << mediaurl_r << " " << err << endl;
     return err;
   }
 
-  if ( (err = _media->attach( )) ) {
-    if ( err != MediaAccess::Error::E_ok) {
-      ERR << "Failed to attach media: " << err << endl;
-      return err;
-    }
+  if ( (err = _media->attach()) ) {
+    ERR << "Failed to attach media: " << err << endl;
+    return err;
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -428,21 +516,13 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
     return Error::E_no_instsrc_on_media;
   }
 
-  ndescr->set_type( ctype );
-
-  MIL << "Found InstSrc " << ndescr << endl;
-
-    if ( !err )
-    {
-	InstSrcDataPtr ndata;
-	err = InstSrcData_UL::tryGetData( ndata, _media, product_dir_r + ndescr->content_descrdir() );
-	if (!err)
-	    _data = ndata;
-    }
-
   ///////////////////////////////////////////////////////////////////
   // done
   ///////////////////////////////////////////////////////////////////
+
+  ndescr->set_type( ctype );
+
+  MIL << "Found InstSrc " << ndescr << endl;
 
 #warning TBD finalize InstSrcDescr from media
 

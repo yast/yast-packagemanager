@@ -9,6 +9,7 @@
 #include <Y2PM.h>
 #include <y2pm/RpmDb.h>
 
+#include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
@@ -36,16 +37,24 @@ int main()
   Y2SLog::setLogfileName("-");
   MIL << "START" << endl;
 
-  InstSrcPtr nsrc;
+  InstSrcManager MGR;
 
-  Url      url     ( "dir:///8.0" );  // media
-  Pathname proddir ( "" );            // product dir
-  Pathname cache   ( "/tmp/tcache" ); // cachedir (must not exist)
+  Url url( "dir:///8.0" );
 
-  PMError err = InstSrc::vconstruct( nsrc, cache, url, proddir, InstSrc::T_UnitedLinux );
-
+  InstSrcManager::ISrcIdList nids;
+  PMError err = MGR.scanMedia( nids, url );
   SEC << err << endl;
-  SEC << nsrc << endl;
+  SEC << nids.size() << endl;
+
+  if ( nids.size() ) {
+    err = MGR.enableSource( *nids.begin() );
+    SEC << "enable: " <<  err << endl;
+  }
+
+  // hack to get InstSrcPtr:
+  //
+  // InstSrcPtr enabled_souce( const_cast<InstSrc*>((*nids.begin()).operator->()) );
+
 
   MIL << "END" << endl;
   return 0;

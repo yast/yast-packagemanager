@@ -61,6 +61,12 @@ class InstSrcData: virtual public Rep {
 
   public:
 
+
+    /**
+     * HACK to compile
+     **/
+    InstSrcData(){}
+
     /**
      * constructor
      * initialization with new media
@@ -143,6 +149,9 @@ class InstSrcData: virtual public Rep {
      **/
     static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
+
+    static PMError tryGetData( InstSrcDataPtr & ndata_r,
+			       MediaAccessPtr media_r, const Pathname & descr_dir_r );
 };
 
 ///////////////////////////////////////////////////////////////////
