@@ -102,11 +102,11 @@ show_pmselection (PMSelectionPtr s)
 
     cout << "Category: " << s->category () << endl;
     cout << "Visible: " << s->visible () << endl;
+    cout << "Order: " << s->order() << endl;
     cout << "Suggests: " << list2string(s->suggests()) << endl;
     cout << "InsPacks: " << list2string(s->inspacks("")) << endl;
     cout << "DelPacks: " << list2string(s->delpacks("")) << endl;
     cout << "Archivesize: " << s->archivesize() << endl;
-    cout << "Sortby: " << s->sortby() << endl;
     cout << "========" << endl;
     return;
 }
