@@ -221,7 +221,14 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     string path = _url.path();
     if ( !path.empty() && path != "/" && *path.rbegin() == '/' &&
          filename.absolute() ) {
+      // If url has a path with trailing slash, remove the leading slash from
+      // the absolute file name
       path += filename.asString().substr( 1, filename.asString().size() - 1 );
+    } else if ( filename.relative() ) {
+      // Add trailing slash to path, if not already there
+      if ( !path.empty() && *path.rbegin() != '/' ) path += "/";
+      // Remove "./" from begin of relative file name
+      path += filename.asString().substr( 2, filename.asString().size() - 2 );
     } else {
       path += filename.asString();
     }
@@ -229,7 +236,9 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     Url url( _url );
     url.setPath( path );
 
-    Pathname dest = attachPoint() + filename;
+    // Use absolute file name to prevent access of files outside of the
+    // hierarchy below the attach point.
+    Pathname dest = attachPoint() + filename.absolutename();
 
     string destNew = dest.asString() + ".new.yast.37456";
 
