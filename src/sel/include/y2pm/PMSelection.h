@@ -24,6 +24,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <y2util/LangCode.h>
+
 #include <y2pm/PMSelectionDataProviderPtr.h>
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMPackagePtr.h>
@@ -46,35 +48,35 @@ class PMSelection : virtual public Rep, public PMObject {
      * PMObject attributes that should be realized by each concrete Object.
      * @see PMObject
      **/
-    std::string                    summary    ( const std::string & lang ) const;
-    std::list<std::string>         description( const std::string & lang ) const;
-    std::list<std::string>         insnotify  ( const std::string & lang ) const;
-    std::list<std::string>         delnotify  ( const std::string & lang ) const;
+    std::string                    summary    ( const LangCode& locale ) const;
+    std::list<std::string>         description( const LangCode& locale ) const;
+    std::list<std::string>         insnotify  ( const LangCode& locale ) const;
+    std::list<std::string>         delnotify  ( const LangCode& locale ) const;
 
-    virtual std::string            summary()     const { return summary( "" ); }
-    virtual std::list<std::string> description() const { return description( "" ); }
-    virtual std::list<std::string> insnotify()   const { return insnotify( "" ); }
-    virtual std::list<std::string> delnotify()   const { return delnotify( "" ); }
+    virtual std::string            summary()     const { return summary( LangCode("") ); }
+    virtual std::list<std::string> description() const { return description( LangCode("") ); }
+    virtual std::list<std::string> insnotify()   const { return insnotify( LangCode("") ); }
+    virtual std::list<std::string> delnotify()   const { return delnotify( LangCode("") ); }
     virtual FSize                  size()        const;
 
     /**
      * PMSelection attributes passed off to PMSelectionDataProvider
      * @see PMSelectionDataProvider
      **/
-    std::string               category()         const;
-    bool                      visible()          const;
-    std::list<std::string>    suggests()         const;
-    std::list<PMSelectionPtr> suggests_ptrs();
-    std::list<std::string>    recommends()       const;
-    std::list<PMSelectionPtr> recommends_ptrs();
-    std::list<std::string>    inspacks     ( const std::string & lang = "" ) const;
-    std::list<PMPackagePtr>   inspacks_ptrs( const std::string & lang = "" );
-    std::list<std::string>    delpacks     ( const std::string & lang = "" ) const;
-    std::list<PMPackagePtr>   delpacks_ptrs( const std::string & lang = "" );
-    FSize                     archivesize()      const;
-    std::string               order()            const;
+    std::string			category()         const;
+    bool			visible()          const;
+    std::list<std::string>	suggests()         const;
+    std::list<PMSelectionPtr>	suggests_ptrs();
+    std::list<std::string>	recommends()       const;
+    std::list<PMSelectionPtr>	recommends_ptrs();
+    std::list<std::string>	inspacks     ( const LangCode& locale = LangCode("") ) const;
+    std::list<PMSelectablePtr>	inspacks_ptrs( const LangCode& locale = LangCode("") );
+    std::list<std::string>	delpacks     ( const LangCode& locale = LangCode("") ) const;
+    std::list<PMSelectablePtr>	delpacks_ptrs( const LangCode& locale = LangCode("") );
+    FSize			archivesize()      const;
+    std::string			order()            const;
 
-    const bool                isBase()           const;
+    const bool			isBase()           const;
 
   protected:
 

@@ -236,11 +236,12 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
     // get list of requested locales
     Y2PM y2pm;
     std::list<LangCode> requested_locales = y2pm.getRequestedLocales();
-    std::string locale = y2pm.getPreferredLocale();
+    LangCode locale = y2pm.getPreferredLocale();
 
     // first, the delpacks
-    setSelectionPackages (selection->delpacks(""), true, package_mgr);
-    setSelectionPackages (selection->delpacks(locale), true, package_mgr);
+    setSelectionPackages (selection->delpacks(), true, package_mgr);
+    if (!((const std::string &)locale).empty())
+	setSelectionPackages (selection->delpacks(locale), true, package_mgr);
     for (std::list<LangCode>::iterator it = requested_locales.begin();
 	 it != requested_locales.end(); ++it)
     {
@@ -250,8 +251,9 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
     }
 
     // then, the inspacks
-    setSelectionPackages (selection->inspacks(""), false, package_mgr);
-    setSelectionPackages (selection->inspacks(locale), false, package_mgr);
+    setSelectionPackages (selection->inspacks(), false, package_mgr);
+    if (!((const std::string &)locale).empty())
+	setSelectionPackages (selection->inspacks(locale), false, package_mgr);
     for (std::list<LangCode>::iterator it = requested_locales.begin();
 	 it != requested_locales.end(); ++it)
     {
@@ -281,11 +283,12 @@ PMSelectionManager::resetSelection (PMSelectionPtr selection, PMPackageManager &
     // get list of requested locales
     Y2PM y2pm;
     std::list<LangCode> requested_locales = y2pm.getRequestedLocales();
-    std::string locale = y2pm.getPreferredLocale();
+    LangCode locale = y2pm.getPreferredLocale();
 
     // first, the inspacks
-    resetSelectionPackages (selection->delpacks(""), true, package_mgr);
-    resetSelectionPackages (selection->delpacks(locale), true, package_mgr);
+    resetSelectionPackages (selection->delpacks(), true, package_mgr);
+    if (!((const std::string &)locale).empty())
+	resetSelectionPackages (selection->delpacks(locale), true, package_mgr);
     for (std::list<LangCode>::iterator it = requested_locales.begin();
 	 it != requested_locales.end(); ++it)
     {
@@ -295,8 +298,9 @@ PMSelectionManager::resetSelection (PMSelectionPtr selection, PMPackageManager &
     }
 
     // then, the inspacks
-    resetSelectionPackages (selection->inspacks(""), false, package_mgr);
-    resetSelectionPackages (selection->inspacks(locale), false, package_mgr);
+    resetSelectionPackages (selection->inspacks(), false, package_mgr);
+    if (!((const std::string &)locale).empty())
+	resetSelectionPackages (selection->inspacks(locale), false, package_mgr);
     for (std::list<LangCode>::iterator it = requested_locales.begin();
 	 it != requested_locales.end(); ++it)
     {
