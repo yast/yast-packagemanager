@@ -329,6 +329,18 @@ void PMSelectable::clistDel( PMObjectPtr obj_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMSelectable::clistSort
+//	METHOD TYPE : void
+//
+void PMSelectable::clistSort()
+{
+  _candidateList.sort( clistIsBetter );
+  chooseCandidateObj();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMSelectable::clistClearAll
 //	METHOD TYPE : void
 //

@@ -178,6 +178,12 @@ class PMManager {
      **/
     void poolRemoveCandidates( PMObjectContainerIter iter_r );
 
+    /**
+     * Sort all Selectables candiadte lists. This has to be done whenever
+     * the sort criteria were changed (e.g. after reordeing the InstSrces).
+     **/
+    void poolSortCandidates();
+
   public:
     /**
      * update all installed objects within this manager
