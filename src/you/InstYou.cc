@@ -298,7 +298,8 @@ void InstYou::updatePackageStates()
 
       bool pkgToInstall = toInstall;
 
-      if ( (*it)->updateOnlyInstalled() && !(*itPkg)->hasInstalledObj() ) {
+      if ( !(*itPkg)->forceInstall() && (*it)->updateOnlyInstalled() &&
+           !(*itPkg)->hasInstalledObj() ) {
 //        D__ << "pkgToInstall: false" << endl;
         pkgToInstall = false;
       }
@@ -678,7 +679,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
                            progressTotal );
     if ( error ) return error;
     if ( patch->updateOnlyInstalled() ) {
-      if ( !(*itPkg)->hasInstalledObj() ) {
+      if ( !(*itPkg)->forceInstall() && !(*itPkg)->hasInstalledObj() ) {
         D__ << "Don't install '" << (*itPkg)->name()
             << "', no installed obj and UpdateOnlyInstalled=true." << endl;
         continue;
@@ -827,7 +828,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     progressCurrent += 100;
 
     if ( patch->updateOnlyInstalled() && !_settings->getAll() ) {
-      if ( !(*itPkg)->hasInstalledObj() ) {
+      if ( !(*itPkg)->forceInstall() && !(*itPkg)->hasInstalledObj() ) {
         D__ << "Don't download '" << (*itPkg)->name()
             << "', no installed obj and UpdateOnlyInstalled=true." << endl;
         continue;

@@ -182,6 +182,19 @@ void PMYouPackageDataProvider::setPatchRpmSize( const PMPackagePtr &pkg, const F
   _patchRpmSizes[ pkg ] = size;
 }
 
+void PMYouPackageDataProvider::setForceInstall( const PMPackagePtr &pkg,
+                                                bool f )
+{
+  _forceInstalls[ pkg ] = f;
+}
+
+bool PMYouPackageDataProvider::forceInstall( const PMPackage &pkg ) const
+{
+  map<PMPackagePtr,bool>::const_iterator it = _forceInstalls.find( mkPtr( pkg ) );
+  if ( it == _forceInstalls.end() ) return false;
+  else return it->second;
+}
+
 void PMYouPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) const {
   dudata_r.clear();
   dudata_r.add( "/var/lib/YaST2/you/mnt/", pkg_r.archivesize().fullBlock(), 1 );

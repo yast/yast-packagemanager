@@ -165,6 +165,9 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   string patchName = patch->name().asString() + "-" + patch->version();
   _packageDataProvider->setSrcLabel( pkg, patchName );
 
+  bool forceInstall = tagValue( YOUPackageTagSet::FORCEINSTALL ) == "true";
+  _packageDataProvider->setForceInstall( pkg, forceInstall );
+
   return PMError();
 }
 

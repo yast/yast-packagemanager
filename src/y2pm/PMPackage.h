@@ -119,6 +119,7 @@ class PMPackage : public PMObject {
     std::string            externalUrl()  const;
     std::list<PkgEdition>  patchRpmBaseVersions() const;
     FSize                  patchRpmSize() const;
+    bool                   forceInstall() const;
 
     // if the rpm file comes from remote
     // (-> package provide takes some time, use 'provide' callback

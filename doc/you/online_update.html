@@ -263,8 +263,9 @@ Segakcap:
 <tr>
   <td>UpdateOnlyInstalled</td>
   <td>"true" or "false"</td>
-  <td>If set to "true", only packages are installed which already are installed in a previous
-      version</td>
+  <td>If set to "true", only packages are installed which already are installed
+  in a previous version and don't have the ForceInstall flag set to "true". The
+  default value for UpdateOnlyInstalled is "false".</td>
 </tr>
 <tr>
   <td>Prescript</td>
@@ -302,7 +303,7 @@ Segakcap:
 <tr>
   <td>Series</td>
   <td>string</td>
-  <td>Architecture of the RPM</td>
+  <td>Architecture of the RPM<br><em>Since 9.1</em></td>
 </tr>
 <tr>
   <td>Requires</td>
@@ -351,6 +352,14 @@ Segakcap:
   <td>string</td>
   <td>RPM group as extracted from RPM</td>
 </tr>
+<tr>
+  <td>ForceInstall</td>
+  <td>"true" or "false"</td>
+  <td>If set to true the package is installed even if the patch has the
+  UpdateOnlyInstalled flag set to "true" and no previous version of the package is
+  present on the system. The default value for ForceInstall is "false".
+  <br><em>Since 9.1</em></td>
+</tr>
 </table>
 </a>
 
@@ -383,9 +392,10 @@ by YOU:
 <!--  <li>One or more packages have a flag ( "Category" ) which is a installed package.</li>-->
 </ul>
 
-<p>If the flag "UpdateOnlyInstalled" is not defined or is false, ALL packages of the
-patch will be installed.
-If this flag is "true", only packages will be updated which are already installed.
+<p>If the flag "UpdateOnlyInstalled" is not defined or is false, ALL packages of
+the patch will be installed. If this flag is "true", only packages will be
+updated which are already installed unless they have the flag "ForceInstall" set
+to "true". The "ForceInstall" flag is supported since 9.1.
 </p>
 
 

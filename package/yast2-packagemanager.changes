@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar  2 14:09:24 CET 2004 - cschum@suse.de
+
+- YOU: Implemented "ForceInstall" flag.
+
+-------------------------------------------------------------------
 Tue Mar  2 10:43:28 CET 2004 - cschum@suse.de
 
 - Fix return code of online_update command.
