@@ -1,0 +1,15 @@
+#!/bin/bash
+TESTS="01simple 02conflict bug21829"
+
+set -e
+
+make autosolvertest >/dev/null 2>&1
+
+for test in $TESTS; do
+	./autosolvertest tests/$test >/dev/null 2>&1
+done
+
+for test in $TESTS; do
+	echo -n "test $test: "
+	diff -q tests/$test.ref tests/$test.out >/dev/null && echo passed || echo FAILED
+done
