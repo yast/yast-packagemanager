@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb  8 13:51:31 CET 2005 - ma@suse.de
+
+- Escape spaces in url passed to curl (#50465).
+- 2.11.15
+
+-------------------------------------------------------------------
 Mon Feb  7 16:00:52 CET 2005 - mir@suse.de
 - Merged in proofread texts
   PO-Revision-Date: 2005-02-05 18:47+0100
