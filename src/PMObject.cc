@@ -57,7 +57,7 @@ PMObject::~PMObject()
 
 string PMObject::getAttributeName(PMObjectAttribute attr)
 {
-    const char* str;
+    const char* str = NULL;
     switch(attr)
     {
 	case PMObject::PMOBJ_DESCRIPTION:
