@@ -154,8 +154,13 @@ class MediaAccess : virtual public Rep {
 	 * Use concrete handler to provide file denoted by path below
 	 * 'attach point'. Filename is interpreted relative to the
 	 * attached url and a path prefix is preserved.
+         *
+         * @param cached  If cached is set to true, the function checks, if
+         *                the file already exists and doesn't download it again
+         *                if it does. Currently only the existence is checked,
+         *                no other file attributes.
 	 **/
-	PMError provideFile( const Pathname & filename ) const;
+	PMError provideFile( const Pathname & filename, bool cached = false ) const;
 
 	/**
 	 * Remove filename below attach point IFF handler downloads files

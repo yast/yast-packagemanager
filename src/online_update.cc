@@ -226,7 +226,7 @@ int main( int argc, char **argv )
     you.showPatches( verbose );
   }
 
-  error = you.retrievePatches( checkSig, autoInstall );
+  error = you.retrievePatches( reload, checkSig, autoInstall );
   if ( error ) {
     cerr << "Error retrieving packages: " << error << endl;
     exit( 1 );
