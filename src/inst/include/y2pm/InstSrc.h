@@ -311,6 +311,12 @@ class InstSrc: virtual public Rep {
 
 	int _medianr;
 
+	/**
+	 * provide media by number
+	 *
+	 */
+	PMError provideMedia (int medianr) const;
+
   public:
 	/** set callback function for media change
 	 *
@@ -322,13 +328,14 @@ class InstSrc: virtual public Rep {
 	    _mediachangefunc = func;
 	    _mediachangedata = data;
 	}
-
+#if 0
 	/**
-	 * provide media by number
+	 * change mount point for remote media
 	 *
+	 * remoteMount(Pathname)
 	 */
-	PMError provideMedia (int medianr) const;
-
+	void remoteMount (const Pathname& path);
+#endif
 	/**
 	 * provide package via medianr, name, and sub-dir
 	 *
