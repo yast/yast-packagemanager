@@ -216,13 +216,15 @@ const std::list<PMYouPatchPtr>&
 InstTarget::getPatches (void) const
 {
     if ( !_patchesInitialized ) {
-        PMYouSettingsPtr paths( new PMYouSettings );
-        PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo( paths ) );
+        PMYouSettingsPtr settings( new PMYouSettings );
+        PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo( settings ) );
 
-        string u = "dir://" + ( rootdir() + paths->installDir() ).asString();
-        paths->setPatchServer( PMYouServer( u ) );
-        paths->primaryProduct()->setPatchPath( "" );
-        PMError error = patchInfo->readDir( _patches, false, false, false );
+        string u = "dir://" + ( rootdir() + settings->installDir() ).asString();
+        settings->setPatchServer( PMYouServer( u ) );
+        settings->primaryProduct()->setPatchPath( "" );
+        settings->setReloadPatches( false );
+        settings->setCheckSignatures( false );
+        PMError error = patchInfo->readDir( _patches, false );
         if ( error ) {
             E__ << "Error reading patch info for installed patches." << endl;
         }

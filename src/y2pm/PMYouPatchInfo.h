@@ -75,8 +75,7 @@ class PMYouPatchInfo : public CountedRep {
      * @param reload    If true, reload patch files from server.
      * @param checkSig  If true, check GPG signature of patch info files.
      **/
-    PMError getPatches( std::list<PMYouPatchPtr> &patches,
-                        bool reload = true, bool checkSig = true );
+    PMError getPatches( std::list<PMYouPatchPtr> &patches );
     
     /**
       Read patch info files from directory.
@@ -86,8 +85,8 @@ class PMYouPatchInfo : public CountedRep {
       @param checkSig         If true, check GPG signature of patch info files.
       @param processMediaDir  If true, read patch file from media directory.
     **/
-    PMError readDir( std::list<PMYouPatchPtr> &patches, bool reload = true,
-                     bool checkSig = true, bool useMediaDir = true );
+    PMError readDir( std::list<PMYouPatchPtr> &patches,
+                     bool useMediaDir = true );
 
     /**
       Read patch info from file.

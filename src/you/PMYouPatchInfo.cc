@@ -325,8 +325,8 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 //
 //	DESCRIPTION :
 //
-PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches, bool reload,
-                                 bool checkSig, bool useMediaDir )
+PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches,
+                                 bool useMediaDir )
 {
     if ( !_doneDirectory ) {
       PMError error = getDirectory( useMediaDir );
@@ -379,12 +379,12 @@ PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches, bool reload,
         Pathname filePath = patchPath + *it;
         Pathname localPath = media.localPath( filePath );
 
-        error = media.provideFile( filePath, !reload );
+        error = media.provideFile( filePath, !_settings->reloadPatches() );
         if ( error ) {
           ERR << "ERR: " << error << ": " << filePath << endl;
           if ( error == MediaError::E_login_failed ) return error;
         } else {
-          if ( checkSig ) {
+          if ( _settings->checkSignatures() ) {
               DBG << "Check signature of '" << localPath << "'" << endl;
               if ( !gpg.check_file( localPath ) ) {
                   ERR << "Signature check for '" << localPath << "' failed."
@@ -533,8 +533,7 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
 //
 //	DESCRIPTION :
 //
-PMError PMYouPatchInfo::getPatches( list<PMYouPatchPtr> &patches,
-                                    bool reload, bool checkSig )
+PMError PMYouPatchInfo::getPatches( list<PMYouPatchPtr> &patches )
 {
     PMYouServer server = _settings->patchServer();
 
@@ -551,7 +550,7 @@ PMError PMYouPatchInfo::getPatches( list<PMYouPatchPtr> &patches,
       if ( error ) return error;
     }
 
-    return readDir( patches, reload, checkSig );
+    return readDir( patches );
 }
 
 PMError PMYouPatchInfo::processMediaDir()

@@ -95,11 +95,8 @@ class InstYou {
     /**
       Read patch information files. The server where the patches are
       retrieved from has to be set in the paths() object.
-     
-      @param reload    If true reload all patches from server.
-      @param checkSig  If true check signatures of patch info files.
     */
-    PMError retrievePatchInfo( bool reload = true, bool checkSig = true );
+    PMError retrievePatchInfo();
     
     /**
      * Attach source of patches.
@@ -115,8 +112,7 @@ class InstYou {
      *                  scripts.
      * @param noExternal If true, external packages aren't downloaded.
      */
-    PMError retrievePatches( bool reload = true, bool checkSig = true,
-                             bool noExternal = false );
+    PMError retrievePatches();
     
     /**
       Get first selected patch.
@@ -136,10 +132,11 @@ class InstYou {
     /**
      * Download next patch in list of selected patches.
      *
+     * @param reload    If true reload all patch from server.
      * @param checkSig  If true check signatures of downloaded packages and
      *                  scripts.
      */
-    PMError retrieveCurrentPatch( bool reload = true, bool checkSig = true );
+    PMError retrieveCurrentPatch();
 
     /**
      * Install next patch in list of selected patches to target system.
@@ -148,10 +145,8 @@ class InstYou {
 
     /**
      * Install patches to target system.
-     *
-     * @param dryrun Don't actually install packages. Just print debug output. 
      */
-    PMError installPatches( bool dryrun = false );
+    PMError installPatches();
 
     /**
      * Select Patches.
@@ -178,7 +173,7 @@ class InstYou {
     /**
      * Get object holding path information.
      */
-    PMYouSettingsPtr paths() const { return _settings; }
+    PMYouSettingsPtr settings() const { return _settings; }
 
     /**
      * Get object holding patch information.
@@ -274,17 +269,14 @@ class InstYou {
     void init();
 
   protected:
-    PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
-    PMError retrievePatch( const PMYouPatchPtr &, bool reload,
-                           bool checkSig = true, bool noExternal = false );
-    PMError retrievePackage( const PMPackagePtr &pkg, const PMYouProductPtr &,
-                             bool reload = true, bool noExternal = false );
-    PMError retrieveScript( const std::string &script, const PMYouProductPtr &,
-                            bool reload, bool checkSig );
-    PMError InstYou::retrieveFile( const PMYouFile &file, bool reload );
+    PMError installPatch( const PMYouPatchPtr & );
+    PMError retrievePatch( const PMYouPatchPtr & );
+    PMError retrievePackage( const PMPackagePtr &pkg, const PMYouProductPtr & );
+    PMError retrieveScript( const std::string &script,
+                            const PMYouProductPtr & );
+    PMError InstYou::retrieveFile( const PMYouFile &file );
 
-    PMError executeScript( const std::string &, const PMYouProductPtr &,
-                           bool dryrun );
+    PMError executeScript( const std::string &, const PMYouProductPtr & );
 
     /**
      * check, if patch has new packages.

@@ -215,6 +215,46 @@ class PMYouSettings : public CountedRep
     */
     PMYouProductPtr primaryProduct() const;
 
+    /**
+      Set if signatures should be checked or not.
+    */
+    void setCheckSignatures( bool );
+    /**
+      Return true, if signatures should be checked, otherwise return false.
+    */
+    bool checkSignatures() const;
+
+    /**
+      Set if patches should be reloaded from the server.
+    */
+    void setReloadPatches( bool );
+    /**
+      Return true if patches should be reloaded from the server, otherwise
+      return false.
+    */
+    bool reloadPatches();
+
+    /**
+      Set if external packages should be downloaded.
+    */
+    void setNoExternalPackages( bool );
+    /**
+      Return true if external packages should be downloaded, otherwise return
+      false.
+    */
+    bool noExternalPackages() const;
+
+    /**
+      Set if the you run should be performed as dry run, i.e. without actually
+      installing the patches.
+    */
+    void setDryRun( bool );
+    /**
+      Return true, if the YOU run should be performed as dry run, i.e. without
+      actually installing the patches, otherwise return false.
+    */
+    bool dryRun() const;
+
   protected:
     void init();
 
@@ -228,6 +268,11 @@ class PMYouSettings : public CountedRep
     LangCode _lang;
 
     std::list<PMYouProductPtr> _products;
+
+    bool _checkSignatures;
+    bool _reloadPatches;
+    bool _noExternalPackages;
+    bool _dryRun;
 };
 
 #endif

@@ -253,8 +253,12 @@ int main( int argc, char **argv )
   }
 
   settings->setLangCode( LangCode( lang ) );
+  settings->setReloadPatches( reload );
+  settings->setCheckSignatures( checkSig );
+  settings->setDryRun( dryrun );
+  settings->setNoExternalPackages( autoInstall );
 
-  list<PMYouProductPtr> products = you.paths()->products();
+  list<PMYouProductPtr> products = you.settings()->products();
 
   if ( showConfig ) {
     int i = 0;
@@ -284,8 +288,8 @@ int main( int argc, char **argv )
       }
       ++i;
     }
-    cout << "Language:     " << you.paths()->langCode() << endl;
-    cout << "Directory:    " << you.paths()->directoryFileName() << endl;
+    cout << "Language:     " << you.settings()->langCode() << endl;
+    cout << "Directory:    " << you.settings()->directoryFileName() << endl;
   
     exit( 0 );
   }
@@ -295,7 +299,7 @@ int main( int argc, char **argv )
   PMYouServer server;
 
   if ( autoInstall ) {
-    server.setUrl( "dir://" + you.paths()->attachPoint().asString() );
+    server.setUrl( "dir://" + you.settings()->attachPoint().asString() );
   } else {
     if ( urlStr ) {
       if ( !Url( urlStr ).isValid() ) {
@@ -304,7 +308,7 @@ int main( int argc, char **argv )
       }
       server.setUrl( urlStr );
     } else {
-      PMYouServers youServers( you.paths() );
+      PMYouServers youServers( you.settings() );
       error = youServers.requestServers( checkUpdates || quickCheckUpdates );
       if ( error ) {
         cerr << "Error while requesting servers: " << error << endl;
@@ -359,7 +363,7 @@ int main( int argc, char **argv )
     }
   }
 
-  error = you.retrievePatchInfo( reload, checkSig );
+  error = you.retrievePatchInfo();
   if ( error ) {
     cerr << "Error retrieving patches: " << error << endl;
     exit( -1 );
@@ -385,7 +389,7 @@ int main( int argc, char **argv )
     return 0;
   }
 
-  error = you.retrievePatches( reload, checkSig, autoInstall );
+  error = you.retrievePatches();
   if ( error ) {
     cerr << "Error retrieving packages: " << error << endl;
     exit( -1 );
@@ -396,7 +400,7 @@ int main( int argc, char **argv )
     return 0;
   }
 
-  error = you.installPatches( dryrun );
+  error = you.installPatches();
   if ( error ) {
     cerr << "Error installing packages: " << error << endl;
     exit( -1 );
