@@ -92,6 +92,9 @@ std::string InstTargetError::errtext( const unsigned e )
   ENUM_OUT( E_UpdateInf_malformed );
 
 #undef ENUM_OUT
+
+  case E_user_abort: return N_("User aborted operation.");
+
   ///////////////////////////////////////////////////////////////////
   // no default: let compiler warn '... not handled in switch'
   ///////////////////////////////////////////////////////////////////

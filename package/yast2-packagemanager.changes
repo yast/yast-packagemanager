@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 24 11:21:34 CEST 2003 - cschum@suse.de
+
+- Added progress callback for InstTarget::executeScript().
+
+-------------------------------------------------------------------
 Tue Jun 17 16:16:07 CEST 2003 - cschum@suse.de
 
 - Added support for "Files" tag in YOU patch files. 

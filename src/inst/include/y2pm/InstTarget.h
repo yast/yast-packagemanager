@@ -158,6 +158,24 @@ class InstTarget: virtual public Rep, public InstData {
 	 */
 	virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
 
+        class Callbacks
+        {
+          public:
+            virtual ~Callbacks() {};
+          
+            /**
+              Signal script execution progress in percent. A value of -1
+              indicates progress without known percentage value. If the
+              implementation returns false the script is cancelled.
+            */
+            virtual bool scriptProgress( int percent ) = 0;
+        };
+
+        static void setCallbacks( Callbacks *c ) { _callbacks = c; }
+
+    private:
+
+        static Callbacks *_callbacks;
 
       ///////////////////////////////////////////////////////////////////
       // Package related interface
