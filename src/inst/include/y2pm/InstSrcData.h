@@ -102,12 +102,12 @@ class InstSrcData: virtual public Rep {
     /**
      * Call concrete InstSrcData to propagate Objects to Manager classes.
      **/
-    virtual void propagateObjects() {}
+    virtual void propagateObjects();
 
     /**
      * Call concrete InstSrcData to withdraw Objects from Manager classes.
      **/
-    virtual void withdrawObjects() {}
+    virtual void withdrawObjects();
 
 #if 1
   private:
