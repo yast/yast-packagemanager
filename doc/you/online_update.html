@@ -440,7 +440,9 @@ installed the variant having the same architecture as the installed package will
 be chosen. If no such variant exists, no variant of the package will be chosen
 at all. If the package isn't installed, the variant with the best architecture
 according to the list of compatible architectures specified by the product and
-the actual architecture of the system will be chosen.</p>
+the actual architecture of the system will be chosen. If the architecture of the
+package isn't listed as compatible architecture the package won't be installed.
+</p>
 
 <h3>Executing scripts within a patch</h3>
 
