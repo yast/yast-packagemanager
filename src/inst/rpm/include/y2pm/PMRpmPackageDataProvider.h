@@ -106,6 +106,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	const std::list<std::string> recommends () const { return PMPackageDataProvider::recommends(); }
 	const std::list<std::string> suggests () const { return PMPackageDataProvider::suggests(); }
 	const std::string location () const { return PMPackageDataProvider::location(); }
+	const int medianr () const { return 0; }
 	const std::list<std::string> keywords () const { return PMPackageDataProvider::keywords(); }
 
     public:

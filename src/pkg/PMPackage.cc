@@ -160,6 +160,9 @@ PMPackage::suggests() const { return _dataProvider->suggests (); }
 const std::string
 PMPackage::location() const { return _dataProvider->location (); }
 
+const int
+PMPackage::medianr() const { return _dataProvider->medianr (); }
+
 const std::list<std::string>
 PMPackage::keywords() const { return _dataProvider->keywords (); }
 

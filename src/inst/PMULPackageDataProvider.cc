@@ -215,6 +215,12 @@ PMULPackageDataProvider::location () const
     return value;
 }
 
+const int
+PMULPackageDataProvider::medianr () const
+{
+    return _attr_MEDIANR;
+}
+
 const std::list<std::string>
 PMULPackageDataProvider::keywords () const
 {
