@@ -174,7 +174,9 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
        {
 	   rpmmsg+=str;
        }
-
+       
+       int status = systemStatus();
+       
        if ( rpmmsg.empty() )
        {
 	  // error
@@ -191,7 +193,7 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 	  }
 	  else
 	  {
-	     if ( systemStatus() != 0 )
+	     if ( status != 0 )
 	     {
 		// error
 		dbStatus = RPMDB_ERROR_CHECK_OLD_VERSION;
@@ -1225,7 +1227,7 @@ int RpmDb::systemStatus()
    delete process;
    process = 0;
 
-   D__ << "exit code " << exit_code << endl;
+//   D__ << "exit code " << exit_code << endl;
 
   return exit_code;
 }
