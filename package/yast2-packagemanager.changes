@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Aug 27 17:48:59 CEST 2002 - kkaempf@suse.de
+
+- improve cache handling of data
+- take media nr into account in installation order
+- fix status handling for selectables
+- fix selection handling
+
+-------------------------------------------------------------------
 Sun Aug 25 22:00:42 CEST 2002 - kkaempf@suse.de
 
 - fix reading of locale based selection data.
