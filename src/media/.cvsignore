@@ -3,5 +3,6 @@ Makefile.in
 *.o
 *.lo
 *.la
+*.prg
 .deps
 .libs
