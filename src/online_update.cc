@@ -206,6 +206,8 @@ int main( int argc, char **argv )
     }
   }
 
+  if ( debug ) verbose = true;
+
   if ( getuid() != 0 && !checkUpdates && !quickCheckUpdates && !showConfig ) {
     cerr << _("You need root permissions to run this command. Use the -q or -k\n"
               "options to check for the availabilty of updates without needing\n"
@@ -293,7 +295,7 @@ int main( int argc, char **argv )
       cout << _("  Name:      ") << prod->product() << endl;
       cout << _("  Version:      ") << prod->version() << endl;
       cout << _("  Architecture: ") << prod->baseArch() << endl;
-      if ( verbose || debug ) {
+      if ( verbose ) {
         cout << _("  Arch list: ");
         std::list<PkgArch> archs = prod->archs();
         std::list<PkgArch>::const_iterator it;
@@ -420,11 +422,15 @@ int main( int argc, char **argv )
     return 0;
   }
 
-  error = you.installPatches();
-  if ( error ) {
-    cerr << _("Error installing packages: ") << error << endl;
-    exit( -1 );
+  bool installedPatches = you.installPatches();
+  if ( verbose ) {
+    if ( !installedPatches ) {
+      cout << _("No patches have been installed.") << endl;
+    } else {
+      cout << _("Patches have been installed.") << endl;
+    }
   }
+  // TODO: Check for installation errors
 
   MIL << "online_update done" << endl;
   return 0;
