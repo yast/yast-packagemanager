@@ -804,52 +804,47 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
     return PMError();
   }
 
-  list<PkgArch> archs = product->archs();
-
-  if ( pkg->hasInstalledObj() ) {
-    archs.push_front( pkg->getInstalledObj()->arch() );
-  }
-
   bool patchRpm = hasPatchRpm( pkg );
 
   PMError error( YouError::E_error );
   Pathname rpmPath;
-  list<PkgArch>::const_iterator it;
-  for( it = archs.begin(); it != archs.end(); ++it ) {
-    D__ << "ARCH: " << *it << endl;
 
+  bool gotRpm = false;
+
+  if ( patchRpm ) {
     // If the package has a version installed, try to get patch RPM first.
-    rpmPath = product->rpmPath( pkg, *it, patchRpm );
-    D__ << "Trying downloading '" << _settings->patchUrl() << "/" << rpmPath
+    rpmPath = product->rpmPath( pkg, patchRpm );
+    D__ << "Trying retrieving '" << _settings->patchUrl() << "/" << rpmPath
         << "'" << endl;
     error = _media.provideFile( rpmPath, !_settings->reloadPatches() );
     if ( error ) {
-      D__ << "Downloading RPM '" << pkg->name() << "' failed: " << error
+      WAR << "Retrieving RPM '" << pkg->name() << "' failed: " << error
           << endl;
       if ( error == MediaError::E_user_abort ) return error;
-
-      // If patch RPM was requested first, try to get full RPM now.
-      if ( patchRpm ) {
-        rpmPath = product->rpmPath( pkg, *it, false );
-        D__ << "Trying downloading '" << _settings->patchUrl() << "/" << rpmPath
-            << "'" << endl;
-        error = _media.provideFile( rpmPath, !_settings->reloadPatches() );
-        if ( error ) {
-          D__ << "Download failed: " << error << endl;
-          if ( error == MediaError::E_user_abort ) return error;
-        }
-      }
-    }
-
-    // If download was successful store path to RPM and return.
-    if ( !error ) {
-      _info->packageDataProvider()->setLocation( pkg, rpmPath.asString() );
-      DBG << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
-      return PMError();
+    } else {
+      gotRpm = true;
     }
   }
 
-  ERR << "Error downloading RPM " << pkg->name() << endl;
+  if ( !gotRpm ) {
+    rpmPath = product->rpmPath( pkg, false );
+    D__ << "Retrieving '" << _settings->patchUrl() << "/" << rpmPath
+        << "'" << endl;
+    error = _media.provideFile( rpmPath, !_settings->reloadPatches() );
+    if ( error ) {
+      D__ << "Retrieval failed: " << error << endl;
+      if ( error == MediaError::E_user_abort ) return error;
+    }
+  }
+
+  // If download was successful store path to RPM and return.
+  if ( !error ) {
+    _info->packageDataProvider()->setLocation( pkg, rpmPath.asString() );
+    DBG << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
+    return PMError();
+  }
+
+  ERR << "Error retrieving RPM " << pkg->name() << endl;
 
   string details = error.details();
   if ( !details.empty() ) details += "\n";
@@ -1170,7 +1165,7 @@ void InstYou::filterArchitectures( PMYouPatchPtr &patch )
   
     PMSelectablePtr s = Y2PM::packageManager().getItem( (*it1)->name() );
 
-    // Handle installed packages. If the packages is already installed, all
+    // Handle installed packages. If the package is already installed, all
     // instances of the packages in the patch which have a different
     // architecture are discarded.
     if ( s ) {

@@ -97,16 +97,6 @@ class PMYouProduct : public CountedRep
                       to full RPM.
     */
     Pathname rpmPath( const PMPackagePtr &pkg, bool patchRpm = false );
-    /**
-      Return path to RPM.
-      
-      @param pkg      Pointer to package
-      @param arch     Architecture of RPM.
-      @param patchRpm If true, return path to patch RPM, if false, return path
-                      to full RPM.
-    */
-    Pathname rpmPath( const PMPackagePtr &pkg, const std::string & arch,
-                      bool patchRpm = false );
 
     /**
       Return path of script.
