@@ -4,6 +4,6 @@
 
 htmldir = $(docdir)
 
-html_DATA = *.png
+html_DATA = $(srcdir)/*.png
 
 EXTRA_DIST = $(html_DATA)
