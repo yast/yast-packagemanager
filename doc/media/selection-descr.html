@@ -122,12 +122,18 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 <tr><td valign=top>+Rec<br>-Rec</td><td valign=top><i>selections</i></td><td>recommended selections</td></tr>
 <tr><td valign=top>+Sug<br>-Sug</td><td valign=top><i>selections</i></td><td>suggested selections</td></tr>
 <tr><td valign=top>=Siz</td><td valign=top><i>pkgsize</i> <i>instsize</i></td><td>size in bytes</td></tr>
-<tr><td valign=top>+Ins</i><br>-Ins</i></td><td valign=top><i>packages list</i></td><td>list of packages to install</td></tr>
+<tr><td valign=top>+Ins</i><br>-Ins</i></td><td valign=top><i>packages list</i></td><td>list of packages to install<br>
+(see below)</td></tr>
 <tr><td valign=top>+Ins.<i>lang</i><br>-Ins.<i>lang</i></td><td valign=top><i>packages list</i></td><td>list of packages to install if given language is active</td></tr>
-<tr><td valign=top>+Del</i><br>-Del</i></td><td valign=top><i>packages list</i></td><td>list of packages to delete</td></tr>
+<tr><td valign=top>+Del</i><br>-Del</i></td><td valign=top><i>packages list</i></td><td>list of packages to delete<br>
+(see below)</td></tr>
 <tr><td valign=top>+Del.<i>lang</i><br>-Del.<i>lang</i></td><td valign=top><i>packages list</i></td><td>list of packages to delete if given language is active</td></tr>
 </TABLE>
 <p></p>
+The list of install and delete packages normally just lists packages by name, one per line.<br>
+An expection is the syntax <tt><i>name</i> (<i>alternative</i>)</tt> which
+gives an alternative package if the first isn't available.<br>
+<br>
 <H2>Example</H2>
 (shortened at <tt>...</tt>)
 <pre>
