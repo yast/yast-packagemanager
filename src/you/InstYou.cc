@@ -13,7 +13,7 @@
   File:       InstYou.cc
 
   Author:     Cornelius Schumacher <cschum@suse.de>
-  Maintainer: Cornelius Schumacher <cschum@suse.de>
+  Maintainer: Michael Radziej <mir@suse.de>
 
   Purpose: YaST Online Update.
 
@@ -204,12 +204,27 @@ PMError InstYou::servers( list<PMYouServer> &servers )
   return PMError();
 }
 
+/*
+ * urlStringNoCred
+ * return the string for an url without
+ * username and password data.
+ */
+
+static std::string urlStringNoCred (const Url &url)
+{
+  Url baseUrl(url);
+  baseUrl.setPassword(std::string());
+  baseUrl.setUsername(std::string());
+  return baseUrl.asString();
+}
+  
+  
 PMError InstYou::readUserPassword()
 {
   SysConfig cfg( _settings->passwordFile() );
-  _username = cfg.readEntry( "USERNAME_" + _settings->patchUrl().asString() );
-  _password = cfg.readEntry( "PASSWORD_" + _settings->patchUrl().asString() );
-
+  std::string urlString = urlStringNoCred( _settings->patchUrl());
+  _username = cfg.readEntry( "USERNAME_" + urlString);
+  _password = cfg.readEntry( "PASSWORD_" + urlString);
   _settings->setUsernamePassword( _username, _password );
 
   return PMError();
@@ -229,8 +244,10 @@ PMError InstYou::setUserPassword( const string &username,
   }
 
   SysConfig cfg( _settings->passwordFile() );
-  cfg.writeEntry( "USERNAME_" + _settings->patchUrl().asString(), u );
-  cfg.writeEntry( "PASSWORD_" + _settings->patchUrl().asString(), p );
+  std::string urlString = urlStringNoCred( _settings->patchUrl());
+
+  cfg.writeEntry( "USERNAME_" + urlString, u );
+  cfg.writeEntry( "PASSWORD_" + urlString, p );
   cfg.save();
 
   PathInfo::chmod( _settings->passwordFile(), 0600 );

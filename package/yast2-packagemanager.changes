@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jan 25 14:02:41 CET 2005 - mir@suse.de
+
+- you bugfix: removed login and password from password file entries
+  which broke changing the password after the first entry.
+  (#44143, feature 7.2.15.1)
+- 2.11.10
+
+-------------------------------------------------------------------
 Mon Jan 24 17:14:48 CET 2005 - lnussel@suse.de
 
 - filter out packages that have unresolvable dependencies early in
