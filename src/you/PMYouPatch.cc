@@ -26,6 +26,7 @@
 #include <y2util/stringutil.h>
 
 #include <y2pm/PMYouPatch.h>
+#include <y2pm/PMSelectable.h>
 
 using namespace std;
 
@@ -208,4 +209,15 @@ void PMYouPatch::setProduct( const PMYouProductPtr &p )
 PMYouProductPtr PMYouPatch::product() const
 {
   return _product;
+}
+
+bool PMYouPatch::isSelected() const
+{
+  PMSelectablePtr selectable = getSelectable();
+  if ( selectable && selectable->to_install() &&
+       constPMYouPatchPtr( this ) == selectable->candidateObj() ) {
+    return true;
+  } else {
+    return false;
+  }
 }

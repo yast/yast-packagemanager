@@ -245,6 +245,11 @@ class PMYouPatch : public PMObject
     */
     bool skipped() const { return _skipped; }
 
+    /**
+      Return if the patch is selected for installation.
+    */
+    bool isSelected() const;
+
   public:
 
     /**

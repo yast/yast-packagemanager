@@ -289,13 +289,7 @@ void InstYou::updatePackageStates()
   for ( it = _patches.begin(); it != _patches.end(); ++it ) {
 //    D__ << "Patch: " << (*it)->name() << endl;
 
-    bool toInstall = false;
-    PMSelectablePtr selectable = (*it)->getSelectable();
-    if ( selectable && selectable->to_install() &&
-         *it == selectable->candidateObj() ) {
-//      D__ << "toInstall: true" << endl;
-      toInstall = true;
-    }
+    bool toInstall = (*it)->isSelected();
 
     list<PMPackagePtr> packages = (*it)->packages();
     list<PMPackagePtr>::const_iterator itPkg;
@@ -460,11 +454,7 @@ PMYouPatchPtr InstYou::firstPatch( bool resetProgress )
     _progressTotal = 0;
     std::list<PMYouPatchPtr>::const_iterator it;
     for ( it = _patches.begin(); it != _patches.end(); ++it ) {
-      PMSelectablePtr selectable = (*it)->getSelectable();
-      if ( selectable && selectable->to_install() &&
-           *it == selectable->candidateObj() ) {
-        _progressTotal++;
-      }
+      if ( (*it)->isSelected() ) _progressTotal++;
     }
 
     _progressTotal *= 2;
@@ -499,9 +489,7 @@ PMYouPatchPtr InstYou::nextPatch( bool *ok )
 PMYouPatchPtr InstYou::nextSelectedPatch()
 {
   while ( _selectedPatchesIt != _patches.end() ) {
-    PMSelectablePtr selectable = (*_selectedPatchesIt)->getSelectable();
-    if ( selectable && selectable->to_install() &&
-         *_selectedPatchesIt == selectable->candidateObj() ) {
+    if ( (*_selectedPatchesIt)->isSelected() ) {
       return *_selectedPatchesIt;
     }
     ++_selectedPatchesIt;
