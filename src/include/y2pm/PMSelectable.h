@@ -24,6 +24,7 @@
 
 #include <y2pm/PMSelectablePtr.h>
 
+#include <y2pm/SelState.h>
 #include <y2pm/PkgName.h>
 #include <y2pm/PMObjectPtr.h>
 
@@ -46,9 +47,13 @@ class PMSelectable : virtual public Rep {
 
     PMManager * _manager;
     unsigned    _mgr_idx;
+    SelState    _state;
 
     void _mgr_attach( PMManager * mgr_r, const unsigned idx_r );
     void _mgr_detach();
+
+    void _attach_obj( PMObjectPtr & obj_r );
+    void _detach_obj( PMObjectPtr & obj_r );
 
   private:
 
@@ -67,6 +72,9 @@ class PMSelectable : virtual public Rep {
 
     Error setInstalledObj( PMObjectPtr obj_r );
     Error delInstalledObj();
+
+    Error setCandidateObj( PMObjectPtr obj_r );
+    Error delCandidateObj();
 
     Error clistAdd( PMObjectPtr obj_r );
     Error clistDel( PMObjectPtr obj_r );
@@ -91,6 +99,18 @@ class PMSelectable : virtual public Rep {
     static const unsigned no_mgr = (unsigned)-1;
 
     unsigned mgr_idx() const { return _mgr_idx; }
+
+  public:
+
+    /**
+     * For state queries.
+     **/
+    const SelState & state() const { return _state; }
+
+    /**
+     *  For state manipulation.
+     **/
+    SelState & state() { return _state; }
 
   public:
 

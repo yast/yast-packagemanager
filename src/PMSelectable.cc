@@ -115,6 +115,36 @@ void PMSelectable::_mgr_detach()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMSelectable::_attach_obj
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectable::_attach_obj( PMObjectPtr & obj_r )
+{
+  if ( obj_r ) {
+    obj_r->_selectable = this;
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::_detach_obj
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectable::_detach_obj( PMObjectPtr & obj_r )
+{
+  if ( obj_r ) {
+    obj_r->_selectable = 0;
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMSelectable::clistLookup
 //	METHOD TYPE : PMSelectable::PMObjectList::iterator
 //
@@ -147,7 +177,8 @@ PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
 
   if ( obj_r ) {
     _installedObj = obj_r;
-    _installedObj->_selectable = this;
+    _attach_obj( obj_r );
+    _state.set_has_installed( true );
   }
 
   return E_Ok;
@@ -164,8 +195,51 @@ PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
 PMSelectable::Error PMSelectable::delInstalledObj()
 {
   if ( _installedObj ) {
-    _installedObj->_selectable = 0;
+    _detach_obj( _installedObj );
     _installedObj = 0;
+    _state.set_has_installed( false );
+  }
+  return E_Ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::setCandidateObj
+//	METHOD TYPE : PMSelectable::Error
+//
+//	DESCRIPTION :
+//
+PMSelectable::Error PMSelectable::setCandidateObj( PMObjectPtr obj_r )
+{
+  if ( _candidateObj == obj_r )
+    return E_Ok;
+
+  delCandidateObj();
+
+  if ( obj_r ) {
+    _candidateObj = obj_r;
+    _attach_obj( obj_r );
+    _state.set_has_candidate( true );
+  }
+
+  return E_Ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::delCandidateObj
+//	METHOD TYPE : PMSelectable::Error
+//
+//	DESCRIPTION :
+//
+PMSelectable::Error PMSelectable::delCandidateObj()
+{
+   if ( _candidateObj ) {
+    _detach_obj( _candidateObj );
+    _candidateObj = 0;
+    _state.set_has_candidate( false );
   }
   return E_Ok;
 }
@@ -190,9 +264,12 @@ PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
   }
 
   _candidateList.push_back( obj_r );
-  obj_r->_selectable = this;
+  _attach_obj( obj_r );
 
 #warning must rerank on add
+  if ( !_candidateObj ) {
+    setCandidateObj( obj_r );
+  }
   return E_Ok;
 }
 
@@ -225,12 +302,15 @@ PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
     return E_Error;
   }
 
-  obj_r->_selectable = 0;
+  _detach_obj( obj_r );
   _candidateList.erase( it );
 
   // check wheter it's been the current candidate
   if ( _candidateObj == obj_r ) {
-    _candidateObj = 0;
+    delCandidateObj();
+    if ( _candidateList.size() ) {
+      setCandidateObj( *_candidateList.begin() );
+    }
 #warning must rerank on del
   }
 
@@ -248,9 +328,10 @@ PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
 PMSelectable::Error PMSelectable::clistClearAll()
 {
   for ( PMObjectList::iterator it = _candidateList.begin(); it != _candidateList.end(); ++it ) {
-    (*it)->_selectable = 0;
+    _detach_obj( *it );
   }
   _candidateList.clear();
+  delCandidateObj();
 
   return E_Ok;
 }
