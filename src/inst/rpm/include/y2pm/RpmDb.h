@@ -63,8 +63,6 @@ class RpmDb: virtual public Rep
 	// list
 	bool _packages_valid;
 
-	Pathname _backuppath;
-
 	FileDeps::FileNames _filerequires;
 
     public:
@@ -275,13 +273,6 @@ class RpmDb: virtual public Rep
 	bool setInstallationLogfile (const Pathname& filename);
 
 	/**
-	 * set backup dir for rpm config files
-	 *
-	 * @param const Pathname
-	 * */
-	void setBackupPath (const Pathname& path) { _backuppath = path; }
-
-	/**
 	 * get backup dir for rpm config files
 	 *
 	 * */
@@ -292,6 +283,50 @@ class RpmDb: virtual public Rep
 	 *
 	 */
 	std::string pkg2rpm (constPMPackagePtr package);
+
+	/**
+	 * create tar.gz of all changed files in a Package
+	 *
+	 * @param packageName name of the Package to backup
+	 *
+	 * @see setBackupPath
+	 * */
+	bool backupPackage(const std::string& packageName);
+
+	/**
+	 * queries file for name and then calls above backupPackage
+	 * function. For convenience.
+	 *
+	 * @param filename rpm file that is about to be installed
+	 * */
+	bool backupPackage(const Pathname& filename);
+
+	/**
+	 * set path where package backups are stored
+	 *
+	 * @see backupPackage
+	 * */
+	void setBackupPath(const Pathname& path);
+
+	/**
+	 * whether to create package backups during install or
+	 * removal
+	 *
+	 * @param yes true or false
+	 * */
+	void createPackageBackups(bool yes) { _packagebackups = yes; }
+	
+	/**
+	 * determine which files of an installed package have been
+	 * modified.
+	 *
+	 * @param fileList (output) where to store modified files
+	 * @param packageName name of package to query
+	 *
+	 * @return false if package couln't be queried for some
+	 * reason
+	 * */
+	bool queryChangedFiles(FileList & fileList, const std::string& packageName);
 
     private:
 
@@ -364,6 +399,12 @@ class RpmDb: virtual public Rep
 	/** packages.rpm */
 	Pathname _rpmdbname;
 
+	/** /var/adm/backup */
+	Pathname _backuppath;
+
+	/** create package backups? */
+	bool _packagebackups;
+
 	/** whether a new database was created */
 	bool _creatednew;
 
@@ -397,7 +438,8 @@ class RpmDb: virtual public Rep
 	void ReportProgress(int p)
 	    { if(_progressfunc != NULL) (*_progressfunc)(p,_progressdata); }
 
-	/** helper for queryPackage
+	/**
+	 * helper for queryPackage
 	 * */
 	bool queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::string& result_r);
 	bool queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::list<std::string>& result_r);
