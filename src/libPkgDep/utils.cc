@@ -29,7 +29,12 @@ bool PkgDep::also_provided_by_installed( const PkgRelation& req )
 	bool also_provided_by_installed = false;
 	// originally installed was used here, this must have been a bug
 	// (lprng, cups-client, lsb incident, #21829)
-	RevRel_for( PkgSet::getRevRelforPkg(vinstalled.provided(),req.name()), prov ) {
+	// ++ no, it's no bug. looking into vinstalled would mean to actually
+	// look into candidates. Bug #21829 will happen again but it is not
+	// that bad since the ui provides a better way to solve the conflict
+	// now. The real problem is that it's not checked whether referers
+	// actually get broken during remove list generation -- ln 12.03.2004
+	RevRel_for( PkgSet::getRevRelforPkg(installed.provided(),req.name()), prov ) {
 		if (req.matches( prov->relation() )) {
 			also_provided_by_installed = true;
 			break;
