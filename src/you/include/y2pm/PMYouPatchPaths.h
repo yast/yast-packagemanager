@@ -37,7 +37,7 @@
 //
 //	CLASS NAME : PMYouPatchPaths
 /**
- * Pathes for patches.
+ * Paths for patches.
  **/
 class PMYouPatchPaths : virtual public Rep {
   REP_BODY(PMYouPatchPaths);

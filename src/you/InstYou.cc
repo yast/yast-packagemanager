@@ -82,6 +82,13 @@ PMError InstYou::servers( list<Url> &servers )
   return PMError();
 }
 
+PMError InstYou::checkAuthorization( const Url &url, const string &regcode,
+                                     const string &password )
+{
+  return PMError();
+}
+
+
 PMError InstYou::retrievePatchInfo( const Url &url, bool checkSig )
 {
   _patches.clear();
