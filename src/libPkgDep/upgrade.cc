@@ -292,17 +292,11 @@ bool PkgDep::solvesystemnoauto(
 	ErrorResultList& out_bad,
 	ErrorResultList& out_obsoleted)
 {
-	PkgSet installed_backup = installed;
-//	noval_hash<PkgName> real_from_input_list;
-//	noval_hash<PkgName> upgrades_solving_conflicts;
-//	noval_hash<PkgName> avoid_break_installs;
 	unsigned numinconsistent = 0;
 	set<PMSolvablePtr> noinstcandidates;
 	PkgSet brokeninstalled;
 
 	D__ << "Starting solver\n";
-
-//	installed.dumpOn(cout);
 
 //	go through all installed, put all inconsistent into candidates and remove them from installed
 	{
@@ -342,16 +336,6 @@ bool PkgDep::solvesystemnoauto(
 	    {
 		if(installed.includes(bit->value->name()))
 		{
-		    /*
-		    SolvableList toremove;
-		    remove_package(&installed, *bit, toremove);
-		    ci_for(SolvableList::,, it, toremove.,)
-		    {
-			brokeninstalled.insert(*it);
-			candidates.add( *it );
-			D__ << (*it)->name() << " ";
-		    }
-		    */
 		    D__ << (bit->value->name()) << " ";
 		    installed.remove( bit->value );
 		    candidates.add( bit->value );
@@ -366,131 +350,6 @@ bool PkgDep::solvesystemnoauto(
 	DBG << "-------------------- install run --------------------\n";
 	install( candidates, out_good, out_bad, out_obsoleted, true );
 	DBG << "-------------------- install end --------------------\n";
-
-#if 0
-		if (out_bad.empty())
-			// no problems...
-			goto out;
-
-		// fix fixable problems
-		ci_for( ErrorResultList::,, p, out_bad., ) {
-			if (p->install_to_avoid_break)
-				avoid_break_installs.insert( p->name );
-			if (p->upgrade_to_remove_conflict)
-				upgrades_solving_conflicts.insert( p->name );
-
-			// if some pkg needs something that's not available, don't upgrade
-			// it
-			if (p->not_available) {
-				DBG << p->name <<" is not available, deselecting its referers\n";
-				set<PkgName> visited;
-				deselect_referers( visited, PkgName("<none>"), candidates, noinstcandidates, p->referers, out_good, out_bad);
-			}
-
-			// alternatives possible: simply choose first one
-			if (!p->alternatives.empty()) {
-				PkgName alt = p->alternatives.front().name;
-				D__ << "Choosing " << alt << " as alternative for "
-					 << p->name << endl;
-				assert( available.includes(alt) );
-				candidates.add( available[alt] );
-				if (p->install_to_avoid_break)
-					avoid_break_installs.insert( alt );
-			}
-
-			// fix conflicts by removing packages, except there is too much to
-			// remove
-			if (!p->conflicts_with.empty()) {
-				if (p->remove_to_solve_conflict.size() > max_remove) {
-					D__ << "too many packages ("
-						 << p->remove_to_solve_conflict.size()
-						 << ") to remove for conflict(s) of " << p->name
-						 << " -- aborting upgrade\n";
-					all_ok = false;
-					goto out;
-				}
-				ci_for( SolvableList::,, q, p->remove_to_solve_conflict., ) {
-					if (candidates.includes((*q)->name())) {
-						D__ << "removing candidate " << (*q)->name()
-							 << " due to conflict with " << p->name << endl;
-						candidates.remove( (*q)->name() );
-					}
-					else {
-						DBG << "removing installed " << (*q)->name()
-							 << " due to conflict with " << p->name << endl;
-						to_remove.push_back( *q );
-					}
-				}
-			}
-		}
-
-		ci_for( ResultList::,, p, out_good., ) {
-			if (p->install_to_avoid_break)
-				avoid_break_installs.insert( p->name );
-			if (p->upgrade_to_remove_conflict)
-				upgrades_solving_conflicts.insert( p->name );
-		}
-
-		// ok, everything fixed, remove to_remove pkgs from installed
-		//DBG << "Ok, removing " << to_remove << endl;
-		ci_for( SolvableList::,, p, to_remove., )
-			installed.remove( (*p)->name() );
-	}
-  out:
-	if (endless_protect <= 0)
-		all_ok = false;
-
-	if (!all_ok)
-		// revert installed list
-		installed = installed_backup;
-	else {
-		i_for( PkgDep::ResultList::,, p, out_good., ) {
-			p->from_input_list = real_from_input_list.exists( p->name );
-			if (avoid_break_installs.exists( p->name ))
-				p->install_to_avoid_break = true;
-			if (upgrades_solving_conflicts.exists( p->name ))
-				p->upgrade_to_remove_conflict = true;
-		}
-		i_for( PkgDep::ErrorResultList::,, p, out_bad., ) {
-			p->from_input_list = real_from_input_list.exists( p->name );
-			if (avoid_break_installs.exists( p->name ))
-				p->install_to_avoid_break = true;
-			if (upgrades_solving_conflicts.exists( p->name ))
-				p->upgrade_to_remove_conflict = true;
-		}
-	}
-
-
-	// go through not installed candidates, mark those as to_remove that
-	// originally were broken installed packages
-	ci_for( set<PMSolvablePtr>::,, bit, noinstcandidates., )
-	{
-	    if(brokeninstalled.find(*bit) != brokeninstalled.end())
-	    {
-		cout << "remove broken " << (*bit)->name() << endl;
-		to_remove.push_back(*bit);
-	    }
-	    else
-		cout << "not installing " << (*bit)->name() << endl;
-	}
-	return all_ok;
-#endif
-
-
-#if 0
-	// go through not installed candidates, mark those as to_remove that
-	// originally were broken installed packages
-	ci_for( set<PMSolvablePtr>::,, bit, noinstcandidates., )
-	{
-	    if(brokeninstalled.find(*bit) != brokeninstalled.end())
-	    {
-		cout << "remove broken " << (*bit)->name() << endl;
-//		to_remove.push_back(*bit);
-	    }
-	    else
-		cout << "not installing " << (*bit)->name() << endl;
-	}
-#endif
 
 	out_good.remove_if( fromBrokeninstalled(brokeninstalled) );
 
