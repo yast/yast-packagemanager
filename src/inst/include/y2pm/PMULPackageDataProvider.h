@@ -61,6 +61,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	FSize			_attr_SIZE;
 
 	// PMPackage
+	std::list<std::string>	_attr_SPLITPROVIDES;
 	Date			_attr_BUILDTIME;
 	// BUILDHOST
 	// INSTALLTIME
@@ -125,7 +126,8 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual FSize                  size        ( const PMPackage & pkg_r ) const;
 
 	// PMPackage attributes
-	virtual Date                   buildtime   ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> splitprovides ( const PMPackage & pkg_r ) const;
+	virtual Date                   buildtime     ( const PMPackage & pkg_r ) const;
 	//virtual std::string            buildhost   ( const PMPackage & pkg_r ) const;
 	//virtual Date                   installtime ( const PMPackage & pkg_r ) const;
 	//virtual std::string            distribution( const PMPackage & pkg_r ) const;

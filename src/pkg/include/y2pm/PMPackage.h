@@ -60,6 +60,9 @@ class PMPackage : virtual public Rep, public PMObject {
      * PMPackage attributes passed off to PMPackageDataProvider
      * @see PMPackageDataProvider
      **/
+    // splitprovides
+    std::list<std::string> splitprovides()  const;
+
     Date                   buildtime()    const;
     std::string            buildhost()    const;
     Date                   installtime()  const;

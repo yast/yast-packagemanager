@@ -216,6 +216,25 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     pkglist.clear();
     if (pkgcache->retrieveData (GET_TAG(PROVIDES)->Pos(), pkglist))
     {
+	unsigned int before = pkglist.size();
+	// filter splitprovides out
+	for (std::list<std::string>::iterator it = pkglist.begin();
+	     it != pkglist.end();)
+	{
+	    if (it->find (":/") != string::npos)
+	    {
+		dataprovider->_attr_SPLITPROVIDES.push_back (*it);
+		it = pkglist.erase (it);
+	    }
+	    else
+	    {
+		++it;
+	    }
+	}
+	if (dataprovider->_attr_SPLITPROVIDES.size () + pkglist.size() != before)
+	{
+	    ERR << "*** LOST PROVIDES ***" << endl;
+	}
 	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	package->setProvides (rellist);
     }
