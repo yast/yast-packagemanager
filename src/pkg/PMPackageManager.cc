@@ -30,9 +30,21 @@
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/InstallOrder.h>
+#include <y2pm/PMVendorAttr.h>
 
 using namespace std;
 using namespace PMPackageManagerCallbacks;
+
+template<typename _Ct, class Compare>
+ostream & operator<<( ostream & str, const set<_Ct, Compare> & obj ) {
+  str << "[" << obj.size() << "]{";
+  for ( typename set<_Ct, Compare>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+    if ( it == obj.begin() )
+      str << endl;
+    str << "  " << *it << endl;
+  }
+  return str << '}';
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -107,14 +119,15 @@ void PMPackageManager::prePSI()
 //
 void PMPackageManager::postPSI()
 {
-#warning must improve taboo handling in pre/postPSI
-
   for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
     const PMSelectablePtr & sel( *it );
 
-    if ( sel->has_installed() && !PMPackagePtr( sel->installedObj() )->vendor().isSuSE() ) {
-      sel->user_set_taboo();
-      MIL << "Protect non SuSE package " << sel->installedObj() << endl;
+    if ( sel->has_installed() ) {
+      Vendor v( PMPackagePtr(sel->installedObj())->vendor() );
+      if ( PMVendorAttr::autoProtect( v ) ) {
+	sel->user_set_taboo();
+	MIL << "Protect vendor '" << v << "': " << sel->installedObj() << endl;
+      }
     }
   }
 }

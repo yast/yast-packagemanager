@@ -25,6 +25,7 @@ liby2pm_la_SOURCES = \
 	PkgArch.cc	\
 	PkgDu.cc	\
 	PkgChangelog.cc	\
+	PMVendorAttr.cc	\
 	PMError.cc	\
 	ModulePkgError.cc	\
 	PMCallbacks.cc	\

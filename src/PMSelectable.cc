@@ -22,11 +22,12 @@
 
 #include <y2util/Y2SLog.h>
 
+#include <Y2PM.h>
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMObject.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/PMVendorAttr.h>
 
-#include <Y2PM.h>
 
 using namespace std;
 
@@ -688,7 +689,8 @@ bool PMSelectable::downgrade_condition() const
 
   // SuSE specific exeption:
   // Version downgrade during update or due to newer buildtime is ok.
-  if ( inst->vendor().isSuSE() && cand->vendor().isSuSE() ) {
+  if (    PMVendorAttr::isKnown( inst->vendor() )
+       && PMVendorAttr::isKnown( cand->vendor() ) ) {
     return( Y2PM::runningFromSystem() && inst->buildtime() >= cand->buildtime() );
   }
 

@@ -7,38 +7,63 @@
 |                        |_|\__,_|____/ |_| |_____|                    |
 |                                                                      |
 |                               core system                            |
-|                                                        (C) SuSE GmbH |
+|                                                    (C) SuSE Linux AG |
 \----------------------------------------------------------------------/
 
-  File:       PMRcValues.h
+  File:       PMVendorAttr.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Manage vendor attributes
 
 /-*/
-#ifndef PMRcValues_h
-#define PMRcValues_h
 
-#include <iosfwd>
+#include <iostream>
 
-#include <y2pm/PMTypes.h>
+#include "PMRcValues.h"
+#include <y2pm/PMVendorAttr.h>
+
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-namespace PM {
+namespace PMVendorAttr {
 ;//////////////////////////////////////////////////////////////////
 
-struct RcValues {
-  PM::LocaleSet         requestedLocales;
-  PM::CandidateOrder    candidateOrder;
-  std::set<std::string> trustedVendors;
-};
+typedef map<Vendor,bool> TrustMap;
 
-extern RcValues & rcValues(); // Y2PM.rcvalue.cc
+static TrustMap trustMap;
+
+static bool trusted( const Vendor & vendor_r ) {
+  TrustMap::value_type val( vendor_r, false );
+  pair<TrustMap::iterator, bool> res = trustMap.insert( val );
+
+  if ( res.second ) {
+    // check the new vendor in map
+    for ( set<string>::const_iterator it = PM::rcValues().trustedVendors.begin();
+	  it != PM::rcValues().trustedVendors.end(); ++it ) {
+	if ( stringutil::toLower( res.first->first->substr( 0, it->size() ) )
+	     == stringutil::toLower( *it ) ) {
+	  // match
+	  res.first->second = true;
+	  break;
+	}
+    }
+  }
+
+  return res.first->second;
+}
+
+bool isKnown( const Vendor & vendor_r )
+{
+  return trusted( vendor_r );
+}
+
+bool autoProtect( const Vendor & vendor_r )
+{
+  return ! trusted( vendor_r );
+}
 
 ///////////////////////////////////////////////////////////////////
-} // namespace PM
+} // namespace PMVendorAttr
 ///////////////////////////////////////////////////////////////////
-
-#endif // PMRcValues_h
