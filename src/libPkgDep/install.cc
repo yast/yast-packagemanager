@@ -144,7 +144,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 
 	ErrorResult res(*this,cand);
 	D__ << "Checking candidate " << candname << endl;
-
+#if 0
 	// check if the candidate is the target of an obsoletes
 	RevRel_for( PkgSet::getRevRelforPkg(vinstalled.obsoleted(),candname), obs ) {
 		if (obs->relation().matches( cand->self_provides() )) {
@@ -160,7 +160,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			res.add_conflict(obs->pkg(),obs->relation(),*this,obs->pkg(),NULL,RelInfo::OBSOLETION);
 		}
 	}
-
+#endif
 	// first check if something already installed conflicts with the new
 	// package
 	ci_for( PMSolvable::,Provides_, prov, cand->,all_provides_ ) {
