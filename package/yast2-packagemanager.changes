@@ -1,8 +1,15 @@
 -------------------------------------------------------------------
+Mon Jan 27 13:27:07 CET 2003 - ma@suse.de
+
+- Fixed configure checks.
+- Removed references to librpm from public header files.
+- 2.7.5
+
+-------------------------------------------------------------------
 Fri Jan 24 13:36:06 CET 2003 - cschum@suse.de
 
 - Moved sysconfig/online-update from yast2-online-update to
-  yast2-packagemanager. 
+  yast2-packagemanager.
 
 -------------------------------------------------------------------
 Thu Jan 23 17:23:06 CET 2003 - ma@suse.de
