@@ -32,6 +32,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <string.h>
+
 #include <y2util/Y2SLog.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstTargetProdDB.h>
@@ -127,6 +129,41 @@ InstTarget::baseArch ()
 		_base_arch = PkgArch (output);
 	}
 	MIL << "_base_arch '" << _base_arch << "'" << endl;
+
+	// some CPUs report i686 but dont implement cx8 and cmov
+	// check for both flags in /proc/cpuinfo and downgrade
+	// to i586 if either is missing (cf bug #18885)
+	if (_base_arch == "i686")
+	{
+	    std::ifstream cpuinfo ("/proc/cpuinfo");
+	    if (!cpuinfo)
+	    {
+		ERR << "Cant open /proc/cpuinfo" << endl;
+	    }
+	    else
+	    {
+		char infoline[1024];
+		while (cpuinfo.good())
+		{
+		    if (!cpuinfo.getline (infoline, 1024, '\n'))
+		    {
+			if (cpuinfo.eof())
+			    break;
+		    }
+		    if (strncmp (infoline, "flags", 5) == 0)
+		    {
+			string flagsline (infoline);
+			if ((flagsline.find("cx8") == string::npos)
+			    || (flagsline.find("cmov") == string::npos))
+			{
+			    _base_arch = PkgArch("i586");
+			}
+			break;
+		    } // flags found
+		} // read proc/cpuinfo
+	    } // proc/cpuinfo opened
+	} // i686 extra flags check
+
     } // _base_arch empty
 
     return _base_arch;
