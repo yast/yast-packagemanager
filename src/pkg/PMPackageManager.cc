@@ -282,26 +282,10 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
     DBG << "doUpdate..." << size() << " selectables" << endl;
 
-
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
     {
 	++i;
-	if (*it == 0)
-	{
-	    ERR << "Selectable NULL" << endl;
-	    continue;
-	}
-	DBG << endl << i << ". @" << *it << endl;
-	DBG << endl << i << ". " << (*it)->name() << endl;
-    }
-    DBG << "Looping over "<< i << " selectables";
-    i = 0;
-
-    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
-    {
-	++i;
-	DBG << endl << i << ". ";
-        DBG << (*it)->name() << ": ";
+	DBG << endl << i << ". " << (*it)->name() << ": ";
 
 	//-----------------------------------------------------------------
 	// pre check: candidate ? taboo ? user ? non-suse ?
@@ -309,24 +293,23 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	PMPackagePtr candidate = (*it)->candidateObj();
 	if (!candidate)
 	{
-	    DBG << "no candidate" << endl;
 	    continue;
 	}
 	if ((*it)->is_taboo())			// skip taboo
 	{
-	    DBG << "taboo" << endl;
+	    DBG << "taboo";
 	    continue;
 	}
 	if ((*it)->by_user())			// skip user
 	{
-	    DBG << "user" << endl;
+	    DBG << "user";
 	    continue;
 	}
 
 	PMPackagePtr installed = (*it)->installedObj();
 	if (!installed)
 	{
-	    DBG << "not installed" << endl;
+	    DBG << "not installed";
 	}
 
 	//-----------------------------------------------------------------
@@ -342,7 +325,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	    string::size_type colonpos = (*splitit).find (":");
 	    if (colonpos == string::npos)
 	    {
-		ERR << "Bad !" << endl;
+		ERR << "Bad split !";
 		continue;
 	    }
 
@@ -354,7 +337,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	    DBG << "'" << name << "' matches '" << rpmname << "' ?" << endl;
 	    if (name == rpmname)		// name matches
 	    {
-		DBG << "Yes !" << endl;
+		DBG << "Yes !";
 		if (suse_vendor (installed))
 		{
 		    (*it)->appl_set_install ();
