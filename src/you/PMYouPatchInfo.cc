@@ -417,7 +417,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                     ERR << "Signature check for '" << filePath << "' failed."
                         << endl;
                     _media.release();
-                    return PMError( YouError::E_bad_sig_file );
+                    return PMError( YouError::E_bad_sig_file, "Patch: " + *it );
                 }
                 DBG << "Signature ok." << endl;
             }
