@@ -53,7 +53,7 @@ class PMSelectable : virtual public Rep {
     PMObjectList _candidateList;
 
     enum Error {
-      E_OK = 0,
+      E_Ok = 0,
       E_Error
     };
 
