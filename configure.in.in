@@ -4,15 +4,10 @@
 @YAST2-INIT-COMMON@
 @YAST2-INIT-LIB@
 
-AC_ARG_ENABLE(debug, [  --enable-debug   compile with debugging],
-  [CFLAGS="$CFLAGS -g -DDEBUG -DPKGDEP_DEBUG";
-     CXXFLAGS="$CXXFLAGS -g -DDEBUG -DPKGDEP_DEBUG"],
-  [CFLAGS="$CFLAGS -DNDEBUG";
-     CXXFLAGS="$CXXFLAGS -DNDEBUG"])
-
 ## some common checks
 @YAST2-CHECKS-COMMON@
 @YAST2-CHECKS-LIB@
+@YAST2-CHECKS-QT@
 
 ## and generate the output
 #AC_CONFIG_FILES(doc/Y2-access.html doc/Y2-components.html)

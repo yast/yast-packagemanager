@@ -10,26 +10,24 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PMPackagePtr.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef PMPackagePtr_h
+#define PMPackagePtr_h
 
-#include <iosfwd>
+#include <y2pm/PMObjectPtr.h>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMPPackagePtr
+//	CLASS NAME : constPMPPackagePtr
+/**
+ *
+ **/
+DEFINE_DERIVED_HANDLES( PMPackage, public, PMObject );
 
-#endif // Y2PM_h
+#endif // PMPackagePtr_h

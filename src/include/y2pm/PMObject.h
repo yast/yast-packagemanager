@@ -10,26 +10,48 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PMObject.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef PMObject_h
+#define PMObject_h
 
 #include <iosfwd>
+#include <string>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
+#include <y2pm/PMObjectPtr.h>
+
 #include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2pm/PkgArch.h>
 
-#endif // Y2PM_h
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMObject
+/**
+ * @short Interface class for stuff common to all objects (Packages, Selections,..)
+ **/
+class REP_CLASS(PMObject), public PMSolvable {
+  REP_BODY(PMObject)
+
+  public:
+
+    PMObject( const PkgName &    name_r,
+	      const PkgEdition & edition_r );
+
+    virtual ~PMObject();
+
+  public:
+
+    virtual std::string label() const { return "--not available--"; }
+
+  public:
+
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // PMObject_h

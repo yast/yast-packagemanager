@@ -10,26 +10,25 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       MediaInfoPtr.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef MediaInfoPtr_h
+#define MediaInfoPtr_h
 
-#include <iosfwd>
+#include <y2util/RepDef.h>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : MediaInfoPtr
+//	CLASS NAME : constMediaInfoPtr
+/**
+ *
+ **/
+DEFINE_BASIC_HANDLES(MediaInfo);
 
-#endif // Y2PM_h
+#endif // MediaInfoPtr_h
+

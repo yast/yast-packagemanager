@@ -10,26 +10,59 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PMPackage.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef PMPackage_h
+#define PMPackage_h
 
 #include <iosfwd>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2pm/PMPackageDataProviderPtr.h>
+#include <y2pm/PMPackagePtr.h>
 
-#endif // Y2PM_h
+#include <y2pm/PMObject.h>
+#include <y2pm/PkgArch.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMPackage
+/**
+ * The Package.
+ **/
+class REP_CLASS(PMPackage), public PMObject {
+  REP_BODY(PMPackage)
+
+  protected:
+
+    PkgArch _arch;
+
+    PMPackageDataProviderPtr _dataProvider;
+
+  public:
+
+    PMPackage( const PkgName &    name_r,
+	       const PkgEdition & edition_r,
+	       const PkgArch &    arch_r );
+
+    virtual ~PMPackage();
+
+  public:
+
+    const PkgArch& arch() const { return _arch; }
+
+  public:
+
+    virtual std::string label() const;
+
+  public:
+
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // PMPackage_h

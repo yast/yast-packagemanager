@@ -7,15 +7,31 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
-	PkgName.h	\
-	PkgEdition.h	\
-	PkgRelation.h	\
-	PkgRevRel.h	\
-	Package.h	\
-	Solvable.h	\
-	PackageSource.h	\
-	PkgDb.h	\
-	PkgSet.h
+	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgArch.h	\
+	\
+	PMError.h	\
+	\
+	PMSolvable.h PMSolvablePtr.h	\
+		PMObject.h PMObjectPtr.h	\
+			PMPackage.h PMPackagePtr.h	\
+	\
+	PMManager.h	\
+		PMPackageManager.h	\
+	\
+	PMSelectable.h PMSelectablePtr.h	\
+		PMPackageSelectable.h PMPackageSelectablePtr.h	\
+	\
+	InstSrcManager.h	\
+	\
+	InstSrc.h InstSrcPtr.h	\
+	InstSrcData.h InstSrcDataPtr.h	\
+	InstSrcDescr.h	InstSrcDescrPtr.h	\
+	\
+	PMDataProvider.h PMDataProviderPtr.h	\
+		PMPackageDataProvider.h	PMPackageDataProviderPtr.h	\
+	\
+	MediaInfo.h	MediaInfoPtr.h \
+		FAKEMediaInfo.h	FAKEMediaInfoPtr.h
 
 #<INSTALL-HEADER-TARGET>
 

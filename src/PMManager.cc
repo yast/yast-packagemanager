@@ -10,26 +10,56 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PMManager.cc
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
 
-#include <iosfwd>
+#include <iostream>
+#include <y2util/Y2SLog.h>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2pm/PMManager.h>
 
-#endif // Y2PM_h
+using namespace std;
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::PMManager
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+PMManager::PMManager()
+{
+
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::~PMManager
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+PMManager::~PMManager()
+{
+
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream &
+**
+**	DESCRIPTION :
+*/
+ostream & operator<<( ostream & str, const PMManager & obj )
+{
+  return str;
+}
+

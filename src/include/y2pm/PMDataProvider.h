@@ -10,26 +10,39 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PMDataProvider.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef PMDataProvider_h
+#define PMDataProvider_h
 
 #include <iosfwd>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2pm/PMDataProviderPtr.h>
 
-#endif // Y2PM_h
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMDataProvider
+/**
+ * @short Interface class for stuff common to all DataProvider
+ **/
+class REP_CLASS(PMDataProvider) {
+  REP_BODY(PMDataProvider)
+
+  public:
+
+    PMDataProvider();
+
+    virtual ~PMDataProvider();
+
+  public:
+
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // PMDataProvider_h

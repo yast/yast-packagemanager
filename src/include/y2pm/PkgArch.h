@@ -10,26 +10,45 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PkgArch.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef PkgArch_h
+#define PkgArch_h
 
 #include <iosfwd>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2util/UniqStr.h>
 
-#endif // Y2PM_h
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PkgArch
+/*
+ *
+ **/
+class PkgArch {
+
+  private:
+
+    static UniqStr nameHash;
+    const char *   name;
+
+  public:
+
+    PkgArch( const char * n = "" )   { name = nameHash.add( n ); }
+    PkgArch( const std::string & s ) { name = nameHash.add( s.c_str() ); }
+
+    bool operator==( const PkgArch & n2 ) const { return name == n2.name; }
+    bool operator!=( const PkgArch & n2 ) const { return name != n2.name; }
+
+    operator const char * () const { return name; }
+
+    friend std::ostream & operator<<( std::ostream & str, const PkgArch & obj );
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // PkgArch_h

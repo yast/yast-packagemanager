@@ -1,0 +1,198 @@
+#! /bin/bash
+
+function Warn() {
+	echo "genPtrClass: $@" >&2
+}
+function Err() {
+	Warn "$@"
+	echo "Usage: genPtrClass CLASSNAME" >&2
+	exit 1
+}
+
+test $# != 1 && Err "Too may arguments $#:'$@'"
+test -z "$1" && Err "Missing CLASSNAME"
+
+CLASS=$1
+CH="${CLASS}.h"
+CC="${CLASS}.cc"
+PH="${CLASS}Ptr.h"
+
+DOEXIT=
+for f in "$CH" "$CC" "$PH"; do
+	test -e $f && {
+		Warn "File already exists: $f"
+		DOEXIT=1
+	}
+done
+
+test -n "$DOEXIT" && Err "Aborting"
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+function catLogo() {
+cat <<'EOF'
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                        (C) SuSE GmbH |
+\----------------------------------------------------------------------/
+EOF
+}
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CH"
+$(catLogo)
+
+   File:       ${CLASS}.h
+
+   Author:     Michael Andres <ma@suse.de>
+   Maintainer: Michael Andres <ma@suse.de>
+
+/-*/
+#ifndef ${CLASS}_h
+#define ${CLASS}_h
+
+#include <iosfwd>
+
+#include <y2pm/${CLASS}Ptr.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : ${CLASS}
+/**
+ *
+ **/
+class REP_CLASS(${CLASS}) {
+  REP_BODY(${CLASS})
+
+  public:
+
+    ${CLASS}();
+
+    virtual ~${CLASS}();
+
+  public:
+
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // ${CLASS}_h
+
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CC"
+$(catLogo)
+
+   File:       ${CLASS}.cc
+
+   Author:     Michael Andres <ma@suse.de>
+   Maintainer: Michael Andres <ma@suse.de>
+
+/-*/
+
+#include <iostream>
+
+#include <y2pm/${CLASS}.h>
+
+using namespace std;
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : ${CLASS}
+//
+///////////////////////////////////////////////////////////////////
+
+IMPL_HANDLES(${CLASS});
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : ${CLASS}::${CLASS}
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+${CLASS}::${CLASS}()
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : ${CLASS}::~${CLASS}
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+${CLASS}::~${CLASS}()
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : ${CLASS}::dumpOn
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+ostream & ${CLASS}::dumpOn( ostream & str ) const
+{
+  Rep::dumpOn( str );
+  return str;
+}
+
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$PH"
+$(catLogo)
+
+   File:       ${CLASS}Ptr.h
+
+   Author:     Michael Andres <ma@suse.de>
+   Maintainer: Michael Andres <ma@suse.de>
+
+/-*/
+#ifndef ${CLASS}Ptr_h
+#define ${CLASS}Ptr_h
+
+#include <y2util/RepDef.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : ${CLASS}Ptr
+//	CLASS NAME : const${CLASS}Ptr
+/**
+ *
+ **/
+DEFINE_BASIC_HANDLES(${CLASS});
+
+#endif // ${CLASS}Ptr_h
+
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+

@@ -1,8 +1,8 @@
 #ifndef _PkgRevRel_h
 #define _PkgRevRel_h
 
-#include <y2pm/Solvable.h>
 #include <y2pm/PkgRelation.h>
+#include <y2pm/PMSolvable.h>
 
 class PkgRevRelation {
 	// _relation can be a NULL pointer; that means that this is a
@@ -10,17 +10,17 @@ class PkgRevRelation {
 	// somebody asks for the PkgRelation, a faked one is returned.
 
 	const PkgRelation *_relation;
-	const Solvable *_pkg;
+	const Solvable _pkg;
 
   public:
-	PkgRevRelation( const PkgRelation *r, const Solvable *p )
+	PkgRevRelation( const PkgRelation *r, const Solvable p )
 		: _relation(r), _pkg(p) {}
 	// default copy constructor and assigment are ok
 
 	const PkgRelation relation() const {
 		return _relation ? *_relation : _pkg->self_provides();
 	}
-	const Solvable *pkg() const { return _pkg; }
+	const Solvable pkg() const { return _pkg; }
 };
 
 #endif  /* _PkgRevRel_h */

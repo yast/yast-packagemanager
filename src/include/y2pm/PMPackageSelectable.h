@@ -10,26 +10,42 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PMPackageSelectable.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef PMPackageSelectable_h
+#define PMPackageSelectable_h
 
 #include <iosfwd>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2pm/PMPackageSelectablePtr.h>
 
-#endif // Y2PM_h
+#include <y2pm/PMSelectable.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMPackageSelectable
+/**
+ *
+ **/
+class REP_CLASS(PMPackageSelectable), public PMSelectable {
+  REP_BODY(PMPackageSelectable)
+
+  public:
+
+    PMPackageSelectable();
+
+    virtual ~PMPackageSelectable();
+
+  public:
+
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // PMPackageSelectable_h
+

@@ -10,26 +10,51 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PMManager.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef PMManager_h
+#define PMManager_h
 
 #include <iosfwd>
+#include <vector>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2util/BitField.h>
 
-#endif // Y2PM_h
+#include <y2pm/PMSelectablePtr.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMManager
+/**
+ *
+ **/
+class PMManager {
+
+  friend std::ostream & operator<<( std::ostream & str, const PMManager & obj );
+
+  PMManager & operator=( const PMManager & );
+  PMManager            ( const PMManager & );
+
+  public:
+
+    typedef std::vector<PMSelectablePtr>  ItemArray;
+
+  protected:
+
+    ItemArray _items;
+
+    BitField  _installed;
+
+  public:
+
+    PMManager();
+    ~PMManager();
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // PMManager_h

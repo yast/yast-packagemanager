@@ -10,26 +10,35 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       PkgArch.cc
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
 
-#include <iosfwd>
+#include <iostream>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2pm/PkgArch.h>
 
-#endif // Y2PM_h
+using namespace std;
+
+///////////////////////////////////////////////////////////////////
+
+UniqStr PkgArch::nameHash;
+
+///////////////////////////////////////////////////////////////////
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream &
+**
+**	DESCRIPTION :
+*/
+ostream & operator<<( ostream & str, const PkgArch & obj )
+{
+  return str << (const char *)obj;
+}
+

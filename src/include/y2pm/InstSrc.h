@@ -10,26 +10,51 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       Y2PM.h
+   File:       InstSrc.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
-#ifndef Y2PM_h
-#define Y2PM_h
+#ifndef InstSrc_h
+#define InstSrc_h
 
 #include <iosfwd>
 
-#include <y2pm/PkgName.h>
-#include <y2pm/PkgEdition.h>
-#include <y2pm/PkgRelation.h>
-#include <y2pm/PkgRevRel.h>
-#include <y2pm/PMSolvable.h>
-#include <y2pm/PMSolvableRep.h>
-#include <y2pm/PMItem.h>
-#include <y2pm/PMItemRep.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageRep.h>
+#include <y2pm/InstSrcManager.h>
 
-#endif // Y2PM_h
+#include <y2pm/InstSrcPtr.h>
+#include <y2pm/MediaInfoPtr.h>
+#include <y2pm/InstSrcDescrPtr.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : InstSrc
+/**
+ *
+ **/
+class REP_CLASS(InstSrc) {
+  REP_BODY(InstSrc)
+
+  private:
+
+    InstSrcManager::ISrcType _type;
+
+    MediaInfoPtr        _media;
+    InstSrcDescrPtr     _descr;
+
+  public:
+
+    InstSrc( MediaInfoPtr media_r );
+
+    virtual ~InstSrc();
+
+  public:
+
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // InstSrc_h
+
