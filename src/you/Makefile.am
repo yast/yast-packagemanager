@@ -29,3 +29,5 @@ liby2pmyou_la_SOURCES = \
         PMYouPatchTags.cc \
         InstYou.cc \
         YouError.cc
+
+EXTRA_DIST = youservers
