@@ -188,6 +188,16 @@ class RpmDb: virtual public Rep
      **/
     PMError rebuildDatabase();
 
+    /**
+     * Import ascii armored public key in file pubkey_r.
+     **/
+    PMError importPubkey( const Pathname & pubkey_r );
+
+    /**
+     * Import ascii armored public key keyname_r exported by keyring_r.
+     **/
+    PMError importPubkey( const Pathname & keyring_r, const std::string & keyname_r );
+
     ///////////////////////////////////////////////////////////////////
     //
     // Cached RPM database retrieval via librpm.

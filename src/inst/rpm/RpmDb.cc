@@ -20,9 +20,6 @@
 /-*/
 #include "librpm.h"
 
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
@@ -686,7 +683,6 @@ PMError RpmDb::closeDatabase()
   ///////////////////////////////////////////////////////////////////
   // Block further database access
   ///////////////////////////////////////////////////////////////////
-#warning MUST: clear packages if provided to Packagemanager (here or InstTArget) or via TBD hook
   _packages.clear();
   librpmDb::blockAccess();
 
@@ -815,6 +811,121 @@ void RpmDb::checkrebuilddbstatus(Pathname tmpdbpath, off_t oldsize)
     }
 }
 #endif
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::importPubkey
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::importPubkey( const Pathname & pubkey_r )
+{
+  FAILIFNOTINITIALIZED;
+  PMError err;
+
+  RpmArgVec opts;
+  opts.push_back ( "--import" );
+  opts.push_back ( pubkey_r.asString().c_str() );
+
+  // don't call modifyDatabase because it would remove the old
+  // rpm3 database, if the current database is a temporary one.
+  // But do invalidate packages list.
+  _packages._valid = false;
+  run_rpm( opts, ExternalProgram::Stderr_To_Stdout );
+
+  string line;
+  while ( systemReadLine( line ) ) {
+    if ( line.substr( 0, 6 ) == "error:" ) {
+      WAR << line << endl;
+    } else {
+      DBG << line << endl;
+    }
+  }
+
+  int rpm_status = systemStatus();
+
+  if ( rpm_status != 0 ) {
+    ERR << "Failed to import public key from file " << pubkey_r << ": rpm returned  " << rpm_status << endl;
+    err = Error::E_RpmDB_subprocess_failed;
+  } else {
+    MIL << "Imported public key from file " << pubkey_r << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::importPubkey
+//	METHOD TYPE : PMError
+//
+PMError RpmDb::importPubkey( const Pathname & keyring_r, const string & keyname_r )
+{
+  FAILIFNOTINITIALIZED;
+
+  // create tempfile
+  char tmpname[] = "/tmp/y2.pubkey.XXXXXX";
+  int tmpfd = mkstemp( tmpname );
+  if ( tmpfd == -1 ) {
+    ERR << "Unable to create a unique temporary file for pubkey" << endl;
+    return Error::E_RpmDB_subprocess_failed;
+  }
+
+  // export keyname from keyring
+  RpmArgVec args;
+  args.push_back( "gpg" );
+  args.push_back( "--armor" );
+  args.push_back( "--no-default-keyring" );
+  args.push_back( "--keyring" );
+  args.push_back( keyring_r.asString().c_str() );
+  args.push_back( "--export" );
+  args.push_back( keyname_r.c_str() );
+
+  const char * argv[args.size() + 1];
+  const char ** p = argv;
+  p = copy( args.begin(), args.end(), p );
+  *p = 0;
+
+  // launch gpg
+  ExternalProgram prg( argv, ExternalProgram::Discard_Stderr, false, -1, true );
+  PMError err;
+  int res = 0;
+
+  // read key
+  for ( string line( prg.receiveLine() ); line.length(); line = prg.receiveLine() ) {
+    ssize_t written = write( tmpfd, line.c_str(), line.length() );
+    if ( written == -1 || unsigned(written) != line.length() ) {
+      ERR << "Error writing pubkey to " << tmpname << endl;
+      err = Error::E_RpmDB_subprocess_failed;
+      break;
+    }
+    res += written; // empty file indicates key not found
+  }
+  close( tmpfd );
+
+  if ( ! res ) {
+    WAR << "gpg: no key '" << keyname_r << "' found in  '" << keyring_r << "'" << endl;
+    err = Error::E_RpmDB_subprocess_failed;
+  }
+
+  // check gpg returncode
+  res = prg.close();
+  if ( res ) {
+    ERR << "gpg: export '" << keyname_r << "' from '" << keyring_r << "' returned " << res << endl;
+    err = Error::E_RpmDB_subprocess_failed;
+  }
+
+  if ( ! err ) {
+    MIL << "Exported '" << keyname_r << "' from '" << keyring_r << "' to " << tmpname << endl;
+    err = importPubkey( tmpname );
+  }
+
+  // remove tempfile
+  PathInfo::unlink( tmpname );
+
+  return err;
+}
 
 
 // helper function
