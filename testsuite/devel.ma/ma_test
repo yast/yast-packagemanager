@@ -22,7 +22,7 @@ if ! fuser $LPIPE >/dev/null; then
 fi
 
 make -C ../../src || exit 1
-if [ $PRG == ma_test.bin ]; then
+if [ $PRG == wfm_test.bin ]; then
 	make -C /Local/ma/yast2/current/source/core/wfm/src || exit 1
 fi
 make $PRG || exit 1

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <list>
+#include <set>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/Date.h>
@@ -22,10 +23,6 @@
 #include <y2pm/Timecount.h>
 #include <y2pm/PMPackageImEx.h>
 
-#include <YCP.h>
-#include <ycp/y2log.h>
-#include <PkgModuleFunctions.h>
-
 #include "PMCB.h"
 
 using namespace std;
@@ -35,19 +32,28 @@ using namespace std;
 #define SMGR Y2PM::selectionManager()
 #define ISM  Y2PM::instSrcManager()
 
-extern ostream & operator<<( ostream & str, const YCPValue & val );
-
-ostream & operator <<( ostream & str, const list<string> & t ) {
-  stringutil::dumpOn( str, t, true );
-  return str;
-}
-
-ostream & operator<<( ostream & str, const PkgSplitSet & obj ) {
-  for ( PkgSplitSet::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
-    str << *it << endl;
+template<typename _Ct>
+ostream & operator<<( ostream & str, const list<_Ct> & obj ) {
+  str << '{';
+  for ( list<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+    if ( it == obj.begin() )
+      str << endl;
+    str << "  " << *it << endl;
   }
-  return str;
+  return str << '}';
 }
+
+template<typename _Ct>
+ostream & operator<<( ostream & str, const set<_Ct> & obj ) {
+  str << '{';
+  for ( set<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+    if ( it == obj.begin() )
+      str << endl;
+    str << "  " << *it << endl;
+  }
+  return str << '}';
+}
+
 
 void dataDump( ostream & str, constPMPackagePtr p ) {
   str << p << " ++++++++++++++++++++++++++++" << endl;
@@ -146,117 +152,6 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 }
 
 /******************************************************************
- ******************************************************************/
-
-struct WFM {
-  YCPInterpreter * _dummy;
-  PkgModuleFunctions * _pkgmod;
-#define OUT SEC
-
-  WFM()
-  {
-    _dummy = 0;
-    _pkgmod = 0;
-  }
-  ~WFM() {
-    //delete _pkgmod;
-  }
-  void init() {
-    if ( !_pkgmod ) {
-      _pkgmod = new PkgModuleFunctions( _dummy );
-    }
-  }
-  void close() {
-    delete _pkgmod;
-    _pkgmod = 0;
-  }
-
-  void SourceStartManager( bool ena ) {
-    YCPList args;
-    args->add( YCPBoolean(ena) );
-    OUT << "SourceStartManager" << args;
-    YCPValue ret = _pkgmod->SourceStartManager( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceStartCache( bool ena ) {
-    YCPList args;
-    args->add( YCPBoolean(ena) );
-    OUT << "SourceStartCache" << args;
-    YCPValue ret = _pkgmod->SourceStartCache( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceGetCurrent( bool ena ) {
-    YCPList args;
-    args->add( YCPBoolean(ena) );
-    OUT << "SourceGetCurrent" << args;
-    YCPValue ret = _pkgmod->SourceGetCurrent( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceProduct( int id ) {
-    YCPList args;
-    args->add( YCPInteger(id) );
-    OUT << "SourceProduct" << args;
-    YCPValue ret = _pkgmod->SourceProduct( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceGeneralData( int id ) {
-    YCPList args;
-    args->add( YCPInteger(id) );
-    OUT << "SourceGeneralData" << args;
-    YCPValue ret = _pkgmod->SourceGeneralData( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceCreate( const string & url_r ) {
-    YCPList args;
-    args->add( YCPString(url_r) );
-    OUT << "SourceCreate" << args;
-    YCPValue ret = _pkgmod->SourceCreate( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceSetEnabled( int id, bool ena ) {
-    YCPList args;
-    args->add( YCPInteger(id) );
-    args->add( YCPBoolean(ena) );
-    OUT << "SourceSetEnabled" << args;
-    YCPValue ret = _pkgmod->SourceSetEnabled( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceEditGet() {
-    YCPList args;
-    OUT << "SourceEditGet" << args;
-    YCPValue ret = _pkgmod->SourceEditGet( args );
-    OUT << " --> " << ret << endl;
-  }
-  void SourceEditSet( const InstSrcManager::SrcStateVector & source_states ) {
-    YCPList args;
-
-    YCPList a1;
-    for ( InstSrcManager::SrcStateVector::const_iterator it = source_states.begin();
-	  it != source_states.end(); ++it ) {
-      YCPMap el;
-      el->add( YCPString("SrcId"),	YCPInteger( it->first ) );
-      el->add( YCPString("enabled"),	YCPBoolean( it->second ) );
-      a1->add( el );
-    }
-    args->add( a1 );
-
-    OUT << "SourceEditSet" << args;
-    YCPValue ret = _pkgmod->SourceEditSet( args );
-    OUT << " --> " << ret << endl;
-  }
-};
-
-static WFM wfm;
-
-void test() {
-  SEC << PMGR["aaa_base"] << endl;
-  for ( PMSelectable::PMObjectList::const_iterator it = PMGR["aaa_base"]->av_begin();
-	it != PMGR["aaa_base"]->av_end(); ++it ) {
-    SEC << "  " << PMPackagePtr(*it)->source()->srcID() << " - "  << *it << endl;
-  }
-}
-
-/******************************************************************
 **
 **
 **	FUNCTION NAME : main
@@ -286,34 +181,21 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  wfm.init();
-  INT << "START" << endl;
-  wfm.SourceStartManager( false );
+  MIL << Y2PM::getPreferredLocale() << endl;
+  MIL << Y2PM::getLocaleFallback( Y2PM::getPreferredLocale() ) << endl;
+  MIL << Y2PM::getLocaleFallback( LangCode("de_AT") ) << endl;
 
-  if ( 1 ) {
-    InstSrcManager::SrcStateVector keep;
-    keep.push_back( InstSrcManager::SrcState( 1, true ) );
-    keep.push_back( InstSrcManager::SrcState( 2, true ) );
-    keep.push_back( InstSrcManager::SrcState( 3, false ) );
-    wfm.SourceEditSet( keep );
-  }
-
-  wfm.SourceStartCache( true );
-
-  test();
-
-  if ( 1 ) {
-    InstSrcManager::SrcStateVector keep;
-    keep.push_back( InstSrcManager::SrcState( 2, true ) );
-    keep.push_back( InstSrcManager::SrcState( 1, true ) );
-    keep.push_back( InstSrcManager::SrcState( 3, false ) );
-    wfm.SourceEditSet( keep );
-  }
-
-  test();
+  MIL << Y2PM::getRequestedLocales() << endl;
+  Y2PM::setRequestedLocales( LangCode("de_AT") );
+  MIL << Y2PM::getRequestedLocales() << endl;
+  Y2PM::addRequestedLocales( LangCode("de_DE") );
+  MIL << Y2PM::getRequestedLocales() << endl;
+  Y2PM::delRequestedLocales( LangCode("de_AT") );
+  MIL << Y2PM::getRequestedLocales() << endl;
+  Y2PM::setRequestedLocales( Y2PM::LocaleSet() );
+  MIL << Y2PM::getRequestedLocales() << endl;
 
   SEC << "STOP" << endl;
-  wfm.close();
   return 0;
 }
 

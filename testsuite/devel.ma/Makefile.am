@@ -15,7 +15,6 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 # -I/Local/ma/yast2/current/source/core/wfm/src
 
 LDADD = $(top_builddir)/src/liby2pm.la
-# /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 
 AM_LDFLAGS = -static
 
@@ -23,12 +22,16 @@ CLEANFILES = *.bin
 
 EXTRA_PROGRAMS = \
 	ma_test.bin		\
+	wfm_test.bin		\
 	rpmtest.bin		\
 	test_librpm_seek.bin	\
 	test_rpm.bin
 
 ma_test_bin_SOURCES = ma_test.cc
 ma_test_bin_LDADD = $(LDADD)
+
+wfm_test_bin_SOURCES = wfm_test.cc
+wfm_test_bin_LDADD = $(LDADD) /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 
 rpmtest_bin_SOURCES = rpmtest.cc
 rpmtest_bin_LDADD = $(LDADD)
