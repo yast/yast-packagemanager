@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 26 15:39:18 CET 2004 - cschum@suse.de
+
+- Make packagemanager translatable.
+
+-------------------------------------------------------------------
 Thu Feb 26 15:36:04 CET 2004 - cschum@suse.de
 
 - Media: Handle relative paths as arguments to

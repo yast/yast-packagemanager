@@ -11,6 +11,8 @@ pkginclude_HEADERS = Y2PMCallbacks.h \
 	Alternatives.h	\
 	PkgSet.h	\
 	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h PkgDu.h PkgChangelog.h	\
+        \
+        PMLocale.h \
 	\
 	PMError.h			\
 	ModulePkgError.h		\

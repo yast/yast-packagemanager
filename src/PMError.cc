@@ -17,6 +17,8 @@
 
   Purpose: Transport class for error values
 
+  Textdomain "packagemanager"
+
 /-*/
 
 #include <iostream>
@@ -28,21 +30,18 @@
 #include <y2pm/InstTargetError.h>
 #include <y2pm/YouError.h>
 #include <y2pm/ModulePkgError.h>
+#include <y2pm/PMLocale.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-#ifndef N_
-#  define N_(STR) STR
-#endif
-///////////////////////////////////////////////////////////////////
 
-const std::string PMError::errstrPrefix( N_("ERROR") ); // "ERROR(some text or number)"
+const std::string PMError::errstrPrefix( _("ERROR") ); // "ERROR(some text or number)"
 
 const unsigned    PMError::E_ok;    // initialized in header!
 const unsigned    PMError::E_error; // initialized in header!
-const std::string PMError::OKstring   ( N_("OK") );
-const std::string PMError::ERRORstring( N_("error") );
+const std::string PMError::OKstring   ( _("OK") );
+const std::string PMError::ERRORstring( _("error") );
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -50,7 +49,7 @@ const std::string PMError::ERRORstring( N_("error") );
 //	METHOD NAME : PMError::errClass
 //	METHOD TYPE : PMError::ErrClass
 //
-//	DESCRIPTION : Retrun the error class coded in error value.
+//	DESCRIPTION : Return the error class coded in error value.
 //
 PMError::ErrClass PMError::errClass( const unsigned e )
 {
