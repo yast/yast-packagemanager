@@ -87,13 +87,13 @@ PMError InstYou::initDu()
 {
   std::set<PkgDuMaster::MountPoint> mountpoints;
 
-  std::string dname = "download area";
+  std::string dname = "/var/lib/YaST2/you";
 
   long long dfree = 0LL;
   long long dused = 0LL;
 
-  dfree = 5000;
-  dused = 10000;
+  dfree = 44040192;
+  dused = 0;
 
   long long dirsize = dfree + dused;
   
