@@ -302,3 +302,18 @@ PMError PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r, P
     return _source->providePackage (pkg_r.medianr(), rpmname, dir, path_r);
 }
 
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::provideSrcPkgToInstall
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : call InstSrc to provide source package, return local path to package in path_r
+//
+PMError PMULPackageDataProvider::provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const
+{
+    MIL << "provideSrcPkgToInstall " << pkg_r->sourcerpm() << endl;
+#warning TBD provideSrcPkgToInstall
+    return PMError::E_ok;
+}

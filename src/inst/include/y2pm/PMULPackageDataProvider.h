@@ -160,6 +160,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual bool			isRemote   ( const PMPackage & pkg_r ) const;
 	// physical access to the rpm file.
 	virtual PMError providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const;
+	virtual PMError provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
