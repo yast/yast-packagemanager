@@ -73,6 +73,43 @@ PMSelectable::PMSelectable( const PkgName& name_r )
 //
 PMSelectable::~PMSelectable()
 {
+  if ( _manager ) {
+    INT << "SUSPICIOUS: " << _manager << '|' << _mgr_idx << endl;
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::_mgr_attach
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectable::_mgr_attach( PMManager * mgr_r, const unsigned idx_r )
+{
+  if ( _manager || !mgr_r || idx_r == no_mgr ) {
+    INT << "SUSPICIOUS: " << _manager << '|' << _mgr_idx << " -> " << mgr_r << '|' << idx_r << endl;
+  }
+  _manager = mgr_r;
+  _mgr_idx = idx_r;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::_mgr_detach
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectable::_mgr_detach()
+{
+  if ( !_manager ) {
+    INT << "SUSPICIOUS: not attached!" << endl;
+  }
+  _manager = 0;
+  _mgr_idx = no_mgr;
 }
 
 ///////////////////////////////////////////////////////////////////

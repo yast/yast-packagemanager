@@ -377,6 +377,8 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   // parse InstSrcDescr from media_r and fill ndescr
   ///////////////////////////////////////////////////////////////////
 
+#warning TBD must parse media.1/media too
+
   Pathname filename = product_dir_r + "/content";
 
   MediaAccess::FileProvider contentfile( media_r, filename );

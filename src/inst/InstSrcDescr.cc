@@ -74,127 +74,6 @@ InstSrcDescr::~InstSrcDescr()
 {
 }
 
-#if 0
-void
-InstSrcDescr::parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile, bool new_media)
-{
-    char buf[101];
-    const char *sptr = susefile.asString().c_str();
-    char *dot;
-
-    sptr += 14;		// skip ".S.u.S.E-disk-"
-
-    // find CD number "NNN."
-
-    _number = 0;
-    while (isdigit (*sptr))
-    {
-	_number *= 10;
-	_number += (*sptr - '0');
-	sptr++;
-    }
-
-    if (*sptr != '.')		// '.' is separator between number and ID
-	return;
-    sptr++;
-    _id = string (sptr);
-
-    if (!new_media)
-	return;
-
-    // if not CD1, dont expect further info
-    if (_number != 1)
-	return;
-
-    // CD1, look for suse/setup/descr/info
-
-    FILE *info = fopen ((mountpoint + "suse/setup/descr/info").asString().c_str(), "r");
-
-    fprintf (stderr, "parseSuSEFile(%s) = %p\n", filename.asString().c_str(), info);
-    if (info == 0)
-	return;
-
-    while (!feof (info))
-    {
-	char *ptr;
-	char *value;
-
-	if (fgets (buf, 100, info) != buf)
-	{
-	    break;
-	}
-	ptr = buf;
-	while (*ptr)			// skip keywork
-	{
-	    if ((*ptr == ' ')
-		|| (*ptr == '\t'))
-	    {
-		*ptr++ = 0;
-		break;
-	    }
-	    ptr++;
-	}
-	while ((*ptr == ' ')		// skip whitespace
-		|| (*ptr == '\t'))
-	{
-	    ptr++;
-	}
-	value = ptr;
-
-	while (*ptr)
-	{
-	    if (*ptr == '\n')		// delete trailing \n
-	    {
-		*ptr = 0;
-		break;
-	    }
-	    ptr++;
-	}
-
-	// check keys, copy value
-
-	if (strcmp (key, "PRODUKT_NAME") == 0)
-	{
-	    _product = value;
-	}
-	else if (strcmp (key, "PRODUKT_VERSION") == 0)
-	{
-	    _version = value;
-	}
-	else if (strcmp (key, "DISTRIBUTION_RELEASE") == 0)
-	{
-	    _release = atoi (value);
-	}
-	else if (strcmp (key, "DIST_STRING") == 0)
-	{
-	    _vendor = value;
-	}
-	else if (strcmp (key, "DISTRIBUTION_NAME") == 0)
-	{
-	    _label = value;
-	}
-    } // while
-
-    fclose (info);
-
-    return;
-}
-
-
-/**
- * write media description to cache file
- * @return pathname of written cache
- * writes private data to an ascii file
- */
-const Pathname
-InstSrcDescr::writeCache (void)
-{
-    return Pathname ("");	// empty == error
-}
-
-#endif
-
-
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -205,6 +84,10 @@ InstSrcDescr::writeCache (void)
 //
 ostream & InstSrcDescr::dumpOn( ostream & str ) const
 {
+  Rep::dumpOn( str ) << "[====================" << endl;
+  writeStream( str );
+  return str << "====================]" << endl;
+
   Rep::dumpOn( str ) << "(";
   str << " type: " << _type;
   str << " url: " << _url;
@@ -694,4 +577,125 @@ std::ostream & InstSrcDescr::writeStream( std::ostream & str ) const
 
   return str;
 }
+
+
+#if 0
+void
+InstSrcDescr::parseSuSEFile (const Pathname & mountpoint, const Pathname & susefile, bool new_media)
+{
+    char buf[101];
+    const char *sptr = susefile.asString().c_str();
+    char *dot;
+
+    sptr += 14;		// skip ".S.u.S.E-disk-"
+
+    // find CD number "NNN."
+
+    _number = 0;
+    while (isdigit (*sptr))
+    {
+	_number *= 10;
+	_number += (*sptr - '0');
+	sptr++;
+    }
+
+    if (*sptr != '.')		// '.' is separator between number and ID
+	return;
+    sptr++;
+    _id = string (sptr);
+
+    if (!new_media)
+	return;
+
+    // if not CD1, dont expect further info
+    if (_number != 1)
+	return;
+
+    // CD1, look for suse/setup/descr/info
+
+    FILE *info = fopen ((mountpoint + "suse/setup/descr/info").asString().c_str(), "r");
+
+    fprintf (stderr, "parseSuSEFile(%s) = %p\n", filename.asString().c_str(), info);
+    if (info == 0)
+	return;
+
+    while (!feof (info))
+    {
+	char *ptr;
+	char *value;
+
+	if (fgets (buf, 100, info) != buf)
+	{
+	    break;
+	}
+	ptr = buf;
+	while (*ptr)			// skip keywork
+	{
+	    if ((*ptr == ' ')
+		|| (*ptr == '\t'))
+	    {
+		*ptr++ = 0;
+		break;
+	    }
+	    ptr++;
+	}
+	while ((*ptr == ' ')		// skip whitespace
+		|| (*ptr == '\t'))
+	{
+	    ptr++;
+	}
+	value = ptr;
+
+	while (*ptr)
+	{
+	    if (*ptr == '\n')		// delete trailing \n
+	    {
+		*ptr = 0;
+		break;
+	    }
+	    ptr++;
+	}
+
+	// check keys, copy value
+
+	if (strcmp (key, "PRODUKT_NAME") == 0)
+	{
+	    _product = value;
+	}
+	else if (strcmp (key, "PRODUKT_VERSION") == 0)
+	{
+	    _version = value;
+	}
+	else if (strcmp (key, "DISTRIBUTION_RELEASE") == 0)
+	{
+	    _release = atoi (value);
+	}
+	else if (strcmp (key, "DIST_STRING") == 0)
+	{
+	    _vendor = value;
+	}
+	else if (strcmp (key, "DISTRIBUTION_NAME") == 0)
+	{
+	    _label = value;
+	}
+    } // while
+
+    fclose (info);
+
+    return;
+}
+
+
+/**
+ * write media description to cache file
+ * @return pathname of written cache
+ * writes private data to an ascii file
+ */
+const Pathname
+InstSrcDescr::writeCache (void)
+{
+    return Pathname ("");	// empty == error
+}
+
+#endif
 
