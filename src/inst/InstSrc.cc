@@ -93,7 +93,10 @@ InstSrc::~InstSrc()
   MIL << "Delete InstSrc " << *this << "(" << (_cache_deleteOnExit ? "delete " : "keep " ) << _cache << ")" << endl;
 
   if ( _media )
+  {
+    _media->release();
     _media->close();
+  }
 
   if ( _cache_deleteOnExit ) {
     PathInfo::recursive_rmdir( _cache );
@@ -828,7 +831,10 @@ InstSrc::provideMedia (int medianr) const
     }
 
     if (reply != "")
+    {
+	_media->release();
 	return InstSrcError::E_no_media;
+    }
 
     InstSrcPtr isptr = InstSrcPtr::cast_away_const (this);
     isptr->_medianr = medianr;			// everything ok
