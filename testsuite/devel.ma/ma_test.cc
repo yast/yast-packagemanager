@@ -137,9 +137,7 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  InstSrcManager::ISrcIdList idlist;
-  ISM.getSources( idlist );
-  SEC << ">>" << (*idlist.begin())->descr()->content_flags() << "<<" << endl;
+  SEC << ISM.cacheCopyTo( "/tmp/mnt" ) << endl;
 
   SEC << "STOP" << endl;
   return 0;
