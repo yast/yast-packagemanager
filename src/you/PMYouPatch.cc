@@ -86,7 +86,7 @@ string PMYouPatch::getAttributeName( PMYouPatchAttribute attr ) const
   ///////////////////////////////////////////////////////////////////
   // no default: let compiler warn '... not handled in switch'
   ///////////////////////////////////////////////////////////////////
-  case YOU_NUM_ATTRIBUTES:
+  case PMYOU_NUM_ATTRIBUTES:
     // illegal attr value
     break;
   }
