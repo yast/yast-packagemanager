@@ -320,8 +320,8 @@ class InstSrc: virtual public Rep {
      * find list of packages
      * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
      */
-    const std::list<PMPackagePtr> *findPackages (const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "") const;
-    
+    const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr> *packages, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "") const;
+
   public:
 
     std::ostream & dumpOn( std::ostream & str ) const;
