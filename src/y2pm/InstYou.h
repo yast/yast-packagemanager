@@ -392,6 +392,9 @@ class InstYou {
      * @return pointer to DeltaToApply. must be freed manually
      * */
     DeltaToApply* FetchSuitableDelta(PMYouPatchPtr patch, PMPackagePtr pkg, bool quickcheck = false);
+
+    /** remove YOU packages from packagemanager and reset youPatchManager */
+    void withdrawCandidates(void);
 };
 
 ///////////////////////////////////////////////////////////////////

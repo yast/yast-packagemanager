@@ -257,18 +257,7 @@ PMError InstYou::retrievePatchInfo()
 {
   D__ << "retrievePatchInfo()" << endl;
 
-  // XXX move to separate function, it's copy&paste from SDGHVAT
-  if(!_patches.empty())
-  {
-      Y2PM::youPatchManager().poolRemoveCandidates( _patches );
-
-      vector<PMYouPatchPtr>::iterator itPatch;
-      for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
-         if ( !_settings->getAll() ) filterArchitectures( *itPatch );
-         Y2PM::packageManager().poolRemoveCandidates( (*itPatch)->packages() );
-      }
-      Y2PM::packageManager().setNothingSelected();
-  }
+  withdrawCandidates();
   _patches.clear();
 
   if ( !_username.empty() && !_password.empty() ) {
@@ -869,18 +858,8 @@ PMError InstYou::processPatches()
     writeLastUpdate();
   }
 
-  // XXX move to separate function, it's copy&paste from SDGHVAT
-  if(!_patches.empty())
-  {
-      Y2PM::youPatchManager().poolRemoveCandidates( _patches );
+  withdrawCandidates();
 
-      vector<PMYouPatchPtr>::iterator itPatch;
-      for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
-         if ( !_settings->getAll() ) filterArchitectures( *itPatch );
-         Y2PM::packageManager().poolRemoveCandidates( (*itPatch)->packages() );
-      }
-      Y2PM::packageManager().setNothingSelected();
-  }
   PMError releaseError = releaseSource();
   if ( releaseError ) {
     ERR << "Error releasing media: " << releaseError << endl;
@@ -1736,43 +1715,34 @@ PMError InstYou::disconnect()
 
 PMError InstYou::removePackages()
 {
-  PMYouPatchPtr patch;
-  for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    list<PMPackagePtr> packages = patch->packages();
-    list<PMPackagePtr>::const_iterator itPkg;
-    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      string externalUrl = (*itPkg)->externalUrl();
-      if ( externalUrl.empty() ) {
-        PMError error = _media.releaseFile( (*itPkg)->location() );
-        if ( error ) {
-          ERR << "Can't release " << (*itPkg)->location() << endl;
-          return error;
-        }
-      } else {
-        PathInfo::unlink( (*itPkg)->location() );
-      }
-    }
-    if ( !patch->preScript().empty() ) {
-      Pathname scriptPath = patch->product()->scriptPath( patch->preScript() );
-      PMError error = _media.releaseFile( scriptPath );
-      if ( error ) {
-        ERR << "Can't release " << scriptPath.asString() << endl;
-        return error;
-      }
-      PathInfo::unlink( patch->product()->localScriptPath( patch->preScript() ) );
-    }
-    if ( !patch->postScript().empty() ) {
-      Pathname scriptPath = patch->product()->scriptPath( patch->postScript() );
-      PMError error = _media.releaseFile( scriptPath );
-      if ( error ) {
-        ERR << "Can't release " << scriptPath.asString() << endl;
-        return error;
-      }
-      PathInfo::unlink( patch->product()->localScriptPath( patch->postScript() ) );
-    }
+  PMError error;
+  PMPackagePtr nullpkg(NULL);
+  const string empty;
+  Pathname path;
+  list<PMYouProductPtr> products;
+  list<PMYouProductPtr>::iterator prodit;
+
+  products = _settings->products();
+
+  for(prodit = products.begin(); prodit != products.end(); ++prodit)
+  {
+    path = (*prodit)->scriptPath(empty);
+    error = _media.releaseFile(path);
+    if ( error ) ERR << "Can't release " << path.asString() << endl;
+
+    path = (*prodit)->localScriptPath(empty);
+    PathInfo::recursive_rmdir(path);
+
+    path = (*prodit)->rpmPath(nullpkg, false);
+    error = _media.releaseFile(path);
+    if ( error ) ERR << "Can't release " << path.asString() << endl;
+
+    path = (*prodit)->deltaPath(empty);
+    error = _media.releaseFile(path);
+    if ( error ) ERR << "Can't release " << path.asString() << endl;
   }
 
-  return PMError();
+  return error;
 }
 
 void InstYou::showPatches( bool verbose )
@@ -2250,4 +2220,19 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
   }
 
   return PMError::E_ok;
+}
+
+void InstYou::withdrawCandidates(void)
+{
+  if(!_patches.empty())
+  {
+      Y2PM::youPatchManager().poolRemoveCandidates( _patches );
+
+      vector<PMYouPatchPtr>::iterator itPatch;
+      for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
+         if ( !_settings->getAll() ) filterArchitectures( *itPatch );
+         Y2PM::packageManager().poolRemoveCandidates( (*itPatch)->packages() );
+      }
+      Y2PM::packageManager().setNothingSelected();
+  }
 }
