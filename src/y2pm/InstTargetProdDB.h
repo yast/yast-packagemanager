@@ -99,7 +99,7 @@ class InstTargetProdDB : public CountedRep {
 
     PMError install( const constInstSrcDescrPtr & isd_r );
 
-    PMError remove( const constInstSrcDescrPtr & isd_r );
+    PMError remove( constInstSrcDescrPtr isd_r );
 
   public:
 

@@ -467,13 +467,9 @@ PMError InstTarget::installProduct( const constInstSrcDescrPtr & isd_r )
 //
 //	DESCRIPTION :
 //
-#warning API: dont pass reference as that breaks reference counting on the pointer
 PMError InstTarget::removeProduct( const constInstSrcDescrPtr & isd_r )
 {
-  // we need to keep a pointer here unit api is fixed otherwise it will self
-  // destruct behind our back
-  constInstSrcDescrPtr bak = isd_r;
-  return _proddb->remove( bak );
+  return _proddb->remove( isd_r );
 }
 
 ///////////////////////////////////////////////////////////////////
