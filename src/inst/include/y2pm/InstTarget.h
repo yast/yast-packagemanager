@@ -365,17 +365,6 @@ class InstTarget: virtual public Rep, public InstData {
          */
         PMError executeScript( const Pathname &scriptname );
 
-	/**
-	 * dumb function that just sums up space on all mounted local
-	 * filesystems below root directory
-	 *
-	 * @param total (out) total available space
-	 * @param used (out) used space
-	 * */
-	void SpaceTotal(FSize& total, FSize& used);
-
-
-
       ///////////////////////////////////////////////////////////////////
       // Product related interface
       ///////////////////////////////////////////////////////////////////
