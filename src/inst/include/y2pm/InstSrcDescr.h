@@ -151,6 +151,7 @@ class InstSrcDescr : virtual public Rep {
      **/
     Pathname _content_datadir;
 
+    std::string _content_youurl;
     std::string _content_youtype;
     std::string _content_youpath;
     
@@ -182,6 +183,7 @@ public:
     const std::string &  content_timezone()    const { return _content_timezone; }
     const Pathname &     content_descrdir()    const { return _content_descrdir; }
     const Pathname &     content_datadir()     const { return _content_datadir; }
+    const std::string &  content_youurl()      const { return _content_youurl; } 
     const std::string &  content_youtype()     const { return _content_youtype; } 
     const std::string &  content_youpath()     const { return _content_youpath; } 
 
@@ -227,6 +229,7 @@ public:
     void set_content_timezone( const std::string & val_r )  { _content_timezone = val_r; }
     void set_content_descrdir( const Pathname & val_r )     { _content_descrdir = val_r; }
     void set_content_datadir( const Pathname & val_r )      { _content_datadir = val_r; }
+    void set_content_youurl( const std::string & val_r )    { _content_youurl = val_r; }
     void set_content_youtype( const std::string & val_r )   { _content_youtype = val_r; }
     void set_content_youpath( const std::string & val_r )   { _content_youpath = val_r; }
 

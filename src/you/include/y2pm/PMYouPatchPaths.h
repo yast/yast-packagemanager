@@ -48,8 +48,8 @@ class PMYouPatchPaths : virtual public Rep {
                      const std::string &baseArch );
 
     void init( const std::string &product, const std::string &version,
-               const std::string &baseArch, const std::string &path,
-               bool business );
+               const std::string &baseArch, const std::string &youUrl,
+               const std::string &path, bool business );
     void init( const std::string &product, const std::string &version,
                const std::string &baseArch );
 
@@ -113,6 +113,7 @@ class PMYouPatchPaths : virtual public Rep {
     
     std::list<Url> _servers;
 
+    std::string _youUrl;
     bool _businessProduct;
 };
 

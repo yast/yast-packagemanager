@@ -57,13 +57,14 @@ PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
 }
 
 void PMYouPatchPaths::init( const string &product, const string &version,
-                            const string &baseArch, const string &path,
-                            bool business )
+                            const string &baseArch, const string &url,
+                            const string &path, bool business )
 {
   _product = product;
   _version = version;
   _baseArch = PkgArch( baseArch );
 
+  _youUrl = url;
   _businessProduct = business;
 
   init( path );
@@ -118,19 +119,21 @@ PMError PMYouPatchPaths::initProduct()
   string product = prodEd.name;
   string version = prodEd.edition.version();
   string baseArch = descr->content_defaultbase();
+  string youUrl = descr->content_youurl();
   string youType = descr->content_youtype();
   string youPath = descr->content_youpath();
 
   D__ << "PRODUCT NAME: " << product << endl;
   D__ << "PRODUCT VERSION: " << version << endl;
   D__ << "BASEARCH: " << baseArch << endl;
+  D__ << "YOUURL: " << youUrl << endl;
   D__ << "YOUTYPE: " << youType << endl;
   D__ << "YOUPATH: " << youPath << endl;
 
   if ( youPath.empty() ) {
     init( product, version, baseArch );
   } else {
-    init( product, version, baseArch, youPath, youType == "business" );
+    init( product, version, baseArch, youUrl, youPath, youType == "business" );
   }
 
   return PMError();
@@ -230,7 +233,7 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
   const char *cmd ="grep 'YAST2_LOADFTPSERVER=' /etc/sysconfig/onlineupdate |"
                    "grep yes >/dev/null 2>/dev/null";
   int status = system( cmd );
-  
+
   if ( status == 0 ) {
     string url = u;
 
@@ -243,8 +246,8 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
     }
 
     if ( url.empty() ) {
-  //    url = "http://www.suse.de/de/support/download/";
-      url = "http://www.suse.de/cgi-bin/suseservers.cgi";
+      if ( _youUrl.empty() ) url = "http://www.suse.de/cgi-bin/suseservers.cgi";
+      else url = _youUrl;
       url += "?product=" + product();
       url += "&version=" + version();
       url += "&basearch=" + string( baseArch() );
