@@ -72,6 +72,74 @@ IMPL_BASE_POINTER(RpmDb);
 
 #define FILEFORBACKUPFILES "YaSTBackupModifiedFiles"
 
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : RpmDb::Logfile
+/**
+ * Simple wrapper for progress log. Refcnt, filename and corresponding
+ * ofstream are static members. Logfile constructor raises, destructor
+ * lowers refcounter. On refcounter changing from 0->1, file is opened.
+ * Changing from 1->0 the file is closed. Thus Logfile objects should be
+ * local to those functions, writing the log, and must not be stored
+ * permanently;
+ *
+ * Usage:
+ *  some methothd ()
+ *  {
+ *    Logfile progresslog;
+ *    ...
+ *    progresslog() << "some message" << endl;
+ *    ...
+ *  }
+ **/
+class RpmDb::Logfile {
+  Logfile( const Logfile & );
+  Logfile & operator=( const Logfile & );
+  private:
+    static ofstream _log;
+    static unsigned _refcnt;
+    static Pathname _fname;
+    static void openLog() {
+      if ( !_fname.empty() ) {
+	_log.clear();
+	_log.open( _fname.asString().c_str(), std::ios::out|std::ios::app );
+	if( !_log )
+	  ERR << "Could not open logfile '" << _fname << "'" << endl;
+      }
+    }
+    static void closeLog() {
+      _log.clear();
+      _log.close();
+    }
+    static void refUp() {
+      if ( !_refcnt )
+	openLog();
+      ++_refcnt;
+    }
+    static void refDown() {
+      --_refcnt;
+      if ( !_refcnt )
+	closeLog();
+    }
+  public:
+    Logfile() { refUp(); }
+    ~Logfile() { refDown(); }
+    ostream & operator()() { return _log; }
+    static void setFname( const Pathname & fname_r ) {
+      if ( _refcnt )
+	closeLog();
+      _fname = fname_r;
+      if ( _refcnt )
+	openLog();
+    }
+};
+
+Pathname RpmDb::Logfile::_fname;
+ofstream RpmDb::Logfile::_log;
+unsigned RpmDb::Logfile::_refcnt = 0;
+
+///////////////////////////////////////////////////////////////////
+
 /****************************************************************/
 /* struct RpmDb::Packages					*/
 /****************************************************************/
@@ -1386,15 +1454,17 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 PMError
 RpmDb::installPackage(const Pathname& filename, unsigned flags)
 {
+    Logfile progresslog;
     RpmArgVec opts;
-MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
+
+    MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
 
     if (_packagebackups)
     {
 	if (!backupPackage (filename))
 	{
 	    ERR << "backup of " << filename.asString() << " failed" << endl;
-	    _progresslogstream << "backup of " << filename.asString() << " failed" << endl;
+	    progresslog() << "backup of " << filename.asString() << " failed" << endl;
 	}
     }
 
@@ -1419,7 +1489,7 @@ MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
     opts.push_back (filename.asString().c_str());
 
     // %s = filename of rpm package
-//    _progresslogstream << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
+    // progresslog() << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
 
     run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
 
@@ -1469,16 +1539,16 @@ MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
     if (rpm_status != 0)
     {
 	// %s = filename of rpm package
-	_progresslogstream << stringutil::form(_("%s failed"), Pathname::basename(filename).c_str()) << endl;
+	progresslog() << stringutil::form(_("%s failed"), Pathname::basename(filename).c_str()) << endl;
 	ERR << "rpm failed, message was: " << rpmmsg << endl;
-	_progresslogstream << _("rpm output:") << endl << rpmmsg << endl;
+	progresslog() << _("rpm output:") << endl << rpmmsg << endl;
 	return Error::E_RpmDB_subprocess_failed;
     }
     // %s = filename of rpm package
-    _progresslogstream << stringutil::form(_("%s installed ok"), Pathname::basename(filename).c_str()) << endl;
+    progresslog() << stringutil::form(_("%s installed ok"), Pathname::basename(filename).c_str()) << endl;
     if(!rpmmsg.empty())
     {
-	_progresslogstream << _("Additional rpm output:") << endl << rpmmsg << endl;
+	progresslog() << _("Additional rpm output:") << endl << rpmmsg << endl;
     }
     return Error::E_ok;
 }
@@ -1596,23 +1666,8 @@ RpmDb::checkPackageResult2string(unsigned code)
 
 bool RpmDb::setInstallationLogfile( const Pathname& filename )
 {
-    if(_progresslogstream.is_open())
-    {
-	_progresslogstream.clear();
-	_progresslogstream.close();
-    }
-
-    if(filename.asString().empty())
-	return true;
-
-    _progresslogstream.clear();
-    _progresslogstream.open(filename.asString().c_str(), std::ios::out|std::ios::app);
-    if(!_progresslogstream)
-    {
-	ERR << "Could not open " << filename << endl;
-	return false;
-    }
-    return true;
+  Logfile::setFname( filename );
+  return true;
 }
 
 #if 0
@@ -1668,6 +1723,7 @@ RpmDb::backupPackage(const Pathname& filename)
 bool
 RpmDb::backupPackage(const string& packageName)
 {
+    Logfile progresslog;
     bool ret = true;
     Pathname backupFilename;
     Pathname filestobackupfile = _rootdir+_backuppath+FILEFORBACKUPFILES;
@@ -1698,7 +1754,7 @@ RpmDb::backupPackage(const string& packageName)
 	return false;
     }
 
-    _progresslogstream << "create backup for " << packageName << endl;
+    progresslog() << "create backup for " << packageName << endl;
 
     {
 	// build up archive name
