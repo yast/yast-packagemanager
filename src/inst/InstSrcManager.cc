@@ -795,10 +795,12 @@ PMError InstSrcManager::cacheCopyTo( const Pathname & newRoot_r )
     return Error::E_error;
   }
 
+  MIL << "START cacheCopyTo '" << newRoot_r << "'" << endl;
+
   Pathname old_cache_root_dir = _cache_root_dir;
   _cache_root_dir = newRoot_r + _cache_root_dir;
 
-  PMError err = intern_cacheCopyTo( newRoot_r );
+  PMError err = intern_cacheCopyTo();
 
   _cache_root_dir = old_cache_root_dir;
 
@@ -819,13 +821,42 @@ PMError InstSrcManager::cacheCopyTo( const Pathname & newRoot_r )
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::intern_cacheCopyTo( const Pathname & newRoot_r )
+PMError InstSrcManager::intern_cacheCopyTo()
 {
   int res = PathInfo::assert_dir( cache_tmp_dir(), 0700 );
   if ( res ) {
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
     return Error::E_error;
   }
+
+  // scan existing caches, adjust ranks and disable them.
+
+  ISrcPool oSources( _knownSources );
+  unsigned rankOffset = oSources.size();
+
+  _knownSources.clear();
+  initSrcPool( /*autoEnable*/false );
+  if ( _knownSources.size() ) {
+
+    // delete already existing oSources
+    for ( ISrcPool::const_iterator it = oSources.begin(); it != oSources.end(); ++it ) {
+      InstSrcPtr gotsrc = lookupInstSrc( *it );
+      if ( gotsrc ) {
+	gotsrc->_cache_deleteOnExit = true;
+      }
+    }
+
+    for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+      (*it)->descr()->set_default_rank( (*it)->descr()->default_rank() + rankOffset );
+      (*it)->descr()->set_default_activate( false );
+      (*it)->writeDescrCache();
+    }
+
+    _knownSources.clear();
+  }
+  _knownSources = oSources;
+  oSources.clear();
+
 
   // iterate all enabled sources and copy caches
 
