@@ -51,25 +51,17 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 
     public:
 
-	//--------------------------------------------------------------------
-	// InstData interface
 	/**
 	 * generate PMSelection objects for each selection on the source
 	 * @return list of PMSelectionPtr on this source
 	 */
-	const std::list<PMSelectionPtr>& getSelections (void) const;
+	const std::list<PMSelectionPtr>& getSelections() const { return _selections; }
 
 	/**
 	 * generate PMPackage objects for each Item on the source/target
 	 * @return list of PMPackagePtr on this source
 	 * */
-	const std::list<PMPackagePtr>& getPackages (void) const;
-
-	/**
-	 * generate PMYouPatch objects for each patch on the source
-	 * @return list of PMYouPatchPtr on this source
-	 */
-	const std::list<PMYouPatchPtr>& getPatches (void) const;
+	const std::list<PMPackagePtr>& getPackages() const { return _packages; }
 
     private:
 

@@ -338,6 +338,24 @@ PMError InstSrcManager::disableSource( const ISrcId & isrc_r )
   return Error::E_bad_id;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::getSources
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcManager::getSources( ISrcIdList & idlist_r, const bool enabled_only ) const
+{
+  idlist_r.clear();
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    if ( !enabled_only || (*it)->enabled() ) {
+      idlist_r.push_back( *it );
+    }
+  }
+}
+
 /******************************************************************
 **
 **

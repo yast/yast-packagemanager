@@ -85,6 +85,10 @@ class InstSrcData: virtual public Rep, public InstData {
 
   public:
 
+    /**
+     * Do nothing in Constructor. Wait for InstSrc to attach
+     * and trigger actions to perform.
+     **/
     InstSrcData();
 
     virtual ~InstSrcData();
@@ -105,9 +109,9 @@ class InstSrcData: virtual public Rep, public InstData {
 
     /**
      * Call concrete InstSrcData to propagate Objects to Manager classes.
+     * Data may be retrieved from cache (if supported and present), or from media.
      *
-     * InstSrc is attached. If data are not yet present, get them from cache
-     * (if there is one) or media.
+     * InstSrc is attached.
      **/
     virtual void propagateObjects();
 
@@ -120,10 +124,29 @@ class InstSrcData: virtual public Rep, public InstData {
      **/
     virtual void withdrawObjects();
 
+  public:
+
     /**
      * Write data to cache, if necessary
      **/
     virtual PMError writeCache( const Pathname & cache_dir_r ) const;
+
+  public:
+
+    /**
+     * Default for concrete InstSrcData providing no Selections
+     **/
+    virtual const std::list<PMSelectionPtr> & getSelections() const { return InstData::getSelections(); }
+
+    /**
+     * Default for concrete InstSrcData providing no Packages
+     **/
+    virtual const std::list<PMPackagePtr> &   getPackages()   const { return InstData::getPackages(); }
+
+    /**
+     * Default for concrete InstSrcData providing no Patches
+     **/
+    virtual const std::list<PMYouPatchPtr> &  getPatches()    const { return InstData::getPatches(); }
 
   public:
 

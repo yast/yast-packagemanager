@@ -135,6 +135,28 @@ class InstSrc: virtual public Rep {
      **/
     Pathname cachePath( const Pathname & sub_r ) const { return( _cache + sub_r ); }
 
+  public:
+
+    /**
+     * Full path of cache_dir.
+     **/
+    Pathname cache_dir() const { return _cache; }
+
+    /**
+     * Full path of InstSrcDescr cache dir.
+     **/
+    Pathname cache_descr_dir() const { return cachePath( _c_descr_dir ); }
+
+    /**
+     * Full path of InstSrcData cache dir.
+     **/
+    Pathname cache_data_dir() const { return cachePath( _c_data_dir ); }
+
+    /**
+     * Full path of (prefered) madia attach point.
+     **/
+    Pathname cache_media_dir() const { return cachePath( _c_media_dir ); }
+
   private:
 
     /**
@@ -205,28 +227,6 @@ class InstSrc: virtual public Rep {
   public:
 
     /**
-     * Full path of cache_dir.
-     **/
-    Pathname cache_dir() const { return _cache; }
-
-    /**
-     * Full path of InstSrcDescr cache dir.
-     **/
-    Pathname cache_descr_dir() const { return cachePath( _c_descr_dir ); }
-
-    /**
-     * Full path of InstSrcData cache dir.
-     **/
-    Pathname cache_data_dir() const { return cachePath( _c_data_dir ); }
-
-    /**
-     * Full path of (prefered) madia attach point.
-     **/
-    Pathname cache_media_dir() const { return cachePath( _c_media_dir ); }
-
-  public:
-
-    /**
      * Const access to installation source description
      **/
     constInstSrcDescrPtr descr() const { return _descr; }
@@ -280,26 +280,6 @@ class InstSrc: virtual public Rep {
      * Sync InstSrcDescr and InstSrcData to cache
      **/
     PMError writeCache();
-
-#if 0
-    /**
-     * generate PMSelection objects for each selection on the source
-     * @return list of PMSelectionPtr on this source
-     */
-    const std::list<PMSelectionPtr>& getSelections (void) const;
-
-    /**
-     * generate PMPackage objects for each Item on the source/target
-     * @return list of PMPackagePtr on this source
-     * */
-    const std::list<PMPackagePtr>& getPackages (void) const;
-
-    /**
-     * generate PMSolvable objects for each patch on the source
-     * @return list of PMSolvablePtr on this source
-     */
-    const std::list<PMYouPatchPtr>& getPatches (void) const;
-#endif
 
   public:
 
