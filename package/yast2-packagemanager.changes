@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug 25 22:00:42 CEST 2002 - kkaempf@suse.de
+
+- fix reading of locale based selection data.
+
+-------------------------------------------------------------------
 Wed Aug 21 16:54:09 CEST 2002 - kkaempf@suse.de
 
 - provide just a single library
