@@ -19,7 +19,6 @@
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstYou.h>
 #include <y2pm/InstSrcDescr.h>
-#include <y2pm/Wget.h>
 #include <y2pm/InstTarget.h>
 
 #include <Y2PM.h>
@@ -58,6 +57,33 @@ int main( int argc, char **argv )
 {
   Y2Logging::setLogfileName( "-" );
 
+  class MyCallbacks : public InstTarget::Callbacks
+  {
+    public:
+      bool scriptProgress( int p )
+      {
+        static int i = 0;
+        INT << "tick " << p << endl;
+//        return i++ < 5;
+        return true;
+      }
+  };
+
+#if 0
+  ExternalProgram prg( "bash myscript" );
+  prg.close();
+#endif
+
+#if 1
+  MyCallbacks c;
+
+  InstTarget::setCallbacks( &c );
+
+  PMError error = Y2PM::instTarget().executeScript( "myscript" );
+
+  DBG << error << endl;
+#endif
+  
 #if 0
   if ( argc != 2 ) {
     cerr << "Usage: " << argv[ 0 ] << " <url>" << endl;

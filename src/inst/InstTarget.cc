@@ -48,6 +48,8 @@ extern "C" {
 
 using namespace std;
 
+InstTarget::Callbacks *InstTarget::_callbacks = 0;
+
 /**
  * constructor
  * @param rootpath, path to root ("/") of target system
@@ -364,9 +366,20 @@ PMError InstTarget::installPatch( const Pathname &filename )
 
 PMError InstTarget::executeScript( const Pathname &scriptname )
 {
+    if ( _callbacks ) _callbacks->scriptProgress( 0 );
     ExternalProgram prg( ( "/bin/bash >/dev/null 2>/dev/null " +
                            scriptname.asString() ).c_str() );
+    while( prg.running() ) {
+      usleep( 500000 );
+      if ( _callbacks ) {
+        if ( !_callbacks->scriptProgress( -1 ) ) {
+          prg.kill();
+          return Error::E_user_abort;
+        }
+      }
+    }
     int result = prg.close();
+    if ( _callbacks ) _callbacks->scriptProgress( 100 );
     if ( result != 0 ) {
         ERR << "Script failed. Exit code " << result << endl;
         return Error::E_error;

@@ -475,7 +475,10 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 
   error = executeScript( patch->preScript(), dryrun );
   D__ << "Prescript: " << error << endl;
-  if ( error ) return PMError( YouError::E_prescript_failed, error.details() );
+  if ( error ) {
+    if ( error == YouError::E_user_abort ) return error;
+    else return PMError( YouError::E_prescript_failed, error.details() );
+  }
 
   error = patchProgress( 1 );
   if ( error ) return error;
@@ -525,7 +528,10 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 
   error = executeScript( patch->postScript(), dryrun );
   D__ << "Postscript: " << error << endl;
-  if ( error ) return PMError( YouError::E_postscript_failed, error.details() );
+  if ( error ) {
+    if ( error == YouError::E_user_abort ) return error;
+    else return PMError( YouError::E_postscript_failed, error.details() );
+  }
 
   error = patchProgress( 100 );
   if ( error ) return error;
@@ -558,8 +564,13 @@ PMError InstYou::executeScript( const string &script, bool dryrun )
       }
     } else {
       PMError error = Y2PM::instTarget().executeScript( scriptPath );
-      if ( error ) return PMError( YouError::E_script_failed,
-                                   scriptPath.asString() );
+      if ( error ) {
+        if ( error == InstTargetError::E_user_abort ) {
+          return PMError( YouError::E_user_abort );
+        } else {
+          return PMError( YouError::E_script_failed, scriptPath.asString() );
+        }
+      }
     }
   }
 

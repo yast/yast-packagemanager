@@ -81,7 +81,9 @@ class InstTargetError {
       E_ProdDB_not_installed,
       //
       E_UpdateInf_not_found,
-      E_UpdateInf_malformed
+      E_UpdateInf_malformed,
+      //
+      E_user_abort
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
