@@ -10,8 +10,8 @@ Provides:	yast2-agent-you
 Obsoletes:	yast2-agent-you
 Provides:	yast2-agent-targetpkg
 Obsoletes:	yast2-agent-targetpkg
-Provides:	yast2-core-clients
-Obsoletes:	yast2-core-clients
+Provides:	yast2-core-clients y2client
+Obsoletes:	yast2-core-clients y2client
 Provides:	yast2-core-pkginfo
 Obsoletes:	yast2-core-pkginfo
 Provides:	yast2-agent-ftp
