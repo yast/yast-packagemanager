@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 20 13:12:12 CEST 2003 - cschum@suse.de
+
+- Own /var/lib/YaST2/you and /var/lib/YaST2/you/mnt (#28793).
+
+-------------------------------------------------------------------
 Tue Aug 19 13:09:03 CEST 2003 - cschum@suse.de
 
 - Fixed -s option of online_update (#28138).
