@@ -541,7 +541,7 @@ PMError InstYou::processPatches()
   if ( _installedPatches == 0 ) {
     log( _("No patches have been installed.") );
   } else if ( _installedPatches == 1 ) {
-    log( _("1 patch has been installed") );
+    log( _("1 patch has been installed.") );
   } else {
     log( stringutil::form( _("%d patches have been installed."),
                            _installedPatches ) );

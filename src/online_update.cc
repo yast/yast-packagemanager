@@ -37,40 +37,40 @@ void usage()
 {
   cout << _("Usage: online-update [options] [types]")
        << endl << endl
-       << _("-u, --url URL            Base URL of directory tree used to get patches from.\n"
+       << _("-u, --url URL            Base URL of directory tree from which to get patches.\n"
             "                         Supported protocols: http, ftp, smb, nfs, cd, dvd, file.\n"
-            "                         If no protocol is given a local file is assumed.\n"
+            "                         If no protocol is given, a local file is assumed.\n"
             "                         Examples: 'ftp://ftp.suse.com/pub/suse', 'cd:///',\n"
             "                                   'file:/var/lib/YaST2/you/mnt'\n"
             "                                   '/var/lib/YaST2/you/mnt'") << endl
        << endl
-       << _("-g, --download-only      Only download patches, don't install.") << endl
+       << _("-g, --download-only      Only download patches. Do not install.") << endl
        << _("-G, --get-all            Retrieve all available patches and packages for the\n"
-            "                         given product, don't install.") << endl
-       << _("-i, --install-only       Install downloaded patches, don't download.") << endl
+            "                         given product. Do not install.") << endl
+       << _("-i, --install-only       Install downloaded patches. Do not download.") << endl
        << endl
-       << _("-q, --quick-check        Quick check for new updates. Doesn't check for types\n"
+       << _("-q, --quick-check        Quick check for new updates. Does not check for types\n"
             "                         of updates.") << endl
        << _("-k, --check              Check for new updates.") << endl
        << endl
-       << _("-c, --show-config        Show configuration. Don't do anything.") << endl
+       << _("-c, --show-config        Show configuration. Do not do anything.") << endl
        << endl
-       << _("-p, --product PRODUCT    Name of product to get patches for.") << endl
-       << _("-v, --version VERSION    Version of product to get patches for.") << endl
-       << _("-a, --architecture ARCH  Base architecture of product to get patches for.") << endl
+       << _("-p, --product PRODUCT    Name of product for which to get patches.") << endl
+       << _("-v, --version VERSION    Version of product for which to get patches.") << endl
+       << _("-a, --architecture ARCH  Base architecture of product for which to get patches.") << endl
        << _("-l, --language LANGCODE  Language used to show patch descriptions.") << endl
        << endl
        << _("-r, --reload             Reload patches from server.") << endl
-       << _("-d, --dry-run            Dry run. Only get patches, don't install them.") << endl
+       << _("-d, --dry-run            Dry run. Only get patches, but do not install them.") << endl
        << _("-n, --no-sig-check       No signature check of downloaded files.") << endl
        << endl
-       << _("-s, --show-patches       Show list of patches (Additionaly use -d to only show list\n"
+       << _("-s, --show-patches       Show list of patches (Additionaly use -d only to show list\n"
             "                         of patches without installing them).") << endl
        << _("-V, --verbose            Be verbose.") << endl
        << _("-D, --debug              Debug output.") << endl
        << endl
        << "security | recommended | patchlevel | document | optional   "
-       << _("Types of patches to be installed.") << endl;
+       << _("Types of patches to install.") << endl;
   exit( 1 );
 }
 
@@ -300,7 +300,7 @@ int main( int argc, char **argv )
       cout << _("  Version:      ") << prod->version() << endl;
       cout << _("  Architecture: ") << prod->baseArch() << endl;
       if ( verbose ) {
-        cout << _("  Arch list: ");
+        cout << _("  Arch List: ");
         std::list<PkgArch> archs = prod->archs();
         std::list<PkgArch>::const_iterator it;
         for( it = archs.begin(); it != archs.end(); ++it ) {
