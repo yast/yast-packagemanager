@@ -44,6 +44,7 @@ class PMUpdateStats {
     // OPTIONS
     ///////////////////////////////////////////////////////////////////
 
+    bool delete_unmaintained;
 
   public:
 
@@ -95,7 +96,6 @@ class PMUpdateStats {
      **/
     unsigned chk_to_keep_old;
 
-
     /**
      * update checks: without candidate: installed package has not vendor SuSE
      *
@@ -138,6 +138,8 @@ class PMUpdateStats {
   public:
 
     PMUpdateStats() {
+      // initial options
+      delete_unmaintained       = true;
       // initial status
       pre_todel			= 0;
       pre_nocand		= 0;
@@ -158,6 +160,15 @@ class PMUpdateStats {
       chk_add_split		= 0;
     }
     ~PMUpdateStats() {}
+
+    /**
+     * total number of packages that will be installed
+     */
+    unsigned totalToInstall (void) const
+    {
+	return chk_already_toins + chk_to_update + chk_to_downgrade + chk_renamed + chk_renamed_guessed + chk_add_split;
+    }
+
 };
 
 ///////////////////////////////////////////////////////////////////
