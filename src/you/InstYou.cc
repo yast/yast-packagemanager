@@ -188,9 +188,11 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
     Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
   }
 
-  // Set correct size depending on if the patch RPM is used or the full one
+  // Set correct size depending on if the patch RPM is used or the full one and
+  // set the packagesInstalled flag
   for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
     D__ << "Patch: " << (*itPatch)->summary() << endl;
+    bool packagesInstalled = false;
     FSize patchSize;
     list<PMPackagePtr> packages = (*itPatch)->packages();
     list<PMPackagePtr>::const_iterator itPkg;
@@ -203,9 +205,13 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
       FSize archiveSize = (*itPkg)->archivesize();
       D__ << "    ArchiveSize: " << archiveSize << endl;
       patchSize += archiveSize;
+
+      if ( (*itPkg)->hasInstalledObj() ) packagesInstalled = true;
     }
     (*itPatch)->setPatchSize( patchSize );
     D__ << "  PatchSize: " << patchSize << endl;
+
+    (*itPatch)->setPackagesInstalled( packagesInstalled );
   }
 
   return PMError();
