@@ -93,6 +93,7 @@ class PMPackageDataProvider : virtual public Rep {
     static std::list<std::string> keywords()    { return std::list<std::string>(); }
     static std::list<std::string> du()		{ return std::list<std::string>(); }
 
+    static bool isRemote()			{ return false; }
     // physical access to the rpm file.
     static PMError providePkgToInstall(Pathname& path_r) { return PMError::E_ok; }
 
@@ -150,6 +151,8 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const { return keywords(); }
     virtual std::list<std::string> du	       ( const PMPackage & pkg_r ) const { return du(); }
 
+
+    virtual bool		   isRemote    ( const PMPackage & pkg_r ) const { return isRemote(); }
     // physical access to the rpm file.
     virtual PMError providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return providePkgToInstall(path_r); }
 };
