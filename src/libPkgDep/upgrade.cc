@@ -331,27 +331,36 @@ bool PkgDep::solvesystemnoauto(
 		}
 	    }
 
-	    D__ << "moving inconsistent from installed to candidates: ";
 	    i_for( PkgSet::,, bit, brokeninstalled., )
 	    {
 		if(installed.includes(bit->second->name()))
 		{
-		    D__ << (bit->second->name());
 		    if(!candidates.includes( bit->second->name()))
 		    {
-			installed.remove( bit->second );
-			candidates.add( bit->second );
-			D__ << " ";
+			// doesn't matter, we force install anyway
+			// installed.remove( bit->second );
+			if(available.includes( bit->second->name() ))
+			{
+			    D__ << "adding inconsistent " << (bit->second->name())
+				<< " from available to candidates" << endl;
+			    candidates.add( available[bit->second->name()] );
+			}
+			else
+			{
+			    D__ << "adding inconsistent " << (bit->second->name())
+				<< " from installed to candidates" << endl;
+			    candidates.add( bit->second );
+			}
 		    }
 		    else
 		    {
-			D__ << "(NOT!) ";
+			D__ << "inconsistent " << (bit->second->name())
+			    << " already candidate" << endl;
 		    }
 		}
 		else
-		    INT << bit->second->name() << " not in installed" << endl;
+		    INT << bit->second->name() << " not in installed!?" << endl;
 	    }
-	    D__ << endl;
 	}
 
 	// try installation of the candidates
