@@ -49,7 +49,8 @@ PMYouPatch::PMYouPatch( const PkgName &    name_r,
 			const PkgEdition & edition_r,
                         const PkgArch & arch_r )
     : PMObject( name_r, edition_r, arch_r )
-    , _kind( kind_invalid ), _updateOnlyInstalled( false )
+    , _kind( kind_invalid ), _updateOnlyInstalled( false ),
+    _packagesInstalled( false )
 {
 }
 
@@ -147,4 +148,18 @@ list<string> PMYouPatch::description() const
     ret.push_back( *it );
   }
   return ret;
+}
+
+list<string> PMYouPatch::insnotify() const
+{
+  if ( packagesInstalled() || !updateOnlyInstalled() ) {
+    return PMObject::insnotify();
+  }
+
+  list<string> text;
+  
+  text.push_back( "Installing this patch will have no effect, because it" );
+  text.push_back( "doesn't contain any updates to installed packages." );
+
+  return text;
 }

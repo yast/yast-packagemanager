@@ -179,6 +179,17 @@ class PMYouPatch : virtual public Rep, public PMObject {
      */
     std::string fullName() const;
 
+    /**
+      Set flag indicating, if the patch contains packages which are alread
+      installed in some version.
+    */
+    void setPackagesInstalled( bool installed ) { _packagesInstalled = installed; }
+
+    /**
+      Return, if patch contains installed patches.
+    */
+    bool packagesInstalled() const { return _packagesInstalled; }
+
   public:
 
     /**
@@ -187,7 +198,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
      **/
     virtual std::string            summary()     const { return shortDescription(); }
     virtual std::list<std::string> description() const;
-    virtual std::list<std::string> insnotify()       const { return PMObject::insnotify(); }
+    virtual std::list<std::string> insnotify()       const;
     virtual std::list<std::string> delnotify()       const { return PMObject::delnotify(); }
     virtual FSize                  size()            const { return patchSize(); }
     virtual bool                   providesSources() const { return PMObject::providesSources(); }
@@ -209,6 +220,8 @@ class PMYouPatch : virtual public Rep, public PMObject {
     std::list<PMPackagePtr> _packages;
 
     Pathname _localFile;
+
+    bool _packagesInstalled;
 
   public:
 
