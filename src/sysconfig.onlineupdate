@@ -11,6 +11,14 @@
 #
 YAST2_LOADFTPSERVER="yes"
 
+## Type: string
+## Default:
+#
+# Command line options which will be appended to the "online_update" command
+# used by the cron job set up with the "automatic update" option in the YOU GUI.
+#
+CMDLINE_OPTIONS=""
+
 #
 # REG_CODE and REG_PASSWORD are now stored in /var/lib/YaST2/you/password.
 #
