@@ -1,8 +1,15 @@
 -------------------------------------------------------------------
+Tue Feb 18 15:36:39 CET 2003 - ma@suse.de
+
+- If MediaHandler is unable to create a default attach point in
+  /var/adm/mount (e.g. no permission), it tries to create it in
+  /var/tmp.
+
+-------------------------------------------------------------------
 Tue Feb 18 15:00:58 CET 2003 - cschum@suse.de
 
 - Make checks for availability of new online updates run without
-  root permissions. 
+  root permissions.
 
 -------------------------------------------------------------------
 Mon Feb 17 10:39:27 CET 2003 - ma@suse.de
