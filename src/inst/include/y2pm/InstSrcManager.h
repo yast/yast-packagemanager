@@ -124,6 +124,13 @@ class InstSrcManager {
     ISrcPool _knownSources;
 
     /**
+     * Turned on at startup or by @ref enableDefaultSources, turned off
+     * by @ref disableAllSources. Evaluated by @ref editSet to see whether
+     * the sources should be activated, or stay as they are.
+     **/
+    bool _want_sources_enabled;
+
+    /**
      * Preload all cached InstSrces.
      **/
     PMError initSrcPool( const bool autoEnable_r );

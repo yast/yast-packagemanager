@@ -52,13 +52,14 @@ const Pathname InstSrcManager::_cache_tmp_dir( "tmp" );
 //	DESCRIPTION :
 //
 InstSrcManager::InstSrcManager( const bool autoEnable_r )
+    : _want_sources_enabled( autoEnable_r )
 {
   int res = PathInfo::assert_dir( cache_tmp_dir() );
   if ( res ) {
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
   }
   if ( Y2PM::runningFromSystem() ) {
-    initSrcPool( autoEnable_r );
+    initSrcPool( _want_sources_enabled );
   } else {
     MIL << "Not running from system: no init from SrcPool" << endl;
   }
@@ -719,7 +720,9 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
   list<ISrcId>   todel;
   set<ISrcId>    seen;
 
-  // Check new known sources. Remember all sources we saw.
+  ///////////////////////////////////////////////////////////////////
+  // Check new known sources. Remember the sources we saw.
+  ///////////////////////////////////////////////////////////////////
   for ( SrcStateVector::const_iterator it = keep_r.begin(); it != keep_r.end(); ++it ) {
     InstSrcPtr item( lookupSourceByID( it->first ) );
     if ( ! item ) {
@@ -734,10 +737,28 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
     known.push_back( item );
   }
 
-  // old sources not mentioned in seen are to be deleted
+  ///////////////////////////////////////////////////////////////////
+  // Old sources not mentioned in seen are to be deleted. On the fly
+  // check whether state has actually changed. If ranking was changed,
+  // additionally notify Package/SelectionManager as candidate list
+  // may have to be adjusted.
+  ///////////////////////////////////////////////////////////////////
+  bool new_states = false;
+  bool new_ranks = false;
+  unsigned idx = 0; // to iterate keep_r
+
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
     if ( seen.insert( *it ).second ) {
       todel.push_back( *it );
+    } else {
+      // still known
+      if ( !new_ranks && (*it)->srcID() != keep_r[idx].first ) {
+	new_ranks = new_states = true;
+      }
+      if ( !new_states && (*it)->descr()->default_activate() != keep_r[idx].second ) {
+	new_states = true;
+      }
+      ++idx;
     }
   }
 
@@ -747,20 +768,31 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
   // adjust sources
   ///////////////////////////////////////////////////////////////////
 
-  // delete unwanted
+  // delete unwanted sources
   for ( list<ISrcId>::iterator it = todel.begin(); it != todel.end(); ++it ) {
     deleteSource( *it );
   }
   todel.clear();
 
-  // adjust _knownSources
+  // adjust _knownSources settings
   _knownSources = known;
 
-  unsigned idx = 0;
-  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it, ++idx ) {
-    (*it)->descr()->set_default_activate( keep_r[idx].second );
-    (*it)->descr()->set_default_rank( idx );
-    (*it)->_mgr_attach();
+  if ( new_states ) {
+    idx = 0;
+    for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it, ++idx ) {
+      (*it)->descr()->set_default_activate( keep_r[idx].second );
+      (*it)->descr()->set_default_rank( idx );
+      (*it)->_mgr_attach();
+    }
+  }
+
+  if ( new_ranks ) {
+#warning Must rerank PMGR!
+  }
+
+  // see what else to adjust...
+  if ( _want_sources_enabled ) {
+    enableDefaultSources();
   }
 
   MIL << *this;
@@ -877,6 +909,7 @@ void InstSrcManager::disableAllSources()
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
     activateSource( *it, false );
   }
+  _want_sources_enabled = false;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -891,6 +924,7 @@ void InstSrcManager::enableDefaultSources()
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
     activateSource( *it, (*it)->descr()->default_activate() );
   }
+  _want_sources_enabled = true;
 }
 
 ///////////////////////////////////////////////////////////////////
