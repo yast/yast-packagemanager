@@ -2,4 +2,6 @@ List of bases for systems
 -------------------------
 
 Processor	Kernel		User		Base
-ia64		64bit		64bit		uname -a
+ia64		64bit		64bit		uname -a (ia64)
+s390		32bit		32bit		uname -a (s390)
+s390x		64bit		64bit		uname -a (s390x)
