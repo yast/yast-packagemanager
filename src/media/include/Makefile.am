@@ -1,7 +1,9 @@
 #
 # Makefile.am for packagemanager/src/media/instance/include
 
-include_DATA = \
+mediaincludedir = $(includedir)/y2pm/media
+
+mediainclude_HEADERS = \
 	MediaAccess.h MediaAccessPtr.h	\
 	MediaInfo.h MediaInfoPtr.h	\
 	MediaHandler.h			\
