@@ -250,6 +250,22 @@ PMULPackageDataProvider::du ( const PMPackage & pkg_r ) const
     return value;
 }
 
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::isRemote
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION : call InstSrc to check if it is a remote source
+//
+bool PMULPackageDataProvider::isRemote (const PMPackage & pkg_r) const
+{
+    if (_source) return _source->isRemote();
+    return false;
+}
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //

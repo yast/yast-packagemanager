@@ -362,6 +362,12 @@ class InstSrc: virtual public Rep {
 	 */
 	PMError provideFile (int medianr, const Pathname& path, Pathname& file_r) const;
 
+	/**
+	 * is the media for this source is remote
+	 * and package provide takes some time
+	 */
+	bool isRemote (void);
+
   public:
 
     std::ostream & dumpOn( std::ostream & str ) const;

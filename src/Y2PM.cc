@@ -342,15 +342,18 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    continue;
 	}
 
+	bool is_remote = (*it)->isRemote();
 	string fullname = (*it)->nameEd();
 
-	if (_callbacks._provide_start_func)
+	if (is_remote
+	    && (_callbacks._provide_start_func != 0))
 	    (*_callbacks._provide_start_func)(fullname, (*it)->archivesize(), true, _callbacks._provide_start_data);
 
 	Pathname path;
 	PMError err = (*it)->providePkgToInstall(path);
 
-	if (_callbacks._provide_done_func)
+	if (is_remote
+	    && (_callbacks._provide_done_func != 0))
 	    (*_callbacks._provide_done_func)(err, "", _callbacks._provide_done_data);
 
 	if (err)
