@@ -105,7 +105,7 @@ class YOUPackageTagSet : public CommonPkdParser::TagSet
             RPMGROUP,
             COPYRIGHT,
             AUTHORNAME,
-            VERSION,
+            PKGVERSION,
             OBSOLETES,
             REQUIRES,
             PROVIDES,
@@ -126,7 +126,7 @@ class YOUPackageTagSet : public CommonPkdParser::TagSet
             createTag("RpmGroup",RPMGROUP);
             createTag("Copyright",COPYRIGHT);
             createTag("AuthorName",AUTHORNAME);
-            createTag("Version",VERSION);
+            createTag("Version",PKGVERSION);
             createTag("Obsoletes",OBSOLETES);
             createTag("Requires",REQUIRES);
             createTag("Provides",PROVIDES);

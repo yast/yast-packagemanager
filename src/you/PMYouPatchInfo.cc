@@ -84,7 +84,7 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   }
   PkgName name( value.substr( 0, pos ) );
 
-  value = tagValue( YOUPackageTagSet::VERSION );
+  value = tagValue( YOUPackageTagSet::PKGVERSION );
   string version;
   string release;
 
