@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 15 12:41:05 CET 2005 - ma@suse.de
+
+- Take care that the original error leading to a media change
+  request is reported and not overwritten by subsequent actions.
+  (#72005)
+
+-------------------------------------------------------------------
 Mon Mar 14 13:40:53 CET 2005 - mir@suse.de
 
 - create_you_patch script:
