@@ -25,22 +25,46 @@
 
 using namespace std;
 
-/******************************************************************
-**
-**
-**	FUNCTION NAME : PkgRelList2StringList
-**	FUNCTION TYPE : std::list<std::string>
-**
-**	DESCRIPTION : converts PkgRelList to list<string>
-*/
+///////////////////////////////////////////////////////////////////
+// static public
+//	METHOD NAME : InstSrcDataUL::Tag2PkgRelList
+//	METHOD TYPE : int
+//
+//	DESCRIPTION : convert list of strings (denoting dependencies)
+//		      to PMSolvable::PkgRelList_type&
+//		      return number of dependencies found
 std::list<std::string>
 PMSolvable::PkgRelList2StringList ( const PkgRelList_type & rellist_r )
 {
-  std::list<std::string> ret;
-  for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
-    ret.push_back( it->asString() );
-  }
-  return ret;
+    std::list<std::string> ret;
+    for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it )
+    {
+	ret.push_back( it->asString() );
+    }
+    return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+// static public
+//	METHOD NAME : PMSolvable::StringList2PkgRelList
+//	METHOD TYPE : PkgRelList_type
+//
+//	DESCRIPTION : convert list of strings (denoting dependencies)
+//		      to PkgRelList_type
+//
+PMSolvable::PkgRelList_type
+PMSolvable::StringList2PkgRelList (const list<string>& relationlist)
+{
+    PkgRelList_type pkgrellist;
+
+    if (!relationlist.empty())
+    {
+	for (list<string>::const_iterator it = relationlist.begin(); it != relationlist.end(); ++it)
+	{
+	    pkgrellist.push_back (PkgRelation::fromString (*it));
+	}
+    }
+    return pkgrellist;
 }
 
 ///////////////////////////////////////////////////////////////////
