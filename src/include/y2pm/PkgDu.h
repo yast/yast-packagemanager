@@ -40,6 +40,46 @@ class PkgDuMaster {
   PkgDuMaster & operator=( const PkgDuMaster & ); // no assign
   PkgDuMaster            ( const PkgDuMaster & ); // no copy
 
+  public:
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    //	CLASS NAME : PkgDuMaster::MountPoint
+    //
+    class MountPoint {
+      public:
+	// vital data (must not be modified)
+	const std::string _mountpoint;
+	const FSize       _blocksize;
+      public:
+	// additional MountPoint data
+	mutable FSize     _total;
+	mutable FSize     _used;
+      public:
+	// statistics counted by add/sub
+	mutable FSize     _pkgusage;
+      public:
+	MountPoint( const std::string & mountpoint_r,
+		    const FSize & blocksize_r = 1024,
+		    const FSize & total_r = 0,
+		    const FSize & used_r  = 0 )
+	  : _mountpoint( mountpoint_r )
+	  , _blocksize( blocksize_r )
+	  , _total( total_r )
+	  , _used( used_r )
+	  , _pkgusage( 0 )
+	{}
+	~MountPoint() {}
+      public:
+	bool assignData( const MountPoint & rhs ) const;
+      public:
+	friend std::ostream & operator<<( std::ostream & str, const MountPoint & obj );
+      public:
+	bool operator==( const MountPoint & rhs ) const { return( _mountpoint == rhs._mountpoint ); }
+	bool operator<( const MountPoint & rhs )  const { return( _mountpoint < rhs._mountpoint ); }
+    };
+    ///////////////////////////////////////////////////////////////////
+
   private:
 
     static unsigned _counter;
@@ -47,27 +87,6 @@ class PkgDuMaster {
     unsigned _count;
 
     void newcount() { _count = ++_counter; }
-
-  public:
-
-    class MountPoint {
-      public:
-	// changes afford newcount()
-	const std::string _mountpoint;
-	const FSize       _blocksize;
-      public:
-	// statistics counted by add/sub
-	mutable FSize     _pkgusage;
-      public:
-	// additional MountPoint data if desired
-      public:
-	MountPoint( const std::string & mountpoint_r, const FSize & blocksize_r = 1024 )
-	  : _mountpoint( mountpoint_r )
-	  , _blocksize( blocksize_r )
-	  , _pkgusage( 0 )
-	{}
-	~MountPoint() {}
-    };
 
   private:
 
@@ -98,6 +117,7 @@ class PkgDuMaster {
   public:
 
     friend std::ostream & operator<<( std::ostream & str, const PkgDuMaster & obj );
+    friend std::ostream & operator<<( std::ostream & str, const std::set<MountPoint> & obj );
 };
 
 ///////////////////////////////////////////////////////////////////

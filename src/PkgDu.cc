@@ -30,6 +30,51 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
+//	CLASS NAME : PkgDuMaster::MountPoint
+//
+///////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgDuMaster::MountPoint::assignData
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PkgDuMaster::MountPoint::assignData( const MountPoint & rhs ) const
+{
+  if (    _mountpoint != rhs._mountpoint
+       || _blocksize  != rhs._blocksize )
+    return false;
+
+  _total    = rhs._total;
+  _used     = rhs._used;
+  _pkgusage = rhs._pkgusage;
+  return true;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream &
+**
+**	DESCRIPTION :
+*/
+ostream & operator<<( ostream & str, const PkgDuMaster::MountPoint & obj )
+{
+  str
+    << " T:" << obj._total   .form( FSize::K, 10 )
+    << " U:" << obj._used    .form( FSize::K, 10 )
+    << " P:" << obj._pkgusage.form( FSize::K, 10 )
+    << " " << obj._mountpoint;
+  return str;
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //	CLASS NAME : PkgDuMaster
 //
 ///////////////////////////////////////////////////////////////////
@@ -113,15 +158,6 @@ unsigned PkgDuMaster::resetStats()
   return _mountpoints.size();
 }
 
-std::ostream & operator<<( std::ostream & str, const std::set<PkgDuMaster::MountPoint> & obj ) {
-  for ( set<PkgDuMaster::MountPoint>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
-    str << stringutil::form( "%-35s (%4lld): %10lld",
-			      it->_mountpoint.c_str(),
-			      (long long)it->_blocksize,
-			      (long long)it->_pkgusage ) << endl;
-  }
-  return str;
-}
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -130,23 +166,62 @@ std::ostream & operator<<( std::ostream & str, const std::set<PkgDuMaster::Mount
 //
 //	DESCRIPTION :
 //
-void PkgDuMaster::setMountPoints( const std::set<MountPoint> & mountpoints_r )
+void PkgDuMaster::setMountPoints( const set<MountPoint> & mountpoints_r )
 {
-  SEC << "NEW:" << endl << mountpoints_r;
-  SEC << "OLD:" << endl << _mountpoints;
-  //SEC << "CMP:" << (mountpoints_r == _mountpoints) << endl;
+  SEC << "OLD:" << *this;
+  SEC << "SET:" << endl << mountpoints_r;
+
+  if ( _mountpoints.size() == mountpoints_r.size() ) {
+    // Common case is update of nonvital data (total, used, etc.)
+    // So we start, and if different vital data (mountpoint/blocksize)
+    // occur we abort and assign the whole set.
+    for ( set<MountPoint>::iterator lit = _mountpoints.begin(), rit = mountpoints_r.begin();
+	  lit != _mountpoints.end(); ++lit, ++rit ) {
+      if ( ! lit->assignData( *rit ) ) {
+	// different vital data
+	SEC << "new set (hard assign)" << endl;
+	_mountpoints = mountpoints_r;
+	newcount();
+	break; //return;
+      }
+    }
+  } else {
+    SEC << "new set" << endl;
+    _mountpoints = mountpoints_r;
+    newcount();
+  }
+  SEC << "NEW:" << *this;
 }
 
 /******************************************************************
 **
 **
 **	FUNCTION NAME : operator<<
-**	FUNCTION TYPE : std::ostream &
+**	FUNCTION TYPE : ostream &
 **
 **	DESCRIPTION :
 */
-std::ostream & operator<<( std::ostream & str, const PkgDuMaster & obj )
+ostream & operator<<( ostream & str, const set<PkgDuMaster::MountPoint> & obj )
 {
+  for ( set<PkgDuMaster::MountPoint>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+    str << *it << endl;
+  }
+  return str;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream &
+**
+**	DESCRIPTION :
+*/
+ostream & operator<<( ostream & str, const PkgDuMaster & obj )
+{
+  str << "--[" << obj._count <<  "]----------------------------" << endl;
+  str << obj._mountpoints;
+  str << "---------------------------------" << endl;
   return str;
 }
 

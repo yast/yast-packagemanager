@@ -24,6 +24,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PMPackage.h>
+#include <y2pm/PkgDu.h>
 
 using namespace std;
 
@@ -101,6 +102,7 @@ PMPackage::PMPackage( const PkgName &    name_r,
 		      const PkgArch &    arch_r,
 		      PMPackageDataProviderPtr dataProvider_r )
     : PMObject( name_r, edition_r, arch_r )
+    , _pkgdu( * new PkgDu )
     , _dataProvider( dataProvider_r )
 {
   if ( !_dataProvider ) {
@@ -118,6 +120,33 @@ PMPackage::PMPackage( const PkgName &    name_r,
 //
 PMPackage::~PMPackage()
 {
+  delete &_pkgdu;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackage::du_add
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMPackage::du_add( PkgDuMaster & master_r ) const
+{
+  return _pkgdu.add( *this, master_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackage::du_sub
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMPackage::du_sub( PkgDuMaster & master_r ) const
+{
+  return _pkgdu.sub( *this, master_r );
 }
 
 ///////////////////////////////////////////////////////////////////
