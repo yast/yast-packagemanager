@@ -255,6 +255,17 @@ class PMYouSettings : public CountedRep
     */
     bool dryRun() const;
 
+    /**
+      Set if all packages should be retrieved, not only the ones which actually
+      will be installed.
+    */
+    void setGetAll( bool );
+    /**
+      Return true if all packages should be retrieved, not only the ones which
+      actually will be installed, otherwise return false.
+    */
+    bool getAll() const;
+
   protected:
     void init();
 
@@ -273,6 +284,7 @@ class PMYouSettings : public CountedRep
     bool _reloadPatches;
     bool _noExternalPackages;
     bool _dryRun;
+    bool _getAll;
 };
 
 #endif

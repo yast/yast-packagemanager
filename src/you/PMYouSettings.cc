@@ -116,6 +116,7 @@ void PMYouSettings::init( const string &product, const string &version,
   _reloadPatches = true;
   _noExternalPackages = false;
   _dryRun = false;
+  _getAll = false;
 
   PMYouProductPtr p = new PMYouProduct( product, version, baseArch,
                                         *this );
@@ -363,4 +364,14 @@ void PMYouSettings::setDryRun( bool dry )
 bool PMYouSettings::dryRun() const
 {
   return _dryRun;
+}
+
+void PMYouSettings::setGetAll( bool dry )
+{
+  _getAll = dry;
+}
+
+bool PMYouSettings::getAll() const
+{
+  return _getAll;
 }
