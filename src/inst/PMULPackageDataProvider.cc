@@ -390,9 +390,11 @@ PMError PMULPackageDataProvider::provideSrcPkgToInstall( const PMPackage & pkg_r
     int medianr = atoi (locsplit[0].c_str());
     Pathname rpmname (locsplit[1]);
     Pathname dir;
-    if (locsplit.size() > 3)
-	dir = Pathname (locsplit[2]);
-
+    if (locsplit.size() > 2)				// if the source location as <medianr> <srpmname> <directory>
+    {
+	dir = Pathname (locsplit[2]);			// get the directory part
+    }
+	
     if (!_source)
     {
 	ERR << "No source for '" << dir << "/" << rpmname << "'" << endl;
