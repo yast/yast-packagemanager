@@ -28,6 +28,7 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
 #include <y2util/stringutil.h>
+#include <y2util/TaggedFile.h>
 
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
@@ -54,6 +55,63 @@ using namespace std;
 //	CLASS NAME : constInstSrcDataULPtr
 ///////////////////////////////////////////////////////////////////
 IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
+
+
+
+namespace PkgTags {
+    enum Tags {
+	PACKAGE,	// name version release arch
+	REQUIRES,	// list of requires tags
+	PREREQUIRES,	// list of pre-requires tags
+	PROVIDES,	// list of provides tags
+	CONFLICTS,	// list of conflicts tags
+	OBSOLETES,	// list of obsoletes tags
+	RECOMMENDS,	// list of recommends tags
+	SUGGESTS,	// list of suggests tags
+	LOCATION,	// file location
+	SIZE,		// packed and unpacked size
+	BUILDTIME,	// buildtime
+	SOURCERPM,	// source package
+	GROUP,		// rpm group
+	LICENSE,	// license
+	AUTHORS,	// list of authors
+	SHAREWITH,	// package to share data with
+	KEYWORDS,	// list of keywords
+	NUM_TAGS
+    };
+};
+
+namespace PkgLangTags {
+    enum Tags {
+	PACKAGE,	// name version release arch
+	SUMMARY,	// short summary (label)
+	DESCRIPTION,	// long description
+	INSNOTIFY,	// install notification
+	DELNOTIFY,	// delete notification
+	NUM_TAGS
+    };
+};
+
+namespace SelTags {
+    enum Tags {
+	SELECTION,	// name version release arch
+	SUMMARY,	// short summary (label)
+	CATEGORY,
+	VISIBLE,
+	ORDER,		// ordering data
+	RECOMMENDS,
+	SUGGESTS,
+	REQUIRES,
+	PROVIDES,
+	CONFLICTS,
+	OBSOLETES,
+	SIZE,
+	INSPACKS,
+	DELPACKS,
+	NUM_TAGS
+    };
+};
+
 
 ///////////////////////////////////////////////////////////////////
 // private
@@ -98,14 +156,41 @@ InstSrcDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const
     for (std::list<std::string>::const_iterator pkgIt = packages.begin();
 	 pkgIt != packages.end(); ++pkgIt)
     {
-	std::list<PMPackagePtr> matches = InstData::findPackages (all_packages, *pkgIt);
+	string name = *pkgIt;
+	std::list<PMPackagePtr> matches;
+
+	// check for alternative package
+	string::size_type spacepos = name.find_first_of (" ");
+	if (spacepos != string::npos)
+	{
+	    string wantedname = name.substr (0, spacepos);
+	    matches = InstData::findPackages (all_packages, wantedname);
+	    if (matches.size() == 0)
+	    {
+		string::size_type startpos = name.find_first_of ("(", spacepos);
+		if (startpos != string::npos)
+		{
+		    string::size_type endpos = name.find_first_of (")", startpos);
+		    if (endpos != string::npos)
+		    {
+			string alternative = name.substr (startpos+1, endpos-startpos-1);
+			matches = InstData::findPackages (all_packages, alternative);
+		    }
+		}
+	    }
+	}
+	else
+	{
+#warning lookup in arch order
+	    matches = InstData::findPackages (all_packages, name);
+	}
+
 	// silently ignore packages not found
 	if (matches.size() > 0)
 	{
 	    package_ptrs.push_back (matches.front());
 	}
     }
-
     return package_ptrs;
 }
 
@@ -125,15 +210,16 @@ InstSrcDataUL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const st
 {
     int count = 0;
     pkgrellist.clear();
+
     if (!relationlist.empty())
     {
-    for (list<string>::const_iterator relation_str_iter = relationlist.begin();
-	 relation_str_iter != relationlist.end();
-	 ++relation_str_iter)
-    {
-	pkgrellist.push_back (PkgRelation::fromString (*relation_str_iter));
-	count++;
-    }
+	for (list<string>::const_iterator relation_str_iter = relationlist.begin();
+	     relation_str_iter != relationlist.end();
+	     ++relation_str_iter)
+	{
+	    pkgrellist.push_back (PkgRelation::fromString (*relation_str_iter));
+	    count++;
+	}
     }
     return count;
 }
@@ -151,12 +237,17 @@ InstSrcDataUL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const st
 //		 * packagelist is used for finding shared packages
 
 PMPackagePtr
-InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
-				CommonPkdParser::TagSet * tagset,
+InstSrcDataUL::PkgTag2Package ( TagCacheRetrievalPtr pkgcache,
+				TaggedFile::TagSet& tagset,
 				const std::list<PMPackagePtr>& packages )
 {
     // PACKAGE
-    string single ((tagset->getTagByIndex(InstSrcDataULPkgTags::PACKAGE))->Data());
+    string single ((tagset.getTagByIndex (PkgTags::PACKAGE))->Data());
+    if (single.empty ())
+    {
+	ERR << "No '=Pkg' value found" << endl;
+	return PMPackagePtr();
+    }
 
     std::vector<std::string> splitted;
 
@@ -173,29 +264,48 @@ InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
     PMPackagePtr package( new PMPackage (name, edition, arch, dataprovider));
     dataprovider->setPackage (package);
 
-    CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
+    TaggedFile::Tag *tagptr;	// for SET_MULTI()
 
 #define SET_VALUE(tagname,value) \
     do { dataprovider->_attr_##tagname = value; } while (0)
-#define SET_POS(tagname,start,stop) \
-    do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcDataULPkgTags::tagname)
+    tagset.getTagByIndex (PkgTags::tagname)
 #define SET_CACHE(tagname) \
-    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
+    do { tagptr = GET_TAG (tagname); dataprovider->_attr_##tagname = tagptr->Pos(); } while (0)
+
+    // pass PMSolvable data directly to instance
 
     PMSolvable::PkgRelList_type pkgrellist;
-
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(REQUIRES))->MultiData()))
+    std::list<std::string> pkglist;
+    if (pkgcache->retrieveData (GET_TAG(REQUIRES)->Pos(), pkglist)
+	&& Tag2PkgRelList (pkgrellist, pkglist))
+    {
 	package->setRequires (pkgrellist);
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(PREREQUIRES))->MultiData()))
+    }
+    pkglist.clear();
+    if (pkgcache->retrieveData (GET_TAG(PREREQUIRES)->Pos(), pkglist)
+	&& Tag2PkgRelList (pkgrellist, pkglist))
+    {
 	package->addPreRequires (pkgrellist); // pkgrellist is modified after that
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(PROVIDES))->MultiData()))
+    }
+    pkglist.clear();
+    if (pkgcache->retrieveData (GET_TAG(PROVIDES)->Pos(), pkglist)
+	&& Tag2PkgRelList (pkgrellist, pkglist))
+    {
 	package->setProvides (pkgrellist);
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(CONFLICTS))->MultiData()))
+    }
+    pkglist.clear();
+    if (pkgcache->retrieveData (GET_TAG(CONFLICTS)->Pos(), pkglist)
+	&& Tag2PkgRelList (pkgrellist, pkglist))
+    {
 	package->setConflicts (pkgrellist);
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(OBSOLETES))->MultiData()))
+    }
+    pkglist.clear();
+    if (pkgcache->retrieveData (GET_TAG(OBSOLETES)->Pos(), pkglist)
+	&& Tag2PkgRelList (pkgrellist, pkglist))
+    {
 	package->setObsoletes (pkgrellist);
+    }
 
     SET_CACHE (RECOMMENDS);
     SET_CACHE (SUGGESTS);
@@ -214,7 +324,7 @@ InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
     while (*locationname && isblank (*locationname)) locationname++;
     if (*locationname)
     {
-	SET_POS (LOCATION, tagptr->posDataStart() + (std::streampos)(locationname-location), tagptr->posDataEnd());
+	dataprovider->_attr_LOCATION = TagRetrievalPos (tagptr->posDataStart() + (std::streampos)(locationname-location), tagptr->posDataEnd());
     }
     else
     {
@@ -254,13 +364,14 @@ InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
     // SHAREWITH, package to share data with
     // FIXME: does not support forwared shared declarations
 
-    string sharewith ((tagset->getTagByIndex(InstSrcDataULPkgTags::SHAREWITH))->Data());
+    string sharewith ((tagset.getTagByIndex (PkgTags::SHAREWITH))->Data());
     if (!sharewith.empty())
     {
 //MIL << "Share " << package->name() << "-" << package->version() << "-" << package->release() << "." << package->arch() << endl;
 	stringutil::split (sharewith, splitted, " ", false);
 //MIL << "With " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
-	const std::list<PMPackagePtr> candidates = InstData::findPackages (packages, splitted[0], splitted[1], splitted[2], splitted[3]);
+	// findPackages (name, arch, version, release)
+	const std::list<PMPackagePtr> candidates = InstData::findPackages (packages, splitted[0], splitted[3], splitted[1], splitted[2]);
 
 	if (candidates.size() != 1)
 	{
@@ -287,47 +398,50 @@ InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
 //		 * Single line values are passed by value
 //		 * Multi line values are passed by file position (on-demand read)
 
-void
-InstSrcDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, CommonPkdParser::TagSet * tagset)
+PMError
+InstSrcDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, TaggedFile::TagSet& tagset)
 {
     // PACKAGE
-    string single ((tagset->getTagByIndex(InstSrcDataULLangTags::PACKAGE))->Data());
+    string single ((tagset.getTagByIndex (PkgLangTags::PACKAGE))->Data());
+    if (single.empty ())
+    {
+	ERR << "No '=Pkg' value found" << endl;
+	return InstSrcError::E_data_bad_packages_lang;
+    }
 
     std::vector<std::string> splitted;
     stringutil::split (single, splitted, " ", false);
 //MIL << "Lang for " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
-    const std::list<PMPackagePtr> candidates = InstData::findPackages (packages, splitted[0], splitted[1], splitted[2], splitted[3]);
+    // findPackages (name, arch, version, release)
+    const std::list<PMPackagePtr> candidates = InstData::findPackages (packages, splitted[0], splitted[3], splitted[1], splitted[2]);
 
     if (candidates.size() < 1)
     {
 	ERR << "No package " << single << endl;
-	return;
+	return InstSrcError::E_data_bad_packages_lang;
     }
 
     PMPackagePtr package = candidates.front();
     PMULPackageDataProviderPtr dataprovider = package->dataProvider();
     dataprovider->setLangCache (langcache);
 
-    CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
+    TaggedFile::Tag *tagptr;		// for SET_MULTI()
 
-#define SET_POS(tagname,start,stop) \
-    do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcDataULLangTags::tagname)
+    tagset.getTagByIndex (PkgLangTags::tagname)
 #define SET_CACHE(tagname) \
-    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
+    do { tagptr = GET_TAG (tagname); dataprovider->_attr_##tagname = tagptr->Pos(); } while (0)
 
     SET_CACHE (SUMMARY);
     SET_CACHE (DESCRIPTION);
     SET_CACHE (INSNOTIFY);
     SET_CACHE (DELNOTIFY);
 
-#undef SET_POS
 #undef GET_TAG
 #undef SET_CACHE
 
-    return;
+    return PMError::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -339,10 +453,17 @@ InstSrcDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<
 //	DESCRIPTION : pass selection data from tagset to PMSelection
 
 PMSelectionPtr
-InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset)
+InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, TaggedFile::TagSet& tagset)
 {
-    // SELECTION
-    string single ((tagset->getTagByIndex(InstSrcDataULSelTags::SELECTION))->Data());
+#define GET_TAG(tagname) \
+    tagset.getTagByIndex(SelTags::tagname)
+
+    string single (GET_TAG(SELECTION)->Data());
+    if (single.empty ())
+    {
+	ERR << "No '=Sel' value found" << endl;
+	return PMSelectionPtr();
+    }
 
     std::vector<std::string> splitted;
 
@@ -360,37 +481,49 @@ InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonP
 
     PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
     dataprovider->setSelection (selection);
-
-    CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
-
+    TagCacheRetrievalPtr selcache = dataprovider->getCacheRetrieval();
+    if (!selcache)
+    {
+	ERR << "No selcache!" << endl;
+	return selection;
+    }
+    TaggedFile::Tag *tagptr;	// for SET_CACHE
 #define SET_VALUE(tagname,value) \
     do { dataprovider->_attr_##tagname = value; } while (0)
-#define SET_LVALUE(tagname,value,lang) \
-    do { dataprovider->_attr_##tagname[lang] = value; } while (0)
-#define SET_POS(tagname,start,stop) \
-    do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
-#define SET_LPOS(tagname,start,stop,lang) \
-    do { dataprovider->_attr_##tagname[lang].set (start, stop); } while (0)
-#define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcDataULSelTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); \
-	 SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
-#define SET_LCACHE(tagname,lang) \
+	 dataprovider->_attr_##tagname = tagptr->Pos(); } while (0)
+#define SET_LCACHE(tagname) \
     do { tagptr = GET_TAG (tagname); \
-	 SET_LPOS (tagname, tagptr->posDataStart(), tagptr->posDataEnd(), lang); } while (0)
+	 dataprovider->_attr_##tagname = tagptr->PosMap(); } while (0)
 
     PMSolvable::PkgRelList_type pkgrellist;
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(REQUIRES))->MultiData()))
+    std::list<std::string> sellist;
+    if (selcache->retrieveData (GET_TAG(REQUIRES)->Pos(), sellist)
+	&& Tag2PkgRelList (pkgrellist, sellist))
+    {
 	selection->setRequires (pkgrellist);
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(PROVIDES))->MultiData()))
+    }
+    sellist.clear();
+    if (selcache->retrieveData (GET_TAG(PROVIDES)->Pos(), sellist)
+	&& Tag2PkgRelList (pkgrellist, sellist))
+    {
 	selection->setProvides (pkgrellist);
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(CONFLICTS))->MultiData()))
+    }
+    sellist.clear();
+    if (selcache->retrieveData (GET_TAG(CONFLICTS)->Pos(), sellist)
+	&& Tag2PkgRelList (pkgrellist, sellist))
+    {
 	selection->setConflicts (pkgrellist);
-    if (Tag2PkgRelList (pkgrellist, (GET_TAG(OBSOLETES))->MultiData()))
+    }
+    sellist.clear();
+    if (selcache->retrieveData (GET_TAG(OBSOLETES)->Pos(), sellist)
+	&& Tag2PkgRelList (pkgrellist, sellist))
+    {
 	selection->setObsoletes (pkgrellist);
+    }
 
-    SET_LCACHE (SUMMARY, "");
+    SET_LCACHE (SUMMARY);
     std::string category = GET_TAG(CATEGORY)->Data();
     SET_VALUE (CATEGORY, category);
     SET_VALUE (ISBASE, (strncmp (category.c_str(), "base", 4) == 0));
@@ -408,17 +541,10 @@ InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonP
 	}
     }
 
-    SET_LCACHE (INSPACKS, "");
-#warning Fix language specific inspacks
-    tagptr = GET_TAG (INSLANGPACKS);
-    SET_LPOS (INSPACKS, tagptr->posDataStart(), tagptr->posDataEnd(), Y2PM::getPreferredLocale());
-    SET_LCACHE (DELPACKS, "");
-    SET_VALUE (ORDER, (GET_TAG(ORDER))->Data());
+    SET_LCACHE (INSPACKS);
+    SET_LCACHE (DELPACKS);
 
 #undef SET_VALUE
-#undef SET_LVALUE
-#undef SET_POS
-#undef SET_LPOS
 #undef GET_TAG
 #undef SET_CACHE
 #undef SET_LCACHE
@@ -464,58 +590,86 @@ InstSrcDataUL::parsePackages (std::list<PMPackagePtr>& packages,
 	return InstSrcError::E_open_file;
     }
 
-    CommonPkdParser::TagSet* tagset = new InstSrcDataULPkgTags ();
-    bool parse = true;
-    TagParser & parser = pkgcache->getParser();
+    TaggedParser::TagType type;
+    TaggedParser parser;
+
+    // find initial version tag
+
+    // find any initial tag
+    type = parser.lookupTag (package_stream);
+
+    if ((type != TaggedParser::SINGLE)
+	|| (parser.currentTag() != "Ver")
+	|| (!parser.currentLocale().empty()))
+    {
+	ERR << "Initial '=Ver:' tag missing" << endl;
+	return InstSrcError::E_data_bad_packages;
+    }
+
+    string version = parser.data();
+    if (version != "2.0")
+    {
+	ERR << "Version '" << version << "' != 2.0" << endl;
+	return InstSrcError::E_data_bad_packages;
+    }
+
+    TaggedFile::TagSet tagset;
+
+    tagset.addTag ("Pkg", PkgTags::PACKAGE,	TaggedFile::SINGLE, TaggedFile::START);
+    tagset.addTag ("Req", PkgTags::REQUIRES,	TaggedFile::MULTI);
+    tagset.addTag ("Prq", PkgTags::PREREQUIRES, TaggedFile::MULTI);
+    tagset.addTag ("Prv", PkgTags::PROVIDES,	TaggedFile::MULTI);
+    tagset.addTag ("Con", PkgTags::CONFLICTS,	TaggedFile::MULTI);
+    tagset.addTag ("Obs", PkgTags::OBSOLETES,	TaggedFile::MULTI);
+    tagset.addTag ("Rec", PkgTags::RECOMMENDS,	TaggedFile::MULTI);
+    tagset.addTag ("Sug", PkgTags::SUGGESTS,	TaggedFile::MULTI);
+
+    tagset.addTag ("Loc", PkgTags::LOCATION,	TaggedFile::SINGLE);
+    tagset.addTag ("Siz", PkgTags::SIZE,	TaggedFile::SINGLE);
+    tagset.addTag ("Tim", PkgTags::BUILDTIME,	TaggedFile::SINGLE);
+    tagset.addTag ("Src", PkgTags::SOURCERPM,	TaggedFile::SINGLEPOS);
+    tagset.addTag ("Grp", PkgTags::GROUP,	TaggedFile::SINGLE);
+    tagset.addTag ("Lic", PkgTags::LICENSE,	TaggedFile::SINGLEPOS);
+    tagset.addTag ("Aut", PkgTags::AUTHORS,	TaggedFile::MULTI);
+    tagset.addTag ("Shr", PkgTags::SHAREWITH,	TaggedFile::SINGLE);
+    tagset.addTag ("Key", PkgTags::KEYWORDS,	TaggedFile::MULTI);
 
     MIL << "start packages parsing" << endl;
 
-    while( parse && parser.lookupTag (package_stream))
+    // now repeatedly parse complete tag sets
+
+    for (;;)
     {
-	bool repeatassign = false;
+	// assign set
+	TaggedFile::assignstatus status = tagset.assignSet (parser, package_stream);
 
-	tagstr = parser.startTag();
-
-	do
+	if ((status == TaggedFile::REJECTED_NOMATCH)
+	    && (package_stream.eof()))
 	{
-	    switch( tagset->assign (tagstr.c_str(), parser, package_stream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    err = PMError::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    packages.push_back (PkgTag2Package( pkgcache, tagset, packages ));
-		    count++;
-		    tagset->clear();
-		    repeatassign = true;
-		    err = PMError::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
-    }
+	    break;
+	}
 
-    if (parse)
-    {
-	// insert final package
+	if (status != TaggedFile::ACCEPTED_FULL)
+	{
+	    ERR << "Error in packages file at " << parser.lineNumber() << endl;
+	    ERR << "Last tag read: " << parser.currentTag();
+	    if (!parser.currentLocale().empty())
+		ERR << "." << parser.currentLocale();
+	    ERR << endl;
+	    return InstSrcError::E_data_bad_packages;
+	}
 
-	packages.push_back (PkgTag2Package( pkgcache, tagset, packages ));
+	PMPackagePtr package = PkgTag2Package (pkgcache, tagset, packages);
+	if (package == NULL)
+	{
+	    ERR << "Error in packages file at " << parser.lineNumber() << endl;
+	    return InstSrcError::E_data_bad_packages;
+	}
+	packages.push_back (package);
 	count++;
     }
 
-    delete tagset;
-
-    if( !parse )
-	ERR << "*** parsing packages was aborted ***" << endl;
-    else
-	MIL << "*** parsed " << count << " packages ***" << std::endl;
+    MIL << "*** parsed " << count << " packages ***" << std::endl;
 
     // implict stream close
 
@@ -554,7 +708,6 @@ InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
 	return err;
     }
 
-
     MIL << "fopen(" << fullpath << ")" << endl;
     TagCacheRetrievalPtr langcache ( new TagCacheRetrieval( filename ));
 
@@ -569,57 +722,69 @@ InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
 	return InstSrcError::E_open_file;
     }
 
-    CommonPkdParser::TagSet* tagset = new InstSrcDataULLangTags ();
-    bool parse = true;
-    TagParser & parser = langcache->getParser();
+    TaggedParser::TagType type;
+    TaggedParser parser;
+
+    // find initial version tag
+
+    // find any initial tag
+    type = parser.lookupTag (language_stream);
+
+    if ((type != TaggedParser::SINGLE)
+	|| (parser.currentTag() != "Ver")
+	|| (!parser.currentLocale().empty()))
+    {
+	ERR << "Initial '=Ver:' tag missing" << endl;
+	return InstSrcError::E_data_bad_packages_lang;
+    }
+
+    string version = parser.data();
+    if (version != "2.0")
+    {
+	ERR << "Version '" << version << "' != 2.0" << endl;
+	return InstSrcError::E_data_bad_packages_lang;
+    }
+
+    TaggedFile::TagSet tagset;
+    tagset.addTag ("Pkg", PkgLangTags::PACKAGE,	    TaggedFile::SINGLE, TaggedFile::START);
+    tagset.addTag ("Sum", PkgLangTags::SUMMARY,	    TaggedFile::SINGLE, TaggedFile::ALLOWLOCALE);
+    tagset.addTag ("Des", PkgLangTags::DESCRIPTION, TaggedFile::MULTI,  TaggedFile::ALLOWLOCALE);
+    tagset.addTag ("Ins", PkgLangTags::INSNOTIFY,   TaggedFile::MULTI,  TaggedFile::ALLOWLOCALE);
+    tagset.addTag ("Del", PkgLangTags::DELNOTIFY,   TaggedFile::MULTI,  TaggedFile::ALLOWLOCALE);
 
     MIL << "start packages.<lang> parsing" << endl;
     count = 0;
 
-    while( parse && parser.lookupTag (language_stream))
+    // now repeatedly parse complete tag sets
+
+    for (;;)
     {
-	bool repeatassign = false;
+	// assign set
 
-	tagstr = parser.startTag();
+	TaggedFile::assignstatus status = tagset.assignSet (parser, language_stream);
 
-	do
+	if ((status == TaggedFile::REJECTED_NOMATCH)
+	    && (language_stream.eof()))
 	{
-	    switch( tagset->assign (tagstr.c_str(), parser, language_stream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    LangTag2Package (langcache, packages, tagset);
-		    count++;
-		    tagset->clear();
-		    repeatassign = true;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
-    }
+	    break;
+	}
 
-    if (parse)
-    {
-	LangTag2Package (langcache, packages, tagset);
+	if (status != TaggedFile::ACCEPTED_FULL)
+	{
+	    ERR << "Error in " << filename << ":" << parser.lineNumber() << endl;
+	    ERR << "Last tag read: " << parser.currentTag();
+	    if (!parser.currentLocale().empty())
+		ERR << "." << parser.currentLocale();
+	    ERR << endl;
+	    return InstSrcError::E_data_bad_packages_lang;
+	}
+	PMError err = LangTag2Package (langcache, packages, tagset);
+	if (err != PMError::E_ok)
+	    return err;
 	count++;
     }
 
-    delete tagset;
-
-    if( !parse )
-	ERR << "*** parsing packages.<lang> was aborted ***" << std::endl;
-    else
-	MIL << "*** parsed " << count << " packages.<lang> entries ***" << std::endl;
+    MIL << "*** parsed " << count << " packages.<lang> entries ***" << std::endl;
 
     // implicit stream close
 
@@ -699,18 +864,32 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
     }
     MIL << "*** Expecting " << selection_names.size() << " selections ***" << endl;
 
-    int count = 0;
     std::ifstream selection_stream;
 
-    std::string tagstr;
-    CommonPkdParser::TagSet* tagset = new InstSrcDataULSelTags ();
-    bool parse = true;
+    TaggedParser::TagType type;
+    TaggedParser parser;
+    TaggedFile::TagSet tagset;
+
+    tagset.addTag ("Sel", SelTags::SELECTION, TaggedFile::SINGLE, TaggedFile::START);
+    tagset.addTag ("Sum", SelTags::SUMMARY,   TaggedFile::SINGLE, TaggedFile::ALLOWLOCALE);
+    tagset.addTag ("Req", SelTags::REQUIRES,  TaggedFile::MULTI);
+    tagset.addTag ("Prv", SelTags::PROVIDES,  TaggedFile::MULTI);
+    tagset.addTag ("Obs", SelTags::OBSOLETES, TaggedFile::MULTI);
+    tagset.addTag ("Con", SelTags::CONFLICTS, TaggedFile::MULTI);
+    tagset.addTag ("Rec", SelTags::RECOMMENDS,TaggedFile::MULTI);
+    tagset.addTag ("Sug", SelTags::SUGGESTS,  TaggedFile::MULTI);
+
+    tagset.addTag ("Siz", SelTags::SIZE,      TaggedFile::SINGLE);
+    tagset.addTag ("Cat", SelTags::CATEGORY,  TaggedFile::SINGLE);
+    tagset.addTag ("Vis", SelTags::VISIBLE,   TaggedFile::SINGLE);
+    tagset.addTag ("Ord", SelTags::ORDER,     TaggedFile::SINGLE);
+    tagset.addTag ("Ins", SelTags::INSPACKS,  TaggedFile::MULTI, TaggedFile::ALLOWLOCALE);
+    tagset.addTag ("Del", SelTags::DELPACKS,  TaggedFile::MULTI, TaggedFile::ALLOWLOCALE);
 
     for (std::list<std::string>::iterator selfile = selection_names.begin();
 	 selfile != selection_names.end();
 	 ++selfile)
     {
-
 	Pathname filename = descr_dir_r + *selfile;
 	err = media_r->provideFile ( filename );
 
@@ -726,62 +905,63 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 	MIL << "Reading " << fullpath.asString() << endl;
 
 	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (fullpath));
-	TagParser& parser = dataprovider->getParser();
+	TaggedParser parser;
 
-	MIL << "start " << *selfile << " parsing" << endl;
+	// find initial version tag
 
-	while( parse && parser.lookupTag (selection_stream))
+	// find any initial tag
+	type = parser.lookupTag (selection_stream);
+	if ((type != TaggedParser::SINGLE)
+	    || (parser.currentTag() != "Ver")
+	    || (!parser.currentLocale().empty()))
 	{
-	    bool repeatassign = false;
+	    ERR << "Initial '=Ver:' tag missing" << endl;
+	    return InstSrcError::E_data_bad_packages_lang;
+	}
 
-	    tagstr = parser.startTag();
+	string version = parser.data();
+	if (version != "3.0")
+	{
+	    ERR << "Version '" << version << "' != 2.0" << endl;
+	    return InstSrcError::E_data_bad_packages_lang;
+	}
 
-	    do
+	// assign set
+
+	tagset.restart ();
+	TaggedFile::assignstatus status = tagset.assignSet (parser, selection_stream);
+
+	if ((status == TaggedFile::REJECTED_NOMATCH)
+	     && (selection_stream.eof())
+	    || (status == TaggedFile::ACCEPTED_FULL))
+	{
+	    PMSelectionPtr selection = Tag2Selection (dataprovider, tagset);
+	    if (selection)
 	    {
-	    switch( tagset->assign (tagstr.c_str(), parser, selection_stream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    selections.push_back (Tag2Selection (dataprovider, tagset));
-		    count++;
-		    tagset->clear();
-		    repeatassign = false;	// only single match
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
+		selections.push_back (selection);
 	    }
-	    } while( repeatassign );
 	}
-
-	if (parse)
+	else
 	{
-	    selections.push_back (Tag2Selection (dataprovider, tagset));
-	    count++;
+	    ERR << "Error in " << filename << ":" << parser.lineNumber() << endl;
+	    ERR << "Status " << (int)status << ", Last tag read: " << parser.currentTag();
+	    if (!parser.currentLocale().empty())
+		ERR << "." << parser.currentLocale();
+	    ERR << endl;
 	}
-	tagset->clear();
 
 	selection_stream.clear();
 	// close own copy of selection_stream
 	selection_stream.close();
-	MIL << "done " << *selfile << " parsing" << endl;
     } // for ()
 
-    delete tagset;
     MIL << "*** parsed " << selections.size() << " selections ***" << std::endl;
 
     return PMError::E_ok;
 }
 
 
+//-------------------------------------------------------------------
 // fill selections with caching data
 // set up lists of PMSelectionPtr and PMPackagePtr
 // for suggests, inspacks, delpacks
@@ -794,13 +974,13 @@ InstSrcDataUL::fillSelections (std::list<PMSelectionPtr>& all_selections, std::l
     for (std::list<PMSelectionPtr>::iterator selIt = all_selections.begin();
 	 selIt != all_selections.end(); ++selIt)
     {
-	MIL << "fillSelection (" << (*selIt)->name() << ")" << endl;
+//	MIL << "fillSelection (" << (*selIt)->name() << ")" << endl;
 	PMULSelectionDataProviderPtr selDp = (*selIt)->dataProvider();
 
 	selDp->_ptrs_attr_SUGGESTS = lookupSelections (all_selections, (*selIt)->suggests());
 	selDp->_ptrs_attr_RECOMMENDS = lookupSelections (all_selections, (*selIt)->recommends());
 
-	for (map <std::string,TagCacheRetrievalPos>::iterator tagIt = selDp->_attr_INSPACKS.begin();
+	for (TaggedFile::Tag::posmaptype::iterator tagIt = selDp->_attr_INSPACKS.begin();
 	     tagIt != selDp->_attr_INSPACKS.end(); ++tagIt)
 	{
 	    // get language packages
@@ -810,7 +990,7 @@ InstSrcDataUL::fillSelections (std::list<PMSelectionPtr>& all_selections, std::l
 		selDp->_ptrs_attr_INSPACKS[tagIt->first] = lookupPackages (all_packages, inspackages);
 	    }
 	}
-	for (map <std::string,TagCacheRetrievalPos>::iterator tagIt = selDp->_attr_DELPACKS.begin();
+	for (TaggedFile::Tag::posmaptype::iterator tagIt = selDp->_attr_DELPACKS.begin();
 	     tagIt != selDp->_attr_DELPACKS.end(); ++tagIt)
 	{
 	    // get language packages
@@ -1145,40 +1325,36 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
     return err;
 }
 
-InstSrcDataULSelTags::InstSrcDataULSelTags( )
-    : TagSet()
+//---------------------------------------------------------------------...
+// public
+
+/**
+ * generate PMSelection objects for each Item on the source
+ * @return list of PMSelectionPtr on this source
+ * */
+const std::list<PMSelectionPtr>&
+InstSrcDataUL::getSelections() const
 {
-	const std::string& preferred_locale = (const std::string &)(Y2PM::getPreferredLocale());
-	CommonPkdParser::Tag* t;
-	createTag( "=Ver", InstSrcDataULSelTags::VERSION);		// general file format version
-	createTag( "=Sel", InstSrcDataULSelTags::SELECTION);		// name version release arch
-	t = createTag( "=Sum", InstSrcDataULSelTags::SUMMARY);
-	t->setType(CommonPkdParser::Tag::ACCEPTPREFERREDLOCALE);
-	t->setPreferredLocale(preferred_locale);
-	createTag( "=Cat", InstSrcDataULSelTags::CATEGORY);
-	createTag( "=Vis", InstSrcDataULSelTags::VISIBLE);
-	createTag( "=Ord", InstSrcDataULSelTags::ORDER);
-	t = createTag( "+Rec", InstSrcDataULSelTags::RECOMMENDS);	// list of recommends tags
-	t->setEndTag("-Rec");
-	t = createTag( "+Sug", InstSrcDataULSelTags::SUGGESTS);	// list of suggests tags
-	t->setEndTag("-Sug");
-	t = createTag( "+Req", InstSrcDataULSelTags::REQUIRES);	// list of requires tags
-	t->setEndTag("-Req");
-	t = createTag( "+Prv", InstSrcDataULSelTags::PROVIDES);	// list of provides tags
-	t->setEndTag("-Prv");
-	t = createTag( "+Con", InstSrcDataULSelTags::CONFLICTS);	// list of conflicts tags
-	t->setEndTag("-Con");
-	t = createTag( "+Obs", InstSrcDataULSelTags::OBSOLETES);	// list of obsoletes tags
-	t->setEndTag("-Obs");
-	createTag( "=Siz", InstSrcDataULSelTags::SIZE);		// packed and unpacked size
-	t = createTag( "+Ins", InstSrcDataULSelTags::INSPACKS);
-	t->setEndTag("-Ins");
-	if (!preferred_locale.empty())
-	{
-	    t = createTag (std::string ("+Ins" + preferred_locale).c_str(), INSLANGPACKS);
-	    t->setEndTag (std::string ("-Ins" + preferred_locale).c_str());
-	}
-	t = createTag( "+Del", InstSrcDataULSelTags::DELPACKS);
-	t->setEndTag("-Del");
+  return _selections;
 }
 
+/**
+ * generate PMPackage objects for each Item on the source
+ * @return list of PMPackagePtr on this source
+ * */
+const std::list<PMPackagePtr>&
+InstSrcDataUL::getPackages() const
+{
+  return _packages;
+}
+
+/**
+ * generate PMYouPatch objects for each patch on the target
+ * @return list of PMYouPatchPtr on this target
+ */
+const std::list<PMYouPatchPtr>&
+InstSrcDataUL::getPatches (void) const
+{
+  // Return empty list as we do not hold Patches
+  return InstData::getPatches();
+}

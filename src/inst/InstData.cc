@@ -101,7 +101,7 @@ InstData::getPatches (void) const
 
 
 const std::list<PMPackagePtr>
-InstData::findPackages (const std::list<PMPackagePtr>& packages, const string& name, const string& version, const string& release, const string& arch)
+InstData::findPackages (const std::list<PMPackagePtr>& packages, const string& name, const string& arch, const string& version, const string& release)
 {
     std::list<PMPackagePtr> hits;
 //    MIL << "InstData::findPackages (" << packages << ", " << name << ", " << version << ", " << release << ", " << arch << ")" << endl;
@@ -115,6 +115,11 @@ InstData::findPackages (const std::list<PMPackagePtr>& packages, const string& n
 	{
 	    continue;
 	}
+	if (!arch.empty()
+	    && ((*package)->arch() != arch))
+	{
+	    continue;
+	}
 	if (!version.empty()
 	    && ((*package)->edition().version() != version))
 	{
@@ -122,11 +127,6 @@ InstData::findPackages (const std::list<PMPackagePtr>& packages, const string& n
 	}
 	if (!release.empty()
 	    && ((*package)->edition().release() != release))
-	{
-	    continue;
-	}
-	if (!arch.empty()
-	    && ((*package)->arch() != arch))
 	{
 	    continue;
 	}
@@ -138,7 +138,7 @@ InstData::findPackages (const std::list<PMPackagePtr>& packages, const string& n
 
 
 const std::list<PMSelectionPtr>
-InstData::findSelections (const std::list<PMSelectionPtr>& selections, const string& name, const string& version, const string& release, const string& arch)
+InstData::findSelections (const std::list<PMSelectionPtr>& selections, const string& name, const string& arch, const string& version, const string& release)
 {
     std::list<PMSelectionPtr> hits;
 //    MIL << "InstData::findSelections (" << selections << ", " << name << ", " << version << ", " << release << ", " << arch << ")" << endl;
@@ -152,6 +152,11 @@ InstData::findSelections (const std::list<PMSelectionPtr>& selections, const str
 	{
 	    continue;
 	}
+	if (!arch.empty()
+	    && ((*selection)->arch() != arch))
+	{
+	    continue;
+	}
 	if (!version.empty()
 	    && ((*selection)->edition().version() != version))
 	{
@@ -159,11 +164,6 @@ InstData::findSelections (const std::list<PMSelectionPtr>& selections, const str
 	}
 	if (!release.empty()
 	    && ((*selection)->edition().release() != release))
-	{
-	    continue;
-	}
-	if (!arch.empty()
-	    && ((*selection)->arch() != arch))
 	{
 	    continue;
 	}

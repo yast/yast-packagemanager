@@ -28,6 +28,9 @@
 
 using namespace std;
 
+typedef TaggedFile::Tag::posmaptype::const_iterator posmapIT;
+typedef map <std::string,std::list<PMPackagePtr> >::const_iterator pkgsmapIT;
+
 ///////////////////////////////////////////////////////////////////
 //	CLASS NAME : PMULSelectionDataProviderPtr
 //	CLASS NAME : constPMULSelectionDataProviderPtr
@@ -93,52 +96,56 @@ PMULSelectionDataProvider::stopRetrieval() const
 }
 
 
-//-------------------------------------------------------------------
-// public access functions
-//-------------------------------------------------------------------
-
-typedef map <std::string,TagCacheRetrievalPos>::const_iterator tagmapIT;
-typedef map <std::string,std::list<PMPackagePtr> >::const_iterator pkgsmapIT;
-
-const std::string
-PMULSelectionDataProvider::summary(const std::string& lang) const
+std::string
+PMULSelectionDataProvider::posmapSLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const
 {
-    MIL << "PMULSelectionDataProvider::summary()" << endl;
     std::string value;
-    tagmapIT it = _attr_SUMMARY.find(lang);
-    if (it == _attr_SUMMARY.end())
-    {
-	MIL << "No summary for language '" << lang << "' available" << endl;
-    }
-    else
+    posmapIT it = theMap.find (locale);
+    if (it != theMap.end())
     {
 	_selection_retrieval->retrieveData (it->second, value);
     }
     return value;
 }
 
+std::list<std::string>
+PMULSelectionDataProvider::posmapLLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const
+{
+    std::list<std::string> value;
+    posmapIT it = theMap.find (locale);
+    if (it != theMap.end())
+    {
+	_selection_retrieval->retrieveData (it->second, value);
+    }
+    return value;
+}
+
+//-------------------------------------------------------------------
+// public access functions
+//-------------------------------------------------------------------
+
+const std::string
+PMULSelectionDataProvider::summary(const std::string& lang) const
+{
+    return posmapSLookup (_attr_SUMMARY, lang);
+}
+
 const std::list<std::string>
 PMULSelectionDataProvider::description(const std::string& lang) const
 {
-    std::list<std::string> value;
-    _selection_retrieval->retrieveData (_attr_DESCRIPTION, value);
-    return value;
+    return posmapLLookup (_attr_DESCRIPTION, lang);
 }
 
 const std::list<std::string>
 PMULSelectionDataProvider::insnotify(const std::string& lang) const
 {
-    std::list<std::string> value;
-    _selection_retrieval->retrieveData (_attr_INSNOTIFY, value);
-    return value;
+    return posmapLLookup (_attr_INSNOTIFY, lang);
 }
 
 const std::list<std::string>
 PMULSelectionDataProvider::delnotify(const std::string& lang) const
 {
-    std::list<std::string> value;
-    _selection_retrieval->retrieveData (_attr_DELNOTIFY, value);
-    return value;
+    return posmapLLookup (_attr_DELNOTIFY, lang);
 }
 
 const FSize
@@ -192,11 +199,7 @@ PMULSelectionDataProvider::recommends_ptrs()
 const std::list<std::string>
 PMULSelectionDataProvider::inspacks(const std::string& lang) const
 {
-    std::list<std::string> value;
-    tagmapIT it = _attr_INSPACKS.find(lang);
-    if (it != _attr_INSPACKS.end())
-	_selection_retrieval->retrieveData (it->second, value);
-    return value;
+    return posmapLLookup (_attr_INSPACKS, lang);
 }
 
 const std::list<PMPackagePtr>
@@ -212,11 +215,7 @@ PMULSelectionDataProvider::inspacks_ptrs(const std::string& lang)
 const std::list<std::string>
 PMULSelectionDataProvider::delpacks(const std::string& lang) const
 {
-    std::list<std::string> value;
-    tagmapIT it = _attr_DELPACKS.find(lang);
-    if (it != _attr_DELPACKS.end())
-	_selection_retrieval->retrieveData (it->second, value);
-    return value;
+    return posmapLLookup (_attr_DELPACKS, lang);
 }
 
 const std::list<PMPackagePtr>
@@ -224,7 +223,7 @@ PMULSelectionDataProvider::delpacks_ptrs(const std::string& lang)
 {
     // already set ?
     pkgsmapIT it = _ptrs_attr_DELPACKS.find(lang);
-    if (it != _ptrs_attr_DELPACKS.end())
+    if (it == _ptrs_attr_DELPACKS.end())
 	return std::list<PMPackagePtr>();
     return it->second;
 }

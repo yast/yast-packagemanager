@@ -28,7 +28,7 @@
 
 #include <y2util/FSize.h>
 #include <y2util/Pathname.h>
-#include <y2util/TagParser.h>
+#include <y2util/TaggedFile.h>
 #include <y2util/TagCacheRetrieval.h>
 #include <y2util/TagCacheRetrievalPtr.h>
 #include <y2pm/PMULSelectionDataProviderPtr.h>
@@ -48,6 +48,10 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 
     friend class InstSrcDataUL;
 
+    private:
+	std::string posmapSLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const;
+	std::list<std::string> posmapLLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const;
+
     protected:
 
 	// the data belongs to this selection
@@ -55,24 +59,27 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 
 	// PMObject
 
-	map <std::string,TagCacheRetrievalPos> _attr_SUMMARY;
-	TagCacheRetrievalPos _attr_DESCRIPTION;
-	TagCacheRetrievalPos _attr_INSNOTIFY;
-	TagCacheRetrievalPos _attr_DELNOTIFY;
+	TaggedFile::Tag::posmaptype _attr_SUMMARY;
+	TaggedFile::Tag::posmaptype _attr_DESCRIPTION;
+	TaggedFile::Tag::posmaptype _attr_INSNOTIFY;
+	TaggedFile::Tag::posmaptype _attr_DELNOTIFY;
 	FSize _attr_SIZE;
 
 	std::string _attr_CATEGORY;	// "base", ...
 	bool _attr_ISBASE;
 
 	bool _attr_VISIBLE;
-	TagCacheRetrievalPos _attr_RECOMMENDS;
+	TagRetrievalPos _attr_RECOMMENDS;
 	std::list<PMSelectionPtr> _ptrs_attr_RECOMMENDS;
-	TagCacheRetrievalPos _attr_SUGGESTS;
+	TagRetrievalPos _attr_SUGGESTS;
 	std::list<PMSelectionPtr> _ptrs_attr_SUGGESTS;
-	map <std::string,TagCacheRetrievalPos> _attr_INSPACKS;
+
+	// map over locales
+	TaggedFile::Tag::posmaptype _attr_INSPACKS;
 	map <std::string,std::list<PMPackagePtr> > _ptrs_attr_INSPACKS;
-	map <std::string,TagCacheRetrievalPos> _attr_DELPACKS;
+	TaggedFile::Tag::posmaptype _attr_DELPACKS;
 	map <std::string,std::list<PMPackagePtr> > _ptrs_attr_DELPACKS;
+
 	FSize _attr_ARCHIVESIZE;
 	std::string _attr_ORDER;
 
@@ -87,8 +94,8 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	void startRetrieval() const;
 	void stopRetrieval() const;
 
-	TagParser& getParser() { return _selection_retrieval->getParser(); }
 	void setSelection ( PMSelectionPtr selection) { _selection = selection; }
+	TagCacheRetrievalPtr getCacheRetrieval() { return _selection_retrieval; }
 
 	/**
 	 * access functions for PMObject/PMSelection attributes

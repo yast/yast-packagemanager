@@ -28,6 +28,7 @@
 #include <fstream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/ExternalProgram.h>
 
 #include <y2pm/InstSrcDescr.h>
 #include <y2util/CommonPkdParser.h>
@@ -62,7 +63,31 @@ InstSrcDescr::InstSrcDescr()
     , _content_baseproduct( PkgName(), PkgEdition() )
     , _content_requires   ( PkgName(), NONE, PkgEdition() )
 {
-#warning must init _base_arch (from hwinfo?)
+    char *argv[3] = { "uname", "-m", 0 };
+    ExternalProgram *process = new ExternalProgram (argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
+    if (process == NULL)
+    {
+	ERR << "Can't run 'uname -m'" << endl;
+    }
+    else
+    {
+	string output = process->receiveLine ();
+	if (output.length() == 0)
+	{
+	    ERR << "No output from 'uname -m'" << endl;
+	}
+	else
+	{
+	    string::size_type endpos = output.find_first_of ("\n");
+	    if (endpos != string::npos)
+		_base_arch = PkgArch (output.substr (0, endpos));
+	    else
+		_base_arch = PkgArch (output);
+	}
+	MIL << "_base_arch '" << _base_arch << "'" << endl;
+	delete process;
+    }
+#warning _base_arch == 'uname -m'
 }
 
 ///////////////////////////////////////////////////////////////////
