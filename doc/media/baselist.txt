@@ -1,11 +1,14 @@
-List of bases for systems
+#List of bases for systems
 -------------------------
 
 Processor	Kernel	User		Base	ARCH.
-ia64		64bit	64bit		ia64	uname -a (ia64)
-s390		32bit	32bit		s390	uname -a (s390)
-s390x		64bit	64bit		s390	uname -a (s390x)
-sparc		32bit	32bit		sparc	uname -a (sparc32)
-sparc		64bit	32bit		sparc	uname -a (sparc64)
-sparc		64bit	64bit		sparc	uname -a (sparc64)
+ia64		64bit	64bit		ia64	uname -m (ia64)
+s390		32bit	32bit		s390	uname -m (s390)
+s390x		64bit	64bit		s390x	uname -m (s390x)
+sparc		32bit	32bit		sparc	uname -m (sparc32)
+sparc		64bit	32bit		sparc	uname -m (sparc64)
+sparc		64bit	64bit		sparc	uname -m (sparc64)
+ppc64		64bit	64bit		ppc64	uname -m (ppc64)
+ppc64		64bit	32bit		ppc64	uname -m (ppc64)
+ppc		32bit	32bit		ppc	uname -m (ppc)
 
