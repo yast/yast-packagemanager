@@ -136,7 +136,7 @@ void PMYouPatchPaths::init( const string &product, const string &version,
     path += product + "/";
   }
   path += version;
-  
+
   init ( path );
 }
 
@@ -161,7 +161,10 @@ void PMYouPatchPaths::init( const string &path )
 
 PMError PMYouPatchPaths::initProduct()
 {
-  InstTarget &instTarget = Y2PM::instTarget( true );
+  // make shure target and managers are up to date:
+  Y2PM::instTargetUpdate();
+
+  InstTarget &instTarget = Y2PM::instTarget();
   const std::list<constInstSrcDescrPtr> &products = instTarget.getProducts();
   std::list<constInstSrcDescrPtr>::const_iterator it = products.begin();
 
@@ -356,7 +359,7 @@ SysConfig *PMYouPatchPaths::config()
   if ( !_config ) {
     _config = new SysConfig( configFile() );
   }
-  
+
   return _config;
 }
 

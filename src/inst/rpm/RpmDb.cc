@@ -495,10 +495,6 @@ PMError RpmDb::internal_initDatabase( const Pathname & root_r, const Pathname & 
       dbptr = 0;
       librpmDb::dbRelease( true );
 
-      // Invalidate all outstanding database handles as the database got modified.
-      dbptr = 0;
-      librpmDb::dbRelease( true );
-
       if ( err ) {
 	return err;
       }
@@ -864,6 +860,17 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : RpmDb::packagesValid
+//	METHOD TYPE : bool
+//
+bool RpmDb::packagesValid() const
+{
+  return( _packages._valid || ! initialized() );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : RpmDb::getPackages
 //	METHOD TYPE : const std::list<PMPackagePtr> &
 //
@@ -871,12 +878,13 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 //
 const std::list<PMPackagePtr> & RpmDb::getPackages()
 {
-  if ( _packages._valid || ! initialized() ) {
+  if ( packagesValid() ) {
     return _packages._list;
   }
 
   Timecount _t( "RpmDb::getPackages" );
 
+#warning may implement callback for rpmdb reread
   _packages.clear();
 
   ///////////////////////////////////////////////////////////////////

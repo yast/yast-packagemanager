@@ -184,7 +184,7 @@ int main( int argc, const char * argv[] ) {
   if ( 0 ) {
     Y2PM::noAutoInstSrcManager();
     Timecount _t( "Launch InstTarget" );
-    Y2PM::instTarget(true,"/");
+    Y2PM::instTargetInit("/");
     _t.start( "Launch PMPackageManager" );
     Y2PM::packageManager();
     _t.start( "Launch PMSelectionManager" );
@@ -196,9 +196,18 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  ret = mmain( argc, argv );
+  //ret = mmain( argc, argv );
+  SEC << Y2PM::instTargetUpdate() << endl;
 
-  TMGR.setInstallationLogfile( "" );
+  SEC << Y2PM::instTargetUpdate() << endl;
+
+  SEC << Y2PM::removePackage( "test" ) << endl;
+  SEC << Y2PM::instTargetUpdate() << endl;
+
+  SEC << Y2PM::installFile( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm" ) << endl;
+  SEC << Y2PM::instTargetUpdate() << endl;
+
+  SEC << Y2PM::instTargetUpdate() << endl;
 
   SEC << "STOP -> " << ret << endl;
   return ret;

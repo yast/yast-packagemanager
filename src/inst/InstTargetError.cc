@@ -61,6 +61,9 @@ std::string InstTargetError::errtext( const unsigned e )
   ///////////////////////////////////////////////////////////////////
 #define ENUM_OUT(V) case V: return #V
 
+  ENUM_OUT( E_already_initialized );
+  ENUM_OUT( E_not_initialized );
+
   ENUM_OUT( E_RpmDB_global_init_failed );
   ENUM_OUT( E_RpmDB_already_open );
   ENUM_OUT( E_RpmDB_init_failed );

@@ -76,7 +76,7 @@ class InstTargetSelDB : virtual public Rep {
 
   public:
 
-    PMError open( const Pathname & system_root_r = "/", const bool create_r = false );
+    PMError open( const Pathname & system_root_r = "/" );
 
     bool isOpen() const { return !_db.empty(); }
 

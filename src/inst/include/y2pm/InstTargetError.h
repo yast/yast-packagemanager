@@ -51,6 +51,8 @@ class InstTargetError {
       // more specific errors start here:
       E_system,		// see errno
       E_invalid_argument,
+      E_already_initialized,
+      E_not_initialized,
       //
       E_RpmDB_global_init_failed,
       E_RpmDB_already_open,

@@ -75,23 +75,29 @@ InstTargetSelDB::~InstTargetSelDB()
 //
 //	DESCRIPTION :
 //
-PMError InstTargetSelDB::open( const Pathname & system_root_r, const bool create_r )
+PMError InstTargetSelDB::open( const Pathname & system_root_r )
 {
+  Pathname dbpath( system_root_r + _db_path );
+
   if ( isOpen() ) {
-    WAR << *this << " " << Error::E_SelDB_already_open << endl;
-    return Error::E_SelDB_already_open;
+    if ( _db == dbpath ) {
+      return Error::E_ok;
+    } else {
+      ERR << *this << " " << Error::E_SelDB_already_open << endl;
+      return Error::E_SelDB_already_open;
+    }
   }
 
-  PathInfo db( system_root_r + _db_path );
+  PathInfo db( dbpath );
 
   if ( !db.isDir() ) {
 
-    if ( db.isExist() || !create_r ) {
+    if ( db.isExist() ) {
       ERR << "Not a directory: " << db << endl;
       return Error::E_SelDB_open_failed;
     }
 
-    // should create one.
+    // create one.
     int res = PathInfo::assert_dir( db.path() );
     if ( res ) {
       ERR << "Error create: " << db << " (errno " << res << ")" << endl;
