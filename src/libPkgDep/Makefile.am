@@ -23,7 +23,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 
 libPkgDep_la_SOURCES = install.cc remove.cc consistency.cc alternatives.cc \
 		       upgrade.cc results.cc output.cc utils.cc \
-		       PkgDep.h PkgDep_int.h PkgSet.cc
+		       PkgDep.h PkgDep_int.h PkgSet.cc InstallOrder.cc
 
 #libPkgDep_la_LIBADD =  $(top_srcdir)/src/libPkgDb/libPkgDb.la
 

@@ -94,6 +94,8 @@ class PkgDep {
 		PkgName name;
 		PkgEdition edition;
 
+		PMSolvablePtr solvable;
+
 		// list of packages that require this pkg (i.e., why it was added or
 		// can't be omitted from the input list)
 		RelInfoList referers;
@@ -177,7 +179,6 @@ class PkgDep {
 	typedef WhatToDoWithUnresolvable(*DealWithUnresolvable_callback)(
 	    PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& ptr);
 	//FIXME make PkgDep* const, requires lots of constPMSolvablePtr everywhere
-
 
 	DealWithUnresolvable_callback _unresolvable_callback;
 
@@ -343,8 +344,11 @@ public:
 			ErrorResultList& out_bad, NameList& to_remove,
 			unsigned max_remove = default_max_remove );
 
-	// return current installed set for inspection
+	/** return current installed set for inspection */
 	const PkgSet& current_installed() { return installed; }
+	
+	/** return current available set */
+	const PkgSet& current_available() { return available; }
 
 	// set defaults
 /*

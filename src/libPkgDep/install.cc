@@ -29,7 +29,7 @@ bool PkgDep::install( PkgSet& in_candidates,
 		PMSolvablePtr instd = installed[candname];
 		if (instd && instd->edition() == cand->edition()) {
 			// is already installed in this version -- drop it
-			DBG << candname << " is already installed in same version "
+			D__ << candname << " is already installed in same version "
 				 << cand->edition() << " -- dropping it\n";
 		}
 		else {
@@ -92,12 +92,12 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	bool error = false;
 	bool delay = false;
 	ErrorResult res(*this,cand);
-	DBG << "Checking candidate " << candname << endl;
+	D__ << "Checking candidate " << candname << endl;
 
 	// check if the candidate is the target of an obsoletes; if yes, drop it
 	RevRel_for( vinstalled.obsoleted()[candname], obs ) {
 		if (obs->relation().matches( cand->self_provides() )) {
-			DBG << "candidate " << candname << " is obsoleted by "
+			D__ << "candidate " << candname << " is obsoleted by "
 				 << obs->pkg()->name() << " -- dropping it\n";
 			error = true;
 		}
@@ -112,7 +112,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	ci_for( PMSolvable::PkgRelList_, obs, cand->obsoletes_ ) {
 		PkgName oname = obs->name();
 		if (vinstalled.includes(oname)) {
-			DBG << "installed/accepted " << oname << " obsoleted by "
+			D__ << "installed/accepted " << oname << " obsoleted by "
 				 << candname << " -- checking for conflict-by-obsoletion\n";
 			if (!check_for_broken_reqs( vinstalled[oname], cand, res ))
 				error = true;
@@ -132,7 +132,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	ci_for( PMSolvable::Provides_, prov, cand->all_provides_ ) {
 		RevRel_for( vinstalled.conflicted()[(*prov).name()], confl ) {
 			if (confl->relation().matches( *prov )) {
-				DBG << "Conflict of candidate " << *prov
+				D__ << "Conflict of candidate " << *prov
 					 << " provided by " << candname
 					 << " with \"Conflicts: " << confl->relation()
 					 << "\" by " << confl->pkg()->name() << endl;
@@ -152,7 +152,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	ci_for( PMSolvable::PkgRelList_, confl, cand->conflicts_ ) {
 		RevRel_for( vinstalled.provided()[confl->name()], prov ) {
 			if (confl->matches( prov->relation() )) {
-				DBG << "Conflict of installed/accepted " << prov->relation()
+				D__ << "Conflict of installed/accepted " << prov->relation()
 					 << " provided by " << prov->pkg()->name()
 					 << " with \"Conflicts: " << *confl
 					 << "\" by " << candname << endl;
@@ -181,7 +181,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			}
 		}
 		if (self_conflict && alternatives.size() > 1) {
-			DBG << "There are multiple alternatives that Provide and Conflict "
+			D__ << "There are multiple alternatives that Provide and Conflict "
 				 "with " << confl->name() << " -- handling that later\n";
 			alts_to_check.push_back( AltInfo(NULL, *confl, alternatives, res));
 			ci_for( RevRelList_, alt, alternatives. ) {
@@ -195,7 +195,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	// candidate package would be broken by installing the candidate
 	// (conflict-by-upgrade)
 	if (vinstalled.includes(candname)) {
-		DBG << "different version of " << candname << " to be installed -- "
+		D__ << "different version of " << candname << " to be installed -- "
 			 "checking for conflict-by-upgrade\n";
 		if (!check_for_broken_reqs( vinstalled[candname], cand, res ))
 			error = true;
@@ -221,7 +221,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		// installed packages.)
 		RevRel_for( candidates->provided()[reqname], prov ) {
 			if (req->matches( prov->relation() )) {
-				DBG << "Candidate " << prov->pkg()->name() << " provides "
+				D__ << "Candidate " << prov->pkg()->name() << " provides "
 					 << prov->relation() << " which is needed by "
 					 << candname << " (Requires: " << *req << ")\n";
 				// add referer only if no installed pkg can provide this
@@ -235,7 +235,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		{
 			RevRel_for( installed.provided()[reqname], prov ) {
 				if (req->matches( prov->relation() )) {
-					DBG << "Installed " << prov->pkg()->name() << " provides "
+					D__ << "Installed " << prov->pkg()->name() << " provides "
 						 << prov->relation() << " which is needed by "
 						 << candname << " (Requires: " << *req << ")\n";
 					goto next_requirement;
@@ -262,14 +262,14 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	}
 
 	if (delay) {
-		DBG << "Candidate " << candname << " delayed\n";
+		D__ << "Candidate " << candname << " delayed\n";
 	}
 	else if (error) {
-		DBG << "Candidate " << candname << " failed\n";
+		D__ << "Candidate " << candname << " failed\n";
 		bad->push_back( res );
 	}
 	else {
-		DBG << "Candidate " << candname << " ok\n";
+		D__ << "Candidate " << candname << " ok\n";
 		good->push_back( res );
 		vinstalled.add( cand, true );
 	}
@@ -298,7 +298,7 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 			continue;
 		seen.insert(prov->pkg());
 		if (req.matches( prov->relation() )) {
-			DBG << "Available " << prov->pkg()->name() << " provides "
+			D__ << "Available " << prov->pkg()->name() << " provides "
 				 << prov->relation() << " which is needed by "
 				 << referer->name() << " (Requires: " << req << ")\n";
 			providers.push_back( *prov );
@@ -315,7 +315,16 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 		    return ONE;
 		case UNRES_TAKETHIS:
 		    if(ptr != NULL)
-			providers.push_back(PkgRevRelation(NULL,ptr));
+		    {
+			if( !candidates->includes(ptr->name()) && !vinstalled.includes(ptr->name()))
+			{
+			    providers.push_back(PkgRevRelation(NULL,ptr));
+			}
+			else
+			{
+			    return ONE;
+			}
+		    }
 		    else
 			ERR << "solvable is NULL" << endl;
 		    break; 
@@ -328,11 +337,11 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 	if (providers.empty()) {
 		// nothing provides what we need -- this candidate is
 		// unresolvable
-		DBG << "No providers found for " << req.name()
+		D__ << "No providers found for " << req.name()
 			 << " which is needed by " << referer->name()
 			 << " (Requires: " << req << ")\n";
 		if (res) {
-			DBG << "add_unres( " << referer->name() << ", " << req << ")\n";
+			D__ << "add_unres( " << referer->name() << ", " << req << ")\n";
 			res->add_unresolvable( referer->name(), req );
 			add_not_available( referer, req );
 		}
@@ -341,7 +350,7 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 	else if (providers.size() == 1) {
 		// exactly one package satisfies our requirement -> add it
 		PMSolvablePtr provider = providers.front().pkg();
-		DBG << "Exactly one provider for " << req
+		D__ << "Exactly one provider for " << req
 			 << " found, adding " << provider->name()
 			 << " as candidate\n";
 		candidates->add( provider, true );
@@ -358,7 +367,7 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 		// from save this for later when all needed packages are
 		// known, because then we can prefer alternatives that don't
 		// require even more stuff 
-		DBG << "More than one provider for " << req << " found\n";
+		D__ << "More than one provider for " << req << " found\n";
 		alts_to_check.push_back( AltInfo( referer, req, providers,
 										  res ? *res : ErrorResult(*this,referer) ));
 		if (!res) {
@@ -378,9 +387,9 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg,
 	bool error = false;
 	
 	ci_for( PMSolvable::Provides_, prov, oldpkg->all_provides_) {
-		DBG << "  checking provided name " << (*prov).name() << endl;
+		D__ << "  checking provided name " << (*prov).name() << endl;
 		RevRel_for( vinstalled.required()[(*prov).name()], req ) {
-			DBG << "    requirement: " << req->relation()
+			D__ << "    requirement: " << req->relation()
 				 << " by installed/accepted " << req->pkg()->name() << endl;
 			if (!req_ok_after_upgrade( req->relation(), oldpkg, newpkg )) {
 				if (PMSolvablePtr upgrade = try_upgrade_requirerer(
@@ -389,12 +398,12 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg,
 				}
 				else if (search_for_provider( req->relation(), req->pkg(),
 											  NULL ) != NONE) {
-					DBG << "Could solve broken requirement " << req->relation()
+					D__ << "Could solve broken requirement " << req->relation()
 						 << " by " << req->pkg()->name() << " by installing "
 						 << "provider for " << req->relation().name() << endl;
 				}
 				else {
-					DBG << "Requirement " << req->relation()
+					D__ << "Requirement " << req->relation()
 						 << " of installed/accepted "
 						 << req->pkg()->name() << " would be broken by "
 						 << " replacing " << oldpkg->name() << "-"
@@ -417,7 +426,7 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
 	// check if newpkg satisfies the requirement
 	ci_for( PMSolvable::Provides_, prov, newpkg->all_provides_) {
 		if ((*prov).name() == rel.name() && (*prov).matches( rel )) {
-			DBG << "    satisfied by upgrade " << newpkg->name() <<
+			D__ << "    satisfied by upgrade " << newpkg->name() <<
 				 " with Provides: " << *prov << endl;
 			return true;
 		}
@@ -426,7 +435,7 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
 	// check if another candidate satifies it
 	RevRel_for( candidates->provided()[rel.name()], prov1 ) {
 		if (prov1->relation().matches( rel )) {
-			DBG << "    satisfied by candidate " << prov1->pkg()->name()
+			D__ << "    satisfied by candidate " << prov1->pkg()->name()
 				 << " with Provides: " << prov1->relation() << endl;
 			return true;
 		}
@@ -440,7 +449,7 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
 			candidates->includes(prov2->pkg()->name()))
 			continue;
 		if (prov2->relation().matches( rel )) {
-			DBG << "    satisfied by installed " << prov2->pkg()->name()
+			D__ << "    satisfied by installed " << prov2->pkg()->name()
 				 << " with Provides: " << prov2->relation() << endl;
 			return true;
 		}

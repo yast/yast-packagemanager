@@ -5,6 +5,9 @@
 
 using namespace std;
 
+PkgSet::PkgSet() : _additionalprovides_callback(NULL)
+{
+}
 /*
 PkgSet::PkgSet( const DistTagList& tags )
 {
@@ -65,6 +68,16 @@ void PkgSet::add( PMSolvablePtr pkg, bool force )
 
 	// every package "provides" its own name
 	_provided[pkg->name()].push_back( PkgRevRelation( NULL, pkg ) );
+
+	if(_additionalprovides_callback)
+	{
+	    PMSolvable::PkgRelList_type addprovides = _additionalprovides_callback(pkg);
+	    for(PMSolvable::PkgRelList_const_iterator p = addprovides.begin();
+		p != addprovides.end(); ++p)
+	    {
+		_provided[p->name()].push_back( PkgRevRelation( &*p, pkg ) );
+	    }
+	}
 }
 
 class RevRel_By {
