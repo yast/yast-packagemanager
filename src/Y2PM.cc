@@ -727,46 +727,25 @@ static PMError commitRemovePkg( PMPackagePtr pkg_r )
 /******************************************************************
 **
 **
-**	FUNCTION NAME : installSpmFromMedia
-**	FUNCTION TYPE : PMError
+**	FUNCTION NAME : extractSpmFromMedia
+**	FUNCTION TYPE : static list<PMPackagePtr>
 **
-** Loop through srclist and pick all spms matching source current_src_ptr,
-** and media number current_src_media. The media is expected to be available.
-**
-** On successfull installation the entry is removed fom srclist.
-**
-** Returns PMError::E_ok if all selected packages were installed, otherwise PMError::E_error.
-** Callback requests to SKIP/CANCEL however are passed back as InstSrcError::E_skip_media/
-** InstSrcError::E_cancel_media, hiding previous errors.
+** Take all spms matching source current_src_ptr, and media number current_src_media
+** out of srclist and return them in a new list.
 */
-static PMError installSpmFromMedia( constInstSrcPtr current_src_ptr_r, unsigned current_src_media_r,
-				    list<PMPackagePtr> & srclist_r )
+static list<PMPackagePtr> extractSpmFromMedia( constInstSrcPtr current_src_ptr_r,
+					       unsigned current_src_media_r,
+					       list<PMPackagePtr> & srclist_r )
 {
-  PMError ret; // error returned
+  list<PMPackagePtr> ret;
 
   // no-op if we don't have a medium yet
-  if ( ! ( current_src_ptr_r && current_src_media_r ) )
+  if ( ! ( current_src_ptr_r && current_src_media_r ) || srclist_r.empty() )
     return ret;
 
-  // Loop through srclist
-  PMError err; // error within loop
   bool eraseit = false; // whether to advance iterator or to erase the current element
   for ( list<PMPackagePtr>::iterator it = srclist_r.begin(); it != srclist_r.end();
 	( eraseit ? it = srclist_r.erase( it ) : ++it ) ) {
-
-    // first of all check for cancel request in previous loop:
-    switch ( err ) {
-    case InstSrcError::E_skip_media:   // skip current media
-    case InstSrcError::E_cancel_media: // cancel all
-      break;
-    default:
-      err = PMError::E_ok;
-      break;
-    }
-    if ( err ) {
-      break; // canceled
-    }
-    // go
 
     PMPackagePtr & cpkg( *it );
     eraseit = false;
@@ -784,6 +763,96 @@ static PMError installSpmFromMedia( constInstSrcPtr current_src_ptr_r, unsigned 
       }
       continue; // unwanted media number
     }
+
+    // wanted:
+    ret.push_back( cpkg );
+    eraseit = true;
+  }
+
+  return ret;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : copySpm
+**	FUNCTION TYPE : void
+**
+** Unfortunately srcremaining_r strores only names, not PMPackagePtr.
+*/
+static void copySpm( const list<PMPackagePtr> & todolist_r, std::list<std::string> & srcremaining_r )
+{
+  for ( std::list<PMPackagePtr>::const_iterator it = todolist_r.begin(); it != todolist_r.end(); ++it ) {
+    srcremaining_r.push_back( (*it)->name() );
+  }
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : rememberSpmFromMedia
+**	FUNCTION TYPE : void
+**
+** Take all spms matching source current_src_ptr, and media number current_src_media
+** out of srclist and store them in srcremaining_r.
+*/
+static void rememberSpmFromMedia( constInstSrcPtr current_src_ptr_r,
+				  unsigned current_src_media_r,
+				  list<PMPackagePtr> & srclist_r,
+				  std::list<std::string> & srcremaining_r )
+{
+  list<PMPackagePtr> todolist( extractSpmFromMedia( current_src_ptr_r, current_src_media_r, srclist_r ) );
+  copySpm( todolist, srcremaining_r );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : installSpmFromMedia
+**	FUNCTION TYPE : PMError
+**
+** Loop through srclist and pick all spms matching source current_src_ptr,
+** and media number current_src_media. The media is expected to be available.
+**
+** On successfull installation the entry is removed fom srclist.
+**
+** Returns PMError::E_ok if all selected packages were installed, otherwise PMError::E_error.
+** Callback requests to SKIP/CANCEL however are passed back as InstSrcError::E_skip_media/
+** InstSrcError::E_cancel_media, hiding previous errors.
+*/
+static PMError installSpmFromMedia( constInstSrcPtr current_src_ptr_r, unsigned current_src_media_r,
+				    list<PMPackagePtr> & srclist_r,
+				    std::list<std::string> & srcremaining_r )
+{
+  PMError ret; // error returned
+
+  // extract todolist from srclist_r
+  list<PMPackagePtr> todolist( extractSpmFromMedia( current_src_ptr_r, current_src_media_r, srclist_r ) );
+  if ( todolist.empty() )
+    return ret;
+
+  // Loop through todolist and remove packages after successfull install.
+  PMError err; // error within loop
+  bool eraseit = false; // whether to advance iterator or to erase the current element
+  for ( list<PMPackagePtr>::iterator it = todolist.begin(); it != todolist.end();
+	( eraseit ? it = todolist.erase( it ) : ++it ) ) {
+
+    // first of all check for cancel request in previous loop:
+    switch ( err ) {
+    case InstSrcError::E_skip_media:   // skip current media
+    case InstSrcError::E_cancel_media: // cancel all
+      break;
+    default:
+      err = PMError::E_ok;
+      break;
+    }
+    if ( err ) {
+      break; // canceled
+    }
+    // go
+
+    PMPackagePtr & cpkg( *it );
+    eraseit = false;
 
     // let source provide the package
     Pathname path;
@@ -818,9 +887,12 @@ static PMError installSpmFromMedia( constInstSrcPtr current_src_ptr_r, unsigned 
     ret = err;
     break;
   default:
-    // report what actually happened
+    // report whatever actually happened
     break;
   }
+
+  // copy remaining sources to srcremaining_r
+  copySpm( todolist, srcremaining_r );
   return ret;
 }
 
@@ -955,7 +1027,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
       ///////////////////////////////////////////////////////////////////
       // Install any source packages before we're going to change media
       ///////////////////////////////////////////////////////////////////
-      res = installSpmFromMedia( current_src_ptr, current_src_media, srclist );
+      res = installSpmFromMedia( current_src_ptr, current_src_media, srclist, srcremaining_r );
       if ( res ) {
 #warning Unevaluated SKIP/CANCEL from installSpmFromMedia
 	res = PMError::E_ok;
@@ -1033,6 +1105,9 @@ static int internal_commitPackages( unsigned mediaNr_r,
 	remaining_r.push_back( (*it)->name() ); // package unprocessed
       }
       --it; // not to miss loop end
+      // Take care about sourcepackages.
+      copySpm( srclist, srcremaining_r );
+      srclist.clear();
       error = res;
       break;
     case InstSrcError::E_skip_media:   // skip current media
@@ -1046,6 +1121,8 @@ static int internal_commitPackages( unsigned mediaNr_r,
 	}
       }
       --it; // not to miss the fist package of next media or loop end
+      // Take care about sourcepackages.
+      rememberSpmFromMedia( current_src_ptr, current_src_media, srclist, srcremaining_r );
       break;
     default:                           // continue
       break;
@@ -1070,79 +1147,73 @@ static int internal_commitPackages( unsigned mediaNr_r,
   // Now loop over srclist and install remaining sources.
   // Start with the currently attached media, if any and loop through
   // all allowed media numbers (limited by media_nr), this effectively
-  // sorts the list of source rpms to install by media number
+  // sorts the list of source rpms to install by media number.
+  //
+  // NOTE: Aborting the installation here will NOT be passed back to the
+  //       caller. The binary packages is what's interesting.
   ///////////////////////////////////////////////////////////////////
   if ( ! error && srclist.size() ) {
-#warning Actually we want to install all remaining sourcepkgs not on media we already skipped. But we miss some!
-    // we retry previously skipped media if it matches current_src_media
-    // we will omitt any medianr below current_src_media if it didn't contain a binpkg
+    PMError res;
 
-    unsigned int next_src_media = current_src_media; // number of currently attached media, if any
-    bool go_on = true;
+    ///////////////////////////////////////////////////////////////////
+    // If a media is avialable, install any source packages before we're
+    // going to change it.
+    ///////////////////////////////////////////////////////////////////
+    if ( current_src_ptr && current_src_media ) {
+      res = installSpmFromMedia( current_src_ptr, current_src_media, srclist, srcremaining_r );
+      switch ( res ) {
+      case InstSrcError::E_cancel_media: // cancel all
+	// keep error
+	break;
+      case InstSrcError::E_skip_media:   // skiped current media
+      default:
+	res = PMError::E_ok; // hide error
+	break;
+      }
+    }
 
-    while (go_on)
-    {
-	if (srclist.size() == 0)			// we're done
-	    break;
+    ///////////////////////////////////////////////////////////////////
+    // now process what's left
+    ///////////////////////////////////////////////////////////////////
+    while ( ! res && srclist.size() ) {
 
-	// find first package in source list which matches next medium
-	unsigned pkgmedianr = 0;
-	std::list<PMPackagePtr>::iterator it = srclist.begin();
-	for (; it != srclist.end(); ++it)
-	{
-	    string srcloc = (*it)->sourceloc();
-	    if (srcloc.empty())
-	    {
-		continue;
-	    }
-	    pkgmedianr = atoi (srcloc.c_str());
-	    if ( !pkgmedianr ) {
-	      continue;	// can not install this.
-	    }
-	    if (  ((next_src_media > 0)				// if we already have an attached/wanted media number
-		    && (pkgmedianr != next_src_media))	// and the current package is not on this media
-	        ||((mediaNr_r > 0)				// or we only want a specific media number
-		    && (pkgmedianr != mediaNr_r)))		// and the current package is not on this media
-	    {
-		continue;					// keep on searching
-	    }
-	    break;
-	}
+      PMPackagePtr & cpkg( *srclist.begin() );
 
-	if (it == srclist.end())				// no matching package found
-	{
-	    break;
-	}
+      unsigned cpkgMedianr = atoi( cpkg->sourceloc().c_str() );
+      constInstSrcPtr cpkgSource = cpkg->source();
 
-	// ok, we have a matching package
+      // Check whether package fits a requested mediaNr_r
+      if ( mediaNr_r && cpkgMedianr != mediaNr_r ) {
+	// unwanted source -> remember packages.
+	rememberSpmFromMedia( cpkgSource, cpkgMedianr, srclist, srcremaining_r );
+	continue;
+      }
 
-	if (((*it)->source() != current_src_ptr)		// source or media change ?
-	    || (pkgmedianr != current_src_media))
-	{
-	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
-		&& (current_src_ptr != 0))		// if we have an old media attached
-	    {
-		current_src_ptr->releaseMedia (true);	// release if removable (CD/DVD)
-	    }
+      ///////////////////////////////////////////////////////////////////
+      // Change the media
+      ///////////////////////////////////////////////////////////////////
+      // If source changes, physically release any old media attached
+      if ( current_src_ptr && cpkgSource != current_src_ptr ) {
+	current_src_ptr->releaseMedia( /*if_removable_r*/true );
+      }
 
-	    current_src_ptr = (*it)->source();
-	    current_src_media = pkgmedianr;
-	    report->advanceToMedia( current_src_ptr, current_src_media );
-	    MIL << "Process media " << current_src_media << " of " << current_src_ptr << endl;
-	}
+      // Change the media (physically changed when accessed access)
+      current_src_ptr = cpkgSource;
+      current_src_media = cpkgMedianr;
+      report->advanceToMedia( current_src_ptr, current_src_media );
+      MIL << "Process media " << current_src_media << " of " << current_src_ptr << endl;
 
-	PMError res = installSpmFromMedia (current_src_ptr, current_src_media, srclist);	// install sources from it while we have it attached
-	if ( res == InstSrcError::E_cancel_media ) {
-	  error = res;
-	  go_on = false;
-	}
-	if (!go_on)
-	    break;
-
-	if (mediaNr_r > 0)				// if a specific media number is requested
-	    break;
-
-	next_src_media++;				// go on with loop and next medium
+      // install them
+      res = installSpmFromMedia( current_src_ptr, current_src_media, srclist, srcremaining_r );
+      switch ( res ) {
+      case InstSrcError::E_cancel_media: // cancel all
+	// keep error
+	break;
+      case InstSrcError::E_skip_media:   // skiped current media
+      default:
+	res = PMError::E_ok; // hide error
+	break;
+      }
     }
   }
 
@@ -1153,9 +1224,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
   // media release is handled in Y2PM::commitPackages
 
   // copy remaining sources to srcremaining_r
-  for ( std::list<PMPackagePtr>::iterator it = srclist.begin(); it != srclist.end(); ++it ) {
-    srcremaining_r.push_back ((*it)->name());
-  }
+  copySpm( srclist, srcremaining_r );
 
   return (error ? (COMMIT_ABORT - count) : count);
 }
