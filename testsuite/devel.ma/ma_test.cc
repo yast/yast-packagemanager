@@ -240,35 +240,16 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-
-  dumpPkgWhatIf( INT );
-  PMGR["ElectricFence"]->user_set_install();
-  PMGR["test"]->appl_set_delete();
-  dumpPkgWhatIf( INT );
-  doSolve( PMGR );
-  dumpPkgWhatIf( INT );
-
-  list<PMPackagePtr> dellist_r;
-  list<PMPackagePtr> instlist_r;
-  list<PMPackagePtr> srclist_r;
-  PMGR.getPackagesToInsDel( dellist_r, instlist_r, srclist_r );
-  SEC << instlist_r << endl;
-  SEC << dellist_r << endl;
-
-
 #if 0
   dumpLangWhatIf( SEC, true );
   doSolve( PMGR );
 
   LMGR["de_DE"]->user_set_offSystem();
-  LMGR["cs"]->user_set_onSystem();
+  LMGR["af"]->user_set_onSystem();
   doSolve( PMGR );
 
-  dumpLangWhatIf( SEC );
+  PkgSelectables pkgs( LMGR.getLangPackagesFor( "af" ) );
 
-  LMGR["de_DE"]->user_set_onSystem();
-  LMGR["cs"]->user_set_offSystem();
-  doSolve( PMGR );
 
   dumpPkgWhatIf( INT );
 #endif

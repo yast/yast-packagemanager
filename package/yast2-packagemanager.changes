@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 10 18:02:54 CET 2005 - ma@suse.de
+
+- Do rebuild the rpm database on update.
+- 2.11.16
+
+-------------------------------------------------------------------
 Tue Feb  8 13:51:31 CET 2005 - ma@suse.de
 
 - Escape spaces in url passed to curl (#50465).
@@ -6,6 +12,7 @@ Tue Feb  8 13:51:31 CET 2005 - ma@suse.de
 
 -------------------------------------------------------------------
 Mon Feb  7 16:00:52 CET 2005 - mir@suse.de
+
 - Merged in proofread texts
   PO-Revision-Date: 2005-02-05 18:47+0100
 - 2.11.14
@@ -26,6 +33,7 @@ Fri Feb  4 12:26:11 CET 2005 - ma@suse.de
 
 -------------------------------------------------------------------
 Thu Jan 27 13:55:04 CET 2005 - mir@suse.de
+
 - Added option --skipPre (49887)
 - 2.11.12
 
