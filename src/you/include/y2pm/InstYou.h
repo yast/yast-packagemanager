@@ -93,11 +93,13 @@ class InstYou {
     /**
      * Download packages and scripts belonging to selected patches.
      *
+     * @param reload    If true reload all patches from server.
      * @param checkSig  If true check signatures of downloaded packages and
      *                  scripts.
      * @param noExternal If true, external packages aren't downloaded.
      */
-    PMError retrievePatches( bool checkSig = true, bool noExternal = false );
+    PMError retrievePatches( bool reload = true, bool checkSig = true,
+                             bool noExternal = false );
     
     /**
       Get first selected patch.
@@ -120,7 +122,7 @@ class InstYou {
      * @param checkSig  If true check signatures of downloaded packages and
      *                  scripts.
      */
-    PMError retrieveCurrentPatch( bool checkSig = true );
+    PMError retrieveCurrentPatch( bool reload = true, bool checkSig = true );
 
     /**
      * Install next patch in list of selected patches to target system.
@@ -209,10 +211,12 @@ class InstYou {
 
   protected:
     PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
-    PMError retrievePatch( const PMYouPatchPtr &, bool checkSig = true,
-                           bool noExternal = false );
-    PMError retrievePackage( const PMPackagePtr &pkg, bool noExternal = false );
-    PMError retrieveScript( const std::string &script, bool checkSig );
+    PMError retrievePatch( const PMYouPatchPtr &, bool reload,
+                           bool checkSig = true, bool noExternal = false );
+    PMError retrievePackage( const PMPackagePtr &pkg, bool reload = true,
+                             bool noExternal = false );
+    PMError retrieveScript( const std::string &script, bool reload,
+                            bool checkSig );
 
     /**
      * check, if patch has new packages.

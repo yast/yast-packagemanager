@@ -322,7 +322,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     value = tagMultiValue( YOUPatchTagSet::PACKAGES, patchstream );
     PMError error = parsePackages( value, p );
-    if ( !error ) {
+    if ( error ) {
       return error;
     }
 
@@ -423,12 +423,8 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
         Pathname filePath = patchPath + *it;
         Pathname localPath = _media.localPath( filePath );
-        PathInfo pi( localPath );
-        if ( pi.isExist() && !reload ) {
-          error = PMError::E_ok;
-        } else {
-          error = _media.provideFile( filePath );
-        }
+        
+        error = _media.provideFile( filePath, !reload );
         if ( error != PMError::E_ok ) {
             ERR << "ERR: " << error << ": " << filePath << endl;
         } else {

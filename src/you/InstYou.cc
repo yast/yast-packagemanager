@@ -213,6 +213,8 @@ void InstYou::selectPatches( int kinds )
       }
     }
   }
+  
+  updatePackageStates();
 }
 
 void InstYou::updatePackageStates()
@@ -273,7 +275,7 @@ PMError InstYou::attachSource()
   return error;
 }
 
-PMError InstYou::retrievePatches( bool checkSig, bool noExternal )
+PMError InstYou::retrievePatches( bool reload, bool checkSig, bool noExternal )
 {
   D__ << "Retrieve patches." << endl;
 
@@ -282,7 +284,7 @@ PMError InstYou::retrievePatches( bool checkSig, bool noExternal )
 
   PMYouPatchPtr patch;
   for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    error = retrievePatch( patch, checkSig, noExternal );
+    error = retrievePatch( patch, reload, checkSig, noExternal );
     if ( error ) return error;
   }
 
@@ -353,14 +355,14 @@ PMError InstYou::installCurrentPatch()
   return installPatch( *_selectedPatchesIt );
 }
 
-PMError InstYou::retrieveCurrentPatch( bool checkSig )
+PMError InstYou::retrieveCurrentPatch( bool reload, bool checkSig )
 {
   if ( _selectedPatchesIt == _patches.end() ) {
     E__ << "No more patches." << endl;
     return PMError( InstSrcError::E_error );
   }
 
-  return retrievePatch( *_selectedPatchesIt, checkSig );
+  return retrievePatch( *_selectedPatchesIt, reload, checkSig );
 }
 
 PMError InstYou::installPatches( bool dryrun )
@@ -455,8 +457,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   return error;
 }
 
-PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
-                                bool noExternal )
+PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
+                                bool checkSig, bool noExternal )
 {
   D__ << "PATCH: " << patch->name() << endl;
 
@@ -478,7 +480,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
       }
     }
 
-    error = retrievePackage( *itPkg, noExternal );
+    error = retrievePackage( *itPkg, reload, noExternal );
     if ( error ) return error;
     if ( checkSig ) {
       string localRpm;
@@ -501,7 +503,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
   
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
-    PMError error = retrieveScript( patch->preScript(), checkSig );
+    PMError error = retrieveScript( patch->preScript(), reload, checkSig );
     if ( error ) {
       ERR << "Error retrieving preScript." << endl;
       return error;
@@ -512,7 +514,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
   if ( error ) return error;
   
   if ( !patch->postScript().empty() ) {
-    PMError error = retrieveScript( patch->postScript(), checkSig );
+    PMError error = retrieveScript( patch->postScript(), reload, checkSig );
     if ( error ) {
       ERR << "Error retrieving postScript." << endl;
       return error;
@@ -525,10 +527,13 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
   return PMError();
 }
 
-PMError InstYou::retrieveScript( const string &script, bool checkSig )
+PMError InstYou::retrieveScript( const string &script, bool reload,
+                                 bool checkSig )
 {
   Pathname scriptPath = _paths->scriptPath( script );
-  PMError error = _media.provideFile( scriptPath );
+
+  PMError error = _media.provideFile( scriptPath, !reload );
+  
   if ( error ) {
     ERR << "Error downloading script from '"
         << _paths->patchUrl() << "/" << scriptPath << "'" << endl;
@@ -556,7 +561,8 @@ PMError InstYou::retrieveScript( const string &script, bool checkSig )
   return PMError();
 }
 
-PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
+PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
+                                  bool noExternal )
 {
   DBG << "InstYou::retrievePackage: '" << pkg->name() << "'" << endl;
 
@@ -588,7 +594,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
       err = media.attach();
       if ( err ) return err;
 
-      err = media.provideFile( path );
+      err = media.provideFile( path, !reload );
       if ( err ) return err;
     }
 
@@ -629,7 +635,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
     rpmPath = _paths->rpmPath( pkg, *it, patchRpm );
     D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
         << "'" << endl;
-    error = _media.provideFile( rpmPath );
+    error = _media.provideFile( rpmPath, !reload );
     if ( error ) {
       D__ << "Downloading RPM '" << pkg->name() << "' failed: " << error
           << endl;
@@ -639,7 +645,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
         rpmPath = _paths->rpmPath( pkg, *it, false );
         D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
             << "'" << endl;
-        error = _media.provideFile( rpmPath );
+        error = _media.provideFile( rpmPath, !reload );
         if ( error ) {
           D__ << "Download failed." << endl;
         }
