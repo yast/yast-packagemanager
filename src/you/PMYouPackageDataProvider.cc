@@ -20,7 +20,9 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2pm/PMPackageManager.h>
 #include <Y2PM.h>
+
 #include <y2pm/PMYouPackageDataProvider.h>
 
 using namespace std;

@@ -26,6 +26,11 @@
 
 #include <Y2PM.h>
 
+#include <y2pm/InstTarget.h>
+#include <y2pm/PMPackageManager.h>
+#include <y2pm/PMSelectionManager.h>
+#include <y2pm/PMYouPatchManager.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////

@@ -50,6 +50,7 @@
 #include <y2pm/PMRpmPackageDataProvider.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
 #include <y2pm/RpmCache.h>
+#include <y2pm/PMPackageManager.h>
 
 #include <Y2PM.h>
 

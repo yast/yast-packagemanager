@@ -26,12 +26,14 @@
 #include <string>
 #include <list>
 #include <y2util/LangCode.h>
+#include <y2util/FSize.h>
 #include <y2pm/PkgArch.h>
-#include <y2pm/InstTarget.h>
 #include <y2pm/InstSrcManager.h>
-#include <y2pm/PMPackageManager.h>
-#include <y2pm/PMSelectionManager.h>
-#include <y2pm/PMYouPatchManager.h>
+
+class InstTarget;
+class PMPackageManager;
+class PMYouPatchManager;
+class PMSelectionManager;
 
 ///////////////////////////////////////////////////////////////////
 //

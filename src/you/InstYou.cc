@@ -32,6 +32,9 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/Wget.h>
 #include <y2pm/PMYouPackageDataProvider.h>
+#include <y2pm/PMYouPatchManager.h>
+#include <y2pm/PMPackageManager.h>
+#include <y2pm/InstTarget.h>
 
 #include <y2pm/InstYou.h>
 

@@ -18,6 +18,7 @@
 /-*/
 
 #include <iostream>
+#include <fstream>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>

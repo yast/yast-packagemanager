@@ -28,6 +28,9 @@
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
+#include <y2pm/PMPackageManager.h>
+#include <y2pm/PMSelectionManager.h>
+#include <y2pm/PMYouPatchManager.h>
 
 #include <Y2PM.h>
 

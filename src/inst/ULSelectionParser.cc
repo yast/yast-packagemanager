@@ -31,7 +31,7 @@
 #include <y2util/TaggedFile.h>
 
 #include <y2pm/PMPackagePtr.h>
-#include <y2pm/PMSelectionPtr.h>
+#include <y2pm/PMSelection.h>
 #include <y2pm/ULSelectionParser.h>
 #include <y2pm/PMULSelectionDataProvider.h>
 #include <y2pm/PMULSelectionDataProviderPtr.h>

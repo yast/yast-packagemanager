@@ -23,6 +23,7 @@
 #include <y2pm/PMRpmPackageDataProvider.h>
 #include <y2pm/PkgName.h>
 #include <y2pm/RpmDb.h>
+#include <y2pm/PMPackageManager.h>
 
 #include <Y2PM.h>
 
