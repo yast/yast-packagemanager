@@ -276,12 +276,22 @@ class InstSrcManager {
     unsigned knownSources() const { return _knownSources.size(); }
 
     /**
-     * PRELIMINARILY: Return via idlist_r the ISrcId's of all known
-     * InsrSrces. Or enabled InsrSrces only, if enabled_only == true.
+     * Return the ISrcId's of all known InsrSrces. Or enabled InsrSrces
+     * only, if enabled_only == true.
      *
-     * Should be replaced by some Iterator.
+     * TODO: Should be replaced by some Iterator.
      **/
-    void getSources( ISrcIdList & idlist_r, const bool enabled_only = false ) const;
+    ISrcIdList getSources( const bool enabled_only = false ) const;
+
+    /**
+     * Return the ISrcId's of all known InsrSrces. Or enabled InsrSrces
+     * only, if enabled_only == true.
+     *
+     * TODO: Should be replaced by some Iterator.
+     **/
+    void getSources( ISrcIdList & idlist_r, const bool enabled_only = false ) const {
+      idlist_r = getSources( enabled_only );
+    }
 
     /**
      * Disable all InstSrc'es.
