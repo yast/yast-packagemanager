@@ -62,20 +62,20 @@ struct Funcs {
 };
 
 static struct Funcs func[] = {
-    { "install", install, "simulated install of a package" },
+    { "install",    install,    "simulated install of a package" },
     { "rpminstall", rpminstall, "install rpm files" },
     { "consistent", consistent, "check consistency" },
-    { "init", init, "initialize packagemanager" },
-    { "query", query, "query packages" },
-    { "remove", remove, "simulate remove packages" },
-    { "help", help, "this screen" },
-    { "verbose", verbose, "set verbosity level" },
-    { "debug", debug, "switch on/off debug" },
-    { NULL, NULL }
+    { "init",       init,       "initialize packagemanager" },
+    { "query",      query,      "query packages" },
+    { "remove",     remove,     "simulate remove packages" },
+    { "help",       help,       "this screen" },
+    { "verbose",    verbose,    "set verbosity level" },
+    { "debug",      debug,      "switch on/off debug" },
+    { NULL,         NULL,       NULL }
 };
 
 void usage(char **argv) {
-	cerr <<
+	cout <<
 "Do PHI dependency completion on a set of RPMS or the installed database.\n\n"
 "Usage: " << argv[0] << " -v for increasing verbose output\n"
 "	-h --help		print this help\n"
@@ -270,7 +270,7 @@ void install(vector<string>& argv)
 
     for (unsigned i=1; i < argv.size() ; i++) {
 	if (available->lookup(PkgName(argv[i])) == NULL) {
-		std::cerr << "package " << argv[i] << " is not available.\n";
+		std::cout << "package " << argv[i] << " is not available.\n";
 		return;
 	}
 	candidates.add(available->lookup(PkgName(argv[i])));
@@ -312,7 +312,7 @@ void install(vector<string>& argv)
 	cout << "*** Conflicts ***" << endl;
 	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
 	     p != bad.end(); ++p ) {
-	    cerr << *p << endl;
+	    cout << *p << endl;
 	    numbad++;
 	}
     }
@@ -384,11 +384,13 @@ void remove(vector<string>& argv)
 
     for(PkgDep::NameList::iterator it = list1.begin(); it != list1.end(); ++it)
     {
+	cout << "Additionally removing ";
 	if(find(list2.begin(),list2.end(),*it) == list2.end())
 	{
-	    cout << "Additionally removing " << *it << endl;
+	    cout << *it << " ";
 	}
     }
+    cout << endl;
 }
 
 
@@ -412,7 +414,7 @@ void consistent(vector<string>& argv)
 	cout << " *** system inconsistent: " << endl << endl;
 	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
 	     p != bad.end(); ++p ) {
-	    cerr << *p << endl;
+	    cout << *p << endl;
 	    numbad++;
 	}
 	cout << endl << " *** "<< numbad << " errors" << endl;
