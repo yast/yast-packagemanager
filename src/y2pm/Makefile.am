@@ -37,6 +37,7 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	RpmDb.h RpmDbPtr.h RpmDbCallbacks.h \
 	PMRpmPackageDataProvider.h PMRpmPackageDataProviderPtr.h \
         \
+        PkgPubkeyCache.h	\
         InstSrcManager.h InstSrcManagerCallbacks.h	\
 	\
 	InstSrcError.h				\

@@ -50,6 +50,7 @@
 #include <y2pm/PkgArch.h>
 
 #include <Y2PM.h>
+#include <y2pm/InstSrcManager.h>
 
 
 using namespace std;
@@ -247,6 +248,30 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     ndescr->set_content_labelmap (labelmap);
 
     ndescr->set_product_dir (product_dir_r);
+
+    // Finaly check whether there are gpg-pubkeys in the media rootdir
+    // and let the ISM store them.
+    list<string> files;
+    PMError res = media_r->dirInfo( files, "/", /*dots*/false );
+    if ( res ) {
+      WAR << "Unable to scan media root for gpg-pubkeys: " << res << endl;
+    } else {
+      PkgPubkeyCache & keyCache( Y2PM::instSrcManager().pkgPubkeyCache() );
+
+      for ( list<string>::const_iterator it = files.begin(); it != files.end(); ++it ) {
+	if ( keyCache.isKey( *it ) ) {
+	  MediaAccess::FileProvider pubkey( media_r, *it );
+	  if ( pubkey.error() ) {
+	    WAR << "Media can't provide '" << pubkey() << "' " << pubkey.error() << endl;
+	    continue;
+	  }
+	  res = keyCache.storeKey( pubkey() );
+	  if ( res ) {
+	    WAR << "Unable to store gpg-pubkey " << pubkey() << ": " << res << endl;
+	  }
+	}
+      }
+    }
 
     ///////////////////////////////////////////////////////////////////
     // done

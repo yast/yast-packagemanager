@@ -27,6 +27,7 @@
 
 #include <y2pm/InstSrcPtr.h>
 #include <y2pm/InstSrcError.h>
+#include <y2pm/PkgPubkeyCache.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -69,6 +70,11 @@ class InstSrcManager {
     static const Pathname _cache_tmp_dir;
 
     /**
+     * Subpath (below _cache_root_dir) for gpg-pubkeys.
+     **/
+    static const Pathname _cache_pubkey_dir;
+
+    /**
      * Helper function to combine _cache_root_dir and subpaths.
      **/
     Pathname cachePath( const Pathname & sub_r ) const { return( _cache_root_dir + sub_r ); }
@@ -84,6 +90,11 @@ class InstSrcManager {
      * Full path of cache_tmp_dir (for downloads, etc.)
      **/
     Pathname cache_tmp_dir() const { return cachePath( _cache_tmp_dir ); }
+
+    /**
+     * Full path of cache_pubkey_dir
+     **/
+    Pathname cache_pubkey_dir() const { return cachePath( _cache_pubkey_dir ); }
 
     /**
      * Return a new (not existing) directory name in cache_root_dir
@@ -419,6 +430,20 @@ class InstSrcManager {
      * or -1 if isrc_r is not enabled or NULL.
      **/
     int instOrderIndex( const ISrcId & isrc_r ) const;
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Manage gpg-pubkeys (package singning keys)
+    //
+    ///////////////////////////////////////////////////////////////////
+
+  private:
+
+    PkgPubkeyCache _pubkeyCache;
+
+  public:
+
+    PkgPubkeyCache & pkgPubkeyCache() { return _pubkeyCache; }
 
 };
 
