@@ -14,7 +14,14 @@ extern const char* op_str[];
 class PkgEdition {
   public:
 	enum type_enum { NORMAL, EPOCH, MAXIMUM, UNSPEC };
+
   private:
+
+        // Use a 'version-release' form for these strings.
+        // (i.e. exactly one '-')
+	static const char *const _str_UNSPEC  = "EDITION-UNSPEC";
+	static const char *const _str_MAXIMUM = "EDITION-MAXIMUM";
+
 	type_enum type;
 	int _epoch;
 	int _buildtime;
@@ -94,9 +101,9 @@ class PkgEdition {
 		  case EPOCH:
 			return _version;
 		  case MAXIMUM:
-			return "-*-MAXIMUM-*-";
+			return _str_MAXIMUM;
 		  case UNSPEC:
-			return "-*-UNSPEC-*-";
+			return _str_UNSPEC;
 		  default:
 			return "";
 		}
@@ -126,6 +133,21 @@ class PkgEdition {
 	operator std::string() const { return as_string(); }
 
 	friend std::ostream& operator<<( std::ostream&, const PkgEdition& );
+
+  public:
+
+    /**
+     * Convert PkgEdition to string (on save to file).
+     * <b>Keep it compatible with fromString.</b>
+     **/
+    static std::string toString( const PkgEdition & t );
+
+    /**
+     * Restore PkgEdition from string (on restore from file).
+     * <b>Keep it compatible with toString.</b>
+     **/
+    static PkgEdition fromString( std::string s );
+
 };
 
 #endif  /* _PkgEdition_h */

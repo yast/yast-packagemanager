@@ -18,6 +18,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 noinst_PROGRAMS = \
 	test_rpmdb	\
 	ma_test.exe	\
+	test_tofromString.exe	\
 	testinstall	\
 	test_patchinfo	\
 	test_content
@@ -25,6 +26,10 @@ noinst_PROGRAMS = \
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
 ma_test_exe_LDFLAGS = -static
+
+test_tofromString_exe_SOURCES = test_tofromString.cc
+test_tofromString_exe_LDADD = $(top_builddir)/src/liby2pm.la
+test_tofromString_exe_LDFLAGS = -static
 
 test_rpmdb_SOURCES = test_rpmdb.cc
 test_rpmdb_LDADD = $(top_builddir)/src/liby2pm.la

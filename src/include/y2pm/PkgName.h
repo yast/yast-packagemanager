@@ -42,6 +42,19 @@ struct PkgNameEd {
 	}
 
 	friend std::ostream& operator<<( std::ostream&, const PkgNameEd& );
+
+      public:
+	/**
+	 * Convert PkgNameEd to string (on save to file).
+	 * <b>Keep it compatible with fromString.</b>
+	 **/
+	static std::string toString( const PkgNameEd & t );
+
+	/**
+	 * Restore PkgNameEd from string (on restore from file).
+	 * <b>Keep it compatible with toString.</b>
+	 **/
+	static PkgNameEd fromString( std::string s );
 };
 
 
