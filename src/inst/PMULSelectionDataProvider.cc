@@ -60,6 +60,38 @@ PMULSelectionDataProvider::~PMULSelectionDataProvider()
     delete _selection_retrieval;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULSelectionDataProvider::startRetrieval
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION : hint to keep file stream open
+//
+void
+PMULSelectionDataProvider::startRetrieval() const
+{
+#if 0
+    _selection_retrieval->startRetrieval();
+#endif
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULSelectionDataProvider::stopRetrieval
+//	METHOD TYPE : void
+//
+//	DESCRIPTION : hint to close stream
+//
+void
+PMULSelectionDataProvider::stopRetrieval() const
+{
+#if 0
+    _selection_retrieval->stopRetrieval();
+#endif
+}
+
 const std::string
 PMULSelectionDataProvider::summary(const std::string& lang) const
 {

@@ -60,6 +60,40 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
 {
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::startRetrieval
+//	METHOD TYPE : void
+//
+//	DESCRIPTION : hint to keep file stream open
+//
+void
+PMULPackageDataProvider::startRetrieval() const
+{
+#if 0
+    _package_retrieval->startRetrieval();
+    _language_retrieval->startRetrieval();
+#endif
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::stopRetrieval
+//	METHOD TYPE : void
+//
+//	DESCRIPTION : hint to close stream
+//
+void
+PMULPackageDataProvider::stopRetrieval() const
+{
+#if 0
+    _package_retrieval->stopRetrieval();
+    _language_retrieval->stopRetrieval();
+#endif
+}
+
 #define FALLBACK(attr,func) \
   do { if (attr.empty() && (_fallback_provider != 0)) return _fallback_provider->func(); } while (0);
 

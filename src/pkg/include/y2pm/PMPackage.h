@@ -77,6 +77,16 @@ class PMPackage : virtual public Rep, public PMObject {
 	PMPKG_NUM_ATTRIBUTES
 	};
 
+	/**
+	 * hint before accessing multiple attributes
+	 */
+	void startRetrieval() const;
+
+	/**
+	 * hint after accessing multiple attributes
+	 */
+	void stopRetrieval() const;
+
 	// overlay virtual PMObject functions
 	const std::string summary() const;
 	const std::list<std::string> description() const;

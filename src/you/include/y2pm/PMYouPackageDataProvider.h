@@ -35,6 +35,16 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	virtual ~PMYouPackageDataProvider();
 
 	/**
+	 * hint before accessing multiple attributes
+	 */
+	void startRetrieval() const { return PMDataProvider::startRetrieval(); }
+
+	/**
+	 * hint after accessing multiple attributes
+	 */
+	void stopRetrieval() const { return PMDataProvider::stopRetrieval(); }
+
+	/**
 	 * access functions for PMObject attributes
 	 */
 
