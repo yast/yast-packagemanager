@@ -409,17 +409,18 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   ///////////////////////////////////////////////////////////////////
   ProductSet products;
 
-  MediaAccess::FileProvider pfile( media, "/media.1/products" );
-  if ( ! pfile.error() ) {
-    // scan products file
-    MIL << "Found '/media.1/products'." << endl;
-    scanProductsFile( pfile(), products );
+  { // to assure FileProvider releases it's reference to media on destruction
+    MediaAccess::FileProvider pfile( media, "/media.1/products" );
+    if ( ! pfile.error() ) {
+      // scan products file
+      MIL << "Found '/media.1/products'." << endl;
+      scanProductsFile( pfile(), products );
+    }
+    if ( products.empty() ) {
+      // scan error or no products file
+      products.insert( ProductEntry() );
+    }
   }
-  if ( products.empty() ) {
-    // scan error or no products file
-    products.insert( ProductEntry() );
-  }
-
   media = 0; // release media
 
   ///////////////////////////////////////////////////////////////////
