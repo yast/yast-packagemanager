@@ -250,10 +250,15 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
             CURLcode infoRet = curl_easy_getinfo( _curl, CURLINFO_HTTP_CODE,
                                                   &httpReturnCode );
             if ( infoRet == CURLE_OK ) {
-              DBG << "HTTP return code: " << httpReturnCode << endl;
+              string msg = "HTTP return code: " +
+                           stringutil::numstring( httpReturnCode );
+              DBG << msg << endl;
+              err.setDetails( msg );
               if ( httpReturnCode == 401 ) return Error::E_login_failed;
+              else return PMError( Error::E_file_not_found, msg );
             }
           }
+          break;
         case CURLE_FTP_COULDNT_RETR_FILE:
           err = Error::E_file_not_found;
           break;

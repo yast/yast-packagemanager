@@ -416,7 +416,12 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
         media.release();
         
         string errMsg = "Unable to get '" + directoryFile.asString() +
-                        "' or to read the directory.";
+                        "' or to read the directory";
+        if ( !error.details().empty() ) {
+          errMsg += " (" + error.details() + ")";
+        }
+        errMsg += ".";
+
         error.setDetails( errMsg );
         
         return error;
