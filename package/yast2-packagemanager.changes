@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 14 19:13:26 CET 2003 - kkaempf@suse.de
+
+- ensure correct media is attached before starting to install
+  source rpms.
+- 2.7.33
+
+-------------------------------------------------------------------
 Fri Mar 14 17:51:16 CET 2003 - kkaempf@suse.de
 
 - fix passing of path information from package provider to target.
