@@ -30,7 +30,7 @@ using namespace std;
 #undef Y2LOG
 #define Y2LOG "Timecount"
 
-#define TC_DOLOG INT
+#define TC_DOLOG DBG
 
 ///////////////////////////////////////////////////////////////////
 //
