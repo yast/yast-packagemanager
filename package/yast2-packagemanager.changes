@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar 25 18:03:23 CET 2004 - cschum@suse.de
+
+- Disable standard media callbacks in YOU.
+
+-------------------------------------------------------------------
 Tue Mar 23 13:59:16 CET 2004 - lnussel@suse.de
 
 - compare edition instead of pointer when determining whether an inconsistent
