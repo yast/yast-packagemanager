@@ -76,24 +76,33 @@ class InstTarget: virtual public Rep, public InstData {
 
   private:
 
-    friend class Y2PM;
-    // no parameters here since Y2PM creates it on first access
-    // and there's no way to pass parameters -> see init()
-    InstTarget();
-    ~InstTarget();
-
-    PkgArch _base_arch;
-
     /**
      * The name of the install root.
      **/
     Pathname _rootdir;
 
-
-    /** rpm database */
+    /**
+     * Rpm database
+     ***/
     RpmDbPtr _rpmdb;
 
-  public:
+    /**
+     * Products database
+     **/
+    InstTargetProdDBPtr _proddb;
+
+    /**
+     * Selection database
+     **/
+    InstTargetSelDBPtr _seldb;
+
+  private:
+
+    friend class Y2PM;
+    // no parameters here since Y2PM creates it on first access
+    // and there's no way to pass parameters -> see init()
+    InstTarget();
+    ~InstTarget();
 
     /**
      * Initialize target system. Takes necessary action to make installation,
@@ -104,63 +113,50 @@ class InstTarget: virtual public Rep, public InstData {
      * inside the target. But might be "/mnt" during installation
      * (running in inst-sys) or "/whatever" if installing into
      * a directory
-     * @param createnew create a new (e.g. rpm-) database if none is present.
-     * It is safe to alwas use true here.
      **/
-    PMError init( const Pathname & rootpath, bool createnew = true );
+    PMError init( const Pathname & rootpath );
 
-
-    /**
-     * Finish target system. Close all databases, logflies etc.
-     **/
-    PMError finish();
+  public:
 
     /**
-     * @return destination root directory of target system
+     * Determine target system architecture.
      **/
-    const std::string& getRoot() const;
+    static PkgArch baseArch();
 
     /**
-     * determine target system architecture
+     * @return The name of the install root. Empty path if not
+     * initialized.
      **/
-    PkgArch baseArch ();
+    const Pathname & rootdir() const { return _rootdir; }
+
+    /**
+     * @return Whether the target is initialized.
+     **/
+    bool initialized() const { return( ! _rootdir.empty() ); }
+
+    /**
+     * @return Whether some data on target changed and should be reread.
+     * (e.g. rpm database after install/delete) (<B>NOTE:</B> returns
+     * false, if not initialized).
+     **/
+    bool needsUpdate() const;
 
     /**
      * bring target into a clean state e.g. by calling rpm --rebuilddb
      **/
     PMError bringIntoCleanState();
 
-
-    //-----------------------------
-    // general functions
-
-    /**
-     * set log file for installation
-     *
-     * @return false if opening the file failed
-     **/
-    bool setInstallationLogfile(const std::string& logfile);
-
-    /**
-     * clean up, e.g. remove all caches
-     **/
-    bool Erase();
-
-    //-----------------------------
-    // InstData interface
-    // target content access
-
     /**
      * generate PMPackage objects for each Item on the source/target
      * @return list of PMPackagePtr on this source
      **/
-    virtual const std::list<PMPackagePtr>& getPackages (void) const;
+    virtual const std::list<PMPackagePtr> & getPackages() const;
 
     /**
      * generate PMYouPatch objects for each patch on the source
      * @return list of PMYouPatchPtr on this source
      **/
-    virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
+    virtual const std::list<PMYouPatchPtr> & getPatches() const;
 
     ///////////////////////////////////////////////////////////////////
     // Package related interface
@@ -196,6 +192,13 @@ class InstTarget: virtual public Rep, public InstData {
 
     //-----------------------------
     // package install / remove
+
+    /**
+     * set log file for installation
+     *
+     * @return false if opening the file failed
+     **/
+    bool setInstallationLogfile(const std::string& logfile);
 
     /**
      * set backup dir for rpm config files
@@ -353,13 +356,6 @@ class InstTarget: virtual public Rep, public InstData {
     ///////////////////////////////////////////////////////////////////
     // Product related interface
     ///////////////////////////////////////////////////////////////////
-  private:
-
-    /**
-     * Products database
-     **/
-    InstTargetProdDBPtr _proddb;
-
   public:
 
     /**
@@ -396,13 +392,6 @@ class InstTarget: virtual public Rep, public InstData {
     ///////////////////////////////////////////////////////////////////
     // Selection related interface
     ///////////////////////////////////////////////////////////////////
-
-  private:
-    /**
-     * Selection database
-     **/
-    InstTargetSelDBPtr _seldb;
-
   public:
 
     /**

@@ -29,6 +29,7 @@
 #include <y2pm/Y2PMCallbacks.h>
 
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstTargetError.h>
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
@@ -57,8 +58,8 @@ static LangCode getLangEnvironment()
     if (lang == 0)
 	return LangCode ("en");
     string langstr (lang);
-// segfaults -- ln
-//    MIL << "LANG=" << langstr << endl;
+    // segfaults -- ln
+    //    MIL << "LANG=" << langstr << endl;
     string::size_type sizepos = langstr.find ("@");	// cut off "@"
     if (sizepos != string::npos)
 	langstr = langstr.substr (0, sizepos);
@@ -74,8 +75,7 @@ static LangCode getLangEnvironment()
 #warning MUST INIT GLOBAL SETTINGS
 #warning Provide a serial number for localesttings. DP could cache localedependent data.
 
-Pathname Y2PM::_instTarget_rootdir( "/" );
-Pathname Y2PM::_system_rootdir    ( "/" );
+Pathname Y2PM::_system_rootdir( "/" );
 bool Y2PM::_cache_to_ramdisk( true );
 LangCode Y2PM::_preferred_locale (getLangEnvironment());
 std::list<LangCode> Y2PM::_requested_locales;
@@ -153,16 +153,19 @@ void Y2PM::packageSelectionClearSaveState() {
 
 ///////////////////////////////////////////////////////////////////
 
-PkgArch
-Y2PM::baseArch(void)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::baseArch
+//	METHOD TYPE : PkgArch
+//
+PkgArch Y2PM::baseArch()
 {
 #warning TBD init _base_arch from product
-    if (((const std::string &)_base_arch).empty())
-    {
-	_base_arch = instTarget().baseArch();
-    }
-
-    return _base_arch;
+  if ( _base_arch->empty() ) {
+    _base_arch = InstTarget::baseArch();
+  }
+  return _base_arch;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -171,47 +174,101 @@ Y2PM::baseArch(void)
 //	METHOD NAME : Y2PM::instTarget
 //	METHOD TYPE : InstTarget &
 //
-InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
+InstTarget & Y2PM::instTarget()
 {
-    if ( !_instTarget )
-    {
-	MIL << "Launch InstTarget..." << endl;
-	_instTarget = new InstTarget ();
-	MIL << "Created InstTarget" << endl;
-    }
-
-    if (do_start)
-    {
-	MIL << "Init InstTarget at '" << root << "'..." << endl;
-	_instTarget_rootdir = root;
-	PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
-	if( dbstat != PMError::E_ok )
-	{
-	    ERR << "error initializing target: " << dbstat << endl;
-#warning error value dropped
-	}
-	else
-	{
-	    // this will start the package manager
-	    Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
-	    // this will start the Selection manager
-	    Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections () );
-	}
-    }
-
-    return *_instTarget;
+  if ( !_instTarget ) {
+    MIL << "Launch InstTarget..." << endl;
+    _instTarget = new InstTarget();
+    MIL << "Created InstTarget" << endl;
+  }
+  return *_instTarget;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : Y2PM::instTargetFinish
-//	METHOD TYPE : void
+//	METHOD NAME : Y2PM::instTargetInit
+//	METHOD TYPE : PMError
 //
-void Y2PM::instTargetFinish()
+PMError Y2PM::instTargetInit( Pathname root_r )
 {
-  if ( _instTarget ) {
+  PMError err;
+
+  if ( instTarget().initialized() ) {
+
+    if ( ! root_r.empty() && root_r != instTarget().rootdir() ) {
+      err = InstTargetError::E_already_initialized;
+      ERR << "Init InstTarget at '" << root_r << "' failed: " << err << " (" << instTarget().rootdir() << ")" << endl;
+    }
+
+  } else {
+
+    // initialize target
+    if ( root_r.empty() ) {
+      root_r = "/";
+    }
+    MIL << "Init InstTarget at '" << root_r << "'..." << endl;
+    err = instTarget().init( root_r );
+
+    if ( err ) {
+      ERR << "Init InstTarget at '" << root_r << "' returned " << err << endl;
+
+    } else {
+      MIL << "InstTarget initialized at '" << root_r << "'" << endl;
+
+      // provide data to already existing managers
+      if ( _packageManager ) {
+	_packageManager->poolSetInstalled( instTarget().getPackages() );
+      }
+      if ( _selectionManager ) {
+	_selectionManager->poolSetInstalled( instTarget().getSelections() );
+      }
+    }
+
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::instTargetUpdate
+//	METHOD TYPE : PMError
+//
+PMError Y2PM::instTargetUpdate()
+{
+  MIL << "InstTarget Update ..." << endl;
+  packageManager();               // make shure it exists
+  selectionManager();             // make shure it exists
+  PMError err = instTargetInit(); // make shure its initialized
+  if ( err ) {
+    return err;
+  }
+  if ( instTarget().needsUpdate() ) {
+    // getPackages() will reread data:
+    packageManager().poolSetInstalled( instTarget().getPackages() );
+
+    // Currently selections need not to be handled here, they are
+    // are handled in CommitPackages and the Selection manager keeps
+    // data uptodate.
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::instTargetClose
+//	METHOD TYPE : PMError
+//
+PMError Y2PM::instTargetClose()
+{
+  if ( _instTarget && instTarget().initialized() ) {
     MIL << "Shutdown InstTarget..." << endl;
+
+    // withdraw data from already existing managers
     if ( _packageManager ) {
       std::list<PMPackagePtr> empty;
       _packageManager->poolSetInstalled( empty );
@@ -220,7 +277,11 @@ void Y2PM::instTargetFinish()
       std::list<PMSelectionPtr> empty;
       _selectionManager->poolSetInstalled( empty );
     }
-    instTarget().finish();
+
+    // close target
+    delete _instTarget;
+    _instTarget = 0;
+
     MIL << "InstTarget down" << endl;
   }
 }
@@ -256,7 +317,7 @@ InstSrcManager & Y2PM::instSrcManager()
 {
   if ( !_instSrcManager ) {
     MIL << "Launch InstSrcManager..." << endl;
-    _instSrcManager = new InstSrcManager ();
+    _instSrcManager = new InstSrcManager;
     MIL << "Created InstSrcManager @" << _instSrcManager << endl;
   }
   return *_instSrcManager;
@@ -277,7 +338,9 @@ PMPackageManager & Y2PM::packageManager()
     MIL << "Launch PackageManager..." << endl;
     _packageManager = new PMPackageManager;
     MIL << "Created PackageManager @" << _packageManager << endl;
-
+    if ( _instTarget && instTarget().initialized() ) {
+      packageManager().poolSetInstalled( instTarget().getPackages() );
+    }
   }
   return *_packageManager;
 }
@@ -296,6 +359,9 @@ PMSelectionManager & Y2PM::selectionManager()
     MIL << "Launch SelectionManager..." << endl;
     _selectionManager = new PMSelectionManager;
     MIL << "Created SelectionManager @" << _selectionManager << endl;
+    if ( _instTarget && instTarget().initialized() ) {
+      selectionManager().poolSetInstalled( instTarget().getPackages() );
+    }
   }
   return *_selectionManager;
 }
@@ -755,6 +821,9 @@ static int internal_commitPackages( unsigned mediaNr_r,
   // or after any packages. Doing it before has the benefit, that the
   // selection DB reflects what the user wanted. In case of trouble it
   // should be easier to check and manualy repair.
+  //
+  // But we could thing about moving it to instTargetUpdate().
+  //
   ///////////////////////////////////////////////////////////////////
   {
     PMError res = Y2PM::selectionManager().installOnTarget();

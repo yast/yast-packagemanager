@@ -1,7 +1,18 @@
 -------------------------------------------------------------------
+Sun Sep  7 13:30:53 CEST 2003 - ma@suse.de
+
+- Fixed instTargetInit and instTargetClose to properly
+  setup and shutdoen target and any existing managers.
+  Prepared instTargetUpdate to reread rpm databes and
+  propagate changes to an existing package manager. Still open,
+  whether this can be done automaticaly on commitPackages.
+  (#29679 partially)
+- 2.8.10
+
+-------------------------------------------------------------------
 Mon Sep  1 17:26:24 CEST 2003 - cschum@suse.de
 
-- Add missing options to sysconfig template. 
+- Add missing options to sysconfig template.
 
 -------------------------------------------------------------------
 Mon Sep 01 15:26:36 CEST 2003 - arvin@suse.de

@@ -54,90 +54,17 @@ extern "C" {
 using namespace std;
 using namespace InstTargetCallbacks;
 
-/**
- * constructor
- * @param rootpath, path to root ("/") of target system
- * Usually "/" if the InstTarget object is actually running
- * inside the target. But might be "/mnt" during installation
- * (running in inst-sys) or "/whatever" if installing into
- * a directory
- */
-InstTarget::InstTarget ( )
-    : _rpmdb( new RpmDb() )
-    , _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE)
-    , _rpmremoveflags(RpmDb::RPMINST_NODEPS)
-    , _patchesInitialized( false )
-    , _proddb( new InstTargetProdDB )
-    , _seldb( new InstTargetSelDB )
-{
-}
-
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstTarget::~InstTarget
-//	METHOD TYPE : Destructor
+//	METHOD NAME : InstTarget::baseArch
+//	METHOD TYPE : PkgArch
 //
-//	DESCRIPTION :
-//
-InstTarget::~InstTarget()
+PkgArch InstTarget::baseArch()
 {
-}
+    static PkgArch _base_arch;
 
-PMError InstTarget::init ( const Pathname & rootpath, bool createnew)
-{
-#warning Deprecated argument createnew in InstTarget::init
-    _rootdir = rootpath;
-
-    _proddb->open( _rootdir, createnew );
-    _seldb->open( _rootdir, createnew );
-
-    return _rpmdb->initDatabase( _rootdir );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstTarget::finish
-//	METHOD TYPE : PMError
-//
-PMError InstTarget::finish()
-{
-  _rpmdb->setInstallationLogfile("");
-  PMError ret = _rpmdb->closeDatabase();
-  _rootdir = "";
-  return ret;
-}
-
-PMError InstTarget::bringIntoCleanState()
-{
-    return _rpmdb->rebuildDatabase();
-}
-
-//-----------------------------
-// general functions
-
-/**
- * clean up, e.g. remove all caches
- */
-bool
-InstTarget::Erase()
-{
-    //TODO
-    D__ << std::endl;
-    return false;
-}
-
-
-/**
- * get target base architecture
- *
- *
- */
-PkgArch
-InstTarget::baseArch ()
-{
-    if (((const std::string)_base_arch).empty())
+    if ( _base_arch->empty() )
     {
 	char *argv[3] = { "uname", "-m", 0 };
 	ExternalProgram process (argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
@@ -154,7 +81,6 @@ InstTarget::baseArch ()
 	    else
 		_base_arch = PkgArch (output);
 	}
-	MIL << "_base_arch '" << _base_arch << "'" << endl;
 
 	// some CPUs report i686 but dont implement cx8 and cmov
 	// check for both flags in /proc/cpuinfo and downgrade
@@ -190,20 +116,92 @@ InstTarget::baseArch ()
 	    } // proc/cpuinfo opened
 	} // i686 extra flags check
 
+	MIL << "Base_arch: '" << _base_arch << "'" << endl;
     } // _base_arch empty
 
     return _base_arch;
 }
 
-//-----------------------------
-// target content access
+///////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::InstTarget
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+InstTarget::InstTarget ( )
+    : _rpmdb( new RpmDb() )
+    , _proddb( new InstTargetProdDB )
+    , _seldb( new InstTargetSelDB )
+    , _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE)
+    , _rpmremoveflags(RpmDb::RPMINST_NODEPS)
+    , _patchesInitialized( false )
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::~InstTarget
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+InstTarget::~InstTarget()
+{
+  _rpmdb->setInstallationLogfile("");
+  _rpmdb->closeDatabase(); // to be shure
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::init
+//	METHOD TYPE : PMError
+//
+PMError InstTarget::init( const Pathname & rootpath )
+{
+#warning Deprecated argument createnew in InstTarget::init
+    _rootdir = rootpath;
+
+    _proddb->open( _rootdir );
+    _seldb->open( _rootdir );
+
+    return _rpmdb->initDatabase( _rootdir );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::needsUpdate
+//	METHOD TYPE : bool
+//
+bool InstTarget::needsUpdate() const
+{
+  if ( ! initialized() )
+    return false;
+  return( !_rpmdb->packagesValid() );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::bringIntoCleanState
+//	METHOD TYPE : PMError
+//
+PMError InstTarget::bringIntoCleanState()
+{
+    return _rpmdb->rebuildDatabase();
+}
 
 /**
  * generate PMPackage objects for each Item on the target
  * @return list of PMPackagePtr on this target
  * */
-const std::list<PMPackagePtr>&
+const std::list<PMPackagePtr> &
 InstTarget::getPackages (void) const
 {
     return _rpmdb->getPackages();
@@ -220,7 +218,7 @@ InstTarget::getPatches (void) const
         PMYouPatchPathsPtr paths( new PMYouPatchPaths );
         PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo( paths ) );
 
-        string u = "dir://" + ( getRoot() + paths->installDir() ).asString();
+        string u = "dir://" + ( rootdir() + paths->installDir() ).asString();
         paths->setPatchServer( PMYouServer( u ) );
         paths->setPatchPath( "" );
         PMError error = patchInfo->readDir( _patches, false, false, false );
@@ -323,27 +321,16 @@ PMError InstTarget::removePackages (const std::list<PMPackagePtr>& packages, uns
     return err;
 }
 
-const std::string& InstTarget::getRoot() const
+bool InstTarget::setInstallationLogfile( const string & logfile )
 {
-    return _rootdir.asString();
-}
-
-bool InstTarget::setInstallationLogfile(const std::string& logfile)
-{
-#warning DIRTY HACK TO FINISH TARGET on logfile close.
-  if ( logfile.empty() ) {
-    Y2PM::instTargetFinish();
-    return true;
-  }
-  return _rpmdb->setInstallationLogfile(logfile);
+  return _rpmdb->setInstallationLogfile( logfile );
 }
 
 PMError InstTarget::installPatch( const Pathname &filename )
 {
     PMYouPatchPaths paths;
 
-    Pathname dest = getRoot();
-    dest += paths.installDir();
+    Pathname dest = rootdir() + paths.installDir();
 
     int err = PathInfo::assert_dir( dest );
     if ( err ) {
@@ -566,8 +553,8 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 {
   std::set<PkgDuMaster::MountPoint> ret;
 
-  if ( _rootdir.empty() ) {
-    INT << "InstTarget not yet initialized (empty rootdir)" << endl;
+  if ( ! initialized() ) {
+    INT << "InstTarget not yet initialized." << endl;
   } else {
     ifstream procmounts( "/proc/mounts" );
 

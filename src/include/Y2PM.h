@@ -55,8 +55,6 @@ class Y2PM {
     // global settings
     ///////////////////////////////////////////////////////////////////
 
-    static Pathname _instTarget_rootdir;
-
     static Pathname _system_rootdir;
 
     static bool _cache_to_ramdisk;
@@ -98,6 +96,7 @@ class Y2PM {
     /**
      * Access to the preferred locale
      **/
+
     static const LangCode & getPreferredLocale () { return _preferred_locale; }
     static void setPreferredLocale (const LangCode & preferred_locale) { _preferred_locale = preferred_locale; }
 
@@ -119,21 +118,6 @@ class Y2PM {
     static void setAllowedArchs(const std::list<PkgArch>& allowed_archs) { _allowed_archs = allowed_archs; }
 
     /**
-     * The local machine's rootdir. "/" if running from system.
-     * Something like "/mnt" during installation/update or "" (empty),
-     * if system root was not yet mounted.
-     *
-     * Not necessarily the same as _instTarget_rootdir (e.g. if we'd install into a
-     * local directory).
-     **/
-    //static const Pathname & systemRoot() { return _system_rootdir; }
-
-    /**
-     *
-     **/
-    //static bool haveSystem() { return ! _system_rootdir.empty(); }
-
-    /**
      * If false, root is ramdisk, and system to install is (or will be) mounted
      * below _system_rootdir. Need to know this e.g. in InstSrc to determine,
      * wheter to write a chache on 'enable' or to wait until system to be installed
@@ -152,17 +136,47 @@ class Y2PM {
   public:
 
     /**
-     * Access to the installation target
-     * if do_start == true, start the target at root
-     * and also !!START THE packageManager!!
+     * Access to the installation target. Target is uninitialized
+     * untill @ref instTargetInit and after @ref instTargetClose.
      **/
-    static InstTarget & instTarget(bool do_start = false, Pathname root = Pathname("/"));
+    static InstTarget & instTarget();
 
+    /**
+     * Initialize the installation target to use the system located
+     * below root_r.
+     * If the installation target is already initialized, a provided
+     * root_r must match the root path in use, otherwise an error is
+     * returned.
+     * If no root_r (or an empty path) is provided, an already initialized
+     * target is used, otherwise it's initialized to use "/".
+     *
+     * If the installation target actually gets initialized, packages
+     * and selections are loaded into already existing managers. Otherwise
+     * managers will retrieve their data as they are created.
+     *
+     * Use @ref instTargetUpdate if you want to make shure, that
+     * installation target and managers exist and are up to date.
+     **/
+    static PMError instTargetInit( Pathname root_r = "" );
 
      /**
-      * Shutdown access to the installation target.
+      * Make shure, that installation target is initialized
+      * and managers exist. Check whether databases on target
+      * need to be reread, and load the updated content into
+      * the managers.
+      *
+      * <B>NOTE:</B> If the installation target has to use some
+      * other location than "/", make shure you explicitly call
+      * @ref instTargetInit before.
       **/
-   static void instTargetFinish();
+    static PMError instTargetUpdate();
+
+     /**
+      * Shutdown access to the installation target. Provided packages
+      * and selections will be withdrawn from existing managers.
+      **/
+    static PMError instTargetClose();
+
 
     /**
      * Special call to create the instSrcManager (if it does not

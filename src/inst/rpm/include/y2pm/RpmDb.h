@@ -204,9 +204,17 @@ class RpmDb: virtual public Rep
   public:
 
     /**
+     * @return Whether the list of installed packages is valid, or
+     * you'd better reread it. (<B>NOTE:</B> returns valid, if not
+     * initialized).
+     **/
+    bool packagesValid() const;
+
+    /**
      * If necessary build, and return the list of all installed packages.
      **/
     const std::list<PMPackagePtr> & getPackages();
+
 
     /**
      * Hack to lookup required and conflicting file relations.
