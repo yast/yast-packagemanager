@@ -243,9 +243,9 @@ class PMSolvable : virtual public Rep {
     std::string nameEd() const { return (const std::string &)_name + '-' + _edition.asString(); }
 
     /**
-     * Returns "name-version-release-arch" string
+     * Returns "name-version-release.arch" string
      **/
-    std::string nameEdArch() const { return nameEd() + '-' + (const std::string &)_arch; }
+    std::string nameEdArch() const { return nameEd() + '.' + (const std::string &)_arch; }
 
     /**
      * access methods for dependencies
