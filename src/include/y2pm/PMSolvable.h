@@ -26,6 +26,7 @@
 
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
+#include <y2pm/PkgArch.h>
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PkgAttributeValue.h>
 
@@ -56,6 +57,7 @@ class PMSolvable : virtual public Rep {
 	ATTR_NAME = PMSLV_ATTR_BEGIN,
 	ATTR_VERSION,
 	ATTR_RELEASE,
+	ATTR_ARCH,
 	ATTR_REQUIRES,
 	ATTR_PREREQUIRES,
 	ATTR_PROVIDES,
@@ -133,9 +135,10 @@ class PMSolvable : virtual public Rep {
 
   protected:
 
-    // name and edition
+    // name, edition, and architecture
     PkgName _name;
     PkgEdition _edition;
+    PkgArch _arch;
 
     // relations of the package
     PkgRelList_type _requires, _conflicts, _provides, _obsoletes, _prerequires;
@@ -145,7 +148,8 @@ class PMSolvable : virtual public Rep {
     PMSolvable();
 
     PMSolvable( const PkgName& name,
-		const PkgEdition& edition);
+		const PkgEdition& edition,
+		const PkgArch& arch);
 
     virtual ~PMSolvable();
 
@@ -209,6 +213,7 @@ class PMSolvable : virtual public Rep {
     // access methods for components
     const PkgName& name() const { return _name; }
     const PkgEdition& edition() const { return _edition; }
+    const PkgArch& arch() const { return _arch; }
     const PkgRelList_type& requires() const { return _requires; }
     const PkgRelList_type& prerequires() const { return _prerequires; }
     const PkgRelList_type& conflicts() const { return _conflicts; }

@@ -50,6 +50,7 @@ class PMSelection : virtual public Rep, public PMObject {
       ATTR_VISIBLE,
       ATTR_INSTALL,
       ATTR_DELETE,
+      ATTR_ARCHIVESIZE,
       // last entry:
       SEL_NUM_ATTRIBUTES
     };

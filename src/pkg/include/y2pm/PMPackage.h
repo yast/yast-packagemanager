@@ -28,7 +28,6 @@
 #include <y2pm/PMPackagePtr.h>
 
 #include <y2pm/PMObject.h>
-#include <y2pm/PkgArch.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -58,7 +57,6 @@ class PMPackage : virtual public Rep, public PMObject {
       ATTR_CHANGELOG,
       ATTR_URL,
       ATTR_OS,
-      ATTR_ARCH,
       ATTR_PREIN,
       ATTR_POSTIN,
       ATTR_PREUN,
@@ -98,8 +96,6 @@ class PMPackage : virtual public Rep, public PMObject {
 
   protected:
 
-    PkgArch _arch;
-
     PMPackageDataProviderPtr _dataProvider;
 
   public:
@@ -117,10 +113,6 @@ class PMPackage : virtual public Rep, public PMObject {
 	       PMPackageDataProviderPtr dataProvider_r );
 
     virtual ~PMPackage();
-
-  public:
-
-    const PkgArch & arch() const { return _arch; }
 
   public:
 
