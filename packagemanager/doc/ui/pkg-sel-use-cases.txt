@@ -1,0 +1,144 @@
+		     Use Cases for YaST2 Package Selection
+		    =======================================
+
+Author:  Stefan Hundhammer <sh@suse.de>
+Updated: 2002-07-04
+
+
+FRESH INSTALLATION
+------------------
+
+* User selects an RPM group
+
+-> Return a list of all pkgs belonging to that RPM group,
+   i.e. apply a filter "matches RPM group"
+
+
+* User toggles pkg state from "don't install" to "install"
+
+-> Set pkg status to "install" for that pkg
+-> Automatically select all pkgs required by this pkg
+-> check dependencies
+   -> report dependency conflicts
+
+
+* User toggles pkg state from "install" to "don't install"
+
+-> Set pkg status to "dont'install" for that pkg
+   (?) -> Automatically deselect all automatically selected pkgs required only
+	  by this pkg
+-> check dependencies
+   -> report dependency conflicts
+
+
+* User requests long pkg info
+
+-> Obtain long pkg info from installation medium.
+   This info may or may not be HTML-formatted - return the type as well.
+
+
+* User requests multimedia pkg info
+
+-> Obtain additional multimedia info (images, sounds, videos) from the
+   installation medium (maybe only their location)
+
+
+* User requests technical pkg info
+
+-> Obtain technical pkg info from installation medium
+   Inserting the corresponding medium may be required if the cached pkg
+   data base doesn't already contain this info (similar to "rpm -qi")
+
+
+* User requests "pkgs required by this pkg"
+
+-> Return dependencies of this pkg as a tree:
+   Direct requirements in the first tree level, indirect req. in deeper levels
+
+
+* User requests "pkgs requiring this pkg"
+
+-> Return dependencies of this pkg as a tree:
+   Direct requirements in the first tree level, indirect req. in deeper levels
+
+
+UPDATE
+------
+
+* User toggles pkg state from "installed" to "update" (or "replace")
+
+-> Set pkg status to "update" / "replace" for that pkg
+-> Automatically select all pkgs required by this pkg
+-> check dependencies
+   -> report dependency conflicts
+
+
+
+* User toggles pkg state from "update" / "replace" to "installed"
+
+-> Set pkg status to "installed" ("don't modify") for that pkg
+   (?) -> Automatically set status to "installed" as well for all automatically
+          selected pkgs required only  by this pkg
+	  (maybe ask for confirmation?)
+-> check dependencies
+   -> report dependency conflicts
+
+
+* User toggles pkg state from "update" to "delete"
+
+-> Set pkg status to "delete" for that pkg
+   (?) -> Automatically deselect all automatically selected pkgs required only
+	  by this pkg - ask for confirmation first!
+-> check dependencies
+   -> report dependency conflicts
+
+
+MISC
+----
+
+* User toggles pkg state from "install" or "don't install" to "exclude"
+
+-> Set pkg status to "exclude" for that pkg -
+   this pkg will be treated very much the same as not present for all future
+   dependency checks
+
+-> check dependencies
+   -> Set pkg status to "automatically deselected" for all pkgs requiring
+      this pkg
+   -> report dependency conflicts
+
+
+* User toggles pkg state from "installed" or "update" to "exclude"
+
+-> Set pkg status to "exclude" for that pkg -
+   this pkg will be treated very much the same as not present for all future
+   dependency checks
+
+-> Prepare to delete this pkg
+
+-> check dependencies
+   -> Set pkg status to "automatically deselected" or "automatically deleting"
+   for all pkgs requiring this pkg
+   -> report dependency conflicts
+
+
+
+
+ADVANCED
+--------
+
+* User requests to filter by key words
+
+-> Apply key word filter; return a list of all pkgs that contain those key
+   words
+
+
+
+INIT PHASE
+----------
+
+* Return list of known RPM group tags
+
+* Return list of known key words
+
+* Return list of supported MIME types

@@ -1,0 +1,566 @@
+#!/usr/bin/perl -w
+#
+#  create_you_patch - Create YOU patch files and corresponding directory tree
+#
+#  Copyright (c) 2003 SuSE Linux AG
+#
+#  Author: Cornelius Schumacher <cschum@suse.de>
+
+use strict;
+
+use File::Basename;
+use File::Copy;
+use File::stat;
+use Getopt::Long;
+use Data::Dumper;
+
+my ( $outputDir, $copyRpms, $productName, $productVersion, $gpgSign,
+     $baseArch, $patchFile, $patchName, $patchSummary, $patchDescription, $patchVersion,
+     $patchKind, $patchUpdateOnlyInstalled, $help, $dummysignature, $dump );
+
+my $patchSize = 0;
+
+sub assertDir($);
+sub printPatchFile($);
+sub Rpm($);
+
+my %RPMTAG = (
+  NAME => 1000,
+  VERSION => 1001,
+  RELEASE => 1002,
+  BUILDTIME => 1006,
+#  PAYLOADFORMAT => 1124,
+#  PAYLOADCOMPRESSOR => 1125,
+  PROVIDENAME => 1047,
+  PROVIDEFLAGS => 1112,
+  PROVIDEVERSION => 1113,
+  REQUIREFLAGS	 => 1048,
+  REQUIRENAME	 => 1049,
+  REQUIREVERSION => 1050,
+  CONFLICTFLAGS => 1053,
+  CONFLICTNAME	 => 1054,
+  CONFLICTVERSION => 1055,
+  OBSOLETENAME	 => 1090,
+  OBSOLETEFLAGS => 1114,
+  OBSOLETEVERSION => 1115,
+  SUMMARY => 1004,
+  SIZE => 1009,
+  ARCH => 1022,
+  GROUP => 1016,
+  LICENSE => 1014,
+#  DESCRIPTION => 1005,
+);
+
+my $RPMSENSE_LESS = (1 << 1);
+my $RPMSENSE_GREATER = (1 << 2);
+my $RPMSENSE_EQUAL = (1 << 3);
+
+GetOptions (
+  'outputdir=s' => \$outputDir,
+  'copyrpms' => \$copyRpms,
+  'productname=s' => \$productName,
+  'productversion=s' => \$productVersion,
+  'basearch=s' => \$baseArch,
+  'patchfile=s' => \$patchFile,
+  'patchname=s' => \$patchName,
+  'patchsummary=s' => \$patchSummary,
+  'patchversion=s' => \$patchVersion,
+  'kind=s' => \$patchKind,
+  'updateonlyinstalled' => \$patchUpdateOnlyInstalled,
+  'help' => \$help,
+  'dummysignature' => \$dummysignature,
+  'dump' => \$dump,
+  'sign' => \$gpgSign,
+);
+
+sub usage()
+{
+  print <<EOF;
+Usage: create_you_patch [options] filenames
+
+  Options:
+    --outputdir <dirname>       Base directory of patch tree
+    --copyrpms                  Copy RPMs to patch tree. You have to supply an
+                                outputdir when you use this option
+    
+    --productname <name>        Product name
+    --productversion <version>  Product version
+    --basearch <basearch>       Base architecture of product
+
+    --patchfile <filename>      Patch file name
+    --patchname <name>          Patch name
+    --patchversion <version>    Patch version
+    --patchsummary <summary>    Patch summary
+
+    --kind <kind>               Kind of patch. Possible values: YaST2,
+                                security, recommended, patchlevel, optional
+    
+    --updateonlyinstalled       Set the UpdateOnlyInstalled flag in the patch
+                                file
+    
+    --dummysignature            Create a dummy signature for testing purposes
+
+    --help                      Show this messages
+
+  Arguments:
+    filenames                   List of RPM files
+EOF
+  exit 1;
+}
+
+if ( $help ) { usage(); }
+
+my %rpms;
+foreach my $rpm ( @ARGV ) {
+  if ( !-e $rpm ) {
+    print STDERR "RPM file '$rpm' doesn't exist.\n";
+    exit 1;
+  }
+  my $fileInfo = `file $rpm`;
+  $fileInfo =~ /\:\s+RPM\s+\S+\s+(\S+)\s+/;
+  my $rpmType = $1;
+  if ( $rpmType ne "bin" ) { next; }
+
+  my $tags = Rpm($rpm);
+  print Dumper($tags) if($dump);
+  
+  $rpms{ $rpm }{ "FullName" } =    $tags->{NAME}[0]
+			      .'-'.$tags->{VERSION}[0]
+			      .'-'.$tags->{RELEASE}[0]
+			      .'.'.$tags->{ARCH}[0].'.rpm';
+  $rpms{ $rpm }{ "Name" } = $tags->{NAME}[0];
+  $rpms{ $rpm }{ "Version" } = $tags->{VERSION}[0];
+  $rpms{ $rpm }{ "Release" } = $tags->{RELEASE}[0];
+  $rpms{ $rpm }{ "Series" } = $tags->{ARCH}[0];
+  $rpms{ $rpm }{ "Size" } = $tags->{SIZE}[0];
+  $rpms{ $rpm }{ "Buildtime" } = $tags->{BUILDTIME}[0];
+  $rpms{ $rpm }{ "RpmGroup" } = $tags->{GROUP}[0];
+  $rpms{ $rpm }{ "Copyright" } = $tags->{LICENSE}[0];
+  $rpms{ $rpm }{ "ArchiveSize" } = stat( $rpm )->size();
+  $rpms{ $rpm }{ "Provides" } = join(' ', @{$tags->{PROVIDES}});
+  $rpms{ $rpm }{ "Requires" } = join(' ', @{$tags->{REQUIRES}});
+  $rpms{ $rpm }{ "Obsoletes" } = join(' ', @{$tags->{OBSOLETES}});
+  $rpms{ $rpm }{ "Conflicts" } = join(' ', @{$tags->{CONFLICTS}});
+  $rpms{ $rpm }{ "Label" } = $tags->{SUMMARY}[0];
+  $patchSummary = $tags->{SUMMARY}[0] unless ($patchSummary);
+#  $patchDescription = $tags->{DESCRIPTION}[0] unless ($patchDescription);
+
+  $patchSize += $rpms{ $rpm }{ "ArchiveSize" };
+}
+
+if ( $copyRpms && !$outputDir ) {
+  print STDERR "You have to supply an output directory with the --outputdir\n" .
+               "option when using the --copyrpm option.";
+  exit 1;
+}
+
+if ( $patchKind ) {
+  my @kinds = ( "recommended", "security", "YaST2", "patchlevel", "optional" );
+  my $valid;
+  foreach my $kind ( @kinds ) {
+    if ( $kind eq $patchKind ) { $valid = 1; }
+  }
+  if ( !$valid ) {
+    print STDERR "Illegal kind: '$patchKind'\n";
+    exit 1;
+  }
+} else {
+  $patchKind = "recommended";
+}
+
+my %shortDescription;
+if ( keys %shortDescription == 0 ) {
+  $shortDescription{ "english" } = $patchSummary;
+}
+
+$patchDescription = "$patchKind patch" unless ($patchDescription);
+my %longDescription;
+if ( keys %longDescription == 0 ) {
+  $longDescription{ "english" } = $patchDescription;
+}
+
+if ( $outputDir ) {
+  if ( !-e $outputDir ) {
+    print STDERR "Output directory '$outputDir' doesn't exist.\n";
+    exit 1;
+  }
+  if ( !-d $outputDir )  {
+    print STDERR "Output directory '$outputDir' isn't a directory.\n";
+    exit 1;
+  }
+
+  if ( !$baseArch ) { $baseArch = "i386"; }
+  if ( !$productName ) { $productName = "SuSE-Linux"; }
+  if ( !$productVersion ) { $productVersion = "9.1.42"; }
+
+  my $youPath = "$outputDir/$baseArch/update/";
+  if ( $productName ne "SuSE-Linux" ) { $youPath .= "$productName/"; }
+  $youPath .= "$productVersion/";
+
+  if ( !$patchFile ) {
+    $patchFile = "youpatch-" . int rand 100000;
+  }
+  
+  my $patchDir = $youPath . "patches/";
+  my $rpmDir = $youPath . "rpm/";
+
+  assertDir( $patchDir );
+  assertDir( $rpmDir );
+
+  my $patchPath = $patchDir . $patchFile;
+
+  printPatchFile( $patchPath );
+
+  my $dirFile = $patchDir . "directory.3";
+
+  my $patches;
+  my $found = 0;
+  if ( -e $dirFile ) {
+    if ( !open( DIR, "$dirFile" ) ) {
+      print STDERR "Warning: Unable to open '$dirFile' for reading.\n";
+    } else {
+      while( <DIR> ) {
+        $patches .= $_;
+        chop;
+        if ( $_ eq $patchFile ) {
+          $found = 1;
+        }
+      }
+      close DIR;
+    }
+  }
+  if ( !$found ) {
+    $patches .= "$patchFile\n";
+  }
+
+  if ( !open( DIR, ">$dirFile" ) ) {
+    print STDERR "Warning: Unable to open '$dirFile' for writing.\n";
+  } else {
+    print DIR $patches;
+    close DIR;
+  }
+
+  if ( $copyRpms ) {
+    foreach my $rpm ( keys %rpms ) {
+      my $arch = $rpms{ $rpm }{ 'Series' };
+      my $fullName = $rpms{ $rpm }{ 'FullName' };
+      my $to = $rpmDir . $arch;
+      assertDir( $to );
+      unlink("$to/$fullName");
+      copy($rpm, "$to/$fullName") or print STDERR "Unable to copy '$rpm' to '$to': $!\n";
+    }
+  }
+} else {
+  printPatchFile( $patchFile );
+}
+
+exit 0;
+
+sub assertDir($)
+{
+  my $dir = shift;
+
+  if ( -e $dir ) {
+    if ( !-d $dir ) {
+      print STDERR "Not a directory: '$dir'\n";
+      exit 1;
+    }    
+  } else {
+    if ( system( "mkdir -p $dir" ) != 0 ) {
+      print STDERR "Unable to create directory: '$dir'\n";
+      exit 1;
+    }
+  }
+}
+
+sub printPatchFile($)
+{
+  my $fileName = shift;
+
+  my $out = *STDOUT;
+
+  if ($gpgSign)
+  {
+    my $gpg = "|gpg --clearsign";
+    if($fileName)
+    {
+      $gpg .= " -o $fileName";
+    }
+
+    if ( !open OUT, $gpg ) {
+      print STDERR "Unable to start gpg: $!\n";
+      exit 1;
+    }
+    $out = *OUT;
+  }
+  elsif ( $fileName ) {
+    if ( !open OUT, ">$fileName" ) {
+      print STDERR "Unable to open '$fileName': $!\n";
+      exit 1;
+    }
+    $out = *OUT;
+  }
+
+  my $date = `date`;
+  chop $date;
+
+  if ( $dummysignature ) {
+    print $out <<EOF;
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+EOF
+  }
+
+  print $out "#\n# YOU patch description\n#\n";
+  print $out "# Patch created by create_you_patch at $date\n#\n\n";
+  print $out "Kind: $patchKind\n";
+  print $out "\n";
+  my $lang;
+  foreach $lang ( keys %shortDescription ) {
+    print $out "Shortdescription.$lang: $shortDescription{ $lang }\n";
+  }
+  print $out "\n";
+  foreach $lang ( keys %longDescription ) {
+    print $out "Longdescription.$lang:\n";
+    print $out "$longDescription{ $lang }\n";
+    my $revLang = &reverseString( $lang ); 
+    print $out "\u$revLang.noitpircsedgnol:\n\n";
+  }
+
+  print $out 'Size: '. ($patchSize>>10)  ."\n\n";
+
+  print $out "UpdateOnlyInstalled: " . ( $patchUpdateOnlyInstalled ? "true" : "false" );
+  print $out "\n\n";
+
+  if ( keys %rpms > 0 ) {
+    print $out "Packages:\n\n";
+    foreach my $rpm ( keys %rpms ) {
+      print $out "##\n";
+      print $out "## -----> $rpms{$rpm}{Name} <-----\n";
+      print $out "##\n";
+      print $out "Filename: $rpms{ $rpm }{ 'Name' }.rpm\n";
+      print $out "Version: $rpms{ $rpm }{ 'Version' }-$rpms{ $rpm }{ 'Release' }\n";
+      print $out "Size: $rpms{ $rpm }{ 'Size' } $rpms{ $rpm }{ 'ArchiveSize' }\n";
+      print $out "Provides: $rpms{ $rpm }{ 'Provides' }\n";
+      print $out "Requires: $rpms{ $rpm }{ 'Requires' }\n";
+      print $out "Obsoletes: $rpms{ $rpm }{ 'Obsoletes' }\n";
+      print $out "Conflicts $rpms{ $rpm }{ 'Conflicts' }\n";
+      for my $i ('Buildtime', 'Series', 'Label', 'Copyright', 'RpmGroup')
+      {
+	print $out $i.': '.$rpms{ $rpm }{ $i }."\n";
+      }
+      print $out "\n";
+    }
+    print $out "Segakcap:\n";
+  }
+
+  if ( $dummysignature ) {
+    print $out <<EOF;
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iEYEARECAAYFAj2UdDQACgkQqE7a6JyACspiEACfepua57QC/eCRROZk8E5NjGY+
+6HsAn1OlLu4/nef3M4G5qcHrZihn/WIS
+=iMY7
+-----END PGP SIGNATURE-----
+EOF
+  }
+
+  if ( $fileName || $gpgSign) { close OUT; }
+}
+
+sub reverseString($)
+{
+  my $string = shift;
+
+  my @string = split( //, $string );
+  return join( '', reverse @string );
+}
+
+# copied from create_package_descr copied from RPM.pm
+sub get_rpm_header($@)
+{
+  my $rpm = shift || return undef;
+  my @stags = @_;
+
+  my %stags = map {0+$_ => 1} @stags;
+
+  my ($magic, $sigtype, $headmagic, $cnt, $cntdata, $lead, $head, $index, $data, $tag, $type, $offset, $count);
+
+  local *RPM;
+  return undef unless open(RPM, "<$rpm");
+  if (read(RPM, $lead, 96) != 96) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+
+  ($magic, $sigtype) = unpack('N@78n', $lead);
+  if ($magic != 0xedabeedb || $sigtype != 5) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+
+  # signature header
+  if (read(RPM, $head, 16) != 16) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+  # how many signature?
+  ($headmagic, $cnt, $cntdata) = unpack('N@8NN', $head);
+  if ($headmagic != 0x8eade801) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+  # read signature index records (1 record = 16 bytes)
+  if (read(RPM, $index, $cnt * 16) != $cnt * 16) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+  $cntdata = ($cntdata + 7) & ~7;
+  if (read(RPM, $data, $cntdata) != $cntdata) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+
+  if (read(RPM, $head, 16) != 16) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+  ($headmagic, $cnt, $cntdata) = unpack('N@8NN', $head);
+  if ($headmagic != 0x8eade801) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+  if (read(RPM, $index, $cnt * 16) != $cnt * 16) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+  if (read(RPM, $data, $cntdata) != $cntdata) {
+    warn("Bad rpm $rpm\n");
+    close RPM;
+    return undef;
+  }
+  close RPM;
+
+  my %res = ();
+  while($cnt-- > 0) {
+    ($tag, $type, $offset, $count, $index) = unpack('N4a*', $index);
+    $tag = 0+$tag;
+    if ($stags{$tag}) {
+      eval {
+	if ($type == 0) {
+	  $res{$tag} = [ '' ];
+	} elsif ($type == 1) {
+	  $res{$tag} = [ unpack("\@${offset}c$count", $data) ];
+	} elsif ($type == 2) {
+	  $res{$tag} = [ unpack("\@${offset}c$count", $data) ];
+	} elsif ($type == 3) {
+	  $res{$tag} = [ unpack("\@${offset}n$count", $data) ];
+	} elsif ($type == 4) {
+	  $res{$tag} = [ unpack("\@${offset}N$count", $data) ];
+	} elsif ($type == 5) {
+	  $res{$tag} = [ undef ];
+	} elsif ($type == 6) {
+	  $res{$tag} = [ unpack("\@${offset}Z*", $data) ];
+	} elsif ($type == 7) {
+	  $res{$tag} = [ unpack("\@${offset}a$count", $data) ];
+	} elsif ($type == 8 || $type == 9) {
+	  my $d = unpack("\@${offset}a*", $data);
+	  my @res = split("\0", $d, $count + 1);
+	  $res{$tag} = [ splice @res, 0, $count ];
+	} else {
+	  $res{$tag} = [ undef ];
+	}
+      };
+      if ($@) {
+	warn("Bad rpm $rpm: $@\n");
+        return undef
+      }
+    }
+  }
+  return \%res;
+}
+
+sub evaldeps($$$$$)
+{
+  my @prov;
+  my $tags = shift;
+  my $dst = shift;
+  my $tag_name = shift;
+  my $tag_flags = shift;
+  my $tag_version = shift;
+
+  if(!exists $tags->{$tag_name})
+  {
+    $tags->{$dst} = \@prov;
+    return;
+  }
+  
+  my @n = @{$tags->{$tag_name}};
+  my @f = @{$tags->{$tag_flags}};
+  my @v = @{$tags->{$tag_version}};
+  my $i=0;
+
+  for($i=0; $i <= $#n; ++$i)
+  {
+    my $op = '';
+    my $flag = $f[$i];
+    if($flag != 0)
+    {
+      $op = '<' if (($flag & $RPMSENSE_LESS));
+      $op = '>' if (($flag & $RPMSENSE_GREATER));
+      $op .= '=' if (($flag & $RPMSENSE_EQUAL));
+    }
+    if($op ne '')
+    {
+      push @prov, $n[$i].' '.$op.' '.$v[$i];
+    }
+    else
+    {
+      push @prov, $n[$i];
+    }
+  }
+
+  $tags->{$dst} = \@prov;
+  delete $tags->{$tag_name};
+  delete $tags->{$tag_flags};
+  delete $tags->{$tag_version};
+}
+
+sub Rpm($)
+{
+  my $rpm = shift;
+  my @t;
+  foreach(keys %RPMTAG)
+  {
+    push @t, $RPMTAG{$_};
+  }
+  my $tags = get_rpm_header($rpm, @t);
+  
+  # turn numeric tags into readable form
+
+  evaldeps($tags, 'PROVIDES', $RPMTAG{PROVIDENAME}, $RPMTAG{PROVIDEFLAGS}, $RPMTAG{PROVIDEVERSION});
+  evaldeps($tags, 'REQUIRES', $RPMTAG{REQUIRENAME}, $RPMTAG{REQUIREFLAGS}, $RPMTAG{REQUIREVERSION});
+  evaldeps($tags, 'OBSOLETES', $RPMTAG{CONFLICTNAME}, $RPMTAG{CONFLICTFLAGS}, $RPMTAG{CONFLICTVERSION});
+  evaldeps($tags, 'CONFLICTS', $RPMTAG{OBSOLETENAME}, $RPMTAG{OBSOLETEFLAGS}, $RPMTAG{OBSOLETEVERSION});
+
+  foreach (keys %RPMTAG)
+  {
+    next unless (exists $tags->{$RPMTAG{$_}});
+    $tags->{$_} = $tags->{$RPMTAG{$_}};
+    delete $tags->{$RPMTAG{$_}};
+  }
+
+  return $tags;
+}

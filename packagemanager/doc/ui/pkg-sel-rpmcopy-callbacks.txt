@@ -1,0 +1,104 @@
+		    YaST2 Package Installation - Callbacks
+		   ========================================
+
+Author:  Stefan Hundhammer <sh@suse.de>
+Updated: 2002-06-18
+
+
+
+				  Parameters
+				  -----------
+
+All callbacks get identical parameters:
+
+    map callback( string callback_reason, map callback_data, map client_data );
+
+'callback_reason' is a string representation of the reason why this particular
+function is called as a callback - e.g. "download_pkg". Thus, the same function
+can be used for several different callbacks with only minor modifications.
+
+'callback_data' is a map that contains all other data specific to that
+particular callback. That map may be empty if the callback doesn't get any
+additional parameters. The callback is responsible for using reasonable
+defaults (if possible) if any of those map elements isn't present. In that
+case, a warning may be issued to the log file.
+
+'client_data' is an opaque map specified upon callback installation that is
+passed through "as is" for each invocation of the callback. This is intended
+for easier communication between the callback and the application frame.
+
+
+All callbacks return a map that contains a number of return parameters specific
+to the respective callback. This map may be empty if the callback doesn't
+return any value. The caller is responsible for using reasonable defaults (if
+possible) if any expected element in this map isn't present. In that case, a
+warning will be issued to the log file.
+
+
+
+				   Functions
+				   ---------
+
+All parameters specified here are really members of the 'callback_data'
+map. The return value will be embedded into the 'return' map. For 'void'
+functions, an empty map will be returned.
+
+
+** download pkg
+
+- void download_start		( string pkg_name, integer pkg_size, string server_name )
+- void download_done		()
+- void download_progress	( integer downloaded_size_so_far )
+
+
+** install pkg
+
+- void rpm_install_start	( string pkg_name, integer pkg_size, string inst_src_name )
+- void rpm_install_done		()
+- void rpm_install_progress	( integer percent )
+
+
+** uninstall pkg
+
+- void rpm_uninstall_start	( string pkg_name, integer pkg_size, string inst_src_name )
+- void rpm_uninstall_done	()
+- void rpm_uninstall_progress	( integer percent )
+
+
+** establish remote connection (FTP, HTTP, ...)
+
+- void connect_remote_start	( string server_name )
+- void connect_remote_done	( string server_name )
+
+
+
+
+** run YOU patch preinstall-script
+
+- void run_preinstall_start	( string you_patch_name )
+- void run_preinstall_done	( string you_patch_name )
+
+
+** run YOU patch postinstall-script
+
+
+- void run_postinstall_start	(  string you_patch_name )
+- void run_postinstall_done	(  string you_patch_name )
+
+
+
+** change media
+
+- symbol change_media		(  string media_type, integer expected_media_no, integer current_media_no )
+  -> `ok, `retry, `skip, `abort
+
+
+** errors
+
+- symbol download_error		(  string pkg_name, string server_name, string error_details )
+  -> `ok, `retry, `skip, `abort
+     ? `change_server
+
+- void disk_full		()
+
+- void unknown_rpm_error	()

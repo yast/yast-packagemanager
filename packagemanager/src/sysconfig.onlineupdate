@@ -1,0 +1,62 @@
+## Path:	System/Yast2/OnlineUpdate
+## Description:	YaST Online Update Configuration
+## Type:	yesno
+## Default:	yes
+#
+# While starting YOU ( YaST2-Online-Update ) the default server list will be
+# updated from a "master" server, usually www.suse.de. This list will be stored
+# under /var/lib/YaST2/you/youservers. User specific servers can be added to
+# /etc/youservers.
+# Set YAST2_LOADFTPSERVER to "no", if you do not want to reload the server list.
+#
+YAST2_LOADFTPSERVER="yes"
+
+## Type: yesno
+## Default: no
+#
+# If SLP_ENABLED is set to "yes", YOU will check via SLP (Service Location Protocol)
+# whether SLP servers, which provide YOU patches, are available. These servers
+# are added to the server list.
+#
+SLP_ENABLED="no"
+
+## Type: string
+## Default:
+#
+# Command line options which will be appended to the "online_update" command
+# used by the cron job set up with the "automatic update" option in the YOU GUI.
+#
+CMDLINE_OPTIONS=""
+
+## Type: yesno
+## Default: yes
+#
+# If set to "no" YOU will skip the patch selection page and will automatically
+# install all security and recommended patches for packages which are installed
+# on the system.
+#
+YOU_MANUAL_SELECTION="yes"
+
+## Type: yesno
+## Default: no
+#
+# If set to "yes" YOU will delete the downloaded RPM archives after installing
+# them to the system.
+#
+YOU_REMOVE_SOURCE_PACKAGES="yes"
+
+## Type: list(yes,no,filesystem)
+## Default: yes
+#
+# If set to "yes" YOU will try to download delta packages if
+# possible. You may need your installation media for this to work.
+#
+# If empty or set to 'filesystem' YOU will try to download delta packages that
+# apply to installed files. You don't need your installation media in this case
+# but might need to accept larger download sizes.
+#
+# If set to 'no' YOU will only use patch rpms and normal rpms.
+#
+# Note: you need to have the deltarpm tools installed to actually
+# make this work. Delta packages are only used via ftp and http.
+YOU_USE_DELTAS=""

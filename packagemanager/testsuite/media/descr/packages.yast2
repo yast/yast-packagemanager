@@ -1,0 +1,54 @@
+=Ver: 2.0
+##----------------------------------------
+=Pkg: yast2 2.6.26 5 i586
++Req:
+yast2-core
+yast2_ui
+yast2_theme
+/bin/bash
+/usr/bin/perl
+ld-linux.so.2
+libc.so.6
+libc.so.6(GLIBC_2.0)
+libc.so.6(GLIBC_2.1)
+libgcc_s.so.1
+libm.so.6
+libncurses.so.5
+libstdc++.so.5
+libstdc++.so.5(CXXABI_1.2)
+rpmlib(PayloadIsBzip2) <= 3.0.5-1
+-Req:
++Prq:
+rpmlib(PayloadIsBzip2) <= 3.0.5-1
+-Prq:
++Prv:
+yast
+yast2-lib-wizard
+yast2-lib-sequencer
+yast2-trans-wizard
+-Prv:
++Obs:
+yast
+yast2-lib-wizard
+yast2-lib-sequencer
+yast2-trans-wizard
+-Obs:
+=Loc: 1 yast2-2.6.26-5.i586.rpm
+=Siz: 194065 302225
+=Tim: 1029974001
+=Src: yast2 2.6.26 5 src
+=Grp: System/YaST
+=Lic: YaST License
++Aut:
+Michael Andres <ma@suse.de>
+Waldo Bastian <bastian@suse.de>
+Michael Hager <mike@suse.de>
+Stefan Hundhammer <sh@suse.de>
+Klaus Kaempf <kkaempf@suse.de>
+Mathias Kettner <kettner@suse.de>
+Thomas Roelz <tom@suse.de>
+Arvin Schnell <arvin@suse.de>
+Stefan Schubert <schubi@suse.de>
+Andreas Schwab <schwab@suse.de>
+Steffen Winterfeldt <snwint@suse.de>
+-Aut:

@@ -1,0 +1,150 @@
+<!-- URL definition -->
+<!-- Maintainer: kkaempf@suse.de -->
+<chapter><title>URL specification for media access</title>
+
+<section><title>Introduction</title>
+<para>
+The URL is a string representation for a media location.
+It specifies the physical access to the media. It does not
+make any assumptions about the media content.
+</para>
+</section>
+<section><title>General layout</title>
+<para>
+A media URL consists of four parts
+<itemizedlist>
+  <listitem><para>Media Type</para>
+    <para>Allowed types are cd, dvd, nfs, ftp, dir, disk, http</para>
+    <para>Types are not case sensitive</para>
+  </listitem>
+  <listitem><para>host setting</para>
+    <para>Used for systems which involve some kind of server. Its possible to
+    optinally add username, password and port parameters</para>
+  </listitem>
+  <listitem><para>Path on device or server, a simple unix path name</para></listitem>
+  <listitem><para>options</para>
+    <para>this is a type-specific semicolon-separated list of 'key=value'
+       pairs, e.g. 'devices=/dev/cdrom,/dev/cdrecorder' for cd
+       access </para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+Type and path are mandatory. Options and hostname settings can be
+left out.</para>
+<para>
+All media types except http, https and ftp have the option mountoptions in
+common. It's value is passed with the -o parameter to mount
+</para>
+</section>
+<section><title>CD access</title>
+<example>
+  <title>URL for CD access</title>
+  <para>
+  Default device if none specified is /dev/cdrom
+  <screen width="60">
+    cd:///suse
+    cd:///suse;devices=/dev/cdrom,/dev/cdrecorder
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>DVD access</title>
+<example>
+  <title>URL for DVD access</title>
+  <para>
+  Default device if none specified is /dev/dvd
+  <screen width="60">
+    dvd:///suse
+    dvd:///suse;devices=/dev/dvd,/dev/dvd1
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>NFS access</title>
+<example>
+  <title>URL for NFS access</title>
+  <para>
+  Hostname is mandatory and can be specified as name or IPv4
+  address. IPv6 is not supported atm.
+  <screen width="60">
+    nfs://nfs.suse.de/var/share/SuSE-Linux/CD1
+    nfs://12.34.56.78/
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>FTP access</title>
+<example>
+  <title>URL for FTP access</title>
+  <para>
+  Same rules as for NFS apply for hostname. Optionally username,
+  password and port can be specified. Addidional options are
+  proxyuser and proxypassword. These two options only take effect if
+  ftp_proxy is set to a http proxy in the environment.
+  <screen width="60">
+    ftp://ftp.suse.com/pub/suse/i386/8.0/suse
+    ftp://ftp:ftp@you.suse.de:21/pub/suse;proxyuser=fritz;proxypassword=gEhEiM
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>Directory access</title>
+<example>
+  <title>URL for local directory access</title>
+  <para>
+  <screen width="60">
+    dir:///local/directory
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>Disk partition access</title>
+<example>
+  <title>URL for DISK access</title>
+  <para>
+  Used to access partitions that have to be mounted. Options are
+  device and filesystem
+  <screen width="60">
+    disk:///suse/CD1;device=/dev/hda3;filesystem=xfs
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>HTTP access</title>
+<example>
+  <title>URL for HTTP access</title>
+  <para>
+  Same rules as for ftp access except the environment variable
+ http_proxy takes effect instead of ftp_proxy
+  <screen width="60">
+    http://disthost.mycompany.com:8080/suse
+  </screen>
+  </para>
+</example>
+<example>
+  <title>URL for HTTPS access</title>
+  <para>
+  Same as HTTP. Server certificate is not validated atm.
+  <screen width="60">
+    https://haegar@maintenance.suse.de/private/area/suse
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>SMB access</title>
+<example>
+  <title>URL for SMB access</title>
+  <para>
+  SMB access via smbfs. username and password must be present or the
+  mountoption guest has to be specified. password may
+  <emphasis>not</emphasis> contain commas.
+  <screen width="60">
+    smb://haegar:5ch3ck1ich@kiste/some/share
+  </screen>
+  </para>
+</example>
+</section>
+
+</chapter>
+

@@ -1,0 +1,2 @@
+rm -rf /tmp/tcache
+./test_content dir:/// `pwd`/media

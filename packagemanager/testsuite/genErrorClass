@@ -1,0 +1,187 @@
+#! /bin/bash
+PROG=$(basename $0)
+
+function Warn() {
+	echo "$PROG: $@" >&2
+}
+function Err() {
+	Warn "$@"
+	echo "Usage: $PROG ERRORCLASSNAME" >&2
+	echo "" >&2
+	echo "Create Error class for ERRORCLASSNAME. To work, register" >&2
+	echo "'C_{ERRORCLASSNAME}Error' in PMErrror. See PMError documentation. " >&2
+	echo "" >&2
+	echo "Created files: {ERRORCLASSNAME}Error.h {ERRORCLASSNAME}Error.cc" >&2
+	echo "" >&2
+	exit 1
+}
+function ChkExists() {
+	DOEXIT=
+	for f in "$@" ; do
+		test -e $f && {
+			Warn "File already exists: $f"
+			DOEXIT=1
+		}
+	done
+
+	test -n "$DOEXIT" && Err "Aborting"
+}
+
+test $# != 1 && Err "Incorrect number of arguments $#:'$@'"
+
+ERRCLASSNAME=$1
+CLASS=${ERRCLASSNAME}Error
+CH="${CLASS}.h"
+CC="${CLASS}.cc"
+
+ChkExists "$CH" "$CC"
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+function catLogo() {
+cat <<'EOF'
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                        (C) SuSE GmbH |
+\----------------------------------------------------------------------/
+EOF
+}
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CH"
+$(catLogo)
+
+  File:       ${CLASS}.h
+
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Definition of "${ERRCLASSNAME}" error values.
+
+/-*/
+#ifndef ${CLASS}_h
+#define ${CLASS}_h
+
+#include <iosfwd>
+
+#include <y2pm/PMError.h>
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : ${CLASS}
+/**
+ * @short Definition of "${ERRCLASSNAME}" error values.
+ * @see PMError
+ **/
+class ${CLASS} {
+
+  private:
+
+    friend class PMError;
+
+    static const std::string errclass;
+
+    static std::string errtext( const unsigned e );
+
+  public:
+
+    enum Error {
+      E_ok    = PMError::E_ok,         	// no error
+      E_error = PMError::C_${CLASS}	// some error
+      // more specific errors start here:
+    };
+    
+    friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
+      return str << PMError( obj );
+    }
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // ${CLASS}_h
+
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CC"
+$(catLogo)
+
+  File:       ${CLASS}.cc
+
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Definition of "${ERRCLASSNAME}" error values.
+
+/-*/
+
+#include <iostream>
+
+#include <y2pm/${CLASS}.h>
+
+using namespace std;
+
+///////////////////////////////////////////////////////////////////
+#ifndef N_
+#  define N_(STR) STR
+#endif
+///////////////////////////////////////////////////////////////////
+
+const std::string ${CLASS}::errclass( "${ERRCLASSNAME}" );
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : ${CLASS}::errtext
+//	METHOD TYPE : std::string
+//
+//	DESCRIPTION : Return textual description or numerical value
+//      as string.
+//
+std::string ${CLASS}::errtext( const unsigned e )
+{
+  switch ( (Error)e ) {
+
+  case E_ok:	return PMError::OKstring;
+  case E_error:	return PMError::ERRORstring;
+  ///////////////////////////////////////////////////////////////////
+  // more specific errors start here:
+  // case E_some_err:	return N_("some text");
+  ///////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////////
+  // In a hurry? Write:
+  // ENUM_OUT( E_some_err );
+  // untill you found a beautifull text describing it.
+  ///////////////////////////////////////////////////////////////////
+#define ENUM_OUT(V) case V: return #V
+
+#undef ENUM_OUT
+  ///////////////////////////////////////////////////////////////////
+  // no default: let compiler warn '... not handled in switch'
+  ///////////////////////////////////////////////////////////////////
+  };
+
+  return stringutil::numstring( e );
+}
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+

@@ -1,0 +1,82 @@
+
+--- Test 1
+
+Name: p2
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p3
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p3a
+Edition: 2.0-1
+Referers: p3 requires p3a
+
+Name: p4
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p4a
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p5
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p5a
+Remove: yes
+
+Name: p5b
+Remove: yes
+
+Name: p6
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p6c
+Edition: 2.0-1
+Referers: p6 requires p6virt
+
+Name: p7new
+Edition: 2.0-1
+From-Input-List: yes
+
+Name: p8
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p8a
+Edition: 2.0-1
+From-Input-List: yes
+Is-Upgrade-From: 1.0-1
+
+Name: p10new
+Edition: 2.0-1
+From-Input-List: yes
+
+Name: p10new2
+Edition: 2.0-1
+Install-To-Avoid-Break: yes
+
+Name: p11new
+Edition: 2.0-1
+From-Input-List: yes
+
+Name: p11new2
+Edition: 2.0-1
+Install-To-Avoid-Break: yes
+_Alt: p11new3
+
+Name: p11new3
+Edition: 2.0-1
+Install-To-Avoid-Break: yes
+_Alt: p11new2
