@@ -80,6 +80,9 @@ class PMYouPatchManager : public PMManager {
 
   private:
     InstYou *_instYou;
+
+  protected:
+    Pathname settingsFile() const;
 };
 
 ///////////////////////////////////////////////////////////////////

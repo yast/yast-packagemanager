@@ -24,6 +24,8 @@
 #include <map>
 #include <list>
 
+#include <y2util/Pathname.h>
+
 #include <y2pm/PMObject.h>
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMObjectContainerIter.h>
@@ -294,6 +296,26 @@ class PMManager {
 
     void buildSets(PkgSet& installed, PkgSet& available, PkgSet& to_install);
 
+  public:
+    
+    /**
+      Write settings like Taboo states to disk.
+    */
+    virtual void writeSettings();
+    
+    /**
+      Read setting slike Taboo states from disk.
+    */
+    virtual void readSettings();
+    
+  protected:
+
+    /**
+      Return file name used to read and write settings. Subclasses should
+      override this function and provide an appropriate filename, if they need
+      their settings to be stored.
+    */
+    virtual Pathname settingsFile() const { return Pathname(); }
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -18,7 +18,10 @@
 /-*/
 
 #include <iostream>
+#include <fstream>
+
 #include <y2util/Y2SLog.h>
+#include <y2util/PathInfo.h>
 
 #include <y2pm/PMManager.h>
 #include <y2pm/PMSelectable.h>
@@ -49,6 +52,10 @@ PMManager::PMManager()
 //
 PMManager::~PMManager()
 {
+#warning Why is the destructor not called?
+
+  writeSettings();
+
   clearAll();
 }
 
@@ -604,4 +611,57 @@ FSize PMManager::SpaceDifference()
     }
 
     return size;
+}
+
+void PMManager::readSettings()
+{
+  PathInfo pi( settingsFile() );
+  if ( !pi.isExist() ) {
+    DBG << "Settings file '" << settingsFile() << "' doesn't exist." << endl;
+    return;
+  }
+
+  ifstream in( settingsFile().asString().c_str() );
+  if ( in.fail() ) {
+    ERR << "Can't read settings from '" << settingsFile() << "'" << endl;
+  }
+
+  bool parseTaboo = false;
+
+  string line;
+  while( getline( in, line ) ) {
+    if ( *line.begin() == '[' ) {
+      if ( line == "[Taboo]" ) parseTaboo = true;
+    } else {
+      if ( parseTaboo ) {
+        PMSelectablePtr selectable = poolLookup( line );
+        if ( selectable ) {
+          selectable->set_status( PMSelectable::S_Taboo );
+        } else {
+          WAR << "Not in pool: " << line << endl;
+        }
+      }
+    }
+  }
+}
+
+void PMManager::writeSettings()
+{
+  D__ << "writeSettings()" << endl;
+
+  ofstream out( settingsFile().asString().c_str() );
+  if ( out.fail() ) {
+    ERR << "Can't write settings to '" << settingsFile() << "'" << endl;
+    return;
+  }
+
+  out << "[Taboo]" << endl;
+
+  PMSelectableVec::const_iterator it;
+  for( it = begin(); it != end(); ++it ) {
+    if ( (*it)->is_taboo() ) {
+      D__ << "taboo: " << (*it)->name() << endl;
+      out << (*it)->name() << endl;
+    }
+  }
 }
