@@ -36,6 +36,8 @@ using namespace std;
 
 Pathname MediaCurl::_cookieFile = "/var/lib/YaST2/cookies";
 
+MediaCurl::Callbacks *MediaCurl::_callbacks = 0;
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaCurl
@@ -134,6 +136,17 @@ PMError MediaCurl::attachTo (bool next)
 
   ret = curl_easy_setopt( _curl, CURLOPT_COOKIEJAR,
                           _cookieFile.asString().c_str() );
+  if ( ret != 0 ) {
+    return PMError( Error::E_curl_setopt_failed, _curlError );
+  }
+
+  ret = curl_easy_setopt( _curl, CURLOPT_PROGRESSFUNCTION,
+                          &MediaCurl::progressCallback );
+  if ( ret != 0 ) {
+    return PMError( Error::E_curl_setopt_failed, _curlError );
+  }
+
+  ret = curl_easy_setopt( _curl, CURLOPT_NOPROGRESS, false );
   if ( ret != 0 ) {
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
@@ -258,6 +271,9 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
         case CURLE_WRITE_ERROR:
           err = Error::E_write_error;
           break;
+        case CURLE_ABORTED_BY_CALLBACK:
+          err = Error::E_user_abort;
+          break;
         case CURLE_SSL_PEER_CERTIFICATE:
         default:
           err = Error::E_error;
@@ -289,6 +305,15 @@ PMError MediaCurl::getDirInfo( std::list<std::string> & retlist,
 			       const Pathname & dirname, bool dots ) const
 {
   return Error::E_not_supported_by_media;
+}
+
+int MediaCurl::progressCallback( void *clientp, double dltotal, double dlnow,
+                                 double ultotal, double ulnow )
+{
+  if ( _callbacks ) {
+    if ( _callbacks->progress( dlnow * 100 / dltotal ) ) return 0;
+    else return 1;
+  }
 }
 
 #if 0

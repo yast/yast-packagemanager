@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Feb 26 10:04:01 CET 2003 - cschum@suse.de
+
+- Call progress callbacks during download of individual RPMs.
+
+-------------------------------------------------------------------
 Tue Feb 25 16:53:11 CET 2003 - arvin@suse.de
 
 - added missing #include <assert.h>

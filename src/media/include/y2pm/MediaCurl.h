@@ -48,6 +48,18 @@ class MediaCurl : public MediaHandler {
 
     static void setCookieFile( const Pathname & );
 
+    class Callbacks
+    {
+      public:
+        virtual bool progress( int percent ) = 0;
+    };
+
+    static void setCallbacks( Callbacks *c ) { _callbacks = c; }
+
+  protected:
+    static int progressCallback( void *clientp, double dltotal, double dlnow,
+                                 double ultotal, double ulnow );
+
   private:
     CURL *_curl;
     char _curlError[ CURL_ERROR_SIZE ]; 
@@ -57,6 +69,8 @@ class MediaCurl : public MediaHandler {
     std::string _proxyuserpwd;
 
     static Pathname _cookieFile;
+
+    static Callbacks *_callbacks;
 };
 
 ///////////////////////////////////////////////////////////////////
