@@ -32,6 +32,7 @@ EXTRA_PROGRAMS = \
 	order		\
 	gs_test		\
 	media_test	\
+	autosolvertest	\
 	test_updateinf
 
 test_updateinf_SOURCES = test_updateinf.cc
@@ -81,6 +82,10 @@ order_LDFLAGS = -static
 media_test_SOURCES = media_test.cc
 media_test_LDADD = $(top_builddir)/src/liby2pm.la
 media_test_LDFLAGS = -static
+
+autosolvertest_SOURCES = autosolvertest.cc show_pm.cc
+autosolvertest_LDADD = $(top_builddir)/src/liby2pm.la
+autosolvertest_LDFLAGS = -static
 
 ## ###################################################################
 
