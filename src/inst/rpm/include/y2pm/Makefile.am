@@ -9,6 +9,7 @@ pkgincludedir = $(includedir)/y2pm
 pkginclude_HEADERS =	\
 	RpmDb.h \
 	RpmDbPtr.h \
+	RpmCache.h \
 	PMRpmPackageDataProvider.h \
 	PMRpmPackageDataProviderPtr.h
 
