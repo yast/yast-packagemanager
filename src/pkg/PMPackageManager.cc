@@ -20,7 +20,7 @@
 #include <iostream>
 
 #ifndef Y2LOG
-#define __FILE__
+#define Y2LOG __FILE__
 #endif
 
 #include <y2util/Y2SLog.h>
