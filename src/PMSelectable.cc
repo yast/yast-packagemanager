@@ -45,7 +45,6 @@ IMPL_BASE_POINTER(PMSelectable);
 //
 PMSelectable::PMSelectable()
     : _manager( 0 )
-    , _mgr_idx( no_mgr )
 {
 }
 
@@ -59,7 +58,6 @@ PMSelectable::PMSelectable()
 //
 PMSelectable::PMSelectable( const PkgName& name_r )
     : _manager( 0 )
-    , _mgr_idx( no_mgr )
     , _name( name_r )
 {
 }
@@ -75,7 +73,7 @@ PMSelectable::PMSelectable( const PkgName& name_r )
 PMSelectable::~PMSelectable()
 {
   if ( _manager ) {
-    INT << "SUSPICIOUS: " << *this << ": " << _manager << '|' << _mgr_idx << endl;
+    INT << "SUSPICIOUS: " << *this << ": " << _manager << endl;
   }
 }
 
@@ -87,13 +85,12 @@ PMSelectable::~PMSelectable()
 //
 //	DESCRIPTION :
 //
-void PMSelectable::_mgr_attach( PMManager * mgr_r, const unsigned idx_r )
+void PMSelectable::_mgr_attach( PMManager * mgr_r )
 {
-  if ( _manager || !mgr_r || idx_r == no_mgr ) {
-    INT << "SUSPICIOUS: " << *this << ": " << _manager << '|' << _mgr_idx << " -> " << mgr_r << '|' << idx_r << endl;
+  if ( _manager || !mgr_r ) {
+    INT << "SUSPICIOUS: " << *this << ": " << _manager << " -> " << mgr_r << endl;
   }
   _manager = mgr_r;
-  _mgr_idx = idx_r;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -110,7 +107,6 @@ void PMSelectable::_mgr_detach()
     INT << "SUSPICIOUS: not attached! " << *this << endl;
   }
   _manager = 0;
-  _mgr_idx = no_mgr;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -46,10 +46,9 @@ class PMSelectable : virtual public Rep {
     friend class PMManager;
 
     PMManager * _manager;
-    unsigned    _mgr_idx;
     SelState    _state;
 
-    void _mgr_attach( PMManager * mgr_r, const unsigned idx_r );
+    void _mgr_attach( PMManager * mgr_r );
     void _mgr_detach();
 
     void _attach_obj( PMObjectPtr & obj_r );
@@ -95,12 +94,6 @@ class PMSelectable : virtual public Rep {
     PMSelectable( const PkgName & name_r );
 
     virtual ~PMSelectable();
-
-  public:
-
-    static const unsigned no_mgr = (unsigned)-1;
-
-    unsigned mgr_idx() const { return _mgr_idx; }
 
   public:
 

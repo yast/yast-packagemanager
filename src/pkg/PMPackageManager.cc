@@ -107,8 +107,8 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 
   PkgSet iset; // for install order
 
-  for ( PMSelectableVec::iterator it = first(); it != last(); ++it ) {
-    PMSelectablePtr & sel( *it );
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    const PMSelectablePtr & sel( *it );
 
     if ( !sel ) {
       INT << "NULL SELECTABLE" << endl;
