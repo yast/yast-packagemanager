@@ -295,9 +295,9 @@ InstSrcDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<
 
     const std::list<PMPackagePtr> candidates = InstData::findPackages (packages, splitted[0], splitted[1], splitted[2], splitted[3]);
 
-    if (candidates.size() != 1)
+    if (candidates.size() < 1)
     {
-	ERR << "Ambiguous package " << single << endl;
+	ERR << "No package " << single << endl;
 	return;
     }
 
