@@ -54,6 +54,11 @@ struct PkgNameEd {
 		return !operator==( ne2 );
 	}
 
+	/** somewhat fake to be usable in map */
+	bool operator<( const PkgNameEd & ne2 ) const {
+	    return (name == ne2.name && edition < ne2.edition);
+	}
+
 	friend std::ostream& operator<<( std::ostream&, const PkgNameEd& );
 
       public:
