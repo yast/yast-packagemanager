@@ -328,6 +328,20 @@ InstSrcManager & Y2PM::instSrcManager()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : Y2PM::ISM_RanksCanged
+//	METHOD TYPE : void
+//
+void Y2PM::ISM_RanksCanged()
+{
+#warning Further actions on new Src ranks, except sorting candidate lists?
+  // sort candidate lists
+  packageManager().poolSortCandidates();
+  selectionManager().poolSortCandidates();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : Y2PM::packageManager
 //	METHOD TYPE : PMPackageManager &
 //
