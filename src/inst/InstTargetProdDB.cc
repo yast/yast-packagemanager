@@ -158,7 +158,7 @@ PMError InstTargetProdDB::read_db_file( const string & fname_r,
 PMError InstTargetProdDB::open( const Pathname & system_root_r, const bool create_r )
 {
   if ( isOpen() ) {
-    ERR << *this << " " << Error::E_ProdDB_already_open << endl;
+    WAR << *this << " " << Error::E_ProdDB_already_open << endl;
     return Error::E_ProdDB_already_open;
   }
 
