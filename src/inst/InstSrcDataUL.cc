@@ -535,6 +535,9 @@ InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, TaggedF
     SET_VALUE (CATEGORY, category);
     SET_VALUE (ISBASE, (strncmp (category.c_str(), "base", 4) == 0));
     SET_VALUE (VISIBLE, GET_TAG(VISIBLE)->Data() == "true");
+    SET_VALUE (ORDER, GET_TAG(ORDER)->Data());
+    if (dataprovider->_attr_ORDER.empty())
+	SET_VALUE (ORDER, name);		// use name if order not given
     SET_CACHE (RECOMMENDS);
     SET_CACHE (SUGGESTS);
 
