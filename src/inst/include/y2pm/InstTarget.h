@@ -67,15 +67,9 @@ class InstTarget: virtual public Rep, public InstData {
     private:
 
         friend class Y2PM;
-	/**
-	 * constructor
-	 * @param rootpath, path to root ("/") of target system
-	 * Usually "/" if the InstTarget object is actually running
-	 * inside the target. But might be "/mnt" during installation
-	 * (running in inst-sys) or "/whatever" if installing into
-	 * a directory
-	 */
-        InstTarget( const Pathname & rootpath );
+	// no parameters here since Y2PM creates it on first access
+	// and there's no way to pass parameters -> see init()
+        InstTarget();
         ~InstTarget();
 
     public:
@@ -102,10 +96,15 @@ class InstTarget: virtual public Rep, public InstData {
 	 * Initialize target system. Takes necessary action to make installation,
 	 * queries etc possible.
 	 *
+	 * @param rootpath, path to root ("/") of target system
+	 * Usually "/" if the InstTarget object is actually running
+	 * inside the target. But might be "/mnt" during installation
+	 * (running in inst-sys) or "/whatever" if installing into
+	 * a directory
 	 * @param createnew create a new (e.g. rpm-) database if none is present.
 	 * It is safe to alwas use true here.
 	 * */
-	PMError init( bool createnew = true );
+	PMError init( const Pathname & rootpath, bool createnew = true );
 
 	/**
 	 * bring target into a clean state e.g. by calling rpm --rebuilddb

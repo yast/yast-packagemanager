@@ -65,10 +65,10 @@ IMPL_BASE_POINTER(RpmDb);
 /*-------------------------------------------------------------*/
 /* creates a RpmDb					       */
 /*-------------------------------------------------------------*/
-RpmDb::RpmDb(string name_of_root) :
+RpmDb::RpmDb() :
     _progressfunc(NULL),
     _progressdata(NULL),
-    _rootdir(name_of_root),
+    _rootdir("/"),
     _varlibrpm("/var/lib/rpm"),
     _varlib("/var/lib"),
     _rpmdbname("packages.rpm"),
@@ -119,7 +119,7 @@ RpmDb::~RpmDb()
 /* exist --> returns DbNewCreated if successfully created 	*/
 /*--------------------------------------------------------------*/
 PMError
-RpmDb::initDatabase( bool createNew )
+RpmDb::initDatabase( string name_of_root, bool createNew )
 {
     Pathname     dbFilename;
     struct stat  dummyStat;
@@ -127,6 +127,7 @@ RpmDb::initDatabase( bool createNew )
 
     DBG << "calling initDatabase" << endl;
 
+    _rootdir = name_of_root;
     dbFilename += _rootdir + _varlibrpm + _rpmdbname;
     if (  stat( dbFilename.asString().c_str(), &dummyStat ) != -1 )
     {

@@ -44,12 +44,11 @@ using namespace std;
  * (running in inst-sys) or "/whatever" if installing into
  * a directory
  */
-InstTarget::InstTarget ( const Pathname & rootpath ) :
+InstTarget::InstTarget ( ) :
     _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
-    _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
-    _rootdir(rootpath)
+    _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE)
 {
-    _rpmdb = new RpmDb(_rootdir.asString());
+    _rpmdb = new RpmDb();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -64,9 +63,10 @@ InstTarget::~InstTarget()
 {
 }
 
-PMError InstTarget::init( bool createnew)
+PMError InstTarget::init (const Pathname & rootpath, bool createnew)
 {
-    return _rpmdb->initDatabase(createnew);
+    _rootdir = rootpath;
+    return _rpmdb->initDatabase(_rootdir.asString(), createnew);
 }
 
 PMError InstTarget::bringIntoCleanState()

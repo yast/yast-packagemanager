@@ -99,9 +99,10 @@ class RpmDb: virtual public Rep
 
 	/**
 	 * Create an new instance.
-	 * name_of_root The name of the install root
+	 * created at InstTarget constructor without knowledge of path
+	 * see initDatabase() for the root path
 	 */
-	RpmDb(std::string name_of_root );
+	RpmDb();
 
 	/**
 	 * Clean up.
@@ -119,10 +120,11 @@ class RpmDb: virtual public Rep
 	/**
 	 * Initialize the rpm database
 	 *
+	 * @param name_of_root The name of the install root
 	 * @param createNew create a new database if none exists. This
 	 * parameter does no harm if a database already exists.
 	 */
-	PMError initDatabase( bool createNew = false);
+	PMError initDatabase (std::string name_of_root, bool createNew = false);
 
 	/**
 	 * Rebuild the rpm database
@@ -346,10 +348,6 @@ class RpmDb: virtual public Rep
 	 * checkPackageResult
 	 * */
 	static std::string checkPackageResult2string(unsigned code);
-
-    private:
-	// forbidden
-	RpmDb();
 };
 
 
