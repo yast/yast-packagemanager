@@ -75,6 +75,7 @@ PMObjectPtr PMSelectionManager::assertObjectType( const PMObjectPtr & object_r )
 */
 ostream & operator<<( ostream & str, const PMSelectionManager & obj )
 {
+  str << "PMSelectionManager" << endl;
   return str;
 }
 

@@ -75,6 +75,7 @@ PMObjectPtr PMYouPatchManager::assertObjectType( const PMObjectPtr & object_r ) 
 */
 ostream & operator<<( ostream & str, const PMYouPatchManager & obj )
 {
+  str << "PMYouPatchManager" << endl;
   return str;
 }
 

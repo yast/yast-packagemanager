@@ -360,6 +360,7 @@ void PMManager::checkPool() const
 */
 ostream & operator<<( ostream & str, const PMManager & obj )
 {
+  str << "PMManager" << endl;
   return str;
 }
 

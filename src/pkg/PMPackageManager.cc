@@ -46,6 +46,7 @@ PMPackageManager::PMPackageManager()
 //
 PMPackageManager::~PMPackageManager()
 {
+    MIL << "PMPackageManager::~PMPackageManager()" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -75,6 +76,7 @@ PMObjectPtr PMPackageManager::assertObjectType( const PMObjectPtr & object_r ) c
 */
 ostream & operator<<( ostream & str, const PMPackageManager & obj )
 {
+  str << "PMPackageManager" << endl;
   return str;
 }
 
