@@ -24,8 +24,8 @@
 		but does not report about installable but installed
 		selections, packages, or patches.
 
-		Additionally, the InstTarget can also change package
-		and patch lists, by installing or removing them.
+		Additionally, the InstTarget can also change packages,
+		selections, and patches, by installing or removing them.
 
 /-*/
 #ifndef InstTarget_h
@@ -39,8 +39,8 @@
 
 #include <y2pm/InstTarget.h>		// pointer to self
 #include <y2pm/MediaAccess.h>		// physical media access class
-#include <y2pm/InstSrcDescr.h>		// target description
-#include <y2pm/InstSrcData.h>		// target content
+#include <y2pm/InstDescr.h>		// target description
+#include <y2pm/InstData.h>		// target content
 
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackage.h>
@@ -71,13 +71,13 @@ class InstTarget: virtual public Rep {
      * of all source descriptions of sources which are
      * installed on the target.
      */
-    std::list <InstSrcDescr> *_descrs;
+    std::list <InstDescr> *_descrs;
 
     /**
      * content of media
      * this describes the content of the target
      */
-    InstSrcData *_data;
+    InstData *_data;
 
   public:
     /**
@@ -108,7 +108,7 @@ class InstTarget: virtual public Rep {
     /**
      * @return description of Installation target
      */
-    const InstSrcDescr **getDescriptions() const;
+    const InstDescr **getDescriptions() const;
 
     //-----------------------------
     // target content access
