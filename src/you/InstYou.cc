@@ -953,6 +953,7 @@ void InstYou::showPatches( bool verbose )
     list<PMPackagePtr>::const_iterator itPkg;
       for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
         cout << "     RPM: " << (*itPkg)->name() << " " << (*itPkg)->edition()
+             << " " << (*itPkg)->arch()
              << " (";
         if ( (*itPkg)->hasInstalledObj() ) {
           PkgEdition instEd = (*itPkg)->getInstalledObj()->edition();
