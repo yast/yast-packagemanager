@@ -47,14 +47,17 @@ PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
 {
   _businessProduct = ( product != "SuSE-Linux" );
 
-  _patchPath = arch + "/update/";
+  string path = arch + "/update/";
   if ( _businessProduct  ) {
-    _patchPath += product + "/";
+    path += product + "/";
     _patchUrl = Url( "http://support.suse.de/" );
   } else {
     _patchUrl = Url( "ftp://ftp.suse.com/pub/suse/" );
   }
-  _patchPath += version + "/patches/";
+  path += version;
+  
+  _patchPath = path + "/patches/";
+  _rpmPath = path + "/rpm/";
 }
 
 void PMYouPatchPaths::setPatchPath( const Pathname &path )
@@ -67,6 +70,19 @@ Pathname PMYouPatchPaths::patchPath()
   return _patchPath;
 }
 
+Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg )
+{
+  string rpmName = pkg->name();
+  rpmName += "-";
+  rpmName += pkg->version();
+  rpmName += "-";
+  rpmName += pkg->release();
+  rpmName += ".";
+  rpmName += arch();
+  rpmName += ".rpm";
+  return _rpmPath + rpmName;
+}
+
 void PMYouPatchPaths::setPatchUrl( const Url &url )
 {
   _patchUrl = url;
@@ -75,6 +91,11 @@ void PMYouPatchPaths::setPatchUrl( const Url &url )
 Url PMYouPatchPaths::patchUrl()
 {
   return _patchUrl;
+}
+
+Pathname PMYouPatchPaths::localDir()
+{
+  return "/var/lib/YaST2/you/";
 }
 
 PkgArch PMYouPatchPaths::arch()
@@ -159,7 +180,6 @@ Url PMYouPatchPaths::defaultServer()
     return *_servers.begin();
   }
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -372,6 +392,8 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
         return PMError( InstSrcError::E_error );
     }
 
+// We don't have patch version information yet.
+#if 0
     unsigned int pos = fileName.find( '-' );
     if ( pos < 0 ) {
       E__ << "No '-' in '" << fileName << "'" << endl;
@@ -380,6 +402,10 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     string name = fileName.substr( 0, pos );
     string version = fileName.substr( pos + 1, fileName.length() - pos );
+#else
+    string name = fileName;
+    string version = "0";    
+#endif
 
     // ma: NULL PMYouPatchDataProviderPtr provided to be able to compile.
     // Finaly we should make shure that there is one, or we don't need it at all.
@@ -444,8 +470,6 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     D__ << "Attach point: " << media->localRoot() << endl;
 
-#warning
-#warning Check changes due to new MediaAccess::dirInfo interace.
     list<string> * patchFiles = new list<string>;
     error = media->dirInfo( *patchFiles, patchPath );
     if ( error ) {
@@ -454,7 +478,6 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       delete patchFiles;
       patchFiles = 0;
     }
-#warning
 
     if ( !patchFiles ) {
       W__ << "dirInfo failed." << endl;

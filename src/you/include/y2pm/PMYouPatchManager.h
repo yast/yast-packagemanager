@@ -48,8 +48,8 @@ class PMYouPatchManager : public PMManager {
   private:
 
     /**
-     * Make shure the passed PMObjectPtr actually references a PMYouPatch. If not,
-     * rerport error and return NULL.
+     * Make sure the passed PMObjectPtr actually references a PMYouPatch. If not,
+     * report error and return NULL.
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
