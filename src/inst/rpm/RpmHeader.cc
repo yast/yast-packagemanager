@@ -105,14 +105,15 @@ constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r )
   Header nh = 0;
   int res = ::rpmReadPackageFile( ts, fd, path_r.asString().c_str(), &nh );
   ts = ::rpmtsFree(ts);
+  ::Fclose( fd );
+
   if ( ! nh ) {
     WAR << "Error reading header from " << path_r << " error(" << res << ")" << endl;
-    ::Fclose( fd );
     return (RpmHeader*)0;
   }
 
   constRpmHeaderPtr h( new RpmHeader( nh ) );
-  headerFree( nh ); // clear reference set in ReadPackageFile
+  headerFree( nh ); // clear the reference set in ReadPackageFile
 
   MIL << h << " from " << path_r << endl;
   return h;
