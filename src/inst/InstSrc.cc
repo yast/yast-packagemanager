@@ -865,7 +865,7 @@ InstSrc::provideMedia (int medianr) const
 **	FUNCTION TYPE : PMError
 **
 **	DESCRIPTION : provide package file by medianr and directory
-**		return local path in path_r
+**		return local path in path_r, even on error
 */
 PMError
 InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir, Pathname& path_r) const
@@ -880,6 +880,7 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir,
     if (err != PMError::E_ok)
     {
 	ERR << "Media can't provide '" << dir+name << "': " << err.errstr() << endl;
+	path_r = filename;		// pass back complete filename of missing package
 	return err;
     }
 
