@@ -49,7 +49,9 @@ class YouError {
       E_error = PMError::C_YouError,	// some error
       // more specific errors start here:
       E_bad_sig_file,
-      E_bad_sig_rpm
+      E_bad_sig_rpm,
+      E_get_suseservers_failed,
+      E_read_suseservers_failed
     };
 };
 
