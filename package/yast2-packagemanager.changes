@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Sun Sep  8 23:07:37 CEST 2002 - ma@suse.de
+
+- fixes for update (handle splitprovides/obsoletes similar to
+  provides/obsoletes, i.e. it's not dropped, but replaced by an
+  other package)
+- fixed PackageDataProvider to provide vendor information for
+  packages. Fixes update problem, where downgraded SuSE packages
+  were wrongly counted and reported as old version.
+- 2.6.11
+
+-------------------------------------------------------------------
 Sat Sep  7 16:05:34 CEST 2002 - kkaempf@suse.de
 
 - add "-C" parameter to tar during package backup
@@ -39,7 +50,7 @@ Thu Sep  5 20:15:35 CEST 2002 - kkaempf@suse.de
 - added package backup (lnussel@suse.de)
 - added rebuilddb progress (lnussel@suse.de)
 - added rebuilddb progress callback (lnussel@suse.de, kkaempf@suse.de)
-- fallback to ".default" locale (#18763) 
+- fallback to ".default" locale (#18763)
 - use solver for selection dependencies
 - implement size differ to take deleted packages into account
   (lnussel@suse.de)
