@@ -30,9 +30,11 @@
 /-*/
 
 #include <iostream>
+#include <fstream>
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/PMYouPatchPaths.h>
 
 using namespace std;
 
@@ -249,4 +251,37 @@ const std::string& InstTarget::getRoot() const
 void InstTarget::setPackageInstallProgressCallback(void (*func)(int,void*), void* data)
 {
     _rpmdb->setProgressCallback(func,data);
+}
+
+PMError InstTarget::installPatch( const Pathname &filename )
+{
+#warning FIXME: Get product info from InstTarget::descr    
+    PMYouPatchPaths paths;
+
+    Pathname dest = getRoot();
+    dest += paths.localDir();
+    dest += "installed/";
+    dest += filename.basename();
+
+    D__ << "in: " << filename << " out: " << dest << endl;
+
+    ifstream in( filename.asString().c_str() );
+    if ( in.fail() ) {
+        E__ << "Can't read " << filename << endl;
+        return PMError( InstTargetError::E_error );
+    }
+    ofstream out( dest.asString().c_str() );
+    if ( out.fail() ) {
+        E__ << "Can't write " << dest << endl;
+        return PMError( InstTargetError::E_error );
+    }
+    
+    int size = 1000;
+    char buf[size];
+    while( !in.eof() ) {
+      in.read( buf, size );
+      out.write( buf, in.gcount() );
+    }
+
+    return PMError();
 }

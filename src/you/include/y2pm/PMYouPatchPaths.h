@@ -43,9 +43,12 @@ class PMYouPatchPaths : virtual public Rep {
   REP_BODY(PMYouPatchPaths);
 
   public:
-    PMYouPatchPaths() {}
+    PMYouPatchPaths();
     PMYouPatchPaths( const std::string &product, const std::string &version,
                      const std::string &baseArch );
+
+    void init( const std::string &product, const std::string &version,
+               const std::string &baseArch );
 
     void setPatchPath( const Pathname & );
     Pathname patchPath();

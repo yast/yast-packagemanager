@@ -24,6 +24,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <y2util/Pathname.h>
+
 #include <y2pm/PMYouPatchDataProviderPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
 
@@ -152,6 +154,9 @@ class PMYouPatch : virtual public Rep, public PMObject {
      */
     std::list<PMPackagePtr> packages() const { return _packages; }
 
+    void setLocalFile( const Pathname &localFile ) { _localFile = localFile; }
+    Pathname localFile() const { return _localFile; }
+
   private:
     std::string _shortDescription, _longDescription;
     std::string _preInformation, _postInformation;
@@ -160,6 +165,8 @@ class PMYouPatch : virtual public Rep, public PMObject {
     bool _updateOnlyInstalled;
 
     std::list<PMPackagePtr> _packages;
+
+    Pathname _localFile;
 
   protected:
 

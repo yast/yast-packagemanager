@@ -223,6 +223,13 @@ class InstTarget: virtual public Rep, public InstData {
 	 * */
 	const std::string& getRoot() const;
 
+        /**
+         * Install patch. This function does not install any packages. It just
+         * registers the patch as installed.
+         *
+         * @param filename Filename of patch to be installed.
+         */
+        PMError installPatch( const Pathname &filename );
 
 	// TODO: more function, like df, du etc.
 

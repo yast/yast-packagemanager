@@ -41,10 +41,24 @@ using namespace std;
 
 IMPL_BASE_POINTER(PMYouPatchPaths);
 
+PMYouPatchPaths::PMYouPatchPaths()
+{
+  init("Dummy","1.0","i386");
+}
+
 PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
                                   const string &baseArch )
-  : _product( product ), _version( version ), _baseArch( baseArch )
 {
+  init( product, version, baseArch );
+}
+
+void PMYouPatchPaths::init( const string &product, const string &version,
+                            const string &baseArch )
+{
+  _product = product;
+  _version = version;
+  _baseArch = PkgArch( baseArch );
+
   _businessProduct = ( product != "SuSE-Linux" );
 
   string path = baseArch + "/update/";
