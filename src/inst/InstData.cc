@@ -23,7 +23,9 @@
 
 #include <y2pm/InstData.h>
 
-#include <y2pm/DataOldSuSE.h>
+#include <y2pm/PMSelection.h>
+#include <y2pm/PMPackage.h>
+#include <y2pm/PMSolvable.h>
 
 using namespace std;
 

@@ -92,6 +92,37 @@ Pathname InstSrcManager::genSrcCacheName() const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::scanProductsFile
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::scanProductsFile( const Pathname & file_r, ProductSet & pset_r ) const
+{
+#warning TBD Actually scan products file.
+  pset_r.insert( ProductEntry() );
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::lookupId
+//	METHOD TYPE : InstSrcPtr
+//
+//	DESCRIPTION :
+//
+InstSrcPtr InstSrcManager::lookupId( const ISrcId & isrc_r ) const
+{
+  InstSrcPtr it = InstSrcPtr::cast_away_const( isrc_r );
+  if ( _knownSources.find( it ) == _knownSources.end() )
+    return 0;
+  return it;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::scanMedia
 //	METHOD TYPE : PMError
 //
@@ -121,25 +152,28 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   ///////////////////////////////////////////////////////////////////
   // look if there's a /media.1/products file
   ///////////////////////////////////////////////////////////////////
-  list<Pathname> plist;
-  PMError scan_err;
+  ProductSet products;
 
-  if ( (scan_err = media->provideFile( "/media.1/products" )) ) {
-    // no products file
-    plist.push_back( "" );
+  MediaAccess::ProvideFile pfile( media, "/media.1/products" );
+  if ( pfile.error() ) {
+    // no products file: default ProductEntry is /
+    products.insert( ProductEntry() );
   } else {
     // scan products file
     MIL << "Found '/media.1/products'." << endl;
-#warning TBD scan /media.1/products
-    plist.push_back( "" );
+    scanProductsFile( pfile(), products );
   }
 
-  scan_err = Error::E_ok;
-  for ( list<Pathname>::const_iterator iter = plist.begin(); iter != plist.end(); ++iter ) {
+  ///////////////////////////////////////////////////////////////////
+  // scan products found
+  ///////////////////////////////////////////////////////////////////
+  PMError scan_err;
+
+  for ( ProductSet::const_iterator iter = products.begin(); iter != products.end(); ++iter ) {
     InstSrcPtr nsrc;
     Pathname   srccache( genSrcCacheName() );
 
-    if ( (scan_err = InstSrc::vconstruct( nsrc, srccache, mediaurl_r, *iter, InstSrc::T_TEST_DIST )) ) {
+    if ( (scan_err = InstSrc::vconstruct( nsrc, srccache, mediaurl_r, iter->_dir)) ) {
       // no InstSrc found
     } else {
 #warning TBD prevent duplicate registration of sources
@@ -156,19 +190,6 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   return err;
 }
 
-#if 0
-PMError InstSrcManager::enableSource( InstSrcPtr & isrc_r )
-{
-  D__ << endl;
-  if(isrc_r->Activate())
-  {
-    PMPackageManager::PM().addPackages( isrc_r->getPackages() );
-    return E_ok;
-  }
-  return E_error;
-}
-#endif
-
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -179,15 +200,13 @@ PMError InstSrcManager::enableSource( InstSrcPtr & isrc_r )
 //
 PMError InstSrcManager::enableSource( const ISrcId & isrc_r )
 {
-  PMError err;
+  InstSrcPtr it( lookupId( isrc_r ) );
+  if ( it ) {
+    return it->enableSource();
+  }
 
-  // close you're eyes
-  if ( isrc_r )
-    return const_cast<InstSrc*>(isrc_r.operator->())->enableSource();
-
-  err = Error::E_TBD;
-
-  return err;
+  E__ << "bad ISrcId " << isrc_r << endl;
+  return Error::E_bad_id;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -200,15 +219,13 @@ PMError InstSrcManager::enableSource( const ISrcId & isrc_r )
 //
 PMError InstSrcManager::disableSource( const ISrcId & isrc_r )
 {
-  PMError err;
+  InstSrcPtr it( lookupId( isrc_r ) );
+  if ( it ) {
+    return it->disableSource();
+  }
 
-  // close you're eyes
-  if ( isrc_r )
-    return const_cast<InstSrc*>(isrc_r.operator->())->disableSource();
-
-  err = Error::E_TBD;
-
-  return err;
+  E__ << "bad ISrcId " << isrc_r << endl;
+  return Error::E_bad_id;
 }
 
 /******************************************************************

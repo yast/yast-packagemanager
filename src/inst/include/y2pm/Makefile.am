@@ -14,14 +14,13 @@ pkginclude_HEADERS =	\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
 	InstSrcData.h	InstSrcDataPtr.h	\
 	InstSrcData_UL.h InstSrcData_ULPtr.h	\
-	InstDescr.h	InstData.h		\
+	InstData.h				\
 	\
 	InstTargetError.h			\
 	InstTarget.h	InstTargetPtr.h		\
 	InstSrcTags.h				\
 	PMULPackageDataProvider.h PMULPackageDataProviderPtr.h	\
-	PMULSelectionDataProvider.h PMULSelectionDataProviderPtr.h \
-	DataOldSuSE.h
+	PMULSelectionDataProvider.h PMULSelectionDataProviderPtr.h
 
 #<INSTALL-HEADER-TARGET>
 
