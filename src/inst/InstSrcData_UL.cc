@@ -285,7 +285,6 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     // parse packages file and fill into ndata
     ///////////////////////////////////////////////////////////////////
 
-    TagParser parser;
     std::string tagstr;
 
     Pathname packagesname = descr_dir_r + "/packages";
@@ -298,7 +297,10 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     packagesname = media_r->getAttachPoint() + packagesname;
     MIL << "fopen(" << packagesname << ")" << endl;
-    std::ifstream packages (packagesname.asString().c_str());
+
+    TagCacheRetrieval *retrieval = new TagCacheRetrieval (packagesname);
+
+    std::ifstream& packages = retrieval->getStream();
 
     if( !packages)
     {
@@ -309,6 +311,8 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     tagset = new InstSrcData_ULTags ();
 
     bool parse = true;
+
+    TagParser & parser = retrieval->getParser();
 
     while( parse && parser.lookupTag (packages))
     {
@@ -328,7 +332,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    pacs->push_back (Tag2Package( tagset ));
+		    pacs->push_back (Tag2Package( retrieval, tagset ));
 		    count++;
 		    tagset->clear();
 		    repeatassign = true;
@@ -344,7 +348,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     if (parse)
     {
-	pacs->push_back (Tag2Package( tagset ));
+	pacs->push_back (Tag2Package( retrieval, tagset ));
 	count++;
 
 	ndata->setPackages (pacs);
@@ -373,7 +377,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 }
 
 PMPackagePtr
-InstSrcData_UL::Tag2Package( CommonPkdParser::TagSet * tagset )
+InstSrcData_UL::Tag2Package( TagCacheRetrieval *retrieval, CommonPkdParser::TagSet * tagset )
 {
     // PACKAGE
     string single ((tagset->getTagByIndex(InstSrcData_ULTags::PACKAGE))->Data());
@@ -389,13 +393,17 @@ InstSrcData_UL::Tag2Package( CommonPkdParser::TagSet * tagset )
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
     PkgArch arch (splitted[3]);
 
-    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider());
+    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (retrieval));
     PMPackagePtr pac( new PMPackage (name, edition, arch, dataprovider));
-
+    CommonPkdParser::Tag *tagptr;
 #define SET_VALUE(tagname,value) \
     dataprovider->setAttributeValue (pac, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, value)
+#define SET_POS(tagname,begin,end) \
+    dataprovider->setAttributeValue (pac, (PMPackage::PMPackageAttribute)PMPackage::ATTR_##tagname, begin, end)
+#define GET_TAG(tagname) \
+    tagset->getTagByIndex(InstSrcData_ULTags::tagname)
 #define SET_MULTI(tagname) \
-    SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->MultiData())
+    do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 #define SET_SINGLE(tagname) \
     SET_VALUE (tagname, (tagset->getTagByIndex(InstSrcData_ULTags::tagname))->Data())
 

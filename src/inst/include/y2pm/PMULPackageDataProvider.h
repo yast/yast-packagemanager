@@ -23,7 +23,11 @@
 
 #include <iosfwd>
 #include <string>
+#include <fstream>
 
+#include <y2util/Pathname.h>
+#include <y2util/TagParser.h>
+#include <y2util/TagCacheRetrieval.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
 
@@ -40,16 +44,17 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
     private:
 	// save file position and size data for each attribute
-	typedef struct {std::streampos pos; int size;} attrpos_t;
-	attrpos_t attrpos[PMPackage::PKG_NUM_ATTRIBUTES];
+	TagCacheRetrieval::retrieval_t attrpos[PMPackage::PKG_NUM_ATTRIBUTES];
 
 	// cache retrieved attribute values here
 	// these are set if attrpos[<attr>].size < 0
 	PkgAttributeValue attrval[PMPackage::PKG_NUM_ATTRIBUTES];
 
+	TagCacheRetrieval *_retrieval;
+
     public:
 
-	PMULPackageDataProvider();
+	PMULPackageDataProvider (TagCacheRetrieval *retrieval = 0);
 	virtual ~PMULPackageDataProvider();
 
 	/**
@@ -76,7 +81,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	/** inject offset/size to cache */
 	virtual void setAttributeValue(
 	    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	    std::streampos pos, int size);
+	    std::streampos begin, std::streampos end);
 
     public:
 

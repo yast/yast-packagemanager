@@ -39,9 +39,11 @@ IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMDataProvide
 //	METHOD NAME : PMULPackageDataProvider::PMULPackageDataProvider
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
+//	DESCRIPTION : open packages stream and keep pointer to tag parser
+//		      for later value retrieval on-demand
 //
-PMULPackageDataProvider::PMULPackageDataProvider()
+PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrieval *retrieval)
+    : _retrieval (retrieval)
 {
 }
 
@@ -74,15 +76,13 @@ PMULPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
     if (attr >= PMObject::PMOBJ_NUM_ATTRIBUTES)
 	return PkgAttributeValue("invalid query");
 
-    if (attrpos[attr].size < 0)
-	return attrval[attr];
-    /*
-	FIXME
-
-	re-read value from cache file
-    */
-
-    return PkgAttributeValue("**undef**");
+    if ((attrpos[attr].end > std::streampos (0))
+	&& (_retrieval != 0))
+    {
+	if (_retrieval->retrieveData (attrpos[attr], attrval[attr]))
+	    attrpos[attr].end = std::streampos (0) ;
+    }
+    return attrval[attr];
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -101,15 +101,13 @@ PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
     if (attr >= PMPackage::PKG_NUM_ATTRIBUTES)
 	return PkgAttributeValue("invalid query");
 
-    if (attrpos[attr].size < 0)
-	return attrval[attr];
-    /*
-	FIXME
-
-	re-read value from cache file
-    */
-
-    return PkgAttributeValue("**undef**");
+    if ((attrpos[attr].end != std::streampos (0))
+	&& (_retrieval != 0))
+    {
+	if (_retrieval->retrieveData (attrpos[attr], attrval[attr]))
+	    attrpos[attr].end = std::streampos (0);
+    }
+    return attrval[attr];
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -128,7 +126,7 @@ PMULPackageDataProvider::setAttributeValue(
     D__ << "PMULPackageDataProvider::setAttributeValue (" << pkg->getAttributeName(attr) << ")" << endl;
     if (attr < PMPackage::PKG_NUM_ATTRIBUTES)
     {
-	attrpos[attr].size = -1;
+	attrpos[attr].end = 0;
 	attrval[attr] = PkgAttributeValue (value);
     }
     else
@@ -149,10 +147,10 @@ PMULPackageDataProvider::setAttributeValue(
 void
 PMULPackageDataProvider::setAttributeValue(
 	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
-	std::streampos pos, int size)
+	std::streampos begin, std::streampos end)
 {
-    attrpos[attr].pos = pos;
-    attrpos[attr].size = size;
+    attrpos[attr].begin = begin;
+    attrpos[attr].end = end;
     return;
 }
 
