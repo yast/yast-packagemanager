@@ -1,9 +1,9 @@
 #
-# Makefile.am for packagemanager/testsuite/media
+# Makefile.am for packagemanager/testsuite/media/descr
 
 noinst_DATA = \
 	selections \
-	*.sel	\
-	packages*
+	$(wildcard *.sel)	\
+	$(wildcard packages*)
 
 EXTRA_DIST = $(noinst_DATA)
