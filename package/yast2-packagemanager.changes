@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jan 23 15:31:57 CET 2004 - cschum@suse.de
+
+- Removed obsolete query code.
+
+-------------------------------------------------------------------
 Wed Jan 21 10:30:50 CET 2004 - cschum@suse.de
 
 - YOU: Support patch files containing the same package in multiple

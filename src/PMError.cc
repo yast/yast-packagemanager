@@ -26,7 +26,6 @@
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaError.h>
 #include <y2pm/InstTargetError.h>
-#include <y2pm/QueryError.h>
 #include <y2pm/YouError.h>
 #include <y2pm/ModulePkgError.h>
 
@@ -62,7 +61,6 @@ PMError::ErrClass PMError::errClass( const unsigned e )
   ENUM_OUT( InstSrcError );
   ENUM_OUT( MediaError );
   ENUM_OUT( InstTargetError );
-  ENUM_OUT( QueryError );
   ENUM_OUT( YouError );
   ENUM_OUT( ModulePkgError );
 
@@ -98,7 +96,6 @@ std::string PMError::errstr( const unsigned e )
     ENUM_OUT( InstSrcError );
     ENUM_OUT( MediaError );
     ENUM_OUT( InstTargetError );
-    ENUM_OUT( QueryError );
     ENUM_OUT( YouError );
     ENUM_OUT( ModulePkgError );
 

@@ -7,14 +7,4 @@ AUTOMAKE_OPTIONS = dejagnu
 
 PACKAGE = packagemanager
 
-INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
-		include	\
-		pkg/include	\
-		sel/include	\
-		you/include	\
-		inst/include	\
-		inst/rpm/include\
-		media/include	\
-		query/include	\
-		libPkgDep/include \
-	   ) -I$(includedir)
+INCLUDES= -I$(top_srcdir)/src -I$(includedir)
