@@ -1,0 +1,126 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Sat Aug 10 17:55:42 UTC 2002
+
+=Ver: 3.0
+
+=Sel: Kde-Desktop 8.1 1
+
+=Siz: 123456 1234567
+
+=Sum.cs: Prostředí KDE
+=Sum.de: KDE Desktop-Umgebung
+=Sum.en: KDE Desktop Environment
+=Sum.es: Entorno Gráfico KDE
+=Sum.fr: Environnement de bureau KDE
+=Sum.gl: KDE Desktop Environment
+=Sum.hu: KDE grafikus munkakörnyezet
+=Sum.it: Ambiente Desktop KDE
+=Sum.ja: KDE デスクトップ環境
+=Sum.lt: KDE Desktop Environment
+=Sum.nl: KDE Desktop omgeving
+=Sum.pt: KDE Desktop Environment
+=Sum.sv: KDE Desktop Environment
+=Sum.tr: KDE Desktop Environment
+
+=Req: X11 Basis-Sound 
+=Con: Minimal 
+=Cat: addon
+
+=Vis: true
+
++Ins:
+SDL
+aalib
+alsa
+arts
+audiofile
+cdk
+cdparanoia
+cdrecord
+compat
+cups-libs
+dialog
+dosbootdisk
+enscript
+esound
+fam
+ghostscript-fonts-std
+gphoto
+heimdal-lib
+icons
+java2-jre
+k3b
+kdeaddons3-internet
+kdeaddons3-kate
+kdeaddons3-kicker
+kdeaddons3-sound
+kdeartwork3
+kdeartwork3-sound
+kdebase3
+kdebase3-SuSE
+kdebase3-kdm
+kdebase3-konqueror
+kdebase3-ksysguardd
+kdebase3-nsplugin
+kdegames3
+kdegames3-arcade
+kdegames3-board
+kdegames3-card
+kdegames3-tactic
+kdegraphics3
+kdegraphics3-fax
+kdegraphics3-kamera
+kdegraphics3-postscript
+kdelibs3
+kdelibs3-32bit
+kdelibs3-cups
+kdemultimedia3-midi
+kdemultimedia3-sound
+kdemultimedia3-video
+kdenetwork3
+kdenetwork3-mail
+kdenetwork3-news
+kdepim3
+kdepim3-organizer
+kdetoys3
+kdeutils3
+kdeutils3-laptop
+kdeutils3-printing
+keramik
+kinternet
+libexif
+libgphoto2
+libogg
+libpcap
+libtool
+libvorbis
+libxml2
+libxslt
+linux-atm
+mkisofs
+netscape-plugins
+openmotif
+pcre
+pcsc-lite
+pixieplus-kde
+ppp
+release-notes
+sensors
+slang
+smpppd
+unixODBC
+wvdial
+-Ins:
+
++Ins.cs:
+kde3-i18n-cs
+-Ins.cs:
+
++Ins.da:
+kde3-i18n-da
+-Ins.da:
+
++Ins.de:
+kde3-i18n-de
+-Ins.de:
+
