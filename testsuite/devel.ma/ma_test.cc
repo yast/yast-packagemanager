@@ -175,6 +175,21 @@ ostream & dumpLangWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
+bool doSolve( PMManager & mgr_r ) {
+  PkgDep::ResultList good;
+  PkgDep::ErrorResultList bad;
+  if ( ! mgr_r.solveInstall( good, bad ) ) {
+    WAR << "SOLVE: failed packages: " << bad.size() << endl;
+    WAR << bad << endl;
+    //for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
+//	 p != bad.end(); ++p ) {
+  //    out << *p << endl;
+    //}
+    return false;
+  }
+  return true;
+}
+
 ostream & dump( ostream & str, const Url & url ) {
   str << url << endl;
   str << url.isValid() << " - " << url.saveAsString() << endl;
@@ -225,10 +240,38 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  dumpLangWhatIf( SEC, true );
 
+  dumpPkgWhatIf( INT );
+  PMGR["ElectricFence"]->user_set_install();
+  PMGR["test"]->appl_set_delete();
+  dumpPkgWhatIf( INT );
+  doSolve( PMGR );
+  dumpPkgWhatIf( INT );
+
+  list<PMPackagePtr> dellist_r;
+  list<PMPackagePtr> instlist_r;
+  list<PMPackagePtr> srclist_r;
+  PMGR.getPackagesToInsDel( dellist_r, instlist_r, srclist_r );
+  SEC << instlist_r << endl;
+  SEC << dellist_r << endl;
+
+
+#if 0
+  dumpLangWhatIf( SEC, true );
+  doSolve( PMGR );
+
+  LMGR["de_DE"]->user_set_offSystem();
   LMGR["cs"]->user_set_onSystem();
+  doSolve( PMGR );
+
+  dumpLangWhatIf( SEC );
+
+  LMGR["de_DE"]->user_set_onSystem();
   LMGR["cs"]->user_set_offSystem();
+  doSolve( PMGR );
+
+  dumpPkgWhatIf( INT );
+#endif
 
   SEC << "STOP" << endl;
   return 0;
