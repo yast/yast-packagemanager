@@ -1,12 +1,31 @@
 #! /bin/bash
+PROG=$(basename $0)
 
 function Warn() {
-	echo "genPtrClass: $@" >&2
+	echo "$PROG: $@" >&2
 }
 function Err() {
 	Warn "$@"
-	echo "Usage: genPtrClass CLASSNAME [ FROMNAME BASENAME ]" >&2
+	echo "Usage: $PROG CLASSNAME [ FROMNAME BASENAME ]" >&2
+	echo "" >&2
+	echo "Create counted pointer class CLASSNAME as base class," >&2
+	echo "derived class, if FROMNAME BASENAME are supplied. See" >&2
+	echo "CountedPointer documentation." >&2
+	echo "" >&2
+	echo "Created files: {CLASSNAME}.h {CLASSNAME}.cc {CLASSNAME}Ptr.h" >&2
+	echo "" >&2
 	exit 1
+}
+function ChkExists() {
+	DOEXIT=
+	for f in "$@" ; do
+		test -e $f && {
+			Warn "File already exists: $f"
+			DOEXIT=1
+		}
+	done
+
+	test -n "$DOEXIT" && Err "Aborting"
 }
 
 CLASS=$1
@@ -24,15 +43,7 @@ else
 	Err "Incorrect number of arguments $#:'$@'"
 fi
 
-DOEXIT=
-for f in "$CH" "$CC" "$PH"; do
-	test -e $f && {
-		Warn "File already exists: $f"
-		DOEXIT=1
-	}
-done
-
-test -n "$DOEXIT" && Err "Aborting"
+ChkExists "$CH" "$CC" "$PH"
 
 ## ---------------------------------------------------------------------
 ## ---------------------------------------------------------------------
