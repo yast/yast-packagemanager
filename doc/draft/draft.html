@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><link href="doxygen.css" rel="stylesheet" type="text/css"></head>
+<body>
+
+<ul>
+  <h4>Index<h4>
+  <li><a href="#Objects">Objects</a></li>
+  <li><a href="#Framework">Framework</a></li>
+  <li><a href="#Solver">Solver</a></li>
+  <li><a href="#MediaAccess">MediaAccess</a></li>
+</ul>
+
+<dl>
+<li>
+<li>
+<li>
+<li>
+<li>
+<li>
+<li>
+<li>
+<li>
+<li>
+<li>
+<li>
+</dl>
+
+<hr><!-- ********************************************************** -->
+<a name="Objects"><h1>Objects</h1></a>
+
+<h4>There are various kinds of Objects Y2PM has to deal with:</h4>
+<center><img src="structy2pm_1_1Object.png" usemap="#y2pm::Object_map" border="0" alt=""></center>
+<map name="y2pm::Object_map">
+<area href="structy2pm_1_1Language.html" alt="y2pm::Language" shape="rect" coords="0,56,104,80">
+<area href="structy2pm_1_1Package.html" alt="y2pm::Package" shape="rect" coords="114,56,218,80">
+<area href="structy2pm_1_1Patch.html" alt="y2pm::Patch" shape="rect" coords="228,56,332,80">
+<area href="structy2pm_1_1Product.html" alt="y2pm::Product" shape="rect" coords="342,56,446,80">
+<area href="structy2pm_1_1Selection.html" alt="y2pm::Selection" shape="rect" coords="456,56,560,80">
+</map>
+
+<ul>
+  <h4>These Object are identified by:</h4>
+  <li>name
+  <li>edition
+  <li>architecture
+</ul>
+
+<ul>
+  <h4>There are dependencies between Objects:</h4>
+  <li>prerequires
+  <li>requires
+  <li>provides
+  <li>conflicts
+  <li>obsoletes
+  <li>suggests
+  <li>recommends
+</ul>
+
+<ul>
+  <h4>Associated with an Object is a State and possible state changes:</h4>
+  <li>installed / not installed
+  <li>install / replace / delete
+</ul>
+
+<ul>
+  <h4>Objects are provided by:</h4>
+  <li>The InstTarget - The system Y2PM maintains, providing installed Objects.
+  <li>InstSources - Objects available for installation may be found at various
+  locations. Basically everything that is somehow able to provide the Objects
+  basic data may serve as an InstSource.
+</ul>
+
+<ul>
+  <h4>Y2PM tasks:</h4>
+  <li>Provide easy and common access to installed and available Objects.
+  <li>Support analysis of the current systems state and the effect of
+  Object state changes.
+  <ul>
+    <li>Solver - Maintain dependencies within none class of Objects.
+    <li>Mediator - Maintain depedencies between different Object classes.
+    E.g. installing a Selection will actually install Packages and may
+    lead to a new Product being avilable ond the System.
+  </ul>
+  <li>Provide the strategies to actually apply the state changes.
+</ul>
+
+<ul>
+  <h4>Further requirements:</h4>
+  <li>Interface design and documentation.
+  <li>Binary comatibility
+  <li>Extensibility
+</ul>
+
+<hr><!-- ********************************************************** -->
+<a name="Framework"><h2>Framework</h2></a>
+
+<center><img src="Framework.png" border="0" alt="Framework"></center>
+
+<hr><!-- ********************************************************** -->
+<a name="Solver"><h2>Solver</h2></a>
+
+<ul>
+  <h4>Solver extensions:</h4>
+  <li>Handle recommends and suggests.
+  <li>Interaction between Solver and Dependency.
+ </ul>
+
+<center><img src="structy2pm_1_1Dependency.png" border="0" alt="Depenndencies"></center>
+
+<p>Interaction? The current Solver knows 'how' to check e.g. a requirement.
+A requirement is fullfilled, if another Object provides it. But first of
+all the Solver is interested 'if' a requirement is fullfilled.
+
+<p>Introducing new requirements like 'require TV-Card' or 'require licenceconfirm'
+require changes to the Solver, or other kinds of workarounds. Dummy Objects
+providing 'TV-Card' or 'licence confirmed for package foo' for example. Or,
+the application is responsible for checking those requirements before
+Objects get installed.
+
+<p>An improved Solver would be able to 'ask' dependencies whether they are
+fullfilled. 'require licenceconfirm' could then try to ask the user for
+confirmation, and dependent on the answer say  'yes' or 'no'.
+
+<p>This would ease introducing new Dependencies without changing the Solver code.
+It would support introducing different Solver levels. More relaxed in sw_single,
+but strict before commit. A LicenseDependency could then keep quiet until
+solving for commit.
+
+<p>We already introduced specialized dependencies: SplitDependencies. They are
+currently evaluated on Update only. As the Solver does not handle them, the
+UpdateStrategy has to take care of them. But actually thats the wrong location.
+
+<hr><!-- ********************************************************** -->
+<a name="MediaAccess"><h2>MediaAccess</h2></a>
+
+<p>MediaAccess provides transparent access to a physical media.
+
+<ul>
+  <li>CD/DVD
+  <li>NFS
+  <li>FTP
+  <li>HTTP/HTTPS
+  <li>SMB/CIFS
+  <li>local directory
+</ul>
+
+<p>MediaAccess is mainly used by InstSources to acess the data. The InstSource
+knows layout and location of the data. MediaAccess knows how to acess them.
+
+<ul>
+  <h4>Desired extensions</h4>
+  <li>URI parsing.
+  <li>Device management for CD/DVD
+  <li>Download management for FTP/HTTP/HTTPS
+  <li>Asynchronous data retrieval and caching.
+</ul>
+
+
+<hr><!-- ********************************************************** -->
+</body>
+</html>
