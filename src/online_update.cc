@@ -74,7 +74,9 @@ void usage()
 */
 int main( int argc, char **argv )
 {
-  MIL << "START" << endl;
+  MIL << "CMD: online_update";
+  for ( int i = 1; i < argc; ++i ) MIL << " " << argv[ i ];
+  MIL << endl;
 
   const char *urlStr = 0;
   const char *productStr = 0;
@@ -334,8 +336,8 @@ int main( int argc, char **argv )
     exit( -1 );
   }
 
-  if ( verbose && autoGet && !autoInstall ) {
-    cout << "Got patches." << endl;
+  if ( autoGet && !autoInstall ) {
+    if ( verbose ) cout << "Got patches." << endl;
     return 0;
   }
 
@@ -345,6 +347,6 @@ int main( int argc, char **argv )
     exit( -1 );
   }
 
-  MIL << "END" << endl;
+  MIL << "online_update done" << endl;
   return 0;
 }
