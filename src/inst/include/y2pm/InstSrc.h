@@ -342,12 +342,34 @@ class InstSrc: virtual public Rep {
 	}
 
 	/**
-	 * provide file via medianr and location
+	 * provide media by number
+	 *
+	 */
+	PMError provideMedia (int medianr);
+
+	/**
+	 * provide package via medianr and location
+	 *
+	 * location is the "=Loc:" entry from the packages file with
+	 * the media number stripped
+	 * for 'src' or 'nosrc' packages, set 'is_source' to true
+	 * this will disable the ARCH lookup needed for binary packages
+	 * (see doc/media in yast2-packagemanager docs)
 	 *
 	 * returns local path or empty on error
 	 * uses media change callback
 	 */
-	Pathname provideLocation (int medianr, const Pathname& location);
+	Pathname providePackage (int medianr, const Pathname& package, bool is_source = false);
+
+	/**
+	 * provide file via medianr and path
+	 *
+	 * path is relavite to the media root
+	 *
+	 * returns local path or empty on error
+	 * uses media change callback
+	 */
+	Pathname provideFile (int medianr, const Pathname& path);
 
   public:
 

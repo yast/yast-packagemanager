@@ -155,7 +155,7 @@ PMError InstSrc::enableSource()
   }
 
 
-  // Determine search path for provideLocation
+  // Determine search path for providePackage
 
   //std::map<std::string,std::list<Pathname> >
   InstSrcDescr::ArchMap archmap = _descr->content_archmap();
@@ -631,16 +631,19 @@ std::string number2string (int nr)
     return string (num);
 }
 
+
+
 /******************************************************************
 **
 **
-**	FUNCTION NAME : provideLocation
-**	FUNCTION TYPE : std::string
+**	FUNCTION NAME : provideMedia
+**	FUNCTION TYPE : PMError
 **
-**	DESCRIPTION : provide file by medianr and location
+**	DESCRIPTION : provide media by medianr
+**		
 */
-Pathname
-InstSrc::provideLocation (int medianr, const Pathname& location)
+PMError
+InstSrc::provideMedia (int medianr)
 {
     PMError err;
 
@@ -690,6 +693,7 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 	err = _media->provideFile (mediafile);
 	if (err == PMError::E_ok)
 	{
+#warning TBD check 'media' file contents
 	    _medianr = medianr;
 	    break;
 	}
@@ -697,7 +701,7 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 	{
 	    MIL << "provideFile failed: " << err.errstr() << endl;
 	}
-#warning TDB eject CD on PPC/MAC
+#warning TBD eject CD on PPC/MAC
 	_media->release();
 
 	std::string path = _descr->url().getPath();
@@ -710,9 +714,9 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 	    while (isdigit(path[path.size()-1])
 		   && !path.empty())
 	    {
-		path.erase(path.size()-1);		// remove trailing digits
+		path.erase (path.size()-1);		// remove trailing digits
 	    }
-	    path += number2string(medianr);		// attach medianr
+	    path += number2string (medianr);		// attach medianr
 	    url.setPath (path);
 	    MIL << "Re-open url '" << url << "'" << endl;
 	    continue;					// try re-open
@@ -734,19 +738,65 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
     }
 
     if (reply != 0)
+	return InstSrcError::E_no_media;
+
+    return InstSrcError::E_ok;
+}
+
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : providePackage
+**	FUNCTION TYPE : std::string
+**
+**	DESCRIPTION : provide file by medianr and location
+**		if 'is_source == false' (the default), search through
+**		the list of allowed (arch based) pathes for a proper
+**		match.
+**		
+*/
+Pathname
+InstSrc::providePackage (int medianr, const Pathname& location, bool is_source)
+{
+    PMError err = provideMedia (medianr);
+    if (err != PMError::E_ok)
 	return Pathname();
 
     Pathname datadir = _descr->content_datadir();
     Pathname filename;
 
-    for (std::list<Pathname>::const_iterator pathIt = _datasubdirs.begin();
-	 pathIt != _datasubdirs.end(); ++pathIt)
+    if (is_source)
     {
-	filename = datadir + *pathIt + Pathname (location);
+	string strpath = location.asString();
+	string::size_type rpmpos = strpath.rfind (".rpm");
+	if (rpmpos == string::npos)
+	{
+	    ERR << "Not .rpm: '" << strpath << "'" << endl;
+	    return Pathname();
+	}
+	rpmpos--;
+	string::size_type dotpos = strpath.rfind (".", rpmpos);
+	if (dotpos == string::npos)
+	{
+	    ERR << "Not .(no)src.rpm: '" << strpath << "'" << endl;
+	    return Pathname();
+	}
+	filename = datadir + Pathname (strpath.substr (dotpos+1, rpmpos-dotpos)) + location;
 	err = _media->provideFile (filename);
-	if (err == PMError::E_ok)
-	    break;
     }
+    else
+    {
+	for (std::list<Pathname>::const_iterator pathIt = _datasubdirs.begin();
+	     pathIt != _datasubdirs.end(); ++pathIt)
+	{
+	    filename = datadir + *pathIt + location;
+	    err = _media->provideFile (filename);
+	    if (err == PMError::E_ok)
+		break;
+	}
+    } // !is_source
+
     if (err != PMError::E_ok)
     {
 	ERR << "Media can't provide '" << location << "': " << err.errstr() << endl;
@@ -754,6 +804,32 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
     }
     return _media->localPath (filename);
 }
+
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : provideFile
+**	FUNCTION TYPE : std::string
+**
+**	DESCRIPTION : provide file by medianr and relative path
+*/
+Pathname
+InstSrc::provideFile (int medianr, const Pathname& path)
+{
+    PMError err = provideMedia (medianr);
+    if (err != InstSrcError::E_ok)
+	return Pathname();
+
+    err = _media->provideFile (path);
+    if (err != PMError::E_ok)
+    {
+	ERR << "Media can't provide '" << path << "': " << err.errstr() << endl;
+	return Pathname();
+    }
+    return _media->localPath (path);
+}
+
 
 /******************************************************************
 **

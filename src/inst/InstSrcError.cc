@@ -69,6 +69,7 @@ std::string InstSrcError::errtext( const unsigned e )
     ENUM_OUT( E_open_file );
     ENUM_OUT( E_create_file );
     ENUM_OUT( E_write_file );
+    ENUM_OUT( E_no_media );
     //
     ENUM_OUT( E_bad_url );
     ENUM_OUT( E_no_instsrc_on_media );
