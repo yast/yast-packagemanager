@@ -42,18 +42,32 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
   REP_BODY(InstSrcData_UL);
 
     private:
+
 	/**
 	 * fill tagset from packages to PMPackage
+	 *
+	 * must be static because called by static trygetData()
+	 */
+	static int Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist);
+
+	/**
+	 * fill tagset from packages to PMPackage
+	 *
+	 * must be static because called by static trygetData()
 	 */
 	static PMPackagePtr PkgTag2Package( TagCacheRetrieval *pkgcache, TagCacheRetrieval *langcache, CommonPkdParser::TagSet * tagset, const std::list<PMPackagePtr>* packagelist );
 
 	/**
 	 * fill tagset from packages.<lang> to PMPackage
+	 *
+	 * must be static because called by static trygetData()
 	 */
 	static void LangTag2Package( TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset );
 
 	/**
 	 * fill tagset from <name>.sel to PMSelection
+	 *
+	 * must be static because called by static trygetData()
 	 */
 	static PMSelectionPtr Tag2Selection ( TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset );
 
@@ -81,12 +95,23 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
      * Any concrete InstSrcData must realize this, as it knows the expected
      * layout on the media. Expect MediaAccessPtr to be open and attached.
      *
+     * try to find product/content information on the media
+     *
      * Return the InstSrcDescr retrieved from the media via ndescr_r,
      * or NULL and PMError set.
      **/
     static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
 
+    /**
+     * Any concrete InstSrcData must realize this, as it knows the expected
+     * layout on the media. Expect MediaAccessPtr to be open and attached.
+     *
+     * try to find selection/package/patch information on the media
+     *
+     * Return the InstSrcData retrieved from the media via ndata_r,
+     * or NULL and PMError set.
+     **/
     static PMError tryGetData( InstSrcDataPtr & ndata_r,
 				MediaAccessPtr media_r, const Pathname & descr_dir_r );
 

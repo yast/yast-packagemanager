@@ -55,6 +55,37 @@ IMPL_DERIVED_POINTER(InstSrcData_UL,InstSrcData,InstSrcData);
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
+//	METHOD NAME : InstSrcData_UL::Tag2PkgRelList
+//	METHOD TYPE : int
+//
+//	DESCRIPTION : convert list of strings (denoting dependencies)
+//		      to PMSolvable::PkgRelList_type&
+//		      return number of dependencies found
+
+int
+InstSrcData_UL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist)
+{
+MIL << "InstSrcData_UL::Tag2PkgRelList()" << endl;
+    int count = 0;
+    pkgrellist.clear();
+    if (!relationlist.empty())
+    {
+    for (list<string>::const_iterator relation_str_iter = relationlist.begin();
+	 relation_str_iter != relationlist.end();
+	 ++relation_str_iter)
+    {
+MIL << *relation_str_iter << endl;
+	pkgrellist.push_back (PkgRelation::fromString (*relation_str_iter));
+	count++;
+    }
+    }
+MIL << count << " relations created" << endl;
+    return count;
+}
+
+///////////////////////////////////////////////////////////////////
+// PRIVATE
+//
 //	METHOD NAME : InstSrcData_UL::PkgTag2Package
 //	METHOD TYPE : PMPackagePtr
 //
@@ -101,16 +132,18 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
 #define SET_SINGLE(tagname) \
     SET_VALUE (tagname, (GET_TAG(tagname))->Data())
 
-    SET_VALUE (NAME, splitted[0]);
-    SET_VALUE (VERSION, splitted[1]);
-    SET_VALUE (RELEASE, splitted[2]);
-    SET_VALUE (ARCH, splitted[3]);
+    PMSolvable::PkgRelList_type pkgrellist;
 
-    SET_MULTI (REQUIRES);
-    SET_MULTI (PREREQUIRES);
-    SET_MULTI (PROVIDES);
-    SET_MULTI (CONFLICTS);
-    SET_MULTI (OBSOLETES);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(REQUIRES))->MultiData()))
+	package->setRequires (pkgrellist);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(PREREQUIRES))->MultiData()))
+	package->setPreRequires (pkgrellist);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(PROVIDES))->MultiData()))
+	package->setProvides (pkgrellist);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(CONFLICTS))->MultiData()))
+	package->setConflicts (pkgrellist);
+    if (Tag2PkgRelList (pkgrellist, (GET_TAG(OBSOLETES))->MultiData()))
+	package->setObsoletes (pkgrellist);
 
     SET_MULTI (RECOMMENDS);
     SET_MULTI (SUGGESTS);
@@ -201,7 +234,7 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
 #define SET_SINGLE(tagname) \
     SET_VALUE (tagname, (GET_TAG(tagname))->Data())
 
-    SET_SINGLE (SUMMARY);
+    SET_MULTI (SUMMARY);
     SET_MULTI (DESCRIPTION);
     SET_MULTI (INSNOTIFY);
     SET_MULTI (DELNOTIFY);
@@ -235,8 +268,8 @@ InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::Tag
     if (splitted.size() < 4)
 	splitted.push_back("");
 
-//MIL << "-----------------------------" << endl;
-//MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+//cerr << "-----------------------------" << endl;
+//cerr << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
     // Pkg -> PMSelection
     PkgName name (splitted[0]);
@@ -739,6 +772,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 	}
 	break;
     }
+    cerr << "*** Expecting " << selection_names.size() << " selections ***" << endl;
 
     std::list<PMSelectionPtr> *selectionlist = new (std::list<PMSelectionPtr>);
 
@@ -798,14 +832,16 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     }
 
 	selection_stream.close();
+	++selfile;
+
 	MIL << "done " << *selfile << " parsing" << endl;
+
 	if (parse)
 	{
 	    selectionlist->push_back (Tag2Selection (selcache, tagset));
 	    count++;
 	}
 	tagset->clear();
-
     } // while selfile
 
     ndata->setSelections(selectionlist);
