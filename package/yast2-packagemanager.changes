@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 22 14:06:04 CEST 2003 - ma@suse.de
+
+- Invalidate all outstanding database handles after conversion.
+
+-------------------------------------------------------------------
 Wed Aug 20 13:12:12 CEST 2003 - cschum@suse.de
 
 - Own /var/lib/YaST2/you and /var/lib/YaST2/you/mnt (#28793).
