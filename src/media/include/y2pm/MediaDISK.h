@@ -30,10 +30,13 @@ class MediaDISK : public MediaHandler {
 
 	unsigned long _mountflags;
 
+	std::string _device;
+	std::string _filesystem;
+
     public:
 	// constructor
 
-	MediaDISK (const std::string & partition, const std::string & path, const std::string & options);
+	MediaDISK (const Url& url);
 
 	MEDIA_HANDLER_API
 

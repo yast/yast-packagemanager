@@ -46,11 +46,19 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaDISK::MediaDISK (const string & partition, const string & path, const string & options)
-    : MediaHandler (partition, path)
+MediaDISK::MediaDISK (const Url& url)
+    : MediaHandler (url)
     , _mountflags (MS_RDONLY)
 {
-    // parse options to _mountflags
+	Url::OptionMapType::iterator it;
+	Url::OptionMapType options;
+	it = options.find("device");
+	if(it != options.end())
+		_device = it->second;
+	
+	it = options.find("filesystem");
+	if(it != options.end())
+		_filesystem = it->second;
 }
 
 
@@ -81,8 +89,7 @@ MediaDISK::~MediaDISK()
 ostream &
 MediaDISK::dumpOn( ostream & str ) const
 {
-    str << "MediaDISK (" << _device << "@" << _path << ")";
-    return str;
+    return MediaHandler::dumpOn(str);
 }
 
 
@@ -103,12 +110,24 @@ MediaDISK::attachTo (const Pathname & to)
     //   mount /tmp_mount/<dir> <to> --bind -o ro    
     // FIXME: try all filesystems
 
-    const char *mountpoint = to.asString().c_str();
-    string dirpath = string (TMPMNT) + _path;
-    const char *dirpoint = dirpath.c_str();
+    if(!_url.isValid())
+	    return E_bad_url;
 
-    if (mount (_device.c_str(), TMPMNT, "ext2", 0, 0) != 0) {
-	if (mount (dirpoint, mountpoint, "ext2", _mountflags|MS_BIND, 0) != 0) {
+    if(_device.empty())
+	    return E_no_destination;
+
+    if(_filesystem.empty())
+	    return E_invalid_filesystem;
+
+    const char *mountpoint = to.asString().c_str();
+
+    Pathname dirpath = string (TMPMNT);
+    dirpath += _url.getPath();
+
+    const char *dirpoint = dirpath.asString().c_str();
+
+    if (mount (_device.c_str(), TMPMNT, _filesystem.c_str(), 0, 0) != 0) {
+	if (mount (dirpoint, mountpoint, _filesystem.c_str(), _mountflags|MS_BIND, 0) != 0) {
 	    return E_system;
 	}
     }

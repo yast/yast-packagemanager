@@ -22,6 +22,10 @@
 #ifndef MediaResult_h
 #define MediaResult_h
 
+#ifndef N_
+#  define N_(STR) STR
+#endif
+
 typedef enum media_result {
     E_none = 0,
     E_system,		// see errno
@@ -35,7 +39,37 @@ typedef enum media_result {
     E_already_attached,
     E_not_attached,
     E_not_open,
-    E_no_destination
+    E_no_destination,
+    E_invalid_device,
+    E_invalid_filesystem,
+    // wget errors
+    E_file_not_found,
+    E_login_failed,
+    E_connection_failed,
+    E_proxyauth_failed
 } MediaResult;
+
+const char* const media_result_strings[] = {
+	N_("OK"),
+	N_("Unkown error in subsystem"),
+	N_("not a directory"),
+	N_("access denied"), //FIXME
+	N_("insufficient permissions"),
+	N_("no space left"),
+	N_("invalid URL"),
+	N_("invalid media type"),
+	N_("invalid filename"),
+	N_("already attached"),
+	N_("not attached"),
+	N_("not opened"),
+	N_("no destination"),
+	N_("invalid device"),
+	N_("invalid filesystem"),
+
+	N_("file not found"),
+	N_("login failed"),
+	N_("connection failed"),
+	N_("proxy authenticatin failed")
+};
 
 #endif // MediaResult_h

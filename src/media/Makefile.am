@@ -17,15 +17,14 @@ liby2pmMedia_la_SOURCES = \
 	MediaNFS.cc		\
 	MediaDISK.cc		\
 	MediaSMB.cc		\
-	MediaFTP.cc		\
-	MediaHTTP.cc		\
+	MediaWget.cc		\
 	Wget.cc
 
 liby2pmMedia_la_LIBADD = -ly2util
 
-noinst_PROGRAMS = media_test_ftp
+noinst_PROGRAMS = media_test.prg
 
-media_test_ftp_SOURCES = media_test_ftp.cc
-media_test_ftp_LDADD = liby2pmMedia.la
+media_test_prg_SOURCES = media_test.cc
+media_test_prg_LDADD = liby2pmMedia.la
 #for debuggin
-media_test_ftp_LDFLAGS = -static
+media_test_prg_LDFLAGS = -static

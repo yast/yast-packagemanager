@@ -37,7 +37,7 @@ class MediaNFS : public MediaHandler {
     public:
 	// constructor
 
-	MediaNFS (const std::string & server, const std::string & path, const std::string & options);
+	MediaNFS (const Url& url);
 
 	MEDIA_HANDLER_API
 

@@ -26,6 +26,7 @@
 
 #include <y2util/Pathname.h>
 #include <y2util/PathInfo.h>
+#include <y2util/Url.h>
 
 #include <y2pm/MediaHandler.h>
 #include <y2pm/MediaAccessPtr.h>
@@ -42,7 +43,7 @@ class REP_CLASS(MediaAccess) {
 
 	typedef enum media_type {
 	    Unknown = 0,
-	    CD, DVD, NFS, DIR, DISK, FTP, SMB, HTTP
+	    CD, DVD, NFS, DIR, DISK, FTP, SMB, HTTP, HTTPS
 	} MediaType;
 
 	// type of media
@@ -61,7 +62,7 @@ class REP_CLASS(MediaAccess) {
 	MediaAccess (void);
 
 	// open url
-	MediaResult open (const std::string & url);
+	MediaResult open (const Url& url);
 
 	// close url
 	void close (void);

@@ -40,7 +40,7 @@ class MediaSMB : public MediaHandler {
     public:
 	// constructor
 
-	MediaSMB (const std::string & device, const std::string & path, const std::string & options);
+	MediaSMB (const Url& url);
 
 	MEDIA_HANDLER_API
 

@@ -40,12 +40,10 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaHandler::MediaHandler (const string & device, const string & path)
-	: _device(device),
-	_path(path),
+MediaHandler::MediaHandler (const Url& url)
+	: _url(url),
 	_attachPoint(string())
 {
-	D__ << _device << _path << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -71,7 +69,7 @@ MediaHandler::~MediaHandler()
 ostream &
 MediaHandler::dumpOn( ostream & str ) const
 {
-    str << "MediaHandler (" << _device << ":" << _path << ")";
+    str << "MediaHandler (" << _url.asString() << ")";
     return str;
 }
 

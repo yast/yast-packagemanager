@@ -27,6 +27,7 @@
 
 #include <y2util/Pathname.h>
 #include <y2util/PathInfo.h>
+#include <y2util/Url.h>
 
 #include <y2pm/MediaResult.h>
 
@@ -40,8 +41,7 @@ class MediaHandler {
 
     protected:
 
-	const std::string _device;	// which device
-	const std::string _path;	// path on device
+	const Url _url;	// which device
 
 	Pathname _attachPoint;		// attached at
 
@@ -54,7 +54,7 @@ class MediaHandler {
     public:
 	// constructor
 
-	MediaHandler (const std::string & device, const std::string & path);
+	MediaHandler (const Url& url);
 
 	// attach media at path
 	virtual MediaResult attachTo (const Pathname & to) = 0;

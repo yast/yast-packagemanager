@@ -31,8 +31,7 @@
 #include <y2pm/MediaDISK.h>
 #include <y2pm/MediaNFS.h>
 #include <y2pm/MediaSMB.h>
-#include <y2pm/MediaFTP.h>
-#include <y2pm/MediaHTTP.h>
+#include <y2pm/MediaWget.h>
 
 using namespace std;
 
@@ -63,51 +62,14 @@ MediaAccess::~MediaAccess()
 
 // open URL
 MediaResult
-MediaAccess::open (const string & url)
+MediaAccess::open (const Url& url)
 {
-//    char *device, *path, *options = 0;
-    string::size_type colon;
-    string protocol;
-    string device;
-    string path;
-    string options;
-
-    // parse url
-
-    DBG << url << endl;
-
-    colon = url.find(':');		// first colon
-    if (colon == string::npos)
+    if(!url.isValid())
 	return E_bad_url;
 
-    protocol=url.substr(0,colon);
-    DBG << "protocol: " << protocol << endl;
+    D__ << url.asString() << endl;
 
-    // set device
-    device = url.substr(colon+1);
-
-    colon = device.find(':');
-    if (colon == string::npos)
-    {
-	return E_bad_url;
-    }
-
-    // seperate path and device
-    path = device.substr(colon+1);
-    device = device.substr(0,colon);
-
-    DBG << "device: " << device << endl;
-    DBG << "path: " << path << endl;
-
-    // if another colon is found, everything behind it are options
-    colon = path.find(':');
-    if (colon != string::npos)
-    {
-	options = path.substr(colon + 1);
-	path = path.substr(0,colon);
-	DBG << "options: " << options << endl;
-	DBG << "path: " << path << endl;
-    }
+    string protocol = url.getProtocol();
 
     for(unsigned i=0;i<protocol.length();i++)
     {
@@ -117,42 +79,47 @@ MediaAccess::open (const string & url)
     if ( protocol == "cd" )
     {
 	_type = CD;
-	_handler = new MediaCD (device, path, options);
+	_handler = new MediaCD (url);
     }
     else if ( protocol == "dvd" )
     {
 	_type = DVD;
-	_handler = new MediaCD (device, path, options, true);
+	_handler = new MediaCD (url);
     }
     else if ( protocol == "nfs" )
     {
 	_type = NFS;
-	_handler = new MediaNFS (device, path, options);
+	_handler = new MediaNFS (url);
     }
     else if ( protocol == "dir" )
     {
 	_type = DIR;
-	_handler = new MediaDIR (device, path, options);
+	_handler = new MediaDIR (url);
     }
     else if ( protocol == "disk" )
     {
 	_type = DISK;
-	_handler = new MediaDISK (device, path, options);
+	_handler = new MediaDISK (url);
     }
     else if ( protocol == "ftp" )
     {
 	_type = FTP;
-	_handler = new MediaFTP (device, path, options);
+	_handler = new MediaWget (url);
     }
     else if ( protocol == "smb" )
     {
 	_type = SMB;
-	_handler = new MediaSMB (device, path, options);
+	_handler = new MediaSMB (url);
     }
     else if ( protocol == "http" )
     {
 	_type = HTTP;
-	_handler = new MediaHTTP (device, path, options);
+	_handler = new MediaWget (url);
+    }
+    else if ( protocol == "https" )
+    {
+	_type = HTTPS;
+	_handler = new MediaWget (url);
     }
     else
     {

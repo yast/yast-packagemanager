@@ -44,8 +44,8 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaNFS::MediaNFS (const string & server, const string & path, const string & options)
-    : MediaHandler (server, path)
+MediaNFS::MediaNFS (const Url& url)
+    : MediaHandler (url)
     , _mountflags (MS_RDONLY)
 {
     // parse options to _mountflags

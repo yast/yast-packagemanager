@@ -33,7 +33,7 @@ class MediaDIR : public MediaHandler {
     public:
 	// constructor
 
-	MediaDIR (const std::string & device, const std::string & path, const std::string & options);
+	MediaDIR (const Url& url);
 
 	MEDIA_HANDLER_API
 

@@ -29,12 +29,15 @@
 class MediaCD : public MediaHandler {
 
 	unsigned long _mountflags;
-	bool _as_dvd;
+
+	typedef std::list<std::string> DeviceList;
+	/** list of devices to try to mount */
+	 DeviceList _devices;
 
     public:
 	// constructor
 
-	MediaCD (const std::string & device, const std::string & path, const std::string & options, bool as_dvd = false);
+	MediaCD (const Url& url);
 
 	MEDIA_HANDLER_API
 

@@ -44,12 +44,32 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaCD::MediaCD (const string & device, const string & path, const string & options, bool as_dvd)
-    : MediaHandler (device, path)
+MediaCD::MediaCD (const Url& url)
+    : MediaHandler (url)
     , _mountflags (MS_RDONLY)
-    , _as_dvd (as_dvd)
 {
-    // parse options to _mountflags
+    Url::OptionMapType options = _url.getOptions();
+    Url::OptionMapType::iterator it;
+
+    // chop up devices and put them in a list
+    if((it=options.find("devices")) != options.end())
+    {
+	string devices=it->second;
+	string::size_type pos;
+	while(!devices.empty())
+	{
+	    pos = devices.find(',');
+	    if(pos != string::npos)
+	    {
+		string device = devices.substr(0,pos);
+		if(!device.empty())
+		{
+		    _devices.push_back(device);
+		}
+		devices=devices.substr(pos+1);
+	    }
+	}
+    }
 }
 
 
@@ -80,8 +100,7 @@ MediaCD::~MediaCD()
 ostream &
 MediaCD::dumpOn( ostream & str ) const
 {
-    str << "MediaCD (" << _device << "@" << _path << ")";
-    return str;
+    return MediaHandler::dumpOn(str);
 }
 
 
@@ -98,19 +117,27 @@ MediaCD::attachTo (const Pathname & to)
 {
     // FIXME, issue "eject -t" to close the tray
     
-    // if DVD, try UDF filesystem before iso9660
-
-    const char *mountpoint = to.asString().c_str();
-    if (!_as_dvd
-	|| (mount (_device.c_str(), mountpoint, "udf", _mountflags, 0) != 0)) {
-
-	if (mount (_device.c_str(), mountpoint, "iso9660", _mountflags, 0) != 0) {
-	    return E_system;
-	}
-    }
     _attachPoint = to;
 
-    return E_none;
+    const char *mountpoint = _attachPoint.asString().c_str();
+    bool mountsucceeded = false;
+
+    // try all devices in turn
+    for(DeviceList::iterator it = _devices.begin()
+	; !mountsucceeded && it != _devices.end()
+	; ++it )
+    {
+	// if DVD, try UDF filesystem before iso9660
+	if (_url.getProtocol() != "dvd"
+	    || (mount (it->c_str(), mountpoint, "udf", _mountflags, 0) != 0)) {
+
+	    if (mount (it->c_str(), mountpoint, "iso9660", _mountflags, 0) != 0) {
+		mountsucceeded = true;
+	    }
+	}
+    }
+
+    return (mountsucceeded?E_none:E_system);
 }
 
 

@@ -43,8 +43,8 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaDIR::MediaDIR (const string & device, const string & path, const string & options)
-    : MediaHandler (device, path)
+MediaDIR::MediaDIR (const Url& url)
+    : MediaHandler (url)
 {
 }
 
@@ -76,8 +76,7 @@ MediaDIR::~MediaDIR()
 ostream &
 MediaDIR::dumpOn( ostream & str ) const
 {
-    str << "MediaDIR (" << "@" << _path << ")";
-    return str;
+    return MediaHandler::dumpOn(str);
 }
 
 

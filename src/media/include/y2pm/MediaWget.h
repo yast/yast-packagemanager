@@ -10,23 +10,23 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:	MediaFTP.h
+   File:	MediaWget.h
 
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
    Purpose:	Implementation class for MediaHandler
-		This class handles access to FTP media
+		This class handles access FTP, HTTP and HTTPS servers
 /-*/
-#ifndef MediaFTP_h
-#define MediaFTP_h
+#ifndef MediaWget_h
+#define MediaWget_h
 
 #include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : MediaFTP
-class MediaFTP : public MediaHandler {
+//	CLASS NAME : MediaWget
+class MediaWget : public MediaHandler {
 
 	std::string _user;		// username
 	std::string _pass;		// password
@@ -41,11 +41,11 @@ class MediaFTP : public MediaHandler {
 	 *
 	 * @param options user, pass, proxyhost, proxyport, proxytype (ftp,http), proxyuser, proxypass
 	 * */
-	MediaFTP (const std::string & server, const std::string & path, const std::string & options);
+	MediaWget (const Url& url);
 
 	MEDIA_HANDLER_API
 
-	~MediaFTP();
+	~MediaWget();
 
     public:
 
@@ -54,4 +54,4 @@ class MediaFTP : public MediaHandler {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // MediaFTP_h
+#endif // MediaWget_h
