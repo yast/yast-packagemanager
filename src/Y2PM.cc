@@ -243,6 +243,7 @@ bool Y2PM::noAutoInstSrcManager()
     MIL << "Launch InstSrcManager (no auto enable)..." << endl;
     _instSrcManager = new InstSrcManager ( /*autoEnable*/false );
     MIL << "Created InstSrcManager (no auto enable) @" << _instSrcManager << endl;
+    return true;
   }
   return false;
 }
