@@ -60,6 +60,11 @@ class PMPackageManager : public PMManager {
 
   public:
 
+    /**
+     * are there currently any "by_user" selectables ?
+     *
+     */
+    bool anythingByUser(void);
 
     /**
      * Fill in the packages set to be deleted and to be installed.
