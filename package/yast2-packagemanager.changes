@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 23 17:23:06 CET 2003 - ma@suse.de
+
+- using librpm for queries
+- 2.7.4
+
+-------------------------------------------------------------------
 Thu Jan 23 12:26:01 CET 2003 - cschum@suse.de
 
 - Show warning, if installation of patch will not install any
