@@ -134,10 +134,21 @@ class RpmHeader : public binHeader {
   public:
 
     /**
+     * Digest and signature verification flags
+     **/
+    enum VERIFICATION {
+      VERIFY       = 0x0000,
+      NODIGEST     = (1<<0),
+      NOSIGNATURE  = (1<<1),
+      NOVERIFY     = 0xffff
+    };
+
+    /**
      * Get an accessible packages data from disk.
      * Returns NULL on any error.
      **/
-    static constRpmHeaderPtr readPackage( const Pathname & path, bool checkDigest = false );
+    static constRpmHeaderPtr readPackage( const Pathname & path,
+					  VERIFICATION verification = VERIFY );
 };
 
 ///////////////////////////////////////////////////////////////////

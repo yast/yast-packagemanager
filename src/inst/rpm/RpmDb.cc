@@ -1182,7 +1182,7 @@ RpmDb::checkPackage (const Pathname & packagePath, string version, string md5 )
     unsigned result = 0;
 
     if ( ! version.empty() ) {
-      constRpmHeaderPtr h( RpmHeader::readPackage( packagePath ) );
+      constRpmHeaderPtr h( RpmHeader::readPackage( packagePath, RpmHeader::NOSIGNATURE ) );
       if ( ! h || PkgEdition( version ) != h->tag_edition() ) {
 	result |= CHK_INCORRECT_VERSION;
       }
@@ -1814,7 +1814,7 @@ RpmDb::checkPackageResult2string(unsigned code)
 //
 bool RpmDb::backupPackage( const Pathname & filename )
 {
-  constRpmHeaderPtr h( RpmHeader::readPackage( filename ) );
+  constRpmHeaderPtr h( RpmHeader::readPackage( filename, RpmHeader::NOSIGNATURE ) );
   if( ! h )
     return false;
 

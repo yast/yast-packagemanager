@@ -249,7 +249,7 @@ PMError InstSrcDataPLAIN::providePkgToInstall( const Pathname & pkgfile_r, Pathn
 
   path_r = media->localPath( pkgfile );
 
-  if ( _instSrc->isRemote() && ! RpmHeader::readPackage( path_r, /*checkDigest*/true ) ) {
+  if ( _instSrc->isRemote() && ! RpmHeader::readPackage( path_r, RpmHeader::NOSIGNATURE ) ) {
     err = Error::E_corrupted_file;
     err.setDetails( pkgfile.asString() );
     PathInfo::unlink( path_r );
