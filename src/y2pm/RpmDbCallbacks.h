@@ -78,6 +78,7 @@ namespace RpmDbCallbacks {
   struct RebuildDbCallback : public RedirectCallback<RebuildDbCallback> {
     virtual void start() = 0;
     virtual void progress( const ProgressData & prg ) = 0;
+    virtual void notify( const std::string & msg ) = 0;
     virtual void stop( PMError error ) = 0;
   };
 
@@ -88,12 +89,38 @@ namespace RpmDbCallbacks {
     virtual void progress( const ProgressData & prg ) {
       RebuildDbCallback::progress( prg );
     }
+    virtual void notify( const std::string & msg ) {
+      RebuildDbCallback::notify( msg );
+    }
     virtual void stop( PMError error ) {
       RebuildDbCallback::stop( error );
     }
   };
 
   extern RebuildDbReport rebuildDbReport;
+
+  ///////////////////////////////////////////////////////////////////
+  // Reporting progress reading the rpm database
+  ///////////////////////////////////////////////////////////////////
+  struct ScanDbCallback : public RedirectCallback<ScanDbCallback> {
+    virtual void start() = 0;
+    virtual void progress( const ProgressData & prg ) = 0;
+    virtual void stop( PMError error ) = 0;
+  };
+
+  class ScanDbReport : public Report<ScanDbCallback> {
+    virtual void start() {
+      ScanDbCallback::start();
+    }
+    virtual void progress( const ProgressData & prg ) {
+      ScanDbCallback::progress( prg );
+    }
+    virtual void stop( PMError error ) {
+      ScanDbCallback::stop( error );
+    }
+  };
+
+  extern ScanDbReport scanDbReport;
 
   ///////////////////////////////////////////////////////////////////
   // Reporting progress of rpm package installation.

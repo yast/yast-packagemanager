@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan 26 21:25:10 CET 2004 - ma@suse.de
+
+- Revised rpm database rebuild and adjusted callbacks.
+- Added progress callbacks when reading the rpm database.
+- 2.9.12
+
+-------------------------------------------------------------------
 Fri Jan 23 15:31:57 CET 2004 - cschum@suse.de
 
 - Removed obsolete query code.
