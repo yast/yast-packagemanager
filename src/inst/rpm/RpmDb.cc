@@ -1990,7 +1990,7 @@ bool RpmDb::setInstallationLogfile( const Pathname& filename )
 	return true;
 
     _progresslogstream.clear();
-    _progresslogstream.open(filename.asString().c_str());
+    _progresslogstream.open(filename.asString().c_str(), std::ios::out|std::ios::app);
     if(!_progresslogstream)
     {
 	ERR << "Could not open " << filename << endl;
