@@ -8,10 +8,11 @@ AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
 
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
-		include	\
-		pkg/include	\
-		inst/include	\
-		media/include	\
+		include			\
+		pkg/include		\
+		inst/include		\
+		inst/pkg/include	\
+		media/include		\
 	   ) -I$(includedir) -I$(QTDIR)/include
 
 lib_LTLIBRARIES = liby2pm.la

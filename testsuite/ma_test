@@ -1,6 +1,10 @@
 #! /bin/bash
 #
 PRG=ma_test.exe
+if [ -x "$1" ]; then
+	PRG=$1
+	shift
+fi
 
 make -C ../src && make || exit 1
 
@@ -20,4 +24,4 @@ fi
 export Y2SLOG_FILE=-
 export Y2SLOG_DEBUG=
 # export Y2DEBUG=1
-./$PRG 2> $LPIPE
+./$PRG "$@" 2> $LPIPE

@@ -37,9 +37,8 @@
 /**
  *
  **/
-class REP_CLASS(MediaAccess) {
-
-	REP_BODY(MediaAccess)
+class MediaAccess : virtual public Rep {
+	REP_BODY(MediaAccess);
 
 	typedef enum media_type {
 	    Unknown = 0,

@@ -32,8 +32,8 @@
 /**
  *
  **/
-class REP_CLASS(PMPackageDataProvider), public PMDataProvider  {
-  REP_BODY(PMPackageDataProvider)
+class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
+  REP_BODY(PMPackageDataProvider);
 
   public:
 

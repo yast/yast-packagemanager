@@ -34,8 +34,8 @@
 //
 //	CLASS NAME : InstDescr
 
-class REP_CLASS(InstDescr) {
-  REP_BODY(InstDescr)
+class InstDescr : virtual public Rep {
+  REP_BODY(InstDescr);
 
   public:
 
@@ -46,7 +46,7 @@ class REP_CLASS(InstDescr) {
     InstDescr (const Pathname & descrcachefile);
 
     virtual ~InstDescr();
-  
+
   private:
     // all this data is saved to a cache file when
     // this sources gets registered (for later use)
