@@ -218,7 +218,7 @@ PMError InstSrcManager::scanProductsFile( const Pathname & file_r, ProductSet & 
   ifstream pfile( file_r.asString().c_str() );
   while ( pfile.good() ) {
 
-    string value = stringutil::getline( pfile, /*trimed*/true );
+    string value = stringutil::getline( pfile, stringutil::TRIM );
     if ( pfile.bad() ) {
       ERR << "Error parsing " << file_r << endl;
       return InstSrcError::E_no_instsrc_on_media;
