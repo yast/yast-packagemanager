@@ -66,6 +66,31 @@ void
 show_pmpackage (PMPackagePtr p)
 {
     show_pmobject (p);
+
+    cout << "Buildtime: " << p->buildtime() << endl;
+    cout << "Buildhost: " << p->buildhost() << endl;
+    cout << "Installtime: " << p->installtime() << endl;
+    cout << "Distribution: " << p->distribution() << endl;
+    cout << "Vendor: " << p->vendor() << endl;
+    cout << "License: " << p->license() << endl;
+    cout << "Packager: " << p->packager() << endl;
+    cout << "Group: " << p->group() << endl;
+    cout << "Changelog: " << list2string(p->changelog()) << endl;
+    cout << "Url: " << p->url() << endl;
+    cout << "OS: " << p->os() << endl;
+    cout << "PreIn: " << list2string(p->prein()) << endl;
+    cout << "PostIn: " << list2string(p->postin()) << endl;
+    cout << "PreUn: " << list2string(p->preun()) << endl;
+    cout << "PostUn: " << list2string(p->postun()) << endl;
+    cout << "Source: " << p->sourcerpm() << endl;
+    cout << "Archivesize: " << p->archivesize() << endl;
+    cout << "Authors: " << list2string(p->authors()) << endl;
+    cout << "Files: " << list2string(p->filenames()) << endl;
+    cout << "Recommends: " << list2string(p->recommends()) << endl;
+    cout << "Suggests: " << list2string(p->suggests()) << endl;
+    cout << "Location: " << p->location() << endl;
+    cout << "Keywords: " << list2string(p->keywords()) << endl;
+
     cout << "-- Package --" << endl;
 	for (PMPackage::PMPackageAttribute attr
 	= PMPackage::PMPackageAttribute(PMPackage::PKG_ATTR_BEGIN);
