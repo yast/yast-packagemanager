@@ -155,7 +155,8 @@ class PMError {
       // ADD/DEL ENTRIES:
       // adjust switches in errClass() and errstr()
       C_InstSrcError = 10*_valrange,
-      C_MediaError   = 11*_valrange
+      C_MediaError   = 11*_valrange,
+      C_InstTargetError   = 12*_valrange
     };
 
     unsigned _errval;
@@ -178,5 +179,124 @@ class PMError {
 };
 
 ///////////////////////////////////////////////////////////////////
+
+#if 0 //draft
+class PMError
+{
+    public:
+	enum Serverity
+	{
+	    None = 0,	// No error
+	    Normal,
+	    Grave,
+	    Fatal	// segfault etc, program should be aborted
+	};
+
+	/**
+	 * suggested Action in case of failure. If Severity == None,
+	 * SuggestedAction should be Continue
+	 * */
+	enum SuggestedAction
+	{
+	    Continue = 0,
+	    Retry,
+	    Fail
+	};
+
+	/**
+	 * Possible Actions to take in case of failure. If Severity == None,
+	 * PossibleAction should always include Continue
+	 * */
+	enum PossibleAction
+	{
+	    Continue = 1,
+	    Retry    = 2,
+	    Fail     = 4
+	};
+
+    public:
+	/**
+	 * Constructor
+	 *
+	 * @param reporter module or program which caused this error (e.g. wget, mount, MediaCD, ...)
+	 * @param s Severity of Error, default no Error
+	 * @param message Short message to show user
+	 * @param possibleAction or'ed value of ways to deal with this error
+	 * @param a Suggested way of proceeding after this error Occured.
+	 * */
+	PMError(
+	    const std::string& reporter,
+	    enum Severity s = None,
+	    const std::string& message = "",
+	    unsigned possibleAction = Continue,
+	    enum SuggestedAction a = Continue
+	    );
+
+	/**
+	 * Constructor
+	 *
+	 * like above except the errno value is accepted instead of a string
+	 * */
+	PMError(
+	    const std::string& reporter,
+	    enum Severity s = None,
+	    int errnoval, 
+	    unsigned possibleAction = Continue,
+	    enum SuggestedAction a = Continue
+	    );
+
+	/**
+	 * set longer explanatory text why this error occured and what's the
+	 * best way to deal with it. May optionally be displayed by UI
+	 * */
+	void setDescription(const std::string& descr);
+
+	/**
+	 * Set callback for asking the user how to proceed with this error
+	 * */
+	void setAskUserFunc(bool (*callbac)(const PMError&));
+
+
+	/**
+	 * invoke callback function
+	 *
+	 * @return what the user decided to do
+	 * */
+	enum SuggestedAction askUser();
+	
+
+	enum Severity getSeverity() const;
+
+	enum SuggestedAction getSuggestedAction() const;
+
+	unsigned getPossibleAction() const;
+
+	bool isActionPossible(enum PossibleAction a) const;
+
+	const std::string& getMessage() const;
+
+	const std::string& getDescription() const;
+
+	int getErrno() const;
+
+    private:
+
+	std::string _reporter;
+	
+	enum Severity _severity;
+
+	std::string _message;
+
+	int _errno; // -1 if not applicable
+
+	enum SuggestedAction _suggestedAction;
+
+	unsigned _possibleAction;
+
+	std::string _description;
+
+	bool (*_askuserfunc)(const PMError&);
+};
+#endif
 
 #endif // PMError_h
