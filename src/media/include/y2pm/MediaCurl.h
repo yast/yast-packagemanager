@@ -60,6 +60,9 @@ class MediaCurl : public MediaHandler {
     static int progressCallback( void *clientp, double dltotal, double dlnow,
                                  double ultotal, double ulnow );
 
+    static int passwordCallback( void *client, char *prompt, char* buffer,
+                                 int buflen );
+
   private:
     CURL *_curl;
     char _curlError[ CURL_ERROR_SIZE ]; 
