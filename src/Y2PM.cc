@@ -33,6 +33,24 @@ using namespace std;
 #define Y2LOG "Y2PM"
 ///////////////////////////////////////////////////////////////////
 
+/*
+ * get LangCode from LANG
+ */
+static LangCode getLangEnvironment()
+{
+    char *lang = getenv ("LANG");
+    if (lang == 0)
+	return LangCode ("en");
+    string langstr (lang);
+    MIL << "LANG=" << langstr << endl;
+    string::size_type sizepos = langstr.find ("@");	// cut off "@"
+    if (sizepos != string::npos)
+	langstr = langstr.substr (0, sizepos);
+    sizepos = langstr.find (".");		// cut off "."
+    if (sizepos != string::npos)
+	return LangCode (langstr.substr (0, sizepos));
+    return LangCode (langstr);
+}
 ///////////////////////////////////////////////////////////////////
 // global settings
 ///////////////////////////////////////////////////////////////////
@@ -40,7 +58,7 @@ using namespace std;
 
 Pathname Y2PM::_instTarget_rootdir( "/" );
 Pathname Y2PM::_system_rootdir    ( "/" );
-LangCode Y2PM::_preferred_locale ("en");
+LangCode Y2PM::_preferred_locale (getLangEnvironment());
 std::list<LangCode> Y2PM::_requested_locales;
 PkgArch Y2PM::_base_arch;
 std::list<PkgArch> Y2PM::_allowed_archs;
