@@ -644,6 +644,22 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 	    continue;
 	  }
 
+	  //
+	  // Check whether mounted readonly
+	  //
+	  bool ro = false;
+	  std::vector<std::string> flags;
+	  stringutil::split( words[3], flags, "," );
+	  for ( unsigned i = 0; i < flags.size(); ++i ) {
+	    if ( flags[i] == "ro" ) {
+	      ro = true;
+	      break;
+	    }
+	  }
+	  if ( ro ) {
+	    DBG << "Filter readonly mount point : " << l << endl;
+	    continue;
+	  }
 
 	  //
 	  // statvfs (full path!) and get the data

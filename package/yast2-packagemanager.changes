@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep 10 00:41:09 CEST 2004 - ma@suse.de
+
+- Omit readonly mounted partitions from disk usage calculation.
+  (#44938)
+
+-------------------------------------------------------------------
 Mon Sep  6 12:49:53 CEST 2004 - ma@suse.de
 
 - On update replace the old distributions packages regardless of

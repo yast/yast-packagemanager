@@ -206,10 +206,12 @@ int main( int argc, char * argv[] )
   }
 
   //Y2PM::setNotRunningFromSystem();
-  Y2PM::instSrcManager();
+  //Y2PM::instSrcManager();
   //InstSrcManager::ISrcId nid = newSrc( "ftp://schnell/CD-ARCHIVE/9.1/SuSE-9.1-FTP-i386-RC2/CD1" );
   //ISM.enableSource( nid );
   //ISM.disableAllSources();
+  Y2PM::instTargetInit("/");
+  DBG << TMGR.getMountPoints() << endl;
 
   SEC << "STOP" << endl;
   return 0;
