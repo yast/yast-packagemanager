@@ -48,6 +48,23 @@ PMPackageManager::~PMPackageManager()
 {
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::assertObjectType
+//	METHOD TYPE : PMObjectPtr
+//
+//	DESCRIPTION :
+//
+PMObjectPtr PMPackageManager::assertObjectType( const PMObjectPtr & object_r ) const
+{
+  PMPackagePtr p( object_r );
+  if ( object_r && !p ) {
+    ERR << "Object is not a Package: " << object_r << endl;
+  }
+  return p;
+}
+
 /******************************************************************
 **
 **

@@ -45,6 +45,14 @@ class PMPackageManager : public PMManager {
     PMPackageManager();
     virtual ~PMPackageManager();
 
+  private:
+
+    /**
+     * Make shure the passed PMObjectPtr actually references a PMPackage. If not,
+     * rerport error and return NULL.
+     **/
+    virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
+
   public:
 
 };

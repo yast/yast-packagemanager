@@ -57,10 +57,32 @@ class PMManager {
 
   private:
 
+    /**
+     * Concrete Manager has to assert that the passed ObjectPtr actually references the
+     * correct type of Object (PackageManager e.g. will handle nothing else but Packages).
+     **/
+    virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const = 0;
+
+    /**
+     * Currently we don't need concrete Selectables (e.g. PackageSelectable), thus new
+     * Selectables are created here. Otherwise make it pure virtual, and let the concrete
+     * Manager create the appropriate type of Selectable.
+     **/
     virtual PMSelectablePtr newSelectable( const PkgName & name_r ) const;
 
+    /**
+     * Lookup Selectable by index.
+     **/
     PMSelectablePtr poolLookup( unsigned idx_r ) const;
+
+    /**
+     * Lookup Selectable by name.
+     **/
     PMSelectablePtr poolLookup( const std::string & name_r ) const;
+
+    /**
+     * Make shure the pool contains a Selectable named name_r, and return it.
+     **/
     PMSelectablePtr poolProvide( const std::string & name_r );
 
     void clearAll();

@@ -11,9 +11,7 @@ pkginclude_HEADERS =	\
 	PMPackageDataProvider.h \
 	PMPackageDataProviderPtr.h \
 	PMPackageManager.h \
-	PMPackagePtr.h \
-	PMPackageSelectable.h \
-	PMPackageSelectablePtr.h
+	PMPackagePtr.h
 
 #<INSTALL-HEADER-TARGET>
 

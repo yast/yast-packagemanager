@@ -194,6 +194,10 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
       ERR << "Refuse to set NULL object" << endl;
       continue;
     }
+    if ( ! assertObjectType( *iter_r ) ) {
+      // Error reported by concrete Manager
+      continue;
+    }
     if ( iter_r->_selectable ) {
       ERR << "Refuse to set object owned by " << iter_r->_selectable << endl;
       continue;
@@ -235,6 +239,10 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
     ///////////////////////////////////////////////////////////////////
     if ( ! *iter_r ) {
       ERR << "Refuse to add NULL object" << endl;
+      continue;
+    }
+    if ( ! assertObjectType( *iter_r ) ) {
+      // Error reported by concrete Manager
       continue;
     }
     if ( iter_r->_selectable ) {
@@ -279,6 +287,10 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
     ///////////////////////////////////////////////////////////////////
     if ( ! *iter_r ) {
       ERR << "Refuse to remove NULL object" << endl;
+      continue;
+    }
+    if ( ! assertObjectType( *iter_r ) ) {
+      // Error reported by concrete Manager
       continue;
     }
     if ( ! iter_r->_selectable ) {
