@@ -32,7 +32,10 @@
 extern "C" {
 #include <unistd.h>
 #include <sys/statvfs.h>
+#include <sys/utsname.h>
 }
+
+#include <cstring>
 
 #include <iostream>
 #include <fstream>
@@ -67,21 +70,15 @@ PkgArch InstTarget::baseArch()
 
     if ( _base_arch->empty() )
     {
-	char *argv[3] = { "uname", "-m", 0 };
-	ExternalProgram process (argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
-	string output = process.receiveLine ();
-	process.close ();
-	if (output.length() == 0)
+	struct utsname u = {0};
+	int ret = ::uname(&u);
+	if (ret == -1 || !u.machine)
 	{
-	    ERR << "No output from 'uname -m'" << endl;
+	    ERR << "uname: " << strerror(errno) << endl;
 	}
 	else
 	{
-	    string::size_type endpos = output.find_first_of ("\n");
-	    if (endpos != string::npos)
-		_base_arch = PkgArch (output.substr (0, endpos));
-	    else
-		_base_arch = PkgArch (output);
+	    _base_arch = PkgArch(u.machine);
 	}
 
 	// some CPUs report i686 but dont implement cx8 and cmov
