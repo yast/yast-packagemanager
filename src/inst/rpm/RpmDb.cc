@@ -45,6 +45,7 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMRpmPackageDataProvider.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
+#include <y2pm/RpmCache.h>
 
 #include <Y2PM.h>
 
@@ -1188,6 +1189,124 @@ RpmDb::queryPackage (const Pathname& path, const char *format, std::list<std::st
     return queryPackage (path.asString(), "-qp", format, result_r);
 }
 
+/**
+ * queryCache()
+ *
+ * fill struct rpmCache with data from package
+ */
+
+bool
+RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
+{
+    string pkgname = (const string &)package->name() + "-" + package->edition().as_string();
+
+    //------------------------------------------------
+    //*** !!! ***
+    // DON'T CHANGE THE ORDER OR THE COUNT
+    // WITHOUT ALSO CHANGING THE PARSING
+    // BELOW
+    //*** !!! ***
+    int querycount = 10;	// number of attributes
+    string rpmquery = "%{BUILDHOST};%{INSTALLTIME};%{DISTRIBUTION};";
+    rpmquery += "%{VENDOR};%{LICENSE};%{PACKAGER};%{URL};%{OS};";
+    rpmquery += "%{SOURCERPM};%{DESCRIPTION}";
+    rpmquery += "\\n";
+    //------------------------------------------------
+
+
+    RpmArgVec opts(4);
+    opts[0] = "-q";
+    opts[1] = "--queryformat";
+    opts[2] = rpmquery.c_str();
+    opts[3] = pkgname.c_str();
+    run_rpm (opts, ExternalProgram::Discard_Stderr);
+
+    if (!process)
+    {
+	theCache->_description.clear();
+	theCache->_buildhost.clear();
+	theCache->_installtime = Date();
+	theCache->_distribution.clear();
+	theCache->_vendor.clear();
+	theCache->_license.clear();
+	theCache->_packager.clear();
+	theCache->_url.clear();
+	theCache->_os.clear();
+	theCache->_sourcerpm.clear();
+	ERR << "RpmDB subprocess start failed" << endl;
+	return false;
+    }
+
+    string value;
+    string output;
+
+    output = process->receiveLine();
+
+    //
+    // now loop over all packages reported by the rpm process
+    // and create (properly filled) PMPackage instances
+    //
+
+    string::size_type ret;
+
+    // extract \n
+    // the queryformat specified "\n" as the package separator
+
+    ret = output.find_last_of ( "\n" );
+    if ( ret != string::npos )
+    {
+	value.assign ( output, 0, ret );
+    }
+    else
+    {
+	value = output;
+    }
+
+    //
+    // parse output to pkgattribs
+    // the queryformat specified ";" as the value separator
+    //
+
+    vector<string> pkgattribs;
+
+    tokenize (value, ';', querycount, pkgattribs);
+
+//0	%{BUILDHOST};
+//1	%{INSTALLTIME};
+//2	%{DISTRIBUTION};
+//3	%{VENDOR};
+//4	%{LICENSE};
+//5	%{PACKAGER};
+//6	%{URL};
+//7	%{OS};
+//8	%{SOURCERPM};
+//9	%{DESCRIPTION}
+
+    theCache->_buildhost = pkgattribs[0];
+    theCache->_installtime = Date(pkgattribs[1]);
+    theCache->_distribution = pkgattribs[2];
+    theCache->_vendor = pkgattribs[3];
+    theCache->_license = pkgattribs[4];
+    theCache->_packager = pkgattribs[5];
+    theCache->_url = pkgattribs[6];
+    theCache->_os = pkgattribs[7];
+    theCache->_sourcerpm = pkgattribs[8];
+
+    vector<string> description;
+    tokenize (pkgattribs[9], '\n', 0, description);
+
+    theCache->_description.clear();
+    for (unsigned int i = 0; i < description.size(); ++i)
+	    theCache->_description.push_back (description[i]);
+
+    if ( systemStatus() != 0 )
+    {
+	ERR << "Failed running rpm";
+	return false;
+    }
+    return true;
+}
+    
 #if 0
 /*--------------------------------------------------------------*/
 /* Evaluate all files of a package which have been changed	*/
@@ -1208,7 +1327,7 @@ RpmDb::queryChangedFiles ( FileList &fileList, string packageName )
       "--nomd5" };
 
    run_rpm(sizeof(opts) / sizeof(*opts), opts,
-	   ExternalProgram::Discard_Stderr);
+       ExternalProgram::Discard_Stderr);
 
    if ( process == NULL )
       return false;
