@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Sep 17 08:48:52 CEST 2003 - ma@suse.de
+
+- Adjusted return code of commitPackages. Calling functions were
+  unable to detect an aborted installation, iff not at least one
+  package was installed. (#31045)
+- 2.8.22
+
+-------------------------------------------------------------------
 Tue Sep 16 19:28:33 CEST 2003 - ma@suse.de
 
 - Fixed candiadate selection to prefer packages introduced by
