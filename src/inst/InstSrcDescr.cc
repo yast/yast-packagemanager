@@ -139,6 +139,7 @@ static const std::string LangTag      = "=Language";
 static const std::string TimeTag      = "=Timezone";
 static const std::string DescrDirTag  = "=DescriptionDir";
 static const std::string DataDirTag   = "=DataDir";
+static const std::string YouUrlTag    = "=YouUrl";
 static const std::string YouTypeTag   = "=YouType";
 static const std::string YouPathTag   = "=YouPath";
 
@@ -171,6 +172,7 @@ public:
 	TIMEZONE,	// _content_timezone
 	DESCRDIR,	// _content_descrdir
 	DATADIR,	// _content_datadir
+        YOUURL,         // _content_youurl
 	YOUTYPE,	// _content_youtype
 	YOUPATH,	// _content_youpath
 	NUM_TAGS
@@ -202,6 +204,7 @@ public:
 	createTag( TimeTag, TIMEZONE );
 	createTag( DescrDirTag, DESCRDIR );
 	createTag( DataDirTag, DATADIR );
+        createTag( YouUrlTag, YOUURL );
         createTag( YouTypeTag, YOUTYPE );
         createTag( YouPathTag, YOUPATH );
     };
@@ -305,6 +308,9 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
 
   // datadir
   str << DataDirTag << ": " << _content_datadir << endl;
+
+  // youurl
+  str << YouUrlTag << ": " << _content_youurl << endl;
 
   // youtype
   str << YouTypeTag << ": " << _content_youtype << endl;
@@ -592,6 +598,17 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     if ( t )
     {
 	ndescr->set_content_datadir( Pathname(t->Data()) );
+    }
+    else
+    {
+	ok = false;
+    }
+
+    // youurl
+    t = tagset.getTagByIndex(DescrTagSet::YOUURL);
+    if ( t )
+    {
+	ndescr->set_content_youurl( t->Data() );
     }
     else
     {

@@ -258,6 +258,10 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	{
 	    ndescr->set_content_datadir (value);
 	}
+	else if (tag == "YOUURL")
+	{
+	    ndescr->set_content_youurl (value);
+	}
 	else if (tag == "YOUTYPE")
 	{
 	    ndescr->set_content_youtype (value);

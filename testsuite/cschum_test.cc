@@ -58,6 +58,7 @@ int main( int argc, char **argv )
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
 
+#if 0
   if ( argc != 4 ) {
     cerr << "Usage: " << argv[0] << " <url> <user> <password>" << endl;
     exit( 1 );
@@ -66,6 +67,7 @@ int main( int argc, char **argv )
   InstYou you;
   PMError error = you.checkAuthorization( Url( argv[1] ), argv[2], argv[3] );
   cerr << error << endl;
+#endif
 
 #if 0
   if ( argc != 2 ) {
@@ -85,7 +87,7 @@ int main( int argc, char **argv )
   cout << "STATUS: " << wget.error_string( status ) << endl;
 #endif
 
-#if 0
+#if 1
   InstTarget &TMGR( Y2PM::instTarget( true ) );
 
 #if 1
@@ -129,6 +131,7 @@ int main( int argc, char **argv )
   cout << "PRODUCT VERSION: " << prodEd.edition.version() << endl;
   cout << "BASEARCH: " << TMGR.baseArch() << endl;
 
+  cout << "YOUURL: " << product->content_youurl() << endl;
   cout << "YOUTYPE: " << product->content_youtype() << endl;
   cout << "YOUPATH: " << product->content_youpath() << endl;
 #endif

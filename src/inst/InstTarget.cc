@@ -192,7 +192,6 @@ const std::list<PMYouPatchPtr>&
 InstTarget::getPatches (void) const
 {
     if ( !_patchesInitialized ) {
-#warning FIXME: Get product info from InstTarget::descr
         PMYouPatchPaths paths;
         PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo );
 
@@ -321,7 +320,6 @@ bool InstTarget::setInstallationLogfile(const std::string& logfile)
 
 PMError InstTarget::installPatch( const Pathname &filename )
 {
-#warning FIXME: Get product info from InstTarget::descr
     PMYouPatchPaths paths;
 
     Pathname dest = getRoot();
