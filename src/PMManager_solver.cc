@@ -32,10 +32,12 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
 
     for ( PMManager::PMSelectableVec::iterator it = this->begin(); it != this->end(); ++it ) {
 	// remove auto state
-	if((*it)->status() == PMSelectable::S_Auto)
+	if((*it)->by_auto() )
 	{
-	    (*it)->setNothingSelected();
+	    (*it)->auto_unset();
 	}
+	if ( (*it)->to_delete() )
+	  continue;
 	// installed into installed set
 	if((*it)->has_installed())
 	{
@@ -87,13 +89,13 @@ static void setAutoState(PkgDep::ResultList good)
 
 	if( op == NULL )
 	    { ERR << it->name << "is no PMObject" << endl; continue; }
-	
+
 	PMSelectablePtr selp = op->getSelectable();
 
 	if(selp == NULL)
 	    { ERR << "good result with NULL selectable: " << it->name << endl; continue; }
 
-	if(!selp->set_status(PMSelectable::S_Auto))
+	if(!selp->auto_set_install())
 	    { ERR << "could not set " << it->name << " to status auto" << endl; continue; }
     }
 }

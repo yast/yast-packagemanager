@@ -80,6 +80,8 @@ Query::checkSelectableFlag (PMSelectablePtr selectable, int flag)
 //    MIL << "Query::checkSelectableFlag (" << flag << endl;
 
     Query::BitMask ret = MASK_NONE;
+#warning Query::checkSelectableFlag function body disabled
+#if 0
     switch (flag)
     {
 	case 1:			//    { "isInstalled",	1 },
@@ -147,6 +149,7 @@ Query::checkSelectableFlag (PMSelectablePtr selectable, int flag)
 	default:
 	break;
     }
+#endif
 //    MIL << "ret " << ret << endl;
     return ret;
 }
