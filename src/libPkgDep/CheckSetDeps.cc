@@ -84,7 +84,7 @@ bool CheckSetDeps::operator()(PMSolvablePtr p)
 
 bool CheckSetDeps::checkAll()
 {
-    bool ok;
+    bool ok = true;
 
     PkgSet::iterator it, end;
     for(it = _c.begin(), end = _c.end(); it != end; ++it)
