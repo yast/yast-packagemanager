@@ -7,10 +7,12 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
-	Query.h	\
+	Query.h		\
 	QueryPtr.h	\
 	QueryNode.h	\
-	QueryError.h
+	QueryError.h	\
+	QueryParser.h	\
+	QueryScanner.h
 
 # Automatically inserted by insert_install_target
 # DO NOT REMOVE THE TAGS!
