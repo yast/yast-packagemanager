@@ -142,7 +142,7 @@ InstYou::~InstYou()
 #warning MediaAccess destructors
   // XXX for some reason MediaAccess destructors are not called. if removed,
   // remove include file above as well
-  if(_usedeltas)
+  if(_usedeltas == ANY_DELTAS)
     Y2PM::instSrcManager().releaseAllMedia();
   releaseSource();
   clearDeltasToApplyList(_deltastoapply);
@@ -177,7 +177,7 @@ void InstYou::init()
     }
   }
 
-  if(_usedeltas)
+  if(_usedeltas == ANY_DELTAS)
   {
     Y2PM::instSrcManager();
   }
@@ -1258,6 +1258,7 @@ static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackage
 }
 
 
+static bool toldaboutnotremote = false;
 /** return the first usable delta for pkg, NULL otherwise.
  * @param pkg the package to check
  * @param quickcheck whether availability of the delta should only be
@@ -1271,6 +1272,31 @@ InstYou::DeltaToApply* InstYou::FetchSuitableDelta(PMYouPatchPtr patch, PMPackag
 {
   if(!_usedeltas)
     return NULL;
+
+  // use deltas only for ftp and http since we cannot write to the mounted
+  // media types
+  Url url;
+  if(_media.isAttached())
+    url = _media.url();
+  else
+    url = _settings->patchUrl();
+
+  switch ( url.protocol() )
+  {
+#warning FIXME: media api should export _does_download
+    case Url::ftp:
+    case Url::http:
+    case Url::https:
+      break;
+
+    default:
+      if(!toldaboutnotremote)
+      {
+	DBG << "media " << url << " is neither ftp nor http. not using deltas" << endl;
+	toldaboutnotremote = true;
+      }
+      return NULL;
+  }
 
   std::list<PMPackageDelta> d = pkg->deltas();
   std::list<PMPackageDelta>::iterator it = d.begin();
