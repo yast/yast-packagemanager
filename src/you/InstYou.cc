@@ -417,6 +417,7 @@ PMError InstYou::retrievePatches()
           error = PMError::E_ok;
         } else if ( callbackError == YouError::E_user_skip_all ) {
           log( _("Skipped\n") );
+          patch->setSkipped( true );
           skipAll = true;
           error = PMError::E_ok;
         } else if ( callbackError == YouError::E_user_retry ) {
@@ -529,7 +530,7 @@ PMError InstYou::retrieveCurrentPatch()
   return retrievePatch( *_selectedPatchesIt );
 }
 
-PMError InstYou::installPatches()
+bool InstYou::installPatches()
 {
   PMYouPatchPtr patch = firstPatch();
   
@@ -631,7 +632,7 @@ PMError InstYou::installPatches()
     writeLastUpdate();
   }
 
-  return PMError();
+  return installedPatches > 0;
 }
 
 PMError InstYou::installPatch( const PMYouPatchPtr &patch )
