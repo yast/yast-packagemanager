@@ -4,6 +4,8 @@
 
 SUBDIRS = include inst pkg media
 
+AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
+
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
