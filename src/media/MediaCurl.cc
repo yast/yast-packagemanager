@@ -117,6 +117,18 @@ PMError MediaCurl::attachTo (bool next)
     }
   }
 
+  const char *cookieFile = "/var/lib/YaST2/cookies";
+
+  ret = curl_easy_setopt( _curl, CURLOPT_COOKIEFILE, cookieFile );
+  if ( ret != 0 ) {
+    return PMError( Error::E_curl_setopt_failed, _curlError );
+  }
+
+  ret = curl_easy_setopt( _curl, CURLOPT_COOKIEJAR, cookieFile );
+  if ( ret != 0 ) {
+    return PMError( Error::E_curl_setopt_failed, _curlError );
+  }
+
   return Error::E_ok;
 }
 
