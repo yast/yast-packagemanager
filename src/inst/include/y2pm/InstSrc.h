@@ -348,18 +348,15 @@ class InstSrc: virtual public Rep {
 	PMError provideMedia (int medianr);
 
 	/**
-	 * provide package via medianr and location
+	 * provide package via medianr, name, and sub-dir
 	 *
-	 * location is the "=Loc:" entry from the packages file with
-	 * the media number stripped
-	 * for 'src' or 'nosrc' packages, set 'is_source' to true
-	 * this will disable the ARCH lookup needed for binary packages
-	 * (see doc/media in yast2-packagemanager docs)
+	 * name is the rpm file name
+	 * dir is the directory below <DATADIR>
 	 *
 	 * returns local path or empty on error
 	 * uses media change callback
 	 */
-	Pathname providePackage (int medianr, const Pathname& package, bool is_source = false);
+	Pathname providePackage (int medianr, const Pathname& name, const Pathname& dir);
 
 	/**
 	 * provide file via medianr and path
