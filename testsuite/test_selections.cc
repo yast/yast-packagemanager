@@ -55,7 +55,7 @@ show_selection (PMSelectionPtr p)
 
     cout << "-- Selection --" << endl;
 	for (PMSelection::PMSelectionAttribute attr
-	= PMSelection::PMSelectionAttribute(PMSelection::SEL_ATTR_BEGIN);
+	= PMSelection::PMSelectionAttribute(PMSelection::PMSEL_ATTR_BEGIN);
 	    attr < PMSelection::PMSEL_NUM_ATTRIBUTES;
 	attr = PMSelection::PMSelectionAttribute(attr+1))
     {
