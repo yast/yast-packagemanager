@@ -29,7 +29,7 @@ This document describes the format of a selection file.<br>
 <br>
 <p></p>
 <H1>Requirements</H1>
-<h2>Content requirements</h2>
+<h2>Selection requirements</h2>
 <OL>
 <LI><b>Name</b><br>
 A selection has a name.</li>
@@ -44,6 +44,15 @@ A selection might have an architecture which restricts
 it to systems with this architecture.</LI>
 <LI><b>Summary</b><br>
 A short label describing the selection (in multiple languages!)</LI>
+<LI><b>Category</b><br>
+A selection can be a <i>base</i> or an <i>add-on</i> selection.<br>
+Base selections should not have any requirements, just suggestions. Base selections are
+mutually exclusive to other base selections.<br>
+Add-on selections stack onto base selections and can be grouped by
+the category name.</LI>
+<LI><b>Sort oder</b><br>
+When presenting selections to the user, a sort order independant of
+the summary translations is needed.</LI>
 <LI><b>Requires</b><br>
 Other selections required</LI>
 <LI><b>Provides</b><br>
@@ -86,12 +95,17 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 	If it's given, is must match (<b>FIXME:</b> 'uname -a' or DEFAULTBASE ?)</td></tr>
 <tr><td valign=top>=Sum.<i>lang</i></td><td valign=top><i>summary</i></td><td>one line language specific label</td></tr>
 <tr><td valign=top>=Cat</i></td><td valign=top><i>category</i></td><td>category (aka 'type of') selection<br>
-	can be 'base' (only one base selection can be choosen) or 'addon' (multiple addon selection can be choosen)<br>
-	(<small>On the long run this key will be dropped since only one base selection will be present.<br>
+	can be '<tt>base</tt>' (only one base selection can be choosen) or any other
+	string, denoting an '<tt>add-on</tt>' selection (multiple addon selection can be choosen)<br>
+	(<small>On the long run this key will denote a grouping for add-on selections and the 'base' key
+	will be dropped. In an ideal world, only one base selection should exist.<br>
 	The current package dependencies aren't ready for a true building block approach.)</small></td></tr>
 <tr><td valign=top>=Vis</i></td><td valign=top><i>visibility</i></td><td>visibility of selection (for user interface)<br>
 	Selection can be hidden from the user. This is useful e.g. for architecture dependant selections which
 	are handled internally by the system.</td></tr>
+<tr><td valign=top>=Ord</i></td><td valign=top><i>ordering</i></td><td>order of selection (for user interface)<br>
+	This <i>three-digit-integer-value</i> defines the order of the selection when
+	listing multiple selections in the user interface</td></tr>
 <tr><td valign=top>+Req<br>-Req</td><td valign=top><i>selections</i></td><td>selections required for installation</td></tr>
 <tr><td valign=top>+Prv<br>-Prv</td><td valign=top><i>selections</i></td><td>selections provided</td></tr>
 <tr><td valign=top>+Con<br>-Con</td><td valign=top><i>selections</i></td><td>selections conflicting</td></tr>
