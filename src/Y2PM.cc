@@ -39,6 +39,7 @@ using namespace std;
 #warning MUST INIT GLOBAL SETTINGS
 
 Pathname Y2PM::_instTarget_rootdir( "/" );
+Pathname Y2PM::_system_rootdir    ( "/" );
 LangCode Y2PM::_preferred_locale ("en");
 
 ///////////////////////////////////////////////////////////////////

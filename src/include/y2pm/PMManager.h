@@ -23,8 +23,6 @@
 #include <set>
 #include <map>
 
-#include <y2util/BitField.h>
-
 #include <y2pm/PMObject.h>
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMObjectContainerIter.h>
