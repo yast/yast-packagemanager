@@ -38,7 +38,11 @@ using namespace std;
 
 //InstSrcManager * Y2PM::_instSrcManager = 0;
 
-PMPackageManager * Y2PM::_packageManager = 0;
+PMPackageManager *   Y2PM::_packageManager = 0;
+
+PMSelectionManager * Y2PM::_selectionManager = 0;
+
+PMYouPatchManager *  Y2PM::_youPatchManager = 0;
 
 ///////////////////////////////////////////////////////////////////
 
@@ -109,5 +113,41 @@ PMPackageManager & Y2PM::packageManager()
     }
   }
   return *_packageManager;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::selectionManager
+//	METHOD TYPE : PMSelectionManager &
+//
+//	DESCRIPTION :
+//
+PMSelectionManager & Y2PM::selectionManager()
+{
+  if ( !_selectionManager ) {
+    MIL << "Launch SelectionManager..." << endl;
+    _selectionManager = new PMSelectionManager;
+    MIL << "Created SelectionManager" << endl;
+  }
+  return *_selectionManager;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::youPatchManager
+//	METHOD TYPE : PMYouPatchManager &
+//
+//	DESCRIPTION :
+//
+PMYouPatchManager & Y2PM::youPatchManager()
+{
+  if ( !_youPatchManager ) {
+    MIL << "Launch YouPatchManager..." << endl;
+    _youPatchManager = new PMYouPatchManager;
+    MIL << "Created YouPatchManager" << endl;
+  }
+  return *_youPatchManager;
 }
 

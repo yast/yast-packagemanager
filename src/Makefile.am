@@ -34,6 +34,11 @@ liby2pm_la_SOURCES = Y2PM.cc \
 
 liby2pm_la_LDFLAGS = -version-info 2:0
 
-liby2pm_la_LIBADD = -ly2util inst/liby2pminstsrc.la pkg/liby2pmpkg.la media/liby2pmMedia.la libPkgDep/libPkgDep.la
-#liby2pm_la_LIBADD = PMSolver/libPMSolver.la PMMgr/libPMMgr.la -ly2util
+liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
+			sel/liby2pmsel.la	\
+			you/liby2pmyou.la	\
+			inst/liby2pminstsrc.la	\
+			media/liby2pmMedia.la	\
+			libPkgDep/libPkgDep.la	\
+			-ly2util
 

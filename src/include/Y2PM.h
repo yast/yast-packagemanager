@@ -27,6 +27,8 @@
 //#include <y2pm/InstTarget.h>
 //#include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
+#include <y2pm/PMSelectionManager.h>
+#include <y2pm/PMYouPatchManager.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -45,6 +47,10 @@ class Y2PM {
 
     static PMPackageManager * _packageManager;
 
+    static PMSelectionManager * _selectionManager;
+
+    static PMYouPatchManager * _youPatchManager;
+
   public:
 
 #if 0
@@ -62,9 +68,19 @@ class Y2PM {
 #endif
 
     /**
-     * Access to the package manager
+     * Access to the Package manager
      **/
     static PMPackageManager & packageManager();
+
+    /**
+     * Access to the Selection manager
+     **/
+    static PMSelectionManager & selectionManager();
+
+    /**
+     * Access to the YouPatch  manager
+     **/
+    static PMYouPatchManager & youPatchManager();
 };
 
 ///////////////////////////////////////////////////////////////////
