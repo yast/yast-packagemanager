@@ -33,6 +33,7 @@
 
 #include <iosfwd>
 #include <list>
+#include <set>
 #include <string>
 
 #include <y2util/Pathname.h>
@@ -52,6 +53,7 @@
 #include <y2pm/InstTargetProdDBPtr.h> // Installed Products
 #include <y2pm/InstSrcDescrPtr.h>
 #include <y2pm/InstTargetSelDBPtr.h>  // Installed Selections
+#include <y2pm/PkgDu.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -449,6 +451,21 @@ class InstTarget: virtual public Rep, public InstData {
        * SelectionDB.
        **/
       PMError removeSelection( const Pathname & selfile_r );
+
+
+      ///////////////////////////////////////////////////////////////////
+      // Disk usage calculation.
+      ///////////////////////////////////////////////////////////////////
+
+  public:
+
+    /**
+     * Fallback for Packagemanager in case no one initialized the
+     * 'df' info for disk usage calculation. Returns an emty set
+     * if _rootdir is not yet set.
+     **/
+    std::set<PkgDuMaster::MountPoint> getMountPoints() const;
+
 };
 
 ///////////////////////////////////////////////////////////////////

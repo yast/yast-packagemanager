@@ -27,6 +27,7 @@
 #include <y2pm/InstallOrder.h>
 
 #include <Y2PM.h>
+#include <y2pm/InstTarget.h>
 
 using namespace std;
 
@@ -301,6 +302,22 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMPackageManager::getDu
+//	METHOD TYPE : const PkgDuMaster &
+//
+//	DESCRIPTION :
+//
+const PkgDuMaster & PMPackageManager::getDu()
+{
+  if ( _du_master.mountpoints().empty() ) {
+     setMountPoints( Y2PM::instTarget().getMountPoints() );
+  }
+  return _du_master;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMPackageManager::updateDu
 //	METHOD TYPE : const PkgDuMaster &
 //
@@ -308,6 +325,8 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 //
 const PkgDuMaster & PMPackageManager::updateDu()
 {
+  getDu(); // tries to initialize an empty mountpoint set from InstTarget.
+
   if ( _du_master.resetStats() ) {
     // There's at least one mountpoint
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
@@ -329,7 +348,7 @@ const PkgDuMaster & PMPackageManager::updateDu()
 
     }
   } else {
-    WAR << "Got no mountpoint info" << endl;
+    WAR << "Unable to get mountpoint info" << endl;
   }
 
   //S__ << _du_master << endl;
@@ -398,6 +417,3 @@ PkgDuMaster & PMPackageManager::countDuSelected( PkgDuMaster & dudata ) const
   }
   return dudata;
 }
-
-
-
