@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Feb  7 18:31:35 CET 2003 - ma@suse.de
+
+- Prevent automatic (by solver/selections) downgrade of packages. As
+  always allow SuSE packages to downgrade themself dependent on buildtime
+  comparison.
+
+-------------------------------------------------------------------
 Thu Feb  6 17:10:24 CET 2003 - lnussel@suse.de
 
 - do not consider installed inconsistent packages that are already marked for

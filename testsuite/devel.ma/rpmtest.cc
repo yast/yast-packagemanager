@@ -117,10 +117,20 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); it != SMGR.end(); ++it ) {
+  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); 0&&it != SMGR.end(); ++it ) {
     (*it)->dumpStateOn( DBG ) << endl;
   }
 
+  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
+    if ( (*it)->has_both_objects() ) {
+      if ( (*it)->auto_set_install() ) {
+	if ( (*it)->installedObj()->edition() < (*it)->candidateObj()->edition() )
+	  INT << "SUSE " << (*it)->installedObj() << " -> " << (*it)->candidateObj() << endl;
+	else
+	  MIL << (*it)->installedObj() << " -> " << (*it)->candidateObj() << endl;
+      }
+    }
+  }
 
   SEC << "STOP" << endl;
   return 0;

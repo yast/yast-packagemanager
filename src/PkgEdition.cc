@@ -87,10 +87,8 @@ bool PkgEdition::compare( rel_op op, const PkgEdition& e2 ) const
 {
   // unspecified versions are uncomparable and always return FALSE, except
   // both editions are UNSPEC
-  if (_type == UNSPEC && e2._type == UNSPEC && op == EQ)
-    return true;
   if (_type == UNSPEC || e2._type == UNSPEC)
-    return false;
+    return (_type == UNSPEC && e2._type == UNSPEC && op == EQ);
 
   // if both editions are MAXIMUM, they're equal.
   // if only one is MAXIMUM, that one is greater

@@ -24,6 +24,7 @@
 
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMObject.h>
+#include <y2pm/PMPackage.h>
 
 #include <Y2PM.h>
 
@@ -578,6 +579,37 @@ bool PMSelectable::set_status( const UI_Status state_r )
   }
 
   return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::downgrade_condition
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::downgrade_condition() const
+{
+  if ( !has_both_objects() )
+    return false; // either nothing to install or nothing to downgrade.
+
+  PMPackagePtr inst( installedObj() );
+  if ( !inst )
+    return false; // not package objects
+  PMPackagePtr cand( candidateObj() );
+
+  if ( inst->edition() < cand->edition() )
+    return false; // candidate is newer
+
+#warning SPEEDUP vendor().isSuSE() tests
+  // SuSE specific exeption: version downgrade due to newer buildtime
+  if ( inst->buildtime() < cand->buildtime()
+       && inst->vendor().isSuSE()
+       && cand->vendor().isSuSE() )
+    return false;
+
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////
