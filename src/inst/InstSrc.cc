@@ -780,7 +780,7 @@ InstSrc::provideMedia (int medianr) const
 	if (_media->attach (true) == PMError::E_ok)	// retry next device of media
 	    continue;
 
-	std::string path = url.getPath();
+	std::string path = url.path().asString();
 
 	if (!triedReOpen)
 	{

@@ -63,7 +63,7 @@ MediaCD::MediaCD( const Url &      url_r,
 		    type_r ),
     _lastdev(-1)
 {
-    Url::OptionMapType options = _url.getOptions();
+    Url::OptionMapType options = _url.options();
     Url::OptionMapType::iterator it;
 
     // chop up devices and put them in a list
@@ -117,7 +117,7 @@ PMError MediaCD::attachTo(bool next)
 
     if (next && _lastdev == -1) return Error::E_not_supported_by_media;
 
-    string options = _url.getOption("mountoptions");
+    string options = _url.option("mountoptions");
     if (options.empty())
     {
 	options="ro";
@@ -127,7 +127,7 @@ PMError MediaCD::attachTo(bool next)
     list<string> filesystems;
 
     // if DVD, try UDF filesystem before iso9660
-    if (_url.getProtocol() == "dvd")
+    if (_url.protocol() == "dvd")
 	filesystems.push_back("udf");
 
     filesystems.push_back("iso9660");

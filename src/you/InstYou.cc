@@ -766,7 +766,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
       return PMError( InstSrcError::E_error );
     }
 
-    Pathname path = url.getPath();
+    Pathname path = url.path();
     url.setPath( "" );
 
     MediaAccess media;
@@ -861,7 +861,7 @@ PMError InstYou::retrieveFile( const PMYouFile &file, bool reload )
     return PMError( InstSrcError::E_error );
   }
 
-  Pathname path = url.getPath();
+  Pathname path = url.path();
   url.setPath( "" );
 
   MediaAccess media;
@@ -1093,7 +1093,7 @@ int InstYou::quickCheckUpdates()
 
   _info->processMediaDir();
   
-  Pathname path = url.getPath();
+  Pathname path = url.path();
   path += _paths->patchPath() + _paths->directoryFileName();
   url.setPath( path.asString() );
   

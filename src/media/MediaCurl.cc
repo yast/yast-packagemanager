@@ -106,9 +106,9 @@ PMError MediaCurl::attachTo (bool next)
   SysConfig cfg( "proxy" );
 
   if ( cfg.readBoolEntry( "PROXY_ENABLED", false ) ) {
-    if ( _url.getProtocol() == "ftp" ) {
+    if ( _url.protocol() == "ftp" ) {
       _proxy = cfg.readEntry( "FTP_PROXY" );
-    } else if ( _url.getProtocol() == "http" ) {
+    } else if ( _url.protocol() == "http" ) {
        _proxy = cfg.readEntry( "HTTP_PROXY" );
     } else {
       _proxy = "";
@@ -193,10 +193,10 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     if(!_url.isValid())
 	return PMError( Error::E_bad_url, _url.asString() );
 
-    if(_url.getHost().empty())
+    if(_url.host().empty())
 	return Error::E_no_host_specified;
 
-    Pathname path = _url.getPath();
+    Pathname path = _url.path();
     path += filename;
 
     Url url(_url);

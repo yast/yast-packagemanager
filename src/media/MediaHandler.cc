@@ -113,7 +113,7 @@ MediaHandler::MediaHandler ( const Url &      url_r,
   if ( !_attachPoint.empty() ) {
     _localRoot = _attachPoint;
     if ( _attachPoint_is_mediaroot )
-      _localRoot += _url.getPath();
+      _localRoot += _url.path();
   }
 
   dumpOn( MIL ) << endl;;

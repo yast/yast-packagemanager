@@ -63,7 +63,7 @@ MediaNFS::MediaNFS( const Url &      url_r,
 //
 PMError MediaNFS::attachTo(bool next)
 {
-    if(_url.getHost().empty())
+    if(_url.host().empty())
 	    return Error::E_no_host_specified;
     if(next)
 	return Error::E_not_supported_by_media;
@@ -72,11 +72,11 @@ PMError MediaNFS::attachTo(bool next)
     const char *mountpoint = attachPoint().asString().c_str();
     Mount mount;
 
-    string path = _url.getHost();
+    string path = _url.host();
     path += ':';
-    path += _url.getPath();
+    path += _url.path().asString();
 
-    string options = _url.getOption("mountoptions");
+    string options = _url.option("mountoptions");
     if(options.empty())
     {
 	options="ro";
