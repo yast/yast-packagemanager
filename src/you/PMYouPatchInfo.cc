@@ -96,10 +96,14 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   PkgName name( nameStr );
 
   value = tagValue( YOUPackageTagSet::PKGVERSION );
-
   PkgEdition edition( value );
 
-  PMPackagePtr pkg( new PMPackage( name, edition, _paths->baseArch(),
+  value = tagValue( YOUPackageTagSet::ARCH );
+  PkgArch arch;
+  if ( value.empty() ) arch = _paths->baseArch();
+  else arch = PkgArch( value );
+
+  PMPackagePtr pkg( new PMPackage( name, edition, arch,
                                    _packageDataProvider ) );
   patch->addPackage( pkg );
 
@@ -466,21 +470,22 @@ PMError PMYouPatchInfo::getDirectory( bool useMediaDir )
     if ( dirError ) {
       if ( dirError == MediaError::E_not_supported_by_media ) {
 	ERR << "dirInfo not supported on " << media << ": " << error << endl;
+        return error;
       } else {
         ERR << dirError << endl;
       }
       media.release();
 
-      string errMsg = "Unable to get '" + directoryFile.asString() +
-                      "' or to read the directory";
-      if ( !error.details().empty() ) {
-        errMsg += " (" + error.details() + ")";
+      string errMsg = "Unable to read the directory '" + patchPath.asString() +
+                      "'";
+      if ( !dirError.details().empty() ) {
+        errMsg += " (" + dirError.details() + ")";
       }
       errMsg += ".";
 
-      error.setDetails( errMsg );
+      dirError.setDetails( errMsg );
 
-      return error;
+      return dirError;
     }
   } else {
     Pathname dirFile = media.localRoot() + patchPath +
