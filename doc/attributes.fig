@@ -74,3 +74,19 @@ Single
 4 0 0 50 0 0 12 0.0000 4 120 375 1305 5385 SIZE\001
 4 0 0 50 0 0 12 0.0000 4 150 2475 1305 5595 -- PMOBJ_NUM_ATTRIBUTES\001
 4 0 0 50 0 0 12 0.0000 4 150 2550 7470 6930 -- PMYOU_NUM_ATTRIBUTES\001
+4 0 0 50 0 0 12 0.0000 4 165 1380 3960 1890 PkgName& name()\001
+4 0 0 50 0 0 12 0.0000 4 165 1575 5625 2070 PkgEdition& edition()\001
+4 0 0 50 0 0 12 0.0000 4 165 1530 3960 2070 std:.string& version()\001
+4 0 0 50 0 0 12 0.0000 4 165 1485 3960 2280 std::string& release()\001
+4 0 0 50 0 0 12 0.0000 4 165 1575 5625 2295 PkgEdition& edition()\001
+4 0 0 50 0 0 12 0.0000 4 165 1965 3960 3600 PkgRelList_type& conflicts\001
+4 0 0 50 0 0 12 0.0000 4 165 2145 3960 3375 PkgRelList_type& obsoletes()\001
+4 0 0 50 0 0 12 0.0000 4 165 2100 3960 3150 PkgRelList_type& provides()\001
+4 0 0 50 0 0 12 0.0000 4 165 2280 3960 2925 PkgRelList_type& prerequires()\001
+4 0 0 50 0 0 12 0.0000 4 165 2055 3960 2700 PkgRelList_type& requires()\001
+4 0 0 50 0 0 12 0.0000 4 165 1245 3960 2475 PkgArch& arch()\001
+4 0 0 50 0 0 12 0.0000 4 165 1710 3915 4545 std::string & summary()\001
+4 0 0 50 0 0 12 0.0000 4 165 2385 3915 4755 std::list<std::string>& description\001
+4 0 0 50 0 0 12 0.0000 4 165 2235 3915 4965 std::list<std::string>& insnotify\001
+4 0 0 50 0 0 12 0.0000 4 165 2235 3915 5175 std::list<std::string>& delnotify\001
+4 0 0 50 0 0 12 0.0000 4 165 1665 3915 5385 PMObject::size_t size()\001
