@@ -70,12 +70,13 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr startpkg, SolvableList& 
 	D__ << "removing package " << pkg->name() << endl;
 	set->remove( pkg );
 
-	PMSolvable::PkgRelList_type list = pkg->provides();
-
-	D__ << " need to check " << list.size() << " provides" << endl;
+	// the package itself must also be checked, not only the explicit provides!
+	D__ << " need to check " << pkg->provides().size()+1 << " provides" << endl;
 
 	unsigned numprov =0;
-	ci_for( PMSolvable::,PkgRelList_, prov, list.,) {
+	for(PMSolvable::Provides_iterator prov = pkg->all_provides_begin();
+	    prov != pkg->all_provides_end(); ++prov)
+	{
 		++numprov;
 		D__ << "  checking provided name " << (*prov).name() << " (" << numprov << ')' << endl;
 		RevRel_for( PkgSet::getRevRelforPkg(set->required(),(*prov).name()), req1 ) {
