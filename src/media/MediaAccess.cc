@@ -153,14 +153,6 @@ MediaAccess::close (void)
 }
 
 
-// get Handler
-MediaHandler *
-MediaAccess::handler (void) const
-{
-    return _handler;
-}
-
-
 // get destination for file retrieval
 const Pathname &
 MediaAccess::getAttachPoint (void) const
