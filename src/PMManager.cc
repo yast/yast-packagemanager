@@ -313,7 +313,7 @@ void PMManager::poolAdjust()
 
       // delete tdel
       if ( (*tdel)->rep_cnt() != 2 )
-	DBG << "(OUTSIDE REFERENCED) ";
+	DBG << "(OUTSIDE REFERENCED) delete " << *tdel << endl;;
 
       // pool first
       PMSelectablePool::iterator iter = _itemPool.find( (*tdel)->name() );
