@@ -1361,7 +1361,6 @@ RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
     string rpmquery = "%{BUILDHOST};%{INSTALLTIME};%{DISTRIBUTION};";
     rpmquery += "%{LICENSE};%{PACKAGER};%{URL};%{OS};";
     rpmquery += "%{SOURCERPM};%{DESCRIPTION}";
-    rpmquery += "\\n";
     //------------------------------------------------
 
 
@@ -1387,39 +1386,18 @@ RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
 	return false;
     }
 
-    string value;
     string output;
 
     output = process->receiveLine();
 
     //
-    // now loop over all packages reported by the rpm process
-    // and create (properly filled) PMPackage instances
-    //
-
-    string::size_type ret;
-
-    // extract \n
-    // the queryformat specified "\n" as the package separator
-
-    ret = output.find_last_of ( "\n" );
-    if ( ret != string::npos )
-    {
-	value.assign ( output, 0, ret );
-    }
-    else
-    {
-	value = output;
-    }
-
-    //
     // parse output to pkgattribs
-    // the queryformat specified ";" as the value separator
+    // the queryformat specified ";" as the output separator
     //
 
     vector<string> pkgattribs;
 
-    tokenize (value, ';', querycount, pkgattribs);
+    tokenize (output, ';', querycount, pkgattribs);
 
 //0	%{BUILDHOST};
 //1	%{INSTALLTIME};
@@ -1440,12 +1418,25 @@ RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
     theCache->_os = pkgattribs[6];
     theCache->_sourcerpm = pkgattribs[7];
 
-    vector<string> description;
-    tokenize (pkgattribs[8], '\n', 0, description);
-
     theCache->_description.clear();
-    for (unsigned int i = 0; i < description.size(); ++i)
-	    theCache->_description.push_back (description[i]);
+
+    string::size_type pos = pkgattribs[8].find("\n");
+    if (pos != string::npos)
+	theCache->_description.push_back (pkgattribs[8].substr (0, pos));
+    else
+	theCache->_description.push_back (pkgattribs[8]);
+
+    for (;;)
+    {
+	output = process->receiveLine();
+	if (output.size() == 0)
+	    break;
+	pos = output.find("\n");
+	if (pos != string::npos)
+	    theCache->_description.push_back (output.substr (0, pos));
+	else
+	    theCache->_description.push_back (output);
+    }
 
     if ( systemStatus() != 0 )
     {
