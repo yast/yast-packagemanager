@@ -19,6 +19,7 @@
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstYou.h>
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/Wget.h>
 
 #include <Y2PM.h>
 
@@ -57,6 +58,34 @@ int main( int argc, char **argv )
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
 
+  if ( argc != 4 ) {
+    cerr << "Usage: " << argv[0] << " <url> <user> <password>" << endl;
+    exit( 1 );
+  }
+
+  InstYou you;
+  PMError error = you.checkAuthorization( Url( argv[1] ), argv[2], argv[3] );
+  cerr << error << endl;
+
+#if 0
+  if ( argc != 2 ) {
+    cerr << "Usage: " << argv[0] << " <url>" << endl;
+    exit( 1 );
+  }
+
+  string url( argv[1] );
+  string dest( "wgot" );
+
+  cout << "Getting '" << url << "' to '" << dest << "'" << endl;
+
+  Wget wget;
+  
+  WgetStatus status = wget.getFile( Url( url ), dest );
+  
+  cout << "STATUS: " << wget.error_string( status ) << endl;
+#endif
+
+#if 0
   InstTarget &TMGR( Y2PM::instTarget( true ) );
 
 #if 1
@@ -102,6 +131,7 @@ int main( int argc, char **argv )
 
   cout << "YOUTYPE: " << product->content_youtype() << endl;
   cout << "YOUPATH: " << product->content_youpath() << endl;
+#endif
 
 #if 0
   PMPackageManager &mgr = Y2PM::packageManager();
