@@ -395,9 +395,21 @@ public:
 	void remove( SolvableList& pkgs );
 	/** check consistency of current installed set */
 	bool consistent( ErrorResultList& failures );
+	/**
+	 * @param candidates which packages to consider for upgrade
+	 * @param out_good good list
+	 * @param out_bad bad list
+	 * @param to_remove which packages will be removed
+	 * @param all if true candidates will be extended by
+	 * packages with newer versions available
+	 * @param max_remove maximum number of packages that will
+	 * automatically be removed
+	 * */
 	bool upgrade(	PkgSet&candidates, ResultList& out_good,
 			ErrorResultList& out_bad, SolvableList& to_remove,
+			bool all = false,
 			unsigned max_remove = default_max_remove );
+
 
 	/** return current installed set for inspection */
 	const PkgSet& current_installed() { return installed; }
