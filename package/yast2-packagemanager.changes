@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb 25 16:53:11 CET 2003 - arvin@suse.de
+
+- added missing #include <assert.h>
+
+-------------------------------------------------------------------
 Mon Feb 24 14:36:39 CET 2003 - ma@suse.de
 
 - Changed ranking of candidate packages, if package is available on

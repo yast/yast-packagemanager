@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstring>
 #include <alloca.h>
+#include <assert.h>
 #include <cctype>
 
 #include <iostream>
