@@ -190,13 +190,17 @@ bool PkgDep::upgrade(
 
 			// alternatives possible: simply choose first one
 			if (!p->alternatives.empty()) {
-				PkgName alt = p->alternatives.front().name;
+				PMSolvablePtr alt = p->alternatives.front().solvable;
+				if(alt == NULL)
+				{
+				    INT << "alt may not be NULL";
+				    break;
+				}
 				D__ << "Choosing " << alt << " as alternative for "
 					 << p->name << endl;
-				assert( available.includes(alt) );
-				candidates.add( available[alt] );
+				candidates.add( alt );
 				if (p->install_to_avoid_break)
-					avoid_break_installs.insert( alt );
+					avoid_break_installs.insert( alt->name() );
 			}
 
 			// fix conflicts by removing packages, except there is too much to
