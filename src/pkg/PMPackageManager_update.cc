@@ -64,6 +64,8 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     << endl;
 
 
+  _update_items.clear();
+
   ///////////////////////////////////////////////////////////////////
   // Reset all auto states and build PkgSet of available candidates
   // (those that do not belong to Selectables set to delete).
@@ -202,7 +204,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	  } else {
 	    DBG << " ==> (candidate older)" << candidate << endl;
 	    ++opt_stats_r.chk_to_keep_old;
-	    opt_stats_r.foreign_and_drop_set.insert( state );
+	    _update_items.insert( state );
 	  }
 	}
       } else {
@@ -215,7 +217,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       if ( ! installed->vendor().isSuSE() ) {
 	DBG << " ==> (keep non SuSE package)" << endl;
 	++opt_stats_r.chk_keep_foreign;
-	opt_stats_r.foreign_and_drop_set.insert( state );
+	_update_items.insert( state );
 	continue; // no check for splits
       }
 
@@ -246,7 +248,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	}
 	DBG << " ==> (dropped)" << endl;
 	++opt_stats_r.chk_dropped;
-	opt_stats_r.foreign_and_drop_set.insert( state );
+	_update_items.insert( state );
 	break;
       case 1:
         addProvided[installed] = mpkg;

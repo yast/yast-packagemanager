@@ -25,6 +25,7 @@
 #include <set>
 
 #include <y2pm/PMSelectablePtr.h>
+#include <y2pm/PMManager.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -134,17 +135,6 @@ class PMUpdateStats {
      * above checks, it's ok. Otherwise we have to guess one.
      **/
     unsigned chk_renamed_guessed;
-
-  public:
-
-    ///////////////////////////////////////////////////////////////////
-    // RESULTLISTS
-    ///////////////////////////////////////////////////////////////////
-
-    /**
-     * chk_to_keep_old / chk_keep_foreign / chk_dropped
-     **/
-    std::set<PMSelectablePtr> foreign_and_drop_set;
 
   public:
 

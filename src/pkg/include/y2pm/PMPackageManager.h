@@ -55,6 +55,11 @@ class PMPackageManager : public PMManager {
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
+    /**
+     * problematic update items, filled by doUpdate, used by UI
+     */
+    PMManager::PMSelectableVec _update_items;
+
   private:
 
     YRpmGroupsTree * _rpmGroupsTree;
@@ -94,6 +99,27 @@ class PMPackageManager : public PMManager {
      * filled by doUpdate.
      **/
     void doUpdate( PMUpdateStats & opt_stats_r );
+
+    /**
+     * The number of problematic update packges.
+     **/
+    unsigned updateSize() const { return _update_items.size(); }
+
+    /**
+     * True if update had problems
+     **/
+    bool updateEmpty() const { return _update_items.empty(); }
+
+    /**
+     * Iterator for problematic update items within this Manager.
+     **/
+    PMSelectableVec::const_iterator updateBegin() const { return _update_items.begin(); }
+
+    /**
+     * Iterator for problematic update items within this Manager.
+     **/
+    PMSelectableVec::const_iterator updateEnd() const { return _update_items.end(); }
+
 
     /**
      * Retrieve the internal RPM groups tree (for cloning tree items in the UI etc.).
