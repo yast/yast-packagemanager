@@ -4,7 +4,9 @@
 
 AUTOMAKE_OPTIONS = dejagnu
 
-INCLUDES= -I$(QTDIR)/include -I$(top_srcdir)/src -I$(top_srcdir)/src/include -I$(includedir)
+INCLUDES= -I$(QTDIR)/include -I$(top_srcdir)/src -I$(top_srcdir)/src/include -I$(includedir) \
+	 -I$(top_srcdir)/src/pkg/include \
+	 -I$(top_srcdir)/src/instsrc/include 
 
 noinst_PROGRAMS = ma_test.exe
 
