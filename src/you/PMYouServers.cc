@@ -144,25 +144,28 @@ PMError PMYouServers::requestServers( bool check )
   
   if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
     PMYouProductPtr product = _patchPaths->primaryProduct();
+    string url;
 
-    string url = product->youUrl();
-    url += "?product=" + product->product();
-    url += "&version=" + product->version();
-    url += "&basearch=" + string( product->baseArch() );
-    url += "&arch=" + string( product->arch() );
+    if ( product )
+    {
+	url = product->youUrl();
+	url += "?product=" + product->product();
+	url += "&version=" + product->version();
+	url += "&basearch=" + string( product->baseArch() );
+	url += "&arch=" + string( product->arch() );
     
-    url += "&lang=" + string( _patchPaths->langCode() );
+	url += "&lang=" + string( _patchPaths->langCode() );
     
-    url += "&business=";
-    if ( product->businessProduct() ) url += "1";
-    else url += "0";
+	url += "&business=";
+	if ( product->businessProduct() ) url += "1";
+	else url += "0";
+	
+	url += "&check=";
+	if ( check ) url += "1";
+	else url += "0";
     
-    url += "&check=";
-    if ( check ) url += "1";
-    else url += "0";
-    
-    url += "&distproduct=" + product->distProduct();
-
+	url += "&distproduct=" + product->distProduct();
+    }
     addPackageVersion( "yast2-online-update", url );
     addPackageVersion( "yast2-packagemanager", url );
     addPackageVersion( "liby2util", url );
