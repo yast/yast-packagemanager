@@ -215,6 +215,11 @@ class InstSrcDescr : virtual public Rep {
      **/
     Pathname datadir() const { return _product_dir + _content_datadir; }
 
+    /**
+     * Content label according to Y2PM::getPreferredLocale
+     **/
+    std::string label() const;
+
   public:
 
     //////////////////////////////////////////////////////////////////

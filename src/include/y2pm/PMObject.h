@@ -23,6 +23,7 @@
 #include <string>
 
 #include <y2util/FSize.h>
+#include <y2util/Vendor.h>
 
 #include <y2pm/PMObjectPtr.h>
 #include <y2pm/PMSolvable.h>
@@ -61,7 +62,10 @@ class PMObject : virtual public Rep, public PMSolvable {
     virtual std::list<std::string> insnotify()       const = 0;
     virtual std::list<std::string> delnotify()       const = 0;
     virtual FSize                  size()            const = 0;
-    virtual bool                   providesSources() const { return false; }
+    virtual bool                   providesSources() const = 0;
+
+    virtual std::string            instSrcLablel()   const = 0;
+    virtual Vendor                 instSrcVendor()   const = 0;
 
   public:
 
