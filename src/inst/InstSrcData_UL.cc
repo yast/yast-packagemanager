@@ -20,8 +20,8 @@
 /-*/
 
 #include <iostream>
+#include <fstream>
 
-#include <stdio.h>
 #include <ctype.h>
 
 #include <y2util/Y2SLog.h>
@@ -108,8 +108,8 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     return err;
   }
   MIL << "fopen(" << (media_r->getAttachPoint() + contentname) << ")" << endl;
-  FILE *content = fopen ("/8.1/content", "r");
-  if (content == 0)
+  ifstream content ("/8.1/content");
+  if (!content)
   {
      return Error::E_no_instsrc_on_media;
   }
@@ -122,34 +122,31 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   InstSrcDescr::ArchMap archmap;
   InstSrcDescr::LabelMap labelmap;
 
-  while (!feof (content))
+  while (content.good())
   {
     char lbuf[201];
 
-    if (fgets (lbuf, 200, content) != lbuf)
+    if (!content.getline (lbuf, 200, '\n'))
     {
-      if (feof (content))
+      if (content.eof())
 	break;
-      MIL << "fgets() failed" << endl;
+      MIL << "getine() failed" << endl;
       err = Error::E_no_instsrc_on_media;
       break;
     }
 
     char *lptr = lbuf;
     while (!isblank (*lptr)) lptr++;
-    if (*lptr == '\n')		// empty value
+    if (*lptr == 0)		// empty value
 	continue;
     *lptr++ = 0;
     while (isblank (*lptr)) lptr++;
-    if (*lptr == '\n')		// empty value
+    if (*lptr == 0)		// empty value
 	continue;
     char *vptr = lptr;		// vptr == value
     while (*lptr) lptr++;
     lptr--;
-    if (*lptr == '\n')		// remove trailing \n
-	*lptr = 0;
-
-     MIL << lbuf << "=" << vptr << endl;
+    MIL << lbuf << "=" << vptr << endl;
 
     if (strcmp (lbuf, "PRODUCT") == 0)
     {
@@ -238,7 +235,6 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	ndescr->set_content_requires (PkgRelation (PkgName (vptr), NONE, PkgEdition ()));
     }
   }
-  fclose (content);
 
   ndescr->set_content_product (PkgNameEd (pname, pversion));
   ndescr->set_content_baseproduct (PkgNameEd (bname, bversion));
