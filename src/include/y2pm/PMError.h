@@ -147,6 +147,7 @@ class PMError {
   public:
 
     static const unsigned    E_ok = 0;
+    static const unsigned    E_error = 1;
     static const std::string OKstring;
     static const std::string ERRORstring;
 
