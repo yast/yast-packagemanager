@@ -390,6 +390,19 @@ librpmDb::~librpmDb()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : librpmDb::unref_to
+//	METHOD TYPE : void
+//
+void librpmDb::unref_to( unsigned rep_cnt_r ) const
+{
+  if ( rep_cnt_r == 1 ) {
+    dbRelease();
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : librpmDb::root
 //	METHOD TYPE : const Pathname &
 //

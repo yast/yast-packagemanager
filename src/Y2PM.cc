@@ -530,6 +530,7 @@ static void commitCkeckMediaGpg( PMPackagePtr pkg_r )
   constInstSrcPtr csource( pkg_r->source() );
   if ( known_Srces.insert( csource->srcID() ).second ) {
     // srcID was not yet present
+    MIL << "Looking for gpg-pubkeys on " << csource << endl;
     list<string> files;
     PMError err = csource->media()->dirInfo( files, "/", /*dots*/false );
     if ( err ) {
@@ -543,7 +544,7 @@ static void commitCkeckMediaGpg( PMPackagePtr pkg_r )
       if ( key.find( prefix ) != 0 )
 	continue;
       key.erase( 0, prefix.size() );
-      if ( key.size() <= key.size() || key.rfind( ext ) != (key.size() - ext.size()) )
+      if ( key.size() <= ext.size() || key.rfind( ext ) != (key.size() - ext.size()) )
 	continue;
       key.erase( key.size() - ext.size() );
 
@@ -560,12 +561,13 @@ static void commitCkeckMediaGpg( PMPackagePtr pkg_r )
 	  known_pubkeys.erase( key );
 	  continue;
 	}
+      } else {
+	MIL << "Already known: " << *it << endl;
       }
 
     }
   }
 }
-
 
 /******************************************************************
 **

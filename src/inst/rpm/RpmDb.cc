@@ -386,7 +386,7 @@ PMError RpmDb::initDatabase( Pathname root_r, Pathname dbPath_r )
       if ( root_r == "/" || dbsi_has( info, DbSI_MODIFIED_V4 ) ) {
 	// Move obsolete rpm3 database beside.
 	MIL << "Cleanup: state " << info << endl;
-	removeV3( root_r + dbPath_r );
+	removeV3( root_r + dbPath_r, dbsi_has( info, DbSI_MADE_V3TOV4 ) );
 	dbsi_clr( info, DbSI_HAVE_V3 );
       } else {
 	// Performing an update: Keep the original rpm3 database
@@ -401,6 +401,11 @@ PMError RpmDb::initDatabase( Pathname root_r, Pathname dbPath_r )
     _dbPath = dbPath_r;
     _dbStateInfo = info;
 
+    // Close the database in case any write acces (create/convert)
+    // happened during init. This should drop any lock acquired
+    // by librpm. On demand it will be reopened readonly and should
+    // not hold any lock.
+    librpmDb::dbRelease( true );
     MIL << "InitDatabase: " << *this << endl;
   }
 
@@ -488,10 +493,6 @@ PMError RpmDb::internal_initDatabase( const Pathname & root_r, const Pathname & 
       extern PMError convertV3toV4( const Pathname & v3db_r, const constlibrpmDbPtr & v4db_r );
 
       err = convertV3toV4( dbInfo.dbV3().path(), dbptr );
-      // Invalidate all outstanding database handles as the database got modified.
-      dbptr = 0;
-      librpmDb::dbRelease( true );
-
       if ( err ) {
 	return err;
       }
@@ -597,7 +598,7 @@ void RpmDb::removeV4( const Pathname & dbdir_r, bool v3backup_r )
 //	METHOD NAME : RpmDb::removeV3
 //	METHOD TYPE : void
 //
-void RpmDb::removeV3( const Pathname & dbdir_r )
+void RpmDb::removeV3( const Pathname & dbdir_r, bool v3backup_r )
 {
   const char * master = "packages.rpm";
   const char * index[] = {
@@ -629,14 +630,21 @@ void RpmDb::removeV3( const Pathname & dbdir_r )
   pi( dbdir_r + master );
   if ( pi.isFile() ) {
     Pathname m( pi.path() );
-    Pathname b( m.extend( ".deleted" ) );
-    pi( b );
-    if ( pi.isFile() ) {
-      // rempve existing backup
-      PathInfo::unlink( b );
+    if ( v3backup_r ) {
+      // backup was already created
+      PathInfo::unlink( m );
+      Pathname b( m.extend( "3" ) );
+      pi( b ); // stat backup
+    } else {
+      Pathname b( m.extend( ".deleted" ) );
+      pi( b );
+      if ( pi.isFile() ) {
+	// rempve existing backup
+	PathInfo::unlink( b );
+      }
+      PathInfo::rename( m, b );
+      pi( b ); // stat backup
     }
-    PathInfo::rename( m, b );
-    pi( b );
     MIL << "(Re)moved rpm3 database to " << pi << endl;
   }
 }
@@ -658,7 +666,7 @@ void RpmDb::modifyDatabase()
   // Move outdated rpm3 database beside.
   if ( dbsi_has( _dbStateInfo, DbSI_HAVE_V3 ) ) {
     MIL << "Update mode: Delayed cleanup: state " << _dbStateInfo << endl;
-    removeV3( _root + _dbPath );
+    removeV3( _root + _dbPath, dbsi_has( _dbStateInfo, DbSI_MADE_V3TOV4 ) );
     dbsi_clr( _dbStateInfo, DbSI_HAVE_V3 );
   }
 
@@ -693,7 +701,7 @@ PMError RpmDb::closeDatabase()
     MIL << "Update mode: Delayed cleanup: state " << _dbStateInfo << endl;
     if ( dbsi_has( _dbStateInfo, DbSI_MODIFIED_V4 ) ) {
       // Move outdated rpm3 database beside.
-      removeV3( _root + _dbPath );
+      removeV3( _root + _dbPath, dbsi_has( _dbStateInfo, DbSI_MADE_V3TOV4 )  );
     } else {
       // Remove unmodified rpm4 database
       removeV4( _root + _dbPath, dbsi_has( _dbStateInfo, DbSI_MADE_V3TOV4 ) );
