@@ -1,0 +1,363 @@
+<HTML>
+<HEAD>
+<TITLE>
+SuSE media description
+</TITLE>
+</HEAD>
+<BODY>
+<H1>SuSE media description</H1>
+<H1>Motivation</H1>
+UnitedLinux defines a set of base components for a Linux
+server distribution. These come on a single and clearly
+defined media, which is identical for every UnitedLinux
+vendor.<BR>
+Applications are installed separately and the install media
+contents are set up by the vendor.<BR>
+In order to make application installation and esp. media (content)
+descriptions commonly defined, this document proposes a
+such a description format.<br>
+
+<H1>Requirements</H1>
+<OL>
+<LI>Multiple products per media<BR>
+A media might contain several products, i.e. a combined patch media.
+</LI>
+<LI>Multiple architectures per product<BR>
+A media might contain products for multiple architectures.
+</LI>
+<LI>Bi-Arch support<BR>
+An architecture might be bi-arch, where mixing of 'compatible'
+architectures is allowed.
+</LI>
+<LI>Multiple languages per product<BR>
+A media might contain products for multiple languages.
+</LI>
+<LI>Multiple media<BR>
+a) The content might be splitted onto multiple media.<br>
+b) It must be able to merge splitted media into a single directory.<br>
+</LI>
+<LI>A media must be easily recognizable by the system<BR>
+This is needed when re-inserting a cd-rom media for further package
+installation. The system must verify that the correct media is
+inserted and can be used for package installation.</LI>
+<LI>product name</LI>
+<LI>product version</LI>
+<LI>base distribution<BR>
+specify the distribution the product is based on.</LI>
+<LI>base distribution version</LI>
+<LI>product vendor</LI>
+<LI>user-readable content description<BR>
+This is needed to present media information to the user prior to
+installing packages. The user must be able to decide on this information
+to proceed or cancel the installation process.</LI>
+<LI>package path<br>
+toplevel path to packages (i.e "suse/" on SuSE media, "unitedlinux/" on
+UL media, etc.)</li>
+<LI>default language<br>
+default language if no language is determinable.</li>
+<li>no wildcard search for files<br>
+doing a wildcard search is cheap on a local media but almost impossible
+via HTTP. So it should be avoided if possible.</li>
+</OL>
+<p></p>
+<H1>Implementation</H1>
+The media and product description is splitted to a set of files,
+separating the media preparation data from the contents (product) and
+making it possible to combine several products on a single media.
+<BR>
+At toplevel of a media, a directory<br>
+<pre>
+	/media.1/
+</pre>
+<br>
+ must exists.<br>
+The numeric extension depends on the media number in case of
+splitted medias. The first media has <tt>.1</tt>, the second <tt>.2</tt>,
+and so on.<br>
+<br>
+This allows merging all medias of a splitted set into a single
+directory. YaST always knows which media to expect and can thereby
+directly access the correct media directory.<br>
+<br>
+<p></p>
+<h3>Files inside <tt>media.<i>N</i>/</tt></h3>
+Inside the <tt>media.<i>N</i>/</tt> directory the files
+<tt>media</tt> and <tt>products</tt> must exist.<br>
+<br>
+The <tt>media</tt> file contains the media identifier needed
+to determine correctness when using removable media.<BR>
+In case of splitted media, it must be present on every media of
+the set.<BR>
+<br>
+The <tt>products</tt> file contains directory specifications for
+each product.<br>
+In case of splitted media, it must be present of the first media
+of the set.<BR>
+<br>
+
+
+<H2>The <tt>/media.<i>N</i>/media</tt> file</H2>
+This should contain a key to quickly identify correctness of the inserted
+media. It is not shown to the user but should contain human-readable
+data for debugging purposes.<BR>
+<BR>
+Proposal: Encode Vendor and Timestamp information in a file<BR>
+<br>
+<TABLE border>
+<tr><td>File:</td><td><tt>media</tt></td></tr>
+<tr><td>Location</td><td> <tt>/media.<i>N</i>/</tt> directory on media</td></tr>
+<tr><td valign="top">Content</td><td>three lines of ASCII as follows<BR>
+  <i><tt>&lt;vendor&gt;</tt><i><br>
+  <i><tt>&lt;YYYYMMDDHHMMSS&gt;</tt></i><br>
+  <i>[<tt>&lt;media count&gt;</tt>]<i><br>
+</td></tr>
+</TABLE>
+<br>
+The identification data is stored inside the file on purpose. It could
+also be encoded in the file name (current SuSE media does it). But this
+requires a directory scan for file access and should be avoided.<BR>
+<br>
+By storing the vendor name in the file, the timestamp can be kept vendor
+specific. (It's the name of the vendor who created the media which might
+be different from a product vendor! It's just used as an additional key
+for media identification.)<BR>
+<br>
+The media count is needed if the installation data is
+split up on multiple (identical) medias. The <tt>media</tt> file on
+the first media should contain the total count of medias. It is an
+optional information on the other media.<BR>
+<br>
+All media of a media-set must have identical vendor and data information
+in the <tt>media</tt> file.<br>
+<p></p>
+<H3>Example</H3>
+<pre>
+linux# mount /dev/cdrom /mnt
+linux# ls /mnt/media.1
+media
+products
+linux# cat /mnt/media.1/media
+SuSE Linux AG
+20020921153042
+7
+linux#
+</pre>
+<p></p>
+
+<H2>The <tt>products</tt> file</H2>
+This file contains the directory name for each product contained on
+the media.<br>
+<br>
+It is an ASCII file with one line per product.<BR>
+<br>
+Each line starts with the directory name (relative to the media's root dir !),
+followed by whitespace (space or tab)
+followed by the product name and version.
+<br>
+ A leading slash in the directory
+name is only needed to specify the root directory of the media.<BR>
+<br>
+<TABLE border>
+<tr><td>File:</td><td><tt>products</tt></td></tr>
+<tr><td>Location</td><td><tt>/media.1/</tt> directory</td></tr>
+<tr><td valign="top">Content</td><td>one or more lines of ASCII as follows<BR>
+  <i><tt>&lt;directory&gt;</tt></i>
+    <i>&lt;whitespace&gt;</i>
+    <i><tt>&lt;product&gt;</tt></i>
+    <i>&lt;whitespace&gt;</i>
+    <i><tt>&lt;version&gt;</tt></i>
+</td></tr>
+</TABLE>
+<br>
+
+<H3>Example</H3>
+<pre>
+linux# mount /dev/cdrom /mnt
+linux# cat /mnt/media.1/products
+/	SuSE Linux Personal 8.1-0
+sles-8	SuSE Linux Enterprise Server 8-0
+openlinux	Caldera OpenLinux 4.0-0
+unitedlinux-1.0	UnitedLinux 1.0-1
+linux# ls -a /mnt
+...
+media.1/
+...
+sles-8/
+openlinux/
+unitedlinux-1.0/
+...
+</pre>
+In the above example, "SuSE Linux Personal" uses the toplevel directory, whereas the
+other products have their own sub-directories.
+<p></p>
+
+<H2>The <tt>content</tt> file</H2>
+This file resides inside the product directory as specified by the <tt>products</tt>
+file on the media. It contains all product-specfic data to describe
+and identify the contents of the product.
+</UL>
+<BR>
+Proposal:<BR>
+<TABLE border>
+<tr><td>File:</td><td><tt>content</tt></td></tr>
+<tr><td>Location</td><td><tt><i>product-dir</i></tt> as specified in <tt>/media.1/products</tt> file</td></tr>
+<tr><td>Content</td><td>UTF-8 encoded
+	<i><tt>&lt;key&gt;&lt;whitespace&gt;&lt;value&gt;</tt></i>
+	pairs, separated by <i><tt>\n</tt><br>
+	For allowed keys see next table.</i>
+</td></tr>
+</TABLE>
+<p></P>
+Mandatory key strings
+<TABLE border>
+<tr><th>prio</th><th>key</th><th>allowed value</th></tr>
+<tr><td>M</td><td><tt>PRODUCT</tt></td><td>english product name in ASCII</td></tr>
+<tr><td>M</td><td><tt>VERSION</tt></td><td>product version and release as in RPM<BR><tt>&lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</tt></td></tr>
+<tr><td>O</td><td><tt>BASEPRODUCT</tt></td><td>name of base product if different from PRODUCT</td></tr>
+<tr><td>O</td><td><tt>BASEVERSION</tt></td><td>version of BASEPRODUCT, mandatory if BASEPRODUCT is defined<BR><tt>&lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</tt></td></tr>
+<tr><td>M</td><td><tt>VENDOR</tt></td><td>vendor name (free form)</td></tr>
+<tr><td>M</td><td><tt>ARCH.&lt;base&gt;</tt></td><td>space separated list of architecture directories under <tt>DATADIR</tt><br>
+(see below for further explanation)
+</td></tr>
+<tr><td>M</td><td><tt>DEFAULTBASE</tt></td><td>Default <tt>&lt;base&gt;</tt> architecture if no matching <tt>ARCH.&lt;base&gt;</tt> is found.
+</td></tr>
+<tr><td>M</td><td><tt>REQUIRES</tt></td><td>package name or tag which must be provided by the installed product.</td></tr>
+<tr><td>O</td><td><tt>LINGUAS</tt></td><td>ISO <i><tt>&lt;language&gt;</tt></i> or <i><tt>&lt;language&gt;_&lt;country&gt;</tt></i> code</td></tr>
+<tr><td>O</td><td><tt>LABEL</tt></td><td>UTF-8 encoded label.<br>
+Default label if <tt>LINGUAS</tt> is omitted or no default language can
+be determined.</td></tr>
+<tr><td>O</td><td><tt>LABEL.&lt;lang&gt;</tt></td><td>UTF-8 encoded label.<br>
+	<i><tt>&lt;lang&gt;</tt></i> has the same syntax as the <tt>LINGUAS</tt> values.<BR>
+	For each language in <tt>LINGUAS</tt> a matching <i><tt>LABEL.&lt;lang&gt;</tt></i> is expected.
+</td></tr>
+<tr><td>M</td><td><tt>DESCRDIR</tt></td><td>package description directory<br>
+(relative to product directory)</td></tr>
+<tr><td>M</td><td><tt>DATADIR</tt></td><td>package data directory<br>
+(relative to product directory)</td></tr>
+<tr><td>O</td><td><tt>LANGUAGE</tt></td><td>default language code</td></tr>
+<tr><td>O</td><td><tt>TIMEZONE</tt></td><td>default timezone</td></tr>
+</table>
+<smaller>prio 'M' == mandatory, 'O' == optional</smaller><br>
+Either <tt>LABEL</tt> or <tt>LABEL&lt;lang&gt;</tt> must be present.
+<p></p>
+The <tt>ARCH.&lt;base&gt;</tt> line needs a bit more explanation:<br>
+Supporting bi-arch architectures and optimized packages requires multiple
+(architecture optimized) occurances of a package (under the same name and version).<BR>
+In order to determine which the 'right' occurance is, YaST needs a fallback
+strategy (a search order). This is given as a list of directories on the
+right side of <tt>ARCH.&lt;base&gt;</tt>. These directories must exist below
+the <tt>DATADIR</tt> directory specified in the <tt>content</tt> file.
+<br>
+The <tt>&lt;base&gt;</tt> part of the left side is used as a starting point
+and determines 'the' architecture of the system. It especially serves as
+the base directory when looking for updates/patches on an update media.<br>
+<br>
+The <tt>&lt;base&gt;</tt> part is determined by <i>hwinfo</i>.
+<br>
+
+<H3>Example</H3>
+<pre>
+linux# mount /dev/cdrom /mnt
+linux# cat /mnt/sles/content
+PRODUCT SuSE Linux Enterprise Sever
+VERSION 8.0-0
+BASEPRODUCT UnitedLinux
+BASEVERSION 1.0-0
+VENDOR SuSE Linux AG
+ARCH.x86_64 x86-64 i686 i586 i486 noarch
+ARCH.i586 i586 i486 noarch
+DEFAULTBASE i586
+LINGUAS en de_DE
+LABEL.en SuSE Linux Enterprise Sever based on UnitedLinux
+LABEL.de_DE SuSE Linux Enterprise Sever basierend auf UnitedLinux
+DESCRDIR suse/setup/descr
+DATADIR suse
+LANGUAGE de_DE
+TIMEZONE Europe/Berlin
+linux#
+</pre>
+<br>
+
+<H2>The package description directory</H2>
+
+Each such directory contains a file listing the selections (<tt>selections</tt>)
+and a file listing the packages (<tt>packages</tt>).<BR>
+<H3>Example</H3>
+<pre>
+linux# grep Enterprise /mnt/media.1/products
+sles	SuSE Linux Enterprise Server
+linux# grep DESCRDIR /mnt/sles/content
+DESCRDIR suse/setup/descr
+linux# ls -R /mnt/sles/suse/setup/descr
+...
+packages
+selections
+...
+linux#
+</pre>
+
+<H2>The <tt>packages</tt> file</H2>
+This is basically a cache file for package data needed for
+package selection and dependency resolution.<br>
+See current <A HREF="http://w3.suse.de/media-descr/package-descr.html">here</A> for the syntax.<br>
+<br>
+The package file contains pure package / rpm data and no user
+readable string (i.e. translations).
+
+<H2>The <tt>packages.<i>LANG</i></tt> file</H2>
+For each language defined in <tt>content:LINGUAS</tt> a <tt>packages.<i>LANG</i></tt>
+file exists in the <tt>content:DESCRDIR</tt> directory.<br>
+This file contains translated strings (i.e. package summary, description, etc.)
+to be viewed by the user.<br>
+See <A HREF=http://w3.suse.de/media-descr/lang-descr.html">here</A> for a format definition of such a file.<br>
+<br>
+
+<H3>Example</H3>
+<pre>
+linux# grep Enterprise /mnt/media.1/products
+sles	SuSE Linux Enterprise Server
+linux# grep DATADIR /mnt/sles/content
+DATADIR suse
+linux# grep ^ARCH /mnt/sles/content
+ARCH.x86_64 x86-64 i686 i586 i486 noarch
+ARCH.i586 i586 i486 noarch
+linux# ls -R /mnt/sles/suse
+...
+x86-64/
+i686/
+i586/
+i486/
+noarch/
+...
+linux#
+</pre>
+
+<H2>The <tt>selections</tt> file</H2>
+This file contains a list of selections file names (one per line,
+possibly with directory pathes,
+relative to the <tt>DESCRDIR/<tt><i>arch</i> directory).<br>
+
+See current <tt>*.sel</tt> for the syntax. (To be defined).
+
+<H3>Example</H3>
+<pre>
+linux# cat /mnt/suse/setup/descr/selections
+Games.sel
+Gnome.sel
+Kde-Desktop.sel
+Kde.sel
+LAMP.sel
+Linux-Devel.sel
+Minimal.sel
+Multimedia.sel
+Network.sel
+Office.sel
+Standard.sel
+SuSE-Documentation.sel
+X11.sel
+default.sel
+linux#
+</pre>
+
+</BODY>
+</HTML>
