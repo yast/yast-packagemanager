@@ -100,7 +100,7 @@ const std::string
 PMRpmPackageDataProvider::buildhost () const
 {
     std::string value;
-    _rpmdb->queryPackage (_package, "%{SUMMARY}", value);
+    _rpmdb->queryPackage (_package, "%{BUILDHOST}", value);
     return value;
 }
 
