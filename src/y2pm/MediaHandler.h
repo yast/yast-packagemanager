@@ -158,6 +158,17 @@ class MediaHandler {
 	 **/
 	virtual PMError getFile( const Pathname & filename ) const = 0;
 
+        /**
+         * Call concrete handler to provide a file under a different place 
+         * in the file system (usually not under attach point) as a copy.
+         * Media must be attached before by callee.
+         *
+         * Default implementation provided that calls getFile(srcFilename)
+         * and copies the result around.
+         **/
+        virtual PMError getFileCopy( const Pathname & srcFilename, const Pathname & targetFilename ) const;
+                         
+
 	/**
 	 * Call concrete handler to provide directory content (not recursive!)
 	 * below attach point.
@@ -314,7 +325,17 @@ class MediaHandler {
 	 * attached url and a path prefix is preserved.
 	 **/
 	PMError provideFile( Pathname filename ) const;
-
+    
+	/**
+	 * Call concrete handler to provide a copy of a file under a different place 
+         * in the file system (usually not under attach point) as a copy.
+         * Media must be attached before by callee.
+         *
+         * @param srcFilename    Filename of source file on the media
+         * @param targetFilename Filename for the target in the file system
+	 **/
+        PMError provideFileCopy( Pathname srcFilename, Pathname targetFilename) const;
+    
 	/**
 	 * Use concrete handler to provide directory denoted
 	 * by path below 'localRoot' (not recursive!).

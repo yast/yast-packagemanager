@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Mon Feb 21 14:19:55 CET 2005 - mir@suse.de
+
+- Timezone bug revisited (#42021, see 2.11.17)
+  - MediaHandler: Removed the hack that simply shortened the filename
+    MediaHandler::getFile now uses MediaHandler::provideFileCopy (not provideFile)
+  - MediaHandler: added provideFileCopy to to provide a file under a different place
+  - MediaCurl: provideFileCopy overwritten to use no intermediate file
+  also replaced various warnings within these changes to debug messages
+  - PMYouPatchInfo: added and updated autodoc documentation
+- 2.11.20
+
+-------------------------------------------------------------------
 Thu Feb 17 19:19:56 CET 2005 - ma@suse.de
 
 - LanguageManager: Do not consider languages as 'installed' before
