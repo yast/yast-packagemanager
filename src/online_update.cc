@@ -248,8 +248,10 @@ int main( int argc, char **argv )
   if ( checkUpdates ) {
     if ( Y2PM::youPatchManager().securityUpdatesAvailable() ) {
       cout << "Security updates available." << endl;
+      return 2;
     } else if ( Y2PM::youPatchManager().updatesAvailable() ) {
       cout << "Updates available." << endl;
+      return 1;
     } else {
       cout << "No updates available." << endl;
     }
