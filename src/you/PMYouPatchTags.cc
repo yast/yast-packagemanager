@@ -46,13 +46,11 @@ YOUPackageTagSet::YOUPackageTagSet() : TagSet()
 {
   addTag("Filename",FILENAME, TaggedFile::SINGLE, TaggedFile::START );
   addTag("Label",LABEL, TaggedFile::SINGLE );
-  addTag("Series",SERIES, TaggedFile::SINGLE );
   addTag("RpmName",RPMNAME, TaggedFile::SINGLE );
   addTag("InstPath",INSTPATH, TaggedFile::SINGLE );
   addTag("Size",SIZE, TaggedFile::SINGLE );
   addTag("Buildtime",BUILDTIME, TaggedFile::SINGLE );
   addTag("BuiltFrom",BUILTFROM, TaggedFile::SINGLE );
-  addTag("Flag",FLAG, TaggedFile::SINGLE );
   addTag("RpmGroup",RPMGROUP, TaggedFile::SINGLE );
   addTag("Copyright",COPYRIGHT, TaggedFile::SINGLE );
   addTag("AuthorName",AUTHORNAME, TaggedFile::SINGLE );

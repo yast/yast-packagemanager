@@ -57,13 +57,11 @@ class YOUPackageTagSet : public TaggedFile::TagSet
     enum Tags {
       FILENAME,
       LABEL,
-      SERIES,
       RPMNAME,
       INSTPATH,
       SIZE,
       BUILDTIME,
       BUILTFROM,
-      FLAG,
       RPMGROUP,
       COPYRIGHT,
       AUTHORNAME,
