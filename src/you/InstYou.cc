@@ -418,6 +418,8 @@ void InstYou::updatePackageStates()
   for ( it = _patches.begin(); it != _patches.end(); ++it ) {
 //    D__ << "Patch: " << (*it)->name() << endl;
 
+    FSize patchSize_inst;
+    FSize patchSize_total;
     bool toInstall = (*it)->isSelected();
 
     list<PMPackagePtr> packages = (*it)->packages();
@@ -432,6 +434,10 @@ void InstYou::updatePackageStates()
 //        D__ << "pkgToInstall: false" << endl;
         pkgToInstall = false;
       }
+
+      patchSize_total += (*itPkg)->archivesize();
+      if((*itPkg)->hasInstalledObj())
+	patchSize_inst += (*itPkg)->archivesize();
 
       PMSelectablePtr selectablePkg = (*itPkg)->getSelectable();
       if ( selectablePkg ) {
@@ -453,8 +459,16 @@ void InstYou::updatePackageStates()
       list<PMYouFile>::const_iterator itFile;
       for( itFile = files.begin(); itFile != files.end(); ++itFile ) {
         _totalDownloadSize += itFile->size();
+	patchSize_total += itFile->size();
+	patchSize_inst += itFile->size();
       }
     }
+
+    if(patchSize_inst)
+      (*it)->setPatchSize( patchSize_inst );
+    else
+      (*it)->setPatchSize( patchSize_total );
+
   }
 
   D__ << _totalDownloadSize << endl;
