@@ -709,7 +709,7 @@ InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
     }
 
     MIL << "fopen(" << fullpath << ")" << endl;
-    TagCacheRetrievalPtr langcache ( new TagCacheRetrieval( filename ));
+    TagCacheRetrievalPtr langcache ( new TagCacheRetrieval( fullpath ));
 
     ///////////////////////////////////////////////////////////////////
     // parse language data
@@ -734,14 +734,14 @@ InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
 	|| (parser.currentTag() != "Ver")
 	|| (!parser.currentLocale().empty()))
     {
-	ERR << "Initial '=Ver:' tag missing" << endl;
+	ERR << filename << ": Initial '=Ver:' tag missing" << endl;
 	return InstSrcError::E_data_bad_packages_lang;
     }
 
     string version = parser.data();
     if (version != "2.0")
     {
-	ERR << "Version '" << version << "' != 2.0" << endl;
+	ERR << filename << ": Version '" << version << "' != 2.0" << endl;
 	return InstSrcError::E_data_bad_packages_lang;
     }
 
@@ -771,7 +771,7 @@ InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
 
 	if (status != TaggedFile::ACCEPTED_FULL)
 	{
-	    ERR << "Error in " << filename << ":" << parser.lineNumber() << endl;
+	    ERR << filename << ":" << parser.lineNumber() << endl;
 	    ERR << "Last tag read: " << parser.currentTag();
 	    if (!parser.currentLocale().empty())
 		ERR << "." << parser.currentLocale();
@@ -915,14 +915,14 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 	    || (parser.currentTag() != "Ver")
 	    || (!parser.currentLocale().empty()))
 	{
-	    ERR << "Initial '=Ver:' tag missing" << endl;
+	    ERR << filename << ": Initial '=Ver:' tag missing" << endl;
 	    return InstSrcError::E_data_bad_packages_lang;
 	}
 
 	string version = parser.data();
 	if (version != "3.0")
 	{
-	    ERR << "Version '" << version << "' != 2.0" << endl;
+	    ERR << filename << ": Version '" << version << "' != 2.0" << endl;
 	    return InstSrcError::E_data_bad_packages_lang;
 	}
 
@@ -943,7 +943,7 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 	}
 	else
 	{
-	    ERR << "Error in " << filename << ":" << parser.lineNumber() << endl;
+	    ERR << filename << ":" << parser.lineNumber() << endl;
 	    ERR << "Status " << (int)status << ", Last tag read: " << parser.currentTag();
 	    if (!parser.currentLocale().empty())
 		ERR << "." << parser.currentLocale();
