@@ -72,21 +72,15 @@ class PMSelectable : virtual public Rep {
     void _attach_obj( PMObjectPtr & obj_r );
     void _detach_obj( PMObjectPtr & obj_r );
 
-    enum Error {
-      E_Ok = 0,
-      E_Error
-    };
-
-    void  _clearInstalledObj();
-    Error setInstalledObj( PMObjectPtr obj_r );
-    Error delInstalledObj();
+    void setInstalledObj( PMObjectPtr obj_r );
+    void delInstalledObj() { setInstalledObj( PMObjectPtr() ); }
 
     static bool clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & rhs );
-    Error clistAdd( PMObjectPtr obj_r );
-    Error clistDel( PMObjectPtr obj_r );
-    Error clistClearAll();
+    void clistAdd( PMObjectPtr obj_r );
+    void clistDel( PMObjectPtr obj_r );
+    void clistClearAll();
 
-    Error clearAll();
+    void clearAll();
 
     bool isEmpty() const;
 

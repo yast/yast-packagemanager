@@ -62,6 +62,8 @@ class PMManager {
     PkgSet* toinstall;
     PkgSet* nowinstalled;
 
+    void invalidateSolverSets();
+
   private:
 
     typedef std::list<PMSelectable::SavedState> SavedList;

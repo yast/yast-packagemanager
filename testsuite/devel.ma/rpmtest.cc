@@ -173,6 +173,11 @@ void Pdb( ) {
   }
 }
 
+void xx() {
+  SEC << "instTargetUpdate: " << Y2PM::instTargetUpdate() << endl;
+  SEC << "pkg 'test': " << PMGR["test"] << endl;
+}
+
 /******************************************************************
  ******************************************************************/
 int mmain( int argc, const char * argv[] );
@@ -197,17 +202,16 @@ int main( int argc, const char * argv[] ) {
   }
 
   //ret = mmain( argc, argv );
-  SEC << Y2PM::instTargetUpdate() << endl;
-
-  SEC << Y2PM::instTargetUpdate() << endl;
-
-  SEC << Y2PM::removePackage( "test" ) << endl;
-  SEC << Y2PM::instTargetUpdate() << endl;
+  xx();
+  xx();
 
   SEC << Y2PM::installFile( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm" ) << endl;
-  SEC << Y2PM::instTargetUpdate() << endl;
+  xx();
+  xx();
 
-  SEC << Y2PM::instTargetUpdate() << endl;
+  SEC << Y2PM::removePackage( "test" ) << endl;
+  xx();
+  xx();
 
   SEC << "STOP -> " << ret << endl;
   return ret;

@@ -59,6 +59,24 @@ PMManager::~PMManager()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMManager::invalidateSolverSets
+//	METHOD TYPE : void
+//
+void PMManager::invalidateSolverSets()
+{
+  delete installed;
+  installed = 0;
+  delete available;
+  available = 0;;
+  delete toinstall;
+  toinstall = 0;;
+  delete nowinstalled;
+  nowinstalled = 0;;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMManager::clearAll
 //	METHOD TYPE : void
 //
@@ -67,13 +85,16 @@ PMManager::~PMManager()
 void PMManager::clearAll()
 {
   DBG << "clearAll" << endl;
+
+  ClearSaveState();
+  invalidateSolverSets();
+
   for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
     (*it)->clearAll();
     (*it)->_mgr_detach();
   }
   _items.clear();
   _itemPool.clear();
-  _savedList.clear();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -154,14 +175,16 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
   prePSI();
 
   ///////////////////////////////////////////////////////////////////
-  // set nothing installed
+  // Get a copy of all items. Items processed when evaluating iter_r
+  // content will be removed. What's remaining will get it's installed
+  // object unset.
   ///////////////////////////////////////////////////////////////////
-  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
-    (*it)->delInstalledObj();
-  }
+  PMSelectableVec unprocessed( _items );
 
+  ///////////////////////////////////////////////////////////////////
+  // Evaluate iter_r
+  ///////////////////////////////////////////////////////////////////
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    //D__ << "--set installed object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -179,15 +202,24 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
     }
 
     ///////////////////////////////////////////////////////////////////
-    // assert there's a Selectable in the pool that gets the Object.
-    // place the Object inside its Selectable.
+    // Assert there's a Selectable in the pool that gets the Object.
+    // Place the Object inside its Selectable.
     ///////////////////////////////////////////////////////////////////
     PMSelectablePtr pitem = poolProvide( iter_r->name() );
-    if ( pitem->setInstalledObj( *iter_r ) ) {
-      INT << "setInstalledObj failed" << endl;
-    }
+    pitem->setInstalledObj( *iter_r );
+
+    unprocessed.erase( pitem );
   }
+
+  ///////////////////////////////////////////////////////////////////
+  // Remove installed object from unprocessed items
+  ///////////////////////////////////////////////////////////////////
+  for ( PMSelectableVec::iterator it = unprocessed.begin(); it != unprocessed.end(); ++it ) {
+    (*it)->delInstalledObj();
+  }
+
   DBG << "installed objects set!" << endl;
+  unprocessed.clear(); // drop references
   poolAdjust();
   postPSI();
 }
@@ -210,7 +242,6 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
   prePAC();
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    //D__ << "--add object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -232,9 +263,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
     // place the Object inside its Selectable.
     ///////////////////////////////////////////////////////////////////
     PMSelectablePtr pitem = poolProvide( iter_r->name() );
-    if ( pitem->clistAdd( *iter_r ) ) {
-      INT << "clistAdd failed" << endl;
-    }
+    pitem->clistAdd( *iter_r );
   }
   DBG << "objects added!" << endl;
   poolAdjust();
@@ -260,7 +289,6 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
   prePRC();
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    //D__ << "--remove object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -305,9 +333,10 @@ void PMManager::poolAdjust()
   MIL << "START " << _items.size() << " Selectables" << endl;
 
   ///////////////////////////////////////////////////////////////////
-  // Clear any saved state!
+  // Trow away stuff we can't reuse, after pool changed
   ///////////////////////////////////////////////////////////////////
   ClearSaveState();
+  invalidateSolverSets();
   ///////////////////////////////////////////////////////////////////
 
   for ( PMSelectableVec::iterator it = begin(); it != end(); /*advanced inside*/ ) {
