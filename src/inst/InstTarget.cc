@@ -215,11 +215,13 @@ PMError InstTarget::installPackage (const std::string& filename, unsigned flags)
 
 PMError InstTarget::installPackages (const std::list<std::string>& filenames, unsigned flags)
 {
+    PMError err;    
     for(list<string>::const_iterator it= filenames.begin(); it != filenames.end(); ++it)
     {
-	installPackage(*it,flags);
+	err = installPackage(*it,flags);
+        if ( err ) break;
     }
-    return 0;
+    return err;
 }
 
 PMError InstTarget::removePackage(const std::string& label, unsigned flags)
@@ -229,11 +231,13 @@ PMError InstTarget::removePackage(const std::string& label, unsigned flags)
 
 PMError InstTarget::removePackages(const std::list<std::string>& labels, unsigned flags)
 {
+    PMError err;    
     for(list<string>::const_iterator it= labels.begin(); it != labels.end(); ++it)
     {
-	removePackage(*it,flags);
+	err = removePackage(*it,flags);
+        if ( err ) break;
     }
-    return 0;
+    return err;
 }
 
 const std::string& InstTarget::getRoot() const
