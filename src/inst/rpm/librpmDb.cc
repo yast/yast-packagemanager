@@ -95,12 +95,19 @@ class librpmDb::D {
 
     ~D() {
       if ( _db ) {
+#if 0
+	// login here may cause a SEGV, if call is caused by
+	// static variables being deleted. Might be that PMError
+	// static strings or logstreams are already destructed.
 	int res = ::rpmdbClose( _db );
 	if ( res ) {
 	  WAR << "::rpmdbClose error(" << res << ")" << endl;
 	}
 	DBG << "DBCLOSE " << *this << endl;
       }
+#else
+      ::rpmdbClose( _db );
+#endif
     }
 };
 
