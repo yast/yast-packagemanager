@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 12 14:40:05 CEST 2003 - cschum@suse.de
+
+- MediaCurl: FTP_ACCESS_DENIED isn't a login error. (#30420).
+
+-------------------------------------------------------------------
 Fri Sep 12 13:46:12 CEST 2003 - cschum@suse.de
 
 - Prevent creation of double slashes in URLs by appending the
