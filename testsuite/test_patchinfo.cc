@@ -55,7 +55,7 @@ int main( int argc, char **argv )
   if ( getServers ) {
     PMYouPatchPaths paths( "eins", "zwei", "drei" );
 
-    PMError error = paths.requestServers();
+    PMError error = paths.requestServers("http://localhost/you/","suseservers.txt");
     if ( error ) {
       cerr << "requestServers failed: " << error << endl;
       return 1;
@@ -82,16 +82,20 @@ int main( int argc, char **argv )
     string patchPath =
         "/build/yast2-cvs/yast2/source/packagemanager/testsuite/patches/";
 
-    PMYouPatchPaths paths( "eMail-Server", "3.1", "i386" );
-
 #if 0
-    paths.setPatchUrl( Url( "dir:///" ) );
-    paths.setPatchPath( patchPath );
+    PMYouPatchPaths *paths = new PMYouPatchPaths( "eMail-Server", "3.1", "i386" );
 #else
-    paths.setPatchUrl( Url( "http://localhost/you/" ) );
+    PMYouPatchPaths *paths = new PMYouPatchPaths( "Dummy", "1.0", "i386" );
 #endif
 
-    PMError error = patchInfo.getPatches( &paths, patches );
+#if 0
+    paths->setPatchUrl( Url( "dir:///" ) );
+    paths->setPatchPath( patchPath );
+#else
+    paths->setPatchUrl( Url( "http://localhost/you/" ) );
+#endif
+
+    PMError error = patchInfo.getPatches( paths, patches );
     if ( error != PMError::E_ok ) {
       cerr << error << endl;
       exit( 1 );
@@ -111,12 +115,14 @@ int main( int argc, char **argv )
       list<PMPackagePtr>::const_iterator it2;
       for( it2 = packages.begin(); it2 != packages.end(); ++it2 ) {
         cout << "  PKG: " << (*it2)->name() << endl;
+#if 0
         cout << "    REQUIRES:" << endl;
         list<PkgRelation> relations = (*it2)->requires();
         list<PkgRelation>::const_iterator it3;
         for( it3 = relations.begin(); it3 != relations.end(); ++it3 ) {
           cout << "      " << (*it3).asString() << endl;          
         }
+#endif
       }
     }
   }
