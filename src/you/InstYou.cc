@@ -1405,11 +1405,28 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
 
     if(_usedeltas)
     {
-      DeltaToApply* delta = FetchSuitableDelta(patch, *itPkg);
-      if(delta)
+      bool havefullrpm = false;
+      // check if full rpm is already downloaded (#47807)
+      if(!_settings->reloadPatches())
       {
-	_deltastoapply.push_back(delta);
-	continue;
+	Pathname rpmPath = patch->product()->rpmPath( *itPkg, false );
+        Pathname localRpm = _media.localPath( rpmPath );
+	PathInfo pi( localRpm );
+	if(pi.isExist())
+	{
+	  havefullrpm = true;
+	  DBG << (*itPkg)->name() << " already on disk, not using delta" << endl;
+	}
+      }
+
+      if(!havefullrpm)
+      {
+	DeltaToApply* delta = FetchSuitableDelta(patch, *itPkg);
+	if(delta)
+	{
+	  _deltastoapply.push_back(delta);
+	  continue;
+	}
       }
     }
 
