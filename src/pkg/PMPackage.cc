@@ -189,8 +189,7 @@ std::string PMPackage::getAttributeName(PMPackageAttribute attr)
 //
 ostream & PMPackage::dumpOn( ostream & str ) const
 {
-  PMObject::dumpOn( str );
-  str << "Architecture: " << _arch << endl;
+  PMObject::dumpOn( str ) << '(' << _arch << ')';
   return str;
 }
 

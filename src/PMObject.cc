@@ -17,6 +17,10 @@
 
 /-*/
 
+#include <iostream>
+
+#include <y2util/Y2SLog.h>
+
 #include <y2pm/PMObject.h>
 
 using namespace std;
@@ -38,7 +42,7 @@ IMPL_HANDLES(PMObject);
 //	DESCRIPTION :
 //
 PMObject::PMObject( const PkgName &    name_r,
-		const PkgEdition & edition_r )
+		    const PkgEdition & edition_r )
     : PMSolvable(name_r, edition_r)
 {
 }
@@ -73,7 +77,7 @@ string PMObject::getAttributeName(PMObjectAttribute attr)
 	    // invalid
 	    return "invalid query";
     }
-    
+
     return str;
 }
 
@@ -87,8 +91,9 @@ string PMObject::getAttributeName(PMObjectAttribute attr)
 //
 ostream & PMObject::dumpOn( ostream & str ) const
 {
-//  Rep::dumpOn( str ) << '(' << _name << ")(" << _edition.version() << ")(" << _edition.release() << ')';
-  PMSolvable::dumpOn(str);
+  Rep::dumpOn( str )
+    << '(' << (_selectable ? "MANAGED" : "unmanaged" ) << ')'
+    << '(' << _name << '-' << _edition.version() << '-' << _edition.release() << ')';
   return str;
 }
 

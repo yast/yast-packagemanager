@@ -20,8 +20,12 @@
 #define PMSelectable_h
 
 #include <iosfwd>
+#include <list>
 
 #include <y2pm/PMSelectablePtr.h>
+
+#include <y2pm/PkgName.h>
+#include <y2pm/PMObjectPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -32,13 +36,34 @@
 class REP_CLASS(PMSelectable) {
   REP_BODY(PMSelectable)
 
-  protected:
+  public:
+
+    typedef std::list<PMObjectPtr>  PMObjectList;
+
+  private:
 
     friend class PMManager;
 
+    PMManager * _manager;
+
+    PkgName _name;
+    PMObjectPtr _installedObj;
+    PMObjectPtr _candidateObj;
+    PMObjectList _candidateList;
+
+  protected:
+
     PMSelectable();
+    PMSelectable( const PkgName & name_r );
 
     virtual ~PMSelectable();
+
+  public:
+
+    const PkgName & name() const { return _name; }
+    PMObjectPtr installedObj() const { return _installedObj; }
+    PMObjectPtr candidateObj() const { return _candidateObj; }
+    const PMObjectList & candidateList() const { return _candidateList; }
 
   public:
 
