@@ -52,8 +52,8 @@ main( int argc, char *argv[] )
 
     y2pm.packageManager ();
     cout << "Initialized target" << endl;
-
     InstSrcManager& mgr = y2pm.instSrcManager();
+
     InstSrcManager::ISrcIdList nids;
 
     PMError err = mgr.scanMedia( nids, Url (argv[1]) );
@@ -72,6 +72,8 @@ main( int argc, char *argv[] )
     {
 	cout << "No source found" << endl;
     }
+    y2pm.instTarget().init("/", false);
+    y2pm.packageManager().poolSetInstalled (y2pm.instTarget().getPackages () );
 
     Query query;
     int argp = 2;
