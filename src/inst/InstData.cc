@@ -124,10 +124,10 @@ InstData::numPatches() const
 
 
 /**
- * generate PMSolvable objects for each selection on the source
- * @return list of PMSolvablePtr on this source
+ * generate PMSelection objects for each selection on the source
+ * @return list of PMSelectionPtr on this source
  */
-const std::list<PMSolvablePtr> *
+const std::list<PMSelectionPtr> *
 InstData::getSelections() const
 {
     return _selections;

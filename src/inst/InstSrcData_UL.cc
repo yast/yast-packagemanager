@@ -808,6 +808,8 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     } // while selfile
 
+    ndata->setSelections(selectionlist);
+
     std::cerr << "*** parsed " << count << " selections ***" << std::endl;
 
     ///////////////////////////////////////////////////////////////////

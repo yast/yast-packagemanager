@@ -152,6 +152,22 @@ PMError InstSrcData::tryGetData( InstSrcDataPtr & ndata_r,
 }
 
 /**
+ * generate PMSelection objects for each Item on the source
+ * @return list of PMSelectionPtr on this source
+ * */
+const std::list<PMSelectionPtr> *
+InstSrcData::getSelections() const
+{
+    D__ << __FUNCTION__ << std::endl;
+    if (!_data)
+    {
+	cerr << "InstSrcData::getSelections() no _data" << endl;
+	return 0;
+    }
+    return _data->getSelections();
+}
+
+/**
  * generate PMPackage objects for each Item on the source
  * @return list of PMPackagePtr on this source
  * */
