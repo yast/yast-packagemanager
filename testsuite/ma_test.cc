@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include <iomanip>
 #include <list>
 #include <string>
