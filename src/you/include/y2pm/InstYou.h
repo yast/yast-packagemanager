@@ -76,6 +76,16 @@ class InstYou {
     PMError retrievePackages();
     
     /**
+     * Get next patch to be installed.
+     */
+    PMYouPatchPtr nextPatch();
+
+    /**
+     * Install next patch in list of selected patches to target system.
+     */
+    PMError installNextPatch();
+
+    /**
      * Install patches to target system.
      *
      * @param dryrun Don't actually install packages. Just print debug output. 
@@ -103,11 +113,19 @@ class InstYou {
     PMYouPatchPathsPtr paths() const { return _paths; }
 
   private:
+    void init();
+
+  protected:
+    PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
+
+  private:
     PMYouPatchInfoPtr _info;
     PMYouPatchPathsPtr _paths;
     
     std::list<PMYouPatchPtr> _patches;
     std::list<PMYouPatchPtr> _selectedPatches;
+
+    std::list<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
 
     MediaAccess _media;
 };
