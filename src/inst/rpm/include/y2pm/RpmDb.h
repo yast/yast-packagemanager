@@ -53,6 +53,9 @@ class RpmDb: virtual public Rep
 
     private:
 
+      /** progress of installation will be logged here */
+      class Logfile;
+
       struct Packages {
 	std::list<PMPackagePtr>        _list;
 	std::map<PkgName,PMPackagePtr> _index;
@@ -457,9 +460,6 @@ class RpmDb: virtual public Rep
 
 	/** whether <_rootdir>/<WARNINGMAILPATH> was already created */
 	bool _warndirexists;
-
-	/** progress of installation will be logged here */
-	std::ofstream _progresslogstream;
 
 	/**
 	 * wrapper for _progressfunc, does nothing if it's unset
