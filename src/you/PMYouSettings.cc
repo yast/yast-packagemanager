@@ -117,6 +117,7 @@ void PMYouSettings::init( const string &product, const string &version,
   _noExternalPackages = false;
   _dryRun = false;
   _getAll = false;
+  _getOnly = false;
 
   PMYouProductPtr p = new PMYouProduct( product, version, baseArch,
                                         *this );
@@ -378,4 +379,14 @@ void PMYouSettings::setGetAll( bool dry )
 bool PMYouSettings::getAll() const
 {
   return _getAll;
+}
+
+void PMYouSettings::setGetOnly( bool dry )
+{
+  _getOnly = dry;
+}
+
+bool PMYouSettings::getOnly() const
+{
+  return _getOnly;
 }

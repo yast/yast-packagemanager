@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar  3 14:39:35 CET 2004 - cschum@suse.de
+
+- InstYou: Merge functions retrievePatches() and installPatches()
+           to processPatches().
+
+-------------------------------------------------------------------
 Tue Mar  2 18:18:26 CET 2004 - cschum@suse.de
 
 - YOU: Implemented new patch kind "patchlevel".
