@@ -142,7 +142,11 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 	{
 	    if ( sel->installedObj() )
 	    {
+	      if ( sel->by_auto() ) {
+		DBG << "Ignore auto_delete (should be obsoleted): " << sel << endl;
+	      } else {
 		dellist_r.push_back( sel->installedObj() );
+	      }
 	    }
 	    else
 	    {
