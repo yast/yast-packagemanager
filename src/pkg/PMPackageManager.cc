@@ -258,7 +258,14 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
   noinstall_r.clear();
   nodelete_r.clear();
 
-  map<string,set<PMPackagePtr> > pass_two;
+  typedef map<string,set<PMPackagePtr> >       PassTwoMap;
+  typedef map<PkgSplit,set<PMPackagePtr> >     SplitMap;
+  typedef map<PMPackagePtr,set<PMPackagePtr> > SplitPkgMap;
+
+  PassTwoMap  pass_two;
+  SplitMap    splitmap;
+  SplitPkgMap splitpkgmap;
+
 
   MIL << "doUpdate start..." << endl;
 
@@ -280,14 +287,62 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
       continue;
     }
 
+    PMPackagePtr candidate( (*it)->candidateObj() );
+
     // if installed not SuSE -> not available ???
-    available.add( (*it)->candidateObj() );
+    available.add( candidate );
 
-    // get splitted
-
+    // remember any splitprovides to packages actually installed
+    PkgSplitSet splits( candidate->splitprovides() );
+    for ( PkgSplitSet::iterator sit = splits.begin(); sit != splits.end(); ++sit ) {
+      PMSelectablePtr item = getItem( sit->ipkg() );
+      if ( item && item->has_installed() ) {
+	splitmap[*sit].insert( candidate );
+      }
+    }
   }
+  MIL << "doUpdate: " << available.size() << " candidates available" << endl;
 
-  DBG << "doUpdate available: " << available.size() << " candidates available " << endl;
+  MIL << "doUpdate: going to check " << splitmap.size() << " probabely splitted packages" << endl;
+  {
+    ///////////////////////////////////////////////////////////////////
+    // splitmap entries are gouped by ipkg (we know this). So get the
+    // filelist as an new ipkg occurres, and use it for consecutive entries.
+    //
+    // On the fly buld SplitPkgMap from splits that do apply (i.e. file is
+    // in ipkg's filelist).
+    ///////////////////////////////////////////////////////////////////
+    PMPackagePtr cpkg;
+    list<string> cflist;
+    for ( SplitMap::iterator it = splitmap.begin(); it != splitmap.end(); ++it ) {
+
+      if ( !cpkg || it->first.ipkg() != cpkg->name() ) {
+	// acquire new filelist
+	cpkg   = getItem( it->first.ipkg() )->installedObj(); // != NULL the way we constructed splitmap
+	cflist = cpkg->filenames();
+      }
+
+      // lookup
+      string lookup( it->first.file().asString() );
+      bool   found = false;
+      for ( list<string>::iterator fit = cflist.begin(); fit != cflist.end(); ++fit ) {
+	if ( *fit == lookup ) {
+	  found = true;
+	  break;
+	}
+      }
+
+      if ( !found ) {
+	DBG << "  " << it-> first << " does not apply" << endl;
+      } else {
+	DBG << "  " << it->second.size() << " package(s) for " << it->first << endl;
+	splitpkgmap[cpkg].insert( it->second.begin(), it->second.end() );
+	DBG << "  split count for " << cpkg->name() << " now " << splitpkgmap[cpkg].size() << endl;
+      }
+    }
+
+    splitmap.clear();
+  }
 
   ///////////////////////////////////////////////////////////////////
   // Now iterate installed packages, not selected to delete, and
@@ -360,7 +415,7 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
         DBG << " ==> ADD (unique provided): " << (*mpkg.begin()) << endl;
 	break;
       default:
-	pass_two.insert( map<string,set<PMPackagePtr> >::value_type( installed->nameEdArch(), mpkg ) );
+	pass_two[installed->nameEdArch()] = mpkg;
 	DBG << " ==> pass 2 (" << mpkg.size() << " times provided)" << endl;
 	break;
       }
@@ -370,6 +425,18 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
     // anyway check for packages split off
     ///////////////////////////////////////////////////////////////////
 
+    SplitPkgMap::iterator sit = splitpkgmap.find( installed );
+    if ( sit != splitpkgmap.end() ) {
+      set<PMPackagePtr> & toadd( sit->second );
+      if ( !toadd.size() ) {
+	INT << "Empty SplitPkgMap entry for " << installed << endl;
+      }
+      for ( set<PMPackagePtr>::iterator ait = toadd.begin(); ait != toadd.end(); ++ait ) {
+	(*ait)->getSelectable()->appl_set_install();
+	DBG << " ==> ADD (splited): " << (*ait) << endl;
+      }
+    }
+
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -378,7 +445,7 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
   ///////////////////////////////////////////////////////////////////
   MIL << "doUpdate pass 2..." << endl;
 
-  for ( map<string,set<PMPackagePtr> >::iterator it = pass_two.begin(); it != pass_two.end(); ++it ) {
+  for ( PassTwoMap::iterator it = pass_two.begin(); it != pass_two.end(); ++it ) {
     DBG << "GET ONE OUT OF " << it->second.size() << " for " << it->first << endl;
 
     PMPackagePtr guess;
@@ -412,211 +479,3 @@ int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackage
   ///////////////////////////////////////////////////////////////////
   return 0;
 }
-
-#if 0
-static bool
-suse_vendor (constPMPackagePtr package)
-{
-    if (!package)
-	return true;
-
-    string vendor = package->vendor();
-    if (vendor.empty()
-	|| (vendor.size() < 4)
-	|| (vendor.substr (0,4) != "SuSE"))
-    {
-	DBG << "vendor '" << vendor << "'" << endl;
-	return false;
-    }
-    return true;
-}
-
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMPackageManager::doUpdate
-//	METHOD TYPE : void
-//
-//	DESCRIPTION : go through all installed (but not yet touched by user)
-//		packages and look for update candidates
-//		Handle splitprovides
-//		Mark packages appl_delete or appl_install accordingly
-//
-//		return number of packages affected
-//		return non-suse packages for which an update candidate exists in noinstall_r
-//		return non-suse packages for which an obsolete exists in nodelete_r
-//
-int
-PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r)
-{
-    int count = 0;
-    int i = 0;
-    noinstall_r.clear();
-    nodelete_r.clear();
-
-    DBG << "doUpdate..." << size() << " selectables" << endl;
-
-    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
-    {
-	++i;
-	DBG << endl << i << ". " << (*it)->name() << ": ";
-
-	//-----------------------------------------------------------------
-	// pre check: candidate ? taboo ? user ? non-suse ?
-
-	PMPackagePtr candidate = (*it)->candidateObj();
-	if (!candidate)
-	{
-	    continue;
-	}
-	if ((*it)->is_taboo())			// skip taboo
-	{
-	    DBG << "taboo";
-	    continue;
-	}
-	if ((*it)->by_user())			// skip user
-	{
-	    DBG << "user";
-	    continue;
-	}
-
-	PMPackagePtr installed = (*it)->installedObj();
-	if (!installed)
-	{
-	    DBG << "not installed";
-	}
-
-	//-----------------------------------------------------------------
-	// check splitprovides
-
-	const list<string> splitprovides = candidate->splitprovides();
-	for (list<string>::const_iterator splitit = splitprovides.begin();
-	     splitit != splitprovides.end(); ++splitit)
-	{
-	    // *splitit = "rpmname:/path/to/file"
-	    DBG << "split ? '" << *splitit << "'" <<endl;
-
-	    string::size_type colonpos = (*splitit).find (":");
-	    if (colonpos == string::npos)
-	    {
-		ERR << "Bad split !";
-		continue;
-	    }
-
-	    // check if rpm exists in target which provides the file
-	    // compare only the rpm name, not the edition
-
-	    string name = (*splitit).substr (0, colonpos);
-	    string rpmname = Y2PM::instTarget().belongsTo (Pathname ((*splitit).substr (colonpos+1)), false);	// name only
-	    DBG << "'" << name << "' matches '" << rpmname << "' ?" << endl;
-	    if (name == rpmname)		// name matches
-	    {
-		DBG << "Yes !";
-		if (suse_vendor (installed))
-		{
-		    (*it)->appl_set_install ();
-		    count++;
-		}
-		else
-		    noinstall_r.push_back (installed);
-		break;
-	    }
-
-	}
-
-	//-----------------------------------------------------------------
-	// check for newer candidate
-
-
-#warning TDB checks edition only
-	if (installed)
-	{
-	    if (installed->edition() < candidate->edition())
-	    {
-		DBG << "Edition " << PkgEdition::toString(installed->edition()) << " < " << PkgEdition::toString(candidate->edition());
-		if (suse_vendor (installed))
-		{
-		    (*it)->appl_set_install ();
-		    count++;
-		}
-		else
-		    noinstall_r.push_back (installed);
-	    }
-	    else if (installed->buildtime() < candidate->buildtime())
-	    {
-		DBG << "Edition " << PkgEdition::toString(installed->edition()) << " ? " << PkgEdition::toString(candidate->edition()) << endl;
-		DBG << "Buildtime " << installed->buildtime() << " < " << candidate->buildtime();
-		if (suse_vendor (installed))
-		{
-		    (*it)->appl_set_install ();
-		    count++;
-		}
-		else
-		    noinstall_r.push_back (installed);
-	    }
-	}
-
-	//-----------------------------------------------------------------
-	// check for obsoletes
-
-	const PMSolvable::PkgRelList_type obsoletes = candidate->obsoletes();
-	for (PMSolvable::PkgRelList_const_iterator obsit = obsoletes.begin();
-	     obsit != obsoletes.end(); ++obsit)
-	{
-	    PMSelectablePtr obsslc = getItem (obsit->name());
-	    if (obsslc							// obsoletes is known
-		&& (obsslc->has_installed())				// and is installed
-		&& (!(obsslc->is_taboo() || obsslc->by_user())))	// and to taboo or set by user
-	    {
-
-		PMPackagePtr installed = obsslc->installedObj();
-
-		if (!(*it)->to_install())		// if not selected for installion yet
-		{
-		    // look for a matching provides
-
-		    const PMSolvable::PkgRelList_type provides = candidate->provides();
-		    for (PMSolvable::PkgRelList_const_iterator prvit = provides.begin();
-			 prvit != provides.end(); ++prvit)
-		    {
-			if ((*obsit) != (*prvit))
-			    continue;
-
-		        DBG << "matching provides";
-
-			if (suse_vendor (installed))
-			{
-			    (*it)->appl_set_install ();
-			    count++;
-			}
-			else
-			    noinstall_r.push_back (installed);
-		    } // provides loop
-
-		} // not yet installed
-
-		// re-test install flag, the above provides check might have changed it
-
-		if ((*it)->to_install())		// if selected for installion
-		{					// remove obsoletes
-		    DBG << "delete!";
-		    if (suse_vendor (installed))
-		    {
-			obsslc->appl_set_delete();
-			count++;
-		    }
-		    else
-			nodelete_r.push_back (installed);
-		}
-
-	    } // obsoletes is installed
-
-	} // obsoletes loop
-
-    } // selectable loop
-
-    return count;
-}
-#endif
