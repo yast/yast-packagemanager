@@ -24,6 +24,7 @@
 
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/InstallOrder.h>
+#include <y2pm/PkgSet.h>
 
 #include <Y2PM.h>
 
@@ -98,7 +99,7 @@ ostream & operator<<( ostream & str, const PMPackageManager & obj )
 //
 //
 //	METHOD NAME : PMPackageManager::anythingByUser
-//	METHOD TYPE : bool
+//	METHOD TYPE : void
 //
 //	DESCRIPTION :are there currently any "by_user" selectables ?
 //
@@ -108,46 +109,6 @@ PMPackageManager::anythingByUser(void)
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
     {
 	if ((*it)->by_user())
-	    return true;
-    }
-    return false;
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMPackageManager::anythingToDelete
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :are there currently any selectables to delete ?
-//
-bool
-PMPackageManager::anythingToDelete (void)
-{
-    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
-    {
-	if ((*it)->to_delete())
-	    return true;
-    }
-    return false;
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMPackageManager::anythingToInstall
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :are there currently any selectables to install ?
-//
-bool
-PMPackageManager::anythingToInstall (void)
-{
-    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
-    {
-	if ((*it)->to_install())
 	    return true;
     }
     return false;
@@ -277,7 +238,182 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::doUpdate
+//	METHOD TYPE : int
+//
+//	DESCRIPTION : go through all installed (but not yet touched by user)
+//		packages and look for update candidates
+//		Handle splitprovides
+//		Mark packages appl_delete or appl_install accordingly
+//
+//		return number of packages affected
+//		return non-suse packages for which an update candidate exists in noinstall_r
+//		return non-suse packages for which an obsolete exists in nodelete_r
+//
+int PMPackageManager::doUpdate( list<PMPackagePtr> & noinstall_r, list<PMPackagePtr> & nodelete_r )
+{
+  noinstall_r.clear();
+  nodelete_r.clear();
 
+  map<string,set<PMPackagePtr> > pass_two;
+
+  MIL << "doUpdate start..." << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // Reset all auto states and build available set
+  ///////////////////////////////////////////////////////////////////
+  PkgSet available; // candidates available for install (no matter if selected for install or not)
+
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    (*it)->auto_unset();
+
+    if ( (*it)->to_delete() ) {
+      D__ << "doUpdate available: SKIP to delete " << (*it) << endl;
+      continue;
+    }
+
+    if ( ! (*it)->has_candidate() ) {
+      D__ << "doUpdate available: SKIP no candidate " << (*it) << endl;
+      continue;
+    }
+
+    // if installed not SuSE -> not available ???
+    available.add( (*it)->candidateObj() );
+
+    // get splitted
+
+  }
+
+  DBG << "doUpdate available: " << available.size() << " candidates available " << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // Now iterate installed packages, not selected to delete, and
+  // figure out what might be an appropriate replacement.
+  ///////////////////////////////////////////////////////////////////
+  MIL << "doUpdate pass 1..." << endl;
+
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+
+    if ( ! (*it)->has_installed() ) {
+      continue;
+    }
+
+    if ( (*it)->to_delete() ) {
+      DBG << "SKIP to delete: " << (*it)->installedObj() << endl;
+      continue;
+    }
+
+    PMSelectablePtr state( *it );
+    PMPackagePtr    installed( (*it)->installedObj() );
+    PMPackagePtr    candidate( (*it)->candidateObj() );
+
+    DBG << "REPLACEMENT FOR " << state << endl;
+    //DBG << "REPLACEMENT FOR " << installed << endl;
+
+    // if installed not SuSE -> no action ???
+
+    // Taboo - currently an installed package can't be taboo,
+    // but if -> -> no action ???
+
+    ///////////////////////////////////////////////////////////////////
+    // figure out replacement
+    ///////////////////////////////////////////////////////////////////
+    if ( candidate ) {
+      if ( ! state->to_install() ) {
+	// check for new version
+	if ( installed->edition() < candidate->edition() ) {
+	  state->appl_set_install();
+	  DBG << " ==> REPLACE (new version): " << candidate << endl;
+	} else {
+	  DBG << " ==> (candidate older)" << endl;
+	}
+      } else {
+	DBG << " ==> REPLACE (is to install): " << candidate << endl;
+      }
+    } else {
+      // if unique provides exists add now, otherwise remember for 2nd pass.
+      const PkgSet::RevRelList_type & provided = available.provided()[installed->name()];
+      set<PMPackagePtr> mpkg;
+
+      if ( provided.size() ) {
+	DBG << "lookup " << provided.size() << " provides for " << installed->name() << endl;
+
+	for( PkgSet::RevRelList_const_iterator pit = provided.begin(); pit != provided.end(); ++pit ) {
+	  if ( pit->relation().matches( installed ) ) {
+	    DBG << "  relation match: " << pit->relation() << " ==> " << pit->pkg() << endl;
+	    mpkg.insert( pit->pkg() );
+	  } else {
+	    DBG << "  NO relation match: " << pit->relation() << " ==> " << pit->pkg() << endl;
+	  }
+	}
+      }
+
+      switch ( mpkg.size() ) {
+      case 0:
+	DBG << " ==> (not provided)" << endl;
+	break;
+      case 1:
+        (*mpkg.begin())->getSelectable()->appl_set_install();
+        DBG << " ==> ADD (unique provided): " << (*mpkg.begin()) << endl;
+	break;
+      default:
+	pass_two.insert( map<string,set<PMPackagePtr> >::value_type( installed->nameEdArch(), mpkg ) );
+	DBG << " ==> pass 2 (" << mpkg.size() << " times provided)" << endl;
+	break;
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // anyway check for packages split off
+    ///////////////////////////////////////////////////////////////////
+
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Now check the remembered non unique provided. Maybe one of them
+  // was somehow selected. Otherwise we have to guess one.
+  ///////////////////////////////////////////////////////////////////
+  MIL << "doUpdate pass 2..." << endl;
+
+  for ( map<string,set<PMPackagePtr> >::iterator it = pass_two.begin(); it != pass_two.end(); ++it ) {
+    DBG << "GET ONE OUT OF " << it->second.size() << " for " << it->first << endl;
+
+    PMPackagePtr guess;
+    set<PMPackagePtr> & gset( it->second );
+    for ( set<PMPackagePtr>::iterator git = gset.begin(); git != gset.end(); ++git ) {
+      if ( (*git)->getSelectable()->to_install() ) {
+	DBG << " ==> (meanwhile set to instll): " << (*git) << endl;
+	guess = 0;
+	break;
+      } else {
+	// Be prepared to guess.
+	// Most common situation for guessing is something like:
+	//   qt-devel
+	//   qt-devel-experimental
+	//   qt-devel-japanese
+	// That's why currently the shortest package name wins.
+	if ( !guess || guess->name()->size() > (*git)->name()->size() ) {
+	  guess = (*git);
+	}
+      }
+    }
+
+    if ( guess ) {
+      guess->getSelectable()->appl_set_install();
+      DBG << " ==> ADD (guessed): " << guess << endl;
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // done
+  ///////////////////////////////////////////////////////////////////
+  return 0;
+}
+
+#if 0
 static bool
 suse_vendor (constPMPackagePtr package)
 {
@@ -448,7 +584,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 			if ((*obsit) != (*prvit))
 			    continue;
 
-		        DBG << "matching provides <" << obsit->asString() << ">";
+		        DBG << "matching provides";
 
 			if (suse_vendor (installed))
 			{
@@ -460,12 +596,12 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 		    } // provides loop
 
 		} // not yet installed
-	
+
 		// re-test install flag, the above provides check might have changed it
 
 		if ((*it)->to_install())		// if selected for installion
 		{					// remove obsoletes
-		    DBG << "obsoletes <" << obsslc->name() << ">";
+		    DBG << "delete!";
 		    if (suse_vendor (installed))
 		    {
 			obsslc->appl_set_delete();
@@ -483,3 +619,4 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
     return count;
 }
+#endif

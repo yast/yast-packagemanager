@@ -30,6 +30,8 @@
 #include <y2util/Pathname.h>
 #include <y2util/YRpmGroupsTree.h>
 
+#include <y2pm/PkgSplit.h>
+
 #include <y2pm/PMError.h>
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
@@ -65,7 +67,7 @@ class PMPackageDataProvider : virtual public Rep {
     static bool                   providesSources() { return false; }
 
     // PMPackage attributes
-    static std::list<std::string> splitprovides() { return std::list<std::string>(); }
+    static PkgSplitSet            splitprovides() { return PkgSplitSet(); }
     static Date                   buildtime()   { return Date(0); }
     static std::string            buildhost()   { return std::string(); }
     static Date                   installtime() { return Date(0); }
@@ -126,7 +128,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual bool                   providesSources( const PMPackage & pkg_r ) const { return providesSources(); }
 
     // PMPackage attributes
-    virtual std::list<std::string> splitprovides( const PMPackage & pkg_r ) const { return splitprovides(); }
+    virtual PkgSplitSet            splitprovides( const PMPackage & pkg_r ) const { return splitprovides(); }
     virtual Date                   buildtime   ( const PMPackage & pkg_r ) const { return buildtime(); }
     virtual std::string            buildhost   ( const PMPackage & pkg_r ) const { return buildhost(); }
     virtual Date                   installtime ( const PMPackage & pkg_r ) const { return installtime(); }
