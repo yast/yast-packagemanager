@@ -17,6 +17,8 @@
 
   Purpose: Defines the YouPatch object.
 
+  Textdomain "packagemanager"
+
 /-*/
 
 #include <iostream>
@@ -103,17 +105,17 @@ string PMYouPatch::kindLabel( Kind kind )
 {
   switch ( kind ) {
     case kind_recommended:
-      return "Recommended";
+      return _("Recommended");
     case kind_security:
-      return "Security";
+      return _("Security");
     case kind_optional:
-      return "Optional";
+      return _("Optional");
     case kind_document:
-      return "Document";
+      return _("Document");
     case kind_yast:
-      return "YaST2";
+      return _("YaST2");
     default:
-      return "unknown";
+      return _("unknown");
    }
 }
 
@@ -178,8 +180,8 @@ list<string> PMYouPatch::insnotify() const
 
   list<string> text;
   
-  text.push_back( "Installing this patch will have no effect, because it" );
-  text.push_back( "doesn't contain any updates to installed packages." );
+  text.push_back( _("Installing this patch will have no effect, because it") );
+  text.push_back( _("doesn't contain any updates to installed packages.") );
 
   return text;
 }
