@@ -45,7 +45,7 @@ liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			media/liby2pmMedia.la	\
 			query/src/liby2pmquery.la\
 			libPkgDep/libPkgDep.la	\
-			-ly2util -lrpm -lpopt
+			-ly2util
 
 bin_PROGRAMS = online_update installation_sources genIS_PLAINcache
 

@@ -189,20 +189,8 @@ ostream & operator<<( ostream & str, const RpmHeaderCache & obj )
 #warning buildHeaderCache needs cleanup
 //
 ///////////////////////////////////////////////////////////////////
+#include "librpm.h"
 #include <y2util/PathInfo.h>
-extern "C" {
-#include <rpm/rpmlib.h>
-#include <rpm/rpmts.h>
-#include <netinet/in.h>
-  // from rpm: lib/header.c
-  struct entryInfo {
-    int_32 tag;
-    int_32 type;
-    int_32 offset;              /* Offset from beginning of data segment,
-				   only defined on disk */
-    int_32 count;
-  };
-}
 
 static const unsigned PHC_MAGIC_SZE = 64; // dont change!
 static const string   PHC_MAGIC( "YaST-PHC-1.0-0" );

@@ -18,10 +18,7 @@
   Purpose:
 
 /-*/
-
-extern "C" {
-#include <rpm/rpmlib.h>
-}
+#include "librpm.h"
 
 #include <iostream>
 

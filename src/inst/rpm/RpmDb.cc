@@ -18,6 +18,7 @@
    Copied and adapted from agent-targetpkg
 
 /-*/
+#include "librpm.h"
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -74,7 +75,7 @@ inline string stringPath( const Pathname & root_r, const Pathname & sub_r )
 **	FUNCTION NAME : testCB
 **	FUNCTION TYPE : static void
 */
-static void testCB( const ProgressCounter & pc, void * )
+static void testCB( const ProgressCounter & pc, const void * )
 {
   int mod = pc.max()/3;
   if ( !mod )
@@ -357,6 +358,17 @@ PMError RpmDb::initDatabase( Pathname root_r, Pathname dbPath_r )
     ERR << "Illegal root or dbPath: " << stringPath( root_r, dbPath_r ) << endl;
     return Error::E_invalid_argument;
   }
+
+  ///////////////////////////////////////////////////////////////////
+#ifdef FAKELIBRPM
+  ///////////////////////////////////////////////////////////////////
+  _root   = root_r;
+  _dbPath = dbPath_r;
+  INT << "calling initDatabase FAKED!!" << endl;
+  return Error::E_ok;
+  ///////////////////////////////////////////////////////////////////
+#endif // FAKELIBRPM
+  ///////////////////////////////////////////////////////////////////
 
   MIL << "Calling initDatabase: " << stringPath( root_r, dbPath_r ) << endl;
 
