@@ -27,4 +27,5 @@ int main(int argc, char* argv[])
 	//result = m->provideFile("/apt/SuSE/STABLE-i386/examples/sources.list.FTP");
 	result = m->provideFile(argv[3]);
 	DBG << media_result_strings[result] << endl;
+	m->release(true);
 }

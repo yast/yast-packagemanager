@@ -21,12 +21,22 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
 #include <y2pm/MediaCD.h>
+
+#include <cstring> // strerror
 
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <errno.h>
 #include <dirent.h>
+
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <linux/cdrom.h>
+
 
 using namespace std;
 
@@ -56,19 +66,29 @@ MediaCD::MediaCD (const Url& url)
     {
 	string devices=it->second;
 	string::size_type pos;
+	D__ << "parse " << devices << endl;
 	while(!devices.empty())
 	{
 	    pos = devices.find(',');
-	    if(pos != string::npos)
+	    string device = devices.substr(0,pos);
+	    if(!device.empty())
 	    {
-		string device = devices.substr(0,pos);
-		if(!device.empty())
-		{
-		    _devices.push_back(device);
-		}
-		devices=devices.substr(pos+1);
+		_devices.push_back(device);
+		D__ << "use device " << device << endl;
 	    }
+	    if(pos!=string::npos)
+		devices=devices.substr(pos+1);
+	    else
+		devices.erase();
 	}
+    }
+    else
+    {
+	    //default is /dev/cdrom
+	    //TODO: make configurable
+	    const char* const device = "/dev/cdrom";
+	    D__ << "use default device " << device << endl;
+	    _devices.push_back(device);
     }
 }
 
@@ -116,28 +136,62 @@ MediaResult
 MediaCD::attachTo (const Pathname & to)
 {
     // FIXME, issue "eject -t" to close the tray
+    // really? mine does close automatically -- lnussel
+    
+
+    if(!_attachPoint.empty())
+	return E_already_attached;
     
     _attachPoint = to;
 
     const char *mountpoint = _attachPoint.asString().c_str();
     bool mountsucceeded = false;
 
-    // try all devices in turn
+    D__ << _attachPoint << endl;
+
+    //TODO: make configurable
+    list<string> filesystems;
+    
+    // if DVD, try UDF filesystem before iso9660
+    if(_url.getProtocol() == "dvd")
+	filesystems.push_back("udf");
+    
+    filesystems.push_back("iso9660");
+
+    // try all devices in sequence
     for(DeviceList::iterator it = _devices.begin()
 	; !mountsucceeded && it != _devices.end()
 	; ++it )
     {
-	// if DVD, try UDF filesystem before iso9660
-	if (_url.getProtocol() != "dvd"
-	    || (mount (it->c_str(), mountpoint, "udf", _mountflags, 0) != 0)) {
-
-	    if (mount (it->c_str(), mountpoint, "iso9660", _mountflags, 0) != 0) {
+	// try all filesystems in sequence
+	for(list<string>::iterator fsit = filesystems.begin()
+	    ; !mountsucceeded && fsit != filesystems.end()
+	    ; ++fsit)
+	{
+	    MIL << "try mount " << it->c_str()
+		<< " to " << mountpoint
+		<< " filesystem " << fsit->c_str() << ": ";
+	    if(!::mount (it->c_str(), mountpoint, fsit->c_str(), _mountflags, NULL))
+	    {
 		mountsucceeded = true;
+		MIL << "succeded" << endl;
+		_mounteddevice = *it;
+	    }
+	    else
+	    {
+		D__ << strerror(errno) << endl;
+		MIL << "failed" << endl;
 	    }
 	}
     }
 
-    return (mountsucceeded?E_none:E_system);
+    if(!mountsucceeded)
+    {
+	_attachPoint = "";
+	_mounteddevice.erase();
+	return E_system;
+    }
+    return E_none;
 }
 
 
@@ -152,11 +206,32 @@ MediaCD::attachTo (const Pathname & to)
 MediaResult
 MediaCD::release (bool eject)
 {
+    if(_mounteddevice.empty())
+    {
+	return E_not_attached;
+    }
+
+    MIL << "umount " << _attachPoint.asString() << endl;
+
     if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
     }
-    // FIXME implement 'eject'
+    // eject device
+    if(eject)
+    {
+	int fd;
+	MIL << "eject " << _mounteddevice << endl;
+	fd = ::open(_mounteddevice.c_str(), O_RDONLY|O_NONBLOCK);
+	if(fd != -1)
+	{
+	    ::ioctl(fd,CDROMEJECT);
+	    ::close(fd);
+	}
+    }
+
     _attachPoint = "";
+    _mounteddevice.erase();
+    
     return E_none;
 }
 
@@ -175,6 +250,21 @@ MediaResult
 MediaCD::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, CD is mounted at destination
+
+    if(!_url.isValid())
+	return E_bad_url;
+
+    Pathname src = _attachPoint;
+    src += _url.getPath();
+    src += filename;
+
+    PathInfo info(src);
+    
+    if(!info.isFile())
+    {
+	    D__ << src.asString() << " does not exist" << endl;
+	    return E_file_not_found;
+    }
     return E_none;
 }
 

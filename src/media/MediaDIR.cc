@@ -46,6 +46,8 @@ using namespace std;
 MediaDIR::MediaDIR (const Url& url)
     : MediaHandler (url)
 {
+    // attach point is always / as files are not copied
+    _attachPoint = "/";
 }
 
 
@@ -59,9 +61,11 @@ MediaDIR::MediaDIR (const Url& url)
 //
 MediaDIR::~MediaDIR()
 {
+	/*
     if (_attachPoint != "") {	// release if still mounted
 	release ();
     }
+    */
 }
 
 
@@ -91,10 +95,8 @@ MediaDIR::dumpOn( ostream & str ) const
 MediaResult
 MediaDIR::attachTo (const Pathname & to)
 {
-    // make directory 'present'
-    _attachPoint = to;
-
-    return E_none;
+    // attach point is always / as files are not copied
+    return E_attachpoint_fixed;
 }
 
 
@@ -109,8 +111,6 @@ MediaDIR::attachTo (const Pathname & to)
 MediaResult
 MediaDIR::release (bool eject)
 {
-    // make directory 'vanish'
-    _attachPoint = "";
     return E_none;
 }
 
@@ -131,13 +131,18 @@ MediaDIR::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, DIR is mounted at destination
 
-    Pathname src = _attachPoint + filename;
+    if(!_url.isValid())
+	return E_bad_url;
+
+    Pathname src = _url.getPath();
+    src += filename;
+
     PathInfo info(src);
     
     if(!info.isFile())
     {
 	    D__ << src.asString() << " does not exist" << endl;
-	    return E_system;
+	    return E_file_not_found;
     }
     return E_none;
 }

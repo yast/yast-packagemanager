@@ -46,7 +46,9 @@ typedef enum media_result {
     E_file_not_found,
     E_login_failed,
     E_connection_failed,
-    E_proxyauth_failed
+    E_proxyauth_failed,
+
+    E_attachpoint_fixed
 } MediaResult;
 
 const char* const media_result_strings[] = {
@@ -69,7 +71,9 @@ const char* const media_result_strings[] = {
 	N_("file not found"),
 	N_("login failed"),
 	N_("connection failed"),
-	N_("proxy authenticatin failed")
+	N_("proxy authenticatin failed"),
+
+	N_("attach point can not be changed")
 };
 
 #endif // MediaResult_h

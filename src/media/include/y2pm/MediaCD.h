@@ -28,11 +28,16 @@
 //	CLASS NAME : MediaCD
 class MediaCD : public MediaHandler {
 
+    private:
+
 	unsigned long _mountflags;
 
 	typedef std::list<std::string> DeviceList;
 	/** list of devices to try to mount */
-	 DeviceList _devices;
+	DeviceList _devices;
+	
+	/** which device has been mounted */
+	std::string _mounteddevice;
 
     public:
 	// constructor

@@ -45,40 +45,47 @@ class MediaHandler {
 
 	Pathname _attachPoint;		// attached at
 
-	// scan directory 'dirname' for first file matching pattern
+	/** scan directory 'dirname' for first file matching pattern
+	 * */
 	const Pathname *scanDirectory (const Pathname & dirname, const std::string & pattern) const;
 
-	// read directory 'dirname' completely to string list
+	/** read directory 'dirname' completely to string list
+	 * */
 	const std::list<std::string> * readDirectory (const Pathname & dirname) const;
 
     public:
 	// constructor
-
 	MediaHandler (const Url& url);
 
-	// attach media at path
+	/** attach media at path */
 	virtual MediaResult attachTo (const Pathname & to) = 0;
 
-	// return current attach directory
+	/** return current attach directory */
 	virtual Pathname & getAttachPoint (void) { return _attachPoint; }
 
-	// release attached media
-	// if eject = true, physically eject the media (i.e. CD-ROM)
+	/** release attached media
+	 * 
+	 * @param eject if true, physically eject the media * (i.e. CD-ROM)
+	 * */
 	virtual MediaResult release (bool eject = false) = 0;
 
-	// provide file denoted by path at 'attached path'
-	// filename is interpreted relative to the attached url
-	// and a path prefix is preserved to destination
+	/** provide file denoted by path at 'attached path' filename is
+	 * interpreted relative to the attached url and a path prefix is
+	 * preserved to destination
+	 * */
 	virtual MediaResult provideFile (const Pathname & filename) const = 0;
 
-	// find file denoted by pattern
-	// filename is interpreted relative to the attached url
+	/** find file denoted by pattern
+	 * filename is interpreted relative to the attached url
+	 * */
 	virtual const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const = 0;
 
-	// get directory denoted by path to a string list
+	/** get directory denoted by path to a string list
+	 * */
 	virtual const std::list<std::string> * dirInfo (const Pathname & dirname) const = 0;
 
-	// get file information
+	/** get file information
+	 * */
 	virtual const PathInfo * fileInfo (const Pathname & filename) const = 0;
 
 	virtual ~MediaHandler();
