@@ -100,18 +100,9 @@ PMError MediaSMB::attachTo(bool next)
     if(!password.empty())
 	options += ",password=" + password;
 
-    MIL << "try mount " << path
-	<< " to " << mountpoint
-	<< " filesystem " << filesystem << ": ";
-
     ret = mount.mount(path,mountpoint,filesystem,options);
-    if(ret == Error::E_ok)
+    if(ret != Error::E_ok)
     {
-	MIL << "succeded" << endl;
-    }
-    else
-    {
-	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
 
@@ -128,18 +119,13 @@ PMError MediaSMB::attachTo(bool next)
 //
 PMError MediaSMB::releaseFrom( bool eject )
 {
-    MIL << "umount " << attachPoint();
-
     Mount mount;
     PMError ret;
 
     if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
     {
-	MIL << " failed: " <<  ret << endl;
 	return ret;
     }
-
-    MIL << " succeded" << endl;
 
     return ret;
 }
@@ -171,39 +157,4 @@ PMError MediaSMB::getDirInfo( std::list<std::string> & retlist,
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-#if 0
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaSMB::findFile
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//	find file denoted by pattern
-//	filename is interpreted relative to the attached url
-//
-//	pattern is a string with an optional trailing '*'
-//
 
-const Pathname *
-MediaSMB::findFile (const Pathname & dirname, const string & pattern) const
-{
-    return scanDirectory (dirname, pattern);
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaSMB::getInfo
-//	METHOD TYPE : const PathInfo *
-//
-//	DESCRIPTION :
-//	get file information
-
-const PathInfo *
-MediaSMB::fileInfo (const Pathname & filename) const
-{
-    // no retrieval needed, CD is mounted at destination
-    return new PathInfo (filename);
-}
-#endif

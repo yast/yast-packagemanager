@@ -90,18 +90,9 @@ PMError MediaDISK::attachTo(bool next)
 	options="ro";
     }
 
-    MIL << "try mount " << _device
-	<< " to " << mountpoint
-	<< " filesystem " << _filesystem << ": ";
-
     PMError ret = mount.mount(_device,mountpoint,_filesystem,options);
-    if( ret == Error::E_ok )
+    if( ret != Error::E_ok )
     {
-	MIL << "succeded" << endl;
-    }
-    else
-    {
-	MIL << "failed" << ret << endl;
 	return ret;
     }
 
@@ -119,14 +110,11 @@ PMError MediaDISK::attachTo(bool next)
 //
 PMError MediaDISK::releaseFrom( bool eject )
 {
-    MIL << "umount " << attachPoint() << endl;
-
     Mount mount;
     PMError ret;
 
     if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
     {
-	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
 
@@ -160,40 +148,4 @@ PMError MediaDISK::getDirInfo( std::list<std::string> & retlist,
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-#if 0
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaDISK::findFile
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//	find file denoted by pattern
-//	filename is interpreted relative to the attached url
-//
-//	pattern is a string with an optional trailing '*'
-//
 
-const Pathname *
-MediaDISK::findFile (const Pathname & dirname, const string & pattern) const
-{
-    return scanDirectory (dirname, pattern);
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaDISK::getInfo
-//	METHOD TYPE : const PathInfo *
-//
-//	DESCRIPTION :
-//	get file information
-
-const PathInfo *
-MediaDISK::fileInfo (const Pathname & filename) const
-{
-    // no retrieval needed, CD is mounted at destination
-    return new PathInfo (filename);
-}
-#endif

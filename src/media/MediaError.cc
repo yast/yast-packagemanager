@@ -56,6 +56,7 @@ std::string MediaError::errtext( const unsigned e )
   ///////////////////////////////////////////////////////////////////
   case E_system:		return N_("Unkown error in subsystem");
   case E_not_a_directory:	return N_("not a directory");
+  case E_not_a_file:		return N_("not a file");
   case E_no_access:		return N_("access denied");
   case E_no_permission:		return N_("insufficient permissions");
   case E_no_space:		return N_("no space left");
@@ -78,6 +79,7 @@ std::string MediaError::errtext( const unsigned e )
   case E_proxyauth_failed:	return N_("proxy authentication failed");
   //mount
   case E_mount_failed:		return N_("mount failed");
+  case E_umount_failed:		return N_("umount failed");
   case E_already_mounted:	return N_("source already mounted");
   case E_busy:			return N_("ressource busy");
 

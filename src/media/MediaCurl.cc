@@ -175,11 +175,17 @@ PMError MediaCurl::attachTo (bool next)
   return Error::E_ok;
 }
 
-PMError MediaCurl::disconnect()
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaCurl::disconnectFrom
+//	METHOD TYPE : PMError
+//
+PMError MediaCurl::disconnectFrom()
 {
   if ( _connected ) curl_easy_cleanup( _curl );
   _connected = false ;
-  
+
   return Error::E_ok;
 }
 
@@ -232,10 +238,10 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     Pathname dest = attachPoint() + filename;
 
     string destNew = dest.asString() + ".new.yast.37456";
-    
+
     D__ << "dest: " << dest << endl;
     D__ << "destNew: " << destNew << endl;
-    
+
     if( PathInfo::assert_dir( dest.dirname() ) )
     {
 	DBG << "assert_dir " << dest.dirname() << " failed" << endl;
@@ -322,7 +328,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
           err = Error::E_error;
           break;
       }
-      
+
       err.setDetails( _curlError );
       return err;
     }

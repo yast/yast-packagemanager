@@ -114,8 +114,6 @@ MediaHandler::MediaHandler ( const Url &      url_r,
     if ( _attachPoint_is_mediaroot )
       _localRoot += _url.path();
   }
-
-  dumpOn( MIL ) << endl;;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -130,6 +128,7 @@ MediaHandler::~MediaHandler()
 {
   if ( _isAttached ) {
     INT << "MediaHandler deleted with media attached." << endl;
+    return; // no cleanup if media still mounted!
   }
 
   if ( _tmp_attachPoint ) {
@@ -151,25 +150,46 @@ MediaHandler::~MediaHandler()
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::attach(bool next)
+PMError MediaHandler::attach( bool next )
 {
   if ( _isAttached )
-    return Error::E_already_attached;
+    return Error::E_ok;
 
-  if ( _attachPoint.empty() )
+  if ( _attachPoint.empty() ) {
+    ERR << Error::E_bad_attachpoint << endl;
     return Error::E_bad_attachpoint;
+  }
 
-  PMError err = attachTo(next); // pass to concrete handler
-  if ( !err ) {
+  PMError err = attachTo( next ); // pass to concrete handler
+  if ( err ) {
+    WAR << "Attach failed: " << err << " " << *this << endl;
+  } else {
     _isAttached = true;
+    MIL << "Attached: " << *this << endl;
   }
 
   return err;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::disconnect
+//	METHOD TYPE : PMError
+//
 PMError MediaHandler::disconnect()
 {
-  return PMError();
+  if ( !_isAttached )
+    return  Error::E_ok;
+
+  PMError err = disconnectFrom(); // pass to concrete handler
+  if ( err ) {
+    WAR << "Disconnect failed: " << err << " " << *this << endl;
+  } else {
+    MIL << "Disconnected: " << *this << endl;
+  }
+
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -189,9 +209,11 @@ PMError MediaHandler::release( bool eject )
   }
 
   PMError err = releaseFrom( eject ); // pass to concrete handler
-  if ( !err ) {
+  if ( err ) {
+    WAR << "Release failed: " << err << " " << *this << endl;
+  } else {
     _isAttached = false;
-    DBG << "ok" << endl;
+    MIL << "Released: " << *this << endl;
   }
 
   return err;
@@ -205,35 +227,23 @@ PMError MediaHandler::release( bool eject )
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::provideFile( const Pathname & filename ) const
+PMError MediaHandler::provideFile( Pathname filename ) const
 {
-  D__ << filename << endl;
-  if ( !_isAttached )
+  if ( !_isAttached ) {
+    INT << Error::E_not_attached << " on provideFile(" << filename << ")" << endl;
     return Error::E_not_attached;
-
-  D__ << filename.absolutename() << endl;
-  return getFile( filename.absolutename() ); // pass to concrete handler
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaHandler::releaseFile
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//
-PMError MediaHandler::releaseFile( const Pathname & filename ) const
-{
-  if ( ! _does_download || _attachPoint.empty() )
-    return Error::E_ok;
-
-  PathInfo info( localPath( filename.absolutename() ) );
-  if ( info.isFile() ) {
-    PathInfo::unlink( info.path() );
   }
 
-  return Error::E_ok;
+  filename = filename.absolutename();
+
+  PMError err = getFile( filename ); // pass to concrete handler
+  if ( err ) {
+    WAR << "provideFile(" << filename << "): " << err << endl;
+  } else {
+    MIL << "provideFile(" << filename << ")" << endl;
+  }
+
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -244,40 +254,48 @@ PMError MediaHandler::releaseFile( const Pathname & filename ) const
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::provideDir( const Pathname & dirname ) const
+PMError MediaHandler::provideDir( Pathname dirname ) const
 {
-    D__ << dirname << endl;
-    if ( !_isAttached )
-	return Error::E_not_attached;
+  if ( !_isAttached ) {
+    INT << Error::E_not_attached << " on provideDir(" << dirname << ")" << endl;
+    return Error::E_not_attached;
+  }
 
-    D__ << dirname.absolutename() << endl;
-    std::list<std::string> filelist;
-    PMError err = getDirInfo( filelist, dirname.absolutename(), false );
-    if (err == PMError::E_ok)
-    {
-	for (std::list<std::string>::iterator it = filelist.begin();
-	     it != filelist.end(); ++it)
-	{
-	    Pathname filename = dirname + *it;
-	    err = getFile ( filename.absolutename() ); // pass to concrete handler
-	    if (err != PMError::E_ok)
-		break;
-	}
+  dirname = dirname.absolutename();
+
+  list<string> filelist;
+  PMError err = getDirInfo( filelist, dirname, false );
+  if ( err ) {
+    WAR << "provideDir(" << dirname << "): " << err << endl;
+  } else {
+    MIL << "provideDir(" << dirname << ")" << endl;
+
+    for ( list<string>::iterator it = filelist.begin(); it != filelist.end(); ++it ) {
+
+      Pathname filename = dirname + *it;
+      PMError res = getFile( filename ); // pass to concrete handler
+      switch ( res ) {
+      case Error::E_ok:
+	DBG << "provideDir: file(" << filename << ")" << endl;
+	break;
+      case Error::E_not_a_file:
+	DBG << "provideDir: file(" << filename << "): " << res << " SKIPPED" << endl;
+	break;
+      case Error::E_file_not_found:
+	// might be incorrect directory.yast
+	WAR << "provideDir: file(" << filename << "): " << res << endl;
+	break;
+      default:
+	ERR << "provideDir: file(" << filename << "): " << res << " ABORTING " << endl;
+	err = res;
+	break;
+      }
+      if ( err )
+	break; // abort
     }
-    return err;
-}
+  }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaHandler::releaseDir
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//
-PMError MediaHandler::releaseDir( const Pathname & dirname ) const
-{
-  return releasePath (dirname);
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -288,13 +306,17 @@ PMError MediaHandler::releaseDir( const Pathname & dirname ) const
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::releasePath( const Pathname & pathname ) const
+PMError MediaHandler::releasePath( Pathname pathname ) const
 {
   if ( ! _does_download || _attachPoint.empty() )
     return Error::E_ok;
 
-  PathInfo info( localPath( pathname.absolutename() ) );
-  if ( info.isDir() ) {
+  pathname = pathname.absolutename();
+  PathInfo info( localPath( pathname ) );
+
+  if ( info.isFile() ) {
+    PathInfo::unlink( info.path() );
+  } else if ( info.isDir() ) {
     if ( info.path() != _localRoot ) {
       PathInfo::recursive_rmdir( info.path() );
     } else {
@@ -313,56 +335,65 @@ PMError MediaHandler::releasePath( const Pathname & pathname ) const
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::dirInfo( std::list<std::string> & retlist,
-			       const Pathname & dirname, bool dots ) const
+PMError MediaHandler::dirInfo( list<string> & retlist, Pathname dirname, bool dots ) const
 {
   retlist.clear();
-
-  if ( !_isAttached )
+  if ( !_isAttached ) {
+    INT << Error::E_not_attached << " on dirInfo(" << dirname << ")" << endl;
     return Error::E_not_attached;
-
-  Pathname dirFile = dirname.absolutename() + "directory.yast";
-
-  PMError err = getFile( dirFile );
-  if ( err ) {
-    DBG << "Directory file '" << dirFile << "': " << err << endl;
-  } else {
-    DBG << "Reading directory from file '" << dirFile << "'" << endl;
-    ifstream dir( localPath( dirFile ).asString().c_str() );
-    if ( dir.fail() ) {
-      ERR << "Unable to load '" << localPath( dirFile ) << "'" << endl;
-      return Error::E_system;
-    }
-    string line;
-    while( getline( dir, line ) ) {
-      if ( line == "directory.yast" ) continue;
-      if ( dots ) {
-        if ( line == "." || line == ".." ) continue;
-      } else {
-        if ( *line.begin() == '.' ) continue;
-      }
-      retlist.push_back( line );
-    }
-    return Error::E_ok;
   }
 
-  return getDirInfo( retlist, dirname.absolutename(), dots );
+  dirname = dirname.absolutename();
+
+  // look for directory.yast
+  Pathname dirFile = dirname + "directory.yast";
+  PMError err = getFile( dirFile );
+  DBG << "provideFile(" << dirFile << "): " << err << endl;
+
+  if ( err ) {
+    err = getDirInfo( retlist, dirname, dots ); // pass to concrete handler
+    if ( err ) {
+      WAR << "dirInfo(" << dirname << "): " << err << endl;
+    } else {
+      MIL << "dirInfo(" << dirname << ")" << endl;
+    }
+
+    return err;
+  }
+
+  // using directory.yast
+  ifstream dir( localPath( dirFile ).asString().c_str() );
+  if ( dir.fail() ) {
+    ERR << "Unable to load '" << localPath( dirFile ) << "'" << endl;
+    return Error::E_system;
+  }
+
+  string line;
+  while( getline( dir, line ) ) {
+    if ( line == "directory.yast" ) continue;
+    if ( dots ) {
+      if ( line == "." || line == ".." ) continue;
+    } else {
+      if ( *line.begin() == '.' ) continue;
+    }
+    retlist.push_back( line );
+  }
+
+  return Error::E_ok;
 }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaHandler::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream &
-MediaHandler::dumpOn( ostream & str ) const
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : ostream &
+*/
+ostream & operator<<( ostream & str, const MediaHandler & obj )
 {
-  str << _url << ( _isAttached ? "" : " not" ) << " attached; localRoot \""
-    << _localRoot << "\"";
+  str << obj.url() << ( obj.isAttached() ? "" : " not" )
+    << " attached; localRoot \"" << obj.localRoot() << "\"";
   return str;
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -376,14 +407,12 @@ MediaHandler::dumpOn( ostream & str ) const
 //
 PMError MediaHandler::getFile( const Pathname & filename ) const
 {
-  D__ << filename << endl;
   PathInfo info( localPath( filename ) );
-  D__ << info << endl;
-  if( ! info.isFile() ) {
-    return Error::E_file_not_found;
+  if( info.isFile() ) {
+    return Error::E_ok;
   }
 
-  return Error::E_ok;
+  return( info.isExist() ? Error::E_not_a_file : Error::E_file_not_found );
 }
 
 
@@ -410,103 +439,3 @@ PMError MediaHandler::getDirInfo( std::list<std::string> & retlist,
 
   return Error::E_ok;
 }
-
-#if 0
-///////////////////////////////////////////////////////////////////
-// PROTECTED
-//
-//
-//	METHOD NAME : MediaHandler::scanDirectory
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//	  scan directory for files matching pattern
-//	  pattern might have a single trailing '*'
-//	  FIXME: use proper regexp handling
-//
-const Pathname *
-MediaHandler::scanDirectory (const Pathname & dirname, const string & pattern) const
-{
-    // prepend mountpoint to dirname
-    Pathname *fullpath = new Pathname (_attachPoint + dirname);
-
-    // open mounted directory
-    DIR *dir = opendir (fullpath->asString().c_str());
-    struct dirent *entry;
-    if (dir == 0)
-    {
-	return 0;
-    }
-
-    // scan directory
-
-    while ((entry = readdir (dir)) != 0)
-    {
-	char *dptr = entry->d_name;		// directory name pointer
-	const char *pptr = pattern.c_str();		// pattern pointer
-
-	// match pattern
-
-	while ((*dptr != 0)
-		&& (*pptr != 0))
-	{
-	    if (*dptr == *pptr)		// pattern matches
-	    {
-		dptr++;
-		pptr++;
-	    }
-	    else if (*pptr == '*')	// wildcard matches
-	    {
-		pptr++;			// assume '*' at end of pattern
-		break;
-	    }
-	    else
-		break;			// no match
-	}
-
-	if (*pptr == 0)			// match !
-	{
-	    *fullpath += entry->d_name;
-	    closedir (dir);
-	    return fullpath;
-	}
-    }
-    closedir (dir);
-    return 0;		// no match
-}
-
-///////////////////////////////////////////////////////////////////
-// PROTECTED
-//
-//
-//	METHOD NAME : MediaHandler::readDirectory
-//	METHOD TYPE : std::list <std::string> *
-//
-//	DESCRIPTION :
-//	  read directory to list of strings
-//	  return NULL on error
-//
-const list<string> *
-MediaHandler::readDirectory (const Pathname & dirname) const
-{
-    list<string> *dirlist = new list<string>;
-
-    // prepend mountpoint to dirname
-    Pathname fullpath = _attachPoint + dirname;
-
-    // open mounted directory
-    DIR * dir = opendir (fullpath.asString().c_str());
-    if ( !dir ) {
-	return errno;
-    }
-
-    struct dirent * entry = 0;
-    while ( (entry = readdir( dir )) != 0 )
-    {
-	dirlist->push_back (entry->d_name);
-    }
-    closedir (dir);
-
-    return dirlist;
-}
-#endif

@@ -98,6 +98,52 @@ MediaCD::MediaCD( const Url &      url_r,
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : MediaCD::openTray
+//	METHOD TYPE : bool
+//
+bool MediaCD::openTray( const string & device_r )
+{
+  int fd = ::open( device_r.c_str(), O_RDONLY|O_NONBLOCK );
+  if ( fd == -1 ) {
+    WAR << "Unable to open '" << device_r << "' (" << ::strerror( errno ) << ")" << endl;
+    return false;
+  }
+  int res = ::ioctl( fd, CDROMEJECT );
+  if ( res ) {
+    WAR << "Eject " << device_r << " failed (" << ::strerror( errno ) << ")" << endl;
+    return false;
+  }
+  ::close( fd );
+  MIL << "Eject " << device_r << endl;
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaCD::closeTray
+//	METHOD TYPE : bool
+//
+bool MediaCD::closeTray( const string & device_r )
+{
+  int fd = ::open( device_r.c_str(), O_RDONLY|O_NONBLOCK );
+  if ( fd == -1 ) {
+    WAR << "Unable to open '" << device_r << "' (" << ::strerror( errno ) << ")" << endl;
+    return false;
+  }
+  int res = ::ioctl( fd, CDROMCLOSETRAY );
+  if ( res ) {
+    WAR << "Close tray " << device_r << " failed (" << ::strerror( errno ) << ")" << endl;
+    return false;
+  }
+  ::close( fd );
+  DBG << "Close tray " << device_r << endl;
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : MediaCD::attachTo
 //	METHOD TYPE : PMError
 //
@@ -108,10 +154,9 @@ PMError MediaCD::attachTo(bool next)
     Mount mount;
     const char *mountpoint = attachPoint().asString().c_str();
     bool mountsucceeded = false;
-    PMError ret = Error::E_mount_failed;
     int count = 0;
 
-    DBG << "next " << next << " last " << _lastdev << " lastdevice " << _mounteddevice << endl;
+    D__ << "next " << next << " last " << _lastdev << " lastdevice " << _mounteddevice << endl;
 
     if (next && _lastdev == -1) return Error::E_not_supported_by_media;
 
@@ -131,40 +176,32 @@ PMError MediaCD::attachTo(bool next)
     filesystems.push_back("iso9660");
 
     // try all devices in sequence
+    PMError err = Error::E_mount_failed;
     for (DeviceList::iterator it = _devices.begin()
 	; !mountsucceeded && it != _devices.end()
 	; ++it, count++ )
     {
-	DBG << "count " << count << endl;
+	D__ << "count " << count << endl;
 	if (next && count<=_lastdev )
 	{
-		DBG << "skip" << endl;
+		D__ << "skip" << endl;
 		continue;
 	}
 
-	DBG << "try mount " << *it << endl;
-
 	// close tray
-	const char *const argv[] = { "/bin/eject", "-t", (*it).c_str(), NULL };
-	ExternalProgram eject(argv, ExternalProgram::Discard_Stderr);
-	eject.close();
+	closeTray( *it );
 
 	// try all filesystems in sequence
 	for(list<string>::iterator fsit = filesystems.begin()
 	    ; !mountsucceeded && fsit != filesystems.end()
 	    ; ++fsit)
 	{
-	    ret = mount.mount (*it, mountpoint, *fsit, options);
-	    if ( ret == Error::E_ok )
+	    err = mount.mount (*it, mountpoint, *fsit, options);
+	    if ( ! err )
 	    {
 		mountsucceeded = true;
-		MIL << " succeded" << endl;
 		_mounteddevice = *it;
 		_lastdev = count;
-	    }
-	    else
-	    {
-		MIL << "failed: " << ret << endl;
 	    }
 	}
     }
@@ -173,9 +210,9 @@ PMError MediaCD::attachTo(bool next)
     {
 	_mounteddevice.erase();
 	_lastdev = -1;
-	return ret;
+	return err;
     }
-    DBG << _lastdev << " " << count << endl;
+    D__ << _lastdev << " " << count << endl;
     return Error::E_ok;
 }
 
@@ -198,41 +235,24 @@ PMError MediaCD::releaseFrom( bool eject )
 		; it != _devices.end()
 		; ++it )
 	    {
-		int fd;
-		MIL << "eject " << (*it) << endl;
-		fd = ::open ((*it).c_str(), O_RDONLY|O_NONBLOCK);
-		if (fd != -1)
-		{
-		    ::ioctl (fd, CDROMEJECT);
-		    ::close (fd);
-		}
+	        openTray( *it );
 	    }
 	    return Error::E_ok;
 	}
 	return Error::E_not_attached;
     }
 
-    MIL << "umount " << attachPoint() << endl;
-
     Mount mount;
-    PMError ret;
-    if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
+    PMError err;
+    if ((err = mount.umount(attachPoint().asString())))
     {
-	MIL << "failed: " <<  ret << endl;
-	return ret;
+	return err;
     }
 
     // eject device
     if (eject)
     {
-	int fd;
-	MIL << "eject " << _mounteddevice << endl;
-	fd = ::open (_mounteddevice.c_str(), O_RDONLY|O_NONBLOCK);
-	if (fd != -1)
-	{
-	    ::ioctl (fd,CDROMEJECT);
-	    ::close (fd);
-	}
+        openTray( _mounteddevice );
     }
 
     _mounteddevice.erase();
@@ -250,23 +270,11 @@ PMError MediaCD::releaseFrom( bool eject )
 //
 void MediaCD::forceEject()
 {
-  if (_mounteddevice.empty())		// no device mounted
-  {
-      for (DeviceList::iterator it = _devices.begin()
-	    ; it != _devices.end()
-	    ; ++it )
-      {
-	int fd;
-	MIL << "eject " << (*it) << endl;
-	fd = ::open ((*it).c_str(), O_RDONLY|O_NONBLOCK);
-	if (fd != -1)
-	{
-	  int res = ::ioctl (fd, CDROMEJECT);
-	  ::close (fd);
-	  if ( res >= 0 )
-	    return; // 1st success
-	}
-      }
+  if ( _mounteddevice.empty() ) {	// no device mounted
+    for ( DeviceList::iterator it = _devices.begin(); it != _devices.end(); ++it ) {
+      if ( openTray( *it ) )
+	break; // on 1st success
+    }
   }
 }
 
@@ -295,28 +303,3 @@ PMError MediaCD::getDirInfo( std::list<std::string> & retlist,
 {
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
-
-#if 0
-const Pathname *
-MediaCD::findFile (const Pathname & dirname, const string & pattern) const
-{
-    return scanDirectory (dirname, pattern);
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaCD::getInfo
-//	METHOD TYPE : const PathInfo *
-//
-//	DESCRIPTION :
-//	get file information
-
-const PathInfo *
-MediaCD::fileInfo (const Pathname & filename) const
-{
-    // no retrieval needed, CD is mounted at destination
-    return new PathInfo (filename);
-}
-#endif

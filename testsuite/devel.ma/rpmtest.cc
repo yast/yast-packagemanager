@@ -274,17 +274,32 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  #define WHICH(err) (err?ERR:INT)
+  #define WHICH(err) (err?SEC:INT)
 
   PMError err;
-  Url mediaurl( "cd:///" );
+  Url mediaurl( "///" );
   MediaAccessPtr media( new MediaAccess );
+
+  err = media->provideFile( "/tmp" );
+  WHICH(err) << "provideFile:" << "/tmp" << " " << err << endl;
+  err = media->provideDir( "/tmp" );
+  WHICH(err) << "provideDile:" << "/tmp" << " " << err << endl;
 
   err = media->open( mediaurl );
   WHICH(err) << "open media:" << mediaurl << " " << err << endl;
 
+  err = media->provideFile( "/tmp" );
+  WHICH(err) << "provideFile:" << "/tmp" << " " << err << endl;
+  err = media->provideDir( "/tmp" );
+  WHICH(err) << "provideDile:" << "/tmp" << " " << err << endl;
+
   err = media->attach();
   WHICH(err) << "attach media: " << err << endl;
+
+  err = media->provideFile( "/tmp" );
+  WHICH(err) << "provideFile:" << "/tmp" << " " << err << endl;
+  err = media->provideDir( "/tmp" );
+  WHICH(err) << "provideDir:" << "/tmp" << " " << err << endl;
 
   err = media->release();
   WHICH(err) << "release media: " << err << endl;

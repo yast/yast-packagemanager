@@ -50,7 +50,7 @@ Mount::~Mount()
 
    process = NULL;
 
-   M__ << "~Mount() end" << endl;   
+   M__ << "~Mount() end" << endl;
 }
 
 PMError Mount::mount ( const string& source,
@@ -67,7 +67,7 @@ PMError Mount::mount ( const string& source,
 	NULL
      };
 
-    PMError ok = Error::E_ok;
+    PMError err;
 
     this->run(argv, ExternalProgram::Stderr_To_Stdout);
 
@@ -95,40 +95,43 @@ PMError Mount::mount ( const string& source,
 	    value = output;
 	}
 
-	D__ << "stdout: " << value << endl;
+	DBG << "stdout: " << value << endl;
 
 	if  ( value.find ( "is already mounted on" ) != string::npos )
 	{
-	    ok = Error::E_already_mounted;
+	    err = Error::E_already_mounted;
 	}
 	else if  ( value.find ( "ermission denied" ) != string::npos )
 	{
-	    ok = Error::E_no_permission;
+	    err = Error::E_no_permission;
 	}
 	else if  ( value.find ( "wrong fs type" ) != string::npos )
 	{
-	    ok = Error::E_invalid_filesystem;
+	    err = Error::E_invalid_filesystem;
 	}
 
 
-	output = process->receiveLine();            
+	output = process->receiveLine();
     }
 
     int status = Status();
 
-    if ( status == 0 && ok != Error::E_ok )
+    if ( status == 0 && err )
     {
-	D__ << endl;
-	// strange
-	ok = Error::E_ok;
+	// return codes overwites parsed error message
+	err = Error::E_ok;
     }
-    else if ( status != 0 && ok == Error::E_ok )
+    else if ( status != 0 && ! err )
     {
-	D__ << endl;
-	ok = Error::E_mount_failed;
+        err = Error::E_mount_failed;
     }
 
-    return ( ok );
+    if ( err ) {
+      WAR << "mount " << source << " " << target << ": " << err << endl;
+    } else {
+      MIL << "mounted " << source << " " << target << endl;
+    }
+    return( err );
 }
 
 PMError Mount::umount (const string& path)
@@ -139,7 +142,7 @@ PMError Mount::umount (const string& path)
 	NULL
      };
 
-    PMError ok = Error::E_ok;
+    PMError err;
 
     this->run(argv, ExternalProgram::Stderr_To_Stdout);
 
@@ -167,36 +170,39 @@ PMError Mount::umount (const string& path)
 	    value = output;
 	}
 
-	D__ << "stdout: " << value << endl;
+	DBG << "stdout: " << value << endl;
 
-	if  ( value.find ( "not mounted" ) != string::npos )
-	{
-	//    ok = Error::E_already_mounted;
-	}
+	// if  ( value.find ( "not mounted" ) != string::npos )
+	// {
+	//    err = Error::E_already_mounted;
+	// }
 
 	if  ( value.find ( "device is busy" ) != string::npos )
 	{
-	    ok = Error::E_busy;
+	    err = Error::E_busy;
 	}
 
-	output = process->receiveLine();            
+	output = process->receiveLine();
     }
 
     int status = Status();
 
-    if ( status == 0 && ok != Error::E_ok )
+    if ( status == 0 && err )
     {
-	D__ << endl;
-	// strange
-	ok = Error::E_ok;
+	// return codes overwites parsed error message
+	err = Error::E_ok;
     }
-    else if ( status != 0 && ok == Error::E_ok )
+    else if ( status != 0 && ! err )
     {
-	D__ << endl;
-	ok = Error::E_mount_failed;
+	err = Error::E_umount_failed;
     }
 
-    return ( ok );
+    if ( err ) {
+      WAR << "umount " << path << ": " << err << endl;
+    } else {
+      MIL << "unmounted " << path << endl;
+    }
+    return( err );
 }
 
 void Mount::run(const char *const *argv,
@@ -222,12 +228,12 @@ int Mount::Status()
 {
    if ( process == NULL )
       return -1;
-   
+
    exit_code = process->close();
    process->kill();
    delete process;
    process = 0;
-   
+
    D__ << "exit code: " << exit_code << endl;
 
    return exit_code;

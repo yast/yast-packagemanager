@@ -36,11 +36,15 @@
 //
 //	CLASS NAME : MediaHandler
 /**
- * Abstract base class for 'physical' MediaHandler like MediaCD, MediaDIR, etc.
- * Under controll of MediaAccess.
- * @see MediaAccess
+ * @short Abstract base class for 'physical' MediaHandler like MediaCD, etc.
+ *
+ * Handles the requests forwarded by @ref MediaAccess. The public interface
+ * contains nonvirtual methods, which should do common sanitychecks and
+ * logging. For the real action they call virtual methods overloaded by the
+ * concrete handler.
  **/
 class MediaHandler {
+    friend std::ostream & operator<<( std::ostream & str, const MediaHandler & obj );
 
     public:
 
@@ -102,6 +106,12 @@ class MediaHandler {
 
     protected:
 
+        ///////////////////////////////////////////////////////////////////
+        //
+        // Real action interface to be overloaded by concrete handler.
+        //
+        ///////////////////////////////////////////////////////////////////
+
 	/**
 	 * Call concrete handler to attach the media.
 	 *
@@ -112,6 +122,20 @@ class MediaHandler {
 	 * devices like cdroms).
 	 **/
 	virtual PMError attachTo(bool next = false) = 0;
+
+        /**
+         * Call concrete handler to disconnect media.
+	 *
+	 * Asserted that media is attached.
+	 *
+         * This is useful for media which e.g. holds open a connection to a
+         * server like FTP. After calling disconnect() the media object still is
+         * valid and files are present.
+	 *
+         * After calling disconnect() it's not possible to call provideFile() or
+         * provideDir() anymore.
+	 **/
+        virtual PMError disconnectFrom() { return Error::E_ok; }
 
 	/**
 	 * Call concrete handler to release the media.
@@ -179,10 +203,22 @@ class MediaHandler {
 
     public:
 
+        ///////////////////////////////////////////////////////////////////
+        //
+        // MediaAccess interface. Does common checks and logging.
+        // Invokes real action if necessary.
+        //
+        ///////////////////////////////////////////////////////////////////
+
         /**
 	 * Protocol hint for MediaAccess.
 	 **/
         Url::Protocol protocol() const { return _url.protocol(); }
+
+	/**
+	 * Url used.
+	 **/
+        Url url() const { return _url; }
 
 	/**
 	 * Use concrete handler to attach the media.
@@ -220,16 +256,16 @@ class MediaHandler {
 	}
 
         /**
-          Disconnect media.
-
-          This is useful for media which e.g. holds open a connection to a
-          server like FTP. After calling disconnect() the media object still is
-          valid and files are present.
-
-          After calling disconnect() it's not possible to call provideFile() or
-          provideDir() anymore.
-        */
-        virtual PMError disconnect();
+	 * Use concrete handler to isconnect media.
+	 *
+	 * This is useful for media which e.g. holds open a connection to a
+	 * server like FTP. After calling disconnect() the media object still is
+	 * valid and files are present.
+	 *
+	 * After calling disconnect() it's not possible to call provideFile() or
+	 * provideDir() anymore.
+	 **/
+        PMError disconnect();
 
 	/**
 	 * Use concrete handler to release the media.
@@ -242,13 +278,7 @@ class MediaHandler {
 	 * 'localRoot'. Filename is interpreted relative to the
 	 * attached url and a path prefix is preserved.
 	 **/
-	PMError provideFile( const Pathname & filename ) const;
-
-	/**
-	 * Remove filename below localRoot IFF handler downloads files
-	 * to the local filesystem. Never remove anything from media.
-	 **/
-	PMError releaseFile( const Pathname & filename ) const;
+	PMError provideFile( Pathname filename ) const;
 
 	/**
 	 * Use concrete handler to provide directory tree denoted
@@ -256,13 +286,19 @@ class MediaHandler {
 	 * dirname is interpreted relative to the
 	 * attached url and a path prefix is preserved.
 	 **/
-	PMError provideDir( const Pathname & dirname ) const;
+	PMError provideDir( Pathname dirname ) const;
+
+	/**
+	 * Remove filename below localRoot IFF handler downloads files
+	 * to the local filesystem. Never remove anything from media.
+	 **/
+	PMError releaseFile( const Pathname & filename ) const { return releasePath( filename ); }
 
 	/**
 	 * Remove directory tree below localRoot IFF handler downloads files
 	 * to the local filesystem. Never remove anything from media.
 	 **/
-	PMError releaseDir( const Pathname & dirname ) const;
+	PMError releaseDir( const Pathname & dirname ) const { return releasePath( dirname ); }
 
 	/**
 	 * Remove pathname below localRoot IFF handler downloads files
@@ -271,8 +307,9 @@ class MediaHandler {
 	 * If pathname denotes a directory it is recursively removed.
 	 * If pathname is empty or '/' everything below the localRoot
 	 * is recursively removed.
+	 * If pathname denotes a file it is unlinked.
 	 **/
-	PMError releasePath( const Pathname & pathname ) const;
+	PMError releasePath( Pathname pathname ) const;
 
     public:
 
@@ -283,12 +320,8 @@ class MediaHandler {
 	 * <B>Caution:</B> This is not supported by all media types. Be
 	 * prepared to handle E_not_supported_by_media.
 	 **/
-        PMError dirInfo( std::list<std::string> & retlist,
-			 const Pathname & dirname, bool dots = true ) const;
-
-    public:
-
-	virtual std::ostream & dumpOn( std::ostream & str ) const;
+	PMError dirInfo( std::list<std::string> & retlist,
+			 Pathname dirname, bool dots = true ) const;
 };
 
 ///////////////////////////////////////////////////////////////////

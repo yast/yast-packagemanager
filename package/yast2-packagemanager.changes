@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct  2 12:06:06 CEST 2003 - ma@suse.de
+
+- Revised MediaHandler error reporting ang logging. Implemented
+  MediaCD open/closeTray to use ioctl.
+- 2.9.2
+
+-------------------------------------------------------------------
 Wed Sep 24 21:33:39 CEST 2003 - ma@suse.de
 
 - MediaAccess::release: If requested, try to eject removable media

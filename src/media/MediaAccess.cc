@@ -65,8 +65,10 @@ MediaAccess::~MediaAccess()
 PMError
 MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
 {
-    if(!url.isValid())
+    if(!url.isValid()) {
+        ERR << Error::E_bad_url << " opening " << url << endl;
 	return Error::E_bad_url;
+    }
 
     close();
 
@@ -94,15 +96,18 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
         _handler = new MediaCurl (url,preferred_attach_point);
         break;
       case Url::unknown:
+	ERR << Error::E_bad_media_type << " opening " << url << endl;
 	return Error::E_bad_media_type;
 	break;
     }
 
     // check created handler
     if ( !_handler ){
+      ERR << "Failed to create media handler" << endl;
       return Error::E_system;
     }
 
+    MIL << "Opened: " << *this << endl;
     return Error::E_ok;
 }
 
@@ -116,17 +121,31 @@ MediaAccess::protocol() const
   return _handler->protocol();
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaAccess::url
+//	METHOD TYPE : Url
+//
+Url MediaAccess::url() const
+{
+  if ( !_handler )
+    return Url();
+
+  return _handler->url();
+}
+
 // close handler
 void
 MediaAccess::close (void)
 {
   ///////////////////////////////////////////////////////////////////
   // !!! make shure handler gets properly deleted.
-  // I.e. release attached media befire deleting the handler.
+  // I.e. release attached media before deleting the handler.
   ///////////////////////////////////////////////////////////////////
   if ( _handler ) {
-    if ( _handler->isAttached() )
-      _handler->release();
+    _handler->release();
+    MIL << "Close: " << *this << endl;
     delete _handler;
     _handler = 0;
   }
@@ -137,9 +156,10 @@ MediaAccess::close (void)
 PMError
 MediaAccess::attach (bool next)
 {
-  if ( !_handler )
+  if ( !_handler ) {
+    INT << Error::E_not_open << endl;
     return Error::E_not_open;
-
+  }
   return _handler->attach(next);
 }
 
@@ -175,8 +195,8 @@ MediaAccess::localPath( const Pathname & pathname ) const
 PMError
 MediaAccess::disconnect()
 {
-  if ( !_handler ) return Error::E_not_open;
-  if ( !isAttached() ) return Error::E_not_attached;
+  if ( !_handler )
+    return Error::E_not_open;
 
   return _handler->disconnect();
 }
@@ -197,15 +217,18 @@ MediaAccess::release( bool eject )
 // filename is interpreted relative to the attached url
 // and a path prefix is preserved to destination
 PMError
-MediaAccess::provideFile (const Pathname & filename, bool cached) const
+MediaAccess::provideFile( const Pathname & filename, bool cached ) const
 {
   if ( cached ) {
     PathInfo pi( localPath( filename ) );
-    if ( pi.isExist() ) return Error::E_ok;
+    if ( pi.isExist() )
+      return Error::E_ok;
   }
 
-  if ( !_handler )
+  if ( !_handler ) {
+    INT << Error::E_not_open << " on provideFile(" << filename << ")" << endl;
     return Error::E_not_open;
+  }
 
   return _handler->provideFile( filename );
 }
@@ -224,14 +247,15 @@ MediaAccess::releaseFile( const Pathname & filename ) const
 // dirname is interpreted relative to the attached url
 // and a path prefix is preserved to destination
 PMError
-MediaAccess::provideDir (const Pathname & dirname) const
+MediaAccess::provideDir( const Pathname & dirname ) const
 {
-  if ( !_handler )
+  if ( !_handler ) {
+    INT << Error::E_not_open << " on provideDir(" << dirname << ")" << endl;
     return Error::E_not_open;
+  }
 
   return _handler->provideDir( dirname );
 }
-
 
 PMError
 MediaAccess::releaseDir( const Pathname & dirname ) const
@@ -253,90 +277,27 @@ MediaAccess::releasePath( const Pathname & pathname ) const
 
 // Return content of directory on media
 PMError
-MediaAccess::dirInfo( std::list<std::string> & retlist,
-		      const Pathname & dirname, bool dots ) const
+MediaAccess::dirInfo( list<string> & retlist, const Pathname & dirname, bool dots ) const
 {
   retlist.clear();
 
-  if ( !_handler )
+  if ( !_handler ) {
+    INT << Error::E_not_open << " on dirInfo(" << dirname << ")" << endl;
     return Error::E_not_open;
+  }
 
   return _handler->dirInfo( retlist, dirname, dots );
 }
 
-#if 0
-
-// find file denoted by pattern
-//
-// filename is interpreted relative to the attached url
-// pattern might have a single trailing '*'
-//
-const Pathname *
-MediaAccess::findFile (const Pathname & dirname, const string & pattern) const
-{
-    if (_handler == 0)
-    {
-	return 0;  //Error::E_not_open;
-    }
-    if (pattern.empty())
-    {
-	return 0;
-    }
-    if (_handler->getAttachPoint().empty())
-    {
-	return 0; //Error::E_not_attached;
-    }
-    return _handler->findFile (dirname, pattern);
-}
-
-
-// get file information
-const PathInfo *
-MediaAccess::fileInfo (const Pathname & filename) const
-{
-    if (_handler == 0)
-    {
-	return 0;
-    }
-    if (_handler->getAttachPoint().empty())
-    {
-	return 0; //Error::E_not_attached;
-    }
-    return _handler->fileInfo (filename);
-}
-
-
-// clean up a file from destination
-// if filename == "", the whole destination is cleared
-PMError
-MediaAccess::cleanUp (const Pathname & filename) const
-{
-    Pathname fullname = _handler->getAttachPoint() + filename;
-    PathInfo info (fullname);
-
-    if (info.isDir())
-    {
-	// rm -rf
-    }
-    else
-    {
-	unlink (fullname.asString().c_str());
-    }
-    return Error::E_ok;
-}
-#endif
-
-
 std::ostream &
 MediaAccess::dumpOn( std::ostream & str ) const
 {
-  if ( ! isOpen() )
+  if ( !_handler )
     return str << "MediaAccess( closed )";
 
   string tstr = Url::protocolToString( _handler->protocol() );
-  str << tstr << "(";
-  _handler->dumpOn( str );
-  return str << ")";
+  str << tstr << "(" << *_handler << ")";
+  return str;
 }
 
 PMError MediaAccess::getFile( const Url &from, const Pathname &to )
