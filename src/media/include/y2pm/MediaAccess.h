@@ -68,7 +68,7 @@ class REP_CLASS(MediaAccess) {
 	MediaHandler *handler (void) const;
 
 	// get destination for file retrieval
-	const Pathname & getAttachPath (void) const;
+	const Pathname & getAttachPoint (void) const;
 
 	// attach media to directory
 	MediaResult attachTo (const Pathname & to);
@@ -80,6 +80,10 @@ class REP_CLASS(MediaAccess) {
 	// filename is interpreted relative to the attached url
 	// and a path prefix is preserved to destination
 	MediaResult provideFile (const Pathname & filename) const;
+
+	// find file denoted by pattern
+	// filename is interpreted relative to the attached url
+	virtual const Pathname * findFile (const Pathname & dirname, const string & pattern) const = 0;
 
 	// get file information
 	const std::list<std::string> * dirInfo (const Pathname & filename) const;

@@ -228,6 +228,26 @@ MediaAccess::provideFile (const Pathname & filename) const
 }
 
 
+// find file denoted by pattern
+//
+// filename is interpreted relative to the attached url
+// pattern might have a single trailing '*'
+//
+const Pathname *
+MediaAccess::findFile (const Pathname & dirname, const string & pattern) const
+{
+    if (_handler == 0)
+    {
+	return 0;
+    }
+    if (pattern == "")
+    {
+	return 0;
+    }
+    return _handler->findFile (dirname, pattern);
+}
+
+
 // get file information
 const std::list<std::string> *
 MediaAccess::dirInfo (const Pathname & filename) const
