@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Aug 10 13:24:00 CEST 2004 - lnussel@suse.de
+
+- online_update:
+  * only output log if in verbose mode for cron to not send useless mails
+  * show pre and post install messages when in verbose mode
+- support mls style delta rpms
+- YOU_USE_DELTAS may now have the value 'filesystem' which means only use
+  deltas that apply to installed files
+- 2.10.4
+
+-------------------------------------------------------------------
 Tue Jul 13 18:08:17 CEST 2004 - lnussel@suse.de
 
 - use boolean YOU_USE_DELTAS sysconfig variable
