@@ -38,6 +38,8 @@ class MediaCurl : public MediaHandler {
 
     MEDIA_HANDLER_API;
 
+    virtual PMError disconnectFrom();
+
   public:
 
     MediaCurl( const Url &      url_r,
@@ -55,9 +57,8 @@ class MediaCurl : public MediaHandler {
 
     static void setCallbacks( Callbacks *c ) { _callbacks = c; }
 
-    PMError disconnect();
-
   protected:
+
     static int progressCallback( void *clientp, double dltotal, double dlnow,
                                  double ultotal, double ulnow );
 
@@ -66,8 +67,8 @@ class MediaCurl : public MediaHandler {
 
   private:
     CURL *_curl;
-    char _curlError[ CURL_ERROR_SIZE ]; 
-    
+    char _curlError[ CURL_ERROR_SIZE ];
+
     std::string _userpwd;
     std::string _proxy;
     std::string _proxyuserpwd;
@@ -76,7 +77,7 @@ class MediaCurl : public MediaHandler {
     static Pathname _cookieFile;
 
     static Callbacks *_callbacks;
-    
+
     bool _connected;
 };
 

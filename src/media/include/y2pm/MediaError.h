@@ -50,6 +50,7 @@ class MediaError {
       // more specific errors start here:
       E_system,		// see errno
       E_not_a_directory,
+      E_not_a_file,
       E_no_access,
       E_no_permission,
       E_no_space,
@@ -72,6 +73,7 @@ class MediaError {
       E_proxyauth_failed,
       //mount
       E_mount_failed,
+      E_umount_failed,
       E_already_mounted,
       E_busy,
       //

@@ -94,18 +94,9 @@ PMError MediaNFS::attachTo(bool next)
         options = stringutil::join( optionList, "," );
     }
 
-    MIL << "try mount " << path
-	<< " to " << mountpoint
-	<< " filesystem " << filesystem << ": ";
-
     PMError ret = mount.mount(path,mountpoint,filesystem,options);
-    if(ret == Error::E_ok)
+    if(ret != Error::E_ok)
     {
-	MIL << "succeded" << endl;
-    }
-    else
-    {
-	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
 
@@ -123,18 +114,13 @@ PMError MediaNFS::attachTo(bool next)
 //
 PMError MediaNFS::releaseFrom( bool eject )
 {
-    MIL << "umount " << attachPoint();
-
     Mount mount;
     PMError ret;
 
     if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
     {
-	MIL << " failed: " <<  ret << endl;
 	return ret;
     }
-
-    MIL << " succeded" << endl;
 
     return ret;
 }
@@ -166,40 +152,4 @@ PMError MediaNFS::getDirInfo( std::list<std::string> & retlist,
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-#if 0
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaNFS::findFile
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//	find file denoted by pattern
-//	filename is interpreted relative to the attached url
-//
-//	pattern is a string with an optional trailing '*'
-//
 
-const Pathname *
-MediaNFS::findFile (const Pathname & dirname, const string & pattern) const
-{
-    return scanDirectory (dirname, pattern);
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaNFS::getInfo
-//	METHOD TYPE : const PathInfo *
-//
-//	DESCRIPTION :
-//	get file information
-
-const PathInfo *
-MediaNFS::fileInfo (const Pathname & filename) const
-{
-    // no retrieval needed, CD is mounted at destination
-    return new PathInfo (filename);
-}
-#endif

@@ -40,6 +40,12 @@ class MediaHandler;
 //	CLASS NAME : MediaAccess
 /**
  * @short Handle access to a medium
+ *
+ * The concrete @ref MediaHandler for a certain url is created
+ * on @ref open and deleted on @close.
+ *
+ * The inteface here basically checks whether the handler exists,
+ * then forwards the request to @ref MediaHandler.
  **/
 class MediaAccess : virtual public Rep {
 	REP_BODY(MediaAccess);
@@ -66,7 +72,7 @@ class MediaAccess : virtual public Rep {
        /**
         * constructor
         **/
-	MediaAccess (void);
+	MediaAccess();
 
 	/**
 	 * open url. If preferred_attach_point is given,
@@ -75,7 +81,7 @@ class MediaAccess : virtual public Rep {
 	 * <b>Caution:</b> The medium can choose a different attach point.
 	 * Only getAttachPoint() knows the real attach point.
 	 **/
-	PMError open (const Url& url, const Pathname & preferred_attach_point = "");
+	PMError open( const Url& url, const Pathname & preferred_attach_point = "" );
 
 	/**
 	 * True if media is open.
@@ -88,9 +94,14 @@ class MediaAccess : virtual public Rep {
         Url::Protocol protocol() const;
 
 	/**
+	 * Url if media is opened, otherwise empty.
+	 **/
+        Url url() const;
+
+	/**
 	 * close url
 	 **/
-	void close (void);
+	void close();
 
     public:
 
@@ -125,11 +136,6 @@ class MediaAccess : virtual public Rep {
 	 * Files provided will be available at 'localPath(filename)'.
 	 **/
 	Pathname localPath( const Pathname & pathname ) const;
-
-	/**
-	 * Deprecated. use localRoot()
-	 * const Pathname & getAttachPoint() const { return localRoot(); }
-	 **/
 
         /**
           Use concrete handler to disconnect the media.

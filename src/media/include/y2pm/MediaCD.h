@@ -46,6 +46,9 @@ class MediaCD : public MediaHandler {
     /** number of last successful mounted device in list */
     int _lastdev;
 
+    static bool openTray( const std::string & device_r );
+    static bool closeTray( const std::string & device_r );
+
   protected:
 
     MEDIA_HANDLER_API;
