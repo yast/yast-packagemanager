@@ -307,6 +307,8 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
       ISrcId nid = poolAdd( nsrc );
       if ( nid ) {
 	idlist_r.push_back( nid );
+      } else {
+         scan_err = Error::E_isrc_cache_duplicate;
       }
     }
   }
