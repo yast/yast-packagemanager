@@ -303,7 +303,7 @@ int main( int argc, char **argv )
   you.selectPatches( kinds );
 
   if ( debug || showPatches ) {
-    cout << "Patches:" << endl;
+    if ( verbose ) cout << "Patches:" << endl;
     you.showPatches( verbose );
   }
 
