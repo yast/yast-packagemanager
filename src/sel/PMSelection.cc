@@ -49,6 +49,9 @@ std::list<std::string>    PMSelection::description( const LangCode& locale ) con
 std::list<std::string>    PMSelection::insnotify  ( const LangCode& locale ) const { DP_ARG_GET( insnotify, locale ); }
 std::list<std::string>    PMSelection::delnotify  ( const LangCode& locale ) const { DP_ARG_GET( delnotify, locale ); }
 FSize                     PMSelection::size()            const { DP_GET( size ); }
+bool                      PMSelection::providesSources() const { DP_GET( providesSources ); }
+std::string               PMSelection::instSrcLablel()   const { DP_GET( instSrcLablel ); }
+Vendor                    PMSelection::instSrcVendor()   const { DP_GET( instSrcVendor ); }
 // PMSelection attributes
 std::string               PMSelection::category()        const { DP_GET( category ); }
 bool                      PMSelection::visible()         const { DP_GET( visible ); }

@@ -180,9 +180,13 @@ class PMYouPatch : virtual public Rep, public PMObject {
       ret.push_back( longDescription() );
       return ret;
     }
-    virtual std::list<std::string> insnotify()   const { return PMObject::insnotify(); }
-    virtual std::list<std::string> delnotify()   const { return PMObject::delnotify(); }
-    virtual FSize                  size()        const { return PMObject::size(); }
+    virtual std::list<std::string> insnotify()       const { return PMObject::insnotify(); }
+    virtual std::list<std::string> delnotify()       const { return PMObject::delnotify(); }
+    virtual FSize                  size()            const { return PMObject::size(); }
+    virtual bool                   providesSources() const { return PMObject::providesSources(); }
+
+    virtual std::string            instSrcLablel()   const { return PMObject::instSrcLablel(); }
+    virtual Vendor                 instSrcVendor()   const { return PMObject::instSrcVendor(); }
 
   private:
 

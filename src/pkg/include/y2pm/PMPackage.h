@@ -64,6 +64,9 @@ class PMPackage : virtual public Rep, public PMObject {
     virtual FSize                  size()            const;
     virtual bool                   providesSources() const;
 
+    virtual std::string            instSrcLablel()   const;
+    virtual Vendor                 instSrcVendor()   const;
+
     /**
      * PMPackage attributes passed off to PMPackageDataProvider
      * @see PMPackageDataProvider

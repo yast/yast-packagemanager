@@ -25,6 +25,7 @@
 #include <string>
 
 #include <y2util/FSize.h>
+#include <y2util/Vendor.h>
 #include <y2util/LangCode.h>
 #include <y2pm/PMSelectionDataProviderPtr.h>
 
@@ -57,7 +58,10 @@ class PMSelectionDataProvider : virtual public Rep {
     static std::list<std::string>    description( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
     static std::list<std::string>    insnotify  ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
     static std::list<std::string>    delnotify  ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
-    static FSize                     size()            { return size(); }
+    static FSize                     size()            { return FSize(0); }
+    static bool                      providesSources() { return false; }
+    static std::string               instSrcLablel()   { return std::string(); }
+    static Vendor                    instSrcVendor()   { return Vendor(); }
 
     // PMSelection attributes
     static std::string               category()        { return std::string(); }
@@ -98,6 +102,9 @@ class PMSelectionDataProvider : virtual public Rep {
     virtual std::list<std::string>    insnotify      ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return insnotify(); }
     virtual std::list<std::string>    delnotify      ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delnotify(); }
     virtual FSize                     size           ( const PMSelection & sel_r ) const { return size(); }
+    virtual bool                      providesSources( const PMSelection & sel_r ) const { return providesSources(); }
+    virtual std::string               instSrcLablel  ( const PMSelection & sel_r ) const { return instSrcLablel(); }
+    virtual Vendor                    instSrcVendor  ( const PMSelection & sel_r ) const { return instSrcVendor(); }
 
     // PMSelection attributes
     virtual std::string               category       ( const PMSelection & sel_r ) const { return category(); }

@@ -34,6 +34,8 @@
 
 #include <y2pm/InstSrcDescr.h>
 
+#include <Y2PM.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -77,6 +79,22 @@ InstSrcDescr::InstSrcDescr()
 //
 InstSrcDescr::~InstSrcDescr()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDescr::label
+//	METHOD TYPE : std::string
+//
+//	DESCRIPTION :
+//
+std::string InstSrcDescr::label() const
+{
+  LabelMap::const_iterator found = _content_labelmap.find( Y2PM::getPreferredLocale() );
+  if ( found != _content_labelmap.end() )
+    return found->second;
+  return content_label();
 }
 
 ///////////////////////////////////////////////////////////////////

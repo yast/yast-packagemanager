@@ -120,6 +120,31 @@ PMULPackageDataProvider::size ( const PMPackage & pkg_r ) const
     return _attr_SIZE;
 }
 
+bool
+PMULPackageDataProvider::providesSources( const PMPackage & pkg_r ) const
+{
+  if (_attr_SOURCELOC.empty() && (_fallback_provider != 0))
+    return _fallback_provider->providesSources(pkg_r);
+  return _attr_SOURCELOC.empty();
+}
+
+std::string
+PMULPackageDataProvider::instSrcLablel( const PMPackage & pkg_r ) const
+{
+  if ( _source && _source->descr() ) {
+    return _source->descr()->label();
+  }
+  return PMPackageDataProvider::instSrcLablel();
+}
+
+Vendor
+PMULPackageDataProvider::instSrcVendor( const PMPackage & pkg_r ) const
+{
+  if ( _source && _source->descr() ) {
+    return _source->descr()->content_vendor();
+  }
+  return PMPackageDataProvider::instSrcVendor();
+}
 
 PkgSplitSet
 PMULPackageDataProvider::splitprovides ( const PMPackage & pkg_r ) const
@@ -138,10 +163,7 @@ PMULPackageDataProvider::buildtime ( const PMPackage & pkg_r ) const
 Vendor
 PMULPackageDataProvider::vendor( const PMPackage & pkg_r ) const
 {
-  if ( _source && _source->descr() ) {
-    return _source->descr()->content_vendor();
-  }
-  return PMPackageDataProvider::vendor();
+  return instSrcVendor( pkg_r );
 }
 
 std::string

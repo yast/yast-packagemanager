@@ -39,11 +39,14 @@ IMPL_DERIVED_POINTER( PMObject, PMSolvable, PMSolvable );
 // PMObject attribute default values
 //
 ///////////////////////////////////////////////////////////////////
-std::string            PMObject::summary()     const { return std::string(); }
-std::list<std::string> PMObject::description() const { return std::list<std::string>(); }
-std::list<std::string> PMObject::insnotify()   const { return std::list<std::string>(); }
-std::list<std::string> PMObject::delnotify()   const { return std::list<std::string>(); }
-FSize                  PMObject::size()        const { return FSize(0); }
+std::string            PMObject::summary()         const { return std::string(); }
+std::list<std::string> PMObject::description()     const { return std::list<std::string>(); }
+std::list<std::string> PMObject::insnotify()       const { return std::list<std::string>(); }
+std::list<std::string> PMObject::delnotify()       const { return std::list<std::string>(); }
+FSize                  PMObject::size()            const { return FSize(0); }
+bool                   PMObject::providesSources() const { return false; }
+std::string            PMObject::instSrcLablel()   const { return std::string(); }
+Vendor                 PMObject::instSrcVendor()   const { return Vendor(); }
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////

@@ -58,6 +58,10 @@ class PMSelection : virtual public Rep, public PMObject {
     virtual std::list<std::string> insnotify()   const { return insnotify( LangCode("") ); }
     virtual std::list<std::string> delnotify()   const { return delnotify( LangCode("") ); }
     virtual FSize                  size()        const;
+    virtual bool                   providesSources() const;
+
+    virtual std::string            instSrcLablel()   const;
+    virtual Vendor                 instSrcVendor()   const;
 
     /**
      * PMSelection attributes passed off to PMSelectionDataProvider
