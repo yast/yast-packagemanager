@@ -95,7 +95,7 @@ public:
 	t->setEndTag( ContentETag );
 	t = createTag( ArchBTag, ARCH );
 	t->setEndTag( ArchETag );
-	createTag( ArchBTag, DEFBASE );
+	createTag( DefBaseTag, DEFBASE );
 	t = createTag( LabelMapBTag, LABELMAP);
 	t->setEndTag( LabelMapETag );
 	t = createTag( LinguasBTag, LINGUAS );
