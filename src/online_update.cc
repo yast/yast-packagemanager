@@ -10,10 +10,13 @@
 
 #include <y2util/Url.h>
 
+#include <Y2PM.h>
+
 #include <y2pm/PMError.h>
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMYouPatchInfo.h>
+#include <y2pm/PMYouPatchManager.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstYou.h>
 
@@ -29,6 +32,8 @@ void usage()
        << endl
        << "-g          Only download patches, don't install." << endl
        << "-i          Install downloaded patches, don't download." << endl
+       << endl
+       << "-k          Check for new updates." << endl
        << endl
        << "-c          Show configuration. Don't do anything." << endl
        << endl
@@ -72,12 +77,13 @@ int main( int argc, char **argv )
   bool debug = false;
   bool autoGet = false;
   bool autoInstall = false;
-  bool reload = true;
-  bool showConfig = true;
+  bool reload = false;
+  bool showConfig = false;
+  bool checkUpdates = false;
   
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "cgihdnsVDu:p:v:a:l:" );
+    c = getopt( argc, argv, "kcgihdnsVDu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
@@ -118,6 +124,9 @@ int main( int argc, char **argv )
         break;
       case 'l':
         langStr = optarg;
+        break;
+      case 'k':
+        checkUpdates = true;
         break;
       default:
         cerr << "Error parsing command line." << endl;
@@ -216,7 +225,7 @@ int main( int argc, char **argv )
         cerr << "Error while requesting servers: " << error << endl;
         exit( 1 );
       }
-      url = you.paths()->defaultServer();
+      url = you.paths()->currentServer();
     }
   }
   
@@ -234,6 +243,17 @@ int main( int argc, char **argv )
   if ( debug || showPatches ) {
     cout << "Patches:" << endl;
     you.showPatches( verbose );
+  }
+
+  if ( checkUpdates ) {
+    if ( Y2PM::youPatchManager().securityUpdatesAvailable() ) {
+      cout << "Security updates available." << endl;
+    } else if ( Y2PM::youPatchManager().updatesAvailable() ) {
+      cout << "Updates available." << endl;
+    } else {
+      cout << "No updates available." << endl;
+    }
+    return 0;
   }
 
   error = you.retrievePatches( reload, checkSig, autoInstall );

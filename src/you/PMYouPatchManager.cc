@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/InstYou.h>
 
@@ -98,4 +99,31 @@ InstYou &PMYouPatchManager::instYou()
 void PMYouPatchManager::updatePackageStates()
 {
   instYou().updatePackageStates();
+}
+
+bool PMYouPatchManager::updatesAvailable()
+{
+  PMSelectableVec::const_iterator it;
+  for( it = begin(); it != end(); ++it ) {
+    if ( (*it)->to_install() ) return true;
+  }
+  
+  return false;
+}
+
+bool PMYouPatchManager::securityUpdatesAvailable()
+{
+  PMSelectableVec::const_iterator it;
+  for( it = begin(); it != end(); ++it ) {
+    if ( (*it)->to_install() ) {
+      PMYouPatchPtr patch = (*it)->theObject();
+      if ( !patch ) {
+        INT << "patch has no object" << endl;
+      } else {
+        if ( patch->kind() == PMYouPatch::kind_security ) return true;
+      }
+    }
+  }
+  
+  return false;
 }

@@ -65,7 +65,18 @@ class PMYouPatchManager : public PMManager {
     /**
       Update states of packages according to states of patches.
     */
-    void updatePackageStates();  
+    void updatePackageStates();
+
+    /**
+      Return true, if updates are available which haven't been installed yet.
+    */
+    bool updatesAvailable();
+
+    /**
+      Return true, if security updates are available, which haven't been
+      installed yet. This implies updatesAvailable() to be true.
+    */
+    bool securityUpdatesAvailable();
 
   private:
     InstYou *_instYou;
