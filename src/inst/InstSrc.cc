@@ -642,7 +642,6 @@ std::string number2string (int nr)
 Pathname
 InstSrc::provideLocation (int medianr, const Pathname& location)
 {
-    MIL << "provideLocation (" << medianr << ", " << location << ")" << endl;
     PMError err;
 
     int reply = 0;
@@ -658,7 +657,6 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 	{
 	    _medianr = 0;
 
-	    MIL << "attach" << endl;
 	    err = _media->attach();
 
 	    if (err == MediaError::E_not_open)
@@ -689,11 +687,9 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 
 	Pathname mediafile ("/media."+number2string(medianr)+"/media");
 
-	MIL << "provide '" << mediafile << "'" << endl;
 	err = _media->provideFile (mediafile);
 	if (err == PMError::E_ok)
 	{
-	    MIL << "Media OK" << endl;
 	    _medianr = medianr;
 	    break;
 	}
@@ -729,7 +725,6 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 	    break;
 	}
 
-	MIL << "callback!" << endl;
 #warning TDB use gettext
 	reply = (*_mediachangefunc) (0, _medianr, medianr, _mediachangedata);
 	if (reply != 0)
@@ -748,7 +743,6 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 	 pathIt != _datasubdirs.end(); ++pathIt)
     {
 	filename = datadir + *pathIt + Pathname (location);
-	MIL << "provideFile (" << filename << ")" << endl;
 	err = _media->provideFile (filename);
 	if (err == PMError::E_ok)
 	    break;
@@ -758,7 +752,6 @@ InstSrc::provideLocation (int medianr, const Pathname& location)
 	ERR << "Media can't provide '" << location << "': " << err.errstr() << endl;
 	return Pathname();
     }
-    MIL << "OK at (" << filename << ")" << endl;
     return _media->localPath (filename);
 }
 
