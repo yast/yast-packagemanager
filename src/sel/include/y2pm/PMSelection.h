@@ -28,6 +28,7 @@
 #include <y2pm/PMSelectionPtr.h>
 
 #include <y2pm/PMObject.h>
+#include <y2pm/PkgArch.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -45,7 +46,10 @@ class PMSelection : virtual public Rep, public PMObject {
      **/
     enum PMSelectionAttribute {
       SEL_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
-      // ATTR_WAHTEVER_IS_FIRST = SEL_ATTR_BEGIN,
+      ATTR_CATEGORY = SEL_ATTR_BEGIN,
+      ATTR_VISIBLE,
+      ATTR_INSTALL,
+      ATTR_DELETE,
       // last entry:
       SEL_NUM_ATTRIBUTES
     };
@@ -85,6 +89,7 @@ class PMSelection : virtual public Rep, public PMObject {
 
     PMSelection( const PkgName &    name_r,
 		 const PkgEdition & edition_r,
+		 const PkgArch &    arch_r,
 		 PMSelectionDataProviderPtr dataProvider_r );
 
     virtual ~PMSelection();
