@@ -88,7 +88,7 @@ PMError InstYou::servers( list<Url> &servers )
   PMError error = _paths->requestServers();
   
   if ( error ) {
-    ERR << "Error fetching servers." << endl;
+    ERR << "Error fetching servers: " << error << endl;
     return error;
   }
   
