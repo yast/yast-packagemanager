@@ -44,12 +44,10 @@ using namespace std;
 //	DESCRIPTION :
 //
 MediaNFS::MediaNFS( const Url &      url_r,
-		    const Pathname & attach_point_hint_r,
-		    MediaAccess::MediaType type_r )
+		    const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
 		    false, // attachPoint_is_mediaroot
-		    false, // does_download
-		    type_r )
+		    false ) // does_download
 {
 }
 
@@ -74,7 +72,7 @@ PMError MediaNFS::attachTo(bool next)
 
     string path = _url.host();
     path += ':';
-    path += _url.path().asString();
+    path += _url.path();
 
     string options = _url.option("mountoptions");
     if(options.empty())

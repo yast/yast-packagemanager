@@ -46,34 +46,7 @@ IMPL_BASE_POINTER(MediaAccess);
 //
 ///////////////////////////////////////////////////////////////////
 
-inline MediaAccess::ProtocolTypes MediaAccess::_init_protocolTypes()
-{
-  ProtocolTypes ret;
-
-  ret.insert( ProtocolTypes::value_type( "cd",    CD ) );
-  ret.insert( ProtocolTypes::value_type( "dvd",   DVD ) );
-  ret.insert( ProtocolTypes::value_type( "nfs",   NFS ) );
-  ret.insert( ProtocolTypes::value_type( "dir",   DIR ) );
-  ret.insert( ProtocolTypes::value_type( "hd",    DISK ) );
-  ret.insert( ProtocolTypes::value_type( "ftp",   FTP ) );
-  ret.insert( ProtocolTypes::value_type( "smb",   SMB ) );
-  ret.insert( ProtocolTypes::value_type( "http",  HTTP ) );
-  ret.insert( ProtocolTypes::value_type( "https", HTTPS ) );
-
-  return ret;
-}
-
-const MediaAccess::ProtocolTypes MediaAccess::protocolTypes( _init_protocolTypes() );
-
 const Pathname MediaAccess::_noPath; // empty path
-
-MediaAccess::MediaType MediaAccess::typeOf( const Url & url_r )
-{
-  ProtocolTypes::const_iterator t = protocolTypes.find( stringutil::toLower( url_r.protocol() ) );
-  if ( t == protocolTypes.end() )
-    return NONE;
-  return t->second;
-}
 
 ///////////////////////////////////////////////////////////////////
 // constructor
@@ -97,38 +70,30 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
 
     close();
 
-    MediaType utype = typeOf( url );
-
-    switch ( utype ) {
-    case CD:
-      _handler = new MediaCD (url,preferred_attach_point,utype);
-      break;
-    case DVD:
-      _handler = new MediaCD (url,preferred_attach_point,utype);
-      break;
-    case NFS:
-      _handler = new MediaNFS (url,preferred_attach_point,utype);
-      break;
-    case DIR:
-      _handler = new MediaDIR (url,preferred_attach_point,utype);
-      break;
-    case DISK:
-       _handler = new MediaDISK (url,preferred_attach_point,utype);
-     break;
-    case FTP:
-      _handler = new MediaCurl (url,preferred_attach_point,utype);
-      break;
-    case SMB:
-      _handler = new MediaSMB (url,preferred_attach_point,utype);
-      break;
-    case HTTP:
-      _handler = new MediaCurl (url,preferred_attach_point,utype);
-      break;
-    case HTTPS:
-      _handler = new MediaCurl (url,preferred_attach_point,utype);
-      break;
-
-    case NONE:
+    switch ( url.protocol() ) {
+      case Url::cd:
+      case Url::dvd:
+        _handler = new MediaCD (url,preferred_attach_point);
+        break;
+      case Url::nfs:
+        _handler = new MediaNFS (url,preferred_attach_point);
+        break;
+      case Url::file:
+      case Url::dir:
+        _handler = new MediaDIR (url,preferred_attach_point);
+        break;
+      case Url::hd:
+        _handler = new MediaDISK (url,preferred_attach_point);
+        break;
+      case Url::smb:
+        _handler = new MediaSMB (url,preferred_attach_point);
+        break;
+      case Url::ftp:
+      case Url::http:
+      case Url::https:
+        _handler = new MediaCurl (url,preferred_attach_point);
+        break;
+      case Url::unknown:
 	return Error::E_bad_media_type;
 	break;
     }
@@ -142,13 +107,13 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
 }
 
 // Type of media if open, otherwise NONE.
-MediaAccess::MediaType
-MediaAccess::type() const
+Url::Protocol
+MediaAccess::protocol() const
 {
   if ( !_handler )
-    return NONE;
+    return Url::unknown;
 
-  return _handler->type();
+  return _handler->protocol();
 }
 
 // close handler
@@ -359,23 +324,7 @@ MediaAccess::dumpOn( std::ostream & str ) const
   if ( ! isOpen() )
     return str << "MediaAccess( closed )";
 
-  const char * tstr = "???"; // default for unknown types
-  switch ( _handler->type() ) {
-  case CD:    tstr = "CD";    break;
-  case DVD:   tstr = "DVD";   break;
-  case NFS:   tstr = "NFS";   break;
-  case DIR:   tstr = "DIR";   break;
-  case DISK:  tstr = "DISK";  break;
-  case FTP:   tstr = "FTP";   break;
-  case SMB:   tstr = "SMB";   break;
-  case HTTP:  tstr = "HTTP";  break;
-  case HTTPS: tstr = "HTTPS"; break;
-  ///////////////////////////////////////////////////////////////////
-  // no default: let compiler warn '... not handled in switch'
-  ///////////////////////////////////////////////////////////////////
-  case NONE:
-    break;
-  }
+  string tstr = Url::protocolToString( _handler->protocol() );
   str << tstr << "(";
   _handler->dumpOn( str );
   return str << ")";

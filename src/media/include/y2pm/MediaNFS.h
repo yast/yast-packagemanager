@@ -39,8 +39,7 @@ class MediaNFS : public MediaHandler {
   public:
 
     MediaNFS( const Url&       url_r,
-	      const Pathname & attach_point_hint_r,
-	      MediaAccess::MediaType type_r );
+	      const Pathname & attach_point_hint_r );
 
     virtual ~MediaNFS() { release(); }
 };

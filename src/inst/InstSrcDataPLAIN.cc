@@ -322,10 +322,10 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
   if ( !cpath.isFile() ) {
 
-    switch ( media->type() ) {
-    case MediaAccess::FTP:
-    case MediaAccess::HTTP:
-    case MediaAccess::HTTPS:
+    switch ( media->protocol() ) {
+    case Url::ftp:
+    case Url::http:
+    case Url::https:
       ERR << "FTP/HTTP package scan supported. Create IS_PLAINcache!" << endl;
       return MediaError::E_not_supported_by_media;
     default:

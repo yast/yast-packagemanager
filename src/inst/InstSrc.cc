@@ -780,7 +780,7 @@ InstSrc::provideMedia (int medianr) const
 	if (_media->attach (true) == PMError::E_ok)	// retry next device of media
 	    continue;
 
-	std::string path = url.path().asString();
+	std::string path = url.path();
 
 	if (!triedReOpen)
 	{
@@ -975,17 +975,17 @@ InstSrc::provideDir (int medianr, const Pathname& path, Pathname& dir_r) const
 bool
 InstSrc::isRemote () const
 {
-  MediaAccess::MediaType mtype = _media->type();
+  Url::Protocol protocol = _media->protocol();
 
-  if ( mtype == MediaAccess::NONE && _descr ) {
+  if ( protocol == Url::unknown && _descr ) {
     // not yet attached. check descr url
-    mtype = MediaAccess::typeOf( _descr->url() );
+    protocol = _descr->url().protocol();
   }
 
-  switch ( mtype ) {
-  case MediaAccess::FTP:
-  case MediaAccess::HTTP:
-  case MediaAccess::HTTPS:
+  switch ( protocol ) {
+  case Url::ftp:
+  case Url::http:
+  case Url::https:
     return true;
 
   default:
@@ -1044,8 +1044,8 @@ InstSrc::releaseMedia( bool if_removable_r )
     return Error::E_ok;
 
   if ( if_removable_r
-       && _media->type() != MediaAccess::CD
-       && _media->type() != MediaAccess::DVD )
+       && _media->protocol() != Url::cd
+       && _media->protocol() != Url::dvd )
     return Error::E_ok;
 
   return _media->release();

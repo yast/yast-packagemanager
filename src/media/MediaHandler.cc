@@ -43,13 +43,11 @@ using namespace std;
 MediaHandler::MediaHandler ( const Url &      url_r,
 			     const Pathname & attach_point_r,
 			     const bool       attachPoint_is_mediaroot_r,
-			     const bool       does_download_r,
-			     MediaAccess::MediaType type_r )
+			     const bool       does_download_r )
     : _attachPoint( attach_point_r )
     , _tmp_attachPoint( false )
     , _attachPoint_is_mediaroot( attachPoint_is_mediaroot_r )
     , _does_download( does_download_r )
-    , _type( type_r )
     , _isAttached( false )
     , _url( url_r )
 {

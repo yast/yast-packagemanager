@@ -51,18 +51,7 @@ class MediaAccess : virtual public Rep {
 	 **/
         typedef MediaError Error;
 
-	enum MediaType {
-	    NONE = 0,
-	    CD, DVD, NFS, DIR, DISK, FTP, SMB, HTTP, HTTPS
-	};
-
     private:
-
-        typedef std::map<std::string,MediaType> ProtocolTypes;
-
-	static ProtocolTypes _init_protocolTypes();
-
-	static const ProtocolTypes protocolTypes;
 
 	static const Pathname _noPath;
 
@@ -94,14 +83,9 @@ class MediaAccess : virtual public Rep {
 	bool isOpen() const { return( _handler != 0 ); }
 
 	/**
-	 * Type of media if open, otherwise NONE.
+	 * Used Protocol if media is opened, otherwise 'unknown'.
 	 **/
-        MediaType type() const;
-
-	/**
-	 * Type of media to expect if you'd open url.
-	 **/
-	static MediaType typeOf( const Url & url_r );
+        Url::Protocol protocol() const;
 
 	/**
 	 * close url
