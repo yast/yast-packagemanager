@@ -16,6 +16,7 @@
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMSelectablePtr.h>
+#include <y2pm/PkgDu.h>
 #include <iostream>
 #include <algorithm>
 
@@ -178,7 +179,8 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     cout << "Location: '" << p->location() << "'" << endl;
     cout << "MediaNr: " << p->medianr () << endl;
     cout << "Keywords: " << strlist2string(p->keywords()) << endl;
-    cout << "DU: " << strlist2string(p->du()) << endl;
+    PkgDu dudata;
+    cout << "DU: " << p->du(dudata) << endl;
     cout << "========" << endl;
     return;
 }

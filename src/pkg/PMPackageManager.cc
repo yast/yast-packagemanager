@@ -308,43 +308,96 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 //
 const PkgDuMaster & PMPackageManager::updateDu()
 {
-  bool count_mp = _du_master.resetStats();
+  if ( _du_master.resetStats() ) {
+    // There's at least one mountpoint
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+      const constPMSelectablePtr & sel( *it );
 
-  // currently installed packages do not have du info ;(
-  //
-  // new install: add candidate
-  // replace:     ---
-  // delete:      sub candiadte (if one)
-  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
-    const constPMSelectablePtr & sel( *it );
-    if ( sel->to_modify() ) {
+      if ( ! sel->to_modify() )
+	continue; // package unchanged
 
       if ( sel->to_install() ) {
 
-	_du_master.add( sel->candidateObj()->size() );
-	if ( sel->has_installed() ) {
-	  _du_master.sub( sel->installedObj()->size() );
-	  // replace:     ---
-	} else {
-	  // new install: add candidate
-	  if ( count_mp )
-	    PMPackagePtr( sel->candidateObj() )->du_add( _du_master );
-	}
+	PMPackagePtr( sel->candidateObj() )->du_add( _du_master );
+	if ( sel->has_installed() )
+	  PMPackagePtr( sel->installedObj() )->du_sub( _du_master );
 
-      } else {
+      } else { // to delete
 
-	// to delete
-	_du_master.sub( sel->installedObj()->size() );
-	// delete:      sub candiadte (if one)
-	if ( count_mp && sel->has_candidate() ) {
-	  PMPackagePtr( sel->candidateObj() )->du_sub( _du_master );
-	}
-
+	PMPackagePtr( sel->installedObj() )->du_sub( _du_master );
       }
 
     }
+  } else {
+    WAR << "Got no mountpoint info" << endl;
   }
 
+  //S__ << _du_master << endl;
   return _du_master;
 }
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::countDuInstalled
+//	METHOD TYPE : PkgDuMaster &
+//
+//	DESCRIPTION :
+//
+PkgDuMaster & PMPackageManager::countDuInstalled( PkgDuMaster & dudata ) const
+{
+  if ( dudata.resetStats() ) {
+    // There's at least one mountpoint
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+      const constPMSelectablePtr & sel( *it );
+      if ( sel->has_installed() )
+	PMPackagePtr( sel->installedObj() )->du_add( dudata );
+    }
+  }
+  return dudata;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::countDuCandidates
+//	METHOD TYPE : PkgDuMaster &
+//
+//	DESCRIPTION :
+//
+PkgDuMaster & PMPackageManager::countDuCandidates( PkgDuMaster & dudata ) const
+{
+  if ( dudata.resetStats() ) {
+    // There's at least one mountpoint
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+      const constPMSelectablePtr & sel( *it );
+      if ( sel->has_candidate() )
+	PMPackagePtr( sel->candidateObj() )->du_add( dudata );
+    }
+  }
+  return dudata;
+}
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::countDuSelected
+//	METHOD TYPE : PkgDuMaster &
+//
+//	DESCRIPTION :
+//
+PkgDuMaster & PMPackageManager::countDuSelected( PkgDuMaster & dudata ) const
+{
+  if ( dudata.resetStats() ) {
+    // There's at least one mountpoint
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+      const constPMSelectablePtr & sel( *it );
+      if ( sel->to_install() )
+	PMPackagePtr( sel->candidateObj() )->du_add( dudata );
+    }
+  }
+  return dudata;
+}
+
+
 

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 30 19:20:01 CET 2003 - ma@suse.de
+
+- Overworked disk usage calculation.
+- 2.7.6
+
+-------------------------------------------------------------------
 Tue Jan 28 13:20:53 CET 2003 - lnussel@suse.de
 
 - better handling of obsoleted packages, problems are now reported in

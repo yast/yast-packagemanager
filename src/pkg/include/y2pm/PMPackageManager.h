@@ -171,6 +171,22 @@ class PMPackageManager : public PMManager {
      **/
     const PkgDuMaster & updateDu();
 
+
+    /**
+     * Debug: Sum up diskusage of all installed packages to dudata.
+     **/
+    PkgDuMaster & countDuInstalled( PkgDuMaster & dudata ) const;
+
+    /**
+     * Debug: Sum up diskusage of all candidate packages to dudata.
+     **/
+    PkgDuMaster & countDuCandidates( PkgDuMaster & dudata ) const;
+
+    /**
+     * Debug: Sum up diskusage of all candidate packages selected for install to dudata.
+     **/
+    PkgDuMaster & countDuSelected( PkgDuMaster & dudata ) const;
+
 };
 
 ///////////////////////////////////////////////////////////////////

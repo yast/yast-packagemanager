@@ -141,7 +141,10 @@ class RpmLibHeader : virtual public Rep {
 
     PkgChangelog tag_changelog() const;
 
-    void tag_du( PkgDu & dudata_r ) const;
+    /**
+     * Returns reference to arg <code>dudata_r</code>.
+     **/
+    PkgDu & tag_du( PkgDu & dudata_r ) const;
 
   public:
 

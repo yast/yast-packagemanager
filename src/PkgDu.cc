@@ -184,12 +184,12 @@ bool PkgDuMaster::MountPoint::assignData( const MountPoint & rhs ) const
 ostream & operator<<( ostream & str, const PkgDuMaster::MountPoint & obj )
 {
   str
-    << " T:" << obj.total()            .form( FSize::K, 10 )
-    << " U:" << obj.initial_used()     .form( FSize::K, 10 )
-    << " A:" << obj.initial_available().form( FSize::K, 10 )
-    << " p:" << obj.pkg_diff()         .form( FSize::K, 10 )
-    << " u:" << obj.pkg_used()         .form( FSize::K, 10 )
-    << " " << obj._mountpoint;
+    << "| T:" << obj.total()            .form( FSize::K, 10 )
+    << "| U:" << obj.initial_used()     .form( FSize::K, 10 )
+    << "| A:" << obj.initial_available().form( FSize::K, 10 )
+    << "| p:" << obj.pkg_diff()         .form( FSize::K, 10 )
+    << "| u:" << obj.pkg_used()         .form( FSize::K, 10 )
+    << "| " << obj._mountpoint;
   return str;
 }
 
@@ -210,7 +210,6 @@ unsigned PkgDuMaster::_counter = 0;
 //	DESCRIPTION :
 //
 PkgDuMaster::PkgDuMaster()
-    : _overall( "overall", 0 )
 {
   newcount();
 }
@@ -240,6 +239,7 @@ void PkgDuMaster::add( FSize * data_r )
 {
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it, ++data_r ) {
     it->_pkgusage += *data_r;
+    _pkg_diff += *data_r;
   }
 }
 
@@ -256,6 +256,7 @@ void PkgDuMaster::sub( FSize * data_r )
 {
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it, ++data_r ) {
     it->_pkgusage -= *data_r;
+    _pkg_diff -= *data_r;
   }
 }
 
@@ -269,11 +270,10 @@ void PkgDuMaster::sub( FSize * data_r )
 //
 unsigned PkgDuMaster::resetStats()
 {
-  _overall._pkgusage = 0;
-
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it ) {
     it->_pkgusage = 0;
   }
+  _pkg_diff = 0;
   return _mountpoints.size();
 }
 
@@ -305,14 +305,9 @@ void PkgDuMaster::setMountPoints( const set<MountPoint> & mountpoints_r )
     newcount();
   }
 
-  // init overall stats
-  _overall._total    = 0;
-  _overall._used     = 0;
-  _overall._pkgusage = 0;
+  _pkg_diff = 0;
   for ( set<MountPoint>::iterator it = _mountpoints.begin(); it != _mountpoints.end(); ++it ) {
-    _overall._total    += it->_total;
-    _overall._used     += it->_used;
-    _overall._pkgusage += it->_pkgusage;
+    _pkg_diff += it->_pkgusage;
   }
 }
 
@@ -344,8 +339,6 @@ ostream & operator<<( ostream & str, const PkgDuMaster & obj )
 {
   str << "--[" << obj._count <<  "]----------------------------" << endl;
   str << obj._mountpoints;
-  str << "-----" << endl;
-  str << obj._overall << endl;
   str << "---------------------------------" << endl;
   return str;
 }
