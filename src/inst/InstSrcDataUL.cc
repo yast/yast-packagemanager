@@ -349,6 +349,22 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
     if (pkgerr) return pkgerr;
     if (selerr) return selerr;
 
+    //-----------------------------------------------------
+    // slideshow via ftp/http hack
+    //-----------------------------------------------------
+    if ( ! Y2PM::runningFromSystem() && source->isRemote() ) {
+      if ( source->descr()->hasFlag( "no_remote_slides" ) ) {
+	MIL << "'no_remote_slides' flag is set. No slide show data download." << endl;
+      } else {
+	MIL << "Downloading slide show data..." << endl;
+	Pathname slide_dir( descr_dir_r.dirname() + "slide" );
+	PMError err = media_r->provideDir( slide_dir );
+	DBG << "provideDir(" << slide_dir << ") " << err << endl;
+	// shot to nothing: ignore any error
+      }
+    }
+    //-----------------------------------------------------
+
     if ( late_cache ) {
       PathInfo srcdir( source->media()->localPath( source->descr()->descrdir() ) );
       if ( !srcdir.isDir() ) {
