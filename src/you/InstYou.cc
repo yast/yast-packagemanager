@@ -789,8 +789,6 @@ PMError InstYou::progress( int i )
     ret = _callbacks->progress( i );
   }
 
-  INT << "ret: " << ret << endl;
-
   if ( ret ) return PMError();
   else return YouError::E_user_abort;
 }
@@ -802,8 +800,6 @@ PMError InstYou::patchProgress( int i, const string &pkg )
   if ( _callbacks ) {
     ret = _callbacks->patchProgress( i, pkg );
   }
-
-  INT << "ret: " << ret << endl;
 
   if ( ret ) return PMError();
   else return YouError::E_user_abort;
