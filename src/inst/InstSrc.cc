@@ -818,6 +818,24 @@ InstSrc::provideFile (int medianr, const Pathname& path, Pathname& file_r) const
 /******************************************************************
 **
 **
+**	FUNCTION NAME : isRemote
+**	FUNCTION TYPE : bool
+**
+**	DESCRIPTION : if the media needs some time to provide a package
+*/
+bool
+InstSrc::isRemote ()
+{
+    return (_media->type() == MediaAccess::FTP)
+	   || (_media->type() == MediaAccess::HTTP)
+	   || (_media->type() == MediaAccess::HTTPS);
+
+}
+
+
+/******************************************************************
+**
+**
 **	FUNCTION NAME : operator<<
 **	FUNCTION TYPE : std::ostream &
 **

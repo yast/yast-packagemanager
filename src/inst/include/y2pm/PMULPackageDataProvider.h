@@ -159,6 +159,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const;
 	virtual std::list<std::string> du	   ( const PMPackage & pkg_r ) const;
 
+	virtual bool			isRemote   ( const PMPackage & pkg_r ) const;
 	// physical access to the rpm file.
 	virtual PMError providePkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const;
 };
