@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Mar 10 18:22:30 CET 2003 - ma@suse.de
+
+- Let solver always tag auto states triggered by packages in goodlist.
+  (e.g. auto delete for obsoleted packages.
+
+-------------------------------------------------------------------
 Mon Mar 10 16:08:59 CET 2003 - ma@suse.de
 
 - On update delete packages replaced by unique provides.
