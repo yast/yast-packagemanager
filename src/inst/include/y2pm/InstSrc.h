@@ -72,14 +72,16 @@ class InstSrc: virtual public Rep {
     };
 
     /**
-     * Convert Type to string
+     * Convert Type to string (on save to file).
+     * <b>Keep it compatible with fromString.</b>
      **/
     static std::string toString( const Type t );
 
     /**
-     * Restore Type from string
+     * Restore Type from string (on restore from file).
+     * <b>Keep it compatible with toString.</b>
      **/
-    static Type fromString( std::string & s );
+    static Type fromString( std::string s );
 
     /**
      * Output Type as string

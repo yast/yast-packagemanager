@@ -27,11 +27,11 @@ class PkgRelation {
 	bool matches( const PMSolvablePtr pkg ) const;
 	bool matches( const PkgRelation& rel ) const;
 
-	bool operator==( const PkgRelation& r2 ) {
+	bool operator==( const PkgRelation& r2 ) const {
 		return( _name == r2._name && _op == r2._op &&
 				(_op == NONE || _edition == r2._edition) );
 	}
-	bool operator!=( const PkgRelation& r2 ) { return !operator==(r2); }
+	bool operator!=( const PkgRelation& r2 ) const { return !operator==(r2); }
 
 	/**
 	 * Convert this into a human readable string.
@@ -52,6 +52,20 @@ class PkgRelation {
 	 * Write out asString()
 	 **/
 	friend std::ostream& operator<<(std::ostream&, const PkgRelation&);
+
+      public:
+
+	/**
+	 * Convert PkgRelation to string (on save to file).
+	 * <b>Keep it compatible with fromString.</b>
+	 **/
+	static std::string toString( const PkgRelation & t );
+
+	/**
+	 * Restore PkgRelation from string (on restore from file).
+	 * <b>Keep it compatible with toString.</b>
+	 **/
+	static PkgRelation fromString( std::string s );
 };
 
 #endif  /* _PkgRelation_h */

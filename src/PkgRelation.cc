@@ -1,5 +1,10 @@
 #include <cstdio>
 #include <cstring>
+#include <iostream>
+
+#include <y2util/Y2SLog.h>
+#include <y2util/stringutil.h>
+
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PMSolvable.h>
 
@@ -73,17 +78,95 @@ bool PkgRelation::matches( const PkgRelation& rel2 ) const
 //
 string PkgRelation::asString() const
 {
-  string ret( _name );
-  switch( _op ) {
-  case LT: ret += " < ";  break;
-  case LE: ret += " <= "; break;
-  case EQ: ret += " = ";  break;
-  case GE: ret += " >= "; break;
-  case GT: ret += " > ";  break;
-  case NE: ret += " != "; break;
-  case NONE: return ret;
+  // if you don't like implement your own format here,
+  // but don't change toString().
+  return toString( *this );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgRelation::toString
+//	METHOD TYPE : string
+//
+//	DESCRIPTION : name[ op edition]
+//
+string PkgRelation::toString( const PkgRelation & t )
+{
+  const char * op = "";
+  switch( t._op ) {
+  case LT: op = "<";  break;
+  case GT: op = ">";  break;
+  case EQ: op = "=";  break;
+  case LE: op = "<="; break;
+  case GE: op = ">="; break;
+  case NE: op = "!="; break;
+  case NONE: return t._name; break;
   }
-  return( ret + _edition.as_string() );
+
+  return stringutil::form( "%s %s %s",
+			   t._name->c_str(),
+			   op,
+			   PkgEdition::toString( t._edition ).c_str() );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgRelation::fromString
+//	METHOD TYPE : PkgRelation
+//
+//	DESCRIPTION : name[ op edition]
+//
+inline rel_op str2op( const string & t ) {
+  switch ( t.size() ) {
+  case 1:
+    switch ( t[0] ) {
+    case '<': return LT;
+    case '>': return GT;
+    case '=': return EQ;
+    }
+    break;
+  case 2:
+    if ( t[1] == '=' ) {
+      switch ( t[0] ) {
+      case '<': return LE;
+      case '>': return GE;
+      case '=': return EQ;
+      case '!': return NE;
+      }
+    }
+    break;
+  }
+  return NONE;
+}
+
+PkgRelation PkgRelation::fromString( string s )
+{
+  vector<string> words;
+  unsigned num = stringutil::split( s, words );
+
+  string n;
+  string o;
+  string e;
+
+  switch ( num ) {
+
+  case 1:
+    return PkgRelation( PkgName(words[0]), NONE, PkgEdition() );
+    break;
+
+  case 3:
+    {
+      rel_op op = str2op( words[1] );
+      if ( op != NONE )
+	return PkgRelation( PkgName(words[0]), op, PkgEdition::fromString(words[2]) );
+    }
+    break;
+  }
+
+  ERR << "Error parsing PkgRelation from '" << s << "'" << endl;
+  return PkgRelation( PkgName(), NONE, PkgEdition() );
 }
 
 /******************************************************************

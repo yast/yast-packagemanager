@@ -48,6 +48,7 @@ class InstSrcManager {
 
     static std::string _cache_root_dir;
 
+    static const Pa;
 
   public:
 

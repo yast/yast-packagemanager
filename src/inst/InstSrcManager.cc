@@ -27,6 +27,14 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
+
+#warning FIX TMPDIR( "/tmp/test_test" )
+std::string InstSrcManager::_cache_root_dir( "/tmp/test_test" );
+
+
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcManager::InstSrcManager
@@ -63,7 +71,6 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   idlist_r.clear();
   PMError err;
 
-#warning FIX TMPDIR( "/tmp/test_test" )
   Pathname tmpDir( "/tmp/test_test" );
 
   MIL << "scanMedia " << mediaurl_r << endl;

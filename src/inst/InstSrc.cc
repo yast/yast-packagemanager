@@ -485,7 +485,7 @@ string InstSrc::toString( const Type t )
 //
 //	DESCRIPTION :
 //
-InstSrc::Type InstSrc::fromString( std::string & s )
+InstSrc::Type InstSrc::fromString( std::string s )
 {
   for ( Type ctype = Type(1); ctype < T_AUTODETECT; ctype = Type(ctype+1) ) {
     if ( s == toString( ctype ) )

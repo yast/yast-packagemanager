@@ -2,6 +2,9 @@
 #include <cstring>
 #include <alloca.h>
 #include <cctype>
+
+#include <y2util/stringutil.h>
+
 #include <y2pm/PkgEdition.h>
 
 using namespace std;
@@ -23,7 +26,7 @@ bool PkgEdition::compare( rel_op op, const PkgEdition& e2 ) const
 		return true;
 	if (type == UNSPEC || e2.type == UNSPEC)
 		return false;
-	
+
 	// if both editions are MAXIMUM, they're equal.
 	// if only one is MAXIMUM, that one is greater
 	if (type == MAXIMUM && e2.type == MAXIMUM)
@@ -126,7 +129,7 @@ int PkgEdition::rpmvercmp(const char * a, const char * b) const
     char * one, * two;
     int rc;
     int isnum;
-    
+
     if (!strcmp(a, b)) return 0;
 
     str1 = (char *)alloca(strlen(a) + 1);
@@ -154,7 +157,7 @@ int PkgEdition::rpmvercmp(const char * a, const char * b) const
 	    while (*str2 && isalpha(*str2)) str2++;
 	    isnum = 0;
 	}
-		
+
 	oldch1 = *str1;
 	*str1 = '\0';
 	oldch2 = *str2;
@@ -167,7 +170,7 @@ int PkgEdition::rpmvercmp(const char * a, const char * b) const
 	    num1 = atoi(one);
 	    num2 = atoi(two);
 
-	    if (num1 < num2) 
+	    if (num1 < num2)
 		return -1;
 	    else if (num1 > num2)
 		return 1;
@@ -175,7 +178,7 @@ int PkgEdition::rpmvercmp(const char * a, const char * b) const
 	    rc = strcmp(one, two);
 	    if (rc) return rc;
 	}
-	
+
 	*str1 = oldch1;
 	one = str1;
 	*str2 = oldch2;
@@ -189,32 +192,83 @@ int PkgEdition::rpmvercmp(const char * a, const char * b) const
 
 string PkgEdition::as_string() const
 {
-	string result;
-
-	if (type == UNSPEC)
-		return string("-*-UNSPEC-*-");
-	if (type == MAXIMUM)
-		return string("-*-MAXIMUM-*-");
-	if (type == EPOCH) {
-		char buf[40];
-		sprintf( buf, "%d", _epoch );
-		result.append( buf );
-		result.append( ":" );
-	}
-	result.append( _version );
-	if (_release) {
-		result.append( "-" );
-		result.append( _release );
-	}
-	
-	return result;
+  // if you don't like implement your own format here,
+  // but don't change toString().
+  return toString( *this );
 }
 
 ostream& operator<<( ostream& os, const PkgEdition& e )
 {
-	os << e.as_string();
-	return os;
+  os << e.as_string();
+  return os;
 }
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgEdition::toString
+//	METHOD TYPE : string
+//
+//	DESCRIPTION : [epoch:]version-release | EDITION-UNSPEC | EDITION-MAXIMUM
+//                    (exactly one '-' in string)
+//
+string PkgEdition::toString( const PkgEdition & t )
+{
+  if ( t.type == UNSPEC )
+    return _str_UNSPEC;
+  if ( t.type == MAXIMUM )
+    return _str_MAXIMUM;
+
+  string ret;
+
+  if ( t.type == EPOCH ) {
+    ret += stringutil::form( "%d:", t._epoch );
+  }
+
+  ret += stringutil::form( "%s-%s",
+			   ( t._version ? t._version : "" ),
+			   ( t._release ? t._release : "" ) );
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgEdition::fromString
+//	METHOD TYPE : PkgEdition
+//
+//	DESCRIPTION : [epoch:]version-release | EDITION-UNSPEC | EDITION-MAXIMUM
+//                    (exactly one '-' in string)
+//
+PkgEdition PkgEdition::fromString( string s )
+{
+  if ( s == _str_UNSPEC ) {
+    return PkgEdition( UNSPEC );
+  }
+  if ( s == _str_MAXIMUM ) {
+    return PkgEdition( MAXIMUM );
+  }
+
+  string::size_type e_sep = s.find( ':' );
+  string::size_type r_sep = s.rfind( '-' );
+
+  string r;
+  if ( r_sep != string::npos ) {
+    r = s.substr( r_sep+1 );
+    s.erase( r_sep );
+  }
+
+  if ( e_sep != string::npos ) {
+    string v = s.substr( e_sep+1 );;
+    s.erase( e_sep );
+    int e = atoi( s.c_str() );
+    return PkgEdition( e, v.c_str(), r.c_str() );
+  }
+
+  return PkgEdition( s.c_str(), r.c_str() );
+}
+
 
 // Local Variables:
 // tab-width: 4
