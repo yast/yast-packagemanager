@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Feb 24 11:08:27 CET 2004 - cschum@suse.de
+
+- YOU: Only try to retrieve packages with the architecture
+  specified in the patch file. Don't iterate through all compatible
+  architectures anymore.
+
+-------------------------------------------------------------------
 Sat Feb 21 02:39:02 CET 2004 - ma@suse.de
 
 - Reimplemented counted pointer classes
