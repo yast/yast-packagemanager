@@ -70,7 +70,13 @@ At toplevel of a media, a directory<br>
 	/media.1/
 </pre>
 <br>
- must exists.<br>
+ should exists.<br>
+<hr>
+If it does not exist, the presence of the correct media can not
+be verified. This might be convenient for an on-line media which
+just provides a set of packages.<br>
+In this case, no verfication takes place.
+<hr>
 The numeric extension depends on the media number in case of
 splitted medias. The first media has <tt>.1</tt>, the second <tt>.2</tt>,
 and so on.<br>
@@ -147,6 +153,10 @@ linux#
 <H2>The <tt>products</tt> file</H2>
 This file contains the directory name for each product contained on
 the media.<br>
+<hr>
+If this file is not present, a single product on the meida's root directory
+is assumed.
+<hr>
 <br>
 It is an ASCII file with one line per product.<BR>
 <br>
@@ -195,6 +205,16 @@ other products have their own sub-directories.
 This file resides inside the product directory as specified by the <tt>products</tt>
 file on the media. It contains all product-specfic data to describe
 and identify the contents of the product.
+<hr>
+If there was no <tt>products</tt> file, the product directory defaults to the
+root directory on the media.
+<hr>
+<p></p>
+<hr>
+The <tt>content</tt> file might be missing if the media does not contain
+a product (but just a set of packages).<br>
+In this case, the user has to 'blindly accept' the media.<br>
+<hr>
 </UL>
 <BR>
 Proposal:<BR>
@@ -300,6 +320,9 @@ linux#
 This is basically a cache file for package data needed for
 package selection and dependency resolution.<br>
 See current <A HREF="package-descr.html">here</A> for the syntax.<br>
+<hr>
+The <tt>packages</tt> file <b>must exist</b> in order to enable a media. 
+<hr>
 <br>
 The package file contains pure package / rpm data and no user
 readable string (i.e. translations).
@@ -309,6 +332,10 @@ For each language defined in <tt>content:LINGUAS</tt> a <tt>packages.<i>LANG</i>
 file exists in the <tt>content:DESCRDIR</tt> directory.<br>
 This file contains translated strings (i.e. package summary, description, etc.)
 to be viewed by the user.<br>
+<hr>
+The <tt>packages.<i>LANG</i></tt> file might be ommitted. The package summary
+defaults to <tt>name-version-release.architecture</tt> in this case.
+<hr>
 <br>
 See <A HREF=lang-descr.html">here</A> for a format definition of such a file.<br>
 <br>
@@ -328,6 +355,10 @@ See <A HREF="du-descr.html">here</A> for a format definition of this file.<br>
 (<small>N.B. The <tt>.DU</tt> suffix does not interfere with the <tt><i>.LANG</i></tt>
 suffix since the language suffix starts with lower case letters.</small>)
 <br>
+<hr>
+The <tt>packages.DU</tt> file might be ommitted. No size estimations
+can be given in this case.
+<hr>
 
 <H3>Example</H3>
 <pre>
@@ -352,9 +383,14 @@ linux#
 <H2>The <tt>selections</tt> file</H2>
 This file contains a list of selections file names (one per line,
 possibly with directory pathes,
-relative to the <tt>DESCRDIR/<tt><i>arch</i> directory).<br>
+relative to the <tt>DESCRDIR/<tt> directory).<br>
 
-See current <tt>*.sel</tt> for the syntax. (To be defined).
+See current <tt>*.sel</tt> for the syntax. (To be defined).<br>
+
+<hr>
+The <tt>selections</tt> file might be ommitted. YaST tries to access
+<tt>*.sel</tt> files in the <tt>DESCRDIR/<tt> directory in this case.
+<hr>
 
 <H3>Example</H3>
 <pre>
