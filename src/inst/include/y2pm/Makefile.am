@@ -16,7 +16,7 @@ pkginclude_HEADERS =	\
 	InstTargetError.h			\
 	InstTarget.h	InstTargetPtr.h		\
 	InstSrcTags.h				\
-	PMPackageDataProvider_UL.h
+	PMPackageDataProviderUL.h PMPackageDataProviderULPtr.h
 	DataOldSuSE.h
 
 #<INSTALL-HEADER-TARGET>

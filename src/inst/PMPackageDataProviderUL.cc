@@ -21,39 +21,40 @@
 
 #include <iostream>
 
-#include <y2pm/PMPackageDataProvider_UL.h>
+#include <y2pm/PMPackageDataProviderUL.h>
+#include <y2pm/PMPackageDataProviderULPtr.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPackageDataProvider_UL
+//	CLASS NAME : PMPackageDataProviderUL
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_DERIVED_POINTER(PMPackageDataProvider_UL, PMPackageDataProvider, PMPackageDataProvider );
+IMPL_DERIVED_POINTER(PMPackageDataProviderUL, PMPackageDataProvider, PMPackageDataProvider );
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProvider_UL::PMPackageDataProvider_UL
+//	METHOD NAME : PMPackageDataProviderUL::PMPackageDataProviderUL
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-PMPackageDataProvider_UL::PMPackageDataProvider_UL()
+PMPackageDataProviderUL::PMPackageDataProviderUL()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProvider_UL::~PMPackageDataProvider_UL
+//	METHOD NAME : PMPackageDataProviderUL::~PMPackageDataProviderUL
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-PMPackageDataProvider_UL::~PMPackageDataProvider_UL()
+PMPackageDataProviderUL::~PMPackageDataProviderUL()
 {
 }
 
@@ -61,47 +62,59 @@ PMPackageDataProvider_UL::~PMPackageDataProvider_UL()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProvider_UL::~PMPackageDataProvider_UL
+//	METHOD NAME : PMPackageDataProviderUL::~PMPackageDataProviderUL
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :Package attribute retrieval.
 //
 PkgAttributeValue
-PMPackageDataProvider_UL::getAttributeValue( constPMPackagePtr pkg_r,
+PMPackageDataProviderUL::getAttributeValue( constPMPackagePtr pkg_r,
 					 PMPackage::PMPackageAttribute attr_r )
 {
-    return PkgAttributeValue("attribute");
+    if (attrpos[attr_r].size < 0)
+	return attrval[attr_r];
+    /*
+	FIXME
+
+	re-read value from cache file
+    */
+
+    return PkgAttributeValue("**undef**");
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProvider_UL::~PMPackageDataProvider_UL
-//	METHOD TYPE : Destructor
+//	METHOD NAME : PMPackageDataProviderUL::setAttributeValue
+//	METHOD TYPE : attribute set
 //
-//	DESCRIPTION : inject some object attribute by value
+//	DESCRIPTION : inject some SINGLE object attribute by value
 //
 void
-PMPackageDataProvider_UL::setAttributeValue(
+PMPackageDataProviderUL::setAttributeValue(
 	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	const std::string& value)
+	const PkgAttributeValue value)
 {
+    attrpos[attr].size = -1;
+    attrval[attr] = PkgAttributeValue (value);
     return;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProvider_UL::~PMPackageDataProvider_UL
-//	METHOD TYPE : Destructor
+//	METHOD NAME : PMPackageDataProviderUL::setAttributeValue
+//	METHOD TYPE : attribute set
 //
 //	DESCRIPTION :inject some package attribute by file offset
 //
 void
-PMPackageDataProvider_UL::setAttributeValue(
+PMPackageDataProviderUL::setAttributeValue(
 	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
 	std::streampos pos, int size)
 {
+    attrpos[attr].pos = pos;
+    attrpos[attr].size = size;
     return;
 }
 
