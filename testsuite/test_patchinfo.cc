@@ -120,7 +120,7 @@ int main( int argc, char **argv )
       list<PMPackagePtr>::const_iterator it2;
       for( it2 = packages.begin(); it2 != packages.end(); ++it2 ) {
         cout << "  PKG: " << (*it2)->name() << endl;
-        list<PkgEdition> editions = patchInfo->patchRpmBaseVersions( *it2 );
+        list<PkgEdition> editions = (*it2)->patchRpmBaseVersions();
         list<PkgEdition>::const_iterator it3;
         for( it3 = editions.begin(); it3 != editions.end(); ++it3 ) {
           cout << "    PATCHRPM BASEVERSION: '" << it3->asString() << "'" << endl;
