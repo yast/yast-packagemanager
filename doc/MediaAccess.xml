@@ -30,8 +30,12 @@ A media URL consists of four parts
 </itemizedlist>
 </para>
 <para>
-Type, and path are mandatory. Options and hostname settings can be
+Type and path are mandatory. Options and hostname settings can be
 left out.</para>
+<para>
+All media types except http, https and ftp have the option mountoptions in
+common. It's value is passed with the -o parameter to mount
+</para>
 </section>
 <section><title>CD access</title>
 <example>
@@ -124,6 +128,17 @@ left out.</para>
   Same as HTTP. Server certificate is not validated atm.
   <screen width="60">
     https://haegar@maintenance.suse.de/private/area/suse
+  </screen>
+  </para>
+</example>
+<example>
+  <title>URL for SMB access</title>
+  <para>
+  SMB access via smbfs. username and password must be present or the
+  mountoption guest has to be specified. password may <em>not</em> contain
+  comas.
+  <screen width="60">
+    smb://haegar:5ch3ck1ich@kiste/some/share
   </screen>
   </para>
 </example>
