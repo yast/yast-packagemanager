@@ -61,11 +61,6 @@ class MediaAccess : virtual public Rep {
 	MediaType _type;
 
 	/**
-	 * destination directory for file retrieval
-	 **/
-	Pathname _destination;
-
-	/**
 	 * handler for 'physical' media
 	 * == 0 if not open
 	 **/
@@ -94,14 +89,14 @@ class MediaAccess : virtual public Rep {
 	void close (void);
 
 	/**
+	 * attach media
+	 **/
+	PMError attach (void);
+
+	/**
 	 * get destination for file retrieval
 	 **/
 	const Pathname & getAttachPoint (void) const;
-
-	/**
-	 * attach media to directory
-	 **/
-	PMError attachTo (const Pathname & to);
 
 	/**
 	 * release attached media

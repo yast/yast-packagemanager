@@ -46,8 +46,6 @@ using namespace std;
 MediaDIR::MediaDIR (const Url& url)
     : MediaHandler (url)
 {
-    // attach point is always / as files are not copied
-    _attachPoint = "/";
 }
 
 
@@ -95,7 +93,10 @@ MediaDIR::dumpOn( ostream & str ) const
 PMError
 MediaDIR::attachTo (const Pathname & to)
 {
+    MIL << "MediaDIR::attachTo (" << to << ")" << endl;
     // attach point is always / as files are not copied
+    _attachPoint = _url.getPath();
+
     return Error::E_attachpoint_fixed;
 }
 
@@ -103,7 +104,7 @@ MediaDIR::attachTo (const Pathname & to)
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDIR::attach
+//	METHOD NAME : MediaDIR::release
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION : release attached media
@@ -111,6 +112,7 @@ MediaDIR::attachTo (const Pathname & to)
 PMError
 MediaDIR::release (bool eject)
 {
+    _attachPoint = "";
     return Error::E_ok;
 }
 
@@ -130,20 +132,22 @@ PMError
 MediaDIR::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, DIR is mounted at destination
-
+MIL << "MediaDIR::provideFile (" << filename << ")" << endl;
     if(!_url.isValid())
 	return Error::E_bad_url;
 
     Pathname src = _url.getPath();
+MIL << "_url.getPath(" << src << ") filename (" << filename << ")" << endl;
     src += filename;
 
     PathInfo info(src);
-    
+
     if(!info.isFile())
     {
 	    D__ << src.asString() << " does not exist" << endl;
 	    return Error::E_file_not_found;
     }
+MIL << "OK(" << src << ")" << endl;
     return Error::E_ok;
 }
 
