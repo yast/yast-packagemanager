@@ -62,6 +62,12 @@ class InstYou {
      * Get list of patch servers.
      */
     PMError servers( std::list<Url> & );
+
+    /**
+     * Check authorization for server access.
+     */
+    PMError checkAuthorization( const Url &url, const std::string &regcode,
+                                const std::string &password );
     
     /**
      * Read patch information files.
