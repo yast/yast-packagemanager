@@ -385,16 +385,16 @@ PMError RpmDb::initDatabase( Pathname root_r, Pathname dbPath_r )
     }
 
   } else {
-    MIL << "Cleanup: state " << info << endl;
     if ( dbsi_has( info, DbSI_HAVE_V3 ) ) {
       if ( root_r == "/" || dbsi_has( info, DbSI_MODIFIED_V4 ) ) {
 	// Move obsolete rpm3 database beside.
+	MIL << "Cleanup: state " << info << endl;
 	removeV3( root_r + dbPath_r );
 	dbsi_clr( info, DbSI_HAVE_V3 );
       } else {
 	// Performing an update: Keep the original rpm3 database
 	// and wait if the rpm4 database gets modified by installing
-	// or removing packages. Cleanup in closeOldDatabase.
+	// or removing packages. Cleanup in modifyDatabase or closeDatabase.
 	MIL << "Update mode: Cleanup delayed until closeOldDatabase." << endl;
       }
     }
