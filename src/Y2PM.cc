@@ -208,8 +208,83 @@ PkgArch Y2PM::baseArch()
 #warning TBD init _base_arch from product
   if ( _base_arch->empty() ) {
     _base_arch = InstTarget::baseArch();
+    _allowed_archs.clear();
+    if ( _base_arch == "i386" ) {
+      _allowed_archs.push_back( PkgArch( "i386" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "i486" ) {
+      _allowed_archs.push_back( PkgArch( "i486" ) );
+      _allowed_archs.push_back( PkgArch( "i386" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "i586" ) {
+      _allowed_archs.push_back( PkgArch( "i586" ) );
+      _allowed_archs.push_back( PkgArch( "i486" ) );
+      _allowed_archs.push_back( PkgArch( "i386" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "i686" ) {
+      _allowed_archs.push_back( PkgArch( "i686" ) );
+      _allowed_archs.push_back( PkgArch( "i586" ) );
+      _allowed_archs.push_back( PkgArch( "i486" ) );
+      _allowed_archs.push_back( PkgArch( "i386" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "ia64" ) {
+      _allowed_archs.push_back( PkgArch( "ia64" ) );
+      _allowed_archs.push_back( PkgArch( "i686" ) );
+      _allowed_archs.push_back( PkgArch( "i586" ) );
+      _allowed_archs.push_back( PkgArch( "i486" ) );
+      _allowed_archs.push_back( PkgArch( "i386" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "athlon" ) {
+      _allowed_archs.push_back( PkgArch( "athlon" ) );
+      _allowed_archs.push_back( PkgArch( "i686" ) );
+      _allowed_archs.push_back( PkgArch( "i586" ) );
+      _allowed_archs.push_back( PkgArch( "i486" ) );
+      _allowed_archs.push_back( PkgArch( "i386" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "x86_64" ) {
+      _allowed_archs.push_back( PkgArch( "x86_64" ) );
+      _allowed_archs.push_back( PkgArch( "athlon" ) );
+      _allowed_archs.push_back( PkgArch( "i686" ) );
+      _allowed_archs.push_back( PkgArch( "i586" ) );
+      _allowed_archs.push_back( PkgArch( "i486" ) );
+      _allowed_archs.push_back( PkgArch( "i386" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "s390" ) {
+      _allowed_archs.push_back( PkgArch( "s390" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "s390x" ) {
+      _allowed_archs.push_back( PkgArch( "s390x" ) );
+      _allowed_archs.push_back( PkgArch( "s390" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "ppc" ) {
+      _allowed_archs.push_back( PkgArch( "ppc" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "ppc64" ) {
+      _allowed_archs.push_back( PkgArch( "ppc64" ) );
+      _allowed_archs.push_back( PkgArch( "ppc" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else if ( _base_arch == "noarch" ) {
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    } else {
+      _allowed_archs.push_back( PkgArch( "_base_arch" ) );
+      _allowed_archs.push_back( PkgArch( "noarch" ) );
+    }
   }
   return _base_arch;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::allowedArchs
+//	METHOD TYPE : const PM::ArchSet &
+//
+const PM::ArchSet & Y2PM::allowedArchs( void )
+{
+  if ( _base_arch->empty() ) {
+    baseArch(); // initializes _allowed_archs
+  }
+  return _allowed_archs;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -97,13 +97,25 @@ ULSelectionParser::~ULSelectionParser()
     // _tagset destructor will clean up _tagset
 }
 
-
 ///////////////////////////////////////////////////////////////////
 // private
 //	METHOD NAME : toProvider
 //	METHOD TYPE : PMSelectionPtr
 //
 //	DESCRIPTION : pass selection data from tagset to dataprovider
+#warning fixme
+inline bool
+isAllowedArch (const PkgArch& arch)
+{
+    for (PM::ArchSet::const_iterator it = Y2PM::allowedArchs().begin();
+	 it != Y2PM:: allowedArchs().end(); ++it)
+    {
+	if (*it == arch)
+	    return true;
+    }
+    return false;
+}
+
 
 PMSelectionPtr
 ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
@@ -111,19 +123,47 @@ ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
 #define GET_TAG(tagname) \
     _tagset.getTagByIndex(tagname)
 
-    string single (GET_TAG(SELECTION)->Data());
-    if (single.empty ())
-    {
+    //---------------------------------------------------------------
+    // SELECTION
+    vector<string> splitted;
+    stringutil::split( GET_TAG(SELECTION)->Data(), splitted );
+
+    if ( splitted.empty() ) {
 	ERR << "No '=Sel' value found" << endl;
 	return PMSelectionPtr();
     }
 
+    PkgName    name( splitted[0] );
+    PkgEdition edition;			// default empty edition
+    PkgArch    arch( "noarch" );	// default "noarch"
 
-    // Pkg -> PMSelection
-    PkgName name (single);
-    PkgEdition edition;			// empty edition
-    PkgArch arch ("noarch");		// selections are "noarch" objects for now
+    switch ( splitted.size() ) {
+    case 4: // name version release arch
+      edition = PkgEdition( splitted[1], splitted[2] );
+      arch = PkgArch( splitted[3] );
+      break;
+    case 3: // name version release [arch]
+      edition = PkgEdition( splitted[1], splitted[2] );
+      break;
+    case 2: // name [version release] arch
+      arch = PkgArch( splitted[1] );
+      break;
+    case 1: // name [version release arch]
+      break;
+    default:
+      ERR << "Illegal '=Sel' value found: " << GET_TAG(SELECTION)->Data() << endl;
+      return PMSelectionPtr();
+      break;
+    }
 
+    //---------------------------------------------------------------
+    // drop selections not allowed for current architecture
+    if ( ! isAllowedArch(arch) ) {
+      DBG << "Drop '" << GET_TAG(SELECTION)->Data() << "' on '" << Y2PM::baseArch() << "'" << endl;
+      return PMSelectionPtr();
+    }
+
+    //---------------------------------------------------------------
 #warning STORE InstSrcPtr in DataProvider
     PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
     TagCacheRetrievalPtr selcache = dataprovider->getCacheRetrieval();
@@ -188,8 +228,7 @@ ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
 	SET_VALUE (SUGGESTS, sellist);
     }
 
-    std::vector<std::string> splitted;
-    stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
+    stringutil::split ((GET_TAG(SIZE))->Data(), splitted );
     if (splitted.size() > 0)
     {
 	SET_VALUE (ARCHIVESIZE, FSize (atoll(splitted[0].c_str())));
@@ -247,9 +286,9 @@ ULSelectionParser::fromPath (const Pathname& path, PMSelectionPtr& selection)
     }
 
     string version = _parser.data();
-    if (version != "3.0")
+    if (version != "4.0" && version != "3.0" )
     {
-	ERR << path << ": Version '" << version << "' != 2.0" << endl;
+	ERR << path << ": Version '" << version << "' != 4.0" << endl;
 	return InstSrcError::E_data_bad_selection;
     }
 

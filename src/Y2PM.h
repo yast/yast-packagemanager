@@ -48,11 +48,6 @@ class Y2PM {
 
     static bool _cache_to_ramdisk;
 
-    // the current base architecture of the target
-    static PkgArch _base_arch;
-    // the current list of allowed architectures
-    static PM::ArchSet _allowed_archs;
-
   private:
 
     ///////////////////////////////////////////////////////////////////
@@ -90,6 +85,35 @@ class Y2PM {
   public:
 
     static PMError setCandidateOrder( PM::CandidateOrder neworder_r );
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    // target architecture
+    //
+    ///////////////////////////////////////////////////////////////////
+  private:
+
+    /**
+     * Architecture of the target
+     **/
+    static PkgArch _base_arch;
+    /**
+     * List of allowed architectures
+     **/
+    static PM::ArchSet _allowed_archs;
+
+  public:
+
+    /**
+     * Return the target architecture
+     **/
+    static PkgArch baseArch();
+
+    /**
+     * Return the list of allowed architectures
+     **/
+    static const PM::ArchSet & allowedArchs(void);
+    static void setAllowedArchs(const PM::ArchSet & allowed_archs) { _allowed_archs = allowed_archs; }
 
     ///////////////////////////////////////////////////////////////////
     //
@@ -177,17 +201,6 @@ class Y2PM {
 						  const LocaleSet & delLocales_r );
 
   public:
-
-    /**
-     * Access to the (target) base architecture
-     **/
-    static PkgArch baseArch(void);
-
-    /**
-     * Access to the list of allowed architectures
-     **/
-    static const PM::ArchSet & allowedArchs(void) { return _allowed_archs; }
-    static void setAllowedArchs(const PM::ArchSet & allowed_archs) { _allowed_archs = allowed_archs; }
 
     /**
      * If false, root is ramdisk, and system to install is (or will be) mounted

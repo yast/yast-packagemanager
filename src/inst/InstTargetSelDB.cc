@@ -217,6 +217,22 @@ Pathname InstTargetSelDB::db_file( const Pathname & selfile_r ) const
   if ( bname.empty() )
     return Pathname();
 
+  if ( bname.size() > 4 &&  bname.rfind( ".sel" ) == bname.size() - 4 ) {
+    bname.erase( bname.size() - 4 );
+    string::size_type sep = bname.rfind( "." );
+    if ( sep != string::npos ) {
+      sep = bname.rfind( "-" );
+      if ( sep != string::npos ) {
+	bname.erase( sep );
+      }
+      sep = bname.rfind( "-" );
+      if ( sep != string::npos ) {
+	bname.erase( sep );
+      }
+    }
+    bname += ".sel";
+  }
+
   return _db + bname;
 }
 
@@ -255,7 +271,8 @@ PMError InstTargetSelDB::install( const Pathname & selfile_r )
     return err;
   }
 
-  int res = PathInfo::copy_file2dir( selfile_r, _db );
+  //int res = PathInfo::copy_file2dir( selfile_r, _db );
+  int res = PathInfo::copy( selfile_r, db_file( selfile_r ) );
   if ( res ) {
     ERR << "Failed install " << selfile_r << " (copy_file2dir " << res << ')' << endl;
     return Error::E_SelDB_install_failed;
