@@ -277,6 +277,8 @@ PMError PMYouServers::readServers( const Pathname &file )
 
 void PMYouServers::addSLPServers( )
 {
+    D__ << "Add SLP servers" << endl;
+
     SLPError err; 
     SLPHandle hslp; 
     
@@ -299,6 +301,8 @@ void PMYouServers::addSLPServers( )
     } 
 
     SLPClose(hslp); 
+
+    D__ << "Add SLP servers done" << endl;    
 }
 
 void PMYouServers::addServer( const PMYouServer &server )
