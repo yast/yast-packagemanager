@@ -181,7 +181,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     if( PathInfo::assert_dir( dest.dirname() ) )
     {
 	DBG << "assert_dir " << dest.dirname() << " failed" << endl;
-	return Error::E_system;
+	return PMError( Error::E_system, dest.dirname().asString() );
     }
 
     DBG << "URL: " << url.asString().c_str() << endl;
@@ -197,7 +197,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
     FILE *file = fopen( destNew.c_str(), "w" );
     if ( !file ) {
       ERR << "fopen failed" << endl;
-      return Error::E_write_error;
+      return PMError( Error::E_write_error, destNew );
     }
 
     ret = curl_easy_setopt( _curl, CURLOPT_WRITEDATA, file );
