@@ -111,6 +111,10 @@ class PMManager {
 
   public:
 
+    //void solveDeps();
+
+  public:
+
     /**
      * The number of Selectables within this Manager.
      **/
@@ -160,6 +164,14 @@ class PMManager {
      * PMSelectablePtr to the Selectable with the given name, or NULL if there is none.
      **/
     PMSelectablePtr operator [] ( const std::string & name_r ) const { return getItem( name_r ); }
+
+  public:
+
+    /**
+     * Set all Selectables to NothingSelected ( neither install nor delete )
+     **/
+    void setNothingSelected();
+
 };
 
 ///////////////////////////////////////////////////////////////////
