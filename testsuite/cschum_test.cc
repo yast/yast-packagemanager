@@ -14,6 +14,7 @@
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMYouPatchInfo.h>
+#include <y2pm/PMYouPatchManager.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstYou.h>
 
@@ -37,7 +38,21 @@ int main( int argc, char **argv )
   cout << PMYouPatchInfo::translateLangCode( LangCode( "de" ) ) << endl;
   cout << PMYouPatchInfo::translateLangCode( LangCode( "argl" ) ) << endl;
 
-#if 1
+  cout << "num: " << Y2PM::youPatchManager().size() << endl;
+
+  const PMYouPatchManager &mgr = Y2PM::youPatchManager();
+
+  PMManager::PMSelectableVec::const_iterator it;
+  for ( it = mgr.begin(); it != mgr.end(); ++it ) {
+    PMSelectablePtr selectable = *it;
+    PMYouPatchPtr installed = selectable->installedObj();
+    if ( installed ) {
+      cout << installed->name() << endl;
+    }
+  }
+
+
+#if 0
   list<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
 
   list<PMYouPatchPtr>::const_iterator it;

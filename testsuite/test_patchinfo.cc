@@ -53,9 +53,9 @@ int main( int argc, char **argv )
   }
 
   if ( getServers ) {
-    PMYouPatchPaths paths( "eins", "zwei", "drei" );
+    PMYouPatchPaths paths;
 
-    PMError error = paths.requestServers("http://localhost/you/","suseservers.txt");
+    PMError error = paths.requestServers();
     if ( error ) {
       cerr << "requestServers failed: " << error << endl;
       return 1;

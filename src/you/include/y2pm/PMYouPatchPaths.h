@@ -70,6 +70,8 @@ class PMYouPatchPaths : virtual public Rep {
     */
     Pathname installDir();
 
+    Pathname localSuseServers();
+
     std::string product();
     
     std::string version();
@@ -78,8 +80,7 @@ class PMYouPatchPaths : virtual public Rep {
 
     bool businessProduct();
 
-    PMError requestServers( const std::string &url = "",
-                            const std::string &file = "" );
+    PMError requestServers( const std::string &url = "", bool addFile = false );
 
     std::list<Url> servers();
     

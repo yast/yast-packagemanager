@@ -56,7 +56,8 @@ std::string YouError::errtext( const unsigned e )
   ///////////////////////////////////////////////////////////////////
   case E_bad_sig_file:  return N_("File has invalid signature.");
   case E_bad_sig_rpm:   return N_("RPM has invalid signature.");
-
+  case E_get_suseservers_failed: return N_("Error getting suseservers file.");
+  case E_read_suseservers_failed: return N_("Error reading suseservers file.");
   };
 
   return stringutil::numstring( e );
