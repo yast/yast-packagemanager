@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Sat Sep  4 00:23:19 CEST 2004 - ma@suse.de
+
+- Per default download slideshow data on FTP/HTTP installation. (#44578)
+- Added some support for EULA maintainance. (supports #44145)
+- 2.10.10
+
+-------------------------------------------------------------------
 Tue Aug 31 12:37:13 CEST 2004 - lnussel@suse.de
 
 - merge proofread texts
