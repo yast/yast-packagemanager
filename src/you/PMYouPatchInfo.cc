@@ -142,19 +142,8 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   PkgName name( nameStr );
 
   value = tagValue( YOUPackageTagSet::PKGVERSION );
-  string version;
-  string release;
 
-  pos = value.rfind( '-' );
-  if ( pos < 0 ) {
-    version = value;
-    release = "0";
-  } else {
-    version = value.substr( 0, pos );
-    release = value.substr( pos + 1, value.length() - pos );
-  }
-
-  PkgEdition edition( version, release );
+  PkgEdition edition( value );
 
   PMPackagePtr pkg( new PMPackage( name, edition, _paths->baseArch(),
                                    _packageDataProvider ) );
