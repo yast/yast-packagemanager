@@ -227,7 +227,7 @@ ostream & InstSrcDescr::dumpOn( ostream & str ) const
 PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & cache_dir_r )
 {
     ndescr_r = 0;
-    PMError err = Error::E_error;
+    PMError err = Error::E_ok;
 
     InstSrcDescrPtr ndescr( new InstSrcDescr );
 
@@ -260,21 +260,14 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 	    switch( tagset->assign( tagstr.c_str(), parser, mediaCacheStream ) )
 	    {
 		case CommonPkdParser::Tag::ACCEPTED:
-		    // fill InstSrcDescr 
-		    std::cerr << "*** filling: " << tagstr << std::endl;
-		    fillInstSrcDescr( ndescr, tagset );
 		    repeatassign = false;
-		    err = Error::E_ok;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_NOMATCH:
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    // not needed here because there is only one set of tags
-		    // fillInstSrcDescr( ndescr, tagset );
 		    tagset->clear();
 		    repeatassign = true;
-		    err = Error::E_ok;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
 		    repeatassign = false;
@@ -285,16 +278,24 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 
     }
 
-    tagset->clear();
-
     if( parse )
-	MIL << "*** parsing completed ***" << std::endl;
+    {
+	// fill the InstSrcDescr object
+	bool ok = fillInstSrcDescr( ndescr, tagset );
+
+	MIL << "Parsing data from " <<  cache_dir_r << " ,result: " << (ok?"true":"false") << std::endl;
+	
+	if ( !ok )
+	{
+	    err = Error::E_error;
+	}
+    }
     else
 	MIL << "*** parsing was aborted ***" << std::endl;
+
+    tagset->clear();
+
     
-    
-#warning TBD InstSrcDescr cache read
-  
     ///////////////////////////////////////////////////////////////////
     // done
     ///////////////////////////////////////////////////////////////////
@@ -307,55 +308,110 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
     return err;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDescr::fillInstSrcDescr
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
 bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset )
 {
     bool ok = true;
-
+    CommonPkdParser::Tag* t = 0;
+    
+    if ( !tagset )
+	return false;
+    
     // architecture
-    PkgArch arch( (tagset->getTagByIndex(InstSrcMediaTags::ARCH))->Data() );
-    ndescr->set_base_arch( arch );
-
-    // default activate
-    if (  (tagset->getTagByIndex(InstSrcMediaTags::ACTIVATE))->Data() == "1" )
+    t = tagset->getTagByIndex( InstSrcMediaTags::ARCH );
+    if ( t )
     {
-	ndescr->set_default_activate( true );
-    }
-    else
-    {
-	ndescr->set_default_activate( false );	
-    }
-
-    // type
-    string typeStr = (tagset->getTagByIndex(InstSrcMediaTags::TYPE))->Data();
-
-    InstSrc::Type type = InstSrc::fromString( typeStr );
-    ndescr->set_type( type );
-
-    // media data
-    std::list<std::string> multi = (tagset->getTagByIndex(InstSrcMediaTags::MEDIA))->MultiData();
-
-    if ( multi.size() >= 3 )
-    {
-	std::list<std::string>::iterator multi_pos = multi.begin();
-	if ( !(*multi_pos).empty() )	ndescr->set_media_vendor( *multi_pos++ );
-	if ( !(*multi_pos).empty() )	ndescr->set_media_id( *multi_pos++ );
-	if ( !(*multi_pos).empty() ) 	ndescr->set_media_count( *multi_pos++ );
+	ndescr->set_base_arch( PkgArch(t->Data()) );
     }
     else
     {
 	ok = false;
     }
+    
+    // default activate
+    t = tagset->getTagByIndex(InstSrcMediaTags::ACTIVATE);
+    if ( t )
+    {
+	if (  t->Data() == "1" )
+	{
+	    ndescr->set_default_activate( true );
+	}
+	else
+	{
+	    ndescr->set_default_activate( false );	
+	}
+    }
+    else
+    {
+	ok = false;
+    }
+    
+    // type
+    t = tagset->getTagByIndex(InstSrcMediaTags::TYPE);
+    if ( t )
+    {
+	InstSrc::Type type = InstSrc::fromString( t->Data() );
+	ndescr->set_type( type );
+    }
+    else
+    {
+	ok = false;
+    }
+    
+    // media data
+    t = tagset->getTagByIndex(InstSrcMediaTags::MEDIA);
+    if ( t )
+    {
+	std::list<std::string> multi = t->MultiData();
 
+	if ( multi.size() >= 3 )
+	{
+	    std::list<std::string>::iterator multi_pos = multi.begin();
+	    if ( !(*multi_pos).empty() )	ndescr->set_media_vendor( *multi_pos++ );
+	    if ( !(*multi_pos).empty() )	ndescr->set_media_id( *multi_pos++ );
+	    if ( !(*multi_pos).empty() ) 	ndescr->set_media_count( *multi_pos++ );
+	}
+	else
+	{
+	    ok = false;
+	}
+    }
+    else
+    {
+	ok = false;
+    }
+    
     // URL
-    Url url( (tagset->getTagByIndex(InstSrcMediaTags::URL))->Data() );
-
-    ndescr->set_url( url );
-
+    t = tagset->getTagByIndex(InstSrcMediaTags::URL);
+    if ( t )
+    {
+	Url url( t->Data() );
+	ndescr->set_url( url );
+    }
+    else
+    {
+	ok = false;
+    }
+    
     // product dir
-    Pathname dir( (tagset->getTagByIndex(InstSrcMediaTags::PRODUCTDIR))->Data() );
-
-    ndescr->set_product_dir( dir );
-
+    t = tagset->getTagByIndex(InstSrcMediaTags::PRODUCTDIR);
+    if ( t )
+    {
+	Pathname dir( t->Data() );
+	ndescr->set_product_dir( dir );
+    }
+    else
+    {
+	ok = false;
+    }
+    
     return ok;
 }
 
@@ -378,16 +434,16 @@ PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
 	return Error::E_create_file;
     }
 
-    file << "=Arch: " << _base_arch << endl;
-    file << "=Type: " << InstSrc::toString(_type) << endl;
-    file << "=URL: " << _url << endl;
-    file << "=ProductDir: " << _product_dir << endl;
-    file << "=Default_activate: " << (_default_activate?"1":"0") << endl;
-    file << "+Media: " << endl;
+    file << ArchTag << ": "<< _base_arch << endl;
+    file << TypeTag << ": " << InstSrc::toString(_type) << endl;
+    file << UrlTag << ": " << _url << endl;
+    file << ProdDirTag << ": " << _product_dir << endl;
+    file << DefActTag << ": " << (_default_activate?"1":"0") << endl;
+    file << MediaBTag << ": " << endl;
     file << _media_vendor << endl;
     file << _media_id << endl;
     file << _media_count << endl;
-    file << "-Media:" << endl;
+    file << MediaETag << ":" << endl;
     
     return Error::E_ok;
 }
