@@ -21,8 +21,8 @@ std::string strlist2string (const std::list<std::string>& slist, const char *sep
 std::string pkglist2string (const std::list<PMPackagePtr>& plist, const char *sep = " ");
 std::string sellist2string (const std::list<PMSelectionPtr>& slist, const char *sep = " ");
 void show_pmsolvable (PMSolvablePtr p);
-void show_pmobject (PMObjectPtr p);
-void show_pmpackage (PMPackagePtr p);
+void show_pmobject (PMObjectPtr p, bool only_cached = false);
+void show_pmpackage (PMPackagePtr p, bool only_cached = false);
 void show_pmselection (PMSelectionPtr s);
 
 #endif //SHOW_PM_H

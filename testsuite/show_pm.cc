@@ -81,29 +81,40 @@ show_pmsolvable (PMSolvablePtr p)
     cout << "Provides: " << strlist2string (PMSolvable::PkgRelList2StringList (p->provides())) << endl;
     cout << "Obsoletes: " << strlist2string (PMSolvable::PkgRelList2StringList (p->obsoletes())) << endl;
     cout << "Conflicts: " << strlist2string (PMSolvable::PkgRelList2StringList (p->conflicts())) << endl;
+
+    return;
 }
 
 void
-show_pmobject (PMObjectPtr p)
+show_pmobject (PMObjectPtr p, bool only_cached)
 {
     show_pmsolvable (p);
     cout << "-- Object --" << endl;
-#if 1
+
     cout << "Summary: " << p->summary() << endl;
-    cout << "Description: " << strlist2string (p->description(), "\n") << endl;
-    cout << "InsNotify: " << strlist2string (p->insnotify(), "\n") << endl;
-    cout << "DelNotify: " << strlist2string (p->delnotify(), "\n") << endl;
     cout << "Size: " << p->size().asString() << endl;
-#endif
+    if (!only_cached)
+    {
+	cout << "Description: " << strlist2string (p->description(), "\n") << endl;
+	cout << "InsNotify: " << strlist2string (p->insnotify(), "\n") << endl;
+	cout << "DelNotify: " << strlist2string (p->delnotify(), "\n") << endl;
+    }
+    return;
 }
 
 void
-show_pmpackage (PMPackagePtr p)
+show_pmpackage (PMPackagePtr p, bool only_cached)
 {
     p->startRetrieval();
-    show_pmobject ((PMObjectPtr)p);
+    show_pmobject ((PMObjectPtr)p, only_cached);
 
     cout << "Buildtime: " << p->buildtime() << endl;
+
+    if (only_cached)
+    {
+	p->stopRetrieval();
+	return;
+    }
     cout << "Buildhost: " << p->buildhost() << endl;
     cout << "Installtime: " << p->installtime() << endl;
     cout << "Distribution: " << p->distribution() << endl;
