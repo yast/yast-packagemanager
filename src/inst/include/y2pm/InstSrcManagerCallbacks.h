@@ -50,8 +50,8 @@ namespace InstSrcManagerCallbacks {
 				     const std::string & error,
 				     const std::string & url,
 				     const std::string & product,
-				     int expected,
-				     int current ) = 0;
+				     int current,
+				     int expected ) = 0;
   };
 
   class MediaChangeReport : public Report<MediaChangeCallback> {
@@ -62,11 +62,11 @@ namespace InstSrcManagerCallbacks {
 				     const std::string & error,
 				     const std::string & url,
 				     const std::string & product,
-				     int expected,
-				     int current ) {
+				     int current,
+				     int expected ) {
       return MediaChangeCallback::changeMedia( instSrc,
 					       error, url, product,
-					       expected, current );
+					       current, expected  );
     }
   };
 
