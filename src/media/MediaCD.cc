@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <MediaCD.h>
+#include <y2pm/MediaCD.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -63,7 +63,7 @@ MediaCD::MediaCD (const string & device, const string & path, const string & opt
 //
 MediaCD::~MediaCD()
 {
-    if (_attachedTo != "") {
+    if (_attachPoint != "") {
 	release ();
     }
 }
@@ -77,7 +77,8 @@ MediaCD::~MediaCD()
 //
 //	DESCRIPTION :
 //
-ostream & MediaCD::dumpOn( ostream & str ) const
+ostream &
+MediaCD::dumpOn( ostream & str ) const
 {
     str << "MediaCD (" << _device << "@" << _path << ")";
     return str;
@@ -87,12 +88,13 @@ ostream & MediaCD::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaCD::attach
+//	METHOD NAME : MediaCD::attachTo
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION : attach media at path
 //
-MediaResult MediaCD::attach (const Pathname & to)
+MediaResult
+MediaCD::attachTo (const Pathname & to)
 {
     
     // if DVD, try UDF filesystem before iso9660
@@ -105,7 +107,7 @@ MediaResult MediaCD::attach (const Pathname & to)
 	    return E_system;
 	}
     }
-    _attachedTo = to;
+    _attachPoint = to;
 
     return E_none;
 }
@@ -119,19 +121,20 @@ MediaResult MediaCD::attach (const Pathname & to)
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult MediaCD::release (void)
+MediaResult
+MediaCD::release (void)
 {
-    if (umount (_attachedTo.asString().c_str()) != 0) {
+    if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
     }
-    _attachedTo = "";
+    _attachPoint = "";
     return E_none;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaCD::getFile
+//	METHOD NAME : MediaCD::provideFile
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION :
@@ -139,7 +142,8 @@ MediaResult MediaCD::release (void)
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult MediaCD::getFile (const Pathname & filename) const
+MediaResult
+MediaCD::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, CD is mounted at destination
     return E_none;
@@ -168,32 +172,15 @@ MediaCD::findFile (const Pathname & dirname, const string & pattern) const
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaCD::getDirectory
-//	METHOD TYPE : const Attribute &
+//	METHOD TYPE : const std::list<std::string> *
 //
 //	DESCRIPTION :
 //	get directory denoted by path to Attribute::A_StringArray
 
-const Attribute *
+const std::list<std::string> *
 MediaCD::dirInfo (const Pathname & dirname) const
 {
-    Attribute *saattr = new Attribute (Attribute::A_StringArray);
-
-    // prepend mountpoint to dirname
-    Pathname fullpath = _attachedTo + dirname;
-
-    // open mounted directory
-    DIR *dir = opendir (fullpath.asString().c_str());
-    struct dirent *entry;
-    if (dir == 0)
-    {
-	return 0;
-    }
-    while ((entry = readdir (dir)) != 0)
-    {
-	saattr->add (entry->d_name);
-    }
-    closedir (dir);
-    return saattr;
+    return readDirectory (dirname, pattern);
 }
 
 

@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <MediaDIR.h>
+#include <y2pm/MediaDIR.h>
 
 #include <sys/mount.h>
 #include <errno.h>
@@ -58,7 +58,7 @@ MediaDIR::MediaDIR (const string & device, const string & path, const string & o
 //
 MediaDIR::~MediaDIR()
 {
-    if (_attachedTo != "") {	// release if still mounted
+    if (_attachPoint != "") {	// release if still mounted
 	release ();
     }
 }
@@ -83,16 +83,16 @@ MediaDIR::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDIR::attach
+//	METHOD NAME : MediaDIR::attachTo
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION : attach media at path
 //
 MediaResult
-MediaDIR::attach (const Pathname & to)
+MediaDIR::attachTo (const Pathname & to)
 {
     // make directory 'present'
-    _attachedTo = to;
+    _attachPoint = to;
 
     return E_none;
 }
@@ -110,7 +110,7 @@ MediaResult
 MediaDIR::release (void)
 {
     // make directory 'vanish'
-    _attachedTo = "";
+    _attachPoint = "";
     return E_none;
 }
 
@@ -156,32 +156,15 @@ MediaDIR::findFile (const Pathname & dirname, const string & pattern) const
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaDIR::getDirectory
-//	METHOD TYPE : const Attribute &
+//	METHOD TYPE : const std::list<std::string> *
 //
 //	DESCRIPTION :
 //	get directory denoted by path to Attribute::A_StringArray
 
-const Attribute *
+const std::list<std::string> *
 MediaDIR::dirInfo (const Pathname & dirname) const
 {
-    Attribute *saattr = new Attribute (Attribute::A_StringArray);
-
-    // prepend mountpoint to dirname
-    Pathname fullpath = _attachedTo + dirname;
-
-    // open mounted directory
-    DIR *dir = opendir (fullpath.asString().c_str());
-    struct dirent *entry;
-    if (dir == 0)
-    {
-	return 0;
-    }
-    while ((entry = readdir (dir)) != 0)
-    {
-	saattr->add (entry->d_name);
-    }
-    closedir (dir);
-    return saattr;
+    return readDirectory (dirname);
 }
 
 

@@ -1,5 +1,5 @@
 #
-# Makefile.am for packagemanager/src/media/instance
+# Makefile.am for packagemanager/src/media
 #
 
 SUBDIRS = include
@@ -9,7 +9,7 @@ INCLUDES = -I$(top_srcdir)/src/include -I$(QTDIR)/include -I$(includedir) -I$(to
 lib_LTLIBRARIES = liby2pmMedia.la
 
 liby2pmMedia_la_SOURCES = \
-	FAKEMediaInfo.cc \
+	MediaInfo.cc		\
 	MediaAccess.cc		\
 	MediaHandler.cc		\
 	MediaCD.cc		\

@@ -177,7 +177,7 @@ MediaAccess::getAttachPath (void) const
 
 // attach media to directory
 MediaResult
-MediaAccess::attach (const Pathname & to)
+MediaAccess::attachTo (const Pathname & to)
 {
     PathInfo info (to);
 
@@ -193,7 +193,7 @@ MediaAccess::attach (const Pathname & to)
 	return E_not_open;
     }
 
-    return _handler->attach (to);
+    return _handler->attachTo (to);
 }
 
 // release attached media
@@ -214,7 +214,7 @@ MediaAccess::release (void)
 // filename is interpreted relative to the attached url
 // and a path prefix is preserved to destination
 MediaResult
-MediaAccess::getFile (const Pathname & filename) const
+MediaAccess::provideFile (const Pathname & filename) const
 {
     if (_handler == 0)
     {
@@ -224,12 +224,12 @@ MediaAccess::getFile (const Pathname & filename) const
     {
 	return E_no_destination;
     }
-    return _handler->getFile (filename);
+    return _handler->provideFile (filename);
 }
 
 
 // get file information
-const Attribute *
+const std::list<std::string> *
 MediaAccess::dirInfo (const Pathname & filename) const
 {
     if (_handler == 0)

@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <MediaFTP.h>
+#include <y2pm/MediaFTP.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -62,7 +62,7 @@ MediaFTP::MediaFTP (const string & server, const string & path, const string & o
 //
 MediaFTP::~MediaFTP()
 {
-    if (_attachedTo != "") {
+    if (_attachPoint != "") {
 	release ();
     }
 }
@@ -76,7 +76,8 @@ MediaFTP::~MediaFTP()
 //
 //	DESCRIPTION :
 //
-ostream & MediaFTP::dumpOn( ostream & str ) const
+ostream &
+MediaFTP::dumpOn( ostream & str ) const
 {
     str << "MediaFTP (" << _device << "@" << _path << ")";
     return str;
@@ -86,20 +87,21 @@ ostream & MediaFTP::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaFTP::attach
+//	METHOD NAME : MediaFTP::attachTo
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION : attach media at path
 //
-MediaResult MediaFTP::attach (const Pathname & to)
+MediaResult
+MediaFTP::attachTo (const Pathname & to)
 {
     
     // FIXME
     // connect to FTP server '_device', cd to '_path'
     //
-    // copy files to '_attachedTo' later
+    // copy files to '_attachPoint' later
 
-    _attachedTo = to;
+    _attachPoint = to;
 
     return E_none;
 }
@@ -113,19 +115,20 @@ MediaResult MediaFTP::attach (const Pathname & to)
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult MediaFTP::release (void)
+MediaResult
+MediaFTP::release (void)
 {
-    if (umount (_attachedTo.asString().c_str()) != 0) {
+    if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
     }
-    _attachedTo = "";
+    _attachPoint = "";
     return E_none;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaFTP::getFile
+//	METHOD NAME : MediaFTP::provideFile
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION :
@@ -133,7 +136,8 @@ MediaResult MediaFTP::release (void)
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult MediaFTP::getFile (const Pathname & filename) const
+MediaResult
+MediaFTP::provideFile (const Pathname & filename) const
 {
     // FIXME: retrieve file from server, save below _attacedTo
     return E_none;
@@ -163,12 +167,12 @@ MediaFTP::findFile (const Pathname & dirname, const string & pattern) const
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaFTP::getDirectory
-//	METHOD TYPE : const Attribute &
+//	METHOD TYPE : const std::list<std::string> *
 //
 //	DESCRIPTION :
-//	get directory denoted by path to Attribute::A_StringArray
+//	get directory denoted by path to a string list
 
-const Attribute *
+const std::list<std::string> *
 MediaFTP::dirInfo (const Pathname & dirname) const
 {
     // FIXME: pull directory from server

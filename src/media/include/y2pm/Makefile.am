@@ -1,5 +1,5 @@
 #
-# Makefile.am for liby2util/src/include/y2pm
+# Makefile.am for packagemanager/src/media/include/y2pm
 #
 
 pkgincludedir = $(includedir)/y2pm

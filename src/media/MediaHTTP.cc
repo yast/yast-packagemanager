@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <MediaHTTP.h>
+#include <y2pm/MediaHTTP.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -62,7 +62,7 @@ MediaHTTP::MediaHTTP (const string & server, const string & path, const string &
 //
 MediaHTTP::~MediaHTTP()
 {
-    if (_attachedTo != "") {
+    if (_attachPoint != "") {
 	release ();
     }
 }
@@ -97,9 +97,9 @@ MediaResult MediaHTTP::attach (const Pathname & to)
     // FIXME
     // connect to HTTP server '_device', cd to '_path'
     //
-    // copy files to '_attachedTo' later
+    // copy files to '_attachPoint' later
 
-    _attachedTo = to;
+    _attachPoint = to;
 
     return E_none;
 }
@@ -113,19 +113,20 @@ MediaResult MediaHTTP::attach (const Pathname & to)
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult MediaHTTP::release (void)
+MediaResult
+MediaHTTP::release (void)
 {
-    if (umount (_attachedTo.asString().c_str()) != 0) {
+    if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
     }
-    _attachedTo = "";
+    _attachPoint = "";
     return E_none;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaHTTP::getFile
+//	METHOD NAME : MediaHTTP::provideFile
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION :
@@ -133,7 +134,8 @@ MediaResult MediaHTTP::release (void)
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult MediaHTTP::getFile (const Pathname & filename) const
+MediaResult
+MediaHTTP::provideFile (const Pathname & filename) const
 {
     // FIXME: retrieve file from server, save below _attacedTo
     return E_none;
@@ -163,12 +165,12 @@ MediaHTTP::findFile (const Pathname & dirname, const string & pattern) const
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaHTTP::getDirectory
-//	METHOD TYPE : const Attribute &
+//	METHOD TYPE : const std::list<std::string> *
 //
 //	DESCRIPTION :
-//	get directory denoted by path to Attribute::A_StringArray
+//	get directory denoted by path to a string list
 
-const Attribute *
+const std::list<std::string> *
 MediaHTTP::dirInfo (const Pathname & dirname) const
 {
     // FIXME: pull directory from server

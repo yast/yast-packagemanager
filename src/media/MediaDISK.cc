@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <MediaDISK.h>
+#include <y2pm/MediaDISK.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -64,7 +64,7 @@ MediaDISK::MediaDISK (const string & partition, const string & path, const strin
 //
 MediaDISK::~MediaDISK()
 {
-    if (_attachedTo != "") {
+    if (_attachPoint != "") {
 	release ();
     }
 }
@@ -89,13 +89,13 @@ MediaDISK::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDISK::attach
+//	METHOD NAME : MediaDISK::attachTo
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION : attach media at path
 //
 MediaResult
-MediaDISK::attach (const Pathname & to)
+MediaDISK::attachTo (const Pathname & to)
 {
     // FIXME
     // do mount --bind <partition>/<dir> to <to>
@@ -112,7 +112,7 @@ MediaDISK::attach (const Pathname & to)
 	    return E_system;
 	}
     }
-    _attachedTo = to;
+    _attachPoint = to;
 
     return E_none;
 }
@@ -129,12 +129,12 @@ MediaDISK::attach (const Pathname & to)
 MediaResult
 MediaDISK::release (void)
 {
-    if (umount (_attachedTo.asString().c_str()) != 0) {
+    if (umount (_attachPoint.asString().c_str()) != 0) {
 	if (umount (TMPMNT) != 0) {
 	    return E_system;
 	}
     }
-    _attachedTo = "";
+    _attachPoint = "";
     return E_none;
 }
 
@@ -179,32 +179,15 @@ MediaDISK::findFile (const Pathname & dirname, const string & pattern) const
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaDISK::getDirectory
-//	METHOD TYPE : const Attribute &
+//	METHOD TYPE : const std::list<std::string> *
 //
 //	DESCRIPTION :
 //	get directory denoted by path to Attribute::A_StringArray
 
-const Attribute *
+const std::list<std::string> *
 MediaDISK::dirInfo (const Pathname & dirname) const
 {
-    Attribute *saattr = new Attribute (Attribute::A_StringArray);
-
-    // prepend mountpoint to dirname
-    Pathname fullpath = _attachedTo + dirname;
-
-    // open mounted directory
-    DIR *dir = opendir (fullpath.asString().c_str());
-    struct dirent *entry;
-    if (dir == 0)
-    {
-	return 0;
-    }
-    while ((entry = readdir (dir)) != 0)
-    {
-	saattr->add (entry->d_name);
-    }
-    closedir (dir);
-    return saattr;
+    return readDirectory (dirname);
 }
 
 

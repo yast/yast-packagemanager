@@ -22,7 +22,7 @@
 
 #include <ctype.h>
 
-#include <MediaInfo.h>
+#include <y2pm/MediaInfo.h>
 
 ///////////////////////////////////////////////////////////////////
 //

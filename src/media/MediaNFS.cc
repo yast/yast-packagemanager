@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <MediaNFS.h>
+#include <y2pm/MediaNFS.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -62,7 +62,7 @@ MediaNFS::MediaNFS (const string & server, const string & path, const string & o
 //
 MediaNFS::~MediaNFS()
 {
-    if (_attachedTo != "") {
+    if (_attachPoint != "") {
 	release ();
     }
 }
@@ -91,14 +91,15 @@ ostream & MediaNFS::dumpOn( ostream & str ) const
 //
 //	DESCRIPTION : attach media at path
 //
-MediaResult MediaNFS::attach (const Pathname & to)
+MediaResult
+MediaNFS::attach (const Pathname & to)
 {
     
     const char *mountpoint = to.asString().c_str();
     if (mount (_server.c_str(), mountpoint, "nfs", _mountflags, 0) != 0) {
 	return E_system;
     }
-    _attachedTo = to;
+    _attachPoint = to;
 
     return E_none;
 }
@@ -112,19 +113,20 @@ MediaResult MediaNFS::attach (const Pathname & to)
 //
 //	DESCRIPTION : release attached media
 //
-MediaResult MediaNFS::release (void)
+MediaResult
+MediaNFS::release (void)
 {
-    if (umount (_attachedTo.asString().c_str()) != 0) {
+    if (umount (_attachPoint.asString().c_str()) != 0) {
 	return E_system;
     }
-    _attachedTo = "";
+    _attachPoint = "";
     return E_none;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaNFS::getFile
+//	METHOD NAME : MediaNFS::provideFile
 //	METHOD TYPE : MediaResult
 //
 //	DESCRIPTION :
@@ -132,7 +134,8 @@ MediaResult MediaNFS::release (void)
 //	filename is interpreted relative to the attached url
 //	and a path prefix is preserved to destination
 
-MediaResult MediaNFS::getFile (const Pathname & filename) const
+MediaResult
+MediaNFS::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, NFS path is mounted at destination
     return E_none;
@@ -161,32 +164,15 @@ MediaNFS::findFile (const Pathname & dirname, const string & pattern) const
 ///////////////////////////////////////////////////////////////////
 //
 //	METHOD NAME : MediaNFS::getDirectory
-//	METHOD TYPE : const Attribute &
+//	METHOD TYPE : const std::list<std::string> *
 //
 //	DESCRIPTION :
-//	get directory denoted by path to Attribute::A_StringArray
+//	get directory denoted by path to a string list
 
-const Attribute *
+const std::list<std::string> *
 MediaNFS::dirInfo (const Pathname & dirname) const
 {
-    Attribute *saattr = new Attribute (Attribute::A_StringArray);
-
-    // prepend mountpoint to dirname
-    Pathname fullpath = _attachedTo + dirname;
-
-    // open mounted directory
-    DIR *dir = opendir (fullpath.asString().c_str());
-    struct dirent *entry;
-    if (dir == 0)
-    {
-	return 0;
-    }
-    while ((entry = readdir (dir)) != 0)
-    {
-	saattr->add (entry->d_name);
-    }
-    closedir (dir);
-    return saattr;
+    return readDirectory (dirname);
 }
 
 

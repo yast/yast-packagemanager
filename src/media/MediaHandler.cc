@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <MediaHandler.h>
+#include <y2pm/MediaHandler.h>
 
 using namespace std;
 
@@ -42,7 +42,7 @@ using namespace std;
 MediaHandler::MediaHandler (const string & device, const string & path)
     : _device (device)
     , _path (path)
-    , _attachedTo (string (""))
+    , _attachPoint (string (""))
 {
 }
 
@@ -66,7 +66,8 @@ MediaHandler::~MediaHandler()
 //
 //	DESCRIPTION :
 //
-ostream & MediaHandler::dumpOn( ostream & str ) const
+ostream &
+MediaHandler::dumpOn( ostream & str ) const
 {
     str << "MediaHandler (" << _device << ":" << _path << ")";
     return str;
@@ -80,12 +81,15 @@ ostream & MediaHandler::dumpOn( ostream & str ) const
 //	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
+//	  scan directory for files matching pattern
+//	  pattern might have a single trailing '*'
+//	  FIXME: use proper regexp handling
 //
 const Pathname *
 MediaHandler::scanDirectory (const Pathname & dirname, const string & pattern) const
 {
     // prepend mountpoint to dirname
-    Pathname *fullpath = new Pathname (_attachedTo + dirname);
+    Pathname *fullpath = new Pathname (_attachPoint + dirname);
 
     // open mounted directory
     DIR *dir = opendir (fullpath->asString().c_str());
@@ -130,4 +134,40 @@ MediaHandler::scanDirectory (const Pathname & dirname, const string & pattern) c
     }
     closedir (dir);
     return 0;		// no match
+}
+
+///////////////////////////////////////////////////////////////////
+// PROTECTED
+//
+//
+//	METHOD NAME : MediaHandler::readDirectory
+//	METHOD TYPE : std::list <std::string> *
+//
+//	DESCRIPTION :
+//	  read directory to list of strings
+//	  return NULL on error
+//
+const list<string> *
+MediaHandler::readDirectory (const Pathname & dirname) const
+{
+    list<string> *dirlist = new list<string>;
+
+    // prepend mountpoint to dirname
+    Pathname fullpath = _attachedTo + dirname;
+
+    // open mounted directory
+    DIR *dir = opendir (fullpath.asString().c_str());
+    if (dir == 0)
+    {
+	return 0;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir (dir)) != 0)
+    {
+	dirlist->push_back (entry->d_name);
+    }
+    closedir (dir);
+
+    return dirlist;
 }
