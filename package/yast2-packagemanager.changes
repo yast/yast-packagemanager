@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 15 12:41:05 CET 2005 - ma@suse.de
+
+- Take care that the original error leading to a media change
+  request is reported and not overwritten by subsequent actions.
+  (#72005)
+
+-------------------------------------------------------------------
 Tue Mar  8 11:25:13 CET 2005 - lnussel@suse.de
 
 - before suggesting to remove a refering package, check if requirements are
