@@ -301,7 +301,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     while (*locationname && isblank (*locationname)) locationname++;
     if (*locationname)
     {
-	dataprovider->_attr_LOCATION = TagRetrievalPos (tagptr->posDataStart() + (std::streampos)(locationname-location), tagptr->posDataEnd());
+	dataprovider->_attr_LOCATION = TagRetrievalPos (tagptr->posDataStart() + (locationname-location), tagptr->posDataEnd());
     }
     else
     {
