@@ -307,6 +307,7 @@ class PkgDuMaster {
       public:
 	const std::string & mountpoint()        const { return _mountpoint; }
 	FSize               total()             const { return _total; }
+	bool                readonly()          const { return _readonly; }
 	// current usage without packages taken into accout
 	FSize               initial_used()      const { return _used; }
 	FSize               initial_available() const { return total() - initial_used(); }
