@@ -26,7 +26,7 @@ bool PkgDep::also_provided_by_installed( const PkgRelation& req )
 unsigned PkgDep::count_providers_for( const PkgSet* set, const PkgRelation& req)
 {
 	unsigned providers = 0;
-	
+
 	RevRel_for( set->provided()[req.name()], prov ) {
 		if (prov->relation().matches( req )) {
 			D__ << req.name() << " satisfied by " << prov->pkg()->name()
@@ -51,7 +51,7 @@ PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg,
 		return NULL;
 
 	bool still_conflicts = false;
-	ci_for( PMSolvable::PkgRelList_, confl, upgrade->conflicts_ ) {
+	ci_for( PMSolvable::,PkgRelList_, confl, upgrade->,conflicts_ ) {
 		if (confl->matches( provides )) {
 			still_conflicts = true;
 			break;
@@ -76,7 +76,7 @@ PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
 	// provided version doesn't match the conflict anymore. Check all names
 	// the upgrade provides if they still match the conflict.
 	bool still_conflicts = false;
-	ci_for( PMSolvable::Provides_, prov, upgrade->all_provides_ ) {
+	ci_for( PMSolvable::,Provides_, prov, upgrade->,all_provides_ ) {
 		if (confl.matches( *prov )) {
 			still_conflicts = true;
 			break;
@@ -102,7 +102,7 @@ PMSolvablePtr PkgDep::try_upgrade_requirerer(
 	// check if all requirements of upgrade that have oldpkg or newpkg as
 	// target are now satisfied
 	bool requirements_ok = true;
-	ci_for( PMSolvable::PkgRelList_, req, upgrade->requires_ ) {
+	ci_for( PMSolvable::,PkgRelList_, req, upgrade->,requires_ ) {
 		if ((req->name() == oldpkg->name() || req->name() == newpkg->name()) &&
 			!req_ok_after_upgrade( *req, oldpkg, newpkg )) {
 			requirements_ok = false;
@@ -129,7 +129,7 @@ void PkgDep::do_upgrade_for_conflict( PMSolvablePtr upgrade )
 {
 	assert( upgrade != NULL );
 	PkgName name = upgrade->name();
-	
+
 	if (candidates->includes(name) && ((*candidates)[name] == upgrade)) {
 		D__ << "Would upgrade " << name << " for solving conflict, but it's "
 			 "already a candidate\n";
@@ -145,7 +145,7 @@ void PkgDep::do_upgrade_for_conflict( PMSolvablePtr upgrade )
 
 bool PkgDep::has_conflict_with( const PkgRelation& prov, PMSolvablePtr pkg )
 {
-	ci_for( PMSolvable::PkgRelList_, confl, pkg->conflicts_ ) {
+	ci_for( PMSolvable::,PkgRelList_, confl, pkg->,conflicts_ ) {
 		if (confl->matches( prov ))
 			return true;
 	}
@@ -161,10 +161,10 @@ void PkgDep::add_referer( const PkgName& name, PMSolvablePtr referer,
 void PkgDep::add_not_available(PMSolvablePtr referer, const PkgRelation& rel )
 {
 	PkgName name = rel.name();
-	
+
 	// add an error result if it doesn't exist yet
 	bool found = false;
-	ci_for( ErrorResultList::, p, bad-> ) {
+	ci_for( ErrorResultList::,, p, bad->, ) {
 		if (p->name == name) {
 			found = true;
 			break;

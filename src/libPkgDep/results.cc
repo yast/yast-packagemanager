@@ -78,7 +78,7 @@ void PkgDep::Result::add_notes( const Notes& notes )
 	from_input_list = notes.from_input;
 	upgrade_to_remove_conflict = notes.upgrade_to_solve_conflict;
 	install_to_avoid_break = notes.install_to_avoid_break;
-	ci_for( IRelInfoList::, n, notes.referers. ) {
+	ci_for( IRelInfoList::,, n, notes.referers., ) {
 		referers.push_back( RelInfo(n->pkg, n->rel) );
 	}
 }
@@ -95,7 +95,7 @@ void PkgDep::ErrorResult::add_notes( const Notes& notes )
 void PkgDep::NeededEditionRange::merge( const PkgRelation& rel )
 {
 	rel_op op = rel.op();
-	
+
 	switch( op ) {
 	  case NONE:
 		break;

@@ -62,7 +62,7 @@ ostream& operator<<( ostream& os, const PkgDep::ErrorResult& res )
 	if (!res.remove_to_solve_conflict.empty())
 	{
 		os << "Remove-To-Solve-Conflict: ";
-		ci_for( PkgDep::SolvableList::, it, res.remove_to_solve_conflict.)
+		ci_for( PkgDep::SolvableList::,, it, res.remove_to_solve_conflict.,)
 		{
 		    if(it != res.remove_to_solve_conflict.begin())
 		    {

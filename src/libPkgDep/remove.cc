@@ -7,8 +7,8 @@ using namespace std;
 void PkgDep::remove( SolvableList& pkgs )
 {
     SolvableList pkgs_p;
-    
-    ci_for( SolvableList::, it, pkgs. ) {
+
+    ci_for( SolvableList::,, it, pkgs., ) {
 	if((*it) == NULL)
 	    { ERR << "got NULL PMSolvablePtr" << endl; continue; }
 
@@ -19,7 +19,7 @@ void PkgDep::remove( SolvableList& pkgs )
     }
 
     pkgs = SolvableList();
-    ci_for( SolvableList::, pkg, pkgs_p. ) {
+    ci_for( SolvableList::,, pkg, pkgs_p., ) {
 	    remove_package( &installed, *pkg, pkgs );
     }
 }
@@ -32,7 +32,7 @@ void PkgDep::virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
 	set.add( assume_instd );
     remove_package( &set, pkg, to_remove );
 }
-	
+
 //recoursive remove package pkg from PkgSet set and extend to_remove
 //with all removed packages
 void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg, SolvableList& to_remove )
@@ -41,7 +41,7 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg, SolvableList& to_re
 	set->remove( pkg );
 
 	bool already_present = false;
-	ci_for( SolvableList::, it, to_remove. ) {
+	ci_for( SolvableList::,, it, to_remove., ) {
 		if (*it == pkg) {
 			already_present = true;
 			break;
@@ -51,10 +51,10 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg, SolvableList& to_re
 		to_remove.push_back( pkg );
 
 	PMSolvable::PkgRelList_type list = pkg->provides();
-	
+
 	for(unsigned callbackdone = 0;callbackdone < 2; callbackdone++)
 	{
-	    ci_for( PMSolvable::PkgRelList_, prov, list.) {
+	    ci_for( PMSolvable::,PkgRelList_, prov, list.,) {
 		    D__ << "  checking provided name " << (*prov).name() << endl;
 		    RevRel_for( set->required()[(*prov).name()], req1 ) {
 			    D__ << "    requirement: " << req1->relation()
