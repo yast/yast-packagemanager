@@ -22,7 +22,7 @@ liby2pminstsrc_la_SOURCES =	\
 	InstSrcError.cc	\
 	InstSrcDescr.cc \
 	InstSrcData.cc	\
-	/
+	\
 	InstTarget.cc	\
 	InstTargetError.cc
 
