@@ -39,6 +39,8 @@ using namespace std;
 
 const std::string PMError::errstrPrefix( N_("ERROR") ); // "ERROR(some text or number)"
 
+const unsigned    PMError::E_ok;    // initialized in header!
+const unsigned    PMError::E_error; // initialized in header!
 const std::string PMError::OKstring   ( N_("OK") );
 const std::string PMError::ERRORstring( N_("error") );
 
