@@ -1,3 +1,23 @@
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                     (C) 2002 SuSE AG |
+\----------------------------------------------------------------------/
+
+   File:       PkgDep.h
+   Purpose:    All functions for solving dependences
+   Author:     Ludwig Nussel <lnussel@suse.de>
+   Maintainer: Ludwig Nussel <lnussel@suse.de>
+
+   copied and modified from phi
+/-*/
+
 #ifndef _PkgDep_h
 #define _PkgDep_h
 
@@ -13,7 +33,9 @@
 #include <y2pm/PkgSet.h>
 #include <y2pm/Alternatives.h>
 
-// solver
+/**
+ * the solver
+ * */
 class PkgDep {
 
 	// ------------------------------ types ------------------------------
@@ -26,7 +48,7 @@ class PkgDep {
 		ASK_ALWAYS, ASK_IF_NO_DEFAULT, AUTO_IF_NO_DEFAULT, AUTO_ALWAYS
 	};
 
-	// RelInfo, Alternative, and NeededEditionRange are for returning results
+	/** RelInfo, Alternative, and NeededEditionRange are for returning results */
 	struct RelInfo {
 		// name of package causing the relation
 		PkgName name;
@@ -53,15 +75,17 @@ class PkgDep {
 
 	typedef Alternatives::AltDefaultList (*AlternativesCallback)( PkgName name );
 
-	// For unresolvable packages, the edition requirements are merged in this
-	// structure and returned. If either 'greater' or 'less' are UNSPEC,
-	// there's no requirement in this direction. If both are UNSPEC, any
-	// edition will satisfy the requirements. Otherwise, a satisfying edition
-	// must be greater than 'greater' and less than 'less'.
-	// The {le,gr}_incl fields are true if the ranges are meant inclusive at
-	// the resp. border.
-	// 'impossible' is true if greater > less, i.e. there are contradicting
-	// requirements.
+	/**
+	 * For unresolvable packages, the edition requirements are merged in this
+	 * structure and returned. If either 'greater' or 'less' are UNSPEC,
+	 * there's no requirement in this direction. If both are UNSPEC, any
+	 * edition will satisfy the requirements. Otherwise, a satisfying edition
+	 * must be greater than 'greater' and less than 'less'.
+	 * The {le,gr}_incl fields are true if the ranges are meant inclusive at
+	 * the resp. border.
+	 * 'impossible' is true if greater > less, i.e. there are contradicting
+	 * requirements.
+	 * */
 	struct NeededEditionRange {
 		PkgEdition greater;
 		PkgEdition less;
@@ -90,40 +114,69 @@ class PkgDep {
 	typedef RelInfoList::const_iterator RelInfoList_const_iterator;
 
 	struct Notes;
+
+	/**
+	 * solver result
+	 * */
 	struct Result {
 		PkgName name;
 		PkgEdition edition;
 
+		/**
+		 * pointer to affected solvable, may be NULL if there is none
+		 * */
 		PMSolvablePtr solvable;
 
-		// list of packages that require this pkg (i.e., why it was added or
-		// can't be omitted from the input list)
+		/**
+		 * list of packages that require this pkg (i.e., why it was
+		 * added or can't be omitted from the input list)
+		 * */
 		RelInfoList referers;
-		// UNSPEC means is no upgrade; otherwise: currently installed version
+		/**
+		 * UNSPEC means is no upgrade; otherwise: currently installed version
+		 * */
 		PkgEdition is_upgrade_from;
-		// UNSPEC means is no downgrade; otherwise: currently installed version
+		/**
+		 * UNSPEC means is no downgrade; otherwise: currently installed version
+		 * */
 		PkgEdition is_downgrade_from;
-		// true if this package was passed in the input list (i.e., hasn't been
-		// added by PkgDep)
+		/**
+		 * true if this package was passed in the input list (i.e.,
+		 * hasn't been added by PkgDep)
+		 * */
 		bool from_input_list : 1;
-		// this package has been upgraded to resolve a conflict (otherwise, the
-		// update wouldn't be necessary)
+		/**
+		 * this package has been upgraded to resolve a conflict
+		 * (otherwise, the update wouldn't be necessary)
+		 * */
 		bool upgrade_to_remove_conflict : 1;
-		// this package has been installed to avoid a broken requirement by
-		// another upgrade/obsoletion
+		/**
+		 * this package has been installed to avoid a broken
+		 * requirement by another upgrade/obsoletion
+		 * */
 		bool install_to_avoid_break : 1;
 
+		/**
+		 * construct Result.
+		 * is_upgrade_from and is_downgrade_from will be calculated
+		 * */
 		Result(const PkgDep& pkgdep, PMSolvablePtr pkg);
+
+		/** construct basic Result */
 		Result(const PkgDep& pkgdep, const PkgName& name);
 		void add_notes( const Notes& notes );
 	};
 
 	struct ErrorResult : public Result {
-		// true if this pkg is required but not available, not_avail_range
-		// gives details
+		/**
+		 * true if this pkg is required but not available,
+		 * not_avail_range gives details
+		 * */
 		bool not_available;
 		NeededEditionRange not_avail_range;
-		// true if not all requirements could be satisfied
+		/**
+		 * true if not all requirements could be satisfied
+		 * */
 		RelInfoList unresolvable;
 		//
 		std::list<Alternative> alternatives;
@@ -201,7 +254,7 @@ class PkgDep {
 	typedef IRelInfoList::iterator IRelInfoList_iterator;
 	typedef IRelInfoList::const_iterator IRelInfoList_const_iterator;
 
-	// Notes keeps some additional information to candidates
+	/** Notes keeps some additional information to candidates */
 	struct Notes {
 		bool from_input : 1;
 		bool upgrade_to_solve_conflict : 1;
@@ -329,16 +382,16 @@ public:
 		: alt_mode(m), installed(PkgSet(DTagListI0())),
 		  available(*default_avail) {}
 */
-	// install packages (if good result, add candidates to installed set)
+	/** install packages (if good result, add candidates to installed set) */
 	// does not throw -- ln
 	bool install( PkgSet& candidates,
 				  ResultList& good, ErrorResultList& bad,
 				  bool commit_to_installed = true );
-	// remove a list of packages; the 'pkgs' list will be extended by all
-	// packages that have to be removed, too, to make the installed set
-	// consistent again
+	/** remove a list of packages; the 'pkgs' list will be extended by all
+	 * packages that have to be removed, too, to make the installed set
+	 * consistent again */
 	void remove( NameList& pkgs );
-	// check consistency of current installed set
+	/** check consistency of current installed set */
 	bool consistent( ErrorResultList& failures );
 	bool upgrade(	PkgSet&candidates, ResultList& out_good,
 			ErrorResultList& out_bad, NameList& to_remove,

@@ -27,7 +27,7 @@ liby2pm_la_SOURCES = Y2PM.cc \
 	PMError.cc	\
 	PMSolvable.cc	\
 	PMObject.cc	\
-	PMManager.cc	\
+	PMManager.cc PMManager_solver.cc	\
 	PMSelectable.cc	SelState.cc \
 	PMDataProvider.cc
 

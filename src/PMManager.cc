@@ -155,7 +155,7 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
   }
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    DBG << "--set installed object " << *iter_r << endl;
+    D__ << "--set installed object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -202,7 +202,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
   MIL << "Going to add " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    DBG << "--add object " << *iter_r << endl;
+    D__ << "--add object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
