@@ -206,9 +206,10 @@ InstSrcDescr::writeCache (void)
 ostream & InstSrcDescr::dumpOn( ostream & str ) const
 {
   Rep::dumpOn( str ) << "(";
-  str << " arch: " << _base_arch;
   str << " type:" << _type;
   str << " url:" << _url;
+  str << " product dir: " << _product_dir;
+  str << " media vendor: " << _media_vendor;
   str << " product:" << _content_product;
   str << " vendor:" << _content_vendor;
   return str << ")";
@@ -259,8 +260,8 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 	    switch( tagset->assign( tagstr.c_str(), parser, mediaCacheStream ) )
 	    {
 		case CommonPkdParser::Tag::ACCEPTED:
-		    std::cerr << "*** filling ***" << std::endl;
 		    // fill InstSrcDescr 
+		    std::cerr << "*** filling: " << tagstr << std::endl;
 		    fillInstSrcDescr( ndescr, tagset );
 		    repeatassign = false;
 		    err = Error::E_ok;
@@ -287,9 +288,9 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
     tagset->clear();
 
     if( parse )
-	std::cerr << "**  +* parsing completed ***" << std::endl;
+	MIL << "*** parsing completed ***" << std::endl;
     else
-	std::cerr << "*** parsing was aborted ***" << std::endl;
+	MIL << "*** parsing was aborted ***" << std::endl;
     
     
 #warning TBD InstSrcDescr cache read
@@ -308,11 +309,14 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 
 bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset )
 {
+    bool ok = true;
+    std::vector<std::string> multi;
+
+    // architecture
     PkgArch arch( (tagset->getTagByIndex(InstSrcMediaTags::ARCH))->Data() );
     ndescr->set_base_arch( arch );
 
-    MIL << "*** Arch" << arch << std::endl;
-
+    // default activate
     if (  (tagset->getTagByIndex(InstSrcMediaTags::ACTIVATE))->Data() == "1" )
     {
 	ndescr->set_default_activate( true );
@@ -322,14 +326,37 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 	ndescr->set_default_activate( false );	
     }
 
+    // type
     string typeStr = (tagset->getTagByIndex(InstSrcMediaTags::TYPE))->Data();
-    InstSrc::Type type = InstSrc::fromString( typeStr );
 
+    InstSrc::Type type = InstSrc::fromString( typeStr );
     ndescr->set_type( type );
 
-    MIL << "*** Type" << type << std::endl;
-    
-    return true;
+    // media data
+    multi = (tagset->getTagByIndex(InstSrcMediaTags::MEDIA))->MultiData();
+
+    if ( !multi.empty() )
+    {
+	if ( !multi[0].empty() )	ndescr->set_media_vendor( multi[0] );
+	if ( !multi[1].empty() )	ndescr->set_media_id( multi[1] );
+	if ( !multi[2].empty() ) 	ndescr->set_media_count( multi[2] );
+    }
+    else
+    {
+	ok = false;
+    }
+
+    // URL
+    Url url( (tagset->getTagByIndex(InstSrcMediaTags::URL))->Data() );
+
+    ndescr->set_url( url );
+
+    // product dir
+    Pathname dir( (tagset->getTagByIndex(InstSrcMediaTags::PRODUCTDIR))->Data() );
+
+    ndescr->set_product_dir( dir );
+
+    return ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -350,15 +377,17 @@ PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
     {
 	return Error::E_create_file;
     }
-    
+
     file << "=Arch: " << _base_arch << endl;
     file << "=Type: " << InstSrc::toString(_type) << endl;
+    file << "=URL: " << _url << endl;
+    file << "=ProductDir: " << _product_dir << endl;
+    file << "=Default_activate: " << (_default_activate?"1":"0") << endl;
     file << "+Media: " << endl;
     file << _media_vendor << endl;
     file << _media_id << endl;
     file << _media_count << endl;
     file << "-Media:" << endl;
-    file << "=Default_activate: " << (_default_activate?"1":"0") << endl;
     
     return Error::E_ok;
 }
