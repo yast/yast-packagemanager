@@ -2126,6 +2126,8 @@ RpmDb::backupPackage(const string& packageName)
 	{
 	    "tar",
 	    "-czhP",
+	    "-C",
+	    _rootdir.asString().c_str(),
 	    "--ignore-failed-read",
 	    "-f",
 	    backupFilename.asString().c_str(),
