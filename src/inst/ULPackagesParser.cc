@@ -744,6 +744,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 	{
 	    have_locale = false;
 	    WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;
+	    err = PMError::E_ok;
 	}
 	break;
     }
@@ -765,6 +766,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 	if (err)
 	{
 	    WAR << "Media can't provide " << duname << ":" << err.errstr() << endl;
+	    err = PMError::E_ok;
 	}
 	else
 	{
