@@ -1,0 +1,114 @@
+<!-- URL definition -->
+<!-- Maintainer: kkaempf@suse.de -->
+<chapter><title>URL specification for media access</title>
+
+<section><title>Introduction</title>
+<para>
+The URL is a string representation for a media location.
+It specifies the physical access to the media. It does not
+make any assumptions about the media content.
+</para>
+</section>
+<section><title>General layout</title>
+<para>
+A media URL consists of four parts
+<itemizedlist>
+  <listitem><para>Media Type</para>
+    <para>Allowed types are cd, dvd, nfs, ftp, dir, disk, http</para>
+    <para>Types are not case sensitive</para>
+  </listitem>
+  <listitem><para>Media device or server</para>
+    <para>Some media types allow a comma-separated list of devices,
+      e.g. cd or dvd ("/dev/cdrom,/dev/cdrecorder")</para>
+  </listitem>
+  <listitem><para>Path on device or server</para></listitem>
+  <listitem><para>options</para>
+    <para>this is a type-specific comma-separated list of 'type=value'
+       pairs, e.g. 'user=ftp,pass=ftp' for ftp access</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+Type, device, path, and options are separated by a colon (':')
+</para>
+<para>
+Type, device, and path are mandatory. Options can be left out.
+</para>
+</section>
+<section><title>CD access</title>
+<example>
+  <title>URL for CD access</title>
+  <para>
+  <screen width="60">
+    cd:/dev/cdrom:/suse
+    cd:/dev/cdrom,/dev/cdrecorder:/suse
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>DVD access</title>
+<example>
+  <title>URL for DVD access</title>
+  <para>
+  <screen width="60">
+    dvd:/dev/dvd:/suse
+    dvd:/dev/dvd,/dev/dvd1:/suse
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>NFS access</title>
+<example>
+  <title>URL for NFS access</title>
+  <para>
+  <screen width="60">
+    nfs:nfs.suse.de:/var/share/SuSE-Linux/CD1
+    nfs:12.34.56.78:/
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>FTP access</title>
+<example>
+  <title>URL for FTP access</title>
+  <para>
+  <screen width="60">
+    ftp:ftp.suse.com:/pub/suse/i386/8.0/suse
+    ftp:you.suse.de:/pub/suse/updates/i386/7.3:user=anon,pass=ftp,proxy=proxy.suse.de,proxyport=4242,proxytype=http
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>Directory access</title>
+<example>
+  <title>URL for DIR access</title>
+  <para>
+  <screen width="60">
+    dir::/local/directory
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>Disk partition access</title>
+<example>
+  <title>URL for DISK access</title>
+  <para>
+  <screen width="60">
+    disk:/dev/hda3:/suse/CD1
+  </screen>
+  </para>
+</example>
+</section>
+<section><title>HTTP access</title>
+<example>
+  <title>URL for HTTP access</title>
+  <para>
+  <screen width="60">
+    http:maintenance.suse.de:/restricted/login/suse:user=sample,pass=word42
+  </screen>
+  </para>
+</example>
+</section>
+
+</chapter>
+
