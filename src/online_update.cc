@@ -85,7 +85,7 @@ class Callbacks : public InstYou::Callbacks
                     if (_verbose) {
                         cout << "#####" << (*it)->fullName() << "#####" << endl;
                         if (_skipPre)
-                            cout << _("NOTE: THIS PATCH HAS BEEN SKIPPED\n      (option --skip-pre and patch contains pre-install information)")
+                            cout << _("NOTE: THIS PATCH HAS BEEN SKIPPED\n      (option --skip-pre and patch contains preinstall information)")
                                  << endl;
                         cout << (*it)->preInformation() << endl;
                     }
@@ -180,15 +180,13 @@ void usage()
        << _("-D, --debug              Debug output.") << endl
        << endl
        << _("-S, --select-patches <list of patches>") << endl
-       << _(
-"                         Select given patches for download and installation. Patches are\n"
-"                         specified as comma-separated list of patch names. Only patches\n"
-"                         that would also be selected by the default selection algorithm\n"
-"                         can be selected (this behavior is overriden by the --force option)."
-	) << endl
+       << _("                         Select patches for download and installation. Patches are\n"
+            "                         specified as a comma-separated list of patch names. Only patches\n"
+            "                         that would also be selected by the default selection algorithm\n"
+            "                         can be selected (this behavior is overriden by the --force option).") << endl
        << _("-f, --force              Force installation of a selected patch.") << endl
-       << _("-P, --skip-pre           Skip patches with pre-install information (e.g. kernel updates).\n"
-            "                         Instead, a message will be generated.\n"
+       << _("-P, --skip-pre           Skip patches with preinstall information (e.g., kernel updates).\n"
+            "                         Instead, a message is generated.\n"
             "                         (Do not use together with -s)") << endl
        << endl
        << "security | recommended | patchlevel | document | optional   "
@@ -416,7 +414,7 @@ int main( int argc, char **argv )
 
   string version;
   if ( versionStr ) version = versionStr;
-  else version = "9.1";
+  else version = "9.2";
   
   string arch;
   if ( archStr ) arch = archStr;

@@ -1733,7 +1733,7 @@ PMError InstYou::retrieveDelta( const std::string& name, const PMYouProductPtr& 
   if(digest.empty() || digest != md5sum)
   {
     // Translator: filename, md5sum, md5sum
-    string msg = stringutil::form(_("file '%s' has wrong MD5 checksum: '%s' != '%s'"),
+    string msg = stringutil::form(_("File '%s' has the wrong MD5 checksum: '%s' != '%s'"),
 	path.asString().c_str(), digest.c_str(), md5sum.c_str());
     return PMError(YouError::E_md5sum_mismatch, msg);
   }
