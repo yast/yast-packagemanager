@@ -23,9 +23,9 @@
 
 #include <y2pm/InstData.h>
 
-#include <y2pm/PMSelection.h>
 #include <y2pm/PMPackage.h>
-#include <y2pm/PMSolvable.h>
+#include <y2pm/PMSelection.h>
+#include <y2pm/PMYouPatch.h>
 
 using namespace std;
 
@@ -45,26 +45,11 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-    /**
-     * constructor
-     * initialization with new media
-     */
-InstData::InstData (MediaAccessPtr media)
+InstData::InstData()
+    : _selections( 0 )
+    , _packages( 0 )
+    , _patches( 0 )
 {
-    return;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstData::InstData
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION : initialization with known media
-//
-InstData::InstData (const Pathname & contentcachefile)
-{
-    return;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -77,6 +62,10 @@ InstData::InstData (const Pathname & contentcachefile)
 //
 InstData::~InstData()
 {
+#warning CHECKIT must detach packages to get empty refcounts
+  delete _selections;
+  delete _packages;
+  delete _patches;
 }
 
 /**
@@ -192,7 +181,7 @@ InstData::findPackages (const std::list<PMPackagePtr> *packagelist, const string
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
  */
-const std::list<PMSolvablePtr> *
+const std::list<PMYouPatchPtr> *
 InstData::getPatches() const
 {
     return _patches;

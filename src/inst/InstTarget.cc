@@ -36,14 +36,6 @@
 
 using namespace std;
 
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : InstTarget
-//
-///////////////////////////////////////////////////////////////////
-
-IMPL_BASE_POINTER(InstTarget);
-
 /**
  * constructor
  * @param rootpath, path to root ("/") of target system
@@ -52,7 +44,7 @@ IMPL_BASE_POINTER(InstTarget);
  * (running in inst-sys) or "/whatever" if installing into
  * a directory
  */
-InstTarget::InstTarget ( const std::string & rootpath ) :
+InstTarget::InstTarget ( const Pathname & rootpath ) :
     _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
     _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
     _rootdir(rootpath)
@@ -252,13 +244,6 @@ const std::string& InstTarget::getRoot() const
     return _rootdir.asString();
 }
 
-
-ostream &
-InstTarget::dumpOn( ostream & str ) const
-{
-    Rep::dumpOn( str );
-    return str;
-}
 
 void InstTarget::setPackageInstallProgressCallback(void (*func)(double,void*), void* data)
 {

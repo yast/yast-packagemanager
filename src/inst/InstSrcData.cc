@@ -43,24 +43,13 @@ IMPL_BASE_POINTER(InstSrcData);
 //	METHOD NAME : InstSrcData::InstSrcData
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION : initialization with new media
+//	DESCRIPTION :
 //
-InstSrcData::InstSrcData(MediaAccessPtr media_r)
-    : _data (new InstData (media_r))
+InstSrcData::InstSrcData()
+    : _propagating( false )
+    , _data( new InstData )
 {
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcData::InstSrcData
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION : initialization with known media
-//
-InstSrcData::InstSrcData(const Pathname & contentcachefile)
-    : _data (new InstData (contentcachefile))
-{
+  MIL << "New InstSrcData " << *this << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -73,7 +62,80 @@ InstSrcData::InstSrcData(const Pathname & contentcachefile)
 //
 InstSrcData::~InstSrcData()
 {
-    delete _data;
+  delete _data;
+  MIL << "Delete InstSrcData " << *this << endl;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::_instSrc_atach
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcData::_instSrc_atach( const InstSrcPtr & instSrc_r )
+{
+  if ( _instSrc || _propagating ) {
+    INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
+  }
+
+  _instSrc = instSrc_r;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::_instSrc_detach
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcData::_instSrc_detach()
+{
+  if ( !_instSrc || _propagating ) {
+    INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
+    if ( _propagating )
+      _instSrc_withdraw();
+  }
+
+  _instSrc = 0;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::_instSrc_propagate
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcData::_instSrc_propagate()
+{
+  if ( !_instSrc || _propagating ) {
+    INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
+  }
+
+  propagateObjects();
+  _propagating = true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::_instSrc_withdraw
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcData::_instSrc_withdraw()
+{
+  if ( !_instSrc || !_propagating ) {
+    INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
+  }
+
+  withdrawObjects();
+  _propagating = false;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -96,7 +158,7 @@ ostream & InstSrcData::dumpOn( ostream & str ) const
 //	METHOD NAME : InstSrcData::tryGetDescr
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
+//	DESCRIPTION : JUST A TEMPLATE
 //
 PMError InstSrcData::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				  MediaAccessPtr media_r, const Pathname & produduct_dir_r )
@@ -111,7 +173,7 @@ PMError InstSrcData::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   ///////////////////////////////////////////////////////////////////
 
   // TBD
-  //err = Error::E_error;
+  err = Error::E_error;
 
   ///////////////////////////////////////////////////////////////////
   // done
@@ -128,7 +190,7 @@ PMError InstSrcData::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 //	METHOD NAME : InstSrcData::tryGetData
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
+//	DESCRIPTION : JUST A TEMPLATE
 //
 PMError InstSrcData::tryGetData( InstSrcDataPtr & ndata_r,
 				 MediaAccessPtr media_r, const Pathname & descr_dir_r )
@@ -143,7 +205,7 @@ PMError InstSrcData::tryGetData( InstSrcDataPtr & ndata_r,
   ///////////////////////////////////////////////////////////////////
 
   // TBD
-  //err = Error::E_error;
+  err = Error::E_error;
 
   ///////////////////////////////////////////////////////////////////
   // done

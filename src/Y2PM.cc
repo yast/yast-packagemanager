@@ -33,9 +33,20 @@ using namespace std;
 #define Y2LOG "Y2PM"
 ///////////////////////////////////////////////////////////////////
 
-//InstTarget * Y2PM::_instTarget = 0;
+///////////////////////////////////////////////////////////////////
+// global settings
+///////////////////////////////////////////////////////////////////
+#warning MUST INIT GLOBAL SETTINGS
 
-//InstSrcManager * Y2PM::_instSrcManager = 0;
+Pathname Y2PM::_instTarget_rootdir( "/" );
+
+///////////////////////////////////////////////////////////////////
+// components provided
+///////////////////////////////////////////////////////////////////
+
+InstTarget * Y2PM::_instTarget = 0;
+
+InstSrcManager * Y2PM::_instSrcManager = 0;
 
 PMPackageManager *   Y2PM::_packageManager = 0;
 
@@ -43,9 +54,9 @@ PMSelectionManager * Y2PM::_selectionManager = 0;
 
 PMYouPatchManager *  Y2PM::_youPatchManager = 0;
 
-InstTarget *  Y2PM::_instTarget = 0;
-
-string* Y2PM::_rootdir = 0;
+///////////////////////////////////////////////////////////////////
+// CallBacks
+///////////////////////////////////////////////////////////////////
 
 Y2PM::CallBacks Y2PM::_callbacks = Y2PM::CallBacks::CallBacks();
 
@@ -69,17 +80,15 @@ Y2PM::CallBacks::CallBacks()
 //
 //	DESCRIPTION :
 //
-#if 0
 InstTarget & Y2PM::instTarget()
 {
   if ( !_instTarget ) {
-    MIL << "Launch InstTarget..." << endl;
-    _instTarget = new InstTarget;
+    MIL << "Launch InstTarget... (rootdir " << _instTarget_rootdir << ")" << endl;
+    _instTarget = new InstTarget( _instTarget_rootdir );
     MIL << "Created InstTarget" << endl;
   }
   return *_instTarget;
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -89,7 +98,6 @@ InstTarget & Y2PM::instTarget()
 //
 //	DESCRIPTION :
 //
-#if 0
 InstSrcManager & Y2PM::instSrcManager()
 {
   if ( !_instSrcManager ) {
@@ -99,7 +107,6 @@ InstSrcManager & Y2PM::instSrcManager()
   }
   return *_instSrcManager;
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -165,51 +172,4 @@ PMYouPatchManager & Y2PM::youPatchManager()
   return *_youPatchManager;
 }
 
-static void progresscallback(double p, void* nix)
-{
-    cout << p << endl;
-}
 
-/**
- * Access to InstTarget
- * */
-InstTarget & Y2PM::instTarget()
-{
-    if(!_rootdir)
-    {
-	_rootdir = new string("/");
-    }
-    if(!_instTarget)
-    {
-	MIL << "Create InstTarget" << endl;
-       _instTarget = new InstTarget(*_rootdir);
-       _instTarget->setPackageInstallProgressCallback(progresscallback,NULL);
-
-    }
-
-    return *_instTarget;
-}
-
-/**
- * set path where root fs is mounted
- * */
-bool Y2PM::setRoot(const std::string& r)
-{
-    if( _rootdir)
-    {
-	if( _instTarget )
-	{
-	    ERR << "root dir already set" << endl;
-	    return false;
-	}
-	else
-	{
-	    delete _rootdir;
-	    _rootdir = NULL;
-	}
-    }
-
-    _rootdir = new string(r);
-
-    return true;
-}

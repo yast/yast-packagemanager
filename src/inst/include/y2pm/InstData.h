@@ -27,36 +27,35 @@
 
 #include <y2util/Pathname.h>
 
-#include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMPackagePtr.h>
-#include <y2pm/PMSolvablePtr.h>
+#include <y2pm/PMSelectionPtr.h>
+#include <y2pm/PMYouPatchPtr.h>
 
 #include <y2pm/MediaAccess.h>
 
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstData
+/**
+ * @short InstData currently is a kludge. Dont' use it.
+ **/
 class InstData {
-  REP_BODY(InstData);
+  //REP_BODY(InstData);
 
   private:
+
     const std::list<PMSelectionPtr> *_selections;
     const std::list<PMPackagePtr>  *_packages;
-    const std::list<PMSolvablePtr> *_patches;
+    const std::list<PMYouPatchPtr> *_patches;
 
-  public:
-
-    /**
-     * constructor
-     * initialization with known media
-     */
-    InstData (const Pathname & contentcachefile);
+  private:
 
     /**
-     * constructor
-     * initialization with new media
-     */
-    InstData (MediaAccessPtr media);
+     * InstData currently is a kludge. Dont' use it.
+     **/
+    friend class InstSrcData;
+
+    InstData();
 
     virtual ~InstData();
 
@@ -95,19 +94,19 @@ class InstData {
      * @return void
      */
     void setSelections (std::list<PMSelectionPtr> *sels) { _selections = sels; }
-    
+
     /**
      * generate PMSelection objects for each selection on the source
      * @return list of PMSelectionPtr on this source
      */
     const std::list<PMSelectionPtr> *getSelections (void) const;
-    
+
     /**
      * set list of packages
      * @return void
      */
     void setPackages (std::list<PMPackagePtr> *pacs) { _packages = pacs; }
-    
+
     /**
      * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source
@@ -118,13 +117,13 @@ class InstData {
      * set list of patches
      * @return void
      */
-    void setPatches (std::list<PMSolvablePtr> *pats) { _patches = pats; }
-    
+    void setPatches (std::list<PMYouPatchPtr> *pats) { _patches = pats; }
+
     /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source
      */
-    const std::list<PMSolvablePtr> *getPatches (void) const;
+    const std::list<PMYouPatchPtr> *getPatches (void) const;
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 

@@ -88,10 +88,6 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
 
   public:
 
-    virtual std::ostream & dumpOn( std::ostream & str ) const;
-
-  public:
-
     /**
      * Any concrete InstSrcData must realize this, as it knows the expected
      * layout on the media. Expect MediaAccessPtr to be open and attached.
@@ -156,7 +152,7 @@ public:
     };
 
 public:
-    InstSrcData_ULPkgTags( ) 
+    InstSrcData_ULPkgTags( )
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
@@ -192,7 +188,7 @@ public:
 private:
 
     CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
-	
+
 	CommonPkdParser::Tag* t;
 	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
 	this->addTag(t);
@@ -200,7 +196,7 @@ private:
 
 	return t;
     }
-    
+
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -227,7 +223,7 @@ public:
     };
 
 public:
-    InstSrcData_ULLangTags( ) 
+    InstSrcData_ULLangTags( )
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
@@ -245,7 +241,7 @@ public:
 private:
 
     CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
-	
+
 	CommonPkdParser::Tag* t;
 	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
 	this->addTag(t);
@@ -253,7 +249,7 @@ private:
 
 	return t;
     }
-    
+
 };
 
 
@@ -289,7 +285,7 @@ public:
     };
 
 public:
-    InstSrcData_ULSelTags( ) 
+    InstSrcData_ULSelTags( )
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
@@ -319,7 +315,7 @@ public:
 private:
 
     CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
-	
+
 	CommonPkdParser::Tag* t;
 	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
 	this->addTag(t);
@@ -327,7 +323,7 @@ private:
 
 	return t;
     }
-    
+
 };
 
 #endif // InstSrcData_UL_h
