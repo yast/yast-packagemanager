@@ -68,6 +68,7 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	MediaHandler.h \
 	MediaDIR.h \
 	MediaSMB.h \
+	MediaCIFS.h \
 	MediaDISK.h \
 	MediaNFS.h \
 	MediaCD.h \
