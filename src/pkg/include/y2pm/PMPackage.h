@@ -70,6 +70,7 @@ class PMPackage : virtual public Rep, public PMObject {
 	// SuSE packages values
 	ATTR_RECOMMENDS,
 	ATTR_SUGGESTS,
+	ATTR_MEDIANR,
 	ATTR_LOCATION,
 	ATTR_KEYWORDS,
 	// last entry:
@@ -117,6 +118,7 @@ class PMPackage : virtual public Rep, public PMObject {
 	const std::list<std::string> recommends() const;
 	const std::list<std::string> suggests() const;
 	const std::string location() const;
+	const int medianr() const;
 	const std::list<std::string> keywords() const;
 
     protected:

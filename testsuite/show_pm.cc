@@ -135,7 +135,8 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     cout << "Files: " << strlist2string(p->filenames(), "\n") << endl;
     cout << "Recommends: " << strlist2string(p->recommends()) << endl;
     cout << "Suggests: " << strlist2string(p->suggests()) << endl;
-    cout << "Location: " << p->location() << endl;
+    cout << "Location: '" << p->location() << "'" << endl;
+    cout << "MediaNr: " << p->medianr () << endl;
     cout << "Keywords: " << strlist2string(p->keywords()) << endl;
     cout << "========" << endl;
     p->stopRetrieval();

@@ -206,13 +206,41 @@ InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
 
     SET_CACHE (RECOMMENDS);
     SET_CACHE (SUGGESTS);
-    SET_CACHE (LOCATION);
+
+    // split =Loc: <medianr> <filename>
+    // and adapt position for filename accordingly
+    tagptr = GET_TAG (LOCATION);
+    const char *location = tagptr->Data().c_str();
+    const char *locationname = location;
+    while (*locationname && isblank (*locationname)) locationname++;
+    if ((dataprovider->_attr_MEDIANR = atoi (locationname)) <= 0)
+    {
+	WAR << "** suspiciuous media nr '" << locationname << "'" << endl;
+    }
+    while (*locationname && isdigit (*locationname)) locationname++;
+    while (*locationname && isblank (*locationname)) locationname++;
+    if (*locationname)
+    {
+	SET_POS (LOCATION, tagptr->posDataStart() + (std::streampos)(locationname-location), tagptr->posDataEnd());
+    }
+    else
+    {
+	ERR << "No location for " << package->name() << endl;
+    }
 
     stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
-    if (splitted.size() > 0)
+    if (splitted.size() <= 0)
+    {
+	ERR << "No archivesize for " << package->name() << endl;
+    }
+    else
     {
 	SET_VALUE (ARCHIVESIZE, FSize (atoll(splitted[0].c_str())));
-	if (splitted.size() > 1)
+	if (splitted.size() < 2)
+        {
+	    ERR << "No size for " << package->name() << endl;
+	}
+	else
 	{
 	    SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
 	}

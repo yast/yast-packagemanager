@@ -190,6 +190,12 @@ PMPackageDataProvider::location () const
     return "";
 }
 
+const int
+PMPackageDataProvider::medianr () const
+{
+    return 1;
+}
+
 const std::list<std::string>
 PMPackageDataProvider::keywords () const
 {

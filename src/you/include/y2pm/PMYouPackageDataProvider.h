@@ -81,6 +81,8 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	const std::list<std::string> recommends () const { return PMPackageDataProvider::recommends(); }
 	const std::list<std::string> suggests () const { return PMPackageDataProvider::suggests(); }
 	const std::string location () const { return PMPackageDataProvider::location(); }
+#warning YouPackage Media Number default used
+	const int medianr () const { return PMPackageDataProvider::medianr(); }
 	const std::list<std::string> keywords () const { return PMPackageDataProvider::keywords(); }
 
     public:

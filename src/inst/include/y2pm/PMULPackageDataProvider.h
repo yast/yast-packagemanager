@@ -81,6 +81,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	TagCacheRetrievalPos _attr_RECOMMENDS;
 	TagCacheRetrievalPos _attr_SUGGESTS;
 	TagCacheRetrievalPos _attr_LOCATION;
+	int _attr_MEDIANR;
 	TagCacheRetrievalPos _attr_KEYWORDS;
 
 	// retrieval pointer for packages data
@@ -145,6 +146,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	const std::list<std::string> recommends () const;
 	const std::list<std::string> suggests () const;
 	const std::string location () const;
+	const int medianr () const;
 	const std::list<std::string> keywords () const;
 
     public:

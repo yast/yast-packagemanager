@@ -77,6 +77,7 @@ class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
 	virtual const std::list<std::string> recommends () const = 0;
 	virtual const std::list<std::string> suggests () const = 0;
 	virtual const std::string location () const = 0;
+	virtual const int medianr () const = 0;
 	virtual const std::list<std::string> keywords () const = 0;
 
 };
