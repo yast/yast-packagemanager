@@ -66,20 +66,23 @@ class librpmDb::D {
     {
       // set %_dbpath macro
       ::addMacro( NULL, "_dbpath", NULL, _dbPath.asString().c_str(), RMIL_CMDLINE );
-
-      // init database
       const char * root = ( _root == "/" ? NULL : _root.asString().c_str() );
       int          perms = 0644;
 
-      int res = ::rpmdbInit( root, perms );
-      if ( res ) {
-	_error = Error::E_RpmDB_init_failed;
-	ERR << "rpmdbInit error(" << res << "): " << *this << endl;
-	return;
+      // check whether to create a new db
+      PathInfo master( _root + _dbPath + "Packages" );
+      if ( ! master.isFile() ) {
+	// init database
+	int res = ::rpmdbInit( root, perms );
+	if ( res ) {
+	  _error = Error::E_RpmDB_init_failed;
+	  ERR << "rpmdbInit error(" << res << "): " << *this << endl;
+	  return;
+	}
       }
 
       // open database
-      res = ::rpmdbOpen( root, &_db, (readonly_r ? O_RDONLY : O_RDWR ), perms );
+      int res = ::rpmdbOpen( root, &_db, (readonly_r ? O_RDONLY : O_RDWR ), perms );
       if ( res || !_db ) {
 	_error = Error::E_RpmDB_open_failed;
 	if ( _db ) {
