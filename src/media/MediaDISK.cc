@@ -49,7 +49,7 @@ using namespace std;
 MediaDISK::MediaDISK( const Url &      url_r,
 		      const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
-		    true,  // attachPoint_is_mediaroot
+		    url_r.path(), // urlpath below attachpoint
 		    false ) // does_download
 {
 	_device = _url.option("device");

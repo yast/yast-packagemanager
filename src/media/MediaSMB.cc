@@ -32,6 +32,55 @@
 
 using namespace std;
 
+/******************************************************************
+**
+**
+**	FUNCTION NAME : getShare
+**	FUNCTION TYPE : inline Pathname
+**
+** Get the 1st path component (CIFS share name).
+*/
+inline string getShare( Pathname spath_r )
+{
+  if ( spath_r.empty() )
+    return string();
+
+  string share( spath_r.absolutename().asString() );
+  string::size_type sep = share.find( "/", 1 );
+  if ( sep == string::npos )
+    share = share.erase( 0, 1 ); // nothing but the share name in spath_r
+  else
+    share = share.substr( 1, sep-1 );
+
+  // deescape %2f in sharename
+  while ( (sep = share.find( "%2f" )) != string::npos ) {
+    share.replace( sep, 3, "/" );
+  }
+
+  return share;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : stripShare
+**	FUNCTION TYPE : inline Pathname
+**
+** Strip off the 1st path component (CIFS share name).
+*/
+inline Pathname stripShare( Pathname spath_r )
+{
+  if ( spath_r.empty() )
+    return Pathname();
+
+  string striped( spath_r.absolutename().asString() );
+  string::size_type sep = striped.find( "/", 1 );
+  if ( sep == string::npos )
+    return "/"; // nothing but the share name in spath_r
+
+  return striped.substr( sep );
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaSMB
@@ -49,8 +98,9 @@ using namespace std;
 MediaSMB::MediaSMB( const Url &      url_r,
 		    const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
-		    false, // attachPoint_is_mediaroot
-		    false ) // does_download
+		    stripShare( url_r.path() ), // urlpath WITHOUT share name at attachpoint
+		    false )       // does_download
+    , _vfstype( "smbfs" )
 {
 }
 
@@ -60,7 +110,12 @@ MediaSMB::MediaSMB( const Url &      url_r,
 //	METHOD NAME : MediaSMB::attachTo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
+//	DESCRIPTION : Asserted that not already attached, and attachPoint
+//      is a directory.
+//
+//      NOTE: The implementation currently serves both, "smbfs"
+//      and "cifs". The only difference is the vfstype passed to
+//      the mount command.
 //
 PMError MediaSMB::attachTo(bool next)
 {
@@ -69,14 +124,12 @@ PMError MediaSMB::attachTo(bool next)
     if(next)
 	return Error::E_not_supported_by_media;
 
-    const char* const filesystem = "smbfs";
     const char *mountpoint = attachPoint().asString().c_str();
     Mount mount;
     PMError ret;
 
     string path = "//";
-    path += _url.host();
-    path += _url.path();
+    path += _url.host() + "/" + getShare( _url.path() );
 
     Mount::Options options( _url.option("mountoptions") );
     string username = _url.username();
@@ -120,19 +173,23 @@ PMError MediaSMB::attachTo(bool next)
 
     // pass 'username' and 'password' via environment
     Mount::Environment environment;
-    environment["USER"] = username;
-    environment["PASSWD"] = password;
+    if ( username.size() )
+      environment["USER"] = username;
+    if ( password.size() )
+      environment["PASSWD"] = password;
 
     //////////////////////////////////////////////////////
 #warning waiting for mount to pass environment to smbmount
     // unless plain mount supports this we add username
     // and password again.
-    options["username"] = username;
-    options["password"] = password;
+    if ( username.size() )
+      options["username"] = username;
+    if ( password.size() )
+      options["password"] = password;
     //
     //////////////////////////////////////////////////////
 
-    ret = mount.mount( path, mountpoint, filesystem,
+    ret = mount.mount( path, mountpoint, _vfstype,
 		       options.asString(), environment );
     if(ret != Error::E_ok)
     {

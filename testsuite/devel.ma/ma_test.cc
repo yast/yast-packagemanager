@@ -138,6 +138,14 @@ InstSrcManager::ISrcId newSrc( const string & url_r ) {
   return( idlist.size() ? *idlist.begin() : 0 );
 }
 
+void cedSrc( const string & url_r ) {
+  SEC << "+++CED Src '" << url_r << "'" << endl;
+  InstSrcManager::ISrcId nid( newSrc( url_r ) );
+  ISM.enableSource( nid );
+  ISM.deleteSource( nid );
+  SEC << "---CED Src '" << url_r << "'" << endl;
+}
+
 ostream & dumpPkgWhatIf( ostream & str, bool all = false )
 {
   str << "+++[dumpPkgWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -219,7 +227,7 @@ int main( int argc, char * argv[] )
   set_log_filename( "-" );
   MIL << "START (" << argc << ")" << endl;
 
-  if ( 1 ) {
+  if ( 0 ) {
     //Y2PM::setNotRunningFromSystem();
     //Y2PM::setCacheToRamdisk( false );
     //Y2PM::noAutoInstSrcManager();
@@ -240,17 +248,10 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  InstSrcManager::ISrcId nid( newSrc("/Local/packages/test/RPMS") );
-  ISM.enableSource( nid );
-  SEC << PMGR["test"] << endl;
-  PMGR["test"]->user_set_install();
-  SEC << PMGR["test"] << endl;
+  Y2PM::noAutoInstSrcManager();
+  Y2PM::instTargetInit("/");
+  cedSrc( "cifs://@host/share/dir" );
 
-  std::list<std::string> errors;
-  std::list<std::string> remaining;
-  std::list<std::string> srcremaining;
-  Y2PM::commitPackages( 0, errors, remaining, srcremaining );
-  ISM.deleteSource( nid );
 
 #if 0
   dumpLangWhatIf( SEC, true );

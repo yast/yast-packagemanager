@@ -22,26 +22,28 @@
 #define MediaCIFS_h
 
 #include <y2pm/MediaHandler.h>
+#include <y2pm/MediaSMB.h>
 
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaCIFS
 /**
  * @short Implementation class for CIFS MediaHandler
+ *
+ * NOTE: It's actually MediaSMB, but using "cifs"
+ * as vfstype for mount.
  * @see MediaHandler
  **/
-class MediaCIFS : public MediaHandler {
-
-  protected:
-
-    MEDIA_HANDLER_API;
+class MediaCIFS : public MediaSMB {
 
   public:
 
     MediaCIFS( const Url&       url_r,
-	      const Pathname & attach_point_hint_r );
-
-    virtual ~MediaCIFS() { release(); }
+	       const Pathname & attach_point_hint_r )
+        : MediaSMB( url_r, attach_point_hint_r )
+    {
+      mountAsCIFS();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////
