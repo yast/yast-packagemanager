@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Mar 15 11:35:33 CET 2004 - lnussel@suse.de
+
+- revert workaround for Bug #21829, the UI can deal with that better now
+- improve automatic solver test
+
+-------------------------------------------------------------------
 Wed Mar 10 15:51:14 CET 2004 - lnussel@suse.de
 
 - generate separate remove_referers list (#24306)
