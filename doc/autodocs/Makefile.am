@@ -3,11 +3,11 @@
 #
 htmldir = $(docdir)/autodocs
 
-html_DATA = index.html
+html_DATA = index.html $(wildcard *.html *.png) doxygen.css @RPMNAME@.tag
 
-EXTRA_DIST = $(html_DATA)
+CLEANFILES = $(html_DATA) doxygen.log
 
-CLEANFILES = $(html_DATA)
+#EXTRA_DIST = $(html_DATA)
 
 SRC_INCLUDEDIRS =	$(addprefix $(top_srcdir)/src/,	\
 				include			\
@@ -25,11 +25,12 @@ SRC_INCLUDEHEADER =	$(wildcard	\
 				$(addsuffix /y2pm/*.h, $(SRC_INCLUDEDIRS))	\
 			)
 
-$(filter-out index.html, $(html_DATA)): index.html
-#index.html: $(srcdir)/../../src/include/*.h $(srcdir)/../../src/include/y2pm/*.h
-#	cd $(srcdir)/../../src/include && @ybindir@/ydoc -p @RPMNAME@ *.h y2pm/*.h
-#	mv -f $(srcdir)/../../src/include/*.html .
-
+# liby2util is in a different rpm, refer to the installed location
+# No install-data-local necessary
+DOC=/usr/share/doc/packages
 index.html: $(SRC_INCLUDEHEADER)
-	@ybindir@/ydoc -p @RPMNAME@ $(SRC_INCLUDEHEADER)
-
+	@ybindir@/ydoxygen PROJECT_NAME=@RPMNAME@ \
+		"TAGFILES=\
+		\"$(DOC)/liby2util/autodocs/liby2util.tag = \
+		  $(DOC)/liby2util/autodocs\" \
+		"

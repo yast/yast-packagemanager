@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov  6 13:46:13 CET 2003 - mvidner@suse.cz
+
+- Use doxygen instead of kdoc.
+- 2.9.4
+
+-------------------------------------------------------------------
 Thu Oct 30 11:41:43 CET 2003 - ma@suse.de
 
 - Added PMError hook for PkgModule.
