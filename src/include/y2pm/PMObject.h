@@ -69,6 +69,16 @@ class PMObject : virtual public Rep, public PMSolvable {
 	PMOBJ_NUM_ATTRIBUTES
     };
 
+	/**
+	 * hint before accessing multiple attributes
+	 */
+	virtual void startRetrieval() const = 0;
+
+	/**
+	 * hint after accessing multiple attributes
+	 */
+	virtual void stopRetrieval() const = 0;
+
     /**
      * access functions for attributes
      */

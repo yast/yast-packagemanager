@@ -67,6 +67,18 @@ PMYouPatch::~PMYouPatch()
 {
 }
 
+void
+PMYouPatch::startRetrieval () const
+{
+    _dataProvider->startRetrieval ();
+}
+
+void
+PMYouPatch::stopRetrieval () const
+{
+    _dataProvider->stopRetrieval ();
+}
+
 const std::string
 PMYouPatch::summary() const { return _dataProvider->summary(); }
 const std::list<std::string>
