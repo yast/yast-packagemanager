@@ -656,10 +656,6 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 	      break;
 	    }
 	  }
-	  if ( ro ) {
-	    DBG << "Filter readonly mount point : " << l << endl;
-	    continue;
-	  }
 
 	  //
 	  // statvfs (full path!) and get the data
@@ -672,7 +668,8 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 	    ret.insert( PkgDuMaster::MountPoint( mp,
 						 sb.f_bsize,
 						 FSize(sb.f_blocks)*sb.f_bsize,
-						 FSize(sb.f_blocks - sb.f_bfree)*sb.f_bsize ) );
+						 FSize(sb.f_blocks - sb.f_bfree)*sb.f_bsize,
+						 ro ) );
 
 	  }
 	}

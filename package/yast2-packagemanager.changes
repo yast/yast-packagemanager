@@ -1,8 +1,9 @@
 -------------------------------------------------------------------
-Fri Sep 10 00:41:09 CEST 2004 - ma@suse.de
+Fri Sep 10 11:34:19 CEST 2004 - ma@suse.de
 
-- Omit readonly mounted partitions from disk usage calculation.
-  (#44938)
+- Tell disk usage calculation which partitions are mounted read-only.
+  No need for the UI to warn about full read-only partions. (#44938)
+- 2.10.12
 
 -------------------------------------------------------------------
 Mon Sep  6 12:49:53 CEST 2004 - ma@suse.de

@@ -299,6 +299,7 @@ class PkgDuMaster {
 	// additional MountPoint data
 	mutable FSize     _total;
 	mutable FSize     _used;
+	mutable bool      _readonly;
       public:
 	// statistics counted by add/sub
 	// contains the change of diskusage
@@ -319,11 +320,13 @@ class PkgDuMaster {
 	MountPoint( const std::string & mountpoint_r,
 		    const FSize & blocksize_r = 1024,
 		    const FSize & total_r = 0,
-		    const FSize & used_r  = 0 )
+		    const FSize & used_r  = 0,
+		    bool readonly_r = false )
 	  : _mountpoint( mountpoint_r )
 	  , _blocksize( blocksize_r )
 	  , _total( total_r )
 	  , _used( used_r )
+	  , _readonly( readonly_r )
 	  , _pkgusage( 0 )
 	{}
 	~MountPoint() {}
