@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <Y2PM.h>
 #include <y2pm/PMYouPackageDataProvider.h>
 
 using namespace std;
@@ -104,4 +105,23 @@ void PMYouPackageDataProvider::setPatchRpmBaseVersions( const PMPackagePtr &pkg,
                                               const list<PkgEdition> &editions )
 {
   _patchRpmBaseVersions[ pkg ] = editions;
+}
+
+std::string PMYouPackageDataProvider::group( const PMPackage & pkg_r ) const
+{
+  YStringTreeItem *item = group_ptr( pkg_r );
+  if ( !item ) return string();
+  else return Y2PM::packageManager().rpmGroup ( item );
+}
+
+YStringTreeItem *PMYouPackageDataProvider::group_ptr( const PMPackage & pkg_r ) const
+{
+  map<PMPackagePtr,YStringTreeItem *>::const_iterator it = _rpmGroups.find( mkPtr( pkg_r ) );
+  if ( it == _rpmGroups.end() ) return 0;
+  else return it->second;
+}
+
+void PMYouPackageDataProvider::setRpmGroup( const PMPackagePtr &pkg, const string &group )
+{
+  _rpmGroups[ pkg ] = Y2PM::packageManager().addRpmGroup( group );
 }

@@ -187,6 +187,9 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
     _packageDataProvider->setExternalUrl( pkg, value );
   }
 
+  value = tagValue( YOUPackageTagSet::RPMGROUP );
+  _packageDataProvider->setRpmGroup( pkg, value );
+
   return PMError();
 }
 

@@ -61,6 +61,21 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         std::string location( const PMPackage & ) const;
 
         /**
+          Get RPM group.
+        */
+        std::string group( const PMPackage & pkg_r ) const;
+
+        /**
+          Get RPM group tree item object.
+        */
+        YStringTreeItem *group_ptr( const PMPackage & pkg_r ) const;
+
+        /**
+          Set RPM group.
+        */
+        void setRpmGroup( const PMPackagePtr &, const std::string &group );
+
+        /**
          * Set external url for given package.
          */
         void setExternalUrl( const PMPackagePtr &pkg, const std::string &str );
@@ -85,7 +100,8 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         std::map<PMPackagePtr,FSize> _sizes;
         std::map<PMPackagePtr,std::string> _locations;
         std::map<PMPackagePtr,std::string> _externalUrls;
-        std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;
+        std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;        
+        std::map<PMPackagePtr,YStringTreeItem *> _rpmGroups;
 };
 
 #endif // PMYouPackageDataProvider_h
