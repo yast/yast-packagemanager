@@ -17,7 +17,9 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		libPkgDep/include \
 	   ) -I$(includedir)
 
-noinst_PROGRAMS = scanner parser
+## ###################################################################
+
+EXTRA_PROGRAMS = scanner parser
 
 scanner_SOURCES = scanner.cc
 scanner_LDADD = $(top_builddir)/src/liby2pm.la -ly2util
@@ -29,3 +31,7 @@ parser_LDADD = $(top_builddir)/src/liby2pm.la -ly2util
 clean-local:
 	rm -f matchword
 	rm -f *.log *.bak *.sum *.out *.exp
+
+## ###################################################################
+
+ALL: $(EXTRA_PROGRAMS)
