@@ -111,40 +111,40 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	 * access functions for PMObject attributes
 	 */
 
-	const std::string summary() const;
-	const std::list<std::string> description() const;
-	const std::list<std::string> insnotify() const;
-	const std::list<std::string> delnotify() const;
-	const FSize size() const;
+	const std::string summary () const;
+	const std::list<std::string> description () const;
+	const std::list<std::string> insnotify () const;
+	const std::list<std::string> delnotify () const;
+	const FSize size () const;
 
 	/**
 	 * access functions for PMPackage attributes
 	 */
 
-	const Date buildtime() const;
-	const std::string buildhost() const;
-	const Date installtime() const;
-	const std::string distribution() const;
-	const std::string vendor() const;
-	const std::string license() const;
-	const std::string packager() const;
-	const std::string group() const;
-	const std::list<std::string> changelog() const;
-	const std::string url() const;
-	const std::string os() const;
-	const std::list<std::string> prein() const;
-	const std::list<std::string> postin() const;
-	const std::list<std::string> preun() const;
-	const std::list<std::string> postun() const;
-	const std::string sourcerpm() const;
-	const FSize archivesize() const;
-	const std::list<std::string> authors() const;
-	const std::list<std::string> filenames() const;
+	const Date buildtime () const;
+	const std::string buildhost () const;
+	const Date installtime () const;
+	const std::string distribution () const;
+	const std::string vendor () const;
+	const std::string license () const;
+	const std::string packager () const;
+	const std::string group () const;
+	const std::list<std::string> changelog () const;
+	const std::string url () const;
+	const std::string os () const;
+	const std::list<std::string> prein () const;
+	const std::list<std::string> postin () const;
+	const std::list<std::string> preun () const;
+	const std::list<std::string> postun () const;
+	const std::string sourcerpm () const;
+	const FSize archivesize () const;
+	const std::list<std::string> authors () const;
+	const std::list<std::string> filenames () const;
 	// suse packages values
-	const std::list<std::string> recommends() const;
-	const std::list<std::string> suggests() const;
-	const std::string location() const;
-	const std::list<std::string> keywords() const;
+	const std::list<std::string> recommends () const;
+	const std::list<std::string> suggests () const;
+	const std::string location () const;
+	const std::list<std::string> keywords () const;
 
 	/**
 	 * Object attribute retrieval. (DataProvider interface)
