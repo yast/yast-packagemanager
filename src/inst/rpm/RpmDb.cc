@@ -2107,7 +2107,7 @@ RpmDb::backupPackage(const string& packageName)
 	    return false;
 	}
 
-	std::ofstream fp ( filestobackupfile.asString().c_str() );
+	std::ofstream fp ( filestobackupfile.asString().c_str(), std::ios::out|std::ios::trunc );
 
 	if(!fp)
 	{
