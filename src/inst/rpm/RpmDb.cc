@@ -607,14 +607,20 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
     }
 }
 
-// fill pkglist with installed packages
-PMError
-RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
+//-------------------------------------------
+// return pkglist with installed packages
+//
+// refreshes _packages
+//
+const std::list<PMPackagePtr>& 
+RpmDb::getPackages (void)
 {
     string rpmquery;
     MIL << "RpmDb::getPackages()" << endl;
 
-    FAILIFNOTINITIALIZED
+    _packages.clear();
+
+    if (!_initialized) return _packages;
 
     // this enum tells the position in rpmquery string
     //
@@ -662,7 +668,10 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     run_rpm (opts, ExternalProgram::Discard_Stderr);
 
     if (!process)
-	return Error::E_RpmDB_subprocess_failed;
+    {
+	ERR << "RpmDB subprocess start failed" << endl;
+	return _packages;
+    }
 
     string value;
     string output;
@@ -743,7 +752,7 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	    p->setObsoletes (obsoletes);
 	    p->setConflicts (conflicts);
 
-	    pkglist.push_back (p);
+	    _packages.push_back (p);
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
 //	    D__ << p << endl;
 	}
@@ -751,12 +760,11 @@ RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	output = process->receiveLine();
     }
 
-    if ( systemStatus() != 0 )
+    if (systemStatus() != 0)
     {
-	return Error::E_RpmDB_subprocess_failed;
+	ERR << "RpmDB subprocess stop failed" << endl;
     }
-    MIL << "Found " << pkglist.size() << " packages" << endl;
-    return Error::E_ok;
+    return _packages;
 }
 
 

@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 #if 0
     cout << "Got " << data->numPackages() << " from source" << endl;
 #endif
-    const std::list<PMPackagePtr> *packages = data->getPackages();
+    const std::list<PMPackagePtr>& packages = data->getPackages();
 
     if (command == "query")
     {
@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 	{
 	    cout << "querying " << args[argpos] << endl;
 
-	    const std::list<PMPackagePtr> pacs = nsrc->findPackages (packages, args[argpos], package_version, package_release, package_arch);
+	    const std::list<PMPackagePtr> pacs = InstData::findPackages (packages, args[argpos], package_version, package_release, package_arch);
 	    if (pacs.empty())
 	    {
 		cout << args[argpos] << " is not available" << endl;

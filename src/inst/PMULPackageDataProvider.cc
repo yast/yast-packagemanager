@@ -42,9 +42,8 @@ IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMDataProvide
 //	DESCRIPTION : open packages stream and keep pointer to tag parser
 //		      for later value retrieval on-demand
 //
-PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrieval *package_retrieval, TagCacheRetrieval *language_retrieval)
+PMULPackageDataProvider::PMULPackageDataProvider(TagCacheRetrievalPtr package_retrieval)
     : _package_retrieval (package_retrieval)
-    , _language_retrieval (language_retrieval)
 {
 }
 

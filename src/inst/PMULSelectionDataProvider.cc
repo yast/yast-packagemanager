@@ -44,7 +44,7 @@ IMPL_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMDataPro
 //
 PMULSelectionDataProvider::PMULSelectionDataProvider(const Pathname &selectionname)
 {
-    _selection_retrieval = new TagCacheRetrieval (selectionname);
+    _selection_retrieval = TagCacheRetrievalPtr (new TagCacheRetrieval (selectionname));
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -57,7 +57,6 @@ PMULSelectionDataProvider::PMULSelectionDataProvider(const Pathname &selectionna
 //
 PMULSelectionDataProvider::~PMULSelectionDataProvider()
 {
-    delete _selection_retrieval;
 }
 
 ///////////////////////////////////////////////////////////////////

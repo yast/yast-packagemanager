@@ -154,23 +154,22 @@ int main(int argc, char* argv[])
 	for(; argpos < argnum; argpos++)
 	{
 	    cout << "querying " << args[argpos] << endl;
-	    const std::list<PMSelectionPtr> *sels = nsrc->getSelections ();
-	    if (!sels
-		|| sels->empty())
+	    const std::list<PMSelectionPtr>& selections = nsrc->getSelections ();
+	    if (selections.empty())
 	    {
 		cout << args[argpos] << " is not available" << endl;
 	    }
 	    else
 	    {
-		cout << sels->size()
+		cout << selections.size()
 		     << " matches for "
 		     << args[argpos]
 		     << (selection_version.empty()?"":("-"+selection_version))
 		     << (selection_release.empty()?"":("-"+selection_release))
 		     << (selection_arch.empty()?"":("."+selection_arch))
 		     << " found" << endl;
-		for (std::list<PMSelectionPtr>::const_iterator p_it = sels->begin();
-			p_it != sels->end(); ++p_it)
+		for (std::list<PMSelectionPtr>::const_iterator p_it = selections.begin();
+			p_it != selections.end(); ++p_it)
 		{
 		    show_pmselection (*p_it);
 		}

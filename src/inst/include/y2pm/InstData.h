@@ -36,24 +36,11 @@
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstData
-/**
- * @short InstData currently is a kludge. Dont' use it.
- **/
+//
+// 	Interface class for InstSrc and InstTarget
+
 class InstData {
-  //REP_BODY(InstData);
-
-  private:
-
-    const std::list<PMSelectionPtr> *_selections;
-    const std::list<PMPackagePtr>  *_packages;
-    const std::list<PMYouPatchPtr> *_patches;
-
-  private:
-
-    /**
-     * InstData currently is a kludge. Dont' use it.
-     **/
-    friend class InstSrcData;
+  protected:
 
     InstData();
 
@@ -69,69 +56,36 @@ class InstData {
      * @return pathname of written cache
      * writes content cache data to an ascii file
      */
-    const Pathname writeCache (const Pathname &descrpathname);
+    virtual const Pathname writeCache (const Pathname &descrpathname) = 0;
 
     //-----------------------------
     // source content access
 
     /**
-     * return the number of selections on this source
-     */
-    int numSelections() const;
-
-    /**
-     * return the number of packages on this source
-     */
-    int numPackages() const;
-
-    /**
-     * return the number of patches on this source
-     */
-    int numPatches() const;
-
-    /**
-     * set list of selections
-     * @return void
-     */
-    void setSelections (std::list<PMSelectionPtr> *sels) { _selections = sels; }
-
-    /**
      * generate PMSelection objects for each selection on the source
      * @return list of PMSelectionPtr on this source
      */
-    const std::list<PMSelectionPtr> *getSelections (void) const;
+    virtual const std::list<PMSelectionPtr>& getSelections (void) const = 0;
 
     /**
-     * set list of packages
-     * @return void
-     */
-    void setPackages (std::list<PMPackagePtr> *pacs) { _packages = pacs; }
-
-    /**
-     * generate PMPackage objects for each Item on the source
+     * generate PMPackage objects for each Item on the source/target
      * @return list of PMPackagePtr on this source
      * */
-    const std::list<PMPackagePtr> *getPackages (void) const;
-
-    /**
-     * set list of patches
-     * @return void
-     */
-    void setPatches (std::list<PMYouPatchPtr> *pats) { _patches = pats; }
+    virtual const std::list<PMPackagePtr>& getPackages (void) const = 0;
 
     /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source
      */
-    const std::list<PMYouPatchPtr> *getPatches (void) const;
+    virtual const std::list<PMYouPatchPtr>& getPatches (void) const = 0;
 
-    virtual std::ostream & dumpOn( std::ostream & str ) const;
+    virtual std::ostream & dumpOn( std::ostream & str ) const = 0;
 
     /**
      * find list of packages
      * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
      */
-    static const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr> *packages, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "");
+    static const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr>& packages, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "");
 };
 
 ///////////////////////////////////////////////////////////////////

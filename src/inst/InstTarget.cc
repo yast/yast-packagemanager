@@ -134,62 +134,59 @@ InstTarget::setActivation (bool yesno)
     return _descr->setActivation (yesno);
 }
 
-//-----------------------------
-// source content access
 #endif
 
-/**
- * return the number of selections on this source
- */
-int
-InstTarget::numSelections() const
-{
-    //TODO
-    D__ << std::endl;
-    return 0;
-}
+//-----------------------------
+// target content access
 
 
 /**
- * return the number of packages on this source
+ * generate PMSelection objects for each selection on the target
+ * @return list of PMSelectionPtr on this target
  */
-int
-InstTarget::numPackages() const
+const std::list<PMSelectionPtr>&
+InstTarget::getSelections (void) const
 {
-    //TODO
-    D__ << std::endl;
-    return 0;
+    return InstData::getSelections();
 }
-
 
 /**
- * return the number of patches on this source
+ * generate PMPackage objects for each Item on the target
+ * @return list of PMPackagePtr on this target
+ * */
+const std::list<PMPackagePtr>&
+InstTarget::getPackages (void) const
+{
+    return _rpmdb->getPackages();
+}
+
+/**
+ * generate PMSolvable objects for each patch on the target
+ * @return list of PMSolvablePtr on this target
  */
-int
-InstTarget::numPatches() const
+const std::list<PMYouPatchPtr>&
+InstTarget::getPatches (void) const
 {
-    D__ << std::endl;
-    return 0;
+    return InstData::getPatches();
 }
 
-
-
-PMError InstTarget::getPackages (std::list<PMPackagePtr>& pkglist)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::dumpOn
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+std::ostream &
+InstTarget::dumpOn( std::ostream & str ) const
 {
-    return _rpmdb->getPackages(pkglist);
+    Rep::dumpOn( str );
+    return str;
 }
 
-PMError InstTarget::getSelections (std::list<PMSelectionPtr>& sellist)
-{
-    //TODO
-    return 0;
-}
-
-PMError InstTarget::getYOUPatches (std::list<PMYouPatchPtr>& youpatchlist)
-{
-    //TODO
-    return 0;
-}
+//--------------------------------------------------------------------
+// target specific functions
 
 void InstTarget::setPkgInstFlags(unsigned flags)
 {

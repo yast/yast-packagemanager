@@ -33,7 +33,7 @@
 
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMPackagePtr.h>
-#include <y2pm/PMSolvablePtr.h>
+#include <y2pm/PMYouPatchPtr.h>
 
 #include <y2pm/InstSrcPtr.h>
 #include <y2pm/InstSrcError.h>
@@ -247,25 +247,36 @@ class InstSrc: virtual public Rep {
      **/
     bool enabled() const { return _data; }
 
-#if 1
+    //-----------------------------
+    // cache file handling
+    /**
+     * write media content data to cache file
+     * @param pathname of corresponding InstSrcDescr cache file
+     * @return pathname of written cache
+     * writes content cache data to an ascii file
+     */
+    const Pathname writeCache (const Pathname &descrpathname);
+
+    //-----------------------------
+    // source content access
+
     /**
      * generate PMSelection objects for each selection on the source
      * @return list of PMSelectionPtr on this source
      */
-    const std::list<PMSelectionPtr> *getSelections() const;
+    const std::list<PMSelectionPtr>& getSelections (void) const;
 
     /**
-     * generate PMPackage objects for each Item on the source
+     * generate PMPackage objects for each Item on the source/target
      * @return list of PMPackagePtr on this source
      * */
-    const std::list<PMPackagePtr> *getPackages() const;
+    const std::list<PMPackagePtr>& getPackages (void) const;
 
     /**
-     * find list of packages
-     * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
+     * generate PMSolvable objects for each patch on the source
+     * @return list of PMSolvablePtr on this source
      */
-    const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr> *packages, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "") const;
-#endif
+    const std::list<PMYouPatchPtr>& getPatches (void) const;
 
   public:
 

@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       InstSrcData_UL.cc
+  File:       ParseDataUL.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -30,13 +30,14 @@
 
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
-#include <y2pm/InstSrcData_UL.h>
+#include <y2pm/ParseDataUL.h>
 #include <y2pm/PMULPackageDataProvider.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/PMULSelectionDataProvider.h>
 #include <y2pm/PMULSelectionDataProviderPtr.h>
 
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/InstSrcError.h>
 #include <y2pm/MediaAccess.h>
 
 #include <y2pm/PkgName.h>
@@ -46,16 +47,16 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-//	CLASS NAME : InstSrcData_ULPtr
-//	CLASS NAME : constInstSrcData_ULPtr
+//	CLASS NAME : ParseDataULPtr
+//	CLASS NAME : constParseDataULPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(InstSrcData_UL,InstSrcData,InstSrcData);
+IMPL_BASE_POINTER(ParseDataUL);
 
 
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : InstSrcData_UL::Tag2PkgRelList
+//	METHOD NAME : ParseDataUL::Tag2PkgRelList
 //	METHOD TYPE : int
 //
 //	DESCRIPTION : convert list of strings (denoting dependencies)
@@ -63,7 +64,7 @@ IMPL_DERIVED_POINTER(InstSrcData_UL,InstSrcData,InstSrcData);
 //		      return number of dependencies found
 
 int
-InstSrcData_UL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist)
+ParseDataUL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist)
 {
     int count = 0;
     pkgrellist.clear();
@@ -83,24 +84,22 @@ InstSrcData_UL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const s
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : InstSrcData_UL::PkgTag2Package
+//	METHOD NAME : ParseDataUL::PkgTag2Package
 //	METHOD TYPE : PMPackagePtr
 //
 //	DESCRIPTION : pass packages data from tagset to pgkcache
 //		 * Single line values are passed by value
 //		 * Multi line values are passed by file position (on-demand read)
 //
-//		 * langcache is only used for PMULPackageDataProvider() constructor
 //		 * packagelist is used for finding shared packages
 
 PMPackagePtr
-InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
-				TagCacheRetrieval *langcache,
+ParseDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
 				CommonPkdParser::TagSet * tagset,
-				const std::list<PMPackagePtr>* packagelist )
+				const std::list<PMPackagePtr>& packages )
 {
     // PACKAGE
-    string single ((tagset->getTagByIndex(InstSrcData_ULPkgTags::PACKAGE))->Data());
+    string single ((tagset->getTagByIndex(ParseDataULPkgTags::PACKAGE))->Data());
 
     std::vector<std::string> splitted;
 
@@ -113,7 +112,7 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
     PkgArch arch (splitted[3]);
 
-    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache, langcache));
+    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache));
     PMPackagePtr package( new PMPackage (name, edition, arch, dataprovider));
     dataprovider->setPackage (package);
 
@@ -124,7 +123,7 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
 #define SET_POS(tagname,start,stop) \
     do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname)
+    tagset->getTagByIndex(ParseDataULPkgTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 
@@ -169,13 +168,13 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
     // SHAREWITH, package to share data with
     // FIXME: does not support forwared shared declarations
 
-    string sharewith ((tagset->getTagByIndex(InstSrcData_ULPkgTags::SHAREWITH))->Data());
+    string sharewith ((tagset->getTagByIndex(ParseDataULPkgTags::SHAREWITH))->Data());
     if (!sharewith.empty())
     {
 //MIL << "Share " << package->name() << "-" << package->version() << "-" << package->release() << "." << package->arch() << endl;
 	stringutil::split (sharewith, splitted, " ", false);
 //MIL << "With " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
-	const std::list<PMPackagePtr> candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
+	const std::list<PMPackagePtr> candidates = InstData::findPackages (packages, splitted[0], splitted[1], splitted[2], splitted[3]);
 
 	if (candidates.size() != 1)
 	{
@@ -195,7 +194,7 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : InstSrcData_UL::LangTag2Package
+//	METHOD NAME : ParseDataUL::LangTag2Package
 //	METHOD TYPE : void
 //
 //	DESCRIPTION : * pass packages.lang data from tagset to langcache
@@ -203,16 +202,16 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
 //		 * Multi line values are passed by file position (on-demand read)
 
 void
-InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset)
+ParseDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, CommonPkdParser::TagSet * tagset)
 {
     // PACKAGE
-    string single ((tagset->getTagByIndex(InstSrcData_ULLangTags::PACKAGE))->Data());
+    string single ((tagset->getTagByIndex(ParseDataULLangTags::PACKAGE))->Data());
 
     std::vector<std::string> splitted;
     stringutil::split (single, splitted, " ", false);
 //MIL << "Lang for " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
-    const std::list<PMPackagePtr> candidates = InstData::findPackages (packagelist, splitted[0], splitted[1], splitted[2], splitted[3]);
+    const std::list<PMPackagePtr> candidates = InstData::findPackages (packages, splitted[0], splitted[1], splitted[2], splitted[3]);
 
     if (candidates.size() != 1)
     {
@@ -222,13 +221,14 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
 
     PMPackagePtr package = candidates.front();
     PMULPackageDataProviderPtr dataprovider = package->dataProvider();
+    dataprovider->setLangCache (langcache);
 
     CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
 
 #define SET_POS(tagname,start,stop) \
     do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcData_ULLangTags::tagname)
+    tagset->getTagByIndex(ParseDataULLangTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 
@@ -247,16 +247,16 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : InstSrcData_UL::Tag2Selection
+//	METHOD NAME : ParseDataUL::Tag2Selection
 //	METHOD TYPE : PMSelectionPtr
 //
 //	DESCRIPTION : pass selection data from tagset to PMSelection
 
 PMSelectionPtr
-InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset)
+ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset)
 {
     // SELECTION
-    string single ((tagset->getTagByIndex(InstSrcData_ULSelTags::SELECTION))->Data());
+    string single ((tagset->getTagByIndex(ParseDataULSelTags::SELECTION))->Data());
 
     std::vector<std::string> splitted;
 
@@ -282,7 +282,7 @@ InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, Common
 #define SET_POS(tagname,start,stop) \
     do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(InstSrcData_ULSelTags::tagname)
+    tagset->getTagByIndex(ParseDataULSelTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); \
 	 SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
@@ -325,6 +325,333 @@ InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, Common
 }
 
 
+PMError
+ParseDataUL::parsePackages (InstSrcDataPtr & ndata,
+		MediaAccessPtr media_r, const Pathname & descr_dir_r )
+{
+    PMError err;
+    int count = 0;
+    std::list<PMPackagePtr>& packages = ndata->_packages;
+    std::string tagstr;
+
+    ///////////////////////////////////////////////////////////////////
+    // parse package data
+    ///////////////////////////////////////////////////////////////////
+
+    // --------------------------------
+    // setup packages access
+
+    Pathname filename = descr_dir_r + "/packages";
+
+    MediaAccess::FileProvider packages_file( media_r, filename );
+    if ( packages_file.error() ) {
+      ERR << "Media can't provide '" << filename << "' " << packages_file.error() << endl;
+      return packages_file.error();
+    }
+
+    MIL << "fopen(" << packages_file() << ")" << endl;
+    TagCacheRetrievalPtr pkgcache ( new TagCacheRetrieval( packages_file() ));
+
+    // --------------------------------
+    // read package data
+
+    std::ifstream& package_stream = pkgcache->getStream();
+    if( !package_stream)
+    {
+	return InstSrcError::E_open_file;
+    }
+
+    CommonPkdParser::TagSet* tagset = new ParseDataULPkgTags ();
+    bool parse = true;
+    TagParser & parser = pkgcache->getParser();
+
+    MIL << "start packages parsing" << endl;
+
+    while( parse && parser.lookupTag (package_stream))
+    {
+	bool repeatassign = false;
+
+	tagstr = parser.startTag();
+
+	do
+	{
+	    switch( tagset->assign (tagstr.c_str(), parser, package_stream))
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    repeatassign = false;
+		    err = PMError::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    packages.push_back (PkgTag2Package( pkgcache, tagset, packages ));
+		    count++;
+		    tagset->clear();
+		    repeatassign = true;
+		    err = PMError::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	} while( repeatassign );
+    }
+
+    if (parse)
+    {
+	// insert final package
+
+	packages.push_back (PkgTag2Package( pkgcache, tagset, packages ));
+	count++;
+    }
+
+    delete tagset;
+
+    if( !parse )
+	ERR << "*** parsing packages was aborted ***" << endl;
+    else
+	MIL << "*** parsed " << count << " packages ***" << std::endl;
+
+    return PMError::E_ok;
+}
+
+
+PMError
+ParseDataUL::parsePackagesLang (InstSrcDataPtr & ndata,
+		MediaAccessPtr media_r, const Pathname & descr_dir_r)
+{
+    PMError err;
+    int count = 0;
+    std::list<PMPackagePtr>& packages = ndata->_packages;
+    std::string tagstr;
+
+    // --------------------------------
+    // setup packages.<lang> access
+    // check for packages.<lang> file
+
+#warning Check lang setup. Should use SrcDescr?
+    char * lang = getenv ("LANG");
+    string langext( "." );
+    langext += ( lang ? lang : "en" );
+    if ( langext.length() > 3 )
+      langext.erase( 3 );
+
+    Pathname filename = descr_dir_r + "/packages";
+    filename = filename.extend( langext );
+
+    MediaAccess::FileProvider packages_lang_file( media_r, filename );
+    if ( packages_lang_file.error() ) {
+      ERR << "Media can't provide '" << filename << "' " << packages_lang_file.error() << endl;
+      return packages_lang_file.error();
+    }
+
+    MIL << "fopen(" << packages_lang_file() << ")" << endl;
+    TagCacheRetrievalPtr langcache ( new TagCacheRetrieval( packages_lang_file() ));
+
+    ///////////////////////////////////////////////////////////////////
+    // parse language data
+    ///////////////////////////////////////////////////////////////////
+
+    std::ifstream& language_stream = langcache->getStream();
+    if( !language_stream)
+    {
+	return InstSrcError::E_open_file;
+    }
+
+    CommonPkdParser::TagSet* tagset = new ParseDataULLangTags ();
+    bool parse = true;
+    TagParser & parser = langcache->getParser();
+
+    MIL << "start packages.<lang> parsing" << endl;
+    count = 0;
+
+    while( parse && parser.lookupTag (language_stream))
+    {
+	bool repeatassign = false;
+
+	tagstr = parser.startTag();
+
+	do
+	{
+	    switch( tagset->assign (tagstr.c_str(), parser, language_stream))
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    repeatassign = false;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    LangTag2Package (langcache, packages, tagset);
+		    count++;
+		    tagset->clear();
+		    repeatassign = true;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	} while( repeatassign );
+    }
+
+    if (parse)
+    {
+	LangTag2Package (langcache, packages, tagset);
+	count++;
+    }
+
+    delete tagset;
+
+    if( !parse )
+	ERR << "*** parsing packages.<lang> was aborted ***" << std::endl;
+    else
+	MIL << "*** parsed " << count << " packages.<lang> entries ***" << std::endl;
+
+    return PMError::E_ok;
+}
+
+
+PMError
+ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
+		MediaAccessPtr media_r, const Pathname & descr_dir_r )
+{
+    PMError err;
+
+    ///////////////////////////////////////////////////////////////////
+    // parse selection data
+    ///////////////////////////////////////////////////////////////////
+
+    // --------------------------------
+    // setup selections access
+    // read <DESCRDIR>/selections to std::list<std::string> selection_names
+
+    std::list<std::string> selection_names;
+
+    Pathname filename = descr_dir_r + "/selections";
+
+    MediaAccess::FileProvider selections_file( media_r, filename );
+    if ( selections_file.error() ) {
+      WAR << "Media can't provide '" << filename << "' " << selections_file.error() << endl;
+    }
+    else {
+
+      while ( true )
+      {
+	std::ifstream selstream (selections_file().asString().c_str());
+	if (!selstream)
+	{
+	    ERR << "Cant open " << selections_file() << ": " << Error::E_open_file << endl;
+	    break;
+	}
+
+	while (selstream.good())
+	{
+	    char lbuf[201];
+
+	    if (!selstream.getline (lbuf, 200, '\n'))
+	    {
+		if (selstream.eof())
+		    break;
+		MIL << "getline() failed" << endl;
+		break;
+	    }
+	    if ((lbuf[0] == '#')		// comment
+		|| (lbuf[0] == 0))		// empty
+		continue;
+	    selection_names.push_back (lbuf);
+	}
+	break;
+      }
+
+    }
+    MIL << "*** Expecting " << selection_names.size() << " selections ***" << endl;
+
+    std::list<PMSelectionPtr>& selections = ndata->_selections;
+    int count = 0;
+    std::ifstream selection_stream;
+
+    std::string tagstr;
+    CommonPkdParser::TagSet* tagset = new ParseDataULSelTags ();
+    bool parse = true;
+
+    for (std::list<std::string>::iterator selfile = selection_names.begin();
+	 selfile != selection_names.end();
+	 ++selfile)
+    {
+
+	Pathname selectionname = descr_dir_r + *selfile;
+	MediaAccess::FileProvider sel_file( media_r, filename );
+
+	selection_stream.open (sel_file().asString().c_str());
+
+	if (!selection_stream)
+	{
+	    ERR << "Cant open " << selectionname << endl;
+	    continue;
+	}
+
+	MIL << "Reading " << selectionname << endl;
+
+	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selectionname));
+	TagParser& parser = dataprovider->getParser();
+
+	MIL << "start " << *selfile << " parsing" << endl;
+
+	while( parse && parser.lookupTag (selection_stream))
+	{
+	    bool repeatassign = false;
+
+	    tagstr = parser.startTag();
+
+	    do
+	    {
+	    switch( tagset->assign (tagstr.c_str(), parser, selection_stream))
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    repeatassign = false;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    selections.push_back (Tag2Selection (dataprovider, tagset));
+		    count++;
+		    tagset->clear();
+		    repeatassign = false;	// only single match
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	    } while( repeatassign );
+        }
+
+	if (parse)
+	{
+	    selections.push_back (Tag2Selection (dataprovider, tagset));
+	    count++;
+	}
+	tagset->clear();
+
+	selection_stream.clear();
+	selection_stream.close();
+	MIL << "done " << *selfile << " parsing" << endl;
+    } // for ()
+
+    delete tagset;
+    MIL << "*** parsed " << count << " selections ***" << std::endl;
+
+    return PMError::E_ok;
+}
+
 ///////////////////////////////////////////////////////////////////
 // PUBLIC
 ///////////////////////////////////////////////////////////////////
@@ -333,40 +660,40 @@ InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, Common
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData_UL::InstSrcData_UL
+//	METHOD NAME : ParseDataUL::ParseDataUL
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-InstSrcData_UL::InstSrcData_UL()
+ParseDataUL::ParseDataUL()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData_UL::~InstSrcData_UL
+//	METHOD NAME : ParseDataUL::~ParseDataUL
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-InstSrcData_UL::~InstSrcData_UL()
+ParseDataUL::~ParseDataUL()
 {
 }
 
 //////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData_UL::tryGetDescr
+//	METHOD NAME : ParseDataUL::tryGetDescr
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION : try to read content data (describing the product)
 //			and fill InstSrcDescrPtr class
 //
-PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
+PMError ParseDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				     MediaAccessPtr media_r, const Pathname & product_dir_r )
 {
-  MIL << "InstSrcData_UL::tryGetDescr(" << product_dir_r << ")" << endl;
+  MIL << "ParseDataUL::tryGetDescr(" << product_dir_r << ")" << endl;
 
   ndescr_r = 0;
   PMError err;
@@ -390,7 +717,7 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   std::ifstream content( contentfile().asString().c_str());
   if( ! content ) {
     ERR << "Can't open '" << filename << "' for reading." << endl;
-    return Error::E_open_file;
+    return InstSrcError::E_open_file;
   }
 
   PkgName pname, bname;
@@ -480,7 +807,7 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
       } else if ( content.bad() ) {
 	ERR << "Error parsing " << contentfile() << endl;
-	return Error::E_no_instsrc_on_media;
+	return InstSrcError::E_no_instsrc_on_media;
       }
     }
 
@@ -505,336 +832,40 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData_UL::tryGetData
+//	METHOD NAME : ParseDataUL::tryGetData
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
+PMError ParseDataUL::tryGetData( InstSrcDataPtr & ndata_r,
 				    MediaAccessPtr media_r, const Pathname & descr_dir_r )
 {
-    MIL << "InstSrcData_UL::tryGetData(" << descr_dir_r << ")" << endl;
-    int count = 0;
+    MIL << "ParseDataUL::tryGetData(" << descr_dir_r << ")" << endl;
 
     ndata_r = 0;
     PMError err;
 
-    std::list<PMPackagePtr> *packagelist = new (std::list<PMPackagePtr>);
     InstSrcDataPtr ndata( new InstSrcData );
-    std::string tagstr;
 
-    ///////////////////////////////////////////////////////////////////
-    // parse package data
-    ///////////////////////////////////////////////////////////////////
-
-    // --------------------------------
-    // setup packages access
-
-    Pathname filename = descr_dir_r + "/packages";
-
-    MediaAccess::FileProvider packages( media_r, filename );
-    if ( packages.error() ) {
-      ERR << "Media can't provide '" << filename << "' " << packages.error() << endl;
-      return packages.error();
-    }
-
-#warning UNFREED MEMORY?
-    MIL << "fopen(" << packages() << ")" << endl;
-    TagCacheRetrieval * pkgcache = new TagCacheRetrieval( packages() );
-
-    // --------------------------------
-    // setup packages.<lang> access
-    // check for packages.<lang> file
-
-#warning Check lang setup. Should use SrcDescr?
-    char * lang = getenv ("LANG");
-    string langext( "." );
-    langext += ( lang ? lang : "en" );
-    if ( langext.length() > 3 )
-      langext.erase( 3 );
-
-    filename = filename.extend( langext );
-
-    MediaAccess::FileProvider packages_lang( media_r, filename );
-    if ( packages_lang.error() ) {
-      ERR << "Media can't provide '" << filename << "' " << packages_lang.error() << endl;
-      return packages_lang.error();
-    }
-
-#warning UNFREED MEMORY?
-    MIL << "fopen(" << packages_lang() << ")" << endl;
-    TagCacheRetrieval * langcache = new TagCacheRetrieval( packages_lang() );
-
-    // --------------------------------
-    // read package data
-
-    std::ifstream& package_stream = pkgcache->getStream();
-    if( !package_stream)
+    if (!parsePackages (ndata, media_r, descr_dir_r))
     {
-	return Error::E_open_file;
+	parsePackagesLang (ndata, media_r, descr_dir_r);
     }
 
-    CommonPkdParser::TagSet* tagset = new InstSrcData_ULPkgTags ();
-    bool parse = true;
-    TagParser & parser = pkgcache->getParser();
-
-    MIL << "start packages parsing" << endl;
-
-    while( parse && parser.lookupTag (package_stream))
-    {
-	bool repeatassign = false;
-
-	tagstr = parser.startTag();
-
-	do
-	{
-	    switch( tagset->assign (tagstr.c_str(), parser, package_stream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset, packagelist ));
-		    count++;
-		    tagset->clear();
-		    repeatassign = true;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
-    }
-
-    if (parse)
-    {
-	// insert final package
-
-	packagelist->push_back (PkgTag2Package( pkgcache, langcache, tagset, packagelist ));
-	count++;
-
-	// =============================================================
-	// pass packages list to InstSrcData
-
-	ndata->setPackages (packagelist);
-    }
-
-    delete tagset;
-    tagset = 0;
-
-    if( !parse )
-	ERR << "*** parsing packages was aborted ***" << endl;
-    else
-	MIL << "*** parsed " << count << " packages ***" << std::endl;
-
-
-    ///////////////////////////////////////////////////////////////////
-    // parse language data
-    ///////////////////////////////////////////////////////////////////
-
-    std::ifstream& language_stream = langcache->getStream();
-    if( !language_stream)
-    {
-	return Error::E_open_file;
-    }
-
-    tagset = new InstSrcData_ULLangTags ();
-    parser = langcache->getParser();
-
-    MIL << "start packages.<lang> parsing" << endl;
-    count = 0;
-
-    while( parse && parser.lookupTag (language_stream))
-    {
-	bool repeatassign = false;
-
-	tagstr = parser.startTag();
-
-	do
-	{
-	    switch( tagset->assign (tagstr.c_str(), parser, language_stream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    LangTag2Package (langcache, packagelist, tagset);
-		    count++;
-		    tagset->clear();
-		    repeatassign = true;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
-    }
-
-    if (parse)
-    {
-	LangTag2Package (langcache, packagelist, tagset);
-	count++;
-    }
-
-    delete tagset;
-    tagset = 0;
-
-    if( !parse )
-	ERR << "*** parsing packages.<lang> was aborted ***" << std::endl;
-    else
-	MIL << "*** parsed " << count << " packages.<lang> entries ***" << std::endl;
-
-
-    ///////////////////////////////////////////////////////////////////
-    // parse selection data
-    ///////////////////////////////////////////////////////////////////
-
-    // --------------------------------
-    // setup selections access
-    // read <DESCRDIR>/selections to std::list<std::string> selection_names
-
-    std::list<std::string> selection_names;
-
-    filename = descr_dir_r + "/selections";
-
-    MediaAccess::FileProvider selections( media_r, filename );
-    if ( selections.error() ) {
-      WAR << "Media can't provide '" << filename << "' " << selections.error() << endl;
-    } else {
-
-      while ( true )
-      {
-	std::ifstream selstream (selections().asString().c_str());
-	if (!selstream)
-	{
-	    ERR << "Cant open " << selections() << ": " << Error::E_open_file << endl;
-	    break;
-	}
-
-	while (selstream.good())
-	{
-	    char lbuf[201];
-
-	    if (!selstream.getline (lbuf, 200, '\n'))
-	    {
-		if (selstream.eof())
-		    break;
-		MIL << "getline() failed" << endl;
-		break;
-	    }
-	    if ((lbuf[0] == '#')		// comment
-		|| (lbuf[0] == 0))		// empty
-		continue;
-	    selection_names.push_back (lbuf);
-	}
-	break;
-      }
-
-    }
-    MIL << "*** Expecting " << selection_names.size() << " selections ***" << endl;
-
-    std::list<PMSelectionPtr> *selectionlist = new (std::list<PMSelectionPtr>);
-
-    count = 0;
-
-    std::ifstream selection_stream;
-
-    tagset = new InstSrcData_ULSelTags ();
-    for (std::list<std::string>::iterator selfile = selection_names.begin();
-	 selfile != selection_names.end();
-	 ++selfile)
-    {
-#warning Code does not work for FTP/HTTP. Missing media->provideFile
-	Pathname selectionname = descr_dir_r + *selfile;
-	selection_stream.open (selectionname.asString().c_str());
-
-	if (!selection_stream)
-	{
-	    ERR << "Cant open " << selectionname << endl;
-	    continue;
-	}
-
-	MIL << "Reading " << selectionname << endl;
-
-	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selectionname));
-	parser = dataprovider->getParser();
-
-	MIL << "start " << *selfile << " parsing" << endl;
-
-	while( parse && parser.lookupTag (selection_stream))
-	{
-	    bool repeatassign = false;
-
-	    tagstr = parser.startTag();
-
-	do
-	{
-	    switch( tagset->assign (tagstr.c_str(), parser, selection_stream))
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    selectionlist->push_back (Tag2Selection (dataprovider, tagset));
-		    count++;
-		    tagset->clear();
-		    repeatassign = false;	// only single match
-		    err = Error::E_ok;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
-        }
-
-	if (parse)
-	{
-	    selectionlist->push_back (Tag2Selection (dataprovider, tagset));
-	    count++;
-	}
-	tagset->clear();
-
-	delete tagset;
-	tagset = 0;
-
-	selection_stream.clear();
-	selection_stream.close();
-	MIL << "done " << *selfile << " parsing" << endl;
-    } // for ()
-
-    ndata->setSelections(selectionlist);
-
-    MIL << "*** parsed " << count << " selections ***" << std::endl;
-
+    parseSelections (ndata, media_r, descr_dir_r);
+  
     ///////////////////////////////////////////////////////////////////
     // done
     ///////////////////////////////////////////////////////////////////
 
     if ( !err )
     {
-	ndata_r = ndata;
+	ndata_r = ndata;			// keep ndata alive
 	MIL << "tryGetDataUL sucessful" << endl;
     }
     else
     {
+						// destroy ndata
 	ERR << "tryGetData failed: " << err << endl;
     }
 

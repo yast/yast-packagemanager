@@ -159,6 +159,11 @@ class PMError {
       C_InstTargetError   = 12*_valrange
     };
 
+    enum Error {
+      // more specific errors start here:
+      E_TBD = C_Error+1
+    }; 
+
     unsigned _errval;
 
   public:
