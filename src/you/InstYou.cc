@@ -166,18 +166,25 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
     Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
   }
 
+  // Set correct size depending on if the patch RPM is used or the full one
   for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
     D__ << "Patch: " << (*itPatch)->summary() << endl;
+    FSize patchSize;
     list<PMPackagePtr> packages = (*itPatch)->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
       D__ << "  Package: " << (*itPkg)->summary() << endl;
       if ( hasPatchRpm( *itPkg ) ) {
+        
         _info->packageDataProvider()->setArchiveSize( *itPkg, (*itPkg)->patchRpmSize() );
         D__ << "    Using patch RPM" << endl;
       }
-      D__ << "    ArchiveSize: " << (*itPkg)->archivesize() << endl;
+      FSize archiveSize = (*itPkg)->archivesize();
+      D__ << "    ArchiveSize: " << archiveSize << endl;
+      patchSize += archiveSize;
     }
+    (*itPatch)->setPatchSize( patchSize );
+    D__ << "  PatchSize: " << patchSize << endl;
   }
 
   return PMError();
