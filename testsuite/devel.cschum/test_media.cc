@@ -22,10 +22,10 @@ int main( int argc, char **argv )
   }
 
   Url url( argv[ 1 ] );
-  Pathname dir( argv[ 2 ] );
+  Pathname arg( argv[ 2 ] );
   
   cout << "URL: " << url.asString() << endl;
-  cout << "Dir: " << dir.asString() << endl;
+  cout << "Arg: " << arg.asString() << endl;
 
   MediaAccess media;
   
@@ -35,8 +35,24 @@ int main( int argc, char **argv )
     return 1;
   }
   
-  media.attach();
+  err = media.attach();
+  if ( err ) {
+    cerr << "Error attaching: " << err << endl;
+    return 1;
+  }
 
+  err = media.provideFile( "/media.1/media" );
+  if ( err ) {
+    cerr << "Error providing file: " << err << endl;
+    return 1;
+  }
+  err = media.provideFile( "/content" );
+  if ( err ) {
+    cerr << "Error providing file: " << err << endl;
+    return 1;
+  }
+
+#if 0
   list<string> files;
   
   cout << "Without dots:" << endl;
@@ -59,6 +75,7 @@ int main( int argc, char **argv )
   for( it = files.begin(); it != files.end(); ++it ) {
     cout << "  " << *it << endl;
   }
+#endif
 
   MIL << "END" << endl;
   
