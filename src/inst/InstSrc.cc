@@ -696,10 +696,6 @@ InstSrc::provideMedia (int medianr) const
 	err = _media->provideFile (mediafile);
 	if (err == MediaError::E_ok)
 	{
-#if 1
-			InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
-			ptr->_medianr = medianr;			// everything ok
-#else
 	    // open media file
 	    std::ifstream media (_media->localPath (mediafile).asString().c_str());
 	    if (media)
@@ -719,6 +715,13 @@ InstSrc::provideMedia (int medianr) const
 			break;
 		    }
 		}
+		MIL << "vendor '" << vendor << "' id '" << id << "'" << endl;
+#if 1
+			InstSrcPtr isptr = InstSrcPtr::cast_away_const (this);
+			isptr->_medianr = medianr;			// everything ok
+			reply = "";
+			break;
+#else
 		if (_mediachangefunc != 0)
 		{
 		    string error = string(vendor) + " != " + _descr->media_vendor();
@@ -753,8 +756,9 @@ InstSrc::provideMedia (int medianr) const
 			}
 		    }
 		}
-	    } // media file ok
+
 #endif
+	    } // media file ok
 	}
 	else
 	{
