@@ -156,3 +156,29 @@ void PMYouPackageDataProvider::setRpmGroup( const PMPackagePtr &pkg, const strin
 {
   _rpmGroups[ pkg ] = Y2PM::packageManager().addRpmGroup( group );
 }
+
+
+FSize PMYouPackageDataProvider::archivesize( const PMPackage &pkg ) const
+{
+  map<PMPackagePtr,FSize>::const_iterator it = _archiveSizes.find( mkPtr( pkg ) );
+  if ( it == _archiveSizes.end() ) return FSize( 0 );
+  else return it->second;
+}
+
+void PMYouPackageDataProvider::setArchiveSize( const PMPackagePtr &pkg, const FSize &size )
+{
+  _archiveSizes[ pkg ] = size;
+}
+
+FSize PMYouPackageDataProvider::patchRpmSize( const PMPackage &pkg ) const
+{
+  map<PMPackagePtr,FSize>::const_iterator it = _patchRpmSizes.find( mkPtr( pkg ) );
+  if ( it == _patchRpmSizes.end() ) return FSize( 0 );
+  else return it->second;
+}
+
+void PMYouPackageDataProvider::setPatchRpmSize( const PMPackagePtr &pkg, const FSize &size )
+{
+  _patchRpmSizes[ pkg ] = size;
+}
+
