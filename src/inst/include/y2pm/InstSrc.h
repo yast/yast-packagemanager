@@ -287,6 +287,68 @@ class InstSrc: virtual public Rep {
      **/
     PMError writeCache();
 
+  private:
+
+	/**
+	 * list of allowed subdirs below _descr->datadir() for package installation
+	 *
+	 * set when enabling source
+	 * used in provideLocation
+	 *
+	 * (see ARCH.x line in content file for further information)
+	 */
+	std::list<Pathname> _datasubdirs;
+
+	/** media change callback
+	    - error type
+		1 = no media found
+		2 = wrong media number
+		3 = wrong product
+		4 = wrong release
+	    - expected media #
+	    - found media # (0 == none)
+	    return 0: ok, 1: skip, -1 cancel
+	 */
+	int (*_mediachangefunc)(int, int, int, void*);
+	int (*_mediaerrorfunc)(const std::string&, void*);
+
+	/** arbitrary data to pass back for progress callback */
+	void* _mediachangedata;
+	void* _mediaerrordata;
+
+	int _medianr;
+
+  public:
+	/** set callback function for media change
+	 *
+	 * @param func callback function
+	 * @param data arbitrary data to pass when function is called
+	 * */
+	void setMediaChangeCallback(int (*func)(int,int,int,void*), void* data)
+	{
+	    _mediachangefunc = func;
+	    _mediachangedata = data;
+	}
+
+	/** set callback function for media error
+	 *
+	 * @param func callback function
+	 * @param data arbitrary data to pass when function is called
+	 * */
+	void setMediaErrorCallback(int (*func)(const std::string&,void*), void* data)
+	{
+	    _mediaerrorfunc = func;
+	    _mediaerrordata = data;
+	}
+
+	/**
+	 * provide file via medianr and location
+	 *
+	 * returns local path or empty on error
+	 * uses media change callback
+	 */
+	Pathname provideLocation (int medianr, const Pathname& location);
+
   public:
 
     std::ostream & dumpOn( std::ostream & str ) const;

@@ -88,6 +88,7 @@ InstSrcDescr::InstSrcDescr()
 	delete process;
     }
 #warning _base_arch == 'uname -m'
+#warning should be in InstTarget
 }
 
 ///////////////////////////////////////////////////////////////////
