@@ -8,8 +8,8 @@
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PkgName
-/*
- *
+/**
+ * A package name
  **/
 class PkgName : public Ustring {
 
@@ -24,21 +24,35 @@ class PkgName : public Ustring {
 
 ///////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PkgNameEd
+/**
+ * Convenience struct containing a PkgName and PkgEdition
+ * @see PkgName
+ * @see PkgEdition
+ **/
 struct PkgNameEd {
-	PkgName name;
+
+  public:
+
+	PkgName    name;
 	PkgEdition edition;
 
-	PkgNameEd( const PkgName& n, const PkgEdition& e )
+	PkgNameEd( const PkgName & n, const PkgEdition & e )
 		: name(n), edition(e) {}
-	PkgNameEd( int bd, int mh, const char *n, const char *v, const char *r )
+	PkgNameEd( int bd, int mh,
+		   const std::string & n,
+		   const std::string & v,
+		   const std::string & r )
 		: name(n), edition(bd,mh,v,r) {}
 	// default copy constructor and assigment are ok
 
-	bool operator==( const PkgNameEd& ne2 ) const {
+	bool operator==( const PkgNameEd & ne2 ) const {
 		return name == ne2.name && edition == ne2.edition;
 	}
-	bool operator!=( const PkgNameEd& ne2 ) const {
-		return name != ne2.name || edition != ne2.edition;
+	bool operator!=( const PkgNameEd & ne2 ) const {
+		return !operator==( ne2 );
 	}
 
 	friend std::ostream& operator<<( std::ostream&, const PkgNameEd& );
