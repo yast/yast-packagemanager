@@ -18,7 +18,8 @@ liby2pmMedia_la_SOURCES = \
 	MediaDISK.cc		\
 	MediaSMB.cc		\
 	MediaWget.cc		\
-	Wget.cc
+	Wget.cc			\
+	Mount.cc
 
 liby2pmMedia_la_LIBADD = -ly2util
 

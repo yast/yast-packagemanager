@@ -23,10 +23,8 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/MediaNFS.h>
+#include <y2pm/Mount.h>
 
-#include <sys/types.h>
-#include <sys/mount.h>
-#include <errno.h>
 #include <dirent.h>
 
 using namespace std;
@@ -47,9 +45,7 @@ using namespace std;
 //
 MediaNFS::MediaNFS (const Url& url)
     : MediaHandler (url)
-    , _mountflags (MS_RDONLY)
 {
-    // parse options to _mountflags
 }
 
 
@@ -103,23 +99,31 @@ MediaNFS::attachTo (const Pathname & to)
 
     const char* const filesystem = "nfs";
     const char *mountpoint = to.asString().c_str();
+    Mount mount;
 
     string path = _url.getHost();
     path += ':';
     path += _url.getPath();
 
+    string options = _url.getOption("mountoptions");
+    if(options.empty())
+    {
+	options="ro";
+    }
+
     MIL << "try mount " << path
 	<< " to " << mountpoint
 	<< " filesystem " << filesystem << ": ";
-    if(!::mount (path.c_str(), mountpoint, filesystem, _mountflags, NULL))
+
+    MediaResult ret = mount.mount(path,mountpoint,filesystem,options);
+    if(ret == E_none)
     {
 	MIL << "succeded" << endl;
     }
     else
     {
-	D__ << strerror(errno) << endl;
-	MIL << "failed" << endl;
-	return E_system;
+	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	return ret;
     }
 
     _attachPoint = to;
@@ -144,14 +148,21 @@ MediaNFS::release (bool eject)
 	return E_not_attached;
     }
     
-    MIL << "umount " << _attachPoint.asString() << endl;
+    MIL << "umount " << _attachPoint.asString();
 
-    if (umount (_attachPoint.asString().c_str()) != 0) {
-	    return E_system;
+    Mount mount;
+    MediaResult ret;
+
+    if ((ret = mount.umount(_attachPoint.asString())) != E_none)
+    {
+	MIL << "failed: " <<  media_result_strings[ret] << endl;
+	return ret;
     }
+    
+    MIL << "succeded" << endl;
 
     _attachPoint = "";
-    return E_none;
+    return ret;
 }
 
 
@@ -176,7 +187,6 @@ MediaNFS::provideFile (const Pathname & filename) const
 	return E_not_attached;
 
     Pathname src = _attachPoint;
-    src += _url.getPath();
     src += filename;
 
     PathInfo info(src);
