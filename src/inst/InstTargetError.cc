@@ -63,6 +63,8 @@ std::string InstTargetError::errtext( const unsigned e )
   case E_RpmDB_not_initialized:			return N_("RPM Database not initialized");
   case E_RpmDB_subprocess_failed:		return N_("Some subprocess failed");
   case E_RpmDB_old_db:				return N_("Can not operate on old Database");
+  case E_RpmLib_read_config:   	                return N_("rpmReadConfigFiles failed");
+  case E_RpmLib_dbopen:			        return N_("rpmdbOpen failed");
   ///////////////////////////////////////////////////////////////////
   // In a hurry? Write:
   // ENUM_OUT( E_some_err );
