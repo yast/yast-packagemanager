@@ -192,16 +192,17 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	  // check whether to downgrade:
 	  // both must have vendor 'SuSE' and candidates buildtime must be
 	  // newer.
-	  if (    installed->vendor().isSuSE()
-	       && candidate->vendor().isSuSE()
-	       && installed->buildtime() < candidate->buildtime() ) {
-	    state->appl_set_install();
-	    DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
-	    ++opt_stats_r.chk_to_downgrade;
-	  } else {
-	    DBG << " ==> (candidate older)" << candidate << endl;
-	    ++opt_stats_r.chk_to_keep_old;
-	    _update_items.insert( state );
+	  if (installed->buildtime() < candidate->buildtime() ) {
+	    if (installed->vendor().isSuSE()
+		&& candidate->vendor().isSuSE()) {
+	      state->appl_set_install();
+	      DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
+	      ++opt_stats_r.chk_to_downgrade;
+	    } else {
+	      DBG << " ==> (candidate older)" << candidate << endl;
+	      ++opt_stats_r.chk_to_keep_old;
+	      _update_items.insert( state );
+	    }
 	  }
 	}
       } else {
