@@ -73,6 +73,7 @@ pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
         MediaCurl.h \
 	Mount.h \
 	MediaError.h \
+	MediaCallbacks.h \
         \
 	PMPackage.h PMPackagePtr.h \
 	PMPackageDataProvider.h PMPackageDataProviderPtr.h \

@@ -26,6 +26,7 @@
 #include <y2util/SysConfig.h>
 
 #include <y2pm/MediaCurl.h>
+#include <y2pm/MediaCallbacks.h>
 
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -35,6 +36,7 @@
 #include "config.h"
 
 using namespace std;
+using namespace MediaCallbacks;
 
 Pathname MediaCurl::_cookieFile = "/var/lib/YaST2/cookies";
 
@@ -273,9 +275,19 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
       return PMError( Error::E_curl_setopt_failed, _curlError );
     }
 
-    ret = curl_easy_perform( _curl );
+    // Set callback and perform.
+    DownloadProgressReport::Send report( downloadProgressReport );
+    report->start( url, dest );
+    if ( curl_easy_setopt( _curl, CURLOPT_PROGRESSDATA, &report ) != 0 ) {
+      WAR << "Can't set CURLOPT_PROGRESSDATA: " << _curlError << endl;;
+    }
 
+    ret = curl_easy_perform( _curl );
     fclose( file );
+
+    if ( curl_easy_setopt( _curl, CURLOPT_PROGRESSDATA, NULL ) != 0 ) {
+      WAR << "Can't unset CURLOPT_PROGRESSDATA: " << _curlError << endl;;
+    }
 
     if ( ret != 0 ) {
       PathInfo::unlink( destNew );
@@ -298,11 +310,12 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
                            stringutil::numstring( httpReturnCode ) +
                            " (URL: " + url.asString() + ")";
               DBG << msg << endl;
-              err.setDetails( msg );
               if ( httpReturnCode == 401 )
-                return PMError( Error::E_login_failed,
-                                "URL: " + url.asString() );
-              else return PMError( Error::E_file_not_found, msg );
+                err = PMError( Error::E_login_failed, "URL: " + url.asString() );
+              else
+		err = PMError( Error::E_file_not_found, msg );
+	      report->stop( err );
+	      return err;
             }
           }
           break;
@@ -333,14 +346,17 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
       }
 
       err.setDetails( _curlError );
+      report->stop( err );
       return err;
     }
 
     if ( PathInfo::rename( destNew, dest ) != 0 ) {
       ERR << "Rename failed" << endl;
+      report->stop( Error::E_write_error );
       return Error::E_write_error;
     }
 
+    report->stop( Error::E_ok );
     return Error::E_ok;
 }
 
@@ -359,9 +375,24 @@ PMError MediaCurl::getDirInfo( std::list<std::string> & retlist,
   return Error::E_not_supported_by_media;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaCurl::progressCallback
+//	METHOD TYPE : int
+//
+//	DESCRIPTION : Progress callback triggered from MediaCurl::getFile
+//
 int MediaCurl::progressCallback( void *clientp, double dltotal, double dlnow,
                                  double ultotal, double ulnow )
 {
+  DownloadProgressReport::Send * reportP = reinterpret_cast<DownloadProgressReport::Send*>( clientp );
+  if ( reportP ) {
+    ProgressData pd( 0, int(dltotal), int(dlnow) );
+    (*reportP)->progress( pd );
+  }
+
+#warning YOU callbacks still active
   if ( _callbacks ) {
     if ( _callbacks->progress( int( dlnow * 100 / dltotal ) ) ) return 0;
     else return 1;
@@ -369,29 +400,3 @@ int MediaCurl::progressCallback( void *clientp, double dltotal, double dlnow,
 
   return 0;
 }
-
-#if 0
-/** find file denoted by pattern
- *
- * @param	filename is interpreted relative to the attached url
- * @pattern	pattern is a string with an optional trailing '*'
- * */
-
-const Pathname *
-MediaCurl::findFile (const Pathname & dirname, const string & pattern) const
-{
-    // FIXME: scan directory on server
-    return 0;
-}
-
-
-/** get file information
- * */
-
-const PathInfo *
-MediaCurl::fileInfo (const Pathname & filename) const
-{
-    // FIXME retrieve file from server
-    return 0;
-}
-#endif

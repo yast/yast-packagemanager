@@ -29,6 +29,7 @@
 
 #include <y2pm/PMCallbacks.h>
 #include <y2pm/RpmDbCallbacks.h>
+#include <y2pm/MediaCallbacks.h>
 #include <y2pm/InstTargetCallbacks.h>
 #include <y2pm/InstSrcManagerCallbacks.h>
 #include <y2pm/PMPackageManagerCallbacks.h>
