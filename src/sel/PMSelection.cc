@@ -44,10 +44,10 @@ IMPL_DERIVED_POINTER( PMSelection, PMObject, PMSolvable );
 #define DP_GET(ATTR)         if ( _dataProvider ) return _dataProvider->ATTR( *this ); return PMSelectionDataProvider::ATTR()
 #define DP_ARG_GET(ATTR,ARG) if ( _dataProvider ) return _dataProvider->ATTR( *this, ARG ); return PMSelectionDataProvider::ATTR( ARG )
 // PMObject attributes
-std::string               PMSelection::summary    ( const std::string & lang ) const { DP_ARG_GET( summary, lang ); }
-std::list<std::string>    PMSelection::description( const std::string & lang ) const { DP_ARG_GET( description, lang ); }
-std::list<std::string>    PMSelection::insnotify  ( const std::string & lang ) const { DP_ARG_GET( insnotify, lang ); }
-std::list<std::string>    PMSelection::delnotify  ( const std::string & lang ) const { DP_ARG_GET( delnotify, lang ); }
+std::string               PMSelection::summary    ( const LangCode& locale ) const { DP_ARG_GET( summary, locale ); }
+std::list<std::string>    PMSelection::description( const LangCode& locale ) const { DP_ARG_GET( description, locale ); }
+std::list<std::string>    PMSelection::insnotify  ( const LangCode& locale ) const { DP_ARG_GET( insnotify, locale ); }
+std::list<std::string>    PMSelection::delnotify  ( const LangCode& locale ) const { DP_ARG_GET( delnotify, locale ); }
 FSize                     PMSelection::size()            const { DP_GET( size ); }
 // PMSelection attributes
 std::string               PMSelection::category()        const { DP_GET( category ); }
@@ -56,10 +56,10 @@ std::list<std::string>    PMSelection::suggests()        const { DP_GET( suggest
 std::list<PMSelectionPtr> PMSelection::suggests_ptrs()         { DP_GET( suggests_ptrs ); }
 std::list<std::string>    PMSelection::recommends()      const { DP_GET( recommends ); }
 std::list<PMSelectionPtr> PMSelection::recommends_ptrs()       { DP_GET( recommends_ptrs ); }
-std::list<std::string>    PMSelection::inspacks     ( const std::string& lang ) const { DP_ARG_GET( inspacks, lang ); }
-std::list<PMPackagePtr>   PMSelection::inspacks_ptrs( const std::string& lang )       { DP_ARG_GET( inspacks_ptrs, lang ); }
-std::list<std::string>    PMSelection::delpacks     ( const std::string& lang ) const { DP_ARG_GET( delpacks, lang ); }
-std::list<PMPackagePtr>   PMSelection::delpacks_ptrs( const std::string& lang )       { DP_ARG_GET( delpacks_ptrs, lang ); }
+std::list<std::string>    PMSelection::inspacks     ( const LangCode& locale ) const { DP_ARG_GET( inspacks, locale ); }
+std::list<PMSelectablePtr>PMSelection::inspacks_ptrs( const LangCode& locale )       { DP_ARG_GET( inspacks_ptrs, locale ); }
+std::list<std::string>    PMSelection::delpacks     ( const LangCode& locale ) const { DP_ARG_GET( delpacks, locale ); }
+std::list<PMSelectablePtr>PMSelection::delpacks_ptrs( const LangCode& locale )       { DP_ARG_GET( delpacks_ptrs, locale ); }
 FSize                     PMSelection::archivesize()     const { DP_GET( archivesize ); }
 std::string               PMSelection::order()           const { DP_GET( order ); }
 

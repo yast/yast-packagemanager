@@ -25,6 +25,7 @@
 #include <string>
 
 #include <y2util/FSize.h>
+#include <y2util/LangCode.h>
 #include <y2pm/PMSelectionDataProviderPtr.h>
 
 #include <y2pm/PMSelection.h>
@@ -52,10 +53,10 @@ class PMSelectionDataProvider : virtual public Rep {
     ///////////////////////////////////////////////////////////////////
 
     // PMObject attributes
-    static std::string               summary    ( const std::string & lang = "" ) { return std::string(); }
-    static std::list<std::string>    description( const std::string & lang = "" ) { return std::list<std::string>(); }
-    static std::list<std::string>    insnotify  ( const std::string & lang = "" ) { return std::list<std::string>(); }
-    static std::list<std::string>    delnotify  ( const std::string & lang = "" ) { return std::list<std::string>(); }
+    static std::string               summary    ( const LangCode& lang = LangCode("") ) { return std::string(); }
+    static std::list<std::string>    description( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
+    static std::list<std::string>    insnotify  ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
+    static std::list<std::string>    delnotify  ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
     static FSize                     size()            { return size(); }
 
     // PMSelection attributes
@@ -65,10 +66,10 @@ class PMSelectionDataProvider : virtual public Rep {
     static std::list<PMSelectionPtr> suggests_ptrs()   { return std::list<PMSelectionPtr>(); }
     static std::list<std::string>    recommends()      { return std::list<std::string>(); }
     static std::list<PMSelectionPtr> recommends_ptrs() { return std::list<PMSelectionPtr>(); }
-    static std::list<std::string>    inspacks     ( const std::string & lang = "" ) { return std::list<std::string>(); }
-    static std::list<PMPackagePtr>   inspacks_ptrs( const std::string & lang = "" ) { return std::list<PMPackagePtr>(); }
-    static std::list<std::string>    delpacks     ( const std::string & lang = "" ) { return std::list<std::string>(); }
-    static std::list<PMPackagePtr>   delpacks_ptrs( const std::string & lang = "" ) { return std::list<PMPackagePtr>(); }
+    static std::list<std::string>    inspacks     ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
+    static std::list<PMSelectablePtr>inspacks_ptrs( const LangCode& lang = LangCode("") ) { return std::list<PMSelectablePtr>(); }
+    static std::list<std::string>    delpacks     ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
+    static std::list<PMSelectablePtr>delpacks_ptrs( const LangCode& lang = LangCode("") ) { return std::list<PMSelectablePtr>(); }
     static FSize                     archivesize()     { return FSize(0); }
     static std::string               order()           { return "000"; }
 
@@ -92,10 +93,10 @@ class PMSelectionDataProvider : virtual public Rep {
     ///////////////////////////////////////////////////////////////////
 
     // PMObject attributes
-    virtual std::string               summary        ( const PMSelection & sel_r, const std::string & lang = "" ) const { return summary(); }
-    virtual std::list<std::string>    description    ( const PMSelection & sel_r, const std::string & lang = "" ) const { return description(); }
-    virtual std::list<std::string>    insnotify      ( const PMSelection & sel_r, const std::string & lang = "" ) const { return insnotify(); }
-    virtual std::list<std::string>    delnotify      ( const PMSelection & sel_r, const std::string & lang = "" ) const { return delnotify(); }
+    virtual std::string               summary        ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return summary(); }
+    virtual std::list<std::string>    description    ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return description(); }
+    virtual std::list<std::string>    insnotify      ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return insnotify(); }
+    virtual std::list<std::string>    delnotify      ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delnotify(); }
     virtual FSize                     size           ( const PMSelection & sel_r ) const { return size(); }
 
     // PMSelection attributes
@@ -105,10 +106,10 @@ class PMSelectionDataProvider : virtual public Rep {
     virtual std::list<PMSelectionPtr> suggests_ptrs  ( const PMSelection & sel_r ) const { return suggests_ptrs(); }
     virtual std::list<std::string>    recommends     ( const PMSelection & sel_r ) const { return recommends(); }
     virtual std::list<PMSelectionPtr> recommends_ptrs( const PMSelection & sel_r ) const { return recommends_ptrs(); }
-    virtual std::list<std::string>    inspacks       ( const PMSelection & sel_r, const std::string & lang = "" ) const { return inspacks(); }
-    virtual std::list<PMPackagePtr>   inspacks_ptrs  ( const PMSelection & sel_r, const std::string & lang = "" ) const { return inspacks_ptrs(); }
-    virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const std::string & lang = "" ) const { return delpacks(); }
-    virtual std::list<PMPackagePtr>   delpacks_ptrs  ( const PMSelection & sel_r, const std::string & lang = "" ) const { return delpacks_ptrs(); }
+    virtual std::list<std::string>    inspacks       ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return inspacks(); }
+    virtual std::list<PMSelectablePtr>inspacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return inspacks_ptrs(); }
+    virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delpacks(); }
+    virtual std::list<PMSelectablePtr>delpacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delpacks_ptrs(); }
     virtual FSize                     archivesize    ( const PMSelection & sel_r ) const { return archivesize(); }
     virtual std::string               order          ( const PMSelection & sel_r ) const { return order(); }
 
