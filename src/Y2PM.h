@@ -331,7 +331,7 @@ class Y2PM {
 			       std::list<std::string>& errors_r,
 			       std::list<std::string>& remaining_r,
 			       std::list<std::string>& srcremaining_r,
-			       PM::ISrcIdList installrank );
+			       PM::ISrcIdList installrank ) __attribute__ ((deprecated));
 
     /**
      * Install a single rpm file.

@@ -71,4 +71,3 @@ void PMPackageDataProvider::du( PkgDu & dudata_r )
 {
   dudata_r.clear();
 }
-

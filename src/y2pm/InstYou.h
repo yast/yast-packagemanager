@@ -300,7 +300,8 @@ class InstYou {
     PMError retrievePackage( const PMPackagePtr &pkg, const PMYouProductPtr & );
     PMError retrieveScript( const std::string &script,
                             const PMYouProductPtr & );
-    PMError InstYou::retrieveFile( const PMYouFile &file );
+    PMError retrieveFile( const PMYouFile &file );
+    PMError retrieveDelta( const std::string& name, const PMYouProductPtr& prod, const std::string& md5sum);
 
     PMError executeScript( const std::string &, const PMYouProductPtr & );
 
@@ -337,7 +338,7 @@ class InstYou {
     bool firesScriptTrigger( const PMYouPatchPtr &patch );
 
     bool hasPatchRpm( const PMPackagePtr &pkg );
-
+    
     /**
       Verify that media with given number is present. If not the function asks
       the user to insert the correct one by using callbacks.
@@ -347,7 +348,7 @@ class InstYou {
   private:
     PMYouPatchInfoPtr _info;
     PMYouSettingsPtr _settings;
-    
+
     std::vector<PMYouPatchPtr> _patches;
 
     std::vector<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
@@ -367,6 +368,14 @@ class InstYou {
     int _installedPatches;
 
     int _currentMediaNumber;
+    
+    bool _usedeltas;
+
+  public:
+    class DeltaToApply;
+
+  private:
+    std::vector<DeltaToApply*> _deltastoapply;
 };
 
 ///////////////////////////////////////////////////////////////////

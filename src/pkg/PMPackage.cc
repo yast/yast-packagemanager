@@ -83,12 +83,15 @@ std::list<std::string> PMPackage::suggests()     const { DP_GET( suggests ); }
 std::string            PMPackage::location()     const { DP_GET( location ); }
 unsigned int           PMPackage::medianr()      const { DP_GET( medianr ); }
 std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
+std::string            PMPackage::md5sum()       const { DP_GET( md5sum ); }
 std::string            PMPackage::externalUrl()  const { DP_GET( externalUrl ); }
 std::list<PkgEdition>  PMPackage::patchRpmBaseVersions() const { DP_GET( patchRpmBaseVersions ); }
 FSize                  PMPackage::patchRpmSize() const { DP_GET( patchRpmSize ); }
 bool                   PMPackage::forceInstall() const { DP_GET( forceInstall ); }
 // package file comes from remote
 bool		       PMPackage::isRemote()	 const { DP_GET( isRemote ); }
+std::list<PMPackageDelta> PMPackage::deltas() const{ DP_GET( deltas ); }
+
 // physical access to the rpm file.
 PMError                PMPackage::providePkgToInstall(Pathname& path) const { DP_ARG_GET( providePkgToInstall, path ); }
 // physical access to the src.rpm file.
@@ -183,3 +186,18 @@ ostream & PMPackage::dumpOn( ostream & str ) const
   return str;
 }
 
+std::ostream& PMPackageDelta::dumpOn(std::ostream& os) const
+{
+  os << _filename << " / "
+     << _size << " / "
+     << _md5sum << " / "
+     << _ned << " / "
+     << _buildtime << " / "
+     << _srcmd5 << endl;
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const PMPackageDelta& delta)
+{
+  return delta.dumpOn(os);
+}

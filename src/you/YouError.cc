@@ -72,6 +72,9 @@ std::string YouError::errtext( const unsigned e )
   case E_callback_missing: return _("No callback function is set.");
   case E_missing_sig_file: return _("Missing signature.");
   case E_wrong_media: return _("Wrong media.");
+  case E_md5sum_mismatch: return _("MD5 checksum does not match.");
+  case E_mkdir_failed: return _("Could not create directory.");
+  case E_reassemble_rpm_from_delta_failed: return _("Could not reassemble RPM from delta.");
   };
 
   return stringutil::numstring( e );

@@ -102,6 +102,8 @@ class PMYouProduct : public CountedRep
       @param scriptName Name of script
     */
     Pathname scriptPath( const std::string &scriptName );
+    
+    Pathname deltaPath( const std::string &deltaName );
 
     /**
       Return path of script at download location.
@@ -184,6 +186,7 @@ class PMYouProduct : public CountedRep
     Pathname _patchPath;
     Pathname _rpmPath;
     Pathname _scriptPath;
+    Pathname _deltaPath;
 
     std::string _product;
     std::string _version;

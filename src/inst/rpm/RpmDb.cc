@@ -164,6 +164,7 @@ class RpmDb::Logfile {
       return _log;
     }
     static void setFname( const Pathname & fname_r ) {
+      MIL << "installation log file " << fname_r << endl;
       if ( _refcnt )
 	closeLog();
       _fname = fname_r;

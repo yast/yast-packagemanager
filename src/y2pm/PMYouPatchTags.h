@@ -71,7 +71,8 @@ class YOUPackageTagSet : public TaggedFile::TagSet
       CONFLICTS,
       PATCHRPMBASEVERSIONS,
       ARCH,
-      FORCEINSTALL
+      FORCEINSTALL,
+      DELTAS
     };
  
     YOUPackageTagSet();

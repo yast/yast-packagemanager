@@ -106,8 +106,10 @@ InstSrc::~InstSrc()
       if ( _cache_deleteOnExit ) {
 	ERR << "Media close failed! Can't delete cache!" << endl;
       }
+      _media = NULL;
       return;
     }
+    _media = NULL;
   }
 
   if ( _cache_deleteOnExit ) {

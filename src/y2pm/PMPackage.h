@@ -30,6 +30,8 @@
 
 #include <y2pm/PMObject.h>
 
+#include <y2pm/PMPackageDelta.h>
+
 class PkgDuMaster;
 class PkgDuSlave;
 class YStringTree;
@@ -112,6 +114,7 @@ class PMPackage : public PMObject {
     std::string            location()     const;
     unsigned int           medianr()      const;
     std::list<std::string> keywords()     const;
+    std::string            md5sum()       const;
 
     // from packages.DU (argument returned for convenience)
     PkgDu & du( PkgDu & dudata_r )        const;
@@ -121,6 +124,8 @@ class PMPackage : public PMObject {
     std::list<PkgEdition>  patchRpmBaseVersions() const;
     FSize                  patchRpmSize() const;
     bool                   forceInstall() const;
+
+    std::list<PMPackageDelta> deltas() const;
 
     // if the rpm file comes from remote
     // (-> package provide takes some time, use 'provide' callback

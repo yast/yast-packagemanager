@@ -28,6 +28,7 @@
 
 #include <y2util/YRpmGroupsTree.h>
 
+
 class PMYouPackageDataProvider : public PMPackageDataProvider {
 	REP_BODY(PMYouPackageDataProvider);
 
@@ -152,6 +153,10 @@ class PMYouPackageDataProvider : public PMPackageDataProvider {
         */
         virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const;
 
+	void addDelta(PMPackagePtr pkg, const PMPackageDelta& delta);
+
+	virtual std::list<PMPackageDelta>  deltas( const PMPackage & pkg_r ) const;
+
     private:
         std::map<PMPackagePtr,std::string> _summaries;
         std::map<PMPackagePtr,std::string> _srcLabels;
@@ -163,6 +168,7 @@ class PMYouPackageDataProvider : public PMPackageDataProvider {
         std::map<PMPackagePtr,FSize> _archiveSizes;
         std::map<PMPackagePtr,FSize> _patchRpmSizes;
         std::map<PMPackagePtr,bool> _forceInstalls;
+        std::map<PMPackagePtr,std::list<PMPackageDelta> > _deltas;
 };
 
 #endif // PMYouPackageDataProvider_h

@@ -67,7 +67,10 @@ class YouError {
       E_read_mediapatches_failed,
       E_callback_missing,
       E_missing_sig_file,
-      E_wrong_media
+      E_wrong_media,
+      E_md5sum_mismatch,
+      E_mkdir_failed,
+      E_reassemble_rpm_from_delta_failed
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
