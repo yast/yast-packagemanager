@@ -47,8 +47,8 @@ using namespace std;
  * a directory
  */
 InstTarget::InstTarget ( ) :
-    _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
-    _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE)
+    _rpminstflags(0),
+    _rpmremoveflags(0)
 {
     _rpmdb = new RpmDb();
 }

@@ -338,7 +338,7 @@ void PMSelectable::chooseCandidateObj()
 
   PMObjectPtr newcand = bestCandidate();
   if ( _candidateObj != newcand ) {
-    DBG << "chooseCandidate: old " << _candidateObj << " -> new " << newcand << endl;
+//    DBG << "chooseCandidate: old " << _candidateObj << " -> new " << newcand << endl;
     _candidateObj = newcand;
   }
   _state.set_has_candidate( _candidateObj );
