@@ -13,6 +13,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(includedir)
 noinst_LTLIBRARIES = liby2pminstsrc.la
 
 liby2pminstsrc_la_SOURCES = \
+	PkgPubkeyCache.cc		\
 	InstSrcManager.cc InstSrcManagerCallbacks.cc	\
 	\
 	InstSrc.cc 			\

@@ -39,6 +39,8 @@ Pathname InstSrcManager::_cache_root_dir( "/var/adm/YaST/InstSrcManager" );
 
 const Pathname InstSrcManager::_cache_tmp_dir( "tmp" );
 
+const Pathname InstSrcManager::_cache_pubkey_dir( "gpg-pubkey" );
+
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
@@ -56,6 +58,9 @@ InstSrcManager::InstSrcManager( const bool autoEnable_r )
   if ( res ) {
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
   }
+
+  _pubkeyCache.setCachedir( cache_pubkey_dir() );
+
   if ( Y2PM::runningFromSystem() ) {
     initSrcPool( _want_sources_enabled );
   } else {
@@ -1044,6 +1049,8 @@ PMError InstSrcManager::intern_cacheCopyTo()
     ERR << "Unable to create cache " << cache_tmp_dir() << " (errno " << res << ")" << endl;
     return Error::E_error;
   }
+
+  _pubkeyCache.cacheCopyTo( cache_pubkey_dir() );
 
   // scan existing caches, adjust ranks and disable them.
 

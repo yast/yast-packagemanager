@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Dec  2 11:46:31 CET 2004 - ma@suse.de
+
+- Always cache the package signing keys found on a new InstSrc. It
+  might be the media is not needed to actually install packages, but
+  we do need the signing keys. (#47991)
+
+-------------------------------------------------------------------
 Thu Dec  2 11:44:18 CET 2004 - ma@suse.de
 
 - Fixed possible overflow in version comparison (#48165)

@@ -148,7 +148,7 @@ struct Y2pmRc : public RcValues, public TextParser {
     // data
     _tagset.addTag( "requestedLocales",	REQUESTEDLOCALES,	TaggedFile::MULTI );
     _tagset.addTag( "candidateOrder",	CANDIDATEORDER,		TaggedFile::SINGLE );
-    _tagset.addTag( "trustedVendorsa",	TRUSTEDVENDORS,	        TaggedFile::MULTI );
+    _tagset.addTag( "trustedVendors",	TRUSTEDVENDORS,	        TaggedFile::MULTI );
   }
 
   ///////////////////////////////////////////////////////////////////
