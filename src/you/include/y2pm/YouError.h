@@ -55,7 +55,11 @@ class YouError {
       E_read_suseservers_failed,
       E_auth_failed,
       E_user_abort,
-      E_parse_error
+      E_parse_error,
+      E_prescript_failed,
+      E_postscript_failed,
+      E_rpm_failed,
+      E_install_failed
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {

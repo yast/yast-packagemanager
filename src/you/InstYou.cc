@@ -350,7 +350,7 @@ PMError InstYou::installCurrentPatch()
 
   if ( _selectedPatchesIt == _patches.end() ) {
     ERR << "No more patches." << endl;
-    return PMError( InstSrcError::E_error );
+    return PMError( YouError::E_error );
   }
 
   return installPatch( *_selectedPatchesIt );
@@ -360,7 +360,7 @@ PMError InstYou::retrieveCurrentPatch( bool reload, bool checkSig )
 {
   if ( _selectedPatchesIt == _patches.end() ) {
     ERR << "No more patches." << endl;
-    return PMError( InstSrcError::E_error );
+    return PMError( YouError::E_error );
   }
 
   return retrievePatch( *_selectedPatchesIt, reload, checkSig );
@@ -392,7 +392,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     if ( dryrun ) {
       cout << "PRESCRIPT: " << scriptPath << endl;
     } else {
-      Y2PM::instTarget().executeScript( scriptPath );
+      error = Y2PM::instTarget().executeScript( scriptPath );
+      if ( error ) return YouError::E_prescript_failed;
     }
   }
 
@@ -429,7 +430,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
       if ( error ) {
         E__ << "Installation of RPM " << fileName << " of patch "
             << patch->name() << "failed" << endl;
-        return error;
+        return YouError::E_rpm_failed;
       }
     }
   }
@@ -441,7 +442,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     error = Y2PM::instTarget().installPatch( patch->localFile() );
     if ( error ) {
       E__ << "Error installing patch info." << endl;
-      return error;
+      return YouError::E_install_failed;
     }
   }
 
@@ -450,7 +451,10 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     if ( dryrun ) {
       cout << "POSTSCRIPT: " << scriptPath << endl;
     } else {
-      Y2PM::instTarget().executeScript( scriptPath );
+      error = Y2PM::instTarget().executeScript( scriptPath );
+      if ( error ) {
+        return YouError::E_postscript_failed;
+      }
     }
   }
 
