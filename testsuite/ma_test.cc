@@ -14,6 +14,8 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
 
+#include "show_pm.h"
+
 using namespace std;
 #undef  Y2LOG
 #define Y2LOG "PM_ma_test"
@@ -37,7 +39,8 @@ int main()
   Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
 
-  InstSrcManager MGR;
+  Y2PM y2pm;
+  InstSrcManager& MGR = y2pm.instSrcManager();
 
   Url url( "dir:///8.0" );
 
@@ -65,12 +68,7 @@ int main()
   INT << Y2PM::packageManager().size() << endl;
   PMSelectablePtr p = Y2PM::packageManager()["aaa_base"];
   INT << p << endl;
-  INT << p->installedObj()->getAttributeValue(p->installedObj()->ATTR_DESCRIPTION) << endl;
-  PMPackagePtr P = p->installedObj();
-  INT << P->getAttributeValue(P->ATTR_DESCRIPTION) << endl;
-  INT << P->getAttributeValue(P->ATTR_INSTALLTIME) << endl;
-  INT << P->getAttributeValue(P->ATTR_NAME) << endl;
-  INT << p << endl;
+  show_pmpackage (p->installedObj());
 
   SEC << "=================================" << endl;
   //Y2PM::packageManager().poolRemoveCandidates( plist );
