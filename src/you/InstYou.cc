@@ -31,6 +31,7 @@
 #include <y2pm/YouError.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/Wget.h>
+#include <y2pm/PMYouPackageDataProvider.h>
 
 #include <y2pm/InstYou.h>
 
@@ -326,7 +327,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
 
     Pathname fileName;
-    if ( _info->externalUrl( *itPkg ).empty() ) {
+    if ( _info->packageDataProvider()->externalUrl( *itPkg ).empty() ) {
       fileName = _media.localPath( (*itPkg)->location() );
     } else {
       fileName = (*itPkg)->location();
@@ -386,7 +387,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
     if ( error ) return error;
     if ( checkSig ) {
       string localRpm;
-      string externalUrl = _info->externalUrl( *itPkg );
+      string externalUrl = _info->packageDataProvider()->externalUrl( *itPkg );
       if ( externalUrl.empty() ) {
         localRpm = _media.localPath( (*itPkg)->location() ).asString();
       } else {
@@ -455,7 +456,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
 {
   D__ << "InstYou::retrievePackage: '" << pkg->name() << "'" << endl;
 
-  string externalUrl = _info->externalUrl( pkg );
+  string externalUrl = _info->packageDataProvider()->externalUrl( pkg );
 
   if ( !externalUrl.empty() ) {
     Url url( externalUrl );
@@ -487,7 +488,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
       if ( err ) return err;
     }
 
-    _info->setLocation( pkg, media.localPath( path ).asString() );
+    _info->packageDataProvider()->setLocation( pkg, media.localPath( path ).asString() );
 
     return PMError();
   }
@@ -511,7 +512,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
     if ( pkgHasInstalledObj ) {
       PkgEdition installedVersion = pkg->getInstalledObj()->edition();
       D__ << "Installed: " << installedVersion.asString() << endl;
-      list<PkgEdition> baseVersions = _info->patchRpmBaseVersions( pkg );
+      list<PkgEdition> baseVersions = _info->packageDataProvider()->patchRpmBaseVersions( pkg );
       list<PkgEdition>::const_iterator it2;
       for( it2 = baseVersions.begin(); it2 != baseVersions.end(); ++it2 ) {
         if ( *it2 == installedVersion ) {
@@ -543,7 +544,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
 
     // If download was successful store path to RPM and return.
     if ( !error ) {
-      _info->setLocation( pkg, rpmPath.asString() );
+      _info->packageDataProvider()->setLocation( pkg, rpmPath.asString() );
       D__ << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
       return PMError();
     }
@@ -560,7 +561,7 @@ PMError InstYou::removePackages()
     list<PMPackagePtr> packages = patch->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      string externalUrl = _info->externalUrl( *itPkg );
+      string externalUrl = _info->packageDataProvider()->externalUrl( *itPkg );
       if ( externalUrl.empty() ) {
         PMError error = _media.releaseFile( (*itPkg)->location() );
         if ( error ) {

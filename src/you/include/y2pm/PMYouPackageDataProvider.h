@@ -40,14 +40,52 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	virtual ~PMYouPackageDataProvider();
 
     public:
+        /**
+         * Set size value for given package.
+         */
+        void setSize( const PMPackagePtr &pkg, const FSize & );
 
         /**
-	 * Looks like nothing but location is provided as PMYouPackage data
-	 * @see PMPackageDataProvider
-	 **/
-	virtual std::string location( const PMPackage & pkg_r ) const;
+          Get size for given package.
+        */
+        FSize size( const PMPackage & ) const;
 
-        FSize size( const PMPackage & pkg_r ) const;
+        /**
+         * Set location value for given package.
+         */
+        void setLocation( const PMPackagePtr &pkg, const std::string &str );
+
+        /**
+          Get location for given package.
+        */
+        std::string location( const PMPackage & ) const;
+
+        /**
+         * Set external url for given package.
+         */
+        void setExternalUrl( const PMPackagePtr &pkg, const std::string &str );
+
+        /**
+          Get external url for given package.
+        */
+        const std::string externalUrl( const PMPackagePtr & ) const;
+
+        /**
+         * Set base versions for patch RPM.
+         */
+        void setPatchRpmBaseVersions( const PMPackagePtr &pkg,
+                                      const std::list<PkgEdition> &editions );
+
+        /**
+          Get base versions for patch RPM.
+        */
+        const std::list<PkgEdition> patchRpmBaseVersions( const PMPackagePtr & ) const;
+
+    private:
+        std::map<PMPackagePtr,FSize> _sizes;
+        std::map<PMPackagePtr,std::string> _locations;
+        std::map<PMPackagePtr,std::string> _externalUrls;
+        std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;
 };
 
 #endif // PMYouPackageDataProvider_h

@@ -114,46 +114,7 @@ class PMYouPatchInfo : virtual public Rep {
      */
     static std::string translateLangCode( const LangCode &lang );
 
-    /**
-     * Set size value for given package.
-     */
-    void setSize( const PMPackagePtr &pkg, const FSize & );
-
-    /**
-      Get size for given package.
-    */
-    FSize size( const PMPackagePtr & ) const;
-
-    /**
-     * Set location value for given package.
-     */
-    void setLocation( const PMPackagePtr &pkg, const std::string &str );
-
-    /**
-      Get location for given package.
-    */
-    const std::string location( const PMPackagePtr & ) const;
-
-    /**
-     * Set external url for given package.
-     */
-    void setExternalUrl( const PMPackagePtr &pkg, const std::string &str );
-
-    /**
-      Get external url for given package.
-    */
-    const std::string externalUrl( const PMPackagePtr & ) const;
-
-    /**
-     * Set base versions for patch RPM.
-     */
-    void setPatchRpmBaseVersions( const PMPackagePtr &pkg,
-                                  const std::list<PkgEdition> &editions );
-
-    /**
-      Get base versions for patch RPM.
-    */
-    const std::list<PkgEdition> patchRpmBaseVersions( const PMPackagePtr & ) const;
+    PMYouPackageDataProviderPtr packageDataProvider() const;
 
   protected:
     std::string tagValueLocale ( YOUPatchTagSet::Tags tagIndex,
@@ -180,10 +141,7 @@ class PMYouPatchInfo : virtual public Rep {
 
     MediaAccess _media;
 
-    std::map<PMPackagePtr,FSize> _sizes;
-    std::map<PMPackagePtr,std::string> _locations;
-    std::map<PMPackagePtr,std::string> _externalUrls;
-    std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;
+    PMYouPackageDataProviderPtr _packageDataProvider;
 };
 
 ///////////////////////////////////////////////////////////////////
