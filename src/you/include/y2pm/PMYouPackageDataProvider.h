@@ -24,17 +24,23 @@
 #include <y2pm/PMPackageDataProvider.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMObject.h>
+#include <y2pm/PMYouPatchInfo.h>
 
 #include <y2util/YRpmGroupsTree.h>
 
 class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvider {
 	REP_BODY(PMYouPackageDataProvider);
 
+        PMYouPatchInfoPtr _patchInfo;
+        PMPackagePtr _pkg;
+
     public:
 
-	PMYouPackageDataProvider();
+	PMYouPackageDataProvider( const PMYouPatchInfoPtr & );
 
 	virtual ~PMYouPackageDataProvider();
+
+        void setPackage( const PMPackagePtr &pkg ) { _pkg = pkg; }
 
 	/**
 	 * hint before accessing multiple attributes
@@ -83,7 +89,7 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	// suse packages values
 	const std::list<std::string> recommends () const { return PMPackageDataProvider::recommends(); }
 	const std::list<std::string> suggests () const { return PMPackageDataProvider::suggests(); }
-	const std::string location () const { return PMPackageDataProvider::location(); }
+	const std::string location () const;
 #warning YouPackage Media Number default used
 	const int medianr () const { return PMPackageDataProvider::medianr(); }
 	const std::list<std::string> keywords () const { return PMPackageDataProvider::keywords(); }

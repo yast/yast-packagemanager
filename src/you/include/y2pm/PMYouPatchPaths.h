@@ -57,6 +57,7 @@ class PMYouPatchPaths : virtual public Rep {
     Url patchUrl();
 
     Pathname rpmPath( const PMPackagePtr &pkg );
+    Pathname rpmPath( const PMPackagePtr &pkg, const std::string & arch );
 
     Pathname scriptPath( const std::string &scriptName );
 

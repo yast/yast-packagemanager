@@ -258,7 +258,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   list<PMPackagePtr> packages = patch->packages();
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-    Pathname fileName = _media.localPath( _paths->rpmPath( *itPkg ) );
+    Pathname fileName = _media.localPath( (*itPkg)->location() );
     D__ << "INSTALL PKG " << fileName << endl;  
     if ( dryrun ) {
       cout << "INSTALL: " << fileName << endl;
@@ -301,16 +301,10 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
   list<PMPackagePtr> packages = patch->packages();
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-    Pathname rpmPath = _paths->rpmPath( *itPkg );
-    D__ << "  RPM: " << (*itPkg)->name() << ": " << rpmPath.asString() << endl;
-    PMError error = _media.provideFile( rpmPath );
-    if ( error ) {
-      E__ << "Error downloading RPM '" << (*itPkg)->name() << "' from '"
-          << _paths->patchUrl() << "/" << rpmPath << "'" << endl;
-      return error;
-    }
+    PMError error = retrievePackage( *itPkg );
+    if ( error ) return error;
     if ( checkSig ) {
-      string localRpm = _media.localPath( rpmPath ).asString();
+      string localRpm = _media.localPath( (*itPkg)->location() ).asString();
       unsigned result = rpm.checkPackage( localRpm );
       if ( result != 0 ) {
         E__ << "Signature check failed for " << localRpm << endl;
@@ -359,6 +353,40 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
   return PMError();
 }
 
+PMError InstYou::retrievePackage( const PMPackagePtr &pkg )
+{
+  list<string> archs;
+
+  if ( pkg->hasInstalledObj() ) {
+    archs.push_back( pkg->getInstalledObj()->arch() );
+  }
+  
+  archs.push_back( _paths->baseArch() );
+  archs.push_back( "noarch" );
+
+  PMError error;
+  Pathname rpmPath;
+  list<string>::const_iterator it;
+  for( it = archs.begin(); it != archs.end(); ++it ) {
+    D__ << *it << endl;
+    rpmPath = _paths->rpmPath( pkg, *it );
+    D__ << "Trying downloading '" << _paths->patchUrl() << "/" << rpmPath
+        << "'" << endl;
+    error = _media.provideFile( rpmPath );
+    if ( error ) {
+      D__ << "Downloading RPM '" << pkg->name() << "' failed: " << error
+          << endl;
+    } else {
+      _info->setLocation( pkg, rpmPath.asString() );
+      D__ << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
+      return PMError();
+    }
+  }
+
+  E__ << "Error downloading RPM " << pkg->name() << endl;
+  return error;
+}
+
 PMError InstYou::removePackages()
 {
   PMYouPatchPtr patch;
@@ -366,9 +394,9 @@ PMError InstYou::removePackages()
     list<PMPackagePtr> packages = patch->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      PMError error = _media.releaseFile( _paths->rpmPath( *itPkg ) );
+      PMError error = _media.releaseFile( (*itPkg)->location() );
       if ( error ) {
-        E__ << "Can't release " << _paths->rpmPath( *itPkg ).asString() << endl;
+        E__ << "Can't release " << (*itPkg)->location() << endl;
         return error;
       }
     }

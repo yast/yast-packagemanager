@@ -23,6 +23,7 @@
 
 #include <list>
 #include <string>
+#include <map>
 
 #include <y2util/CommonPkdParser.h>
 #include <y2util/Url.h>
@@ -102,7 +103,21 @@ class PMYouPatchInfo : virtual public Rep {
     PMError parsePackages( const std::string &packages,
                            const PMYouPatchPtr &patch );
 
+    /**
+     * Translate standard lang code into full language name as used in patch
+     * info files.
+     */
     static std::string translateLangCode( const LangCode &lang );
+
+    /**
+     * Set location value for given package.
+     */
+    void setLocation( const PMPackagePtr &pkg, const std::string &str );
+
+    /**
+      Get location for given package.
+    */
+    const std::string location( const PMPackagePtr & ) const;
 
   protected:
     std::string tagValue( YOUPatchTagSet::Tags tag );
@@ -114,11 +129,11 @@ class PMYouPatchInfo : virtual public Rep {
     CommonPkdParser::TagSet *_patchtagset;
     CommonPkdParser::TagSet *_packagetagset;
     
-    PMYouPackageDataProviderPtr _packageProvider;
-
     PMYouPatchPathsPtr _paths;
 
     MediaAccess _media;
+
+    std::map<PMPackagePtr,std::string> _locations;
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -99,13 +99,19 @@ Url PMYouPatchPaths::patchUrl()
 
 Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg )
 {
-  string rpmName = pkg->name();
+  return rpmPath( pkg, baseArch() );
+}
+
+Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg, const string &arch )
+{
+  string rpmName = arch + "/";
+  rpmName += pkg->name();
   rpmName += "-";
   rpmName += pkg->version();
   rpmName += "-";
   rpmName += pkg->release();
   rpmName += ".";
-  rpmName += baseArch();
+  rpmName += arch;
   rpmName += ".rpm";
   return _rpmPath + rpmName;
 }

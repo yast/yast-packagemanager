@@ -155,6 +155,7 @@ class InstYou {
   protected:
     PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
     PMError retrievePatch( const PMYouPatchPtr &, bool checkSig = true );
+    PMError retrievePackage( const PMPackagePtr &pkg );
 
     /**
      * check, if patch has new packages.
