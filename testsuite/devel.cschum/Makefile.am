@@ -12,7 +12,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 
 LDADD = $(top_builddir)/src/liby2pm.la
 
-LDFLAGS = -static
+AM_LDFLAGS = -static
 
 EXTRA_PROGRAMS = \
 	cschum_test	\

@@ -17,7 +17,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 LDADD = $(top_builddir)/src/liby2pm.la /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 # /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 
-LDFLAGS = -static
+AM_LDFLAGS = -static
 
 CLEANFILES = *.bin
 
