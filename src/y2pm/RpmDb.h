@@ -373,7 +373,9 @@ class RpmDb: public CountedRep
 	RPMINST_FORCE      = 0x04,
 	RPMINST_NODEPS     = 0x08,
 	RPMINST_IGNORESIZE = 0x10,
-	RPMINST_JUSTDB     = 0x20
+	RPMINST_JUSTDB     = 0x20,
+	RPMINST_NODIGEST   = 0x40,
+	RPMINST_NOSIGNATURE= 0x80
       };
 
     /**

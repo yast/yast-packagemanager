@@ -1560,9 +1560,11 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
     RpmArgVec opts;
     opts.push_back("-U");
     opts.push_back("--percent");
-    opts.push_back("--nodigest");
-    opts.push_back("--nosignature");
 
+    if (flags & RPMINST_NODIGEST)
+	opts.push_back("--nodigest");
+    if (flags & RPMINST_NOSIGNATURE)
+	opts.push_back("--nosignature");
     if (flags & RPMINST_NODOCS)
 	opts.push_back ("--excludedocs");
     if (flags & RPMINST_NOSCRIPTS)

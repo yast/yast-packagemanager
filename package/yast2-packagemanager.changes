@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Apr  1 17:17:12 CEST 2004 - lnussel@suse.de
+
+- don't use --nodigest at rpm installation by default so faulty packages don't
+  make rpm segfault (#37685).
+
+-------------------------------------------------------------------
 Wed Mar 31 12:59:07 CEST 2004 - ma@suse.de
 
 - Rcfile to store permanent settings like locales to support when
