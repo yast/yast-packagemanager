@@ -1,7 +1,7 @@
 #
 # Makefile.am for packagemanager/testsuite
 #
-
+SUBDIRS = query
 AUTOMAKE_OPTIONS = dejagnu
 PACKAGE = packagemanager
 INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
