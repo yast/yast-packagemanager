@@ -215,6 +215,19 @@ class PMManager {
      * */
     void setMaxRemoveThreshold(unsigned nr);
 
+    /**
+     * compute relative space requirement
+     * 
+     * size = 0
+     * if to install
+     *    if has_installed
+     *       subtract from size
+     *    add to size
+     * if to delete
+     *    subtract from size
+     * */
+    FSize SpaceDifference();
+
   private:
 
     void buildSets(PkgSet& installed, PkgSet& available, PkgSet& to_install);
