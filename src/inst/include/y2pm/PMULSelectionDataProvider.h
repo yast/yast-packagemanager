@@ -76,7 +76,7 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 
     public:
 
-	PMULSelectionDataProvider (const std::string& selectionname);
+	PMULSelectionDataProvider (const Pathname& selectionname);
 	virtual ~PMULSelectionDataProvider();
 
 	TagParser& getParser() { return _selection_retrieval->getParser(); }

@@ -791,7 +791,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
 MIL << "Reading " << selectionname << endl;
 
-	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (*selfile));
+	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selectionname));
 	parser = dataprovider->getParser();
 
 	MIL << "start " << *selfile << " parsing" << endl;
