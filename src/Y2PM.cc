@@ -179,7 +179,7 @@ InstTarget & Y2PM::instTarget()
   if ( !_instTarget ) {
     MIL << "Launch InstTarget..." << endl;
     _instTarget = new InstTarget();
-    MIL << "Created InstTarget" << endl;
+    MIL << "Created InstTarget (not yet initialized)" << endl;
   }
   return *_instTarget;
 }
