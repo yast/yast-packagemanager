@@ -58,13 +58,14 @@ class InstSrc: virtual public Rep {
      * Known types of InstSrc.
      *
      * For each type there must be a concrete InstSrcData able to handle
-     * that kind of InstSrc. Autodtdct switch in _init_newMedia must be
+     * that kind of InstSrc. Autodetect switch in _init_newMedia must be
      * adjusted, if types are added/removed.
      * @see InstSrcData
      **/
     enum Type {
       T_UNKNOWN,
       // :first entry
+      T_UnitedLinux,
       T_TEST_DIST,
       // last entry:
       T_AUTODETECT
@@ -197,7 +198,17 @@ class InstSrc: virtual public Rep {
      **/
     InstSrcDataPtr _data;
 
-  protected:
+  public:
+
+    /**
+     * Access to installation source description
+     **/
+    constInstSrcDescrPtr descr() const { return _descr; }
+
+    /**
+     * Access to installation source data
+     **/
+    constInstSrcDataPtr  data() const { return _data; }
 
 #if 0
     bool initialized() const { return( _descr != 0 ); }

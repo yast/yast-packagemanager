@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       InstSrcData.cc
+  File:       InstSrcData_UL.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -21,53 +21,52 @@
 
 #include <iostream>
 
-#include <y2pm/InstSrcData.h>
+#include <y2pm/InstSrcData_UL.h>
 
-#include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-//	CLASS NAME : InstSrcDataPtr
-//	CLASS NAME : constInstSrcDataPtr
+//	CLASS NAME : InstSrcData_ULPtr
+//	CLASS NAME : constInstSrcData_ULPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_BASE_POINTER(InstSrcData);
+IMPL_DERIVED_POINTER(InstSrcData_UL,InstSrcData,InstSrcData);
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::InstSrcData
+//	METHOD NAME : InstSrcData_UL::InstSrcData_UL
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-InstSrcData::InstSrcData()
+InstSrcData_UL::InstSrcData_UL()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::~InstSrcData
+//	METHOD NAME : InstSrcData_UL::~InstSrcData_UL
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-InstSrcData::~InstSrcData()
+InstSrcData_UL::~InstSrcData_UL()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::dumpOn
+//	METHOD NAME : InstSrcData_UL::dumpOn
 //	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-ostream & InstSrcData::dumpOn( ostream & str ) const
+ostream & InstSrcData_UL::dumpOn( ostream & str ) const
 {
   Rep::dumpOn( str );
   return str;
@@ -76,13 +75,13 @@ ostream & InstSrcData::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::tryGetDescr
+//	METHOD NAME : InstSrcData_UL::tryGetDescr
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-PMError InstSrcData::tryGetDescr( InstSrcDescrPtr & ndescr_r,
-				  MediaAccessPtr media_r, const Pathname & produduct_dir_r )
+PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
+				     MediaAccessPtr media_r, const Pathname & produduct_dir_r )
 {
   ndescr_r = 0;
   PMError err;

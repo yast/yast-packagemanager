@@ -1,3 +1,5 @@
+
+
 #include <iomanip>
 #include <list>
 #include <string>
@@ -6,6 +8,10 @@
 
 #include <Y2PM.h>
 #include <y2pm/RpmDb.h>
+
+#include <y2pm/InstSrc.h>
+#include <y2pm/InstSrcDescr.h>
+#include <y2pm/MediaAccess.h>
 
 using namespace std;
 #undef  Y2LOG
@@ -30,38 +36,21 @@ int main()
   Y2SLog::setLogfileName("-");
   MIL << "START" << endl;
 
-#if 0
-  string root = "/";
-  RpmDbPtr rpmdb( new RpmDb(root) );
+  InstSrcPtr nsrc;
 
-  list<PMPackagePtr> plist;
-  RpmDb::DbStatus dbstat = rpmdb->initDatabase(true);
-  if( ! (dbstat == RpmDb::RPMDB_OK || dbstat == RpmDb::RPMDB_NEW_CREATED)) {
-    ERR << "error initializing rpmdb: " << dbstat << endl;
-    return 1;
-  }
-  dbstat = rpmdb->getPackages(plist);
-  MIL << dbstat << " - Got " << plist.size() << " Packages" << endl;
+  Url      url     ( "dir:///8.0" );  // media
+  Pathname proddir ( "" );            // product dir
+  Pathname cache   ( "/tmp/tcache" ); // cachedir (must not exist)
 
-  string n( "name_" );
-  string v( "version_" );
-  string r( "release_" );
-  string a( "i386" );
+  PMError err = InstSrc::vconstruct( nsrc, cache, url, proddir, InstSrc::T_UnitedLinux );
 
-  for ( unsigned i = 0; i < 10; ++i ) {
-    string si( ::dec(i) );
-    plist.push_back( new PMPackage( PkgName(n+si), PkgEdition( (v+si).c_str(), (r+si).c_str() ), PkgArch("i386")) );
-    SEC << *plist.rbegin() << endl;
-  }
+  SEC << err << endl;
+  SEC << nsrc << endl;
 
-  plist.push_back( 0 );
-  plist.push_back( *plist.begin() );
-  string si( ::dec(5) );
-  plist.push_back( new PMPackage( PkgName(n+si), PkgEdition( (v+si).c_str(), (r+si).c_str() ), PkgArch("i686")) );
-  plist.push_back( new PMPackage( PkgName(n+si), PkgEdition( (v+si+".1").c_str(), (r+si).c_str() ), PkgArch("i686")) );
+  MIL << "END" << endl;
+  return 0;
 
-  Y2PM::packageManager().poolSetInstalled( plist );
-#endif
+
   SEC << "=================================" << endl;
 
   INT << Y2PM::packageManager().size() << endl;

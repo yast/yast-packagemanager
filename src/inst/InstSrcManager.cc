@@ -58,11 +58,46 @@ InstSrcManager::~InstSrcManager()
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::scanMedia( constInstSrcPtr & isrc_r,
-				   const Url &       mediaurl_r,
-				   const ISrcType    type_r )
+PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r )
 {
-  MIL << "scanMedia (" << type_r << ") " << media_r << endl;
+  idlist_r.clear();
+  PMError err;
+
+#warning FIX TMPDIR( "/tmp/test_test" )
+  Pathname tmpDir( "/tmp/test_test" );
+
+  MIL << "scanMedia " << mediaurl_r << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // prepare media
+  ///////////////////////////////////////////////////////////////////
+  MediaAccessPtr  media = new MediaAccess;
+  if ( (err = _media->open( mediaurl_r )) ) {
+    ERR << "Failed to open " << mediaurl_r << " " << err << endl;
+    return err;
+  }
+
+  if ( (err = _media->attachTo( tmpDir )) ) {
+    if ( err != MediaAccess::Error::E_attachpoint_fixed ) {
+      ERR << "Failed to attach media to " << tmpDir << " " << err << endl;
+      return err;
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // look if there's a /media.1/products file
+  ///////////////////////////////////////////////////////////////////
+  list<Pathname,string> plist;
+
+  if ( ! media->provideFile( "/media.1/products" ) ) {
+
+  } else {
+
+  }
+
+
+
+
   DBG << "scanMedia " << isrc_r << endl;
 
   isrc_r = 0;

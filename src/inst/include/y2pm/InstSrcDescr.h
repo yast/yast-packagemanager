@@ -189,6 +189,36 @@ class InstSrcDescr : virtual public Rep {
 
   public:
 
+    //////////////////////////////////////////////////////////////////
+    // set value functions
+    ///////////////////////////////////////////////////////////////////
+
+    void set_base_arch( const PkgArch & val_r )             { _base_arch = val_r; }
+    void set_type( InstSrc::Type val_r )                    { _type = val_r; }
+    void set_url( const Url & val_r )                       { _url = val_r; }
+    void set_product_dir( const Pathname & val_r )          { _product_dir = val_r; }
+    void set_default_acitivate( bool val_r )                { _default_acitivate = val_r; }
+
+    void set_media_vendor( const std::string & val_r )      { _media_vendor = val_r; }
+    void set_media_id( const std::string & val_r )          { _media_id = val_r; }
+    void set_media_count( const std::string & val_r )       { _media_count = val_r; }
+
+    void set_content_product( const PkgNameEd & val_r )     { _content_product = val_r; }
+    void set_content_baseproduct( const PkgNameEd & val_r ) { _content_baseproduct = val_r; }
+    void set_content_vendor( const std::string & val_r )    { _content_vendor = val_r; }
+    void set_content_defaultarch( const PkgArch & val_r )   { _content_defaultarch = val_r; }
+    void set_content_archmap( const ArchMap & val_r )       { _content_archmap = val_r; }
+    void set_content_requires( const PkgRelation & val_r )  { _content_requires = val_r; }
+    void set_content_language(const LangCode & val_r )      { _content_language = val_r; }
+    void set_content_linguas( const LinguasList & val_r )   { _content_linguas = val_r; }
+    void set_content_label( const std::string & val_r )     { _content_label = val_r; }
+    void set_content_labelmap( const LabelMap & val_r )     { _content_labelmap = val_r; }
+    void set_content_timezone( const std::string & val_r )  { _content_timezone = val_r; }
+    void set_content_descrdir( const Pathname & val_r )     { _content_descrdir = val_r; }
+    void set_content_datadir( const Pathname & val_r )      { _content_datadir = val_r; }
+
+  public:
+
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 
   public:

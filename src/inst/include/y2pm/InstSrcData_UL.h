@@ -10,44 +10,30 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       InstSrcManager.h
+  File:       InstSrcData_UL.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
+  Purpose: Concrete InstSrcData able to handle UnitedLinux style layout.
+
 /-*/
-#ifndef InstSrcManager_h
-#define InstSrcManager_h
+#ifndef InstSrcData_UL_h
+#define InstSrcData_UL_h
 
 #include <iosfwd>
-#include <set>
-#include <list>
 
-#include <y2pm/InstSrc.h>
+#include <y2pm/InstSrcData_ULPtr.h>
+#include <y2pm/InstSrcData.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : InstSrcManager
+//	CLASS NAME : InstSrcData_UL
 /**
- *
+ * @short Concrete InstSrcData able to handle UnitedLinux style layout.
  **/
-class InstSrcManager {
-
-  friend std::ostream & operator<<( std::ostream & str, const InstSrcManager & obj );
-
-  InstSrcManager & operator=( const InstSrcManager & );
-  InstSrcManager            ( const InstSrcManager & );
-
-  private:
-
-    friend class Y2PM;
-    InstSrcManager();
-    ~InstSrcManager();
-
-  private:
-
-    static std::string _cache_root_dir;
-
+class InstSrcData_UL : virtual public Rep, public InstSrcData {
+  REP_BODY(InstSrcData_UL);
 
   public:
 
@@ -56,38 +42,31 @@ class InstSrcManager {
      **/
     typedef InstSrcError Error;
 
-    typedef constInstSrcPtr   ISrcId;
 
-    typedef std::list<ISrcId> ISrcIdList;
+  public:
 
-  private:
+    InstSrcData_UL();
 
-    typedef std::set<InstSrcPtr>  ISrcPool;
+    virtual ~InstSrcData_UL();
 
-    typedef std::list<InstSrcPtr> ISrcList;
+  public:
 
-    ISrcPool _knownSources;
-
-    ISrcList _enabledSources;
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
 
   public:
 
     /**
-     * Access media. Detect kind of InstSrc available on media.
+     * Any concrete InstSrcData must realize this, as it knows the expected
+     * layout on the media. Expect MediaAccessPtr to be open and attached.
      *
+     * Return the InstSrcDescr retrieved from the media via ndescr_r,
+     * or NULL and PMError set.
      **/
-    PMError scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r );
-
-    PMError enableSource( const ISrcId & isrc_r );
-
-    PMError disableSource( const ISrcId & isrc_r );
-
-    PMError deleteSource( const ISrcId & isrc_r );
-
-    PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
-
+    static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
+				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
 };
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // InstSrcManager_h
+#endif // InstSrcData_UL_h
+

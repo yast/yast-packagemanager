@@ -33,7 +33,9 @@
 
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstSrcDescr.h>
+
 #include <y2pm/InstSrcData.h>
+#include <y2pm/InstSrcData_UL.h>
 
 using namespace std;
 
@@ -384,8 +386,12 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produd
 
     switch ( ctype ) {
 
+    case T_UnitedLinux:
+      err = InstSrcData_UL::tryGetDescr( ndescr, _media, produduct_dir_r );
+      break;
+
     case T_TEST_DIST:
-      err = InstSrcData::tryGetDescr( ndescr, this, produduct_dir_r );
+      err = InstSrcData::tryGetDescr( ndescr, _media, produduct_dir_r );
       break;
 
     ///////////////////////////////////////////////////////////////////
@@ -456,6 +462,7 @@ string InstSrc::toString( const Type t )
   switch ( t ) {
 
 #define ENUM_OUT(V) case T_##V: return #V; break
+    ENUM_OUT( UnitedLinux );
     ENUM_OUT( TEST_DIST );
     ENUM_OUT( AUTODETECT );
 #undef ENUM_OUT
