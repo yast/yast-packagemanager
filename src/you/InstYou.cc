@@ -580,6 +580,11 @@ PMError InstYou::processPatches()
     writeLastUpdate();
   }
 
+  PMError releaseError = releaseSource();
+  if ( releaseError ) {
+    ERR << "Error releasing media: " << releaseError << endl;
+  }
+
   return error;
 }
 
@@ -1650,12 +1655,17 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
 
       string errorStr = _("Media not found");
       string productStr = _("YOU Patch CD");
-      string result = callback->changeMedia( errorStr, "", productStr,
+      string urlStr = _settings->patchUrl().asString();
+      string result = callback->changeMedia( errorStr, urlStr, productStr,
                                              lastNumber, number,
                                              masterMedia->doubleSided() );
-      if ( result == "" || result == "I" ) {
+      if ( result == "" ) {
         log( _("Ok.\n") );
         // retry
+      } else if ( result == "I" ) {
+        log( _("Ignore.\n" ) );
+        // Ignore bad media id
+        break;
       } else if ( result == "S" ) {
         log( _("Skip.\n") );
         return YouError::E_user_skip;
@@ -1664,7 +1674,8 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
         return YouError::E_user_abort;
       } else if ( result == "E" ) {
         log( _("Eject media.\n") );
-        // TODO: Eject
+        _media.release( true );
+        continue;
       }
     } else {
       log( _("Failed.\n") );
