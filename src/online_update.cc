@@ -198,7 +198,7 @@ int main( int argc, char **argv )
   you.selectPatches( kinds );
 
   if ( debug || showPatches ) {
-    cout << "--PATCHES:--" << endl;
+    cout << "Patches:" << endl;
     you.showPatches( verbose );
   }
 

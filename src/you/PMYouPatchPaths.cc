@@ -45,7 +45,7 @@ IMPL_BASE_POINTER(PMYouPatchPaths);
 
 PMYouPatchPaths::PMYouPatchPaths()
 {
-  init("Dummy","1.0","i386");
+  init("SuSE-Linux","8.1","i386");
 }
 
 PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
@@ -178,7 +178,7 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
 
     if ( url.empty() ) {
   //    url = "http://www.suse.de/de/support/download/";
-      url = "http://localhost/cgi-bin/suseservers.cgi";
+      url = "http://www.suse.de/cgi-bin/suseservers.cgi";
       url += "?product=" + product();
       url += "&version=" + version();
       url += "&basearch=" + string( baseArch() );
