@@ -43,6 +43,8 @@
  * reported as <B>ERROR(InstSrc:short description of error)</B>, if an error text
  * is provided, otherwise <B>ERROR(InstSrc:10242)</B>.
  *
+ * An optional details string may be provided to give further explanation.
+ *
  * To accomplish this extend <CODE>enum ErrClass</CODE> and define a new first error
  * value for InstSrcError in multiples of <CODE>_valrange</CODE> (currently 1024).
  * Extend the switches in <CODE>PMError::errClass</CODE> and <CODE>PMError::errstr</CODE>
@@ -159,7 +161,8 @@ class PMError {
       C_MediaError        = 11*_valrange,
       C_InstTargetError   = 12*_valrange,
       C_QueryError	  = 13*_valrange,
-      C_YouError	  = 14*_valrange
+      C_YouError	  = 14*_valrange,
+      C_ModulePkgError    = 15*_valrange
     };
 
     enum Error {
@@ -173,26 +176,63 @@ class PMError {
 
   public:
 
+    /**
+     * Default Constructor. Assign errorvalue, defaults to E_ok.
+     **/
     PMError( const unsigned e = E_ok ) { _errval = e; }
-    PMError( const unsigned e, const std::string &details )
+
+    /**
+     * Constructor. Assign error value and details.
+     **/
+    PMError( const unsigned e, const std::string & details )
     {
       _errval = e;
       _errdetails = details;
     }
 
+    /**
+     * Conversion to unsigned error value.
+     **/
     operator unsigned() const { return _errval; }
 
+    /**
+     * @return The error string <B>without</B> details: <B>ERROR(InstSrc:short_description)</B>
+     **/
     static std::string errstr( const unsigned e );
 
+    /**
+     * @return The error string <B>without</B> details: <B>ERROR(InstSrc:short_description)</B>
+     **/
     std::string errstr() const { return errstr( _errval ); }
 
+    /**
+     * @return The error values error class.
+     **/
     static ErrClass errClass( const unsigned e );
 
+    /**
+     * @return The error values error class.
+     **/
     ErrClass errClass() const { return errClass( _errval ); }
 
-    void setDetails( const std::string &details ) { _errdetails = details; }
+    /**
+     * Assign a details string
+     **/
+    void setDetails( const std::string & details ) { _errdetails = details; }
+
+    /**
+     * @return The details string.
+     **/
     std::string details() const { return _errdetails; }
 
+    /**
+     * @return The full error string icl. deatils: <B>ERROR(InstSrc:short_description)[details if set]</B>
+     **/
+    std::string asString() const;
+
+    /**
+     * Stream output @ref asString.
+     **/
     friend std::ostream & operator<<( std::ostream & str, const PMError & obj );
 };
 

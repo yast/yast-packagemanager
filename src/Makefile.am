@@ -31,6 +31,7 @@ liby2pm_la_SOURCES = Y2PM.cc Y2PMCallbacks.cc \
 	PkgDu.cc	\
 	PkgChangelog.cc	\
 	PMError.cc	\
+	ModulePkgError.cc	\
 	PMCallbacks.cc	\
 	PMSolvable.cc	\
 	PMObject.cc	\

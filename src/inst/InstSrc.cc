@@ -753,7 +753,7 @@ InstSrc::provideMedia (int medianr) const
 	}
 	else
 	{
-            MIL << "Media can't provide '" << mediafile << "': " << err.errstr() << endl;
+            MIL << "Media can't provide '" << mediafile << "': " << err << endl;
 	}
 
 	_media->release();
@@ -799,7 +799,7 @@ InstSrc::provideMedia (int medianr) const
 	string changereply;
 	for (;;)
 	{
-	    changereply = report->changeMedia( this, err.errstr(), url.asString(), product,
+	    changereply = report->changeMedia( this, err.asString(), url.asString(), product,
 					       _medianr, medianr );
 
 	    if (changereply != "E")		// eject
@@ -861,7 +861,7 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir,
 
     if (err != PMError::E_ok)
     {
-	ERR << "Media can't provide '" << dir+name << "': " << err.errstr() << endl;
+	ERR << "Media can't provide '" << dir+name << "': " << err << endl;
 	path_r = filename;		// pass back complete filename of missing package
 	return err;
     }
@@ -909,7 +909,7 @@ InstSrc::provideFile (int medianr, const Pathname& path, Pathname& file_r) const
     err = _media->provideFile (path);
     if (err != PMError::E_ok)
     {
-	ERR << "Media can't provide '" << path << "': " << err.errstr() << endl;
+	ERR << "Media can't provide '" << path << "': " << err << endl;
 	return err;
     }
     file_r = _media->localPath (path);
@@ -936,7 +936,7 @@ InstSrc::provideDir (int medianr, const Pathname& path, Pathname& dir_r) const
     err = _media->provideDir (path);
     if (err != PMError::E_ok)
     {
-	ERR << "Media can't provide '" << path << "': " << err.errstr() << endl;
+	ERR << "Media can't provide '" << path << "': " << err << endl;
 	return err;
     }
     dir_r = _media->localPath (path);
