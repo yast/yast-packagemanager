@@ -52,6 +52,7 @@ class REP_CLASS(MediaAccess) {
 	Pathname _destination;
 
 	// handler for 'physical' media
+	// == 0 if not open
 	MediaHandler * _handler;
 
     public:
