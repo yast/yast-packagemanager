@@ -664,8 +664,7 @@ InstSrc::provideMedia (int medianr) const
     bool triedReOpen = false;
 
     Url url = _descr->url();
-#warning TBD content_label(LangCode)
-    string product = _descr->content_label();
+    string product = _descr->label();
     while (medianr != _medianr)
     {
 	if (!_media->isAttached())
