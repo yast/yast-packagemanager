@@ -325,12 +325,15 @@ class InstSrc: virtual public Rep {
 	/** arbitrary data to pass back for change callback */
 	void* _mediachangedata;
 
-	int _medianr;
+	/**
+	 * Current media number. Mutable because media provide/release
+	 * are const methods.
+	 **/
+	mutable int _medianr;
 
 	/**
 	 * provide media by number
-	 *
-	 */
+	 **/
 	PMError provideMedia (int medianr) const;
 
   public:
@@ -338,20 +341,12 @@ class InstSrc: virtual public Rep {
 	 *
 	 * @param func callback function
 	 * @param data arbitrary data to pass when function is called
-	 * */
+	 **/
 	void setMediaChangeCallback(std::string (*func)(const std::string&,const std::string&,const std::string&,int,int,void*), void* data)
 	{
 	    _mediachangefunc = func;
 	    _mediachangedata = data;
 	}
-#if 0
-	/**
-	 * change mount point for remote media
-	 *
-	 * remoteMount(Pathname)
-	 */
-	void remoteMount (const Pathname& path);
-#endif
 	/**
 	 * provide package via medianr, name, and sub-dir
 	 *
@@ -403,7 +398,7 @@ class InstSrc: virtual public Rep {
 	 * release media. if_removable is true: release if CD/DVD only.
 	 *
 	 **/
-	PMError releaseMedia( bool if_removable_r = false );
+	PMError releaseMedia( bool if_removable_r = false ) const;
 
   public:
 

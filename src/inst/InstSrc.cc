@@ -665,8 +665,7 @@ InstSrc::provideMedia (int medianr) const
     {
 	if (!_media->isAttached())
 	{
-	    InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
-	    ptr->_medianr = 0;
+	    _medianr = 0;
 
 	    err = _media->attach();
 
@@ -705,8 +704,7 @@ InstSrc::provideMedia (int medianr) const
 		    if ((mediaf.getline (id, 200, '\n'))
 			&& (string (id) == _descr->media_id()))		// check id
 		    {
-			InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
-			ptr->_medianr = medianr;			// everything ok
+			_medianr = medianr;			        // everything ok
 			mediaf.close();
 			break;
 		    }
@@ -853,8 +851,7 @@ InstSrc::provideMedia (int medianr) const
 	return InstSrcError::E_no_media;
     }
 
-    InstSrcPtr isptr = InstSrcPtr::cast_away_const (this);
-    isptr->_medianr = medianr;			// everything ok
+    _medianr = medianr;			// everything ok
 
     return InstSrcError::E_ok;
 }
@@ -1035,8 +1032,7 @@ InstSrc::changeUrl (const Url & newUrl_r)
 //
 //	DESCRIPTION :
 //
-PMError
-InstSrc::releaseMedia( bool if_removable_r )
+PMError InstSrc::releaseMedia( bool if_removable_r ) const
 {
   _medianr = 0;
 
