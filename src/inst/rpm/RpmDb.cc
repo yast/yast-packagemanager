@@ -1700,26 +1700,28 @@ RpmDb::checkPackageResult2string(unsigned code)
     return msg;
 }
 
-bool
-RpmDb::backupPackage( const Pathname & filename )
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::backupPackage
+//	METHOD TYPE : bool
+//
+bool RpmDb::backupPackage( const Pathname & filename )
 {
-    constRpmHeaderPtr h( RpmHeader::readPackage( filename ) );
+  constRpmHeaderPtr h( RpmHeader::readPackage( filename ) );
+  if( ! h )
+    return false;
 
-    if( !h )
-    {
-	ERR << "querying "
-	    << filename
-	    << " for its name failed, no backup possible" << endl;
-	return false;
-    }
-    else
-    {
-	return backupPackage( h->tag_name() );
-    }
+  return backupPackage( h->tag_name() );
 }
 
-bool
-RpmDb::backupPackage(const string& packageName)
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::backupPackage
+//	METHOD TYPE : bool
+//
+bool RpmDb::backupPackage(const string& packageName)
 {
     Logfile progresslog;
     bool ret = true;

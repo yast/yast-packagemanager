@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep  9 10:34:54 CEST 2003 - ma@suse.de
+
+- Fixed missing Fclose reading rpm header from package. (#29916)
+- 2.8.12
+
+-------------------------------------------------------------------
 Mon Sep  8 11:45:49 CEST 2003 - ma@suse.de
 
 - After commiting all packages, packagemanager is synced with
