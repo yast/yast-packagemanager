@@ -388,6 +388,10 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
     error = _media.provideFile( patchPath + "directory" );
     if ( error ) {
       W__ << "no directory file found." << endl;
+      if ( error == MediaError::E_login_failed ||
+           error == MediaError::E_proxyauth_failed ) {
+          return error;
+      }
 
       error = _media.dirInfo( patchFiles, patchPath );
       if ( error ) {
