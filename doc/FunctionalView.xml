@@ -76,6 +76,14 @@ An installation source contains
 </para>
 
 <para>
+*** NEW ***
+</para>
+<para>
+An installation media can also contain several products and architectures,
+i.e. a combined patch CD for all UnitedLinux based products
+</para>
+
+<para>
 An installation source instance is created for every known
 installation media. The target system is also regarded as an installation
 media.
