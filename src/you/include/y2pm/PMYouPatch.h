@@ -92,7 +92,8 @@ class PMYouPatch : virtual public Rep, public PMObject {
       kind_recommended = 2,
       kind_optional = 4,
       kind_document = 8,
-      kind_yast = 16
+      kind_yast = 16,
+      kind_all = 31
     };
     /**
      * Set kind attribute.

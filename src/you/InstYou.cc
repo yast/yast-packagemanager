@@ -23,6 +23,8 @@
 
 #include <y2util/Y2SLog.h>
 
+#include <Y2PM.h>
+
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMPackage.h>
 
@@ -79,6 +81,13 @@ PMError InstYou::retrievePatches( const Url &url )
   if ( error ) {
     E__ << "Error downloading patchinfos: " << error << endl;
     return error;
+  }
+
+  Y2PM::youPatchManager().poolAddCandidates( _patches );
+
+  list<PMYouPatchPtr>::const_iterator itPatch;
+  for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
+    Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
   }
 
   return PMError();
@@ -142,19 +151,77 @@ PMError InstYou::retrievePackages()
   return PMError();
 }
 
-PMError InstYou::installPatches()
+PMError InstYou::installPatches( bool dryrun )
 {
   list<PMYouPatchPtr>::const_iterator itPatch;
   for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
        ++itPatch ) {
     D__ << "INSTALL: " << (*itPatch)->name() << endl;
+    
+    list<string> packageFileNames;
+    
     list<PMPackagePtr> packages = (*itPatch)->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+      Pathname fileName = _media.localPath( _paths->rpmPath( *itPkg ) );
+      packageFileNames.push_back( fileName.asString() );
       D__ << "  rpm -i --force --nodeps "
-          << _media.localPath( _paths->rpmPath( *itPkg ) ) << endl;
+          << fileName << endl;      
+      if ( dryrun ) {
+        cout << "INSTALL: " << fileName << endl;
+      }
+    }
+    
+    if ( !dryrun ) {
+      PMError error = Y2PM::instTarget().installPackages( packageFileNames );
+      if ( error ) {
+        E__ << "Installation of RPMs of patch " << (*itPatch)->name()
+            << "failed" << endl;
+        return error;
+      }
     }
   }
 
   return PMError();
+}
+
+void InstYou::filterPatchSelection()
+{
+  list<PMYouPatchPtr> filteredPatches;
+
+  list<PMYouPatchPtr>::const_iterator itPatch;
+  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
+       ++itPatch ) {
+    D__ << "PATCH: " << (*itPatch)->name() << endl;
+
+    list<PMPackagePtr> packages = (*itPatch)->packages();
+    list<PMPackagePtr>::const_iterator itPkg;
+
+    bool install = false;
+    
+    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+      D__ << "  PKG: " << (*itPkg)->name() << "-" << (*itPkg)->edition() << endl;
+      if ( (*itPkg)->hasInstalledObj() ) {
+        if ( (*itPkg)->getInstalledObj()->edition() >= (*itPkg)->edition() ) {
+          D__ << "    is older than installed" << endl;
+          install = false;
+          break;
+        } else {
+          D__ << "    is newer than installed" << endl;
+          install = true;
+        }
+      } else {
+        D__ << "    not installed" << endl;
+      }
+    }
+    
+    if ( install ) filteredPatches.push_back( *itPatch );
+  }
+
+  _selectedPatches = filteredPatches;
+
+  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
+       ++itPatch ) {
+    cerr << "Install: " << (*itPatch)->name() << endl;
+  }
 }
