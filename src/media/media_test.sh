@@ -11,6 +11,7 @@ destdir=tmp
 
 servers=("ftp://hewitt.suse.de:/suse-STABLE" "http://najar.suse.de/manual/;proxyuser=heinz;proxypassword=ketchup")
 files=("/apt/SuSE/STABLE-i386/examples/sources.list.FTP" "/LICENSE")
+#cd:///suse /mnt /setup/descr/info
 
 i=0;
 while test "$i" -lt "${#servers[@]}";
