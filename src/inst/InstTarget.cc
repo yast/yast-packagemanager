@@ -138,7 +138,7 @@ InstTarget::InstTarget ( )
     : _rpmdb( new RpmDb() )
     , _proddb( new InstTargetProdDB )
     , _seldb( new InstTargetSelDB )
-    , _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE)
+    , _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE|RpmDb::RPMINST_NOSIGNATURE)
     , _rpmremoveflags(RpmDb::RPMINST_NODEPS)
     , _patchesInitialized( false )
 {
