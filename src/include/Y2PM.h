@@ -24,8 +24,9 @@
 
 #include <iosfwd>
 #include <string>
-
+#include <list>
 #include <y2util/LangCode.h>
+#include <y2pm/PkgArch.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
@@ -60,7 +61,10 @@ class Y2PM {
     // packages of selections
     static std::list<LangCode> _requested_locales;
 
+    // the current base architecture of the target
     static PkgArch _base_arch;
+    // the current list of allowed architectures
+    static std::list<PkgArch> _allowed_archs;
 
   private:
 
@@ -96,6 +100,12 @@ class Y2PM {
      * Access to the (target) base architecture
      **/
     static PkgArch baseArch(void);
+
+    /**
+     * Access to the list of allowed architectures
+     **/
+    static std::list<PkgArch>& allowedArchs(void) { return _allowed_archs; }
+    static void setAllowedArchs(const std::list<PkgArch>& allowed_archs) { _allowed_archs = allowed_archs; }
 
     /**
      * The local machine's rootdir. "/" if running from system.
