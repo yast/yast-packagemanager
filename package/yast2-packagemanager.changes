@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar 13 14:02:09 CET 2003 - ma@suse.de
+
+- Fixed: Request to install source rpm got lost, if binary package
+  is to be installed/deleted.
+
+-------------------------------------------------------------------
 Mon Mar 10 22:51:42 CET 2003 - ma@suse.de
 
 - On query whether instsource is remote (ftp,http), check the url
