@@ -84,43 +84,45 @@ ostream & InstSrcData_UL::dumpOn( ostream & str ) const
 //	METHOD NAME : InstSrcData_UL::tryGetDescr
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
+//	DESCRIPTION : try to read content data (describing the product)
+//			and fill InstSrcDescrPtr class
 //
 PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				     MediaAccessPtr media_r, const Pathname & product_dir_r )
 {
-      MIL << "InstSrcData_UL::tryGetDescr(" << product_dir_r << ")" << endl;
+    MIL << "InstSrcData_UL::tryGetDescr(" << product_dir_r << ")" << endl;
 
-  ndescr_r = 0;
-  PMError err;
+    ndescr_r = 0;
+    PMError err;
 
-  InstSrcDescrPtr ndescr( new InstSrcDescr );
+    InstSrcDescrPtr ndescr( new InstSrcDescr );
 
-  ///////////////////////////////////////////////////////////////////
-  // parse InstSrcDescr from media_r and fill ndescr
-  ///////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////
+    // parse InstSrcDescr from media_r and fill ndescr
+    ///////////////////////////////////////////////////////////////////
 
-  Pathname contentname = product_dir_r + "/content";
-  MIL << "provideFile (" << contentname << ")" << endl;
-  err = media_r->provideFile (contentname);
-  if (err != Error::E_ok)
-  {
-    return err;
-  }
-  MIL << "fopen(" << (media_r->getAttachPoint() + contentname) << ")" << endl;
-  ifstream content ("/8.1/content");
-  if (!content)
-  {
-     return Error::E_no_instsrc_on_media;
-  }
-  MIL << "ok" << endl;
+    Pathname contentname = product_dir_r + "/content";
+    MIL << "provideFile (" << contentname << ")" << endl;
+    err = media_r->provideFile (contentname);
+    if (err != Error::E_ok)
+    {
+	return err;
+    }
 
-  err = Error::E_ok;
+    contentname = media_r->getAttachPoint() + contentname;
+    MIL << "ifstream(" << contentname << ")" << endl;
+    std::ifstream content (contentname.asString().c_str());
+    if (!content)
+    {
+	return Error::E_open_file;
+    }
 
-  PkgName pname, bname;
-  PkgEdition pversion, bversion;	// base product
-  InstSrcDescr::ArchMap archmap;
-  InstSrcDescr::LabelMap labelmap;
+    err = Error::E_ok;
+
+    PkgName pname, bname;
+    PkgEdition pversion, bversion;	// base product
+    InstSrcDescr::ArchMap archmap;
+    InstSrcDescr::LabelMap labelmap;
 
   while (content.good())
   {
@@ -250,3 +252,105 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   return err;
 }
 
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData_UL::tryGetData
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
+				     MediaAccessPtr media_r, const Pathname & descr_dir_r )
+{
+    MIL << "InstSrcData_UL::tryGetData(" << descr_dir_r << ")" << endl;
+
+    ndata_r = 0;
+    PMError err;
+
+    InstSrcDataPtr ndata( new InstSrcData );
+
+    ///////////////////////////////////////////////////////////////////
+    // parse packages file and fill into ndata
+    ///////////////////////////////////////////////////////////////////
+
+    TagParser parser;
+    std::string tagstr;
+
+    Pathname packagesname = descr_dir_r + "/packages";
+    MIL << "provideFile (" << packagesname << ")" << endl;
+    err = media_r->provideFile (packagesname);
+    if (err != Error::E_ok)
+    {
+	return err;
+    }
+
+    packagesname = media_r->getAttachPoint() + packagesname;
+    MIL << "fopen(" << packagesname << ")" << endl;
+    std::ifstream packages (packagesname.asString().c_str());
+
+    if( !packages)
+    {
+	return Error::E_open_file;
+    }
+
+    CommonPkdParser::TagSet* tagset;
+    tagset = new InstSrcData_ULTags ();
+    
+    bool repeatassign = false;
+    bool parse = true;
+    
+    while( parse && parser.lookupTag (packages))
+    {
+	tagstr = parser.startTag();
+
+	do
+	{
+	    switch( tagset->assign (tagstr.c_str(), parser, packages))
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    std::cerr << "*** filling ***" << std::endl;
+		    // fill InstSrcDescr 
+		    //fillInstSrcData_UL( ndescr, tagset );
+		    repeatassign = false;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    // not needed here because there is only one set of tags
+		    // fillInstSrcDescr( ndescr, tagset );
+		    tagset->clear();
+		    repeatassign = true;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	} while( repeatassign );
+
+    }
+
+    tagset->clear();
+
+    if( parse )
+	std::cerr << "**  +* parsing completed ***" << std::endl;
+    else
+	std::cerr << "*** parsing was aborted ***" << std::endl;
+    
+    
+    ///////////////////////////////////////////////////////////////////
+    // done
+    ///////////////////////////////////////////////////////////////////
+
+    if ( err == Error::E_ok )
+    {
+	ndata_r = ndata;
+    }
+
+    return err;
+}

@@ -363,9 +363,9 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
     return err;
   }
 
-  if ( (err = _media->attachTo( cache_media_dir() )) ) {
-    if ( err != MediaAccess::Error::E_attachpoint_fixed ) {
-      ERR << "Failed to attach media to " << cache_media_dir() << " " << err << endl;
+  if ( (err = _media->attach( )) ) {
+    if ( err != MediaAccess::Error::E_ok) {
+      ERR << "Failed to attach media: " << err << endl;
       return err;
     }
   }
@@ -423,6 +423,11 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
   }
 
   MIL << "Found InstSrc " << ndescr << endl;
+  if ( !err )
+  {
+      InstSrcDataPtr ndata;
+      err = InstSrcData_UL::tryGetData( ndata, _media, product_dir_r + ndescr->content_descrdir() );
+  }
 
   ///////////////////////////////////////////////////////////////////
   // done
