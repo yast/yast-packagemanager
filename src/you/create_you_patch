@@ -1,0 +1,320 @@
+#!/usr/bin/perl
+#
+#  create_you_patch - Create YOU patch files and corresponding directory tree
+#
+#  Copyright (c) 2003 SuSE Linux AG
+#
+#  Author: Cornelius Schumacher <cschum@suse.de>
+
+use strict;
+
+use File::Basename;
+use File::stat;
+use Getopt::Long;
+
+my ( $outputDir, $copyRpms, $productName, $productVersion,
+     $baseArch, $patchFile, $patchFile, $patchName, $patchVersion,
+     $patchKind, $patchUpdateOnlyInstalled, $help, $dummysignature );
+
+GetOptions (
+  'outputdir=s' => \$outputDir,
+  'copyrpms' => \$copyRpms,
+  'productname=s' => \$productName,
+  'productversion=s' => \$productVersion,
+  'basearch=s' => \$baseArch,
+  'patchfile=s' => \$patchFile,
+  'patchname=s' => \$patchName,
+  'patchversion=s' => \$patchVersion,
+  'kind=s' => \$patchKind,
+  'updateonlyinstalled' => \$patchUpdateOnlyInstalled,
+  'help' => \$help,
+  'dummysignature' => \$dummysignature,
+);
+
+sub usage()
+{
+  print <<EOF;
+Usage: create_you_patch [options] filenames
+
+  Options:
+    --outputdir <dirname>       Base directory of patch tree
+    --copyrpms                  Copy RPMs to patch tree. You have to supply an
+                                outputdir when you use this option
+    
+    --productname <name>        Product name
+    --productversion <version>  Product version
+    --basearch <basearch>       Base architecture of product
+
+    --patchfile <filename>      Patch file name
+    --patchname <name>          Patch name
+    --patchversion <version>    Patch version
+
+    --kind <kind>               Kind of patch. Possible values: YaST2,
+                                security, recommended, optional
+    
+    --updateonlyinstalled       Set the UpdateOnlyInstalled flag in the patch
+                                file
+    
+    --dummysignature            Create a dummy signature for testing purposes
+
+    --help                      Show this messages
+
+  Arguments:
+    filenames                   List of RPM files
+EOF
+  exit 1;
+}
+
+if ( $help ) { usage(); }
+
+my %rpms;
+foreach my $rpm ( @ARGV ) {
+  if ( !-e $rpm ) {
+    print STDERR "RPM file '$rpm' doesn't exist.\n";
+    exit 1;
+  }
+  my $fileInfo = `file $rpm`;
+  $fileInfo =~ /\:\s+RPM\s+\S+\s+(\S+)\s+/;
+  my $rpmType = $1;
+  if ( $rpmType ne "bin" ) { next; }
+  
+  my $rpmFullName = `rpm -qp --queryformat "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm" $rpm`;
+  $rpms{ $rpm }{ "FullName" } = $rpmFullName;
+  $rpmFullName =~ /(.+)-(.+)-(.+)\.(.+)\.rpm$/;
+  
+  $rpms{ $rpm }{ "Name" } = $1;
+  $rpms{ $rpm }{ "Version" } = $2;
+  $rpms{ $rpm }{ "Release" } = $3;
+  $rpms{ $rpm }{ "Arch" } = $4;
+  $rpms{ $rpm }{ "Size" } = `rpm -qp $rpm --qf "%{SIZE}"`;
+  $rpms{ $rpm }{ "ArchiveSize" } = stat( $rpm )->size();
+  $rpms{ $rpm }{ "Provides" } = rpmDependencies( $rpm, "provides" );
+  $rpms{ $rpm }{ "Requires" } = rpmDependencies( $rpm, "requires" );
+  $rpms{ $rpm }{ "Obsoletes" } = rpmDependencies( $rpm, "obsoletes" );
+  $rpms{ $rpm }{ "Label" } = "";
+}
+
+if ( $copyRpms && !$outputDir ) {
+  print STDERR "You have to supply an output directory with the --outputdir\n" .
+               "option when using the --copyrpm option.";
+  exit 1;
+}
+
+if ( $patchKind ) {
+  my @kinds = ( "recommended", "security", "YaST2", "optional" );
+  my $valid;
+  foreach my $kind ( @kinds ) {
+    if ( $kind eq $patchKind ) { $valid = 1; }
+  }
+  if ( !$valid ) {
+    print STDERR "Illegal kind: '$patchKind'\n";
+    exit 1;
+  }
+} else {
+  $patchKind = "recommended";
+}
+
+my %shortDescription;
+if ( keys %shortDescription == 0 ) {
+  $shortDescription{ "english" } = "This is a patch";
+}
+
+my %longDescription;
+if ( keys %longDescription == 0 ) {
+  $longDescription{ "english" } = "This is the patch description.";
+}
+
+if ( $outputDir ) {
+  if ( !-e $outputDir ) {
+    print STDERR "Output directory '$outputDir' doesn't exist.\n";
+    exit 1;
+  }
+  if ( !-d $outputDir )  {
+    print STDERR "Output directory '$outputDir' isn't a directory.\n";
+    exit 1;
+  }
+
+  if ( !$baseArch ) { $baseArch = "i386"; }
+  if ( !$productName ) { $productName = "SuSE-Linux"; }
+  if ( !$productVersion ) { $productVersion = "8.1.99"; }
+
+  my $youPath = "$outputDir/$baseArch/update/";
+  if ( $productName ne "SuSE-Linux" ) { $youPath .= "$productName/"; }
+  $youPath .= "$productVersion/";
+
+  if ( !$patchFile ) {
+    $patchFile = "youpatch-" . int rand 100000;
+  }
+  
+  my $patchDir = $youPath . "patches/";
+  my $rpmDir = $youPath . "rpm/";
+
+  assertDir( $patchDir );
+  assertDir( $rpmDir );
+
+  my $patchPath = $patchDir . $patchFile;
+
+  printPatchFile( $patchPath );
+
+  my $dirFile = $patchDir . "directory.3";
+
+  my $patches;
+  my $found = 0;
+  if ( -e $dirFile ) {
+    if ( !open( DIR, "$dirFile" ) ) {
+      print STDERR "Warning: Unable to open '$dirFile' for reading.\n";
+    } else {
+      while( <DIR> ) {
+        $patches .= $_;
+        chop;
+        if ( $_ eq $patchFile ) {
+          $found = 1;
+        }
+      }
+      close DIR;
+    }
+  }
+  if ( !$found ) {
+    $patches .= "$patchFile\n";
+  }
+
+  if ( !open( DIR, ">$dirFile" ) ) {
+    print STDERR "Warning: Unable to open '$dirFile' for writing.\n";
+  } else {
+    print DIR $patches;
+    close DIR;
+  }
+
+  if ( $copyRpms ) {
+    foreach my $rpm ( keys %rpms ) {
+      my $arch = $rpms{ $rpm }{ 'Arch' };
+      my $fullName = $rpms{ $rpm }{ 'FullName' };
+      my $to = $rpmDir . $arch;
+      assertDir( $to );
+      if ( system( "cp $rpm $to/$fullName" ) != 0 ) {
+        print STDERR "Unable to copy '$rpm' to '$to'\n";
+      }
+    }
+  }
+} else {
+  printPatchFile( $patchFile );
+}
+
+exit 0;
+
+sub assertDir($)
+{
+  my $dir = shift;
+
+  if ( -e $dir ) {
+    if ( !-d $dir ) {
+      print STDERR "Not a directory: '$dir'\n";
+      exit 1;
+    }    
+  } else {
+    if ( system( "mkdir -p $dir" ) != 0 ) {
+      print STDERR "Unable to create directory: '$dir'\n";
+      exit 1;
+    }
+  }
+}
+
+sub printPatchFile($)
+{
+  my $fileName = shift;
+
+  my $out = *STDOUT;
+
+  if ( $fileName ) {
+    if ( !open OUT, ">$fileName" ) {
+      print STDERR "Unable to open '$fileName' for writing.\n";
+      exit 1;
+    }
+    $out = *OUT;
+  }
+
+  my $date = `date`;
+  chop $date;
+
+  if ( $dummysignature ) {
+    print $out <<EOF;
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+EOF
+  }
+
+  print $out "#\n# YOU patch description\n#\n";
+  print $out "# Patch created by create_you_patch at $date\n#\n\n";
+  print $out "Kind: $patchKind\n";
+  print $out "\n";
+  my $lang;
+  foreach $lang ( keys %shortDescription ) {
+    print $out "Shortdescription.$lang: $shortDescription{ $lang }\n";
+  }
+  print $out "\n";
+  foreach $lang ( keys %longDescription ) {
+    print $out "Longdescription.$lang:\n";
+    print $out "$longDescription{ $lang }\n";
+    my $revLang = &reverseString( $lang ); 
+    print $out "\u$revLang.noitpircsedgnol:\n\n";
+  }
+
+  print $out "UpdateOnlyInstalled: " . ( $patchUpdateOnlyInstalled ? "true" : "false" );
+  print $out "\n\n";
+
+  if ( keys %rpms > 0 ) {
+    print $out "Packages:\n\n";
+    foreach my $rpm ( keys %rpms ) {
+      print $out "#\n# Package: $rpms{ $rpm }{ 'Name' }\n#\n";
+      print $out "Filename: $rpms{ $rpm }{ 'Name' }.rpm\n";
+      print $out "Version: $rpms{ $rpm }{ 'Version' }\n";
+      print $out "Label: $rpms{ $rpm }{ 'Label' }\n";
+      print $out "Size: $rpms{ $rpm }{ 'Size' } $rpms{ $rpm }{ 'ArchiveSize' }\n";
+      print $out "Provides: $rpms{ $rpm }{ 'Provides' }\n";
+      print $out "Requires: $rpms{ $rpm }{ 'Requires' }\n";
+      print $out "Obsoletes: $rpms{ $rpm }{ 'Obsoletes' }\n";
+      print $out "\n";
+    }
+    print $out "Segakcap:\n";
+  }
+
+  if ( $dummysignature ) {
+    print $out <<EOF;
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iEYEARECAAYFAj2UdDQACgkQqE7a6JyACspiEACfepua57QC/eCRROZk8E5NjGY+
+6HsAn1OlLu4/nef3M4G5qcHrZihn/WIS
+=iMY7
+-----END PGP SIGNATURE-----
+EOF
+  }
+
+  if ( $fileName ) { close OUT; }
+}
+
+sub rpmDependencies($$)
+{
+  my $filename = shift;
+  my $option = shift;
+  
+  my $result;
+  
+  open RPM, ( "rpm -qp $filename --$option|" );
+  while( <RPM> ) {
+    chop;
+    $result = "$_ ";
+  }
+  $result =~ s/\s+/ /g;
+  return $result;
+}
+
+sub reverseString($)
+{
+  my $string = shift;
+
+  my @string = split( //, $string );
+  return join( '', reverse @string );
+}
