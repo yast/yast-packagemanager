@@ -30,35 +30,35 @@ void usage()
        << "[-a arch] [-d] [-s] [-n] [-g] [-i] [security] [recommended] [document]"
        << " [optional]"
        << endl << endl
-       << "-u url      Base URL of directory tree used to get patches from." << endl
-       << "            Supported protocols: http, ftp, smb, nfs, cd, dvd, file." << endl
-       << "            If no protocol is given a local file is assumed." << endl
-       << "            Examples: 'ftp://ftp.suse.com/pub/suse', 'cd:///'," << endl
-       << "                      'file:/var/lib/YaST2/you/mnt'" << endl
-       << "                      '/var/lib/YaST2/you/mnt'" << endl
+       << "-u, --url URL            Base URL of directory tree used to get patches from." << endl
+       << "                         Supported protocols: http, ftp, smb, nfs, cd, dvd, file." << endl
+       << "                         If no protocol is given a local file is assumed." << endl
+       << "                         Examples: 'ftp://ftp.suse.com/pub/suse', 'cd:///'," << endl
+       << "                                   'file:/var/lib/YaST2/you/mnt'" << endl
+       << "                                   '/var/lib/YaST2/you/mnt'" << endl
        << endl
-       << "-g          Only download patches, don't install." << endl
-       << "-i          Install downloaded patches, don't download." << endl
+       << "-g, --download-only      Only download patches, don't install." << endl
+       << "-i, --install-only       Install downloaded patches, don't download." << endl
        << endl
-       << "-q          Quick check for new updates. Doesn't check for types" << endl
-       << "            of updates." << endl
-       << "-k          Check for new updates." << endl
+       << "-q, --quick-check        Quick check for new updates. Doesn't check for types" << endl
+       << "                         of updates." << endl
+       << "-k, --check              Check for new updates." << endl
        << endl
-       << "-c          Show configuration. Don't do anything." << endl
+       << "-c, --show-config        Show configuration. Don't do anything." << endl
        << endl
-       << "-p product  Name of product to get patches for." << endl
-       << "-v version  Version of product to get patches for." << endl
-       << "-a arch     Base architecture of product to get patches for." << endl
-       << "-l langcode Language used to show patch descriptions." << endl
+       << "-p, --product PRODUCT    Name of product to get patches for." << endl
+       << "-v, --version VERSION    Version of product to get patches for." << endl
+       << "-a, --architecture ARCH  Base architecture of product to get patches for." << endl
+       << "-l, --language LANGCODE  Language used to show patch descriptions." << endl
        << endl
-       << "-r          Reload patches from server." << endl
-       << "-d          Dry run. Only get patches, don't install them." << endl
-       << "-n          No signature check of downloaded files." << endl
+       << "-r, --reload             Reload patches from server." << endl
+       << "-d, --dry-run            Dry run. Only get patches, don't install them." << endl
+       << "-n, --no-sig-check       No signature check of downloaded files." << endl
        << endl
-       << "-s          Show list of patches (Additionaly use -d to only show list " << endl
-       << "            of patches without installing them)." << endl
-       << "-V          Be verbose." << endl
-       << "-D          Debug output." << endl
+       << "-s, --show-patches       Show list of patches (Additionaly use -d to only show list " << endl
+       << "                         of patches without installing them)." << endl
+       << "-V, --verbose            Be verbose." << endl
+       << "-D, --debug              Debug output." << endl
        << endl
        << "security | recommended | document | optional   Types of patches to be installed." << endl;
   exit( 1 );
@@ -98,10 +98,41 @@ int main( int argc, char **argv )
   
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "qkrcgihdnsVDu:p:v:a:l:" );
+    static struct option long_options[] = {
+      { "quick-check", no_argument, 0, 'q' },
+      { "check", no_argument, 0, 'k' },
+      { "reload", no_argument, 0, 'r' },
+      { "show-config", no_argument, 0, 'c' },
+      { "download-only", no_argument, 0, 'g' },
+      { "install-only", no_argument, 0, 'i' },
+      { "help", no_argument, 0, 'h' },
+      { "dry-run", no_argument, 0, 'd' },
+      { "no-sig-check", no_argument, 0, 'n' },
+      { "show-patches", no_argument, 0, 's' },
+      { "verbose", no_argument, 0, 'V' },
+      { "debug", no_argument, 0, 'D' },
+      { "url", required_argument, 0, 'u' },
+      { "product", required_argument, 0, 'p' },
+      { "version", required_argument, 0, 'v' },
+      { "architecture", required_argument, 0, 'a' },
+      { "language", required_argument, 0, 'l' },
+      { 0, 0, 0, 0 }
+    };
+
+    int option_index = 0;
+
+    c = getopt_long( argc, argv, "qkrcgihdnsVDu:p:v:a:l:", long_options,
+                     &option_index );
     if ( c < 0 ) break;
 
     switch ( c ) {
+      case 0:
+      printf ("option %s", long_options[option_index].name);
+      if (optarg)
+          printf (" with arg %s", optarg);
+      printf ("\n");
+      break;
+        
       case 'c':
         showConfig = true;
       case 'g':
