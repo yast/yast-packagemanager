@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Sep 29 11:46:16 CEST 2004 - lnussel@suse.de
+
+- do not initialize installation sources in YOU if only filesystem
+  deltas are requested
+- only use deltas via ftp and http (#46393)
+- 2.10.15
+
+-------------------------------------------------------------------
 Wed Sep 29 13:02:27 CEST 2004 - ma@suse.de
 
 - Don't pass URL options which libcurl does not understand (#45477)

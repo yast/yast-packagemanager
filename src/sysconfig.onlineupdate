@@ -58,5 +58,5 @@ YOU_REMOVE_SOURCE_PACKAGES="no"
 # If set to 'no' YOU will only use patch rpms and normal rpms.
 #
 # Note: you need to have the deltarpm tools installed to actually
-# make this work
+# make this work. Delta packages are only used via ftp and http.
 YOU_USE_DELTAS=""
