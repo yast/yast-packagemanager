@@ -184,12 +184,6 @@ class PMSelectable : virtual public Rep {
     }
 
     /**
-     * Find candidate matching arch
-     * May be NULL, if no candidate for given arch is available.
-     **/
-    PMObjectPtr archCandidate (const PkgArch& arch) const;
-
-    /**
      * Best among the availableObjs() Determined by ranking.
      * May be NULL, if no available is better than the installed.
      **/

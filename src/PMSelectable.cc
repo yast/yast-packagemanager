@@ -159,29 +159,6 @@ PMSelectable::PMObjectList::iterator PMSelectable::clistLookup( PMObjectPtr obj_
   return it;
 }
 
-
-///////////////////////////////////////////////////////////////////
-// private
-//
-//	METHOD NAME : PMSelectable::archCandidate
-//	METHOD TYPE : PMObjectPtr
-//
-//	DESCRIPTION : find candidate by arch
-//		May be NULL, if no candidate matching the given arch is available.
-//
-
-PMObjectPtr
-PMSelectable::archCandidate (const PkgArch& arch) const
-{
-    for (PMObjectList::const_iterator objpos = _candidateList.begin();
-	 objpos != _candidateList.end(); ++objpos)
-    {
-	if (arch == (*objpos)->arch())
-	    return *objpos;
-    }
-    return PMObjectPtr();
-}
-
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -189,35 +166,25 @@ PMSelectable::archCandidate (const PkgArch& arch) const
 //	METHOD TYPE : PMObjectPtr
 //
 //	DESCRIPTION : Best among the availableObjs() Determined by ranking.
-//			May be NULL, if no available is better than the installed.
+//		      May be NULL, if no available is better than the installed.
 //
-
-PMObjectPtr
-PMSelectable::autoCandidate() const
+//      - candidateList is sorted by (best InstSrcRank, best allowed arch, best version).
+//      - if we have an installed object, it determines the architecture.
+//      - Otherwise the fist is the best.
+//
+PMObjectPtr PMSelectable::autoCandidate() const
 {
-#warning TBD auto candidate by source priority
-    PMObjectPtr object;
-    if ( !_candidateList.empty() )
-    {
-	// if we have an installed object, it determines the architecture
-	if (_installedObj)
-	{
-	    object = archCandidate (_installedObj->arch());
-	    if (object)
-		return object;
-	}
+  if ( _candidateList.empty() )
+    return  PMObjectPtr();
 
-	// find best candidate by architecture
-	for (std::list<PkgArch>::const_iterator archpos = Y2PM::allowedArchs().begin();
-	     archpos != Y2PM::allowedArchs().end(); ++archpos)
-	{
-	    object = archCandidate(*archpos);
-	    if (object)
-		return object;
-	}
-	return _candidateList.front();
+  if ( _installedObj ) {
+    for ( PMObjectList::const_iterator it = _candidateList.begin(); it != _candidateList.end(); ++it ) {
+      if ( (*it)->arch() == _installedObj->arch() )
+	return *it;
     }
-    return object;
+  }
+
+  return *_candidateList.begin();
 }
 
 
@@ -242,6 +209,7 @@ PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
     _state.set_has_installed( true );
   }
 
+  chooseCandidateObj(); // installed arch influences it
   return E_Ok;
 }
 
@@ -260,6 +228,8 @@ PMSelectable::Error PMSelectable::delInstalledObj()
     _installedObj = 0;
     _state.set_has_installed( false );
   }
+
+  chooseCandidateObj(); // installed arch influences it
   return E_Ok;
 }
 
@@ -282,10 +252,35 @@ PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
     return E_Error;
   }
 
-  _candidateList.push_back( obj_r );
-  _attach_obj( obj_r );
+  // sorted add: best InstSrcRank, best allowed arch, best version
+  // autocandidate rely's on this!
+  unsigned orank = obj_r->instSrcRank();
+  PkgArch  oarch = obj_r->arch();
 
-#warning must rerank on add
+  PMObjectList::iterator it = _candidateList.begin();
+  for ( ; it != _candidateList.end(); ++it ) {
+    unsigned crank = (*it)->instSrcRank();
+    if ( orank > crank ) // higher rank -> lower priority
+      continue;
+    if ( orank == crank ) {
+      int acmp = PkgArch::compare( oarch, (*it)->arch() );
+      if ( acmp > 0 ) // worse arch
+	continue;
+      if ( acmp == 0 ) {
+	if ( obj_r->edition() > (*it)->edition() )
+	  continue;
+	// ran out of sort criteria
+      }
+    }
+    // Here: insert
+    _candidateList.insert( it, obj_r );
+    break;
+  }
+  if ( it == _candidateList.end() ) {
+    // empty list or worst candidate
+    _candidateList.insert( it, obj_r );
+  }
+  _attach_obj( obj_r );
 
   chooseCandidateObj();
 
@@ -323,8 +318,6 @@ PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
 
   _detach_obj( obj_r );
   _candidateList.erase( it );
-
-#warning must rerank on del
 
   if ( _userCandidateObj == obj_r ) {
     _userCandidateObj = 0;
