@@ -133,11 +133,11 @@ class MediaAccess : virtual public Rep {
 
         /**
           Use concrete handler to disconnect the media.
-          
+
           This is useful for media which e.g. holds open a connection to a
           server like FTP. After calling disconnect() the media object still is
           valid and files are present.
-          
+
           After calling disconnect() it's not possible to call provideFile() or
           provideDir() anymore.
         */
@@ -247,16 +247,16 @@ class MediaAccess : virtual public Rep {
 	FileProvider( const FileProvider & );             // no copy
 	FileProvider & operator=( const FileProvider & ); // no assign
 	private:
-	  MediaAccessPtr _media;
-	  Pathname       _file;
-	  PMError        _lasterr;
+	  constMediaAccessPtr _media;
+	  Pathname            _file;
+	  PMError             _lasterr;
 	public:
 	  /**
 	   * default error class
 	   **/
 	  typedef MediaError Error;
 
-	  FileProvider( MediaAccessPtr media_r, const Pathname & file_r )
+	  FileProvider( constMediaAccessPtr media_r, const Pathname & file_r )
 	    : _media( media_r )
 	    , _file( file_r )
 	    , _lasterr( Error::E_error )
