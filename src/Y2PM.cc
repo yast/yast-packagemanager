@@ -1095,7 +1095,7 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
 			  std::list<std::string> & srcremaining_r,
 			  InstSrcManager::ISrcIdList installrank_r )
 {
-  if ( ! ( _instTarget || && instTarget().initialized() ) ) {
+  if ( ! ( _instTarget && instTarget().initialized() ) ) {
     ERR << "Can't commit packages without instTarget being initialized!" << endl;
     return 0;
   }
