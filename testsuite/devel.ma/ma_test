@@ -1,12 +1,14 @@
 #! /bin/bash
 #
+
 PRG=ma_test.exe
+
 if [ -x "$1" ]; then
 	PRG=$1
 	shift
 fi
 
-make -C ../src && make $PRG || exit 1
+make -C ../../src && make $PRG || exit 1
 
 if [ ! -x ~ma/bin/sy2l.tcl ]; then
 	exec ./$PRG
@@ -26,4 +28,4 @@ export Y2SLOG_FILE=-
 # export Y2DEBUG=1
 # exec gdb ./$PRG
 #./$PRG "$@" 2> log
-./$PRG "$@" 2>&1 | tee log > $LPIPE
+./$PRG "$@" 2>&1 > $LPIPE

@@ -1,7 +1,7 @@
 #
 # Makefile.am for packagemanager/testsuite
 #
-SUBDIRS = query
+SUBDIRS = query devel.ma
 AUTOMAKE_OPTIONS = dejagnu
 PACKAGE = packagemanager
 INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
@@ -18,21 +18,6 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 
 noinst_HEADERS = show_pm.h
 
-EXTRA_PROGRAMS = \
-	test_rpmdb	\
-	test_tofromString.exe	\
-	testinstall	\
-	test_patchinfo	\
-	test_content	\
-	test_packages	\
-	test_selections	\
-	test_query	\
-	order	\
-	ma_test.exe	\
-	gs_test \
-        test_you \
-        cschum_test
-
 noinst_PROGRAMS = \
 	test_rpmdb	\
 	test_tofromString.exe	\
@@ -43,7 +28,6 @@ noinst_PROGRAMS = \
 	test_selections	\
 	test_query	\
 	order		\
-	ma_test.exe	\
 	gs_test		\
         test_you	\
         cschum_test	\
@@ -52,10 +36,6 @@ noinst_PROGRAMS = \
 
 test_updateinf_SOURCES = test_updateinf.cc
 test_updateinf_LDADD = $(top_builddir)/src/liby2pm.la
-
-ma_test_exe_SOURCES = ma_test.cc
-ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
-ma_test_exe_LDFLAGS = -static
 
 gs_test_SOURCES = gs_test.cc
 gs_test_LDADD =  $(top_builddir)/src/liby2pm.la		\
