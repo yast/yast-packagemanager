@@ -722,6 +722,8 @@ PMError InstSrc::provideMedia ( int medianr ) const
 	  // version match, before offering to use the media as substitute.
 
 	}
+      } else {
+	err.setDetails( mediafile.asString() );
       }
     }
 
@@ -733,8 +735,7 @@ PMError InstSrc::provideMedia ( int medianr ) const
     // try next device if media supports it
     if ( _media->isOpen() ) {
       _media->release();
-      err = _media->attach( true ); // try next device of media
-      if ( ! err )
+      if ( ! _media->attach( true ) )
 	continue;               // ------------------------------------> continue
     }
 
