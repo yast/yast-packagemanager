@@ -65,12 +65,12 @@ class PkgDuMaster {
 	// current usage without packages taken into accout
 	FSize               initial_used()      const { return _used; }
 	FSize               initial_available() const { return total() - initial_used(); }
-	int                 initial_u_percent() const { return initial_used() * 100 / total(); }
+	int                 initial_u_percent() const { return( total() ? initial_used() * 100 / total() : 0 ); }
 	// current usage with packages taken into accout
 	FSize               pkg_diff()          const { return _pkgusage; }
 	FSize               pkg_used()          const { return _used + _pkgusage; }
 	FSize               pkg_available()     const { return total() - pkg_used(); }
-	int                 pkg_u_percent()     const { return pkg_used() * 100 / total(); }
+	int                 pkg_u_percent()     const { return( total() ? pkg_used() * 100 / total() : 0 ); }
       public:
 	MountPoint( const std::string & mountpoint_r,
 		    const FSize & blocksize_r = 1024,
