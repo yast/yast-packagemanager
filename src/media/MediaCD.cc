@@ -60,7 +60,8 @@ MediaCD::MediaCD( const Url &      url_r,
     : MediaHandler( url_r, attach_point_hint_r,
 		    true,  // attachPoint_is_mediaroot
 		    false, // does_download
-		    type_r )
+		    type_r ),
+    _lastdev(-1)
 {
     Url::OptionMapType options = _url.getOptions();
     Url::OptionMapType::iterator it;
@@ -104,12 +105,17 @@ MediaCD::MediaCD( const Url &      url_r,
 //
 //	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError MediaCD::attachTo()
+PMError MediaCD::attachTo(bool next)
 {
     Mount mount;
     const char *mountpoint = attachPoint().asString().c_str();
     bool mountsucceeded = false;
-    PMError ret = Error::E_ok;
+    PMError ret = Error::E_mount_failed;
+    int count = 0;
+
+    DBG << "next " << next << " last " << _lastdev << " lastdevice " << _mounteddevice << endl;
+
+    if(next && _lastdev == -1) return Error::E_not_supported_by_media;
 
     string options = _url.getOption("mountoptions");
     if (options.empty())
@@ -129,29 +135,34 @@ PMError MediaCD::attachTo()
     // try all devices in sequence
     for (DeviceList::iterator it = _devices.begin()
 	; !mountsucceeded && it != _devices.end()
-	; ++it )
+	; ++it, count++ )
     {
+	DBG << "count " << count << endl;
+	if(next && count<=_lastdev )
+	{
+		DBG << "skip" << endl;
+		continue;
+	}
+
+	DBG << "try mount " << *it << endl;
+
 	// close tray
 	const char *const argv[] = { "/bin/eject", "-t", (*it).c_str(), NULL };
-	ExternalProgram *process = new ExternalProgram (argv, ExternalProgram::Discard_Stderr);
-	delete process;
+	ExternalProgram eject(argv, ExternalProgram::Discard_Stderr);
+	eject.close();
 
 	// try all filesystems in sequence
 	for(list<string>::iterator fsit = filesystems.begin()
 	    ; !mountsucceeded && fsit != filesystems.end()
 	    ; ++fsit)
 	{
-#if 0 // mount.mount does the logging
-	    MIL << "try mount " << *it
-		<< " to " << mountpoint
-		<< " filesystem " << *fsit << ": ";
-#endif
 	    ret = mount.mount (*it, mountpoint, *fsit, options);
 	    if( ret == Error::E_ok )
 	    {
 		mountsucceeded = true;
 		MIL << "succeded" << endl;
 		_mounteddevice = *it;
+		_lastdev = count;
 	    }
 	    else
 	    {
@@ -163,8 +174,10 @@ PMError MediaCD::attachTo()
     if(!mountsucceeded)
     {
 	_mounteddevice.erase();
+	_lastdev = -1;
 	return ret;
     }
+    DBG << _lastdev << " " << count << endl;
     return Error::E_ok;
 }
 

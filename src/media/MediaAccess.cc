@@ -170,12 +170,12 @@ MediaAccess::close (void)
 
 // attach media
 PMError
-MediaAccess::attach (void)
+MediaAccess::attach (bool next)
 {
   if ( !_handler )
     return Error::E_not_open;
 
-  return _handler->attach();
+  return _handler->attach(next);
 }
 
 // True if media is open and attached.

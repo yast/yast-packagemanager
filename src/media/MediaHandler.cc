@@ -145,7 +145,7 @@ MediaHandler::~MediaHandler()
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::attach()
+PMError MediaHandler::attach(bool next)
 {
   if ( _isAttached )
     return Error::E_already_attached;
@@ -153,7 +153,7 @@ PMError MediaHandler::attach()
   if ( _attachPoint.empty() )
     return Error::E_bad_attachpoint;
 
-  PMError err = attachTo(); // pass to concrete handler
+  PMError err = attachTo(next); // pass to concrete handler
   if ( !err ) {
     _isAttached = true;
   }
@@ -177,6 +177,7 @@ PMError MediaHandler::release( bool eject )
   PMError err = releaseFrom( eject ); // pass to concrete handler
   if ( !err ) {
     _isAttached = false;
+    DBG << "ok" << endl;
   }
 
   return err;

@@ -122,8 +122,12 @@ class MediaHandler {
 	 * Call concrete handler to attach the media.
 	 *
 	 * Asserted that not already attached, and attachPoint is a directory.
+	 *
+	 * @param next try next available device in turn until end of device
+	 * list is reached (for media which are accessible through multiple
+	 * devices like cdroms).
 	 **/
-	virtual PMError attachTo() = 0;
+	virtual PMError attachTo(bool next = false) = 0;
 
 	/**
 	 * Call concrete handler to release the media.
@@ -191,8 +195,12 @@ class MediaHandler {
 
 	/**
 	 * Use concrete handler to attach the media.
+	 *
+	 * @param next try next available device in turn until end of device
+	 * list is reached (for media which are accessible through multiple
+	 * devices like cdroms).
 	 **/
-	PMError attach();
+	PMError attach(bool next);
 
 	/**
 	 * True if media is attached.
@@ -282,7 +290,7 @@ class MediaHandler {
 
 #define	MEDIA_HANDLER_API						\
     protected:								\
-	virtual PMError attachTo ();					\
+	virtual PMError attachTo (bool next = false);					\
 	virtual PMError releaseFrom( bool eject );			\
 	virtual PMError getFile( const Pathname & filename ) const;	\
         virtual PMError getDirInfo( std::list<std::string> & retlist,	\

@@ -109,8 +109,12 @@ class MediaAccess : virtual public Rep {
 
 	/**
 	 * Use concrete handler to attach the media.
+	 *
+	 * @param next try next available device in turn until end of device
+	 * list is reached (for media which are accessible through multiple
+	 * devices like cdroms).
 	 **/
-	PMError attach();
+	PMError attach(bool next = false);
 
 	/**
 	 * True if media is attached.

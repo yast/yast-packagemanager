@@ -43,6 +43,9 @@ class MediaCD : public MediaHandler {
     /** which device has been mounted */
     std::string _mounteddevice;
 
+    /** number of last successful mounted device in list */
+    int _lastdev;
+
   protected:
 
     MEDIA_HANDLER_API;

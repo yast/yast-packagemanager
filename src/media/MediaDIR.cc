@@ -62,8 +62,10 @@ MediaDIR::MediaDIR( const Url &      url_r,
 //
 //	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError MediaDIR::attachTo()
+PMError MediaDIR::attachTo(bool next)
 {
+    if(next)
+	return Error::E_not_supported_by_media;
   return Error::E_ok;
 }
 
