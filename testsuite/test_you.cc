@@ -159,7 +159,7 @@ int main( int argc, char **argv )
 
   InstYou you( patchInfo, patchPaths );
 
-  error = you.retrievePatches( url );
+  error = you.retrievePatchInfo( url );
   if ( error ) {
     cerr << "Error retrieving patches: " << error << endl;
     exit( 1 );
@@ -169,7 +169,7 @@ int main( int argc, char **argv )
 
   you.filterPatchSelection();
 
-  error = you.retrievePackages();
+  error = you.retrievePatches();
   if ( error ) {
     cerr << "Error retrieving packages: " << error << endl;
     exit( 1 );

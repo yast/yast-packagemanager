@@ -68,22 +68,38 @@ class InstYou {
      *
      * @param url URL of patch server.
      */
-    PMError retrievePatches( const Url &url );
+    PMError retrievePatchInfo( const Url &url );
+    
+    /**
+     * Attach source of patches.
+     *
+     */
+    PMError attachSource();
     
     /**
      * Download packages belonging to selected patches.
      */
-    PMError retrievePackages();
+    PMError retrievePatches();
     
     /**
-     * Get next patch to be installed.
+     * Get first selected patch.
+     */
+    PMYouPatchPtr firstPatch();
+
+    /**
+     * Get next selected patch.
      */
     PMYouPatchPtr nextPatch();
 
     /**
+     * Download next patch in list of selected patches.
+     */
+    PMError retrieveCurrentPatch();
+
+    /**
      * Install next patch in list of selected patches to target system.
      */
-    PMError installNextPatch();
+    PMError installCurrentPatch();
 
     /**
      * Install patches to target system.
@@ -117,6 +133,7 @@ class InstYou {
 
   protected:
     PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
+    PMError retrievePatch( const PMYouPatchPtr & );
 
   private:
     PMYouPatchInfoPtr _info;

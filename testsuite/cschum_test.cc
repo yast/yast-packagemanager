@@ -34,35 +34,16 @@ int main( int argc, char **argv )
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
 
-  int numPkgs = Y2PM::packageManager().size();
-  cout << "Number of packages: " << numPkgs << endl;
-
-  InstYou you;
-  you.retrievePatches( Url( "http://localhost/you/" ) );
-
-  int numPatches  = Y2PM::youPatchManager().size();
-  cout << "Number of patches: " << numPatches << endl;
-
-  numPkgs = Y2PM::packageManager().size();
-  cout << "Number of packages: " << numPkgs << endl;
-
-#if 0
-  int numPkgs = Y2PM::packageManager().size();
-
-  cout << "Number of packages: " << numPkgs << endl;
-
-  PMSelectablePtr selectable = Y2PM::packageManager().getItem( "gdb" );
-
-  if ( selectable ) {
-    PMObjectPtr obj = selectable->installedObj();
-    if ( obj ) {
-      PMPackagePtr pkg( obj );
-    
-      cout << "NAME: " << pkg->name() << endl;
-      cout << "VERSION: " << pkg->version() << endl;
-    }
-  }
-#endif
+  PMYouPatchPtr patch = new PMYouPatch( PkgName( "mypatch" ),
+                                        PkgEdition( "1.0" ),
+                                        PkgArch( "i386" ),
+                                        PMYouPatchDataProviderPtr() );
+  
+  list<PMYouPatchPtr> patches;
+  
+  patches.push_back( patch );
+  
+  Y2PM::youPatchManager().poolAddCandidates( patches );
 
   MIL << "END" << endl;
   return 0;
