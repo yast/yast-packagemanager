@@ -81,6 +81,7 @@ void solveinstall(vector<string>& argv);
 void solve(vector<string>& argv);
 void showtimes(vector<string>& argv);
 void createbackups(vector<string>& argv);
+void rebuilddb(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -111,6 +112,7 @@ static struct Funcs func[] = {
     { "solve",		solve,		1,	"solve" },
     { "showtimes",	showtimes,	0,	"showtimes" },
     { "createbackups",	createbackups,	0,	"createbackups" },
+    { "rebuilddb",	rebuilddb,	1,	"rebuild rpm db" },
     { NULL,		NULL,		0,	NULL }
 };
 
@@ -129,6 +131,11 @@ void usage(char **argv) {
 "	remove <pkgname>		Remove this package.\n"
 	    ;
 	exit(1);
+}
+
+void progresscallback(int p, void* nix)
+{
+    cout << p << "%" << endl;
 }
 
 void instlog(vector<string>& argv)
@@ -205,6 +212,20 @@ void createbackups(vector<string>& argv)
     cout << "create backups " << (_createbackups?"enabled":"disabled") << endl;
 }
 
+
+void rebuilddb(vector<string>& argv)
+{
+    cout << "rebuilding database ... " << endl;
+
+    Y2PM::instTarget().setRebuildDBProgressCallback(progresscallback, NULL);
+    PMError err = Y2PM::instTarget().bringIntoCleanState();
+    if(err != PMError::E_ok)
+    {
+	cout << "failed: " << err << endl;
+    }
+    else
+	cout << "done" << endl;
+}
 
 void setmaxremove(vector<string>& argv)
 {
@@ -805,11 +826,6 @@ void deselect(vector<string>& argv)
 
 	selp->setNothingSelected();
     }
-}
-
-void progresscallback(int p, void* nix)
-{
-    cout << p << "%" << endl;
 }
 
 void rpminstall(vector<string>& argv)

@@ -23,6 +23,8 @@
 #include <unistd.h>
 
 #include <cstdlib>
+#include <cstdio>
+#include <ctime>
 
 #include <iostream>
 #include <fstream>
@@ -239,25 +241,81 @@ RpmDb::initDatabase( string name_of_root, bool createNew )
     return dbStatus;
 }
 
+void RpmDb::checkrebuilddbstatus(Pathname tmpdbpath, off_t oldsize)
+{
+    if(tmpdbpath.empty()) return;
+
+    PathInfo pi(tmpdbpath);
+
+    off_t size = pi.size();
+    DBG << tmpdbpath << " " << size << " " << oldsize << endl;
+
+    if(size && oldsize)
+    {
+	int p = static_cast<int>(static_cast<double>(size)/oldsize*100);
+	ReportRebuildDBProgress(p);
+    }
+}
+
 // rebuild rpm database
+// beware: you must report 100% before return
 PMError
 RpmDb::rebuildDatabase()
 {
     RpmArgVec opts(1);
     PMError status = Error::E_ok;
+    Pathname tmpdbpath;
+    Pathname rpmdb = _rootdir + _varlibrpm + _rpmdbname;
+    Pathname rebuilddbdir = "/var/lib/rpmrebuilddb.";
 
     FAILIFNOTINITIALIZED
+
+    PathInfo rpmpi( rpmdb );
+
+    off_t oldsize = rpmpi.size();
 
     DBG << endl;
 
     opts[0] = "--rebuilddb";
 
     run_rpm (opts);
+    if(process)
+	tmpdbpath = _rootdir + Pathname::extend(rebuilddbdir,stringutil::form("%d",process->getpid())) + _rpmdbname;
 
     string rpmerrormsg, str;
-    while (systemReadLine(str))
+
+    while(process)
     {
-	rpmerrormsg+=str;
+	FILE* stream = process->outputFile();
+	int fd = ::fileno(stream);
+
+	if(fd == -1) break;
+
+	fd_set rfds;
+	struct timeval tv;
+	int retval;
+
+	FD_ZERO(&rfds);
+	FD_SET(fd, &rfds);
+	tv.tv_sec = 0;
+	tv.tv_usec = 600000;
+
+	retval = ::select(fd+1, &rfds, NULL, NULL, &tv);
+
+	if(retval > 0 )
+	{
+	    if(!systemReadLine(str)) break;
+
+	    rpmerrormsg+=str;
+
+	    checkrebuilddbstatus(tmpdbpath, oldsize);
+	}
+	else if(retval == 0) // no data within timeout
+	{
+	    checkrebuilddbstatus(tmpdbpath, oldsize);
+	}
+	else // select error
+	    break;
     }
     if ( systemStatus() != 0 )
     {
@@ -265,6 +323,8 @@ RpmDb::rebuildDatabase()
 	status = Error::E_RpmDB_rebuilddb_failed;
 	ERR << "Error rebuilding rpm database, rpm error was: " << rpmerrormsg << endl;
     }
+
+    ReportRebuildDBProgress(100);
 
     return status;
 }

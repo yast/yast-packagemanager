@@ -145,7 +145,9 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
 
     show_pmobject ((PMObjectPtr)p, only_cached);
 
-    cout << "Splitprovides: " << strlist2string(p->splitprovides(), "\n") << endl;
+//    cout << "Splitprovides: " << strlist2string(p->splitprovides(), "\n") << endl;
+#warning splitprovides
+    cout << "Splitprovides: " << "***FIXME***" << endl;
     cout << "Buildtime: " << p->buildtime() << endl;
     cout << "Group: " << p->group() << endl;
 

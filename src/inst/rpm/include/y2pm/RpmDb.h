@@ -259,6 +259,19 @@ class RpmDb: virtual public Rep
 	}
 
 	/**
+	 * set callback function for reporting progress of rebuildding the
+	 * package database (rpm --rebuilddb)
+	 *
+	 * @param func callback function, must accept int as argument for percentage
+	 * @param data arbitrary data to pass when function is called
+	 * */
+	void setRebuildDBProgressCallback(void (*func)(int,void*), void* data)
+	{
+	    _rebuilddbprogressfunc = func;
+	    _rebuilddbprogressdata = data;
+	}
+
+	/**
 	 * @return destination root directory
 	 * */
 	const std::string& getRoot() const { return _rootdir.asString(); }
@@ -335,6 +348,12 @@ class RpmDb: virtual public Rep
 
 	/** arbitrary data to pass back for progress callback */
 	void* _progressdata;
+
+	/** rebuilddb callback */
+	void (*_rebuilddbprogressfunc)(int,void*);
+
+	/** arbitrary data to pass back for rebuilddb callback */
+	void* _rebuilddbprogressdata;
 
 	/**
 	 * The name of the install root.
@@ -433,10 +452,17 @@ class RpmDb: virtual public Rep
 			PMSolvable::PkgRelList_type& deps,
 			FileDeps::FileNames& files, bool fill_files = false);
 
-	/** wrapper for _progressfunc, does nothing if it's unset
+	/**
+	 * wrapper for _progressfunc, does nothing if it's unset
 	 * */
-	void ReportProgress(int p)
+	inline void ReportProgress(int p)
 	    { if(_progressfunc != NULL) (*_progressfunc)(p,_progressdata); }
+
+	/**
+	 * wrapper for _rebuilddbprogressfunc, does nothing if it's unset
+	 * */
+	inline void ReportRebuildDBProgress(int p)
+	    { if(_rebuilddbprogressfunc != NULL) (*_rebuilddbprogressfunc)(p,_rebuilddbprogressdata); }
 
 	/**
 	 * helper for queryPackage
@@ -453,7 +479,18 @@ class RpmDb: virtual public Rep
 	 * @param difffailmsg what to put into mail if diff failed, must contain two %s for the two files
 	 * @param diffgenmsg what to put into mail if diff succeeded, must contain two %s for the two files
 	 * */
-	void processConfigFiles(const std::string& line, const std::string& name, const char* typemsg, const char* difffailmsg, const char* diffgenmsg);
+	void processConfigFiles(const std::string& line,
+		const std::string& name,
+		const char* typemsg,
+		const char* difffailmsg,
+		const char* diffgenmsg);
+
+
+	/**
+	 * compare file tmpdbpath against oldsize and call
+	 * ReportRebuildDBProgress
+	 * */
+	void checkrebuilddbstatus(Pathname tmpdbpath, off_t oldsize);
 
     public: // static members
 
