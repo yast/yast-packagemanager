@@ -221,10 +221,10 @@ class InstYou {
           virtual bool patchProgress( int percent, const std::string &str ) = 0;
     };
 
-    void setCallbacks( Callbacks * );
+    static void setCallbacks( Callbacks * );
 
   private:
-    Callbacks *_callbacks;
+    static Callbacks *_callbacks;
 
   private:
     void init();
