@@ -48,7 +48,10 @@ pkglist2string (const std::list<PMPackagePtr>& plist, const char *sep)
    {
 	if (!ret.empty())
 	    ret += sep;
-	ret += ((const std::string &)((*pos)->name()) + "-" + (*pos)->version() + "-" + (*pos)->release() + "." + (const std::string &)((*pos)->arch()));
+	if (!(*pos))
+	    ret += "(nil)";
+	else
+	    ret += ((const std::string &)((*pos)->name()) + "-" + (*pos)->version() + "-" + (*pos)->release() + "." + (const std::string &)((*pos)->arch()));
    }
    return ret;
 }
@@ -156,18 +159,29 @@ show_pmselection (PMSelectionPtr s)
     s->startRetrieval();
     show_pmobject ((PMObjectPtr)s);
 
+    char *locales[] = { "de", "en", "cs", "es", "fr", "gl", "hu", "it", "ja", "nl", "pt", "sv", "tr", "ru", "cz", 0 };
+    int pos = 0;
     cout << "Category: " << s->category () << endl;
     cout << "IsBase: " << s->isBase () << endl;
     cout << "Visible: " << s->visible () << endl;
     cout << "Order: " << s->order() << endl;
     cout << "Recommends: " << strlist2string(s->recommends()) << endl;
+    cout << "RecommendsPtrs: " << sellist2string(s->recommends_ptrs()) << endl;
     cout << "Suggests: " << strlist2string(s->suggests()) << endl;
     cout << "SuggestsPtrs: " << sellist2string(s->suggests_ptrs(), ", ") << endl;
-    cout << "InsPacks: " << strlist2string(s->inspacks("")) << endl;
-    cout << "InsPacksPtrs: " << pkglist2string(s->inspacks_ptrs(""), ", ") << endl;
-    cout << "DelPacks: " << strlist2string(s->delpacks("")) << endl;
-    cout << "DelPacksPtrs: " << pkglist2string(s->delpacks_ptrs(""), ", ") << endl;
     cout << "Archivesize: " << s->archivesize() << endl;
+    while (locales[pos] != 0)
+    {
+	cout << "Summary[" << locales[pos] << "]: " << s->summary(locales[pos]) << endl;
+	cout << "InsPacks[" << locales[pos] << "]: " << strlist2string(s->inspacks(locales[pos])) << endl;
+	cout << "InsPacksPtrs[" << locales[pos] << "]: (";
+	cout << pkglist2string(s->inspacks_ptrs(locales[pos]), ", ") << ")" << endl;
+	cout << "DelPacks[" << locales[pos] << "]: (";
+	cout << strlist2string(s->delpacks(locales[pos])) << ")" << endl;
+	cout << "DelPacksPtrs[" << locales[pos] << "]: (";
+	cout << pkglist2string(s->delpacks_ptrs(locales[pos]), ", ") << ")" << endl;
+	pos++;
+    }
     cout << "========" << endl;
     s->stopRetrieval();
     return;
