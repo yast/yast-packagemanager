@@ -30,6 +30,7 @@
 #include <y2pm/InstSrcData_ULPtr.h>
 #include <y2pm/InstSrcData.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/PMSelection.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -50,6 +51,11 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
 	 * fill tagset from packages.<lang> to PMPackage
 	 */
 	static void LangTag2Package( TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset );
+
+	/**
+	 * fill tagset from <name>.sel to PMSelection
+	 */
+	static PMSelectionPtr Tag2Selection ( TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset );
 
   public:
 
@@ -224,5 +230,73 @@ private:
     
 };
 
-#endif // InstSrcData_UL_h
 
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : InstSrcData_ULSelTags
+/**
+ * @short provides the tag set for a <name>.sel file
+ * (to feed the tag parser)
+ *
+ **/
+class InstSrcData_ULSelTags : public CommonPkdParser::TagSet
+{
+
+public:
+	// ** use same names as for PkgAttribute
+    enum Tags {
+	VERSION,	// general file format version
+	SELECTION,	// name version release arch
+	SUMMARY,	// short summary (label)
+	CATEGORY,
+	VISIBLE,
+	REQUIRES,
+	PROVIDES,
+	CONFLICTS,
+	OBSOLETES,
+	SIZE,
+	INSTALL,
+	DELETE,
+	NUM_TAGS
+    };
+
+public:
+    InstSrcData_ULSelTags( ) 
+	: TagSet()	{
+
+	CommonPkdParser::Tag* t;
+	createTag( "=Ver", VERSION);		// general file format version
+	createTag( "=Sel", SELECTION);		// name version release arch
+	createTag( "=Sum", SUMMARY);
+	createTag( "=Cat", CATEGORY);
+	createTag( "=Vis", VISIBLE);
+	t = createTag( "+Req", REQUIRES);	// list of requires tags
+	t->setEndTag("-Req");
+	t = createTag( "+Prv", PROVIDES);	// list of provides tags
+	t->setEndTag("-Prv");
+	t = createTag( "+Con", CONFLICTS);	// list of conflicts tags
+	t->setEndTag("-Con");
+	t = createTag( "+Obs", OBSOLETES);	// list of obsoletes tags
+	t->setEndTag("-Obs");
+	createTag( "=Siz", SIZE);		// packed and unpacked size
+	t = createTag( "+Ins", INSTALL);
+	t->setEndTag("-Ins");
+	t = createTag( "+Del", DELETE);
+	t->setEndTag("-Del");
+    };
+
+private:
+
+    CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
+	
+	CommonPkdParser::Tag* t;
+	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
+	this->addTag(t);
+	addTagByIndex( tagEnum, t );
+
+	return t;
+    }
+    
+};
+
+#endif // InstSrcData_UL_h

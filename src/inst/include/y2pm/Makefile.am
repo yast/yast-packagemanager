@@ -19,6 +19,7 @@ pkginclude_HEADERS =	\
 	InstTarget.h	InstTargetPtr.h		\
 	InstSrcTags.h				\
 	PMULPackageDataProvider.h PMULPackageDataProviderPtr.h	\
+	PMULSelectionDataProvider.h PMULSelectionDataProviderPtr.h \
 	DataOldSuSE.h
 
 #<INSTALL-HEADER-TARGET>
