@@ -101,6 +101,11 @@ PMULSelectionDataProvider::posmapSLookup (TaggedFile::Tag::posmaptype theMap, co
 {
     std::string value;
     posmapIT it = theMap.find (locale);
+    if ((it == theMap.end())
+	&& (locale.size() > 2))
+    {
+	it = theMap.find (locale.substr (0, 2));
+    }
     if (it != theMap.end())
     {
 	_selection_retrieval->retrieveData (it->second, value);
@@ -113,6 +118,12 @@ PMULSelectionDataProvider::posmapLLookup (TaggedFile::Tag::posmaptype theMap, co
 {
     std::list<std::string> value;
     posmapIT it = theMap.find (locale);
+
+    if ((it == theMap.end())
+	&& (locale.size() > 2))
+    {
+	it = theMap.find (locale.substr (0, 2));
+    }
     if (it != theMap.end())
     {
 	_selection_retrieval->retrieveData (it->second, value);
@@ -125,27 +136,27 @@ PMULSelectionDataProvider::posmapLLookup (TaggedFile::Tag::posmaptype theMap, co
 //-------------------------------------------------------------------
 
 const std::string
-PMULSelectionDataProvider::summary(const std::string& lang) const
+PMULSelectionDataProvider::summary(const std::string& locale) const
 {
-    return posmapSLookup (_attr_SUMMARY, lang);
+    return posmapSLookup (_attr_SUMMARY, locale);
 }
 
 const std::list<std::string>
-PMULSelectionDataProvider::description(const std::string& lang) const
+PMULSelectionDataProvider::description(const std::string& locale) const
 {
-    return posmapLLookup (_attr_DESCRIPTION, lang);
+    return posmapLLookup (_attr_DESCRIPTION, locale);
 }
 
 const std::list<std::string>
-PMULSelectionDataProvider::insnotify(const std::string& lang) const
+PMULSelectionDataProvider::insnotify(const std::string& locale) const
 {
-    return posmapLLookup (_attr_INSNOTIFY, lang);
+    return posmapLLookup (_attr_INSNOTIFY, locale);
 }
 
 const std::list<std::string>
-PMULSelectionDataProvider::delnotify(const std::string& lang) const
+PMULSelectionDataProvider::delnotify(const std::string& locale) const
 {
-    return posmapLLookup (_attr_DELNOTIFY, lang);
+    return posmapLLookup (_attr_DELNOTIFY, locale);
 }
 
 const FSize
@@ -197,34 +208,47 @@ PMULSelectionDataProvider::recommends_ptrs()
 }
 
 const std::list<std::string>
-PMULSelectionDataProvider::inspacks(const std::string& lang) const
+PMULSelectionDataProvider::inspacks(const std::string& locale) const
 {
-    return posmapLLookup (_attr_INSPACKS, lang);
+    return posmapLLookup (_attr_INSPACKS, locale);
 }
 
 const std::list<PMPackagePtr>
-PMULSelectionDataProvider::inspacks_ptrs(const std::string& lang)
+PMULSelectionDataProvider::inspacks_ptrs(const std::string& locale)
 {
     // already set ?
-    pkgsmapIT it = _ptrs_attr_INSPACKS.find(lang);
+    pkgsmapIT it = _ptrs_attr_INSPACKS.find(locale);
     if (it == _ptrs_attr_INSPACKS.end())
+    {
+	if (locale.size() > 2)
+	{
+	    it = _ptrs_attr_INSPACKS.find(locale.substr(0,2));
+	}
 	return std::list<PMPackagePtr>();
+    }
     return it->second;
 }
 
 const std::list<std::string>
-PMULSelectionDataProvider::delpacks(const std::string& lang) const
+PMULSelectionDataProvider::delpacks(const std::string& locale) const
 {
-    return posmapLLookup (_attr_DELPACKS, lang);
+    return posmapLLookup (_attr_DELPACKS, locale);
 }
 
 const std::list<PMPackagePtr>
-PMULSelectionDataProvider::delpacks_ptrs(const std::string& lang)
+PMULSelectionDataProvider::delpacks_ptrs(const std::string& locale)
 {
     // already set ?
-    pkgsmapIT it = _ptrs_attr_DELPACKS.find(lang);
+    pkgsmapIT it = _ptrs_attr_DELPACKS.find(locale);
     if (it == _ptrs_attr_DELPACKS.end())
-	return std::list<PMPackagePtr>();
+    {
+	if (locale.size() > 2)
+	{
+	    it = _ptrs_attr_DELPACKS.find(locale.substr(0,2));
+	}
+	if (it == _ptrs_attr_DELPACKS.end())
+	    return std::list<PMPackagePtr>();
+    }
     return it->second;
 }
 

@@ -107,10 +107,10 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	const std::list<std::string> delnotify() const { return delnotify(""); }
 	const FSize size() const;
 
-	const std::string summary(const std::string& lang) const;
-	const std::list<std::string> description(const std::string& lang) const;
-	const std::list<std::string> insnotify(const std::string& lang) const;
-	const std::list<std::string> delnotify(const std::string& lang) const;
+	const std::string summary(const std::string& locale) const;
+	const std::list<std::string> description(const std::string& locale) const;
+	const std::list<std::string> insnotify(const std::string& locale) const;
+	const std::list<std::string> delnotify(const std::string& locale) const;
 
 	/**
 	 * access functions for PMSelection attributes
@@ -122,10 +122,10 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	const std::list<PMSelectionPtr> suggests_ptrs();
 	const std::list<std::string> recommends() const;
 	const std::list<PMSelectionPtr> recommends_ptrs();
-	const std::list<std::string> inspacks(const std::string& lang = "") const;
-	const std::list<PMPackagePtr> inspacks_ptrs (const std::string& lang = "");
-	const std::list<std::string> delpacks(const std::string& lang = "") const;
-	const std::list<PMPackagePtr> delpacks_ptrs (const std::string& lang = "");
+	const std::list<std::string> inspacks(const std::string& locale = "") const;
+	const std::list<PMPackagePtr> inspacks_ptrs (const std::string& locale = "");
+	const std::list<std::string> delpacks(const std::string& locale = "") const;
+	const std::list<PMPackagePtr> delpacks_ptrs (const std::string& locale = "");
 	const FSize archivesize() const;
 	const std::string order() const;
 
