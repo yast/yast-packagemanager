@@ -94,6 +94,8 @@ PMError                PMPackage::providePkgToInstall(Pathname& path) const { DP
 PMError                PMPackage::provideSrcPkgToInstall(Pathname& path) const { DP_ARG_GET( provideSrcPkgToInstall, path ); }
 // who's providing this package
 constInstSrcPtr  PMPackage::source()		 const { DP_GET ( source ); }
+// internaly used by PMSelectable
+bool PMPackage::prefererCandidate() const { DP_GET( prefererCandidate ); }
 #undef DP_GET
 
 // dudata is special

@@ -111,7 +111,10 @@ class PMPackageDataProvider : virtual public Rep {
     // physical access to the src.rpm file.
     static PMError provideSrcPkgToInstall(Pathname& path_r) { path_r = Pathname(); return PMError::E_error; }
     // source for this package, needed for callbacks
-    static constInstSrcPtr source()		{ return (constInstSrcPtr)0; }
+    static constInstSrcPtr source()		{ return constInstSrcPtr(0); }
+
+    // Internally used by PMSelectable.
+    static bool prefererCandidate() { return false; }
 
     // dudata is special
     static void du( PkgDu & dudata_r );
@@ -183,7 +186,10 @@ class PMPackageDataProvider : virtual public Rep {
     // physical access to the src.rpm file.
     virtual PMError provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const { return provideSrcPkgToInstall(path_r); }
     // source for this package, needed for callbacks
-    virtual constInstSrcPtr source 		(const PMPackage & pkg_r ) const { return source (pkg_r); }
+    virtual constInstSrcPtr source( const PMPackage & pkg_r ) const { return source(); }
+
+    // Internally used by PMSelectable.
+    virtual bool prefererCandidate( const PMPackage & pkg_r ) const { return prefererCandidate(); }
 
     // dudata is special
     virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const { return du( dudata_r ); }

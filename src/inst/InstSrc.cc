@@ -69,6 +69,7 @@ const Pathname InstSrc::_c_media_dir( "MEDIA" );
 InstSrc::InstSrc()
     : _cache_deleteOnExit( false )
     , _may_use_cache( true )
+    , _specialCache( -1 )
     , _mediachangefunc (0)
     , _mediachangedata (0)
     , _medianr (0)
@@ -103,6 +104,23 @@ InstSrc::~InstSrc()
       PathInfo::clean_dir( mediadir.path() );
     }
   }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrc::specialCache
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION : Hack for adrian to enforce package
+//                    candidate selection from this source.
+//
+bool InstSrc::specialCache() const
+{
+  if ( _specialCache == -1 ) {
+    _specialCache = ( _cache.basename() == "IS_CACHE_0x00000000" ? 1 : 0 );
+  }
+  return  _specialCache;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -145,7 +145,18 @@ class InstSrc: virtual public Rep {
      **/
     mutable Pathname previouslyDnlPackage;
 
+
+    /**
+     * For internal use by PMUlDataProvider only.
+     **/
+    mutable int _specialCache;
+
   public:
+
+    /**
+     * Public, but for internal use by PMUlDataProvider only.
+     **/
+    bool specialCache() const;
 
     /**
      * Full path of cache_dir.

@@ -166,11 +166,12 @@ PMSelectable::PMObjectList::iterator PMSelectable::clistLookup( PMObjectPtr obj_
 //	METHOD NAME : PMSelectable::autoCandidate
 //	METHOD TYPE : PMObjectPtr
 //
-//	DESCRIPTION : Best among the availableObjs() Determined by ranking.
-//		      May be NULL, if no available is better than the installed.
+//	DESCRIPTION : Best among the availableObjs(). May be NULL, if no
+//                    available is better than the installed.
 //
-//      - candidateList is sorted by (best InstSrcRank, best allowed arch, best version).
-//      - if we have an installed object, it determines the architecture.
+//      - candidateList is sorted, best candidate first.
+//      - if we have an installed object, it determines the desired architecture.
+//        (Except there is a candidate that comes from a source with prefererCandidate fag set).
 //      - Otherwise the fist is the best.
 //
 PMObjectPtr PMSelectable::autoCandidate() const
@@ -180,7 +181,7 @@ PMObjectPtr PMSelectable::autoCandidate() const
 
   if ( _installedObj ) {
     for ( PMObjectList::const_iterator it = _candidateList.begin(); it != _candidateList.end(); ++it ) {
-      if ( (*it)->arch() == _installedObj->arch() )
+      if ( (*it)->prefererCandidate() || (*it)->arch() == _installedObj->arch() )
 	return *it;
     }
   }
@@ -248,6 +249,44 @@ PMSelectable::Error PMSelectable::delInstalledObj()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMSelectable::clistIsBetter
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION : Return true if lhs is better candidate than rhs.
+//
+bool PMSelectable::clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & rhs )
+{
+  if ( !lhs )
+    return false; // anything better than nothing
+
+  if ( !rhs )
+    return true; // anything better than nothing
+
+  if ( rhs->prefererCandidate() )
+    return false; // rhs always best.
+
+  if ( lhs->edition() > rhs->edition() )
+    return true; // lhs better version
+
+  if ( lhs->edition() == rhs->edition() ) {
+    int acmp = PkgArch::compare( lhs->arch(), rhs->arch() );
+    if ( acmp < 0 )
+      return true; // lhs better arch
+
+    if ( acmp == 0 ) {
+      if ( lhs->instSrcRank() < rhs->instSrcRank() )
+	return true; // lhs lower rank -> higher priority
+
+      // ran out of sort criteria
+    }
+  }
+
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMSelectable::clistAdd
 //	METHOD TYPE : PMSelectable::Error
 //
@@ -264,38 +303,17 @@ PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
     return E_Error;
   }
 
-  // sorted add: best InstSrcRank, best allowed arch, best version
-  // autocandidate rely's on this!
-  unsigned orank = obj_r->instSrcRank();
-  PkgArch  oarch = obj_r->arch();
-
+  // sorted add: autocandidate rely's on this!
   PMObjectList::iterator it = _candidateList.begin();
   for ( ; it != _candidateList.end(); ++it ) {
-    unsigned crank = (*it)->instSrcRank();
-    if ( orank > crank ) // higher rank -> lower priority
-      continue;
-    if ( orank == crank ) {
-      int acmp = PkgArch::compare( oarch, (*it)->arch() );
-      if ( acmp > 0 ) // worse arch
-	continue;
-      if ( acmp == 0 ) {
-	if ( obj_r->edition() < (*it)->edition() )
-	  continue;
-	// ran out of sort criteria
-      }
-    }
-    // Here: insert
-    _candidateList.insert( it, obj_r );
-    break;
+    if ( ! clistIsBetter( *it, obj_r ) )
+      break;
   }
-  if ( it == _candidateList.end() ) {
-    // empty list or worst candidate
-    _candidateList.insert( it, obj_r );
-  }
+  // Here: insert
+  _candidateList.insert( it, obj_r );
   _attach_obj( obj_r );
 
   chooseCandidateObj();
-
   return E_Ok;
 }
 
