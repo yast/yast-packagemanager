@@ -2,4 +2,4 @@
 # Makefile.am for packagemanager/src/query
 #
 
-SUBDIRS = include tools src testsuite
+SUBDIRS = include tools src
