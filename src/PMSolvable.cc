@@ -64,11 +64,14 @@ PMSolvable::StringList2PkgRelList ( const list<string>& relationlist,
 	for (list<string>::const_iterator it = relationlist.begin(); it != relationlist.end(); ++it)
 	{
 	  PkgRelation newrel = PkgRelation::fromString (*it);
+	  // ignore provides/conflicts/obsoletes/requires on own name
 	  if ( forPkg->size() && newrel.name() == forPkg ) {
 	    _INT("DEPCHECK") << forPkg << " self " << kind << ": " << newrel << endl;
-	    break;
 	  }
-	  pkgrellist.push_back (newrel);
+	  else
+	  {
+	      pkgrellist.push_back (newrel);
+	  }
 	}
     }
     return pkgrellist;
