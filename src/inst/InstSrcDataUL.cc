@@ -966,23 +966,22 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
     // create instance of _own_ class
     //-----------------------------------------------------
 
-    InstSrcDataUL *ulptr = new InstSrcDataUL();
-    InstSrcDataPtr ndata( ulptr );
+    InstSrcDataULPtr ndata( new InstSrcDataUL() );
 
     // parse <DESCRDIR>/packages
-    if (!parsePackages (ulptr->_packages, media_r, descr_dir_r))
+    if (!parsePackages (ndata->_packages, media_r, descr_dir_r))
     {
 	// parse <DESCRDIR>/packages.<lang>
-	parsePackagesLang (ulptr->_packages, media_r, descr_dir_r);
+	parsePackagesLang (ndata->_packages, media_r, descr_dir_r);
     }
 
     // parse <DESCRDIR>/selections and <DESCRDIR>/*.sel
-    parseSelections (ulptr->_selections, media_r, descr_dir_r);
+    parseSelections (ndata->_selections, media_r, descr_dir_r);
 
     // fill selections with caching data
     // set up lists of PMSelectionPtr and PMPackagePtr
     // for suggests, inspacks, delpacks
-    fillSelections (ulptr->_selections, ulptr->_packages);
+    fillSelections (ndata->_selections, ndata->_packages);
 
     ///////////////////////////////////////////////////////////////////
     // done
