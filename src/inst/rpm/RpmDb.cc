@@ -102,7 +102,7 @@ ostream & operator<<( ostream & str, const RpmDb::DbStateInfoBits & obj )
 ///////////////////////////////////////////////////////////////////
 IMPL_BASE_POINTER(RpmDb);
 
-#define WARNINGMAILPATH "/var/adm/notify/warnings"
+#define WARNINGMAILPATH "/var/log/YaST2/"
 #define FILEFORBACKUPFILES "YaSTBackupModifiedFiles"
 
 ///////////////////////////////////////////////////////////////////
@@ -1462,8 +1462,9 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
     string msg = line.substr(9);
     string::size_type pos1 = string::npos;
     string::size_type pos2 = string::npos;
-    string file1;
-    string file2;
+    string file1s, file2s;
+    Pathname file1;
+    Pathname file2;
 
     pos1 = msg.find (typemsg);
     for (;;)
@@ -1476,53 +1477,67 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 	if (pos2 >= msg.length() )
 	    break;
 
+	file1 = msg.substr (0, pos1);
+	file2 = msg.substr (pos2);
+
+	file1s = file1.asString();
+	file2s = file2.asString();
+
 	if (!_root.empty() && _root != "/")
 	{
-	    file1 = _root.asString() + msg.substr (0, pos1);
-	    file2 = _root.asString() + msg.substr (pos2);
-	}
-	else
-	{
-	    file1 = msg.substr (0, pos1);
-	    file2 = msg.substr (pos2);
+	    file1 = _root + file1;
+	    file2 = _root + file2;
 	}
 
 	string out;
-	int ret = Diff::differ (file1, file2, out, 25);
+	int ret = Diff::differ (file1.asString(), file2.asString(), out, 25);
 	if (ret)
 	{
-	    Pathname notifydir = Pathname(_root) + WARNINGMAILPATH;
-	    if (PathInfo::assert_dir(notifydir) != 0)
+	    Pathname file = _root + WARNINGMAILPATH;
+	    if (PathInfo::assert_dir(file) != 0)
 	    {
-		ERR << "Could not create " << notifydir.asString() << endl;
+		ERR << "Could not create " << file.asString() << endl;
 		break;
 	    }
-	    string file = name + '_' + file1;
-	    for (string::size_type pos = file.find('/'); pos != string::npos; pos = file.find('/'))
-	    {
-		file[pos] = '_';
-	    }
-	    file = (notifydir + file).asString();
-	    ofstream notify(file.c_str());
+	    file += Date::form("config_diff_%Y_%m_%d.log", Date::now());
+	    ofstream notify(file.asString().c_str(), std::ios::out|std::ios::app);
 	    if(!notify)
 	    {
 		ERR << "Could not open " <<  file << endl;
 		break;
 	    }
 
-	    notify << name << endl;
+	    // Translator: %s = name of an rpm package. A list of diffs follows
+	    // this message.
+	    notify << stringutil::form(_("Changed configuration files for %s:"), name.c_str()) << endl;
 	    if(ret>1)
 	    {
 		ERR << "diff failed" << endl;
 		notify << stringutil::form(difffailmsg,
-		    file1.c_str(), file2.c_str()) << endl;
+		    file1s.c_str(), file2s.c_str()) << endl;
 	    }
 	    else
 	    {
 		notify << stringutil::form(diffgenmsg,
-		    file1.c_str(), file2.c_str()) << endl;
+		    file1s.c_str(), file2s.c_str()) << endl;
+
+		// remove root for the viewer's pleasure (#38240)
+		if (!_root.empty() && _root != "/")
+		{
+		    if(out.substr(0,4) == "--- ")
+		    {
+			out.replace(4, file1.asString().length(), file1s);
+		    }
+		    string::size_type pos = out.find("\n+++ ");
+		    if(pos != string::npos)
+		    {
+			out.replace(pos+5, file2.asString().length(), file2s);
+		    }
+		}
 		notify << out << endl;
 	    }
+	    notify.close();
+	    notify.open("/var/lib/update-messages/yast2-packagemanager.rpmdb.configfiles");
 	    notify.close();
 	}
 	else
@@ -1618,12 +1633,12 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
     {
 	    processConfigFiles(*it, Pathname::basename(filename), " saved as ",
 		// %s = filenames
-		_("rpm saved %s as %s, but it was impossible to generate a diff"),
+		_("rpm saved %s as %s but it was impossible to determine the difference"),
 		// %s = filenames
 		_("rpm saved %s as %s.\nHere are the first 25 lines of difference:\n"));
 	    processConfigFiles(*it, Pathname::basename(filename), " created as ",
 		// %s = filenames
-		_("rpm created %s as %s, but it was impossible to generate a diff"),
+		_("rpm created %s as %s but it was impossible to determine the difference"),
 		// %s = filenames
 		_("rpm created %s as %s.\nHere are the first 25 lines of difference:\n"));
     }
