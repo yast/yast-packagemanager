@@ -8,17 +8,19 @@
 #include <y2pm/PMSolvablePtr.h>
 
 class PkgRelation {
-	PkgName _name;
-	rel_op _op;
+	PkgName    _name;
+	rel_op     _op;
 	PkgEdition _edition;
-	bool _isprereq;  // whether this is a prerequirement
+	bool       _isprereq;  // whether this is a prerequirement
   public:
+	PkgRelation( const PkgName& n ) :
+		_name(n), _op(NONE), _isprereq(false) {};
 	PkgRelation( const PkgName& n, rel_op o, const PkgEdition& e ) :
-		_name(n), _op(o), _edition(e) {};
+		_name(n), _op(o), _edition(e), _isprereq(false) {};
 	// default copy constructor and assigment are ok
 
-	const PkgName& name() const { return _name; }
-	rel_op op() const { return _op; }
+	const PkgName&    name()    const { return _name; }
+	rel_op            op()      const { return _op; }
 	const PkgEdition& edition() const { return _edition; }
 
 	// return true if this relation holds given a package (providing itself)
