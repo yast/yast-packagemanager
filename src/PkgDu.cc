@@ -176,6 +176,7 @@ bool PkgDuMaster::MountPoint::assignData( const MountPoint & rhs ) const
 
   _total    = rhs._total;
   _used     = rhs._used;
+  _readonly = rhs._readonly;
   _pkgusage = rhs._pkgusage;
   return true;
 }
@@ -196,7 +197,7 @@ ostream & operator<<( ostream & str, const PkgDuMaster::MountPoint & obj )
     << "| A:" << obj.initial_available().form( FSize::K, 11 )
     << "| p:" << obj.pkg_diff()         .form( FSize::K, 11 )
     << "| u:" << obj.pkg_used()         .form( FSize::K, 11 )
-    << "| " << obj._mountpoint;
+    << "|" << (obj._readonly?"*":" ") << obj._mountpoint;
   return str;
 }
 
