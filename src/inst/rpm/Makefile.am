@@ -23,10 +23,9 @@ liby2pminstrpmsrc_la_SOURCES = 	\
 	binHeader.cc binHeaderCache.cc \
 	RpmLibHeader.cc RpmLibHeaderCache.cc \
 	RpmDb.cc \
-	librpmDb.cc \
-	RpmLibDb.cc \
+	librpmDb.cc librpmDb.cv3.cc \
 	PMRpmPackageDataProvider.cc
 
 liby2pminstrpmsrc_la_LIBADD = -ly2util -lrpm -lpopt
 
-EXTRA_DIST = Make.defines RpmLib.h
+EXTRA_DIST = Make.defines

@@ -58,7 +58,13 @@ class binHeader : virtual public Rep {
 
   public:
 
-    binHeader( Header h = 0 );
+    binHeader( Header h_r = 0 );
+
+    /**
+     * <B>Dangerous!<\B> This one takes the header out of rhs
+     * and leaves rhs empty.
+     **/
+    binHeader( binHeaderPtr & rhs );
 
     virtual ~binHeader();
 

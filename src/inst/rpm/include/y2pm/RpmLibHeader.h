@@ -48,24 +48,27 @@ class PkgDu;
  *
  * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>Header</code>! </B>
  **/
-class RpmLibHeader : virtual public Rep {
+class RpmLibHeader : virtual public Rep, public binHeader {
   REP_BODY(RpmLibHeader); // includes no cpoy, no assign
 
   private:
 
-    binHeaderPtr _hdr;
-
     bool         _isSrc;
 
-    PMSolvable::PkgRelList_type PkgRelList_val( binHeader::tag tag_r, FileDeps::FileNames * freq_r = 0 ) const;
+    PMSolvable::PkgRelList_type PkgRelList_val( tag tag_r, FileDeps::FileNames * freq_r = 0 ) const;
 
   public:
 
     /**
-     * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>binHeaderPtr</code>! </B>
+     *
      **/
-    RpmLibHeader( binHeader::Header h_r, bool isSrc = false );
-    RpmLibHeader( binHeaderPtr hdr_r, bool isSrc = false );
+    RpmLibHeader( Header h_r = 0, bool isSrc = false );
+
+    /**
+     * <B>Dangerous!<\B> This one takes the header out of rhs
+     * and leaves rhs empty.
+     **/
+    RpmLibHeader( binHeaderPtr & rhs, bool isSrc = false );
 
     virtual ~RpmLibHeader();
 
@@ -129,6 +132,14 @@ class RpmLibHeader : virtual public Rep {
   public:
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
+
+  public:
+
+    /**
+     * Get an accessible packages data from disk.
+     * Returns NULL on any error.
+     **/
+    static constRpmLibHeaderPtr readPackage( const Pathname & path );
 };
 
 ///////////////////////////////////////////////////////////////////

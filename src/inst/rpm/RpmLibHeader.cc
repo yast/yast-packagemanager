@@ -19,7 +19,9 @@
 
 /-*/
 
-#include "RpmLib.h"
+extern "C" {
+#include <rpm/rpmlib.h>
+}
 
 #include <iostream>
 #include <map>
@@ -29,32 +31,18 @@
 #include <y2util/PathInfo.h>
 
 #include <y2pm/RpmLibHeader.h>
-#include <y2pm/binHeader.h>
 #include <y2pm/PkgDu.h>
 
 using namespace std;
 
 #undef Y2LOG
-#define Y2LOG "RpmLib"
+#define Y2LOG "RpmLibHeader"
 
 ///////////////////////////////////////////////////////////////////
 //	CLASS NAME : RpmLibHeaderPtr
 //	CLASS NAME : constRpmLibHeaderPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_BASE_POINTER(RpmLibHeader);
-
-///////////////////////////////////////////////////////////////////
-
-#define has_tag        _hdr->has_tag
-#define int_list       _hdr->int_list
-#define string_list    _hdr->string_list
-#define int_val        _hdr->int_val
-#define string_val     _hdr->string_val
-#define stringList_val _hdr->stringList_val
-
-typedef binHeader::tag        tag;
-typedef binHeader::intList    intList;
-typedef binHeader::stringList stringList;
+IMPL_DERIVED_POINTER(RpmLibHeader,binHeader,binHeader);
 
 ///////////////////////////////////////////////////////////////////
 
@@ -66,13 +54,10 @@ typedef binHeader::stringList stringList;
 //
 //	DESCRIPTION :
 //
-RpmLibHeader::RpmLibHeader( binHeader::Header h_r, bool isSrc )
-    : _hdr( h_r ? new binHeader( h_r ) : 0 )
+RpmLibHeader::RpmLibHeader( Header h_r, bool isSrc )
+    : binHeader( h_r )
     , _isSrc( isSrc )
 {
-  if ( !_hdr ) {
-    INT << "OOPS: NULL HEADER created!" << endl;
-  }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -81,15 +66,10 @@ RpmLibHeader::RpmLibHeader( binHeader::Header h_r, bool isSrc )
 //	METHOD NAME : RpmLibHeader::RpmLibHeader
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
-//
-RpmLibHeader::RpmLibHeader( binHeaderPtr hdr_r, bool isSrc )
-    : _hdr( hdr_r )
+RpmLibHeader::RpmLibHeader( binHeaderPtr & rhs, bool isSrc )
+    : binHeader( rhs )
     , _isSrc( isSrc )
 {
-  if ( !_hdr ) {
-    INT << "OOPS: NULL HEADER created!" << endl;
-  }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -107,6 +87,54 @@ RpmLibHeader::~RpmLibHeader()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : RpmLibHeader::readPackage
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+#warning OLD RPMAPI CHECK IT
+static int rpmReadPackageHeader(FD_t fd, Header * hdr, int * isSource, int * major, int * minor ) {
+  INT << "Illegal use of old api: " << __FUNCTION__ << endl;
+  * hdr = 0;
+  * isSource = 0;
+  * major = 0;
+  * minor = 0;
+  return -1;
+}
+constRpmLibHeaderPtr RpmLibHeader::readPackage( const Pathname & path_r )
+{
+  PathInfo file( path_r );
+  if ( ! file.isFile() ) {
+    ERR << "Not a file: " << file << endl;
+    return (RpmLibHeader*)0;
+  }
+
+  FD_t fd = ::Fopen( file.asString().c_str(), "r" );
+  if ( fd == 0 || ::Ferror(fd) ) {
+    ERR << "Can't open file for reading: " << file << " (" << ::Fstrerror(fd) << ")" << endl;
+    if ( fd )
+      ::Fclose( fd );
+    return (RpmLibHeader*)0;
+  }
+
+  Header nh    = 0;
+  int isSource = 0;
+  int major    = 0;
+  int minor    = 0;
+
+  int res = ::rpmReadPackageHeader( fd, &nh, &isSource, &major, &minor );
+  ::Fclose( fd );
+  if ( res || !nh ) {
+    ERR << "Error reading: " << file << (res==1?" (bad magic)":"") << endl;
+    return (RpmLibHeader*)0;
+  }
+
+  constRpmLibHeaderPtr h( new RpmLibHeader( nh, isSource ) );
+  MIL << major << "." << minor << "-" << (isSource?"src ":"bin ") << h << " from " << path_r << endl;
+  return h;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : RpmLibHeader::dumpOn
 //	METHOD TYPE : ostream &
 //
@@ -114,8 +142,8 @@ RpmLibHeader::~RpmLibHeader()
 //
 ostream & RpmLibHeader::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str );
-  return str << _hdr << '{' << tag_name() << "-" << tag_edition() << ( _isSrc ? ".src}" : "}");
+  binHeader::dumpOn( str );
+  return binHeader::dumpOn( str ) << '{' << tag_name() << "-" << tag_edition() << ( _isSrc ? ".src}" : "}");
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -1,3 +1,9 @@
+extern "C" {
+#include <rpm/rpmlib.h>
+#include <rpm/rpmdb.h>
+#include <rpm/rpmmacro.h>
+extern int _hdr_debug;
+}
 #include <iomanip>
 #include <fstream>
 #include <string>
@@ -10,7 +16,7 @@
 
 #include <Y2PM.h>
 #include <y2pm/RpmDb.h>
-#include <y2pm/RpmLibDb.h>
+#include <y2pm/librpmDb.h>
 
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrc.h>
@@ -141,61 +147,102 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 /******************************************************************
  ******************************************************************/
 
+string s;
+
+Pathname root( "/tmp/rpmdbs" );
+//Pathname dbPath( "/fibo" );
+Pathname dbPath( "/mand" );
+Pathname db3path( root+dbPath+"packages.rpm" );
+
+static void testCB( const ProgressCounter & pc, void * )
+{
+  if ( pc.state() == ProgressCounter::st_value && pc.val() % 25 )
+    return;
+  SEC << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
+	<< pc.val() << " " << pc.precent() << "%" << endl;
+}
+
+/******************************************************************
+ ******************************************************************/
+int mmain( int argc, const char * argv[] );
+int main( int argc, const char * argv[] ) {
+  Y2Logging::setLogfileName("-");
+  SEC << "START" << endl;
+
+  if ( 0 ) {
+    Y2PM::noAutoInstSrcManager();
+    Timecount _t( "Launch InstTarget" );
+    Y2PM::instTarget(true,"/");
+    _t.start( "Launch PMPackageManager" );
+    Y2PM::packageManager();
+    _t.start( "Launch PMSelectionManager" );
+    Y2PM::selectionManager();
+    _t.start( "Launch InstSrcManager" );
+    Y2PM::instSrcManager();
+    _t.stop();
+    INT << "Total Packages "   << PMGR.size() << endl;
+    INT << "Total Selections " << SMGR.size() << endl;
+  }
+
+  int ret = mmain( argc, argv );
+
+  SEC << "STOP -> " << ret << endl;
+  return ret;
+}
+
+void Pdb() {
+  {
+    librpmDb::db_const_iterator it;
+    unsigned cnt = 0;
+    for ( ; *it; ++it ) {
+      ++cnt;
+    }
+    SEC << "db_const_iterator: " << cnt << " " << it.dbError() << endl;
+  }
+  librpmDb::dbRelease();
+}
+
 /******************************************************************
 **
 **
-**	FUNCTION NAME : main
+**	FUNCTION NAME : mmain
 **	FUNCTION TYPE : int
 **
 **	DESCRIPTION :
 */
-int main()
+int mmain( int argc, const char * argv[] )
 {
-  Y2Logging::setLogfileName("-");
-  MIL << "START" << endl;
-  if ( 1 ) {
-  Y2PM::noAutoInstSrcManager();
-  Timecount _t( "Launch InstTarget" );
-  Y2PM::instTarget(true,"/");
-  _t.start( "Launch PMPackageManager" );
-  Y2PM::packageManager();
-  _t.start( "Launch PMSelectionManager" );
-  Y2PM::selectionManager();
-  _t.start( "Launch InstSrcManager" );
-  Y2PM::instSrcManager();
-  _t.stop();
-  INT << "Total Packages "   << PMGR.size() << endl;
-  INT << "Total Selections " << SMGR.size() << endl;
-  }
+  _rpmdb_debug = 0;
 
-  //InstSrcManager::ISrcId nid( newSrc( "ftp://cml.suse.cz/testing/msvec/CD1" ) );
-  //ISM.enableSource( nid );
-  //
-  //SEC << "STOP" << endl;
-  //return 0;
+  unsigned V3toV4Written = 0;
+  unsigned V3toV4Errors = 0;
+  ProgressCounter pcnt( testCB );
 
-  //InstSrcManager::ISrcId nid( newSrc( "dir:////Local/packages/test/RPMS" ) );
-  //ISM.enableSource( nid );
+  int Finst = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE;
+  int Fdel  = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE;
 
-  PMSelectablePtr P( PMGR["test"] );
-  P->user_clr_taboo();
-  MIL << P << endl;
-  for ( PMSelectable::PMObjectList::const_iterator it = P->av_begin(); it != P->av_end(); ++it ) {
-    PMObjectPtr obj( *it );
-    DBG << obj << endl;
-    if ( obj->release() == "11" ) {
-      MIL << "SetUserCandidate: " <<  P->setUserCandidate( obj ) << endl;
-      break;
-    }
-  }
-  MIL << P << endl;
+  RpmDb db;
+  SEC << db << endl;
+  INT << db.initDatabase( root, dbPath ) << endl;
+  SEC << db << endl;
+  Pdb();
 
-  PMUpdateStats opt_stats;
-  PMGR.doUpdate( opt_stats );
+  INT << db.removePackage( "test", Fdel ) << endl;
 
-  MIL << P << endl;
+  Pdb();
 
-  SEC << "STOP" << endl;
+  //INT << db.installPackage( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm", Finst ) << endl;
+  //INT << db.installPackage( "/Local/packages/test/RPMS/test-2-1.intern.i386.rpm", Finst ) << endl;
+
+  Pdb();
+
+#if 0
+  INT << db.initDatabase( root, dbPath ) << endl;
+  SEC << db << endl;
+  INT << db.initDatabase( "/var/tmp", dbPath ) << endl;
+  SEC << db << endl;
+#endif
+
   return 0;
 }
 

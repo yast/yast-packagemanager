@@ -1,6 +1,7 @@
 extern "C" {
 #include <rpm/rpmlib.h>
 #include <rpm/rpmdb.h>
+#include <rpm/rpmmacro.h>
 extern int _hdr_debug;
 }
 #include <iomanip>
@@ -73,23 +74,13 @@ int main()
 
   ///////////////////////////////////////////////////////////////////
 #if 1
-  err = ::rpmReadConfigFiles(NULL, NULL);
-  CHK << "::rpmReadConfigFiles() -> " << err << endl;
+
+  librpmDb::globalInit();
+
 
   constlibrpmDbPtr db( librpmDb::access( err ) );
   CHK << "librpmDb::access() -> " << err << endl;
 
-  librpmDb::db_const_iterator it( db );
-  //dumpit( it );
-
-  it.findPackage( PkgName("test") );
-  dumpit( it );
-
-  it.findPackage( PkgName("test"), PkgEdition("3-1") );
-  dumpit( it );
-
-  it.findPackage( PkgName("test"), PkgEdition("4-1") );
-  dumpit( it );
 
   ///////////////////////////////////////////////////////////////////
   MIL << "END" << endl;

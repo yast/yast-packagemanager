@@ -12,11 +12,8 @@ pkginclude_HEADERS =	\
 	RpmLibHeader.h RpmLibHeaderPtr.h \
 	RpmLibHeaderCache.h \
 	librpmDb.h librpmDbPtr.h \
-	RpmLibDb.h \
-	RpmDb.h \
-	RpmDbPtr.h \
-	PMRpmPackageDataProvider.h \
-	PMRpmPackageDataProviderPtr.h
+	RpmDb.h RpmDbPtr.h \
+	PMRpmPackageDataProvider.h PMRpmPackageDataProviderPtr.h
 
 #<INSTALL-HEADER-TARGET>
 

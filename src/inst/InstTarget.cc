@@ -60,7 +60,7 @@ InstTarget::Callbacks *InstTarget::_callbacks = 0;
  */
 InstTarget::InstTarget ( ) :
     _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
-    _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
+    _rpmremoveflags(RpmDb::RPMINST_NODEPS),
     _patchesInitialized( false ),
     _proddb( new InstTargetProdDB ),
     _seldb( new InstTargetSelDB )
@@ -80,14 +80,15 @@ InstTarget::~InstTarget()
 {
 }
 
-PMError InstTarget::init (const Pathname & rootpath, bool createnew)
+PMError InstTarget::init ( const Pathname & rootpath, bool createnew)
 {
+#warning Deprecated argument createnew in InstTarget::init
     _rootdir = rootpath;
 
     _proddb->open( _rootdir, createnew );
     _seldb->open( _rootdir, createnew );
 
-    return _rpmdb->initDatabase(_rootdir.asString(), createnew);
+    return _rpmdb->initDatabase( _rootdir );
 }
 
 PMError InstTarget::bringIntoCleanState()
@@ -312,12 +313,14 @@ const std::string& InstTarget::getRoot() const
 
 void InstTarget::setPackageInstallProgressCallback(void (*func)(int,void*), void* data)
 {
-    _rpmdb->setProgressCallback(func,data);
+#warning CALLBACK DISABLED
+    //_rpmdb->setProgressCallback(func,data);
 }
 
 void InstTarget::setRebuildDBProgressCallback(void (*func)(int,void*), void* data)
 {
-    _rpmdb->setRebuildDBProgressCallback(func,data);
+#warning CALLBACK DISABLED
+    //_rpmdb->setRebuildDBProgressCallback(func,data);
 }
 
 bool InstTarget::setInstallationLogfile(const std::string& logfile)

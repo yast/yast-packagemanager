@@ -19,6 +19,11 @@
 
 /-*/
 
+extern "C" {
+#include <rpm/rpmlib.h>
+#include <fcntl.h>
+}
+
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
@@ -28,8 +33,6 @@
 
 #include <y2pm/binHeaderCache.h>
 #include <y2pm/binHeader.h>
-
-#include "RpmLib.h"
 
 using namespace std;
 
