@@ -702,6 +702,8 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
 PMError InstYou::retrieveScript( const string &script, bool reload,
                                  bool checkSig )
 {
+  DBG << "Retrieve script '" << script << "'" << endl;
+
   Pathname scriptPath = _paths->scriptPath( script );
 
   PMError error = _media.provideFile( scriptPath, !reload );
@@ -725,9 +727,14 @@ PMError InstYou::retrieveScript( const string &script, bool reload,
   GPGCheck gpg;
   bool ok = gpg.check_file( sourceScript, destScript );
 
-  if ( checkSig && !ok ) {
-    ERR << "Signature check failed for script " << sourceScript << endl;
-    return PMError( YouError::E_bad_sig_file );
+  if ( !ok ) {
+    if ( checkSig ) {
+      ERR << "Signature check failed for script " << sourceScript << endl;
+      return PMError( YouError::E_bad_sig_file, sourceScript );
+    } else {
+      ERR << "gpg call failed" << endl;
+      return PMError( YouError::E_missing_sig_file, sourceScript );
+    }
   }
   
   return PMError();
