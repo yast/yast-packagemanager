@@ -26,6 +26,7 @@
 
 #include <y2util/Url.h>
 #include <y2util/Pathname.h>
+#include <y2util/FSize.h>
 
 #include <y2pm/PMError.h>
 #include <y2pm/MediaAccess.h>
@@ -62,6 +63,8 @@ class InstYou {
       Init you with product information from installed system.
     */
     PMError initProduct();
+
+    PMError initDu();
 
     /**
      * Get list of patch servers.
@@ -201,6 +204,12 @@ class InstYou {
     */
     PMError writeLastUpdate();
 
+    /**
+      Return total size of data to be downloaded based on current selection of
+      patches.
+    */
+    FSize totalDownloadSize() { return _totalDownloadSize; }
+
   public:
     class Callbacks
     {
@@ -259,6 +268,8 @@ class InstYou {
 
     std::string _regcode;
     std::string _password;
+
+    FSize _totalDownloadSize;
 };
 
 ///////////////////////////////////////////////////////////////////
