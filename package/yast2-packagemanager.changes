@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Sep 11 22:34:54 CEST 2002 - kkaempf@suse.de
+
+- fix skipping cd.
+- allow abort during install
+- implement source ranking
+- implement state save/restore
+- fix source management
+- 2.6.18
+
+-------------------------------------------------------------------
 Wed Sep 11 16:36:30 CEST 2002 - kkaempf@suse.de
 
 - equal buildtime is no reason to check manually during update
