@@ -77,7 +77,7 @@ Query::findCandidate (PMSelectablePtr selectable)
 Query::BitMask
 Query::checkSelectableFlag (PMSelectablePtr selectable, int flag)
 {
-    MIL << "Query::checkSelectableFlag (" << flag << endl;
+//    MIL << "Query::checkSelectableFlag (" << flag << endl;
 
     Query::BitMask ret = MASK_NONE;
     switch (flag)
@@ -147,7 +147,7 @@ Query::checkSelectableFlag (PMSelectablePtr selectable, int flag)
 	default:
 	break;
     }
-    MIL << "ret " << ret << endl;
+//    MIL << "ret " << ret << endl;
     return ret;
 }
 
@@ -231,9 +231,9 @@ Query::checkSelectable (PMSelectablePtr selectable, struct qnode *query)
     }
     else if (query->op == OP_FLAG)
     {
-	if (query->left.type != QTYPE_ATTR)
+	if (query->left.type != QTYPE_FLAG)
 	{
-	    ERR << "op flag but type " << query->left.type << " != attr" << endl;
+	    ERR << "op flag but type " << query->left.type << " != flag" << endl;
 	}
 	else
 	{
