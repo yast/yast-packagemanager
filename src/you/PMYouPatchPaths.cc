@@ -157,6 +157,16 @@ PMError PMYouPatchPaths::initProduct()
   return PMError();
 }
 
+void PMYouPatchPaths::setPathPrefix( const Pathname &prefix )
+{
+  _pathPrefix = prefix;
+}
+
+Pathname PMYouPatchPaths::pathPrefix()
+{
+  return _pathPrefix;
+}
+
 void PMYouPatchPaths::setPatchPath( const Pathname &path )
 {
   _patchPath = path;
@@ -164,7 +174,7 @@ void PMYouPatchPaths::setPatchPath( const Pathname &path )
 
 Pathname PMYouPatchPaths::patchPath()
 {
-  return _patchPath;
+  return _pathPrefix + _patchPath;
 }
 
 void PMYouPatchPaths::setPatchUrl( const Url &url )
@@ -175,6 +185,11 @@ void PMYouPatchPaths::setPatchUrl( const Url &url )
 Url PMYouPatchPaths::patchUrl()
 {
   return _patchUrl;
+}
+
+Pathname PMYouPatchPaths::mediaPatchesFile()
+{
+  return "media.1/patches";
 }
 
 Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg, bool patchRpm )
@@ -195,12 +210,12 @@ Pathname PMYouPatchPaths::rpmPath( const PMPackagePtr &pkg, const string &arch,
   rpmName += arch;
   if ( patchRpm ) rpmName += ".patch";
   rpmName += ".rpm";
-  return _rpmPath + rpmName;
+  return _pathPrefix + _rpmPath + rpmName;
 }
 
 Pathname PMYouPatchPaths::scriptPath( const string &scriptName )
 {
-  return _scriptPath + scriptName;
+  return _pathPrefix + _scriptPath + scriptName;
 }
 
 Pathname PMYouPatchPaths::localScriptPath( const std::string &scriptName )
