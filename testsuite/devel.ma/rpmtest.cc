@@ -224,11 +224,13 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 
 /******************************************************************
  ******************************************************************/
-int mmain( int argc, const char * argv[] );
+
 int main( int argc, const char * argv[] ) {
+  _rpmdb_debug = 0;
+  _hdr_debug = 0;
+  int ret = 0;
   set_log_filename("-");
   SEC << "START" << endl;
-  int ret = 0;
 
   if ( 0 ) {
     Y2PM::noAutoInstSrcManager();
@@ -245,58 +247,10 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  //Y2PM::noAutoInstSrcManager();
-  Y2PM::instSrcManager();
-
-  newSrc( "/schnell/CD-ARCHIVE/8.2/SuSE-8.2-DVD-i386-RC2/CD1" );
-  newSrc( "/schnell/CD-ARCHIVE/8.1/SuSE-8.1-DVD-i386-Int-RC5" );
-  newSrc( "/schnell/CD-ARCHIVE/8.0/suse80-dvd-de-i386-RC4" );
-
-  ISM.disableAllSources();
-  return 0;
-
-  MIL << "ISM.getSources " << ISM.getSources() << endl;
-  MIL << "ISM.instOrderSources " << ISM.instOrderSources() << endl;
-
-  InstSrcManager::InstOrder order;
-  {
-    InstSrcManager::ISrcIdList obj( ISM.getSources() );
-    order.reserve( obj.size() );
-    for ( InstSrcManager::ISrcIdList::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
-      DBG << (*it)->srcID() << endl;
-      order.insert( order.begin(), (*it)->srcID() );
-    }
-  }
-
-  ISM.setInstOrder( order );
-  MIL << "ISM.instOrderSources " << ISM.instOrderSources() << endl;
-
-  {
-    InstSrcManager::ISrcIdList obj( ISM.getSources() );
-    for ( InstSrcManager::ISrcIdList::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
-      DBG << (*it)->srcID() << " -> " << ISM.instOrderIndex( *it ) << endl;
-    }
-  }
-
+  //Y2PM::instTargetUpdate();
+  SEC << Y2PM::instTargetInit("/") << endl;
+  SEC << TMGR.bringIntoCleanState() << endl;
 
   SEC << "STOP -> " << ret << endl;
   return ret;
 }
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : mmain
-**	FUNCTION TYPE : int
-**
-**	DESCRIPTION :
-*/
-int mmain( int argc, const char * argv[] )
-{
-  _rpmdb_debug = 0;
-  _hdr_debug = 0;
-
-
-  return 0;
-}
-

@@ -89,13 +89,23 @@ ConvertDbReceive convertDbReceive;
 // Reporting progress of rpm database rebuild.
 ///////////////////////////////////////////////////////////////////
 struct RebuildDbCallback : public RpmDbCallbacks::RebuildDbCallback {
-  virtual void reportbegin() { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  ProgressCounter _pc;
+  virtual void reportbegin() {
+    _pc.reset();
+    SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl;
+  }
   virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
   virtual void start() {
     MIL << XXX << __PRETTY_FUNCTION__ << endl;
   }
   virtual void progress( const ProgressData & prg ) {
-    MIL << XXX << __PRETTY_FUNCTION__ << YYY << prg << YYY << endl;
+    _pc = prg;
+    if ( _pc.updateIfNewPercent() ) {
+      MIL << XXX << __PRETTY_FUNCTION__ << YYY << _pc << YYY << endl;
+    }
+  }
+  virtual void notify( const string & msg ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << msg << YYY << endl;
   }
   virtual void stop( PMError error ) {
     MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << endl;
