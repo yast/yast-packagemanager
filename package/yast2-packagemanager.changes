@@ -1,7 +1,25 @@
 -------------------------------------------------------------------
+Mon Dec  9 14:58:05 CET 2002
+
+- Don't preselect patch of kind "YaST2", if it only has new versions
+  for non-installed packages.
+
+-------------------------------------------------------------------
+Mon Dec  2 11:43:22 CET 2002 - cschum@suse.de
+
+- Pass versions of packages containing code of YOU to suseservers.cgi.
+
+-------------------------------------------------------------------
 Mon Dec 02 12:15:16 CET 2002 - arvin@suse.de
 
 - added openssl to neededforbuild (libcurl needs it)
+
+-------------------------------------------------------------------
+Mon Nov 25 18:06:11 CET 2002 - cschum@suse.de
+
+- Split long description of YOU patches in lines, so that it can
+  properly be formatted in the patch selector.
+- 2.6.46
 
 -------------------------------------------------------------------
 Thu Nov 14 10:13:41 CET 2002 - cschum@suse.de
