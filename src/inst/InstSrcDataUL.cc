@@ -645,15 +645,27 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 
     Pathname filename = descr_dir_r + "/selections";
 
-    err = media_r->provideFile ( filename );
-
-    Pathname fullpath = media_r->localPath (filename);
+    err = media_r->provideFile ( filename );			// try <descr>/selections first
     if ( err )
     {
-	WAR << "Media can't provide '" << fullpath << "' " << err.errstr() << endl;
+	WAR << "No selections cache found" << endl;		// failed, build own cache
+	std::list<std::string> all_names;
+	err = media_r->dirInfo (all_names, descr_dir_r, false);		// get all names not starting with '.'
+	if (err)
+	{
+	    ERR << "dirInfo failed for '" << descr_dir_r << "' " << err.errstr() << endl;
+	    return err;
+	}
+	for (std::list<std::string>::iterator fileIt = all_names.begin();
+	     fileIt != all_names.end(); ++fileIt)
+	{
+	    if (fileIt->find (".sel") != string::npos)		// filter "*.sel"
+		selection_names.push_back (*fileIt);
+	}
     }
     else
     {
+	Pathname fullpath = media_r->localPath (filename);
 	while ( true )
 	{
 	    std::ifstream selstream (fullpath.asString().c_str());
