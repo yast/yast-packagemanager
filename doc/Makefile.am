@@ -2,7 +2,7 @@
 # Makefile.am for liby2/doc
 #
 
-SUBDIRS = autodocs media
+SUBDIRS = autodocs media ui
 
 htmldir = $(docdir)
 
