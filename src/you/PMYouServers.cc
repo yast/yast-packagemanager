@@ -109,6 +109,13 @@ PMError PMYouServers::requestServers( bool check )
 
     DBG << "url: '" << url << "'" << endl;
 
+    Pathname writeDir = _patchPaths->localWriteDir();
+    int ret = PathInfo::assert_dir( writeDir );
+    if ( ret != 0 ) {
+      ERR << "Unable to create " << writeDir << ": errno " << ret
+          << endl;
+    }
+    
     PMError error = MediaAccess::getFile( Url( url ), cachedYouServers() );
     if ( error ) {
       if ( error == MediaError::E_write_error ) {
