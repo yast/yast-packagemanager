@@ -109,6 +109,11 @@ class PMYouPatchInfo : virtual public Rep {
                            const PMYouPatchPtr &patch );
 
     /**
+      Parse Files tag.
+    */
+    PMError parseFiles( const std::string &files, const PMYouPatchPtr &patch );
+
+    /**
       Return language code used for displaying messages to the user.
     */
     LangCode langCode() const { return _lang; }

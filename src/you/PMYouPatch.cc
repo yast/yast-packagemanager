@@ -163,3 +163,13 @@ list<string> PMYouPatch::insnotify() const
 
   return text;
 }
+
+void PMYouPatch::setFiles( const std::list<PMYouFile> &files )
+{
+  _files = files;
+}
+
+void PMYouPatch::addFile( const PMYouFile &file )
+{
+  _files.push_back( file );
+}

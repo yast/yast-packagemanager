@@ -271,6 +271,7 @@ class InstYou {
                              bool noExternal = false );
     PMError retrieveScript( const std::string &script, bool reload,
                             bool checkSig );
+    PMError InstYou::retrieveFile( const PMYouFile &file, bool reload );
 
     PMError executeScript( const std::string &, bool dryrun );
 

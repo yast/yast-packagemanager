@@ -197,6 +197,11 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname externalRpmDir();
 
     /**
+      Return path to directory where extra files are stored.
+    */
+    Pathname filesDir();
+
+    /**
       Return name of file holding the list of patches in the "patches"
       directory.
     */

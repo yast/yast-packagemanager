@@ -23,23 +23,24 @@
 
 YOUPatchTagSet::YOUPatchTagSet()
 {
-  addTag("Patchname",PATCHNAME, TaggedFile::SINGLE );
-  addTag("Patchversion",PATCHVERSION, TaggedFile::SINGLE );
-  addTag("Requires",REQUIRES, TaggedFile::SINGLE );
-  addTag("Provides",PROVIDES, TaggedFile::SINGLE );
-  addTag("Kind",KIND, TaggedFile::SINGLE );
-  addTag("Shortdescription",SHORTDESCRIPTION, TaggedFile::SINGLE, TaggedFile::ALLOWLOCALE );
-  addTag("Longdescription",LONGDESCRIPTION, TaggedFile::MULTIYOU, TaggedFile::ALLOWLOCALE );
-  addTag("Preinformation",PREINFORMATION, TaggedFile::MULTIYOU, TaggedFile::ALLOWLOCALE );
-  addTag("Postinformation",POSTINFORMATION, TaggedFile::MULTIYOU, TaggedFile::ALLOWLOCALE );
-  addTag("Size",SIZE, TaggedFile::SINGLE );
-  addTag("Buildtime",BUILDTIME, TaggedFile::SINGLE );
-  addTag("MinYaST1Version",MINYAST1VERSION, TaggedFile::SINGLE );
-  addTag("MinYaST2Version",MINYAST1VERSION, TaggedFile::SINGLE );
-  addTag("UpdateOnlyInstalled",UPDATEONLYINSTALLED, TaggedFile::SINGLE );
-  addTag("Packages",PACKAGES, TaggedFile::MULTIOLD );
-  addTag("Prescript",PRESCRIPT, TaggedFile::SINGLE );
-  addTag("Postscript",POSTSCRIPT, TaggedFile::SINGLE );
+  addTag( "Patchname", PATCHNAME, TaggedFile::SINGLE );
+  addTag( "Patchversion", PATCHVERSION, TaggedFile::SINGLE );
+  addTag( "Requires", REQUIRES, TaggedFile::SINGLE );
+  addTag( "Provides", PROVIDES, TaggedFile::SINGLE );
+  addTag( "Kind", KIND, TaggedFile::SINGLE );
+  addTag( "Shortdescription", SHORTDESCRIPTION, TaggedFile::SINGLE, TaggedFile::ALLOWLOCALE );
+  addTag( "Longdescription", LONGDESCRIPTION, TaggedFile::MULTIYOU, TaggedFile::ALLOWLOCALE );
+  addTag( "Preinformation", PREINFORMATION, TaggedFile::MULTIYOU, TaggedFile::ALLOWLOCALE );
+  addTag( "Postinformation", POSTINFORMATION, TaggedFile::MULTIYOU, TaggedFile::ALLOWLOCALE );
+  addTag( "Size", SIZE, TaggedFile::SINGLE );
+  addTag( "Buildtime", BUILDTIME, TaggedFile::SINGLE );
+  addTag( "MinYaST1Version", MINYAST1VERSION, TaggedFile::SINGLE );
+  addTag( "MinYaST2Version", MINYAST1VERSION, TaggedFile::SINGLE );
+  addTag( "UpdateOnlyInstalled", UPDATEONLYINSTALLED, TaggedFile::SINGLE );
+  addTag( "Packages", PACKAGES, TaggedFile::MULTIOLD );
+  addTag( "Prescript", PRESCRIPT, TaggedFile::SINGLE );
+  addTag( "Postscript", POSTSCRIPT, TaggedFile::SINGLE );
+  addTag( "Files", FILES, TaggedFile::MULTIOLD );
 }
 
 YOUPackageTagSet::YOUPackageTagSet() : TagSet()
