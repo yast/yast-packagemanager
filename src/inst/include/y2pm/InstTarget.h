@@ -278,10 +278,19 @@ class InstTarget: virtual public Rep, public InstData {
 	 * set callback function for reporting progress of package
 	 * installation
 	 *
-	 * @param func callback function, must accept int as argument
+	 * @param func callback function, must accept int as argument for percentage
 	 * @param data arbitrary data to pass when function is called
 	 * */
 	void setPackageInstallProgressCallback(void (*func)(int,void*), void* data);
+
+	/**
+	 * set callback function for reporting progress of rebuildding the
+	 * package database (rpm --rebuilddb)
+	 *
+	 * @param func callback function, must accept int as argument for percentage
+	 * @param data arbitrary data to pass when function is called
+	 * */
+	void setRebuildDBProgressCallback(void (*func)(int,void*), void* data);
 
 	/**
 	 * query system for provided tag (rpm -q --whatprovides)

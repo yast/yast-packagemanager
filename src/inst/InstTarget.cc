@@ -271,6 +271,11 @@ void InstTarget::setPackageInstallProgressCallback(void (*func)(int,void*), void
     _rpmdb->setProgressCallback(func,data);
 }
 
+void InstTarget::setRebuildDBProgressCallback(void (*func)(int,void*), void* data)
+{
+    _rpmdb->setRebuildDBProgressCallback(func,data);
+}
+
 bool InstTarget::setInstallationLogfile(const std::string& logfile)
 {
     return _rpmdb->setInstallationLogfile(logfile);
