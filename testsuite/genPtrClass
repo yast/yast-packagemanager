@@ -256,6 +256,21 @@ $(PTR_include)
 ///////////////////////////////////////////////////////////////////
 $(PTR_def)
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref ${CLASS} *></code>
+ *
+ * <b>See:</> @ref ${CLASS}
+ **/
+class ${CLASS}Ptr {};
+/**
+ * @short Refcounting <code>&lt;const @ref ${CLASS} *></code>
+ *
+ * <b>See:</> @ref ${CLASS}
+ **/
+class const${CLASS}Ptr {};
+#endif // just for kdoc
+
 #endif // ${CLASS}Ptr_h
 
 EOF
