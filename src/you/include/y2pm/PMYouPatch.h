@@ -65,6 +65,10 @@ class PMYouPatch : virtual public Rep, public PMObject {
     /**
      * Return translated kind label.
      */
+    std::string kindLabel() { return kindLabel( _kind ); }
+    /**
+     * Return translated kind label.
+     */
     static std::string kindLabel( Kind kind );
 
     /**
@@ -157,6 +161,12 @@ class PMYouPatch : virtual public Rep, public PMObject {
      * Return name of file where patch info is stored on local system.
      */
     Pathname localFile() const { return _localFile; }
+
+    /**
+     * Return full name in the format "name-version-release".
+     *
+     */
+    std::string fullName() const;
 
   public:
 
