@@ -17,6 +17,8 @@
 
   Purpose: YaST Online Update.
 
+  Textdomain "packagemanager"
+
 /-*/
 
 #include <iostream>
