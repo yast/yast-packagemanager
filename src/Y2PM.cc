@@ -44,41 +44,13 @@ using namespace Y2PMCallbacks;
 #define Y2LOG "Y2PM"
 ///////////////////////////////////////////////////////////////////
 
-/******************************************************************
-**
-**
-**	FUNCTION NAME : getLangEnvironment
-**	FUNCTION TYPE : static LangCode
-**
-** Get LangCode from LANG environment variable.
-*/
-static LangCode getLangEnvironment()
-{
-    char *lang = getenv ("LANG");
-    if (lang == 0)
-	return LangCode ("en");
-    string langstr (lang);
-    // segfaults -- ln
-    //    MIL << "LANG=" << langstr << endl;
-    string::size_type sizepos = langstr.find ("@");	// cut off "@"
-    if (sizepos != string::npos)
-	langstr = langstr.substr (0, sizepos);
-    sizepos = langstr.find (".");		// cut off "."
-    if (sizepos != string::npos)
-	return LangCode (langstr.substr (0, sizepos));
-    return LangCode (langstr);
-}
-
 ///////////////////////////////////////////////////////////////////
 // global settings
 ///////////////////////////////////////////////////////////////////
 #warning MUST INIT GLOBAL SETTINGS
-#warning Provide a serial number for localesttings. DP could cache localedependent data.
 
 Pathname Y2PM::_system_rootdir( "/" );
 bool Y2PM::_cache_to_ramdisk( true );
-LangCode Y2PM::_preferred_locale (getLangEnvironment());
-std::list<LangCode> Y2PM::_requested_locales;
 PkgArch Y2PM::_base_arch;
 std::list<PkgArch> Y2PM::_allowed_archs;
 

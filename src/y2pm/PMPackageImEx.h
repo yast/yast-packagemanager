@@ -73,7 +73,7 @@ class PMPackageImEx : public CountedRep {
 
   private:
 
-    std::list<LangCode> _requestedLocales;
+    std::set<LangCode> _requestedLocales;
 
     NameEdSet _onSystemSel;
     NameSet   _offSystemSel;

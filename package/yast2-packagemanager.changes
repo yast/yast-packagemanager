@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Feb 25 12:45:45 CET 2004 - ma@suse.de
+
+- Dropped man-made restrictions when creating new InstSrces.
+- Y2PM locale setting interface changed.
+- 2.9.16
+
+-------------------------------------------------------------------
 Tue Feb 24 14:23:52 CET 2004 - cschum@suse.de
 
 - Added function PMError::addDetails().

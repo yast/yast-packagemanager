@@ -125,25 +125,6 @@ bool InstSrcDescr::sameContentProduct( const constInstSrcDescrPtr & rhs,
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcDescr::sameInstSource
-//	METHOD TYPE : bool
-//
-//	DESCRIPTION :
-//
-bool InstSrcDescr::sameInstSource( const constInstSrcDescrPtr & rhs,
-				   const constInstSrcDescrPtr & lhs )
-{
-  if ( rhs == lhs )
-    return true;
-  if ( ! ( rhs && lhs ) )
-    return false;
-  return ( rhs->content_product() == lhs->content_product()
-	   && rhs->_url == lhs->_url );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : InstSrcDescr::dumpOn
 //	METHOD TYPE : ostream &
 //

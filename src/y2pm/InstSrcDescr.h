@@ -275,11 +275,6 @@ class InstSrcDescr : public CountedRep {
      **/
     static bool sameContentProduct( const constInstSrcDescrPtr & rhs, const constInstSrcDescrPtr & lhs );
 
-    /**
-     * Test for equal InstSource (sameContentProduct via equal Url)
-     **/
-    static bool sameInstSource( const constInstSrcDescrPtr & rhs, const constInstSrcDescrPtr & lhs );
-
   public:
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;

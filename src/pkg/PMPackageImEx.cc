@@ -735,11 +735,11 @@ const std::vector<TagDescr> Mtags::_tagvec( Mtags::init() );
 **
 **	DESCRIPTION :
 */
-void doSet( std::list<LangCode> & data, const std::list<std::string> & values )
+void doSet( std::set<LangCode> & data, const std::list<std::string> & values )
 {
   data.clear();
   for ( std::list<std::string>::const_iterator i = values.begin(); i != values.end(); ++i ) {
-    data.push_back( LangCode(*i) );
+    data.insert( LangCode(*i) );
   }
 }
 void doSet( NameEdSet & data, const std::list<std::string> & values )
@@ -813,10 +813,10 @@ std::istream & PMPackageImEx::doImport( std::istream & str )
 **
 **	DESCRIPTION :
 */
-void doWrite( std::ostream & str, const TagDescr & tag, const std::list<LangCode> & data )
+void doWrite( std::ostream & str, const TagDescr & tag, const std::set<LangCode> & data )
 {
   tag.writeStart( str );
-  for ( std::list<LangCode>::const_iterator i = data.begin(); i != data.end(); ++i ) {
+  for ( std::set<LangCode>::const_iterator i = data.begin(); i != data.end(); ++i ) {
     str << (*i) << endl;
   }
   tag.writeEnd( str );

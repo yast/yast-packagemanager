@@ -164,12 +164,6 @@ class InstSrcManager {
     InstSrcPtr lookupSourceByID( InstSrc::UniqueID srcID_r ) const;
 
     /**
-     * Find InstSrcPtr in _knownSources by comparing
-     * InstSrcDescr. Return NULL if not in _knownSources.
-     **/
-    InstSrcPtr lookupInstSrc( const InstSrcPtr & isrc_r ) const;
-
-    /**
      * Add nsrc_r to _knownSources if same product is not yet present.
      * Return ISrcId for the added nsrc_r, or NULL if duplicate.
      *

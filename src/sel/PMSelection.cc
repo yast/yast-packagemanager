@@ -120,12 +120,7 @@ set<PMSelectablePtr> PMSelection::inspacks_ptrs()
 {
   set<PMSelectablePtr> ret = inspacks_ptrs( LangCode( "" ) );
 
-  if ( ! Y2PM::getPreferredLocale()->empty() ) {
-    set<PMSelectablePtr> res = inspacks_ptrs( Y2PM::getPreferredLocale() );
-    ret.insert( res.begin(), res.end() );
-  }
-
-  for ( list<LangCode>::const_iterator it = Y2PM::getRequestedLocales().begin();
+  for ( Y2PM::LocaleSet::const_iterator it = Y2PM::getRequestedLocales().begin();
 	it != Y2PM::getRequestedLocales().end(); ++it ) {
     set<PMSelectablePtr> res = inspacks_ptrs( *it );
     ret.insert( res.begin(), res.end() );
@@ -146,12 +141,7 @@ set<PMSelectablePtr> PMSelection::delpacks_ptrs()
 {
   set<PMSelectablePtr> ret = delpacks_ptrs( LangCode( "" ) );
 
-  if ( ! Y2PM::getPreferredLocale()->empty() ) {
-    set<PMSelectablePtr> res = delpacks_ptrs( Y2PM::getPreferredLocale() );
-    ret.insert( res.begin(), res.end() );
-  }
-
-  for ( list<LangCode>::const_iterator it = Y2PM::getRequestedLocales().begin();
+  for ( Y2PM::LocaleSet::const_iterator it = Y2PM::getRequestedLocales().begin();
 	it != Y2PM::getRequestedLocales().end(); ++it ) {
     set<PMSelectablePtr> res = delpacks_ptrs( *it );
     ret.insert( res.begin(), res.end() );
