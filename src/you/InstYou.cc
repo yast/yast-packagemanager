@@ -49,10 +49,32 @@
 #include <y2pm/PMLocale.h>
 #include <y2pm/PMYouMedia.h>
 #include <y2pm/InstSrcManagerCallbacks.h>
+#include <y2pm/RpmDbCallbacks.h>
+#include <y2pm/MediaCallbacks.h>
 
 #include <y2pm/InstYou.h>
 
 using namespace std;
+
+template <class CB, class H>
+class CallbackSaver
+{
+  public:
+    CallbackSaver( H &hook, CB *callback )
+      : mHook( hook )
+    {
+      mCallback = hook.redirectTo( callback );
+    }
+
+    ~CallbackSaver()
+    {
+      mHook.redirectTo( mCallback );
+    }
+    
+  private:
+    H &mHook;
+    CB *mCallback;
+};
 
 InstYou::Callbacks *InstYou::_callbacks = 0;
 
@@ -373,6 +395,13 @@ PMError InstYou::attachSource()
 PMError InstYou::processPatches()
 {
   MIL << "Process patches." << endl;
+
+  CallbackSaver<RpmDbCallbacks::InstallPkgCallback,
+                RpmDbCallbacks::InstallPkgReport>
+      saver1( RpmDbCallbacks::installPkgReport, 0 );
+  CallbackSaver<MediaCallbacks::DownloadProgressCallback,
+                MediaCallbacks::DownloadProgressReport>
+      saver2( MediaCallbacks::downloadProgressReport, 0 );
 
   resetProgress();
   _installedPatches = 0;
