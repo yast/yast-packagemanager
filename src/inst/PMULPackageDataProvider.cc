@@ -63,6 +63,7 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
 const std::string
 PMULPackageDataProvider::summary() const
 {
+MIL << "PMULPackageDataProvider::summary(" << _attr_SUMMARY.begin << ", " << _attr_SUMMARY.end << ")" << endl;
     std::string value;
     _language_retrieval->retrieveData (_attr_SUMMARY, value);
     return value;
