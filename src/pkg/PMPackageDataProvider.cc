@@ -58,171 +58,171 @@ PMPackageDataProvider::~PMPackageDataProvider()
 }
 
 const std::string
-PMPackageDataProvider::summary() const
+PMPackageDataProvider::summary () const
 {
     return "";
 }
 
 const std::list<std::string>
-PMPackageDataProvider::description() const
+PMPackageDataProvider::description () const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMPackageDataProvider::insnotify() const
+PMPackageDataProvider::insnotify () const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMPackageDataProvider::delnotify() const
+PMPackageDataProvider::delnotify () const
 {
     return std::list<std::string>();
 }
 
 const FSize
-PMPackageDataProvider::size() const
+PMPackageDataProvider::size () const
 {
     return FSize(0);
 }
 
 
 const Date
-PMPackageDataProvider::buildtime() const
+PMPackageDataProvider::buildtime () const
 {
     return 0;
 }
 
 const std::string
-PMPackageDataProvider::buildhost() const
+PMPackageDataProvider::buildhost () const
 {
     return "";
 }
 
 const Date
-PMPackageDataProvider::installtime() const
+PMPackageDataProvider::installtime () const
 {
     return 0;
 }
 
 const std::string
-PMPackageDataProvider::distribution() const
+PMPackageDataProvider::distribution () const
 {
     return "";
 }
 
 const std::string
-PMPackageDataProvider::vendor() const
+PMPackageDataProvider::vendor () const
 {
     return "";
 }
 
 const std::string
-PMPackageDataProvider::license() const
+PMPackageDataProvider::license () const
 {
     return "";
 }
 
 const std::string
-PMPackageDataProvider::packager() const
+PMPackageDataProvider::packager () const
 {
     return "";
 }
 
 const std::string
-PMPackageDataProvider::group() const
-{
-    return "";
-}
-
-const std::list<std::string>
-PMPackageDataProvider::changelog() const
-{
-    return std::list<std::string>();
-}
-
-const std::string
-PMPackageDataProvider::url() const
-{
-    return "";
-}
-
-const std::string
-PMPackageDataProvider::os() const
+PMPackageDataProvider::group () const
 {
     return "";
 }
 
 const std::list<std::string>
-PMPackageDataProvider::prein() const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMPackageDataProvider::postin() const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMPackageDataProvider::preun() const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMPackageDataProvider::postun() const
+PMPackageDataProvider::changelog () const
 {
     return std::list<std::string>();
 }
 
 const std::string
-PMPackageDataProvider::sourcerpm() const
+PMPackageDataProvider::url () const
+{
+    return "";
+}
+
+const std::string
+PMPackageDataProvider::os () const
+{
+    return "";
+}
+
+const std::list<std::string>
+PMPackageDataProvider::prein () const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMPackageDataProvider::postin () const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMPackageDataProvider::preun () const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMPackageDataProvider::postun () const
+{
+    return std::list<std::string>();
+}
+
+const std::string
+PMPackageDataProvider::sourcerpm () const
 {
     return "";
 }
 
 const FSize
-PMPackageDataProvider::archivesize() const
+PMPackageDataProvider::archivesize () const
 {
   return 0;
 }
 
 const std::list<std::string>
-PMPackageDataProvider::authors() const
+PMPackageDataProvider::authors () const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMPackageDataProvider::filenames() const
+PMPackageDataProvider::filenames () const
 {
     return std::list<std::string>();
 }
 
 // suse packages values
 const std::list<std::string>
-PMPackageDataProvider::recommends() const
+PMPackageDataProvider::recommends () const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMPackageDataProvider::suggests() const
+PMPackageDataProvider::suggests () const
 {
     return std::list<std::string>();
 }
 
 const std::string
-PMPackageDataProvider::location() const
+PMPackageDataProvider::location () const
 {
     return "";
 }
 
 const std::list<std::string>
-PMPackageDataProvider::keywords() const
+PMPackageDataProvider::keywords () const
 {
     return std::list<std::string>();
 }

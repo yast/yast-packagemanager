@@ -64,7 +64,7 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
   do { if (attr.empty() && (_fallback_provider != 0)) return _fallback_provider->func(); } while (0);
 
 const std::string
-PMULPackageDataProvider::summary() const
+PMULPackageDataProvider::summary () const
 {
     FALLBACK(_attr_SUMMARY,summary);
     std::string value;
@@ -73,7 +73,7 @@ PMULPackageDataProvider::summary() const
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::description() const
+PMULPackageDataProvider::description () const
 {
     FALLBACK(_attr_DESCRIPTION,description);
     std::list<std::string> value;
@@ -82,7 +82,7 @@ PMULPackageDataProvider::description() const
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::insnotify() const
+PMULPackageDataProvider::insnotify () const
 {
     FALLBACK(_attr_INSNOTIFY,insnotify);
     std::list<std::string> value;
@@ -91,7 +91,7 @@ PMULPackageDataProvider::insnotify() const
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::delnotify() const
+PMULPackageDataProvider::delnotify () const
 {
     FALLBACK(_attr_DELNOTIFY,delnotify);
     std::list<std::string> value;
@@ -100,44 +100,44 @@ PMULPackageDataProvider::delnotify() const
 }
 
 const FSize
-PMULPackageDataProvider::size() const
+PMULPackageDataProvider::size () const
 {
     return _attr_SIZE;
 }
 
 
 const Date
-PMULPackageDataProvider::buildtime() const
+PMULPackageDataProvider::buildtime () const
 {
     return _attr_BUILDTIME;
 }
 
 const std::string
-PMULPackageDataProvider::buildhost() const
+PMULPackageDataProvider::buildhost () const
 {
     return "";
 }
 
 const Date
-PMULPackageDataProvider::installtime() const
+PMULPackageDataProvider::installtime () const
 {
     return Date();
 }
 
 const std::string
-PMULPackageDataProvider::distribution() const
+PMULPackageDataProvider::distribution () const
 {
     return "";
 }
 
 const std::string
-PMULPackageDataProvider::vendor() const
+PMULPackageDataProvider::vendor () const
 {
     return "";
 }
 
 const std::string
-PMULPackageDataProvider::license() const
+PMULPackageDataProvider::license () const
 {
     FALLBACK(_attr_LICENSE,license);
     std::string value;
@@ -146,13 +146,13 @@ PMULPackageDataProvider::license() const
 }
 
 const std::string
-PMULPackageDataProvider::packager() const
+PMULPackageDataProvider::packager () const
 {
     return "";
 }
 
 const std::string
-PMULPackageDataProvider::group() const
+PMULPackageDataProvider::group () const
 {
     FALLBACK(_attr_GROUP,group);
     std::string value;
@@ -161,49 +161,49 @@ PMULPackageDataProvider::group() const
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::changelog() const
+PMULPackageDataProvider::changelog () const
 {
     return std::list<std::string>();
 }
 
 const std::string
-PMULPackageDataProvider::url() const
+PMULPackageDataProvider::url () const
 {
     return "";
 }
 
 const std::string
-PMULPackageDataProvider::os() const
+PMULPackageDataProvider::os () const
 {
     return "";
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::prein() const
+PMULPackageDataProvider::prein () const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::postin() const
+PMULPackageDataProvider::postin () const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::preun() const
+PMULPackageDataProvider::preun () const
 {
     return std::list<std::string>();
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::postun() const
+PMULPackageDataProvider::postun () const
 {
     return std::list<std::string>();
 }
 
 const std::string
-PMULPackageDataProvider::sourcerpm() const
+PMULPackageDataProvider::sourcerpm () const
 {
     FALLBACK(_attr_SOURCERPM,sourcerpm);
     std::string value;
@@ -212,13 +212,13 @@ PMULPackageDataProvider::sourcerpm() const
 }
 
 const FSize
-PMULPackageDataProvider::archivesize() const
+PMULPackageDataProvider::archivesize () const
 {
   return _attr_ARCHIVESIZE;
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::authors() const
+PMULPackageDataProvider::authors () const
 {
     FALLBACK(_attr_AUTHORS,authors);
     std::list<std::string> value;
@@ -227,14 +227,14 @@ PMULPackageDataProvider::authors() const
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::filenames() const
+PMULPackageDataProvider::filenames () const
 {
     return std::list<std::string>();
 }
 
 // suse packages values
 const std::list<std::string>
-PMULPackageDataProvider::recommends() const
+PMULPackageDataProvider::recommends () const
 {
     FALLBACK(_attr_RECOMMENDS,recommends);
     std::list<std::string> value;
@@ -243,7 +243,7 @@ PMULPackageDataProvider::recommends() const
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::suggests() const
+PMULPackageDataProvider::suggests () const
 {
     FALLBACK(_attr_SUGGESTS,suggests);
     std::list<std::string> value;
@@ -252,7 +252,7 @@ PMULPackageDataProvider::suggests() const
 }
 
 const std::string
-PMULPackageDataProvider::location() const
+PMULPackageDataProvider::location () const
 {
     FALLBACK(_attr_LOCATION,location);
     std::string value;
@@ -261,7 +261,7 @@ PMULPackageDataProvider::location() const
 }
 
 const std::list<std::string>
-PMULPackageDataProvider::keywords() const
+PMULPackageDataProvider::keywords () const
 {
     FALLBACK(_attr_KEYWORDS,keywords);
     std::list<std::string> value;
