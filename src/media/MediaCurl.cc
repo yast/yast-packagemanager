@@ -112,37 +112,77 @@ PMError MediaCurl::attachTo (bool next)
     }
   }
 
-  SysConfig cfg( "proxy" );
-#warning must evaluate proxy via url options
+  /*---------------------------------------------------------------*
+   CURLOPT_PROXY: host[:port]
 
-  if ( cfg.readBoolEntry( "PROXY_ENABLED", false ) ) {
-    if ( _url.protocol() == Url::ftp ) {
-      _proxy = cfg.readEntry( "FTP_PROXY" );
-    } else if ( _url.protocol() == Url::http ) {
-       _proxy = cfg.readEntry( "HTTP_PROXY" );
-    } else {
-      _proxy = "";
+   Url::option(proxy and proxyport) -> CURLOPT_PROXY
+   If not provided, /etc/sysconfig/proxy is evaluated
+   *---------------------------------------------------------------*/
+
+  _proxy = _url.option( "proxy" );
+
+  if ( ! _proxy.empty() ) {
+
+    string proxyport( _url.option( "proxyport" ) );
+    if ( ! proxyport.empty() ) {
+      _proxy += ":" + proxyport;
     }
 
-    D__ << "Proxy: " << _proxy << endl;
+  } else {
 
-    if ( !_proxy.empty() ) {
-      ret = curl_easy_setopt( _curl, CURLOPT_PROXY, _proxy.c_str() );
-      if ( ret != 0 ) {
-        return PMError( Error::E_curl_setopt_failed, _curlError );
+    SysConfig cfg( "proxy" );
+
+    if ( cfg.readBoolEntry( "PROXY_ENABLED", false ) ) {
+      if ( _url.protocol() == Url::ftp ) {
+	_proxy = cfg.readEntry( "FTP_PROXY" );
+      } else if ( _url.protocol() == Url::http ) {
+	_proxy = cfg.readEntry( "HTTP_PROXY" );
       }
+    }
+
+  }
+  D__ << "Proxy: " << _proxy << endl;
+
+  if ( ! _proxy.empty() ) {
+
+    ret = curl_easy_setopt( _curl, CURLOPT_PROXY, _proxy.c_str() );
+    if ( ret != 0 ) {
+      return PMError( Error::E_curl_setopt_failed, _curlError );
+    }
+
+    /*---------------------------------------------------------------*
+     CURLOPT_PROXYUSERPWD: [user name]:[password]
+
+     Url::option(proxyuser and proxypassword) -> CURLOPT_PROXYUSERPWD
+     If not provided, $HOME/.curlrc is evaluated
+     *---------------------------------------------------------------*/
+
+    _proxyuserpwd = _url.option( "proxyuser" );
+
+    if ( ! _proxyuserpwd.empty() ) {
+
+      string proxypassword( _url.option( "proxypassword" ) );
+      if ( ! proxypassword.empty() ) {
+	_proxyuserpwd += ":" + proxypassword;
+      }
+
+    } else {
 
       string curlrcFile = string( getenv("HOME") ) + string( "/.curlrc" );
       SysConfig curlrc( curlrcFile );
       _proxyuserpwd = curlrc.readEntry( "proxy-user" );
 
-      ret = curl_easy_setopt( _curl, CURLOPT_PROXYUSERPWD,
-                              _proxyuserpwd.c_str() );
-      if ( ret != 0 ) {
-          return PMError( Error::E_curl_setopt_failed, _curlError );
-      }
     }
+
+    ret = curl_easy_setopt( _curl, CURLOPT_PROXYUSERPWD, _proxyuserpwd.c_str() );
+    if ( ret != 0 ) {
+      return PMError( Error::E_curl_setopt_failed, _curlError );
+    }
+
   }
+
+  /*---------------------------------------------------------------*
+   *---------------------------------------------------------------*/
 
   _currentCookieFile = _cookieFile.asString();
 
