@@ -3,9 +3,7 @@
 #
 
 #SUBDIRS = include inst pkg sel you media libPkgDep query
-SUBDIRS = include inst pkg sel you media libPkgDep 
-
-AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
+SUBDIRS = include media inst pkg sel you  libPkgDep
 
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\

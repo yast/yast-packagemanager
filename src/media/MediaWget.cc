@@ -39,66 +39,56 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-MediaWget::MediaWget (const Url& url)
-    : MediaHandler (url)
+MediaWget::MediaWget( const Url &      url_r,
+		      const Pathname & attach_point_hint_r,
+		      MediaAccess::MediaType type_r )
+    : MediaHandler( url_r, attach_point_hint_r,
+		    false, // attachPoint_is_mediaroot
+		    true,  // does_download
+		    type_r )
 {
 }
 
-
-MediaWget::~MediaWget()
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaWget::attachTo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
+//
+PMError MediaWget::attachTo ()
 {
-    if (!_attachPoint.empty()) {
-	release ();
-    }
+  // FIXME
+  // connect to FTP server, cd to path
+  //
+  // copy files to '_attachPoint' later
+
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaWget::releaseFrom
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaWget::releaseFrom( bool eject )
+{
+  return Error::E_ok;
 }
 
 
-ostream &
-MediaWget::dumpOn( ostream & str ) const
-{
-    return MediaHandler::dumpOn(str);
-}
-
-
-/** attach media to path
- * */
-
-PMError
-MediaWget::attachTo (const Pathname & to)
-{
-
-    // FIXME
-    // connect to FTP server, cd to path
-    //
-    // copy files to '_attachPoint' later
-
-    if(!_url.isValid())
-	return Error::E_bad_url;
-
-    _attachPoint = to;
-
-    D__ << _attachPoint.asString() << endl;
-
-    return Error::E_ok;
-}
-
-
-/** release attached media
- * */
-
-PMError
-MediaWget::release (bool eject)
-{
-    _attachPoint = string();
-    return Error::E_ok;
-}
-
-
-/** get file denoted by path to 'attached path' filename is interpreted
- * relative to the attached url and a path prefix is preserved to destination
- * */
-
-PMError MediaWget::provideFile (const Pathname & filename) const {
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : MediaCD::getFile
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaWget::getFile( const Pathname & filename ) const {
 
     D__ << filename.asString() << endl;
 
@@ -125,7 +115,7 @@ PMError MediaWget::provideFile (const Pathname & filename) const {
     D__ << url << endl;
 
     // TODO: recreate fs structure
-    Pathname dest = _attachPoint+filename;
+    Pathname dest = attachPoint()+filename;
     if(PathInfo::assert_dir(dest.dirname()))
     {
 	DBG << "assert_dir " << dest.asString() << " failed" << endl;
@@ -143,6 +133,22 @@ PMError MediaWget::provideFile (const Pathname & filename) const {
     }
 }
 
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaWget::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaWget::getDirInfo( std::list<std::string> & retlist,
+			       const Pathname & dirname, bool dots ) const
+{
+  return Error::E_not_supported_by_media;
+}
+
+#if 0
 /** find file denoted by pattern
  *
  * @param	filename is interpreted relative to the attached url
@@ -157,17 +163,6 @@ MediaWget::findFile (const Pathname & dirname, const string & pattern) const
 }
 
 
-/** get directory denoted by path to a string list
- * */
-
-const std::list<std::string> *
-MediaWget::dirInfo (const Pathname & dirname) const
-{
-    // FIXME: pull directory from server
-    return 0;
-}
-
-
 /** get file information
  * */
 
@@ -177,3 +172,4 @@ MediaWget::fileInfo (const Pathname & filename) const
     // FIXME retrieve file from server
     return 0;
 }
+#endif

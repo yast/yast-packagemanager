@@ -15,7 +15,7 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Abstract base class for 'physical' media classes
+   Purpose:	Abstract base class for 'physical' MediaHandler
 		like MediaCD, MediaDIR, ...
 
 /-*/
@@ -30,13 +30,15 @@
 #include <y2util/PathInfo.h>
 #include <y2util/Url.h>
 
-#include <y2pm/MediaError.h>
+#include <y2pm/MediaAccess.h>
 
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaHandler
 /**
- *
+ * Abstract base class for 'physical' MediaHandler like MediaCD, MediaDIR, etc.
+ * Under controll of MediaAccess.
+ * @see MediaAccess
  **/
 class MediaHandler {
 
@@ -47,16 +49,65 @@ class MediaHandler {
 	 **/
         typedef MediaError Error;
 
-    protected:
-
-	const Url _url;	// which device
+    private:
 
 	/**
-	 * this is where the media is actually "mounted"
-	 * all files are provided 'below' this directory
-	 */
+	 * this is where the media will be actually "mounted"
+	 * all files are provided 'below' this directory.
+	 **/
 	Pathname _attachPoint;
 
+	/**
+	 * If a default attach point was created, it has to be
+	 * removed on destuction.
+	 **/
+	bool _tmp_attachPoint;
+
+	/**
+	 * True if the medias root dir will be attached to _attachPoint (e.g. CD).
+	 * If so, filenames are relative to '_attachPoint + _url.getPath()'.
+	 *
+	 * If not (e.g. DIR, NFS) filenames are relative to '_attachPoint'.
+	 **/
+	bool _attachPoint_is_mediaroot;
+
+	/**
+	 * Dependent on _attachPoint_is_mediaroot either _attachPoint or
+	 * '_attachPoint + _url.getPath()'.
+	 **/
+	Pathname _localRoot;
+
+	/**
+	 * True if concrete handler downloads files to the local
+	 * filesystem. If true releaseFile/Dir will delete them.
+	 **/
+	bool _does_download;
+
+        /**
+	 * Type hint for MediaAccess. Just stored, but not evaluated by
+	 * MeadiaHandler.
+	 **/
+	const MediaAccess::MediaType _type;
+
+        /**
+	 * True, if media is attached.
+	 **/
+	bool _isAttached;
+
+    protected:
+
+        /**
+	 * Url to handle
+	 **/
+	const Url _url;
+
+        /**
+	 * Attachpoint to use
+	 **/
+	const Pathname & attachPoint() const { return _attachPoint; }
+
+    protected:
+#if 0
 	/** scan directory 'dirname' for first file matching pattern
 	 * */
 	const Pathname *scanDirectory (const Pathname & dirname, const std::string & pattern) const;
@@ -64,50 +115,163 @@ class MediaHandler {
 	/** read directory 'dirname' completely to string list
 	 * */
 	const std::list<std::string> * readDirectory (const Pathname & dirname) const;
+#endif
+    protected:
+
+	/**
+	 * Call concrete handler to attach the media.
+	 *
+	 * Asserted that not already attached, and attachPoint is a directory.
+	 **/
+	virtual PMError attachTo() = 0;
+
+	/**
+	 * Call concrete handler to release the media.
+	 * If eject is true, physically eject the media * (i.e. CD-ROM).
+	 *
+	 * Asserted that media is attached.
+	 **/
+	virtual PMError releaseFrom( bool eject ) = 0;
+
+	/**
+	 * Call concrete handler to provide file below attach point.
+	 *
+	 * Default implementation provided, that returns whether a file
+	 * is located at '_localRoot + filename'.
+	 *
+	 * Asserted that media is attached.
+	 **/
+	virtual PMError getFile( const Pathname & filename ) const = 0;
+
+	/**
+	 * Call concrete handler to provide content of directory on media via
+	 * retlist. If dots is false entries starting with '.' are not reported.
+	 *
+	 * Return E_not_supported_by_media if media does not support retrieval of
+	 * directory content.
+	 *
+	 * Default implementation provided, that returns the content of a
+	 * directory at '_localRoot + dirnname'.
+	 *
+	 * Asserted that media is attached and retlist is empty.
+	 **/
+        virtual PMError getDirInfo( std::list<std::string> & retlist,
+			            const Pathname & dirname, bool dots = true ) const = 0;
+    public:
+
+	/**
+	 * If the concrete media handler provides a nonempty
+	 * attach_point, it must be an existing directory.
+	 *
+	 * On an empty attach_point, MediaHandler will create
+	 * a temporay directory, which will be erased from
+	 * destructor.
+	 *
+	 * On any error, the attach_point is set to an empty Pathname,
+	 * which should lead to E_bad_attachpoint.
+	 **/
+	MediaHandler ( const Url&       url_r,
+		       const Pathname & attach_point_r,
+		       const bool       attachPoint_is_mediaroot_r,
+		       const bool       does_download_r,
+		       MediaAccess::MediaType type_r );
+
+	/**
+	 * Contolling MediaAccess takes care, that attached media is released
+	 * prior to deleting this.
+	 **/
+	virtual ~MediaHandler();
 
     public:
-	// constructor
-	MediaHandler (const Url& url);
 
-	/** attach media
-	    the 'hint' is a directory for attaching the media
-	    the concrete media handler is free to choose another
-	    directory and report this via Error::E_attachpoint_fixed
+        /**
+	 * Type hint for MediaAccess.
+	 **/
+        MediaAccess::MediaType type() const { return _type; }
 
-	    For example, a local directory can't be attached to
-	    somewhere else.
-	 */
-	virtual PMError attachTo (const Pathname & hint) = 0;
+	/**
+	 * Use concrete handler to attach the media.
+	 **/
+	PMError attach();
 
-	/** return current attach directory */
-	virtual const Pathname & getAttachPoint (void) const;
+	/**
+	 * True if media is attached.
+	 **/
+	bool isAttached() const { return _isAttached; }
 
-	/** release attached media
+	/**
+	 * Return the local directory that corresponds to medias url,
+	 * no matter if media isAttached or not. Files requested will
+	 * be available at 'localRoot() + filename' or better
+	 * 'localPath( filename )'.
 	 *
+	 * Returns empty pathname if E_bad_attachpoint
+	 **/
+	const Pathname & localRoot() const { return _localRoot; }
+
+	/**
+	 * Files provided will be available at 'localPath(filename)'.
+	 *
+	 * Returns empty pathname if E_bad_attachpoint
+	 **/
+	Pathname localPath( const Pathname & pathname ) const {
+	  if ( _localRoot.empty() )
+	    return _localRoot;
+	  return _localRoot + pathname.absolutename();
+	}
+
+	/**
+	 * Use concrete handler to release the media.
 	 * @param eject if true, physically eject the media * (i.e. CD-ROM)
-	 * */
-	virtual PMError release (bool eject = false) = 0;
+	 **/
+	PMError release( bool eject = false );
 
-	/** provide file denoted by path at 'attached path' filename is
-	 * interpreted relative to the attached url and a path prefix is
-	 * preserved to destination
-	 * */
-	virtual PMError provideFile (const Pathname & filename) const = 0;
+	/**
+	 * Use concrete handler to provide file denoted by path below
+	 * 'localRoot'. Filename is interpreted relative to the
+	 * attached url and a path prefix is preserved.
+	 **/
+	PMError provideFile( const Pathname & filename ) const;
 
+	/**
+	 * Remove filename below localRoot IFF handler downloads files
+	 * to the local filesystem. Never remove anything from media.
+	 **/
+	PMError releaseFile( const Pathname & filename ) const;
+
+	/**
+	 * Remove pathname below localRoot IFF handler downloads files
+	 * to the local filesystem. Never remove anything from media.
+	 *
+	 * If pathname denotes a directory it is recursively removed.
+	 * If pathname is empty or '/' everything below the localRoot
+	 * is recursively removed.
+	 **/
+	PMError releasePath( const Pathname & pathname ) const;
+
+    public:
+
+	/**
+	 * Return content of directory on media via retlist. If dots is false
+	 * entries starting with '.' are not reported.
+	 *
+	 * <B>Caution:</B> This is not supported by all media types. Be
+	 * prepared to handle E_not_supported_by_media.
+	 **/
+        PMError dirInfo( std::list<std::string> & retlist,
+			 const Pathname & dirname, bool dots = true ) const;
+
+
+#if 0
 	/** find file denoted by pattern
 	 * filename is interpreted relative to the attached url
 	 * */
-	virtual const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const = 0;
-
-	/** get directory denoted by path to a string list
-	 * */
-	virtual const std::list<std::string> * dirInfo (const Pathname & dirname) const = 0;
+	const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const = 0;
 
 	/** get file information
 	 * */
-	virtual const PathInfo * fileInfo (const Pathname & filename) const = 0;
-
-	virtual ~MediaHandler();
+	const PathInfo * fileInfo (const Pathname & filename) const = 0;
+#endif
 
     public:
 
@@ -116,14 +280,13 @@ class MediaHandler {
 
 ///////////////////////////////////////////////////////////////////
 
-#define	MEDIA_HANDLER_API					\
-	PMError attachTo (const Pathname & hint);		\
-	PMError release (bool eject = false);			\
-	PMError provideFile (const Pathname & filename) const;	\
-	const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const;	\
-	const std::list<std::string> * dirInfo (const Pathname & dirname) const;\
-	const PathInfo * fileInfo (const Pathname & filename) const;
-
+#define	MEDIA_HANDLER_API						\
+    protected:								\
+	virtual PMError attachTo ();					\
+	virtual PMError releaseFrom( bool eject );			\
+	virtual PMError getFile( const Pathname & filename ) const;	\
+        virtual PMError getDirInfo( std::list<std::string> & retlist,	\
+			            const Pathname & dirname, bool dots = true ) const;
 
 #endif // MediaHandler_h
 

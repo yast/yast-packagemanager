@@ -82,6 +82,8 @@ std::string MediaError::errtext( const unsigned e )
   case E_busy:			return N_("ressource busy");
 
   case E_attachpoint_fixed:	return N_("attach point can not be changed");
+  case E_not_supported_by_media:return N_("operation is not supported by media");
+
   ///////////////////////////////////////////////////////////////////
   // In a hurry? Write:
   // ENUM_OUT( E_some_err );

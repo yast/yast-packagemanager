@@ -24,7 +24,10 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/stringutil.h>
+
 #include <y2pm/MediaAccess.h>
+#include <y2pm/MediaHandler.h>
 
 #include <y2pm/MediaCD.h>
 #include <y2pm/MediaDIR.h>
@@ -40,30 +43,50 @@ IMPL_BASE_POINTER(MediaAccess);
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaAccess
+//
+///////////////////////////////////////////////////////////////////
 
-// constructor
-
-int MediaAccess::_media_count = 0;
-
-MediaAccess::MediaAccess ()
-    : _type (Unknown)
-    , _handler (0)
-    , _preferred_attach_point (Pathname (""))
+inline MediaAccess::ProtocolTypes MediaAccess::_init_protocolTypes()
 {
-    _media_count++;
-    DBG << endl;
+  ProtocolTypes ret;
+
+  ret.insert( ProtocolTypes::value_type( "cd",    CD ) );
+  ret.insert( ProtocolTypes::value_type( "dvd",   DVD ) );
+  ret.insert( ProtocolTypes::value_type( "nfs",   NFS ) );
+  ret.insert( ProtocolTypes::value_type( "dir",   DIR ) );
+  ret.insert( ProtocolTypes::value_type( "disk",  DISK ) );
+  ret.insert( ProtocolTypes::value_type( "ftp",   FTP ) );
+  ret.insert( ProtocolTypes::value_type( "smb",   SMB ) );
+  ret.insert( ProtocolTypes::value_type( "http",  HTTP ) );
+  ret.insert( ProtocolTypes::value_type( "https", HTTPS ) );
+
+  return ret;
+}
+
+const MediaAccess::ProtocolTypes MediaAccess::protocolTypes( _init_protocolTypes() );
+
+const Pathname MediaAccess::_noPath; // empty path
+
+inline MediaAccess::MediaType MediaAccess::typeOf( const Url & url_r )
+{
+  ProtocolTypes::const_iterator t = protocolTypes.find( stringutil::toLower( url_r.getProtocol() ) );
+  if ( t == protocolTypes.end() )
+    return NONE;
+  return t->second;
+}
+
+///////////////////////////////////////////////////////////////////
+// constructor
+MediaAccess::MediaAccess ()
+    : _handler (0)
+{
 }
 
 // destructor
 MediaAccess::~MediaAccess()
 {
-    if (_handler)
-    {
-	this->close ();
-    }
-    _media_count--;
+  close(); // !!! make shure handler gets properly deleted.
 }
-
 
 // open URL
 PMError
@@ -72,131 +95,76 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
     if(!url.isValid())
 	return Error::E_bad_url;
 
-    this->close();
+    close();
 
-    if (preferred_attach_point.empty())
-    {
-#warning CHECK if fixed "/var/adm/mount" is appropriate
-        Pathname apoint( "/var/adm/mount" );
-        PathInfo adir( apoint );
-	if ( !adir.isDir() ) {
-	  E__ << "directory does not exist: " << adir << endl;
-	  return Error::E_bad_attachpoint;
-	}
+    MediaType utype = typeOf( url );
 
-	apoint += stringutil::form( "media%d", _media_count );
-	adir.stat( apoint );
-	if ( !adir.isExist() ) {
-	  int err = PathInfo::mkdir( adir.path(), 0755 );
-	  if ( err ) {
-	    E__ << "can't mkdir: " << adir << " (errno " << err << ")" << endl;
-	    return Error::E_bad_attachpoint;
-	  }
-	} else if ( !adir.isDir() ) {
-	  E__ << "attachpoint is not a directory: " << adir << endl;
-	  return Error::E_bad_attachpoint;
-	}
-        _preferred_attach_point = apoint;
-    }
-    else
-    {
-	_preferred_attach_point = preferred_attach_point;
-	if (!PathInfo(_preferred_attach_point).isDir())
-	{
-	    return Error::E_bad_attachpoint;
-	}
-    }
+    switch ( utype ) {
+    case CD:
+      _handler = new MediaCD (url,preferred_attach_point,utype);
+      break;
+    case DVD:
+      _handler = new MediaCD (url,preferred_attach_point,utype);
+      break;
+    case NFS:
+      _handler = new MediaNFS (url,preferred_attach_point,utype);
+      break;
+    case DIR:
+      _handler = new MediaDIR (url,preferred_attach_point,utype);
+      break;
+    case DISK:
+       _handler = new MediaDISK (url,preferred_attach_point,utype);
+     break;
+    case FTP:
+      _handler = new MediaWget (url,preferred_attach_point,utype);
+      break;
+    case SMB:
+      _handler = new MediaSMB (url,preferred_attach_point,utype);
+      break;
+    case HTTP:
+      _handler = new MediaWget (url,preferred_attach_point,utype);
+      break;
+    case HTTPS:
+      _handler = new MediaWget (url,preferred_attach_point,utype);
+      break;
 
-    D__ << url.asString() << endl;
-    D__ << _preferred_attach_point << endl;
-
-    string protocol = url.getProtocol();
-
-    for(unsigned i=0;i<protocol.length();i++)
-    {
-	protocol[i]=tolower(protocol[i]);
-    }
-
-    if ( protocol == "cd" )
-    {
-	_type = CD;
-	_handler = new MediaCD (url);
-    }
-    else if ( protocol == "dvd" )
-    {
-	_type = DVD;
-	_handler = new MediaCD (url);
-    }
-    else if ( protocol == "nfs" )
-    {
-	_type = NFS;
-	_handler = new MediaNFS (url);
-    }
-    else if ( protocol == "dir" )
-    {
-	_type = DIR;
-	_handler = new MediaDIR (url);
-    }
-    else if ( protocol == "disk" )
-    {
-	_type = DISK;
-	_handler = new MediaDISK (url);
-    }
-    else if ( protocol == "ftp" )
-    {
-	_type = FTP;
-	_handler = new MediaWget (url);
-    }
-    else if ( protocol == "smb" )
-    {
-	_type = SMB;
-	_handler = new MediaSMB (url);
-    }
-    else if ( protocol == "http" )
-    {
-	_type = HTTP;
-	_handler = new MediaWget (url);
-    }
-    else if ( protocol == "https" )
-    {
-	_type = HTTPS;
-	_handler = new MediaWget (url);
-    }
-    else
-    {
+    case NONE:
 	return Error::E_bad_media_type;
+	break;
     }
 
     // check created handler
-
-    if (_handler == 0)
-    {
-	return Error::E_system;
+    if ( !_handler ){
+      return Error::E_system;
     }
 
     return Error::E_ok;
 }
 
+// Type of media if open, otherwise NONE.
+MediaAccess::MediaType
+MediaAccess::type() const
+{
+  if ( !_handler )
+    return NONE;
+
+  return _handler->type();
+}
 
 // close handler
 void
 MediaAccess::close (void)
 {
-    if (_handler)
-    {
-	_handler->release ();
-	delete _handler;
-	_handler = 0;
-    }
-    return;
-}
-
-
-// get destination for file retrieval
-const Pathname &
-MediaAccess::getAttachPoint (void) const
-{
-    return _handler->getAttachPoint();
+  ///////////////////////////////////////////////////////////////////
+  // !!! make shure handler gets properly deleted.
+  // I.e. release attached media befire deleting the handler.
+  ///////////////////////////////////////////////////////////////////
+  if ( _handler ) {
+    if ( _handler->isAttached() )
+      _handler->release();
+    delete _handler;
+    _handler = 0;
+  }
 }
 
 
@@ -204,34 +172,49 @@ MediaAccess::getAttachPoint (void) const
 PMError
 MediaAccess::attach (void)
 {
-    PMError err;
+  if ( !_handler )
+    return Error::E_not_open;
 
-    if (_handler == 0)
-    {
-	return Error::E_not_open;
-    }
-    if (!_handler->getAttachPoint().empty())
-    {
-	return Error::E_already_attached;
-    }
+  return _handler->attach();
+}
 
-    err = _handler->attachTo (_preferred_attach_point);
+// True if media is open and attached.
+bool
+MediaAccess::isAttached() const
+{
+  return( _handler && _handler->isAttached() );
+}
 
-    if (err == Error::E_attachpoint_fixed)	// attached somewhere else
-	err = Error::E_ok;
-    return err;
+// local directory that corresponds to medias url
+// If media is not open an empty pathname.
+const Pathname &
+MediaAccess::localRoot() const
+{
+  if ( !_handler )
+    return _noPath;
+
+  return _handler->localRoot();
+}
+
+// Short for 'localRoot() + pathname', but returns an empty
+// * pathname if media is not open.
+Pathname
+MediaAccess::localPath( const Pathname & pathname ) const
+{
+  if ( !_handler )
+    return _noPath;
+
+  return _handler->localPath( pathname );
 }
 
 // release attached media
 PMError
-MediaAccess::release (bool eject)
+MediaAccess::release( bool eject )
 {
-    if (_handler == 0)
-    {
-	return Error::E_not_open;
-    }
+  if ( !_handler )
+    return Error::E_not_open;
 
-    return _handler->release (eject);
+  return _handler->release( eject );
 }
 
 
@@ -242,18 +225,27 @@ MediaAccess::release (bool eject)
 PMError
 MediaAccess::provideFile (const Pathname & filename) const
 {
-    D__ << filename.asString() << endl;
-    if (_handler == 0)
-    {
-	return Error::E_not_open;
-    }
-    if (_handler->getAttachPoint().empty())
-    {
-	return Error::E_not_attached;
-    }
-    return _handler->provideFile (filename);
+  if ( !_handler )
+    return Error::E_not_open;
+
+  return _handler->provideFile( filename );
 }
 
+
+// Return content of directory on media
+PMError
+MediaAccess::dirInfo( std::list<std::string> & retlist,
+		      const Pathname & dirname, bool dots ) const
+{
+  retlist.clear();
+
+  if ( !_handler )
+    return Error::E_not_open;
+
+  return _handler->dirInfo( retlist, dirname, dots );
+}
+
+#if 0
 
 // find file denoted by pattern
 //
@@ -278,21 +270,6 @@ MediaAccess::findFile (const Pathname & dirname, const string & pattern) const
     return _handler->findFile (dirname, pattern);
 }
 
-
-// get file information
-const std::list<std::string> *
-MediaAccess::dirInfo (const Pathname & filename) const
-{
-    if (_handler == 0)
-    {
-	return 0;
-    }
-    if (_handler->getAttachPoint().empty())
-    {
-	return 0; //Error::E_not_attached;
-    }
-    return _handler->dirInfo (filename);
-}
 
 // get file information
 const PathInfo *
@@ -328,33 +305,35 @@ MediaAccess::cleanUp (const Pathname & filename) const
     }
     return Error::E_ok;
 }
+#endif
 
 
 std::ostream &
 MediaAccess::dumpOn( std::ostream & str ) const
 {
-    str << "MediaAccess (";
+  if ( ! isOpen() )
+    return str << "MediaAccess( closed )";
 
-    const char * tstr = "???"; // default for unknown types
-    switch (_type)
-    {
-	case CD:    tstr = "CD";    break;
-	case DVD:   tstr = "DVD";   break;
-	case NFS:   tstr = "NFS";   break;
-	case DIR:   tstr = "DIR";   break;
-	case DISK:  tstr = "DISK";  break;
-	case FTP:   tstr = "FTP";   break;
-	case SMB:   tstr = "SMB";   break;
-	case HTTP:  tstr = "HTTP";  break;
-	case HTTPS: tstr = "HTTPS"; break;
-	///////////////////////////////////////////////////////////////////
-	// no default: let compiler warn '... not handled in switch'
-        ///////////////////////////////////////////////////////////////////
-	case Unknown:
-	  break;
-    }
-    str << tstr << "@" << _handler->getAttachPoint().asString() << endl;
-    return str;
+  const char * tstr = "???"; // default for unknown types
+  switch ( _handler->type() ) {
+  case CD:    tstr = "CD";    break;
+  case DVD:   tstr = "DVD";   break;
+  case NFS:   tstr = "NFS";   break;
+  case DIR:   tstr = "DIR";   break;
+  case DISK:  tstr = "DISK";  break;
+  case FTP:   tstr = "FTP";   break;
+  case SMB:   tstr = "SMB";   break;
+  case HTTP:  tstr = "HTTP";  break;
+  case HTTPS: tstr = "HTTPS"; break;
+  ///////////////////////////////////////////////////////////////////
+  // no default: let compiler warn '... not handled in switch'
+  ///////////////////////////////////////////////////////////////////
+  case NONE:
+    break;
+  }
+  str << tstr << "(";
+  _handler->dumpOn( str );
+  return str << ")";
 }
 
 ///////////////////////////////////////////////////////////////////

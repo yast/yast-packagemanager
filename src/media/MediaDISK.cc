@@ -46,44 +46,17 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaDISK::MediaDISK (const Url& url)
-    : MediaHandler (url)
+MediaDISK::MediaDISK( const Url &      url_r,
+		      const Pathname & attach_point_hint_r,
+		      MediaAccess::MediaType type_r )
+    : MediaHandler( url_r, attach_point_hint_r,
+		    true,  // attachPoint_is_mediaroot
+		    false, // does_download
+		    type_r )
 {
 	_device = _url.getOption("device");
 	_filesystem = _url.getOption("filesystem");
 }
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaDISK::~MediaDISK
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-MediaDISK::~MediaDISK()
-{
-    if (_attachPoint != "") {
-	release ();
-    }
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaDISK::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream &
-MediaDISK::dumpOn( ostream & str ) const
-{
-    return MediaHandler::dumpOn(str);
-}
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -91,19 +64,15 @@ MediaDISK::dumpOn( ostream & str ) const
 //	METHOD NAME : MediaDISK::attachTo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : attach media to path
+//	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError
-MediaDISK::attachTo (const Pathname & to)
+PMError MediaDISK::attachTo()
 {
     // FIXME
     // do mount --bind <partition>/<dir> to <to>
     //   mount /dev/<partition> /tmp_mount
-    //   mount /tmp_mount/<dir> <to> --bind -o ro    
+    //   mount /tmp_mount/<dir> <to> --bind -o ro
     // FIXME: try all filesystems
-
-    if(!_url.isValid())
-	    return Error::E_bad_url;
 
     if(_device.empty())
 	    return Error::E_no_destination;
@@ -112,7 +81,7 @@ MediaDISK::attachTo (const Pathname & to)
 	    return Error::E_invalid_filesystem;
 
     Mount mount;
-    const char *mountpoint = to.asString().c_str();
+    const char *mountpoint = attachPoint().asString().c_str();
     string options = _url.getOption("mountoptions");
     if(options.empty())
     {
@@ -134,8 +103,6 @@ MediaDISK::attachTo (const Pathname & to)
 	return ret;
     }
 
-    _attachPoint = to;
-
     return Error::E_ok;
 }
 
@@ -143,70 +110,55 @@ MediaDISK::attachTo (const Pathname & to)
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDISK::release
+//	METHOD NAME : MediaDISK::releaseFrom
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : release attached media
+//	DESCRIPTION : Asserted that media is attached.
 //
-PMError
-MediaDISK::release (bool eject)
+PMError MediaDISK::releaseFrom( bool eject )
 {
-    if(_attachPoint.asString().empty())
-    {
-	return Error::E_not_attached;
-    }
-    
-    MIL << "umount " << _attachPoint.asString() << endl;
+    MIL << "umount " << attachPoint() << endl;
 
     Mount mount;
     PMError ret;
 
-    if ((ret = mount.umount(_attachPoint.asString())) != Error::E_ok)
+    if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
     {
 	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
 
-    _attachPoint = "";
     return Error::E_ok;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaDISK::provideFile
+//	METHOD NAME : MediaDISK::getFile
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
-//	provide file denoted by path to 'attached path'
-//	filename is interpreted relative to the attached url
-//	and a path prefix is preserved to destination
-
-PMError
-MediaDISK::provideFile (const Pathname & filename) const
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaDISK::getFile (const Pathname & filename) const
 {
-    // no retrieval needed, disk is mounted at destination
-    if(!_url.isValid())
-	return Error::E_bad_url;
-
-    if(_attachPoint.asString().empty())
-	return Error::E_not_attached;
-
-    Pathname src = _attachPoint;
-    src += _url.getPath();
-    src += filename;
-
-    PathInfo info(src);
-    
-    if(!info.isFile())
-    {
-	    D__ << src.asString() << " does not exist" << endl;
-	    return Error::E_file_not_found;
-    }
-
-    return Error::E_ok;
+  return MediaHandler::getFile( filename );
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaDISK::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaDISK::getDirInfo( std::list<std::string> & retlist,
+			     const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}
+
+#if 0
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -229,21 +181,6 @@ MediaDISK::findFile (const Pathname & dirname, const string & pattern) const
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaDISK::getDirectory
-//	METHOD TYPE : const std::list<std::string> *
-//
-//	DESCRIPTION :
-//	get directory denoted by path to Attribute::A_StringArray
-
-const std::list<std::string> *
-MediaDISK::dirInfo (const Pathname & dirname) const
-{
-    return readDirectory (dirname);
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
 //
 //	METHOD NAME : MediaDISK::getInfo
 //	METHOD TYPE : const PathInfo *
@@ -257,3 +194,4 @@ MediaDISK::fileInfo (const Pathname & filename) const
     // no retrieval needed, CD is mounted at destination
     return new PathInfo (filename);
 }
+#endif

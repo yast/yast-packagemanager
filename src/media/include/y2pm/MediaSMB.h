@@ -15,33 +15,34 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Implementation class for MediaHandler
-		This class handles access to SMB media
+   Purpose:	Implementation class for SMB MediaHandler
+
 /-*/
 #ifndef MediaSMB_h
 #define MediaSMB_h
-
-#include <string>
 
 #include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaSMB
+/**
+ * @short Implementation class for SMB MediaHandler
+ * @see MediaHandler
+ **/
 class MediaSMB : public MediaHandler {
 
-    public:
-	// constructor
+  protected:
 
-	MediaSMB (const Url& url);
+    MEDIA_HANDLER_API;
 
-	MEDIA_HANDLER_API
+  public:
 
-	~MediaSMB();
+    MediaSMB( const Url&       url_r,
+	      const Pathname & attach_point_hint_r,
+	      MediaAccess::MediaType type_r );
 
-    public:
-
-	std::ostream & dumpOn( std::ostream & str ) const;
+    virtual ~MediaSMB() { release(); }
 };
 
 ///////////////////////////////////////////////////////////////////

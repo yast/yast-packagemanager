@@ -46,42 +46,15 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaSMB::MediaSMB (const Url& url)
-    : MediaHandler (url)
+MediaSMB::MediaSMB( const Url &      url_r,
+		    const Pathname & attach_point_hint_r,
+		    MediaAccess::MediaType type_r )
+    : MediaHandler( url_r, attach_point_hint_r,
+		    false, // attachPoint_is_mediaroot
+		    false, // does_download
+		    type_r )
 {
 }
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaSMB::~MediaSMB
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-MediaSMB::~MediaSMB()
-{
-    if (_attachPoint != "") {
-	release ();
-    }
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaSMB::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream &
-MediaSMB::dumpOn( ostream & str ) const
-{
-    return MediaHandler::dumpOn(str);
-}
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -89,19 +62,15 @@ MediaSMB::dumpOn( ostream & str ) const
 //	METHOD NAME : MediaSMB::attachTo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : attach media to path
+//	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError
-MediaSMB::attachTo (const Pathname & to)
+PMError MediaSMB::attachTo()
 {
-    if(!_url.isValid())
-	    return Error::E_bad_url;
-
     if(_url.getHost().empty())
 	    return Error::E_no_host_specified;
 
     const char* const filesystem = "smbfs";
-    const char *mountpoint = to.asString().c_str();
+    const char *mountpoint = attachPoint().asString().c_str();
     Mount mount;
     PMError ret;
 
@@ -146,80 +115,63 @@ MediaSMB::attachTo (const Pathname & to)
 	return ret;
     }
 
-    _attachPoint = to;
-
     return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaSMB::release
+//	METHOD NAME : MediaSMB::releaseFrom
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : release attached media
+//	DESCRIPTION : Asserted that media is attached.
 //
-PMError
-MediaSMB::release (bool eject)
+PMError MediaSMB::releaseFrom( bool eject )
 {
-    if(_attachPoint.asString().empty())
-    {
-	return Error::E_not_attached;
-    }
-    
-    MIL << "umount " << _attachPoint.asString();
+    MIL << "umount " << attachPoint();
 
     Mount mount;
     PMError ret;
 
-    if ((ret = mount.umount(_attachPoint.asString())) != Error::E_ok)
+    if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
     {
 	MIL << "failed: " <<  ret << endl;
 	return ret;
     }
-    
+
     MIL << "succeded" << endl;
 
-    _attachPoint = "";
     return ret;
-
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaSMB::provideFile
+//	METHOD NAME : MediaSMB::getFile
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
-//	get file denoted by path to 'attached path'
-//	filename is interpreted relative to the attached url
-//	and a path prefix is preserved to destination
-
-PMError
-MediaSMB::provideFile (const Pathname & filename) const
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaSMB::getFile (const Pathname & filename) const
 {
-    // no retrieval needed, NFS path is mounted at destination
-    if(!_url.isValid())
-	return Error::E_bad_url;
-
-    if(_attachPoint.asString().empty())
-	return Error::E_not_attached;
-
-    Pathname src = _attachPoint;
-    src += filename;
-
-    PathInfo info(src);
-    
-    if(!info.isFile())
-    {
-	    D__ << src.asString() << " does not exist" << endl;
-	    return Error::E_file_not_found;
-    }
-
-    return Error::E_ok;
+  return MediaHandler::getFile( filename );
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaSMB::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaSMB::getDirInfo( std::list<std::string> & retlist,
+			      const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}
+
+#if 0
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -239,22 +191,6 @@ MediaSMB::findFile (const Pathname & dirname, const string & pattern) const
     return scanDirectory (dirname, pattern);
 }
 
-
-///////////////////////////////////////////////////////////////////
-//
-//	METHOD NAME : MediaSMB::getDirectory
-//	METHOD TYPE : const std::list<std::string> *
-//
-//	DESCRIPTION :
-//	get directory denoted by path to a string list
-
-const std::list<std::string> *
-MediaSMB::dirInfo (const Pathname & dirname) const
-{
-    return readDirectory (dirname);
-}
-
-
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -270,3 +206,4 @@ MediaSMB::fileInfo (const Pathname & filename) const
     // no retrieval needed, CD is mounted at destination
     return new PathInfo (filename);
 }
+#endif

@@ -75,7 +75,8 @@ class MediaError {
       E_already_mounted,
       E_busy,
       //
-      E_attachpoint_fixed
+      E_attachpoint_fixed,
+      E_not_supported_by_media
     };
 };
 

@@ -269,7 +269,7 @@ InstSrcData_UL::Tag2Selection (const std::string& sortby, TagCacheRetrieval *sel
     PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selcache));
     PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
     dataprovider->setSelection (selection);
-  
+
     CommonPkdParser::Tag *tagptr;	// for SET_MULTI()
 
 #define SET_VALUE(tagname,value) \
@@ -391,7 +391,7 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	return err;
     }
 
-    contentname = media_r->getAttachPoint() + contentname;
+    contentname = media_r->localRoot() + contentname;
     MIL << "ifstream(" << contentname << ")" << endl;
     std::ifstream content (contentname.asString().c_str());
     if (!content)
@@ -571,7 +571,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     {
 	return err;
     }
-    packagesname = media_r->getAttachPoint() + packagesname;
+    packagesname = media_r->localRoot() + packagesname;
     MIL << "fopen(" << packagesname << ")" << endl;
     TagCacheRetrieval *pkgcache = new TagCacheRetrieval (packagesname);
 
@@ -653,7 +653,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
 	ndata->setPackages (packagelist);
     }
-    
+
     delete tagset;
 
     MIL << "done packages parsing" << endl;
