@@ -189,8 +189,8 @@ class PMError {
 
     ErrClass errClass() const { return errClass( _errval ); }
 
-    void setErrDetails( const std::string &details ) { _errdetails = details; }
-    std::string errDetails() const { return _errdetails; }
+    void setDetails( const std::string &details ) { _errdetails = details; }
+    std::string details() const { return _errdetails; }
 
     friend std::ostream & operator<<( std::ostream & str, const PMError & obj );
 };

@@ -344,20 +344,25 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 {
     int err = PathInfo::assert_dir( _paths->attachPoint() );
     if ( err ) {
-      ERR << "Can't create " << _paths->attachPoint() << " (errno: " << err << ")"
-          << endl;
-      return PMError( InstSrcError::E_error );
+      string errMsg = "Can't create " + _paths->attachPoint().asString() +
+                      ": " + strerror( err );
+      ERR << errMsg;
+      return PMError( YouError::E_error, errMsg );
     }
 
     PMError error = _media.open( baseUrl, _paths->attachPoint() );
     if ( error != PMError::E_ok ) {
-      ERR << "MediaAccess::open() failed." << endl;
+      string errMsg = "Can't open " + baseUrl.asString();
+      ERR << "MediaAccess::open() failed: " << errMsg << endl;
+      error.setDetails( errMsg );
       return error;
     }
 
     error = _media.attach( );
     if ( error != PMError::E_ok ) {
       ERR << "MediaAccess::attach() failed." << endl;
+      string errMsg = "Attach point: " + _media.localRoot().asString();
+      error.setDetails( errMsg );
       return error;
     }
 
@@ -365,7 +370,9 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     list<string> patchFiles;
 
-    error = _media.provideFile( patchPath + _paths->directoryFileName() );
+    Pathname directoryFile = patchPath + _paths->directoryFileName();
+
+    error = _media.provideFile( directoryFile );
     if ( error ) {
       WAR << "no directory file found." << endl;
       if ( error == MediaError::E_login_failed ||
@@ -374,12 +381,19 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
           return error;
       }
 
-      error = _media.dirInfo( patchFiles, patchPath );
-      if ( error ) {
-        if ( error == MediaError::E_not_supported_by_media ) {
+      PMError dirError = _media.dirInfo( patchFiles, patchPath );
+      if ( dirError ) {
+        if ( dirError == MediaError::E_not_supported_by_media ) {
 	  ERR << "dirInfo not supported on " << _media << ": " << error << endl;
+        } else {
+          ERR << dirError << endl;
         }
         _media.release();
+        
+        string errMsg = "Unable to get '" + directoryFile.asString() +
+                        "' or to read the directory.";
+        error.setDetails( errMsg );
+        
         return error;
       }
     } else {
@@ -406,7 +420,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
              (*it).substr( 0, 9 ) == "directory" ) continue;
         error = _media.provideFile( patchPath + *it );
         if ( error != PMError::E_ok ) {
-            ERR << "ERR: " << error << patchPath + *it << endl;
+            ERR << "ERR: " << error << ": " << patchPath + *it << endl;
         } else {
             Pathname path = _media.localRoot() + patchPath;
 
@@ -427,6 +441,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
             if ( error != PMError::E_ok ) {
                 ERR << "Error reading patch " << *it << endl;
                 _media.release();
+                error.setDetails( "Patch: " + *it );
                 return error;
             }
         }
