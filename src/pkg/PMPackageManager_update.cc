@@ -30,6 +30,8 @@
 #include <y2pm/PMPackageManager_update.h>
 #include <y2pm/PkgSet.h>
 
+#include <y2pm/CheckSetDeps.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -102,6 +104,30 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       }
     }
   }
+
+  // filter packages with requires that are not fulfilled by other candidates,
+  // to reduce errors a bit when trying to update from a broken installation
+  // medium (ie. STABLE)
+  {
+    CheckSetDeps::BrokenMap broken;
+    CheckSetDeps checker(available, broken);
+
+    checker.setTrackRelations(false);
+    checker.checkAll();
+
+    if(!broken.empty())
+    {
+      CheckSetDeps::BrokenMap::iterator bit, bend;
+      for(bit = broken.begin(), bend = broken.end(); bit != bend; ++bit)
+      {
+	DBG << bit->first->name() << " is broken, not considering it for update" << endl;
+	available.remove(bit->first);
+	--opt_stats_r.pre_avcand;
+	++opt_stats_r.pre_nocand;
+      }
+    }
+  }
+
   MIL << "doUpdate: " << opt_stats_r.pre_todel  << " packages tagged to delete" << endl;
   MIL << "doUpdate: " << opt_stats_r.pre_nocand << " packages without candidate (foreign, replaced or dropped)" << endl;
   MIL << "doUpdate: " << opt_stats_r.pre_avcand << " packages available for update" << endl;
