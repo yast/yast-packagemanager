@@ -57,12 +57,19 @@ MediaHandler::MediaHandler ( const Url &      url_r,
     ///////////////////////////////////////////////////////////////////
     // provide a default attachpoint
     ///////////////////////////////////////////////////////////////////
-#warning CHECK if fixed "/var/adm/mount" is appropriate
 
-    Pathname aroot( "/var/adm/mount" );
-    PathInfo adir( aroot );
-    if ( !adir.isDir() ) {
-      ERR << "Create attach point: directory does not exist: " << adir << endl;
+    Pathname aroot;
+    PathInfo adir;
+    const char * defmounts[] = { "/var/adm/mount", "/var/tmp", /**/NULL/**/ };
+    for ( const char ** def = defmounts; *def; ++def ) {
+      adir( *def );
+      if ( adir.isDir() && adir.userMayRWX() ) {
+	aroot = adir.path();
+	break;
+      }
+    }
+    if ( aroot.empty() ) {
+      ERR << "Create attach point: Can't find a writable directory to create an attach point" << endl;
       return;
     }
 
