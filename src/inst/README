@@ -1,0 +1,34 @@
+InstSrc Implementation
+
+InstSrc is the installation source, i.e. any provider of
+installation data (selections, packages, patches).
+
+This data resides on a media.
+
+InstSrc uses MediaAccess (see media/ directory) for access
+to the media.
+
+In order to minimize real media access (which might be costly
+for ftp access), InstSrc abstracts away from the physical media
+and tries to cache meta-information about the media contents.
+
+This allows the packagemanager to handle media contents without
+actually accessing the media for most of the usual tasks. It's up
+to the InstSrc to decide which information to cache and which
+information to retrieve from the media.
+
+In order to handle multiple installation sources in parallel, the
+installation source manager (InstSrcMgr) keeps track of 'known'
+sources and their cached meta-information.
+
+* InstSrc meta-information
+
+- url		string, specifies access data for MediaAccess
+- enabled	bool, a source might be temporarely disabled but still known
+		to the manager
+- priority	int, used to prefer sources, i.e. patch-server before cd
+- cost		int, cost of access
+- checksig	bool, if signatures are to be checked (GPG key known)
+- mirror	string, filename of real url (for mirrors)
+- label		string, user defined label
+- MediaInfo	see MediaInfo (product, version, vendor, architectures, ...)
