@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 27 13:19:27 CET 2003 - cschum@suse.de
+
+- Fixed dangling pointer to cookie jar (#24286).
+
+-------------------------------------------------------------------
 Wed Feb 26 15:33:51 CET 2003 - lnussel@suse.de
 
 - Honor implicit provide of own name when computing remove lists (#24298)
