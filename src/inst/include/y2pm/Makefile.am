@@ -18,6 +18,7 @@ pkginclude_HEADERS =	\
 	ULPackagesParser.h ULPackagesParserPtr.h \
 	UpdateInfParser.h			\
 	InstData.h				\
+	FileDeps.h				\
 	\
 	InstTargetError.h			\
 	InstTarget.h				\
