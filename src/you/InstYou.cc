@@ -673,6 +673,13 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
   }
 
   ERR << "Error downloading RPM " << pkg->name() << endl;
+
+  string details = error.details();
+  if ( !details.empty() ) details += "\n";
+  details += pkg->nameEd();
+  
+  error.setDetails( details );
+
   return error;
 }
 
