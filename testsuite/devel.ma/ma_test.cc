@@ -35,6 +35,8 @@ using namespace std;
 #define SMGR Y2PM::selectionManager()
 #define ISM  Y2PM::instSrcManager()
 
+extern ostream & operator<<( ostream & str, const YCPValue & val );
+
 ostream & operator <<( ostream & str, const list<string> & t ) {
   stringutil::dumpOn( str, t, true );
   return str;
@@ -146,38 +148,6 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 /******************************************************************
  ******************************************************************/
 
-ostream & operator<<( ostream & str, const YCPValue & val ) {
-  string outstr( "YT_UNKNOWN" );
-  //SEC << val->valuetype() << endl;
-  switch ( val->valuetype() ) {
-  case YT_UNDEFINED:
-    outstr = "YT_UNDEFINED";
-    break;
-#define ENUMOUT(V,v) case YT_##V: outstr = val->as##v()->toString(); break
-    ENUMOUT( VOID,	Void );
-    ENUMOUT( BOOLEAN,	Boolean );
-    ENUMOUT( INTEGER,	Integer );
-    ENUMOUT( FLOAT,	Float );
-    ENUMOUT( STRING,	String );
-    ENUMOUT( BYTEBLOCK,	Byteblock );
-    ENUMOUT( PATH,	Path );
-    ENUMOUT( SYMBOL,	Symbol );
-    ENUMOUT( DECLARATION,	Declaration );
-    ENUMOUT( LOCALE,	Locale );
-    ENUMOUT( LIST,	List );
-    ENUMOUT( TERM,	Term );
-    ENUMOUT( MAP,	Map );
-    ENUMOUT( BLOCK,	Block );
-    ENUMOUT( BUILTIN,	Builtin );
-    ENUMOUT( IDENTIFIER,	Identifier );
-    ENUMOUT( ERROR,	Error );
-  }
-#undef ENUMOUT
-  return str << outstr;
-}
-
-/******************************************************************
- ******************************************************************/
 struct WFM {
   YCPInterpreter * _dummy;
   PkgModuleFunctions * _pkgmod;
@@ -203,7 +173,7 @@ struct WFM {
 
   void SourceStartManager( bool ena ) {
     YCPList args;
-    args->add( YCPBoolean(ena) );
+    //args->add( YCPBoolean(ena) );
     OUT << "SourceStartManager" << args;
     YCPValue ret = _pkgmod->SourceStartManager( args );
     OUT << " --> " << ret << endl;
@@ -226,6 +196,13 @@ struct WFM {
     args->add( YCPInteger(id) );
     OUT << "SourceProduct" << args;
     YCPValue ret = _pkgmod->SourceProduct( args );
+    OUT << " --> " << ret << endl;
+  }
+  void SourceGeneralData( int id ) {
+    YCPList args;
+    args->add( YCPInteger(id) );
+    OUT << "SourceGeneralData" << args;
+    YCPValue ret = _pkgmod->SourceGeneralData( args );
     OUT << " --> " << ret << endl;
   }
 };
@@ -253,7 +230,7 @@ void st() {
 int main()
 {
   y2error( "xxx" );
-  Y2Logging::setLogfileName("-");
+  Y2Logging::setLogfileName( "-" );
   MIL << "START" << endl;
 
   if ( 0 ) {
@@ -274,15 +251,11 @@ int main()
 
   wfm.init();
   INT << "START" << endl;
-
-  //wfm.SourceStartCache( true );
-
   wfm.SourceStartManager( false );
   wfm.SourceStartCache( false );
   wfm.SourceGetCurrent();
-
-  wfm.SourceStartCache( true );
-  st();
+  wfm.SourceGeneralData( 0 );
+  wfm.SourceGeneralData( 1 );
 
   SEC << "STOP" << endl;
   wfm.close();

@@ -213,44 +213,6 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 /******************************************************************
  ******************************************************************/
 
-string s;
-
-Pathname root( "/tmp/rpmdbs" );
-//Pathname dbPath( "/fibo" );
-Pathname dbPath( "/mand" );
-Pathname db3path( root+dbPath+"packages.rpm" );
-
-static void instPkgCb( int pc, void * )
-{
-  INT << "  at " << pc << "%" << endl;
-}
-
-void Pdb( ) {
-  {
-    librpmDb::db_const_iterator it;
-    unsigned cnt = 0;
-    for ( ; *it; ++it ) {
-      ++cnt;
-    }
-    SEC << "db_const_iterator: " << cnt << " " << it.dbError() << endl;
-  }
-}
-
-void xx( RpmDb & db ) {
-  set<string> known_pubkeys;
-  set<PkgEdition> pubkeys( db.pubkeys() );
-  for( set<PkgEdition>::const_iterator it = pubkeys.begin(); it != pubkeys.end(); ++it ) {
-    known_pubkeys.insert( (*it).asString() );
-  }
-  DBG << "--pubkeys----" << endl;
-  for ( set<string>::const_iterator it = known_pubkeys.begin(); it != known_pubkeys.end(); ++it ) {
-    DBG << *it << endl;
-  }
-  DBG << "-------------" << endl;
-}
-
-extern void TcommitCkeckMediaGpg( PMPackagePtr pkg_r );
-
 /******************************************************************
  ******************************************************************/
 int mmain( int argc, const char * argv[] );
@@ -274,83 +236,25 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  #define WHICH(err) (err?SEC:INT)
-
-  PMError err;
-  Url mediaurl( "///" );
-  MediaAccessPtr media( new MediaAccess );
-
-  err = media->provideFile( "/tmp" );
-  WHICH(err) << "provideFile:" << "/tmp" << " " << err << endl;
-  err = media->provideDir( "/tmp" );
-  WHICH(err) << "provideDile:" << "/tmp" << " " << err << endl;
-
-  err = media->open( mediaurl );
-  WHICH(err) << "open media:" << mediaurl << " " << err << endl;
-
-  err = media->provideFile( "/tmp" );
-  WHICH(err) << "provideFile:" << "/tmp" << " " << err << endl;
-  err = media->provideDir( "/tmp" );
-  WHICH(err) << "provideDile:" << "/tmp" << " " << err << endl;
-
-  err = media->attach();
-  WHICH(err) << "attach media: " << err << endl;
-
-  err = media->provideFile( "/tmp" );
-  WHICH(err) << "provideFile:" << "/tmp" << " " << err << endl;
-  err = media->provideDir( "/tmp" );
-  WHICH(err) << "provideDir:" << "/tmp" << " " << err << endl;
-
-  err = media->release();
-  WHICH(err) << "release media: " << err << endl;
-
-  err = media->release( true );
-  WHICH(err) << "release and eject media: " << err << endl;
-
-
-#if 0
-  set<string> allpks;
-  //allpks.insert( "aaa_base" );
-  allpks.insert( "test" );
-  allpks.insert( "test1" );
-  allpks.insert( "test2" );
-  allpks.insert( "test3" );
-  allpks.insert( "test11" );
-  allpks.insert( "test22" );
-  allpks.insert( "test33" );
-  allpks.insert( "test111" );
-  allpks.insert( "test222" );
-  allpks.insert( "test333" );
-#define forall for ( set<string>::const_iterator it = allpks.begin(); it != allpks.end(); ++it )
-
   Y2PM::instSrcManager();
-  forall {
-    DBG << "  " << PMGR[*it]->user_set_install() << endl;
-    DBG << "  " << PMGR[*it]->providesSources() << endl;
-    DBG << "  " << PMGR[*it]->set_source_install( true ) << endl;
-    SEC << PMGR[*it] << endl;
-  }
-
   Y2PM::instTargetUpdate();
-  forall {
-    //DBG << "  " << PMGR[*it]->user_set_install() << endl;
-    SEC << PMGR[*it] << endl;
+
+  INT << PMGR["MPlayer"]->user_set_taboo() << endl;
+  INT << PMGR["MPlayer-w32codecs"]->user_set_taboo() << endl;
+
+  PMUpdateStats opt_stats;
+  PMGR.doUpdate( opt_stats );
+
+  dumpPkgWhatIf( INT );
+
+  // get packages to process
+  std::list<PMPackagePtr> dellist;
+  std::list<PMPackagePtr> inslist;
+  std::list<PMPackagePtr> srclist;
+  Y2PM::packageManager().getPackagesToInsDel( dellist, inslist, srclist );
+  for ( list<PMPackagePtr>::iterator it = dellist.begin(); it != dellist.end(); ++it ) {
+    SEC << *it << endl;
   }
-
-  InstSrcManagerCallbacks::mediaChangeReport.redirectTo( mediaChangeReceive );
-
-  Y2PMCallbacks::commitProvideReport.redirectTo( commitProvideReceive );
-  InstSrcManagerCallbacks::mediaChangeReport.redirectTo( mediaChangeReceive );
-
-  forall {
-    SEC << PMGR[*it] << endl;
-  }
-
-  list<string> errors;
-  list<string> remaining;
-  list<string> srcremaining;
-  Y2PM::commitPackages( 0, errors, remaining, srcremaining );
-#endif
 
   SEC << "STOP -> " << ret << endl;
   return ret;
