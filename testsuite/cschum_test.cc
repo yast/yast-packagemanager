@@ -90,7 +90,7 @@ int main( int argc, char **argv )
 #if 1
   InstTarget &TMGR( Y2PM::instTarget( true ) );
 
-#if 1
+#if 0
   InstSrcManager &MGR( Y2PM::instSrcManager() );
 
   InstSrcManager::ISrcIdList nids;
@@ -134,6 +134,19 @@ int main( int argc, char **argv )
   cout << "YOUURL: " << product->content_youurl() << endl;
   cout << "YOUTYPE: " << product->content_youtype() << endl;
   cout << "YOUPATH: " << product->content_youpath() << endl;
+
+  InstSrcDescr::ArchMap archMap = product->content_archmap();
+  string basearch = TMGR.baseArch();
+  
+  list<PkgArch> archs = archMap[ basearch ];
+  
+  cout << "ARCHS: ";
+  list<PkgArch>::const_iterator it2;
+  for( it2 = archs.begin(); it2 != archs.end(); ++it2 ) {
+    cout << " " << *it2;
+  }
+  cout << endl;
+
 #endif
 
 #if 0
