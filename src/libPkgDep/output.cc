@@ -74,7 +74,7 @@ ostream& operator<<( ostream& os, const list<PkgDep::Alternative>& al )
 		 p != al.end(); ++p ) {
 		if (p != al.begin())
 			os << ", ";
-		os << p->name << "("
+		os << p->solvable->name() << "("
 		   << (p->kind == PkgDep::SIMPLE ? 'S' :
 			   p->kind == PkgDep::REQUIRES_MORE ? 'D' : 'C') << ")";
 	}

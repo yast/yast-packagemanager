@@ -207,17 +207,17 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		ci_for( RevRelList_, alt, alt_info.providers. ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == SIMPLE)
-				err.add_alternative( altname, altkind[altname] );
+				err.add_alternative( alt->pkg(), altkind[altname] );
 		}
 		ci_for( RevRelList_, alt, alt_info.providers. ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == REQUIRES_MORE)
-				err.add_alternative( altname, altkind[altname] );
+				err.add_alternative( alt->pkg(), altkind[altname] );
 		}
 		ci_for( RevRelList_, alt, alt_info.providers. ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == CONFLICT)
-				err.add_alternative( altname, altkind[altname] );
+				err.add_alternative( alt->pkg(), altkind[altname] );
 		}
 		if (cand)
 			add_referer( reqname, cand, alt_info.req );

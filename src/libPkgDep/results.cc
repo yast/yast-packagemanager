@@ -69,9 +69,9 @@ void PkgDep::ErrorResult::add_unresolvable( PkgName n, const PkgRelation& rel )
 	unresolvable.push_back( RelInfo( n, rel, false ));
 }
 
-void PkgDep::ErrorResult::add_alternative( PkgName n, alternative_kind k )
+void PkgDep::ErrorResult::add_alternative( PMSolvablePtr p, alternative_kind k )
 {
-	alternatives.push_back( Alternative( n, k ));
+	alternatives.push_back( Alternative( p, k ));
 }
 
 void PkgDep::Result::add_notes( const Notes& notes )

@@ -25,6 +25,7 @@
 
 using namespace std;
 
+/*
 #warning file dependencies
 static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
     PkgDep* solver, const PkgRelation& rel, PMSolvablePtr& p)
@@ -63,6 +64,7 @@ static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
 
     return PkgDep::UNRES_FAIL;
 }
+*/
 
 
 void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstall)
@@ -184,7 +186,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
     buildSets(installed, available, toinstall);
 
     PkgDep engine( installed, available ); // TODO alternative_default
-    engine.set_unresolvable_callback(unresolvable_callback); //TODO
+//    engine.set_unresolvable_callback(unresolvable_callback); //TODO
 
 //    bool success = engine.install( toinstall, good, bad);
     bool success = engine.solvesystemnoauto( toinstall, good, bad);
@@ -221,7 +223,7 @@ bool PMManager::solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
     buildSets(installed, available, toinstall);
 
     PkgDep engine( installed, available ); // TODO alternative_default
-    engine.set_unresolvable_callback(unresolvable_callback); //TODO
+//    engine.set_unresolvable_callback(unresolvable_callback); //TODO
 
     bool success = engine.upgrade( toinstall, good, bad, to_remove, true);
 

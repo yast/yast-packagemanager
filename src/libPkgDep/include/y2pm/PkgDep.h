@@ -66,11 +66,11 @@ class PkgDep {
 	};
 
 	struct Alternative {
-		PkgName name;
+		PMSolvablePtr solvable;
 		alternative_kind kind;
 
-		Alternative( const PkgName& n, alternative_kind k )
-			: name(n), kind(k) {}
+		Alternative( PMSolvablePtr p, alternative_kind k )
+			: solvable(p), kind(k) {}
 	};
 
 	typedef Alternatives::AltDefaultList (*AlternativesCallback)( PkgName name );
@@ -225,7 +225,7 @@ class PkgDep {
 						   PMSolvablePtr to_remove,
 						   PMSolvablePtr assume_instd,
 						   bool is_conflict = true );
-		void add_alternative( PkgName n, alternative_kind k );
+		void add_alternative( PMSolvablePtr p, alternative_kind k );
 		void add_notes( const Notes& notes );
 
 		/**
