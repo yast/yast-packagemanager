@@ -55,7 +55,7 @@ PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg,
 			break;
 		}
 	}
-	return still_conflicts ? NULL : upgrade;
+	return still_conflicts ? (PMSolvablePtr)0 : upgrade;
 }
 
 PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
@@ -80,7 +80,7 @@ PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
 			break;
 		}
 	}
-	return still_conflicts ? NULL : upgrade;
+	return still_conflicts ? (PMSolvablePtr)0 : upgrade;
 }
 
 PMSolvablePtr PkgDep::try_upgrade_requirerer(
@@ -107,7 +107,7 @@ PMSolvablePtr PkgDep::try_upgrade_requirerer(
 			break;
 		}
 	}
-	return requirements_ok ? upgrade : NULL;
+	return requirements_ok ? upgrade : (PMSolvablePtr)0;
 }
 
 PMSolvablePtr PkgDep::available_upgrade( PMSolvablePtr pkg )

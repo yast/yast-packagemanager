@@ -24,9 +24,13 @@ void progresscallback(double p, void* nix)
 
 int main(int argc, char* argv[])
 {
-    if(argc<2)
+    if (argc<2)
     {
 	cerr << "specify option" << endl;
+	cerr << "[--root <root-dir>]" << endl;
+	cerr << "[--flags <num>]" << endl;
+	cerr << "<command>: " << endl;
+	cerr << "query, install, remove, check, checkversion, rebuilddb" << endl;
 	return 1;
     }
 
@@ -44,31 +48,31 @@ int main(int argc, char* argv[])
     
     unsigned argnum = args.size();
 
-    string command = args.at(argpos++);
+    string command = args[argpos++];
 
     if(command == "--root")
     {
 	if(argpos>=argnum) return 1;
-	root = args.at(argpos++);
+	root = args[argpos++];
 	if(root.empty())
 	    return 1;
 	
 	if(argnum>argpos)
-	    command = args.at(argpos++);
+	    command = args[argpos++];
 	else
 	    command = "";
     }
     if(command == "--flags")
     {
 	if(argpos>=argnum) return 1;
-	string flagstr = args.at(argpos++);
+	string flagstr = args[argpos++];
 	if(flagstr.empty())
 	    return 1;
 
 	flags = atoi(flagstr.c_str());
 	
 	if(argnum>argpos)
-	    command = args.at(argpos++);
+	    command = args[argpos++];
 	else
 	    command = "";
     }
@@ -89,12 +93,12 @@ int main(int argc, char* argv[])
 	rpmdb->getPackages(pkglist);
 	for(;argpos<argnum;argpos++)
 	{
-	    cout << "querying " << args.at(argpos) << endl;
+	    cout << "querying " << args[argpos] << endl;
 	    typedef list<PMPackagePtr>::iterator PkgLI;
-	    PkgLI p = find_if(pkglist.begin(),pkglist.end(),PMPkg_eq(args.at(argpos)));
+	    PkgLI p = find_if(pkglist.begin(),pkglist.end(),PMPkg_eq(args[argpos]));
 	    if(p == pkglist.end())
 	    {
-		cout << args.at(argpos)<< " is not installed" << endl;
+		cout << args[argpos] << " is not installed" << endl;
 	    }
 	    else
 	    {
