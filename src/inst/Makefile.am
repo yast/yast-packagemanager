@@ -23,7 +23,7 @@ liby2pminstsrc_la_SOURCES = \
 	InstSrcDescr.cc 		\
 	InstSrcData.cc			\
 	InstSrcData_UL.cc		\
-	PMPackageDataProviderUL.cc	\
+	PMULPackageDataProvider.cc	\
 	\
 	InstTarget.cc			\
 	InstTargetError.cc

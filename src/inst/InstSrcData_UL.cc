@@ -29,8 +29,8 @@
 #include <y2util/stringutil.h>
 
 #include <y2pm/InstSrcData_UL.h>
-#include <y2pm/PMPackageDataProviderUL.h>
-#include <y2pm/PMPackageDataProviderULPtr.h>
+#include <y2pm/PMULPackageDataProvider.h>
+#include <y2pm/PMULPackageDataProviderPtr.h>
 
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
@@ -381,7 +381,7 @@ MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitte
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
     PkgArch arch (splitted[3]);
 
-//    PMPackageDataProviderULPtr dataprovider ( new PMPackageDataProviderUL());
+//    PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider());
     PMPackagePtr pac( new PMPackage (name, edition, arch, PMPackageDataProviderPtr()));
 
     // -> PMPackage::PMSolvable::PMSolvableAttribute::ATTR_NAME

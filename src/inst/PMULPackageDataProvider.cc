@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMPackageDataProvider.cc
+  File:       PMULPackageDataProvider.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -21,40 +21,40 @@
 
 #include <iostream>
 
-#include <y2pm/PMPackageDataProviderUL.h>
-#include <y2pm/PMPackageDataProviderULPtr.h>
+#include <y2pm/PMULPackageDataProvider.h>
+#include <y2pm/PMULPackageDataProviderPtr.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPackageDataProviderUL
+//	CLASS NAME : PMULPackageDataProvider
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_DERIVED_POINTER(PMPackageDataProviderUL, PMPackageDataProvider, PMPackageDataProvider );
+IMPL_DERIVED_POINTER(PMULPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProviderUL::PMPackageDataProviderUL
+//	METHOD NAME : PMULPackageDataProvider::PMULPackageDataProvider
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-PMPackageDataProviderUL::PMPackageDataProviderUL()
+PMULPackageDataProvider::PMULPackageDataProvider()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProviderUL::~PMPackageDataProviderUL
+//	METHOD NAME : PMULPackageDataProvider::~PMULPackageDataProvider
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-PMPackageDataProviderUL::~PMPackageDataProviderUL()
+PMULPackageDataProvider::~PMULPackageDataProvider()
 {
 }
 
@@ -62,13 +62,13 @@ PMPackageDataProviderUL::~PMPackageDataProviderUL()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProviderUL::~PMPackageDataProviderUL
+//	METHOD NAME : PMULPackageDataProvider::~PMULPackageDataProvider
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :Package attribute retrieval.
 //
 PkgAttributeValue
-PMPackageDataProviderUL::getAttributeValue( constPMPackagePtr pkg_r,
+PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
 					 PMPackage::PMPackageAttribute attr_r )
 {
     if (attrpos[attr_r].size < 0)
@@ -85,13 +85,13 @@ PMPackageDataProviderUL::getAttributeValue( constPMPackagePtr pkg_r,
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProviderUL::setAttributeValue
+//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
 //	METHOD TYPE : attribute set
 //
 //	DESCRIPTION : inject some SINGLE object attribute by value
 //
 void
-PMPackageDataProviderUL::setAttributeValue(
+PMULPackageDataProvider::setAttributeValue(
 	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
 	const PkgAttributeValue value)
 {
@@ -103,13 +103,13 @@ PMPackageDataProviderUL::setAttributeValue(
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageDataProviderUL::setAttributeValue
+//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
 //	METHOD TYPE : attribute set
 //
 //	DESCRIPTION :inject some package attribute by file offset
 //
 void
-PMPackageDataProviderUL::setAttributeValue(
+PMULPackageDataProvider::setAttributeValue(
 	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
 	std::streampos pos, int size)
 {
