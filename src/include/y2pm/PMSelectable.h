@@ -155,10 +155,10 @@ class PMSelectable : virtual public Rep {
      * one out of availableObjs().
      **/
     PMObjectPtr theObject() const {
-      if ( _installedObj )
-	return _installedObj;
       if ( _candidateObj )
 	return _candidateObj;
+      if ( _installedObj )
+	return _installedObj;
       PMObjectPtr ret = bestCandidate();
       if ( ret )
 	return ret;
