@@ -60,6 +60,18 @@ class PkgDuMaster {
 	// contains the change of diskusage
 	mutable FSize     _pkgusage;
       public:
+	const std::string & mountpoint()        const { return _mountpoint; }
+	FSize               total()             const { return _total; }
+	// current usage without packages taken into accout
+	FSize               initial_used()      const { return _used; }
+	FSize               initial_available() const { return total() - initial_used(); }
+	int                 initial_u_percent() const { return initial_used() * 100 / total(); }
+	// current usage with packages taken into accout
+	FSize               pkg_diff()          const { return _pkgusage; }
+	FSize               pkg_used()          const { return _used + _pkgusage; }
+	FSize               pkg_available()     const { return total() - pkg_used(); }
+	int                 pkg_u_percent()     const { return pkg_used() * 100 / total(); }
+      public:
 	MountPoint( const std::string & mountpoint_r,
 		    const FSize & blocksize_r = 1024,
 		    const FSize & total_r = 0,
@@ -117,18 +129,28 @@ class PkgDuMaster {
 
   private:
 
-    FSize _total;
+    MountPoint _overall;
 
   public:
 
     /**
-     * Contains the overall change of diskusage
+     * Overall stats (not per partition)
      **/
-    const FSize & total() const { return _total; }
+    FSize               total()             const { return _overall.total(); }
+    // current usage without packages taken into accout
+    FSize               initial_used()      const { return _overall.initial_used(); }
+    FSize               initial_available() const { return _overall.initial_available(); }
+    int                 initial_u_percent() const { return _overall.initial_u_percent(); }
+    // current usage with packages taken into accout
+    FSize               pkg_diff()          const { return _overall.pkg_diff(); }
+    FSize               pkg_used()          const { return _overall.pkg_used(); }
+    FSize               pkg_available()     const { return _overall.pkg_available(); }
+    int                 pkg_u_percent()     const { return _overall.pkg_u_percent(); }
 
-    void add( const FSize & szs_r ) { _total += szs_r; }
+  public:
 
-    void sub( const FSize & szs_r ) { _total -= szs_r; }
+    void add( const FSize & szs_r ) { _overall._pkgusage += szs_r; }
+    void sub( const FSize & szs_r ) { _overall._pkgusage -= szs_r; }
 
   public:
 
