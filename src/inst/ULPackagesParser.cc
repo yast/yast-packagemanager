@@ -334,7 +334,10 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 	    if (package->requires().size() == 0)		// not own requires
 		package->setRequires (share_target->requires());
 	    if (package->prerequires().size() == 0)
-		package->addPreRequires (share_target->prerequires());
+	    {
+		PMSolvable::PkgRelList_type prereqs = share_target->prerequires();		
+		package->addPreRequires (prereqs);
+	    }
 	    if (package->provides().size() == 0)
 		package->setProvides (share_target->provides());
 	    if (package->conflicts().size() == 0)

@@ -173,7 +173,7 @@ class PMSolvable : virtual public Rep {
      *
      * @return reference to requires
      */
-    const PkgRelList_type& addPreRequires(const PkgRelList_type& prerequires);
+    const PkgRelList_type& addPreRequires(PkgRelList_type& prerequires);
 
     /**
      * set obsoletes list
