@@ -67,6 +67,7 @@ install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
 %{_libdir}/liby2pm.so.*
 /usr/bin/online_update
 /usr/bin/installation_sources
+/usr/bin/genIS_PLAINcache
 %config(noreplace) /etc/youservers
 /var/adm/fillup-templates/sysconfig.onlineupdate
 
