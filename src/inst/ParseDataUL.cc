@@ -264,8 +264,8 @@ ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkd
     while (splitted.size() < 4)
 	splitted.push_back("");
 
-//cerr << "-----------------------------" << endl;
-//cerr << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+//MIL << "-----------------------------" << endl;
+//MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
     // Pkg -> PMSelection
     PkgName name (splitted[0]);
@@ -436,15 +436,15 @@ ParseDataUL::parsePackagesLang (InstSrcDataPtr & ndata,
     string langext( "." );
     langext += ( lang ? lang : "en" );
     if ( langext.length() > 3 )
-      langext.erase( 3 );
+	langext.erase( 3 );
 
     Pathname filename = descr_dir_r + "/packages";
     filename = filename.extend( langext );
 
     MediaAccess::FileProvider packages_lang_file( media_r, filename );
     if ( packages_lang_file.error() ) {
-      ERR << "Media can't provide '" << filename << "' " << packages_lang_file.error() << endl;
-      return packages_lang_file.error();
+	ERR << "Media can't provide '" << filename << "' " << packages_lang_file.error() << endl;
+	return packages_lang_file.error();
     }
 
     MIL << "fopen(" << packages_lang_file() << ")" << endl;
@@ -536,38 +536,39 @@ ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
 
     MediaAccess::FileProvider selections_file( media_r, filename );
     if ( selections_file.error() ) {
-      WAR << "Media can't provide '" << filename << "' " << selections_file.error() << endl;
+	WAR << "Media can't provide '" << filename << "' " << selections_file.error() << endl;
     }
     else {
 
-      while ( true )
-      {
-	std::ifstream selstream (selections_file().asString().c_str());
-	if (!selstream)
+	while ( true )
 	{
-	    ERR << "Cant open " << selections_file() << ": " << Error::E_open_file << endl;
-	    break;
-	}
-
-	while (selstream.good())
-	{
-	    char lbuf[201];
-
-	    if (!selstream.getline (lbuf, 200, '\n'))
+	    std::ifstream selstream (selections_file().asString().c_str());
+	    if (!selstream)
 	    {
-		if (selstream.eof())
-		    break;
-		MIL << "getline() failed" << endl;
+		ERR << "Cant open " << selections_file() << ": " << Error::E_open_file << endl;
 		break;
 	    }
-	    if ((lbuf[0] == '#')		// comment
-		|| (lbuf[0] == 0))		// empty
-		continue;
-	    selection_names.push_back (lbuf);
-	}
-	break;
-      }
 
+	    while (selstream.good())
+	    {
+		char lbuf[201];
+
+		if (!selstream.getline (lbuf, 200, '\n'))
+		{
+		    if (selstream.eof())
+			break;
+		    MIL << "getline() failed" << endl;
+		    break;
+		}
+		if ((lbuf[0] == '#')		// comment
+		    || (lbuf[0] == 0))		// empty
+		{
+		    continue;
+		}
+		selection_names.push_back (lbuf);
+	    }
+	    break;
+	}
     }
     MIL << "*** Expecting " << selection_names.size() << " selections ***" << endl;
 
@@ -585,17 +586,17 @@ ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
     {
 
 	Pathname selectionname = descr_dir_r + *selfile;
-	MediaAccess::FileProvider sel_file( media_r, filename );
+	MediaAccess::FileProvider sel_file( media_r, selectionname );
 
 	selection_stream.open (sel_file().asString().c_str());
 
-	if (!selection_stream)
+	if (!selection_stream.is_open())
 	{
-	    ERR << "Cant open " << selectionname << endl;
+	    ERR << "Cant open " << sel_file().asString() << endl;
 	    continue;
 	}
 
-	MIL << "Reading " << selectionname << endl;
+	MIL << "Reading " << sel_file().asString() << endl;
 
 	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selectionname));
 	TagParser& parser = dataprovider->getParser();
@@ -632,7 +633,7 @@ ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
 		    break;
 	    }
 	    } while( repeatassign );
-        }
+	}
 
 	if (parse)
 	{
@@ -647,7 +648,7 @@ ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
     } // for ()
 
     delete tagset;
-    MIL << "*** parsed " << count << " selections ***" << std::endl;
+    MIL << "*** parsed " << selections.size() << " selections ***" << std::endl;
 
     return PMError::E_ok;
 }
@@ -693,117 +694,117 @@ ParseDataUL::~ParseDataUL()
 PMError ParseDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				     MediaAccessPtr media_r, const Pathname & product_dir_r )
 {
-  MIL << "ParseDataUL::tryGetDescr(" << product_dir_r << ")" << endl;
+    MIL << "ParseDataUL::tryGetDescr(" << product_dir_r << ")" << endl;
 
-  ndescr_r = 0;
-  PMError err;
+    ndescr_r = 0;
+    PMError err;
 
-  InstSrcDescrPtr ndescr( new InstSrcDescr );
+    InstSrcDescrPtr ndescr( new InstSrcDescr );
 
-  ///////////////////////////////////////////////////////////////////
-  // parse InstSrcDescr from media_r and fill ndescr
-  ///////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////
+    // parse InstSrcDescr from media_r and fill ndescr
+    ///////////////////////////////////////////////////////////////////
 
 #warning TBD must parse media.1/media too
 
-  Pathname filename = product_dir_r + "/content";
+    Pathname filename = product_dir_r + "/content";
 
-  MediaAccess::FileProvider contentfile( media_r, filename );
-  if ( contentfile.error() ) {
-    ERR << "Media can't provide '" << filename << "' " << contentfile.error() << endl;
-    return contentfile.error();
-  }
+    MediaAccess::FileProvider contentfile( media_r, filename );
+    if ( contentfile.error() ) {
+	ERR << "Media can't provide '" << filename << "' " << contentfile.error() << endl;
+	return contentfile.error();
+    }
 
-  std::ifstream content( contentfile().asString().c_str());
-  if( ! content ) {
-    ERR << "Can't open '" << filename << "' for reading." << endl;
-    return InstSrcError::E_open_file;
-  }
+    std::ifstream content( contentfile().asString().c_str());
+    if( ! content ) {
+	ERR << "Can't open '" << filename << "' for reading." << endl;
+	return InstSrcError::E_open_file;
+    }
 
-  PkgName pname, bname;
-  PkgEdition pversion, bversion;	// base product
-  InstSrcDescr::ArchMap archmap;
-  InstSrcDescr::LabelMap labelmap;
+    PkgName pname, bname;
+    PkgEdition pversion, bversion;	// base product
+    InstSrcDescr::ArchMap archmap;
+    InstSrcDescr::LabelMap labelmap;
 
-  MIL << "Parsing " << contentfile() << endl;
-  while (content.good())
+    MIL << "Parsing " << contentfile() << endl;
+    while (content.good())
     {
-      // If not reding trimed, at least rtrim value
-      string value = stringutil::getline( content, true );
+	// If not reding trimed, at least rtrim value
+	string value = stringutil::getline( content, true );
 
-      if ( ! (content.fail() || content.bad()) ) {
+	if ( ! (content.fail() || content.bad()) ) {
 	string tag = stringutil::stripFirstWord( value );
 
 	if (tag == "PRODUCT")
 	{
-	  pname = PkgName (value);
+	    pname = PkgName (value);
 	}
 	else if (tag == "VERSION")
 	{
-	  pversion = PkgEdition (value);
+	    pversion = PkgEdition (value);
 	}
 	else if (tag == "BASEPRODUCT")
 	{
-	  bname = PkgName (value);
+	    bname = PkgName (value);
 	}
-        else if (tag == "BASEVERSION")
+	else if (tag == "BASEVERSION")
 	{
-	  bversion = PkgEdition (value);
+	    bversion = PkgEdition (value);
 	}
 	else if (tag == "VENDOR")
 	{
-	  ndescr->set_content_vendor (value);
+	    ndescr->set_content_vendor (value);
 	}
 	else if (tag == "DEFAULTBASE")
 	{
-	  ndescr->set_content_defaultbase (value);
+	    ndescr->set_content_defaultbase (value);
 	}
 	else if (tag.find( "ARCH." ) == 0)
 	{
-	  std::list<Pathname> pathlist;
-	  string path;
-	  while ( ! (path = stringutil::stripFirstWord( value )).empty() ) {
-	    pathlist.push_back( path );
-	  }
-	  archmap[tag.substr( 5 )] = pathlist;
+	    std::list<Pathname> pathlist;
+	    string path;
+	    while ( ! (path = stringutil::stripFirstWord( value )).empty() ) {
+	      pathlist.push_back( path );
+	    }
+	    archmap[tag.substr( 5 )] = pathlist;
 	}
 	else if (tag == "LINGUAS")
 	{
-	  std::list<LangCode> langlist;
-	  string lang;
-	  while ( ! (lang = stringutil::stripFirstWord( value )).empty() ) {
-	    langlist.push_back( LangCode(lang) );
-	  }
-	  ndescr->set_content_linguas (langlist);
+	    std::list<LangCode> langlist;
+	    string lang;
+	    while ( ! (lang = stringutil::stripFirstWord( value )).empty() ) {
+		langlist.push_back( LangCode(lang) );
+	    }
+	    ndescr->set_content_linguas (langlist);
 	}
 	else if (tag == "LANGUAGE")
 	{
-	  ndescr->set_content_language (LangCode (value));
+	    ndescr->set_content_language (LangCode (value));
 	}
 	else if (tag == "LABEL")
 	{
-	  ndescr->set_content_label (value);
+	    ndescr->set_content_label (value);
 	}
-        else if (tag.find( "LABEL." ) == 0)
-        {
-	  labelmap[LangCode(tag.substr( 6 ))] = value;
-        }
-        else if (tag == "TIMEZONE")
-        {
-	  ndescr->set_content_timezone (value);
-        }
-        else if (tag == "DESCRDIR")
-        {
-	  ndescr->set_content_descrdir (value);
-        }
-        else if (tag == "DATADIR")
-        {
-	  ndescr->set_content_datadir (value);
-        }
-        else if (tag == "REQUIRES")
-        {
-	  ndescr->set_content_requires (PkgRelation (PkgName (value), NONE, PkgEdition ()));
-        }
+	else if (tag.find( "LABEL." ) == 0)
+	{
+	    labelmap[LangCode(tag.substr( 6 ))] = value;
+	}
+	else if (tag == "TIMEZONE")
+	{
+	    ndescr->set_content_timezone (value);
+	}
+	else if (tag == "DESCRDIR")
+	{
+	    ndescr->set_content_descrdir (value);
+	}
+	else if (tag == "DATADIR")
+	{
+	    ndescr->set_content_datadir (value);
+	}
+	else if (tag == "REQUIRES")
+	{
+	    ndescr->set_content_requires (PkgRelation (PkgName (value), NONE, PkgEdition ()));
+	}
 
       } else if ( content.bad() ) {
 	ERR << "Error parsing " << contentfile() << endl;
@@ -811,21 +812,21 @@ PMError ParseDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
       }
     }
 
-  ndescr->set_content_product (PkgNameEd (pname, pversion));
-  ndescr->set_content_baseproduct (PkgNameEd (bname, bversion));
-  ndescr->set_content_archmap (archmap);
-  ndescr->set_content_labelmap (labelmap);
+    ndescr->set_content_product (PkgNameEd (pname, pversion));
+    ndescr->set_content_baseproduct (PkgNameEd (bname, bversion));
+    ndescr->set_content_archmap (archmap);
+    ndescr->set_content_labelmap (labelmap);
 
-  ndescr->set_product_dir (product_dir_r);
+    ndescr->set_product_dir (product_dir_r);
 
-  ///////////////////////////////////////////////////////////////////
-  // done
-  ///////////////////////////////////////////////////////////////////
-  if ( ! err ) {
-    ndescr_r = ndescr;
-  }
+    ///////////////////////////////////////////////////////////////////
+    // done
+    ///////////////////////////////////////////////////////////////////
+    if ( ! err ) {
+	ndescr_r = ndescr;
+    }
 
-  return err;
+    return err;
 }
 
 
@@ -853,7 +854,7 @@ PMError ParseDataUL::tryGetData( InstSrcDataPtr & ndata_r,
     }
 
     parseSelections (ndata, media_r, descr_dir_r);
-  
+
     ///////////////////////////////////////////////////////////////////
     // done
     ///////////////////////////////////////////////////////////////////
@@ -862,6 +863,8 @@ PMError ParseDataUL::tryGetData( InstSrcDataPtr & ndata_r,
     {
 	ndata_r = ndata;			// keep ndata alive
 	MIL << "tryGetDataUL sucessful" << endl;
+	MIL << ndata_r->_packages.size() << " packages" << endl;
+	MIL << ndata_r->_selections.size() << " selections" << endl;
     }
     else
     {
