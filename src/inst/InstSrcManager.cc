@@ -313,7 +313,7 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   // done
   ///////////////////////////////////////////////////////////////////
   DBG << "scanMedia " << mediaurl_r << " found " << idlist_r.size() << " InstSrc(es)" << endl;
-  return err;
+  return scan_err;
 }
 
 ///////////////////////////////////////////////////////////////////
