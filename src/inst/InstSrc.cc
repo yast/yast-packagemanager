@@ -750,15 +750,13 @@ PMError InstSrc::provideMedia ( int medianr ) const
       pos = path.find_last_not_of( "1234567890" );
       if ( pos != string::npos && ++pos != path.size() ) {
 	string mnum( stringutil::numstring( medianr ) );
-	if ( mnum != path.substr( pos ) ) {
-	  path.erase( pos );
-	  path += mnum;
+	path.erase( pos );
+	path += mnum;
 
-	  // give it a try
-	  _media->close();
-	  url.setPath( path );
-	  continue;             // ------------------------------------> continue
-	}
+	// give it a try
+	_media->close();
+	url.setPath( path );
+	continue;             // ------------------------------------> continue
       }
     }
 
