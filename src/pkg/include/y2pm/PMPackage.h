@@ -59,6 +59,7 @@ class REP_CLASS(PMPackage), public PMObject {
       ATTR_POSTUN,
       ATTR_SOURCERPM,
       ATTR_ARCHIVESIZE,
+      ATTR_AUTHOR,
 
       PKG_NUM_ATTRIBUTES
   };

@@ -47,7 +47,7 @@ class REP_CLASS(PMObject), public PMSolvable {
     enum PMObjectAttribute {
       ATTR_SUMMARY = 0,
       ATTR_DESCRIPTION,
-      ATTR_SIZE,
+      ATTR_SIZE, // installed size
 
       PMOBJ_NUM_ATTRIBUTES
     };

@@ -167,6 +167,9 @@ std::string PMPackage::getAttributeName(PMPackageAttribute attr)
 	case ATTR_ARCHIVESIZE:
 	    str = "ARCHIVESIZE";
 	    break;
+	case ATTR_AUTHOR:
+	    str = "AUTHOR";
+	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid
 	    return "invalid query";

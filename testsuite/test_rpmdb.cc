@@ -25,20 +25,21 @@ int main(int argc, char* argv[])
 {
     if(argc<2)
     {
-	cerr << "specify rpm package or -a" << endl;
+	cerr << "specify option" << endl;
 	return 1;
     }
 
-    string package = argv[1];
+    string command = argv[1];
+    unsigned argpos = 2;
 
     RpmDbPtr rpmdb = new RpmDb("/");
     rpmdb->initDatabase();
 
-    if(package == "-a")
+    if(command == "-a")
     {
 	list<PMPackagePtr> pkglist;
 	rpmdb->getPackages(pkglist);
-	for(int i = 2; i < argc; i++)
+	for(int i = argpos; i < argc; i++)
 	{
 	    typedef list<PMPackagePtr>::iterator PkgLI;
 	    PkgLI p = find_if(pkglist.begin(),pkglist.end(),PMPkg_eq(argv[i]));
@@ -62,20 +63,24 @@ int main(int argc, char* argv[])
 	    }
 	}
     }
-    else if(package == "-i")
+    else if(command == "-i")
     {
 	rpmdb->setProgressCallback(progresscallback);
-	for(int i = 2; i < argc; i++)
+	for(int i = argpos; i < argc; i++)
 	{
 	    bool success = rpmdb->installPackage(argv[i],0);
 	    cout << "installation of " << argv[i]
 	    << (success?" succeeded":" failed") << endl;
 	}
     }
-    else
+    else if(command == "-c")
     {
-	bool ret = rpmdb->checkPackage(package);
-	cout << package << " is " << (ret?"ok":"corrupt") << endl;
+	for(int i = argpos; i < argc; i++)
+	{
+	    cout << "Checking: " << argv[i] << endl; 
+	    unsigned ret = rpmdb->checkPackage(argv[i]);
+	    cout << RpmDb::checkPackageResult2string(ret) << endl;
+	}
     }
 
     return 0;
