@@ -388,6 +388,11 @@ bool PMYouPatchPaths::businessProduct()
   return _businessProduct;
 }
 
+void PMYouPatchPaths::setArchs( const list<PkgArch> &a )
+{
+  _archs = a;
+}
+
 list<PkgArch> PMYouPatchPaths::archs()
 {
   return _archs;

@@ -246,6 +246,12 @@ class InstYou {
     */
     std::string password() const { return _password; }
 
+    /**
+      Remove all packages which aren't to be installed because of their
+      architecture.
+    */
+    void filterArchitectures( PMYouPatchPtr &patch );
+
   public:
     class Callbacks
     {

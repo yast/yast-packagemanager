@@ -164,10 +164,12 @@ PMError InstYou::retrievePatchInfo( bool reload, bool checkSig )
     return error;
   }
 
+
   Y2PM::youPatchManager().poolAddCandidates( _patches );
 
-  list<PMYouPatchPtr>::const_iterator itPatch;
+  list<PMYouPatchPtr>::iterator itPatch;
   for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
+    filterArchitectures( *itPatch );
     Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
   }
 
@@ -1147,4 +1149,93 @@ int InstYou::quickCheckUpdates()
   }
 
   return patchCount;
+}
+
+void InstYou::filterArchitectures( PMYouPatchPtr &patch )
+{
+  D__ << "filter " << patch->name() << endl;
+
+  list<PMPackagePtr> packages = patch->packages();
+  list<PMPackagePtr>::iterator it1 = packages.begin();
+  while( it1 != packages.end() ) {
+    D__ << "  PKG: " << (*it1)->nameEdArch() << endl;
+  
+    PMSelectablePtr s = Y2PM::packageManager().getItem( (*it1)->name() );
+
+    // Handle installed packages. If the packages is already installed, all
+    // instances of the packages in the patch which have a different
+    // architecture are discarded.
+    if ( s ) {
+      PMPackagePtr installedPkg = s->installedObj();
+      if ( installedPkg ) {
+        D__ << "    Package is installed" << endl;
+        if ( installedPkg->arch() == (*it1)->arch() ) {
+          D__ << "    Same arch" << endl;
+          ++it1;
+        } else {
+          D__ << "    Different arch" << endl;
+          it1 = packages.erase( it1 );
+        }
+        continue;
+      }
+    }
+
+    D__ << "    Package isn't installed." << endl;
+
+    std::list<PkgArch> archs = _paths->archs();
+
+    // Check if package instance has an allowed arch. If not, discard it.
+    std::list<PkgArch>::const_iterator archIt;
+    for( archIt = archs.begin(); archIt != archs.end(); ++archIt ) {
+      if ( *archIt == (*it1)->arch() ) break;
+    }
+    if ( archIt == archs.end() ) {
+      it1 = packages.erase( it1 );
+      continue;
+    }
+    
+    // Handle uninstalled packages. The instance of the package which has the
+    // best architecture is used. All other instances are discarded.
+    std::list<PMPackagePtr>::iterator bestArch = it1;
+    list<PMPackagePtr>::iterator it2 = it1;
+    ++it2;
+    while( it2 != packages.end() ) {
+      D__ << "      Iterating " << (*it2)->nameEdArch() << endl;
+      if ( (*bestArch)->name() == (*it2)->name() ) {
+        if ( (*bestArch)->arch() == (*it2)->arch() ) {
+          ERR << "Two packages '" << (*bestArch)->name() << "' with same "
+              << "architecture in the same patch is illegal." << endl;
+          ++it2;
+        } else {
+          std::list<PkgArch>::const_iterator archIt;
+          for( archIt = archs.begin(); archIt != archs.end(); ++archIt ) {
+            if ( *archIt == (*bestArch)->arch() ) {
+              D__ << "        already have best arch" << endl;
+              it2 = packages.erase( it2 );
+              break;
+            } else if ( *archIt == (*it2)->arch() ) {
+              D__ << "        better arch." << endl;
+              if ( bestArch == it1 ) ++it1;
+              packages.erase( bestArch );
+              bestArch = it2;
+              ++it2;
+              break;
+            }
+          }
+          if ( archIt == archs.end() ) {
+            D__ << "        arch no allowed." << endl;
+            if ( bestArch == it1 ) ++it1;
+            packages.erase( bestArch );
+            break;
+          }
+        }
+      } else {
+        ++it2;
+      }
+    }
+  
+    ++it1;
+  }
+
+  patch->setPackages( packages );
 }
