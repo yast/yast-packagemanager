@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug 12 18:37:50 CEST 2003 - ma@suse.de
+
+- Adapt to changes in liby2util.
+- 2.8.5
+
+-------------------------------------------------------------------
 Thu Aug  7 15:02:57 CEST 2003 - ma@suse.de
 
 - Close rpmdatabase when installing/deleting packages via rpm to
