@@ -65,9 +65,24 @@ class InstYou {
     
     /**
      * Read patch information files.
+     *
+     * @param url URL of patch server.
      */
-    PMError retrievePatches( const Url & );
+    PMError retrievePatches( const Url &url );
     
+    /**
+     * Download packages belonging to selected patches.
+     */
+    PMError retrievePackages();
+    
+    /**
+     * Install patches to target system.
+     *
+     * @param dryrun Don't actually install packages. Just print debug output. 
+     */
+    PMError installPatches( bool dryrun = false );
+
+  public:
     /**
      * Select Patches. If there are YaST2 patches, only the newest YaST2 patch
      * will be selected.
@@ -77,15 +92,12 @@ class InstYou {
     void selectPatches( int kinds );
 
     /**
-     * Download packages belonging to selected patches.
+     * Deselect all patches which only contain packages which aren't installed
+     * or which contain packages which are older than the packages that are
+     * installed.
      */
-    PMError retrievePackages();
-    
-    /**
-     * Install patches to target system.
-     */
-    PMError installPatches();
-  
+    void filterPatchSelection();
+
   private:
     PMYouPatchInfoPtr _info;
     PMYouPatchPathsPtr _paths;
