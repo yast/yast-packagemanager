@@ -8,3 +8,4 @@ Makefile.in
 online_update
 installation_sources
 genIS_PLAINcache
+*.loT

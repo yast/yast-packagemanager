@@ -6,3 +6,4 @@ Makefile.in
 *.prg
 .deps
 .libs
+*.loT
