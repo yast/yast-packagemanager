@@ -123,3 +123,11 @@ PMSelectionDataProvider::archivesize() const
 {
     return 0;
 }
+
+const std::string
+PMSelectionDataProvider::sortby() const
+{
+    return "";
+}
+
+

@@ -51,10 +51,10 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 
 	// PMObject
 
-	TagCacheRetrieval::retrieval_t _attr_SUMMARY;
-	TagCacheRetrieval::retrieval_t _attr_DESCRIPTION;
-	TagCacheRetrieval::retrieval_t _attr_INSNOTIFY;
-	TagCacheRetrieval::retrieval_t _attr_DELNOTIFY;
+	TagCacheRetrievalPos _attr_SUMMARY;
+	TagCacheRetrievalPos _attr_DESCRIPTION;
+	TagCacheRetrievalPos _attr_INSNOTIFY;
+	TagCacheRetrievalPos _attr_DELNOTIFY;
 	FSize _attr_SIZE;
 
 	// PMPackage
@@ -63,9 +63,9 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// INSTALLTIME
 	// DISTRIBUTION
 	// VENDOR
-	TagCacheRetrieval::retrieval_t _attr_LICENSE;
+	TagCacheRetrievalPos _attr_LICENSE;
 	// PACKAGER
-	TagCacheRetrieval::retrieval_t _attr_GROUP;
+	TagCacheRetrievalPos _attr_GROUP;
 	// CHANGELOG
 	// URL
 	// OS
@@ -73,14 +73,14 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// POSTIN
 	// PREUN
 	// POSTUN
-	TagCacheRetrieval::retrieval_t _attr_SOURCERPM;
+	TagCacheRetrievalPos _attr_SOURCERPM;
 	FSize _attr_ARCHIVESIZE;
-	TagCacheRetrieval::retrieval_t _attr_AUTHORS;
+	TagCacheRetrievalPos _attr_AUTHORS;
 	// FILENAMES
-	TagCacheRetrieval::retrieval_t _attr_RECOMMENDS;
-	TagCacheRetrieval::retrieval_t _attr_SUGGESTS;
-	TagCacheRetrieval::retrieval_t _attr_LOCATION;
-	TagCacheRetrieval::retrieval_t _attr_KEYWORDS;
+	TagCacheRetrievalPos _attr_RECOMMENDS;
+	TagCacheRetrievalPos _attr_SUGGESTS;
+	TagCacheRetrievalPos _attr_LOCATION;
+	TagCacheRetrievalPos _attr_KEYWORDS;
 
 	// retrieval pointer for packages data
 	TagCacheRetrieval *_package_retrieval;
@@ -143,7 +143,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// suse packages values
 	const std::list<std::string> recommends() const;
 	const std::list<std::string> suggests() const;
-	const std::list<std::string> location() const;
+	const std::string location() const;
 	const std::list<std::string> keywords() const;
 
 	/**

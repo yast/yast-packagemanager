@@ -114,7 +114,7 @@ const std::list<std::string>
 PMPackage::recommends() const { return _dataProvider->recommends(); }
 const std::list<std::string>
 PMPackage::suggests() const { return _dataProvider->suggests(); }
-const std::list<std::string>
+const std::string
 PMPackage::location() const { return _dataProvider->location(); }
 const std::list<std::string>
 PMPackage::keywords() const { return _dataProvider->keywords(); }

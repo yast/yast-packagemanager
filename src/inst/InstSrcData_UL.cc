@@ -122,8 +122,7 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
 #define SET_VALUE(tagname,value) \
     do { dataprovider->_attr_##tagname = value; } while (0)
 #define SET_POS(tagname,start,stop) \
-    do { dataprovider->_attr_##tagname.begin = start;\
-	 dataprovider->_attr_##tagname.end = stop; } while (0)
+    do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
     tagset->getTagByIndex(InstSrcData_ULPkgTags::tagname)
 #define SET_CACHE(tagname) \
@@ -221,8 +220,7 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
     CommonPkdParser::Tag *tagptr;		// for SET_MULTI()
 
 #define SET_POS(tagname,start,stop) \
-    do { dataprovider->_attr_##tagname.begin = start;\
-	 dataprovider->_attr_##tagname.end = stop; } while (0)
+    do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
     tagset->getTagByIndex(InstSrcData_ULLangTags::tagname)
 #define SET_CACHE(tagname) \
@@ -249,7 +247,7 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
 //	DESCRIPTION : pass selection data from tagset to PMSelection
 
 PMSelectionPtr
-InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset)
+InstSrcData_UL::Tag2Selection (const std::string& sortby, TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset)
 {
     // SELECTION
     string single ((tagset->getTagByIndex(InstSrcData_ULSelTags::SELECTION))->Data());
@@ -277,8 +275,7 @@ InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::Tag
 #define SET_VALUE(tagname,value) \
     do { dataprovider->_attr_##tagname = value; } while (0)
 #define SET_POS(tagname,start,stop) \
-    do { dataprovider->_attr_##tagname.begin = start;\
-	 dataprovider->_attr_##tagname.end = stop; } while (0)
+    do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
     tagset->getTagByIndex(InstSrcData_ULSelTags::tagname)
 #define SET_CACHE(tagname) \
@@ -308,6 +305,7 @@ InstSrcData_UL::Tag2Selection (TagCacheRetrieval *selcache, CommonPkdParser::Tag
 
     SET_CACHE (INSPACKS);
     SET_CACHE (DELPACKS);
+    SET_VALUE (SORTBY, sortby);
 
 #undef SET_VALUE
 #undef SET_POS
@@ -816,7 +814,7 @@ MIL << "Reading " << selectionname << endl;
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    selectionlist->push_back (Tag2Selection (selcache, tagset));
+		    selectionlist->push_back (Tag2Selection (*selfile, selcache, tagset));
 		    count++;
 		    tagset->clear();
 		    repeatassign = false;	// only single match
@@ -832,7 +830,7 @@ MIL << "Reading " << selectionname << endl;
 
 	if (parse)
 	{
-	    selectionlist->push_back (Tag2Selection (selcache, tagset));
+	    selectionlist->push_back (Tag2Selection (*selfile, selcache, tagset));
 	    count++;
 	}
 	tagset->clear();

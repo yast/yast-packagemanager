@@ -215,10 +215,10 @@ PMPackageDataProvider::suggests() const
     return std::list<std::string>();
 }
 
-const std::list<std::string>
+const std::string
 PMPackageDataProvider::location() const
 {
-    return std::list<std::string>();
+    return "";
 }
 
 const std::list<std::string>

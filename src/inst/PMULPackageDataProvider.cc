@@ -60,10 +60,13 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
 {
 }
 
+#define FALLBACK(attr,func) \
+  do { if (attr.empty() && (_fallback_provider != 0)) return _fallback_provider->func(); } while (0);
+
 const std::string
 PMULPackageDataProvider::summary() const
 {
-MIL << "PMULPackageDataProvider::summary(" << _attr_SUMMARY.begin << ", " << _attr_SUMMARY.end << ")" << endl;
+    FALLBACK(_attr_SUMMARY,summary);
     std::string value;
     _language_retrieval->retrieveData (_attr_SUMMARY, value);
     return value;
@@ -72,6 +75,7 @@ MIL << "PMULPackageDataProvider::summary(" << _attr_SUMMARY.begin << ", " << _at
 const std::list<std::string>
 PMULPackageDataProvider::description() const
 {
+    FALLBACK(_attr_DESCRIPTION,description);
     std::list<std::string> value;
     _language_retrieval->retrieveData (_attr_DESCRIPTION, value);
     return value;
@@ -80,6 +84,7 @@ PMULPackageDataProvider::description() const
 const std::list<std::string>
 PMULPackageDataProvider::insnotify() const
 {
+    FALLBACK(_attr_INSNOTIFY,insnotify);
     std::list<std::string> value;
     _language_retrieval->retrieveData (_attr_INSNOTIFY, value);
     return value;
@@ -88,6 +93,7 @@ PMULPackageDataProvider::insnotify() const
 const std::list<std::string>
 PMULPackageDataProvider::delnotify() const
 {
+    FALLBACK(_attr_DELNOTIFY,delnotify);
     std::list<std::string> value;
     _language_retrieval->retrieveData (_attr_DELNOTIFY, value);
     return value;
@@ -133,6 +139,7 @@ PMULPackageDataProvider::vendor() const
 const std::string
 PMULPackageDataProvider::license() const
 {
+    FALLBACK(_attr_LICENSE,license);
     std::string value;
     _package_retrieval->retrieveData (_attr_LICENSE, value);
     return value;
@@ -147,6 +154,7 @@ PMULPackageDataProvider::packager() const
 const std::string
 PMULPackageDataProvider::group() const
 {
+    FALLBACK(_attr_GROUP,group);
     std::string value;
     _package_retrieval->retrieveData (_attr_GROUP, value);
     return value;
@@ -197,6 +205,7 @@ PMULPackageDataProvider::postun() const
 const std::string
 PMULPackageDataProvider::sourcerpm() const
 {
+    FALLBACK(_attr_SOURCERPM,sourcerpm);
     std::string value;
     _package_retrieval->retrieveData (_attr_SOURCERPM, value);
     return value;
@@ -211,8 +220,9 @@ PMULPackageDataProvider::archivesize() const
 const std::list<std::string>
 PMULPackageDataProvider::authors() const
 {
+    FALLBACK(_attr_AUTHORS,authors);
     std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_AUTHORS, value);
+    _package_retrieval->retrieveData (_attr_AUTHORS, value);
     return value;
 }
 
@@ -226,32 +236,36 @@ PMULPackageDataProvider::filenames() const
 const std::list<std::string>
 PMULPackageDataProvider::recommends() const
 {
+    FALLBACK(_attr_RECOMMENDS,recommends);
     std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_RECOMMENDS, value);
+    _package_retrieval->retrieveData (_attr_RECOMMENDS, value);
     return value;
 }
 
 const std::list<std::string>
 PMULPackageDataProvider::suggests() const
 {
+    FALLBACK(_attr_SUGGESTS,suggests);
     std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_SUGGESTS, value);
+    _package_retrieval->retrieveData (_attr_SUGGESTS, value);
     return value;
 }
 
-const std::list<std::string>
+const std::string
 PMULPackageDataProvider::location() const
 {
-    std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_LOCATION, value);
+    FALLBACK(_attr_LOCATION,location);
+    std::string value;
+    _package_retrieval->retrieveData (_attr_LOCATION, value);
     return value;
 }
 
 const std::list<std::string>
 PMULPackageDataProvider::keywords() const
 {
+    FALLBACK(_attr_KEYWORDS,keywords);
     std::list<std::string> value;
-    _language_retrieval->retrieveData (_attr_KEYWORDS, value);
+    _package_retrieval->retrieveData (_attr_KEYWORDS, value);
     return value;
 }
 

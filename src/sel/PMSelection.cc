@@ -87,6 +87,8 @@ const std::list<std::string>
 PMSelection::delpacks(const std::string& lang) const { return _dataProvider->delpacks(lang); }
 const FSize
 PMSelection::archivesize() const { return _dataProvider->archivesize(); }
+const std::string
+PMSelection::sortby() const { return _dataProvider->sortby(); }
 
 
 ///////////////////////////////////////////////////////////////////
