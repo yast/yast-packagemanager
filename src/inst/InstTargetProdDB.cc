@@ -379,6 +379,7 @@ PMError InstTargetProdDB::remove( const constInstSrcDescrPtr & isd_r )
       }
       // finaly from _prodmap
       _prodmap.erase( it );
+      break;
     }
   }
 
