@@ -91,19 +91,6 @@ show_pmpackage (PMPackagePtr p)
     cout << "Location: " << p->location() << endl;
     cout << "Keywords: " << list2string(p->keywords()) << endl;
 
-    cout << "-- Package --" << endl;
-	for (PMPackage::PMPackageAttribute attr
-	= PMPackage::PMPackageAttribute(PMPackage::PKG_ATTR_BEGIN);
-	    attr < PMPackage::PMPKG_NUM_ATTRIBUTES;
-	attr = PMPackage::PMPackageAttribute(attr+1))
-    {
-	cout
-	<< p->getAttributeName(attr)
-	<< ": "
-	<< p->getAttributeValue(attr)
-	<< endl;
-    }
-
     return;
 }
 
