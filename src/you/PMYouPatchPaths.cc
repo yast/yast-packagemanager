@@ -301,14 +301,15 @@ list<PkgArch> PMYouPatchPaths::archs()
 
 PMError PMYouPatchPaths::requestServers( const string &u )
 {
-  DBG << "url: '" << u << endl;
+  DBG << "url: '" << u << "'" << endl;
 
   string lastServer = config()->readEntry( "LastServer" );
   if ( !lastServer.empty() ) {
     addServer( Url( lastServer ) );
   }
 
-  readServers( localYouServers() );
+  PMError error = readServers( localYouServers() );
+  if ( error ) return error;
 
   SysConfig cfg( "onlineupdate" );
   
@@ -334,16 +335,11 @@ PMError PMYouPatchPaths::requestServers( const string &u )
 
     url = encodeUrl( url );
 
-    DBG << "url: '" << url << endl;
+    DBG << "url: '" << url << "'" << endl;
 
-    Wget wget;
-    wget.setCookiesFile( cookiesFile().asString() );
-
-    WgetStatus status = wget.getFile( Url(url), cachedYouServers() );
-
-    if ( status != WGET_OK ) {
-      return PMError( YouError::E_get_suseservers_failed,
-                      wget.error_string( status ) );
+    PMError error = MediaAccess::getFile( Url( url ), cachedYouServers() );
+    if ( error ) {
+      return PMError( YouError::E_get_suseservers_failed );
     }
 
     // Remove obsolete file.
@@ -352,12 +348,13 @@ PMError PMYouPatchPaths::requestServers( const string &u )
       PathInfo::unlink( localSuseServers() );
     }
   } else {
-    readServers( localSuseServers() );
+    error = readServers( localSuseServers() );
+    if ( error ) return error;
   }
 
-  readServers( cachedYouServers() );
+  error = readServers( cachedYouServers() );
 
-  return PMError();
+  return error;
 }
 
 PMError PMYouPatchPaths::readServers( const Pathname &file )
@@ -373,6 +370,7 @@ PMError PMYouPatchPaths::readServers( const Pathname &file )
   string line;
   ifstream in( file.asString().c_str() );
   if ( in.fail() ) {
+    ERR << "Error reading " << file << endl;
     return PMError( YouError::E_read_suseservers_failed, file.asString() );
   }
   while( getline( in, line ) ) {
@@ -446,8 +444,13 @@ string PMYouPatchPaths::encodeUrl( const string &url )
   
   string::const_iterator it;
   for( it = url.begin(); it != url.end(); ++it ) {
-    if ( *it == ' ' ) result += "%20";
-    else result += *it;
+    switch ( *it ) {
+      case ' ':
+        result += "%20";
+        break;
+      default:
+        result += *it;
+    }
   }
 
   D__ << result << endl;
