@@ -42,6 +42,7 @@ typedef enum media_result {
     E_no_destination,
     E_invalid_device,
     E_invalid_filesystem,
+    E_no_host_specified,
     // wget errors
     E_file_not_found,
     E_login_failed,
@@ -67,6 +68,7 @@ const char* const media_result_strings[] = {
 	N_("no destination"),
 	N_("invalid device"),
 	N_("invalid filesystem"),
+	N_("no hostname specified"),
 
 	N_("file not found"),
 	N_("login failed"),
