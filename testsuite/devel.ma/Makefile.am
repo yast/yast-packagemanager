@@ -11,15 +11,13 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		media/include		\
 		query/include		\
 		libPkgDep/include	\
-	   ) -I$(includedir)
-
+	   ) -I$(includedir) -I/Local/ma/yast2/current/source/core/wfm/src
 # -I/Local/ma/yast2/current/source/core/wfm/src
 
-LDADD = $(top_builddir)/src/liby2pm.la
-
+LDADD = $(top_builddir)/src/liby2pm.la /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 # /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 
-#LDFLAGS = -static
+LDFLAGS = -static
 
 CLEANFILES = *.bin
 
@@ -30,7 +28,7 @@ EXTRA_PROGRAMS = \
 	test_rpm.bin
 
 ma_test_bin_SOURCES = ma_test.cc
-ma_test_bin_LDADD = $(LDADD)
+ma_test_bin_LDADD = $(LDADD) -lycp
 
 rpmtest_bin_SOURCES = rpmtest.cc
 rpmtest_bin_LDADD = $(LDADD) -lycp
