@@ -232,6 +232,24 @@ MediaAccess::provideFile (const Pathname & filename) const
 }
 
 
+PMError
+MediaAccess::releaseFile( const Pathname & filename ) const
+{
+  if ( !_handler )
+    return Error::E_ok;
+
+  return _handler->releaseFile( filename );
+}
+
+PMError
+MediaAccess::releasePath( const Pathname & pathname ) const
+{
+  if ( !_handler )
+    return Error::E_ok;
+
+  return _handler->releasePath( pathname );
+}
+
 // Return content of directory on media
 PMError
 MediaAccess::dirInfo( std::list<std::string> & retlist,
