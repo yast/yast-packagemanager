@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Apr 15 09:14:19 CEST 2004 - nashif@suse.de
+
+- #38391: fix for http/ftp installation of multiple sources 
+  (SLES/CORE)
+- 2.9.35
+
+-------------------------------------------------------------------
 Tue Apr  6 22:38:59 CEST 2004 - ma@suse.de
 
 - Install y2pmrc in system after installation/update.
