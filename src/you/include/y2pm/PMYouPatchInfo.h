@@ -107,8 +107,6 @@ class PMYouPatchInfo : virtual public Rep {
     CommonPkdParser::TagSet *_patchtagset;
     CommonPkdParser::TagSet *_packagetagset;
     
-    std::list<std::string> *_patchFiles;
-
     PMYouPackageDataProviderPtr _packageProvider;
 
     PMYouPatchPathsPtr _paths;
