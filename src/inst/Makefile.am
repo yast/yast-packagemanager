@@ -8,6 +8,8 @@ SUBDIRS = include rpm
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
 		pkg/include	\
+		sel/include	\
+		you/include	\
 		inst/include	\
 		media/include	\
 	   ) -I$(includedir) -I$(QTDIR)/include

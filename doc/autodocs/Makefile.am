@@ -12,6 +12,8 @@ CLEANFILES = $(html_DATA)
 SRC_INCLUDEDIRS =	$(addprefix $(top_srcdir)/src/,	\
 				include			\
 				pkg/include		\
+				sel/include		\
+				you/include		\
 				inst/include		\
 				inst/rpm/include	\
 				media/include		\

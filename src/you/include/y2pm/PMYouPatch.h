@@ -10,70 +10,50 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMPackage.h
+  File:       PMYouPatch.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose: Defines the Package object.
+  Purpose: Defines the YouPatch object.
 
 /-*/
-#ifndef PMPackage_h
-#define PMPackage_h
+#ifndef PMYouPatch_h
+#define PMYouPatch_h
 
 #include <iosfwd>
 #include <string>
 
-#include <y2pm/PMPackageDataProviderPtr.h>
-#include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMYouPatchDataProviderPtr.h>
+#include <y2pm/PMYouPatchPtr.h>
 
 #include <y2pm/PMObject.h>
-#include <y2pm/PkgArch.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPackage
+//	CLASS NAME : PMYouPatch
 /**
  * The Package.
  **/
-class PMPackage : virtual public Rep, public PMObject {
-  REP_BODY(PMPackage);
+class PMYouPatch : virtual public Rep, public PMObject {
+  REP_BODY(PMYouPatch);
 
   public:
 
     /**
-     * Attributes provided by PMPackage
+     * Attributes provided by PMYouPatch
      **/
-    enum PMPackageAttribute {
-      PKG_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
-      ATTR_BUILDTIME = PKG_ATTR_BEGIN,
-      ATTR_BUILDHOST,
-      ATTR_INSTALLTIME,
-      ATTR_DISTRIBUTION,
-      ATTR_VENDOR,
-      ATTR_LICENSE,
-      ATTR_PACKAGER,
-      ATTR_GROUP,
-      ATTR_CHANGELOG,
-      ATTR_URL,
-      ATTR_OS,
-      ATTR_ARCH,
-      ATTR_PREIN,
-      ATTR_POSTIN,
-      ATTR_PREUN,
-      ATTR_POSTUN,
-      ATTR_SOURCERPM,
-      ATTR_ARCHIVESIZE,
-      ATTR_AUTHOR,
-      ATTR_FILENAMES,
+    enum PMYouPatchAttribute {
+      YOU_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
+      // ATTR_WAHTEVER_IS_FIRST = YOU_ATTR_BEGIN,
       // last entry:
-      PKG_NUM_ATTRIBUTES
+      YOU_NUM_ATTRIBUTES
     };
 
     /**
      * Get attribute name as string.
      **/
-    std::string getAttributeName(PMPackageAttribute attr) const;
+    std::string getAttributeName(PMYouPatchAttribute attr) const;
 
     /**
      * Access to base class getAttributeName
@@ -83,7 +63,7 @@ class PMPackage : virtual public Rep, public PMObject {
     /**
      * Get attribute value
      **/
-    PkgAttributeValue getAttributeValue(PMPackageAttribute attr) const;
+    PkgAttributeValue getAttributeValue(PMYouPatchAttribute attr) const;
 
     /**
      * Access to base class getAttributeValue
@@ -92,9 +72,7 @@ class PMPackage : virtual public Rep, public PMObject {
 
   protected:
 
-    PkgArch _arch;
-
-    PMPackageDataProviderPtr _dataProvider;
+    PMYouPatchDataProviderPtr _dataProvider;
 
   protected:
 
@@ -105,22 +83,17 @@ class PMPackage : virtual public Rep, public PMObject {
 
   public:
 
-    PMPackage( const PkgName &    name_r,
-	       const PkgEdition & edition_r,
-	       const PkgArch &    arch_r );
+    PMYouPatch( const PkgName &    name_r,
+		const PkgEdition & edition_r );
 
-    virtual ~PMPackage();
-
-  public:
-
-    const PkgArch& arch() const { return _arch; }
+    virtual ~PMYouPatch();
 
   public:
 
     /** assign a data provider
      * @param dataprovider the dataprovider
      * */
-    void setDataProvider(PMPackageDataProviderPtr dataprovider)
+    void setDataProvider(PMYouPatchDataProviderPtr dataprovider)
     { _dataProvider = dataprovider; }
 
   public:
@@ -130,4 +103,4 @@ class PMPackage : virtual public Rep, public PMObject {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // PMPackage_h
+#endif // PMYouPatch_h

@@ -1,5 +1,5 @@
 #
-# Makefile.am for packagemanager/src/instsrc
+# Makefile.am for packagemanager/src/pkg
 #
 
 SUBDIRS = include
@@ -11,14 +11,12 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		sel/include	\
 		you/include	\
 		inst/include	\
-		inst/rpm/include	\
 		media/include	\
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-noinst_LTLIBRARIES = liby2pminstrpmsrc.la
+noinst_LTLIBRARIES = liby2pmpkg.la
 
-liby2pminstrpmsrc_la_SOURCES = 	\
-	RpmDb.cc \
-	PMRpmPackageDataProvider.cc
-
-liby2pminstrpmsrc_la_LIBADD = -ly2util
+liby2pmpkg_la_SOURCES = \
+	PMYouPatch.cc \
+	PMYouPatchDataProvider.cc \
+	PMYouPatchManager.cc
