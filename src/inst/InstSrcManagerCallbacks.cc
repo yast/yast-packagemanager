@@ -41,7 +41,9 @@ namespace InstSrcManagerCallbacks {
 					   const string & url,
 					   const string & product,
 					   int current,
+					   const std::string & currentLabel,
 					   int expected,
+					   const std::string & expectedLabel,
                                            bool doublesided ) {
     return "";
   }

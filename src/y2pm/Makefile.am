@@ -36,6 +36,8 @@ pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
         \
         InstSrcManager.h InstSrcManagerCallbacks.h	\
 	\
+	F_Media.h F_Medianames.h	\
+	\
 	InstSrcError.h				\
 	InstSrc.h	InstSrcPtr.h		\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\

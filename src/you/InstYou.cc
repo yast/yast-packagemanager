@@ -1675,7 +1675,8 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
       string productStr = _("YOU Patch CD");
       string urlStr = _settings->patchUrl().asString();
       string result = callback->changeMedia( errorStr, urlStr, productStr,
-                                             lastNumber, number,
+                                             lastNumber, "",
+					     number, "",
                                              masterMedia->doubleSided() );
       if ( result == "" ) {
         log( _("Ok.\n") );
