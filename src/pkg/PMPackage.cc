@@ -48,8 +48,7 @@ PMPackage::PMPackage( const PkgName &    name_r,
 		      const PkgEdition & edition_r,
 		      const PkgArch &    arch_r,
 		      PMPackageDataProviderPtr dataProvider_r )
-    : PMObject( name_r, edition_r )
-    , _arch( arch_r )
+    : PMObject( name_r, edition_r, arch_r )
     , _dataProvider( dataProvider_r )
 {
 }
@@ -93,7 +92,6 @@ std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
     ENUM_OUT( CHANGELOG );
     ENUM_OUT( URL );
     ENUM_OUT( OS );
-    ENUM_OUT( ARCH );
     ENUM_OUT( PREIN );
     ENUM_OUT( POSTIN );
     ENUM_OUT( PREUN );
@@ -147,7 +145,7 @@ PkgAttributeValue PMPackage::getAttributeValue( PMPackageAttribute attr ) const
 //
 ostream & PMPackage::dumpOn( ostream & str ) const
 {
-  PMObject::dumpOn( str ) << '(' << _arch << ')';
+  PMObject::dumpOn( str );
   return str;
 }
 

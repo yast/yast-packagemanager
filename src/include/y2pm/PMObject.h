@@ -90,7 +90,8 @@ class PMObject : virtual public Rep, public PMSolvable {
   public:
 
     PMObject( const PkgName &    name_r,
-	      const PkgEdition & edition_r );
+	      const PkgEdition & edition_r,
+	      const PkgArch &    arch_r );
 
     virtual ~PMObject();
 

@@ -44,8 +44,9 @@ IMPL_DERIVED_POINTER( PMObject, PMSolvable, PMSolvable );
 //	DESCRIPTION :
 //
 PMObject::PMObject( const PkgName &    name_r,
-		    const PkgEdition & edition_r )
-    : PMSolvable(name_r, edition_r)
+		    const PkgEdition & edition_r,
+		    const PkgArch &    arch_r )
+    : PMSolvable(name_r, edition_r, arch_r)
 {
 }
 

@@ -48,7 +48,7 @@ PMSelection::PMSelection( const PkgName &    name_r,
 			  const PkgEdition & edition_r,
 			  const PkgArch &    arch_r,
 			  PMSelectionDataProviderPtr dataProvider_r )
-    : PMObject( name_r, edition_r )
+    : PMObject( name_r, edition_r, arch_r )
     , _dataProvider( dataProvider_r )
 {
 }
@@ -82,6 +82,7 @@ string PMSelection::getAttributeName( PMSelectionAttribute attr ) const
     ENUM_OUT( VISIBLE );
     ENUM_OUT( INSTALL );
     ENUM_OUT( DELETE );
+    ENUM_OUT( ARCHIVESIZE );
 #undef ENUM_OUT
 
   ///////////////////////////////////////////////////////////////////

@@ -71,8 +71,9 @@ PMSolvable::PMSolvable()
 //	DESCRIPTION :
 //
 PMSolvable::PMSolvable( const PkgName& name,
-			const PkgEdition& edition )
-      : _name(name), _edition(edition)
+			const PkgEdition& edition,
+			const PkgArch& arch )
+      : _name(name), _edition(edition), _arch(arch)
 {
 }
 
@@ -104,6 +105,7 @@ string PMSolvable::getAttributeName( PMSolvableAttribute attr ) const
     ENUM_OUT( NAME );
     ENUM_OUT( VERSION );
     ENUM_OUT( RELEASE );
+    ENUM_OUT( ARCH );
     ENUM_OUT( REQUIRES );
     ENUM_OUT( PREREQUIRES );
     ENUM_OUT( PROVIDES );
@@ -146,6 +148,10 @@ PkgAttributeValue PMSolvable::getAttributeValue( PMSolvableAttribute attr ) cons
 
   case ATTR_RELEASE:
     return PkgAttributeValue( edition().release() );
+    break;
+
+  case ATTR_ARCH:
+    return PkgAttributeValue( arch() );
     break;
 
   case ATTR_REQUIRES:
