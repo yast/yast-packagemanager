@@ -24,7 +24,9 @@
 #include <iosfwd>
 #include <fstream>
 #include <y2util/CommonPkdParser.h>
+#include <y2util/TagCacheRetrieval.h>
 
+#include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/InstSrcData_ULPtr.h>
 #include <y2pm/InstSrcData.h>
 #include <y2pm/PMPackage.h>
@@ -72,7 +74,7 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
 				MediaAccessPtr media_r, const Pathname & descr_dir_r );
 
     private:
-	static PMPackagePtr Tag2Package( CommonPkdParser::TagSet * tagset );
+	static PMPackagePtr Tag2Package( TagCacheRetrieval *retrieval, CommonPkdParser::TagSet * tagset );
 };
 
 ///////////////////////////////////////////////////////////////////
