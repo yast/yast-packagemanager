@@ -104,6 +104,11 @@ class PMYouPatchInfo : virtual public Rep {
                            const PMYouPatchPtr &patch );
 
     /**
+      Return language code used for displaying messages to the user.
+    */
+    LangCode langCode() const { return _lang; }
+
+    /**
      * Translate standard lang code into full language name as used in patch
      * info files.
      */
@@ -141,6 +146,8 @@ class PMYouPatchInfo : virtual public Rep {
     CommonPkdParser::TagSet *_packagetagset;
     
     PMYouPatchPathsPtr _paths;
+
+    LangCode _lang;
 
     MediaAccess _media;
 
