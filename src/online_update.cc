@@ -31,9 +31,11 @@ void usage()
        << " [optional]"
        << endl << endl
        << "-u url      Base URL of directory tree used to get patches from." << endl
-       << "            Supported protocols: http, ftp, smb, nfs, cd, dvd, dir." << endl
+       << "            Supported protocols: http, ftp, smb, nfs, cd, dvd, file." << endl
+       << "            If no protocol is given a local file is assumed." << endl
        << "            Examples: 'ftp://ftp.suse.com/pub/suse', 'cd:///'," << endl
-       << "                      'dir:///var/lib/YaST2/you/mnt'" << endl
+       << "                      'file:/var/lib/YaST2/you/mnt'" << endl
+       << "                      '/var/lib/YaST2/you/mnt'" << endl
        << endl
        << "-g          Only download patches, don't install." << endl
        << "-i          Install downloaded patches, don't download." << endl
@@ -53,7 +55,8 @@ void usage()
        << "-d          Dry run. Only get patches, don't install them." << endl
        << "-n          No signature check of downloaded files." << endl
        << endl
-       << "-s          Show list of patches." << endl
+       << "-s          Show list of patches (Additionaly use -d to only show list " << endl
+       << "            of patches without installing them)." << endl
        << "-V          Be verbose." << endl
        << "-D          Debug output." << endl
        << endl
@@ -81,7 +84,7 @@ int main( int argc, char **argv )
 
   bool dryrun = false;
   bool checkSig = true;
-  bool showPatches = true;
+  bool showPatches = false;
   bool verbose = false;
   bool debug = false;
   bool autoGet = false;
