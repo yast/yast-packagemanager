@@ -18,6 +18,7 @@
 /-*/
 
 #include <iostream>
+#include <fstream>
 
 #include <y2util/Y2SLog.h>
 
@@ -136,4 +137,23 @@ Pathname PMYouPatchManager::settingsFile() const
 FSize PMYouPatchManager::totalDownloadSize()
 {
   return instYou().totalDownloadSize();
+}
+
+list<string> PMYouPatchManager::rawPatchInfo( const PMYouPatchPtr &patch )
+{
+  list<string> text;
+
+  if ( patch ) {
+    ifstream in( patch->localFile().asString().c_str() );
+    if ( in.fail() ) {
+      ERR << "Unable to load '" << patch->localFile() << "'" << endl;
+    } else {
+      string line;
+      while( getline( in, line ) ) {
+        text.push_back( line );
+      }
+    }
+  }
+
+  return text;
 }

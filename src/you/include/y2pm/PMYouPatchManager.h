@@ -84,6 +84,11 @@ class PMYouPatchManager : public PMManager {
     */
     FSize totalDownloadSize();
 
+    /**
+      Return raw content of patch info file.
+    */
+    std::list<std::string> rawPatchInfo( const PMYouPatchPtr & );
+
   private:
     InstYou *_instYou;
 
