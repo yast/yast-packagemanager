@@ -28,9 +28,8 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMObject.h>
 
-class REP_CLASS(PMRpmPackageDataProvider), public PMPackageDataProvider {
-
-	REP_BODY(PMRpmPackageDataProvider)
+class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvider {
+	REP_BODY(PMRpmPackageDataProvider);
 
 	RpmDbPtr _rpmdb;
 

@@ -35,8 +35,8 @@
  *
  * @short Contains everything needed for dependency solving.
  **/
-class REP_CLASS(PMSolvable) {
-  REP_BODY(PMSolvable)
+class PMSolvable : virtual public Rep {
+  REP_BODY(PMSolvable);
 
   public:
 
@@ -131,7 +131,7 @@ class REP_CLASS(PMSolvable) {
     const PkgRelation& addProvides( const char *name ) {
       return addProvides( PkgName(name) );
     }
-    
+
     const PkgRelList_type& setProvides(PkgRelList_type& provides)
     {
       _provides = provides;

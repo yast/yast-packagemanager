@@ -29,8 +29,8 @@
 /**
  *
  **/
-class REP_CLASS(MediaInfo) {
-  REP_BODY(MediaInfo)
+class MediaInfo : virtual public Rep {
+  REP_BODY(MediaInfo);
 
   public:
 

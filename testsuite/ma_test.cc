@@ -5,6 +5,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <Y2PM.h>
+#include <y2pm/RpmDb.h>
 
 using namespace std;
 #undef  Y2LOG
@@ -29,8 +30,14 @@ int main()
   Y2SLog::setLogfileName("-");
   MIL << "START" << endl;
 
-  list<PMPackagePtr> plist;
+  string root = "/";
+  RpmDbPtr rpmdb( new RpmDb(root) );
 
+  list<PMPackagePtr> plist;
+  RpmDb::DbStatus dbstat = rpmdb->getPackages(plist);
+  MIL << dbstat << " - Got " << plist.size() << " Packages" << endl;
+
+  return 0;
   string n( "name_" );
   string v( "version_" );
   string r( "release_" );

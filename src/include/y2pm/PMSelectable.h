@@ -33,8 +33,8 @@
 /**
  *
  **/
-class REP_CLASS(PMSelectable) {
-  REP_BODY(PMSelectable)
+class PMSelectable : virtual public Rep {
+  REP_BODY(PMSelectable);
 
   public:
 

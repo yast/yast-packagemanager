@@ -34,8 +34,8 @@
 /**
  * The Package.
  **/
-class REP_CLASS(PMPackage), public PMObject {
-  REP_BODY(PMPackage)
+class PMPackage : virtual public Rep, public PMObject {
+  REP_BODY(PMPackage);
 
   public:
 
@@ -92,7 +92,7 @@ class REP_CLASS(PMPackage), public PMObject {
      * @return Attribute value
      * */
     std::string getAttributeValue(PMPackageAttribute attr);
-    
+
     std::string getAttributeValue(PMObjectAttribute attr);;
 
     /** get the name of an attribute
@@ -101,7 +101,7 @@ class REP_CLASS(PMPackage), public PMObject {
      * @return Attribute name
      * */
     std::string getAttributeName(PMPackageAttribute attr);
-    
+
     std::string getAttributeName(PMObjectAttribute attr);
 
     /** assign a data provider

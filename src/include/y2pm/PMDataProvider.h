@@ -29,8 +29,8 @@
 /**
  * @short Interface class for stuff common to all DataProvider
  **/
-class REP_CLASS(PMDataProvider) {
-  REP_BODY(PMDataProvider)
+class PMDataProvider : virtual public Rep {
+  REP_BODY(PMDataProvider);
 
   public:
 
