@@ -4,6 +4,7 @@ Wed Jul  9 11:15:13 CEST 2003 - cschum@suse.de
 - YOU: Store username/password for each server separately.
 - MediaCurl: Send packagemanager version as password with
   anonymous FTP login.
+- Make absolute FTP paths in URLs work (#23535)
 
 -------------------------------------------------------------------
 Tue Jul  8 16:52:41 CEST 2003 - cschum@suse.de
