@@ -17,4 +17,5 @@ test_packages
 test_selections
 test_you
 gs_test
+cschum_test
 order

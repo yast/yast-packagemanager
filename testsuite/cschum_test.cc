@@ -31,7 +31,7 @@ using namespace std;
 */
 int main( int argc, char **argv )
 {
-  Y2SLog::setLogfileName( "cschum_test.log" );
+  Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
 
   int numPkgs = Y2PM::packageManager().size();
