@@ -108,7 +108,7 @@ PMSolvable::~PMSolvable()
 //	METHOD NAME : PMSolvable::addPreRequires
 //	METHOD TYPE : const PMSolvable::PkgRelList_type&
 //
-//	DESCRIPTION :
+//	DESCRIPTION : copy pre-requires to requires list and mark them
 //
 const PMSolvable::PkgRelList_type& PMSolvable::addPreRequires(PMSolvable::PkgRelList_type& prerequires)
 {
