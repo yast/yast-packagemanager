@@ -2,6 +2,8 @@
 # Makefile.am for packagemanager/src/query/tools
 #
 
+AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
+
 noinst_PROGRAMS = maketable
 noinst_DATA = lookuptable.h
 

@@ -2,6 +2,8 @@
 
 noinst_LTLIBRARIES = libPkgDb.la
 
+AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
+
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
