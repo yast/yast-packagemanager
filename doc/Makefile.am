@@ -2,10 +2,10 @@
 # Makefile.am for liby2/doc
 #
 
-SUBDIRS = autodocs
+SUBDIRS = autodocs media
 
 htmldir = $(docdir)
 
 html_DATA =
 
-EXTRA_DIST = $(html_DATA)
+EXTRA_DIST = $(html_DATA) README
