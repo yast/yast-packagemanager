@@ -51,7 +51,7 @@ MediaCurl::MediaCurl( const Url &      url_r,
     : MediaHandler( url_r, attach_point_hint_r,
 		    false, // attachPoint_is_mediaroot
 		    true ), // does_download
-      _curl( 0 )
+      _curl( 0 ), _connected( false )
 {
 }
 
@@ -86,6 +86,8 @@ PMError MediaCurl::attachTo (bool next)
     ERR << "curl easy init failed" << endl;
     return Error::E_error;
   }
+
+  _connected = true;
 
   ret = curl_easy_setopt( _curl, CURLOPT_ERRORBUFFER, _curlError );
   if ( ret != 0 ) {
@@ -173,6 +175,14 @@ PMError MediaCurl::attachTo (bool next)
   return Error::E_ok;
 }
 
+PMError MediaCurl::disconnect()
+{
+  if ( _connected ) curl_easy_cleanup( _curl );
+  _connected = false ;
+  
+  return Error::E_ok;
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -183,7 +193,8 @@ PMError MediaCurl::attachTo (bool next)
 //
 PMError MediaCurl::releaseFrom( bool eject )
 {
-  curl_easy_cleanup( _curl );
+  disconnect();
+
   curl_global_cleanup();
 
   return Error::E_ok;

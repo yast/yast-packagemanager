@@ -186,6 +186,11 @@ class InstYou {
     PMYouPatchInfoPtr patchInfo() const { return _info; }
 
     /**
+      Close connection to server.
+    */
+    PMError disconnect();
+
+    /**
      * Remove downloaded packages.
      */
     PMError removePackages();

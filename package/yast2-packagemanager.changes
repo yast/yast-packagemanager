@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 29 13:22:20 CEST 2003 - cschum@suse.de
+
+- Added MediaAccess::disconnect() for closing a server connection
+  before releasing the media (#28040).
+
+-------------------------------------------------------------------
 Wed Jul  9 11:15:13 CEST 2003 - cschum@suse.de
 
 - YOU: Store username/password for each server separately.

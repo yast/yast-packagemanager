@@ -172,6 +172,15 @@ MediaAccess::localPath( const Pathname & pathname ) const
   return _handler->localPath( pathname );
 }
 
+PMError
+MediaAccess::disconnect()
+{
+  if ( !_handler ) return Error::E_not_open;
+  if ( !isAttached() ) return Error::E_not_attached;
+
+  return _handler->disconnect();
+}
+
 // release attached media
 PMError
 MediaAccess::release( bool eject )
