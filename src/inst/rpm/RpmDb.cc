@@ -248,7 +248,6 @@ void RpmDb::checkrebuilddbstatus(Pathname tmpdbpath, off_t oldsize)
     PathInfo pi(tmpdbpath);
 
     off_t size = pi.size();
-    DBG << tmpdbpath << " " << size << " " << oldsize << endl;
 
     if(size && oldsize)
     {
