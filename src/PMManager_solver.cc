@@ -200,7 +200,7 @@ bad, PkgDep::SolvableList& to_remove)
     for(PkgDep::ErrorResultList::iterator it = bad.begin();
 	    it != bad.end(); ++it)
     {
-    	if(it->state_change_not_possible)
+    	if(!it->referers.empty())
 	{
 	    PkgSet fakei = installed;
 	    for(PkgDep::RelInfoList::iterator rit = it->referers.begin()
