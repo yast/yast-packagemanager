@@ -425,6 +425,10 @@ void consistent(vector<string>& argv)
     }
 }
 
+void progresscallback(int p, void* nix)
+{
+    cout << p << endl;
+}
 void rpminstall(vector<string>& argv)
 {
     vector<string>::iterator it=argv.begin();
@@ -435,6 +439,8 @@ void rpminstall(vector<string>& argv)
     {
 	pkgs.push_back(*it);
     }
+
+    Y2PM::instTarget().setPackageInstallProgressCallback(progresscallback, NULL);
 
     if(Y2PM::instTarget().init("/", false) != InstTarget::Error::E_ok)
     {

@@ -216,10 +216,10 @@ class RpmDb: virtual public Rep
 	/** set callback function for reporting progress of package
 	 * installation
 	 *
-	 * @param func callback function, must accept double as argument
+	 * @param func callback function, must accept int as argument
 	 * @param data arbitrary data to pass when function is called
 	 * */
-	void setProgressCallback(void (*func)(double,void*), void* data)
+	void setProgressCallback(void (*func)(int,void*), void* data)
 	{
 	    _progressfunc = func;
 	    _progressdata = data;
@@ -233,7 +233,7 @@ class RpmDb: virtual public Rep
     private:
 
 	/** progress callback */
-	void (*_progressfunc)(double,void*);
+	void (*_progressfunc)(int,void*);
 
 	/** arbitrary data to pass back for progress callback */
 	void* _progressdata;
@@ -322,7 +322,7 @@ class RpmDb: virtual public Rep
 
 	/** wrapper for _progressfunc, does nothing if it's unset
 	 * */
-	void ReportProgress(double p)
+	void ReportProgress(int p)
 	    { if(_progressfunc != NULL) (*_progressfunc)(p,_progressdata); }
 
 	/** helper for queryPackage

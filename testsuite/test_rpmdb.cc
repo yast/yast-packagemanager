@@ -26,7 +26,7 @@ class PMPkg_eq : public unary_function<PMPackagePtr,bool>
 	    { return (c->name() == _name); }
 };
 
-void progresscallback(double p, void* nix)
+void progresscallback(int p, void* nix)
 {
     cout << p << endl;
 }
