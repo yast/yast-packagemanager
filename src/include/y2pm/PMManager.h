@@ -92,6 +92,20 @@ class PMManager {
     PMManager();
     virtual ~PMManager();
 
+  protected:
+
+    /**
+     * Non const version for inernal use
+     * (gcc does not like a protected non const and public const version)
+     **/
+    PMSelectableVec::iterator first() { return _items.begin(); }
+
+    /**
+     * Non const version for inernal use
+     * (gcc does not like a protected non const and public const version)
+     **/
+    PMSelectableVec::iterator last() { return _items.end(); }
+
   public:
 
     /**

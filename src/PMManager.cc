@@ -142,10 +142,6 @@ PMSelectablePtr PMManager::poolProvide( const std::string & name_r )
 
     _itemPool.insert( PMSelectablePool::value_type( item->name(), item ) );
     _items.push_back( item );
-
-    M__ << "    new Selectable " << item << endl;
-  } else {
-    M__ << "    lookup found " << item << endl;
   }
   return item;
 }
@@ -174,7 +170,7 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
   }
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    M__ << "  set installed object " << *iter_r << endl;
+    DBG << "  set installed object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -200,7 +196,7 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
       INT << "setInstalledObj failed" << endl;
     }
   }
-  M__ << "installed objects set!" << endl;
+  DBG << "installed objects set!" << endl;
   checkPool();
 }
 
@@ -221,7 +217,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
   MIL << "Going to add " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    M__ << "  add object " << *iter_r << endl;
+    DBG << "  add object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -247,7 +243,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
       INT << "clistAdd failed" << endl;
     }
   }
-  M__ << "objects added!" << endl;
+  DBG << "objects added!" << endl;
   checkPool();
 }
 
@@ -327,23 +323,23 @@ void PMManager::checkPool() const
 
 
   if ( _itemPool.size() == _items.size() )
-    S__ << "Pool size " << _items.size() << endl;
+    DBG << "Pool size " << _items.size() << endl;
   else
     INT << "Pool size missmatch " << _itemPool.size() << " <-> " << _items.size() << endl;
 
-  Rep::dumpRepStats( S__ ) << endl;
+  Rep::dumpRepStats( DBG ) << endl;
 
   for ( unsigned i = 0; i < _items.size(); ++i ) {
     PMSelectablePtr c = _items[i];
-    S__ << "[" << i << "] " << c << endl;
+    DBG << "[" << i << "] " << c << endl;
 
     if ( ! c ) {
-      E__ << "  Null selectable" << endl;
+      INT << "  Null selectable" << endl;
     } else {
       if ( c->_manager != this )
-	E__ << "  wrong manager->" << endl;
+	INT << "  wrong manager->" << endl;
       if ( c->_mgr_idx != i )
-	E__ << "  wrong _mgr_idx " << c->_mgr_idx << endl;
+	INT << "  wrong _mgr_idx " << c->_mgr_idx << endl;
       c->check();
     }
   }
@@ -379,4 +375,5 @@ void PMManager::setNothingSelected()
     _items[i]->setNothingSelected();
   }
 }
+
 
