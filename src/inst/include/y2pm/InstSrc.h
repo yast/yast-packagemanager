@@ -110,6 +110,11 @@ class InstSrc: virtual public Rep {
     static const Pathname _c_descr_dir;
 
     /**
+     * Subpath (below _cache) to cached InstSrcData.
+     **/
+    static const Pathname _c_data_dir;
+
+    /**
      * Subpath (below _cache) to madia attach point.
      **/
     static const Pathname _c_media_dir;
@@ -126,8 +131,8 @@ class InstSrc: virtual public Rep {
      * Used by InstSrc::vconstruct to set up an InstSrc from
      * an existing cachedir.
      *
-     * Setup InstSrc from an (existing!) cachedir. cache_media_dir
-     * is created on the fly. InstSrcDescr is created from cache_descr_dir.
+     * Setup InstSrc from an (existing!) cachedir. cache_descr_dir
+     * must exist. InstSrcDescr is created from cache_descr_dir.
      * MediaAccess is created, but media remains closed.
      **/
     PMError _init_openCache( const Pathname & cachedir_r );
@@ -137,7 +142,7 @@ class InstSrc: virtual public Rep {
      * URL.
      *
      * A new cachedir is created and initialized: cachedir must
-     * not exist, but parent dir must. cache_media_dir is created.
+     * not exist, but parent dir must.
      * _cache_deleteOnExit is set, so cachedir will be deleted if
      * further initialisation fails. InstSrc::vconstruct will clear
      * the flag, if initialisation succeeded.
@@ -170,24 +175,7 @@ class InstSrc: virtual public Rep {
      **/
     ~InstSrc();
 
-  protected:
-
-    /**
-     * Full path of cache_dir.
-     **/
-    Pathname cache_dir() const { return _cache; }
-
-    /**
-     * Full path of InstSrcDescr cache file.
-     **/
-    Pathname cache_descr_dir() const { return cachePath( _c_descr_dir ); }
-
-    /**
-     * Full path of madia attach point.
-     **/
-    Pathname cache_media_dir() const { return cachePath( _c_media_dir ); }
-
-  protected:
+  private:
 
     /**
      * direct media access
@@ -203,6 +191,28 @@ class InstSrc: virtual public Rep {
      * content of media
      **/
     InstSrcDataPtr _data;
+
+  public:
+
+    /**
+     * Full path of cache_dir.
+     **/
+    Pathname cache_dir() const { return _cache; }
+
+    /**
+     * Full path of InstSrcDescr cache dir.
+     **/
+    Pathname cache_descr_dir() const { return cachePath( _c_descr_dir ); }
+
+    /**
+     * Full path of InstSrcData cache dir.
+     **/
+    Pathname cache_data_dir() const { return cachePath( _c_data_dir ); }
+
+    /**
+     * Full path of (prefered) madia attach point.
+     **/
+    Pathname cache_media_dir() const { return cachePath( _c_media_dir ); }
 
   public:
 
