@@ -99,12 +99,6 @@ class InstYou {
     PMError retrievePatchInfo();
     
     /**
-     * Attach source of patches.
-     *
-     */
-    PMError attachSource();
-    
-    /**
      * Download packages and scripts belonging to selected patches.
      *
      * @param reload    If true reload all patches from server.
@@ -115,38 +109,13 @@ class InstYou {
     PMError retrievePatches();
     
     /**
-      Get first selected patch.
-    
-      @param resetProgress If true reset progress indicator. 
+      Install patches to target system. Return true if patches have been
+      installed, return false if no patches have benn installed.
+      
+      This function uses the InstYou::Callbacks to handle error messages and
+      other events requiring information or action of the user.
     */
-    PMYouPatchPtr firstPatch( bool resetProgress = true );
-
-    /**
-      Get next selected patch.
-     
-      @param ok Pointer to bool variable which is set to false on error and
-                true on success.
-    */
-    PMYouPatchPtr nextPatch( bool *ok = 0 );
-
-    /**
-     * Download next patch in list of selected patches.
-     *
-     * @param reload    If true reload all patch from server.
-     * @param checkSig  If true check signatures of downloaded packages and
-     *                  scripts.
-     */
-    PMError retrieveCurrentPatch();
-
-    /**
-     * Install next patch in list of selected patches to target system.
-     */
-    PMError installCurrentPatch();
-
-    /**
-     * Install patches to target system.
-     */
-    PMError installPatches();
+    bool installPatches();
 
     /**
      * Select Patches.
@@ -179,11 +148,6 @@ class InstYou {
      * Get object holding patch information.
      */
     PMYouPatchInfoPtr patchInfo() const { return _info; }
-
-    /**
-      Close connection to server.
-    */
-    PMError disconnect();
 
     /**
      * Remove downloaded packages.
@@ -233,11 +197,6 @@ class InstYou {
       when no update has occured yet.
     */
     int lastUpdate();
-
-    /**
-      Writes current date as date of last update.
-    */
-    PMError writeLastUpdate();
 
     /**
       Return total size of data to be downloaded based on current selection of
@@ -297,6 +256,51 @@ class InstYou {
     void init();
 
   protected:
+    /**
+     * Attach source of patches.
+     *
+     */
+    PMError attachSource();
+
+    /**
+      Get first selected patch.
+    
+      @param resetProgress If true reset progress indicator. 
+    */
+    PMYouPatchPtr firstPatch( bool resetProgress = true );
+
+    /**
+      Get next selected patch.
+     
+      @param ok Pointer to bool variable which is set to false on error and
+                true on success.
+    */
+    PMYouPatchPtr nextPatch( bool *ok = 0 );
+
+    /**
+     * Download next patch in list of selected patches.
+     *
+     * @param reload    If true reload all patch from server.
+     * @param checkSig  If true check signatures of downloaded packages and
+     *                  scripts.
+     */
+    PMError retrieveCurrentPatch();
+
+    /**
+     * Install next patch in list of selected patches to target system.
+     */
+    PMError installCurrentPatch();
+    
+    /**
+      Close connection to server.
+    */
+    PMError disconnect();
+
+    /**
+      Writes current date as date of last update.
+    */
+    PMError writeLastUpdate();
+
     PMError installPatch( const PMYouPatchPtr & );
     PMError retrievePatch( const PMYouPatchPtr & );
     PMError retrievePackage( const PMPackagePtr &pkg, const PMYouProductPtr & );
