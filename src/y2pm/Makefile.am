@@ -11,6 +11,8 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	PkgName.h PkgEdition.h PkgArch.h PkgIdent.h		\
 	PkgRelation.h PkgRevRel.h Alternatives.h PkgSet.h	\
 	PkgSplit.h PkgDu.h PkgChangelog.h			\
+	\
+	ProductIdent.h	\
         \
         PMLocale.h	\
 	\

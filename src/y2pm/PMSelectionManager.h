@@ -113,12 +113,62 @@ class PMSelectionManager : public PMManager {
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
+  private:
+
+    ///////////////////////////////////////////////////////////////////
+    // Remember selection packages fate.
+    ///////////////////////////////////////////////////////////////////
+    struct PkgFates {
+      void add( PMSelectableVec & lhs, const PMSelectableVec & rhs ) {
+	lhs.insert( rhs.begin(), rhs.end() );
+      }
+      public:
+	// selections to install:
+	PMSelectableVec pkgToDelete;   // hard request: get rid of it (delpack)
+	PMSelectableVec pkgToInstall;  // hard request: (re)install it
+	// unmodified but installed selections: protect inspacks from deletion (except by a delpack)
+	PMSelectableVec pkgOnSystem;   // soft request: Keep it OnSystem.
+	// selections to delete:
+	PMSelectableVec pkgOffSystem;  // soft request: if no one minds, bring it OffSystem
+	// EVERYTHING ELSE:
+	PMSelectableVec pkgUnmodified; // is set to unmodified
+
+	void addToDelete  ( const PMSelectableVec & rhs ) { add( pkgToDelete, rhs ); }
+	void addToInstall ( const PMSelectableVec & rhs ) { add( pkgToInstall, rhs ); }
+	void addOnSystem  ( const PMSelectableVec & rhs ) { add( pkgOnSystem, rhs ); }
+	void addOffSystem ( const PMSelectableVec & rhs ) { add( pkgOffSystem, rhs ); }
+	void addUnmodified( const PMSelectableVec & rhs ) { add( pkgUnmodified, rhs ); }
+      public:
+	PMSelectableVec pkgProcessed;
+
+	void setNothingProcessed() { pkgProcessed.clear(); }
+
+	void setProcessed( PMSelectableVec rhs ) {
+	  add( pkgProcessed, rhs );
+	  rhs.clear();
+	}
+	void processedToDelete()   { setProcessed( pkgToDelete ); }
+	void processedToInstall()  { setProcessed( pkgToInstall ); }
+	void processedOnSystem()   { setProcessed( pkgOnSystem ); }
+	void processedOffSystem()  { setProcessed( pkgOffSystem ); }
+	void processedUnmodified() { setProcessed( pkgUnmodified ); }
+
+	bool didProcess( PMSelectablePtr pkg_r ) const {
+	  return( pkgProcessed.find( pkg_r ) != pkgProcessed.end() );
+	}
+    };
+
+    /**
+     * Go through package fates lists and accordingly select/deselect
+     * the packages in PMPackageManager. Used by @ref activate.
+     **/
+    PMError syncToPkgMgr( PkgFates & fates_r );
+
   public:
 
     /**
-     * activate the selection
-     * (go through package list of selection and select/deselect
-     * all packages in PMPackageManager)
+     * Activate the selection. I.e. translate the selections state changes into
+     * state changes of individual packages and sync this to the PMPackageManager.
      **/
     PMError activate( PMPackageManager & package_mgr );
 
@@ -128,7 +178,9 @@ class PMSelectionManager : public PMManager {
     PMError activate();
 
     /**
-     *
+     * Adjust language specific packages of the currently activated
+     * selection set. Hast to be done whenever the set of requested
+     * locales changes.
      **/
     PMError requestedLocalesChanged( const PM::LocaleSet & addLocales_r,
 				     const PM::LocaleSet & delLocales_r );

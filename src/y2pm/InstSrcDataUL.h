@@ -136,6 +136,7 @@ class InstSrcDataUL : public InstSrcData {
 
   private:
 
+    friend class InstSrc;
     /**
      * If cache is not disabled, assert that it actualy contains data. If still empty,
      * initialize cache from InstSrc's media. Called from tryGetData().

@@ -137,7 +137,7 @@ class RpmHeader : public binHeader {
      * Get an accessible packages data from disk.
      * Returns NULL on any error.
      **/
-    static constRpmHeaderPtr readPackage( const Pathname & path );
+    static constRpmHeaderPtr readPackage( const Pathname & path, bool checkDigest = false );
 };
 
 ///////////////////////////////////////////////////////////////////

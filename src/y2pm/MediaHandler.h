@@ -164,20 +164,64 @@ class MediaHandler {
 	virtual PMError getFile( const Pathname & filename ) const = 0;
 
 	/**
-	 * Call concrete handler to provide content of directory on media via
-	 * retlist. If dots is false entries starting with '.' are not reported.
+	 * Call concrete handler to provide directory content (not recursive!)
+	 * below attach point.
+	 *
+	 * Return E_not_supported_by_media if media does not support retrieval of
+	 * directory content.
+	 *
+	 * Default implementation provided, that returns whether a directory
+	 * is located at '_localRoot + dirname'.
+	 *
+	 * Asserted that media is attached.
+	 **/
+	virtual PMError getDir( const Pathname & dirname ) const = 0;
+
+	/**
+	 * Call concrete handler to provide a content list of directory on media
+	 * via retlist. If dots is false entries starting with '.' are not reported.
 	 *
 	 * Return E_not_supported_by_media if media does not support retrieval of
 	 * directory content.
 	 *
 	 * Default implementation provided, that returns the content of a
-	 * directory at '_localRoot + dirnname'.
+	 * directory at '_localRoot + dirnname' retrieved via 'readdir'.
 	 *
 	 * Asserted that media is attached and retlist is empty.
 	 **/
         virtual PMError getDirInfo( std::list<std::string> & retlist,
 			            const Pathname & dirname, bool dots = true ) const = 0;
-    public:
+
+	/**
+	 * Basically the same as getDirInfo above. The content list is returned as
+	 * PathInfo::dircontent, which includes name and filetype of each directory
+	 * entry. Retrieving the filetype usg. requires an additional ::stat call for
+	 * each entry, thus it's more expensive than a simple readdir.
+	 *
+	 * Asserted that media is attached and retlist is empty.
+	 **/
+        virtual PMError getDirInfo( PathInfo::dircontent & retlist,
+			            const Pathname & dirname, bool dots = true ) const = 0;
+
+  protected:
+
+        /**
+	 * Retrieve and if available scan dirname/directory.yast.
+	 *
+	 * Asserted that media is attached.
+	 **/
+        PMError getDirectoryYast( std::list<std::string> & retlist,
+			          const Pathname & dirname, bool dots = true ) const;
+
+        /**
+	 * Retrieve and if available scan dirname/directory.yast.
+	 *
+	 * Asserted that media is attached.
+	 **/
+        PMError getDirectoryYast( PathInfo::dircontent & retlist,
+			          const Pathname & dirname, bool dots = true ) const;
+
+  public:
 
 	/**
 	 * If the concrete media handler provides a nonempty
@@ -281,8 +325,8 @@ class MediaHandler {
 	PMError provideFile( Pathname filename ) const;
 
 	/**
-	 * Use concrete handler to provide directory tree denoted
-	 * by path below 'localRoot'.
+	 * Use concrete handler to provide directory denoted
+	 * by path below 'localRoot' (not recursive!).
 	 * dirname is interpreted relative to the
 	 * attached url and a path prefix is preserved.
 	 **/
@@ -317,22 +361,41 @@ class MediaHandler {
 	 * Return content of directory on media via retlist. If dots is false
 	 * entries starting with '.' are not reported.
 	 *
-	 * <B>Caution:</B> This is not supported by all media types. Be
-	 * prepared to handle E_not_supported_by_media.
+	 * The request is forwarded to the concrete handler,
+	 * which may atempt to retieve the content e.g. via 'readdir'
+	 *
+	 * <B>Caution:</B> This is not supported by all media types.
+	 * Be prepared to handle E_not_supported_by_media.
 	 **/
-	PMError dirInfo( std::list<std::string> & retlist,
-			 Pathname dirname, bool dots = true ) const;
+        PMError dirInfo( std::list<std::string> & retlist,
+			 const Pathname & dirname, bool dots = true ) const;
+
+	/**
+	 * Basically the same as dirInfo above. The content is returned as
+	 * PathInfo::dircontent, which includes name and filetype of each directory
+	 * entry. Retrieving the filetype usg. requires an additional ::stat call for
+	 * each entry, thus it's more expensive than a simple readdir.
+	 *
+	 * <B>Caution:</B> This is not supported by all media types.
+	 * Be prepared to handle E_not_supported_by_media.
+	 **/
+	PMError dirInfo( PathInfo::dircontent & retlist,
+			 const Pathname & dirname, bool dots = true ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
 
 #define	MEDIA_HANDLER_API						\
     protected:								\
-	virtual PMError attachTo (bool next = false);					\
+	virtual PMError attachTo (bool next = false);			\
 	virtual PMError releaseFrom( bool eject );			\
 	virtual PMError getFile( const Pathname & filename ) const;	\
+	virtual PMError getDir( const Pathname & dirname ) const;	\
         virtual PMError getDirInfo( std::list<std::string> & retlist,	\
+			            const Pathname & dirname, bool dots = true ) const;	\
+        virtual PMError getDirInfo( PathInfo::dircontent & retlist,	\
 			            const Pathname & dirname, bool dots = true ) const;
+
 
 #endif // MediaHandler_h
 

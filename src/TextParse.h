@@ -15,7 +15,8 @@
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Conversion of common datatypes to/from text representation.
+  For y2pm specific types see PMTextParse.h.
 
 /-*/
 #ifndef TextParse_h

@@ -30,6 +30,7 @@
 #include <y2pm/YouError.h>
 #include <y2pm/PMYouProduct.h>
 #include <y2pm/PMLocale.h>
+#include <y2pm/InstTarget.h>
 
 using namespace std;
 
@@ -54,6 +55,7 @@ void usage()
        << _("-k, --check              Check for new updates.") << endl
        << endl
        << _("-c, --show-config        Show configuration. Do not do anything.") << endl
+       << _("-I, --show-installed     Show installed patches. Do nothing else.") << endl
        << endl
        << _("-p, --product PRODUCT    Name of product for which to get patches.") << endl
        << _("-v, --version VERSION    Version of product for which to get patches.") << endl
@@ -68,6 +70,14 @@ void usage()
             "                         of patches without installing them).") << endl
        << _("-V, --verbose            Be verbose.") << endl
        << _("-D, --debug              Debug output.") << endl
+       << endl
+       << _("-S, --select-patches <list of patches>") << endl
+       << _("                         Select given patches for download/installation. Patches are\n"
+            "                         specified as comma-separated list of patch names. Only patches\n"
+            "                         which would also be selected by the default selection algorithm\n"
+            "                         can be selected (this behavior is overriden by the --force"
+            "                         option).") << endl
+       << _("-f, --force              Force installation of a selected patch.") << endl
        << endl
        << "security | recommended | patchlevel | document | optional   "
        << _("Types of patches to install.") << endl;
@@ -96,10 +106,12 @@ int main( int argc, char **argv )
   const char *versionStr = 0;
   const char *archStr = 0;
   const char *langStr = 0;
+  const char *selectionStr = 0;
 
   bool dryrun = false;
   bool checkSig = true;
   bool showPatches = false;
+  bool showInstalled = false;
   bool verbose = false;
   bool debug = false;
   bool autoGet = false;
@@ -109,6 +121,7 @@ int main( int argc, char **argv )
   bool checkUpdates = false;
   bool quickCheckUpdates = false;
   bool getAll = false;
+  bool force = false;
   
   int c;
   while( 1 ) {
@@ -123,6 +136,7 @@ int main( int argc, char **argv )
       { "dry-run", no_argument, 0, 'd' },
       { "no-sig-check", no_argument, 0, 'n' },
       { "show-patches", no_argument, 0, 's' },
+      { "show-installed", no_argument, 0, 'I' },
       { "verbose", no_argument, 0, 'V' },
       { "debug", no_argument, 0, 'D' },
       { "url", required_argument, 0, 'u' },
@@ -131,12 +145,14 @@ int main( int argc, char **argv )
       { "architecture", required_argument, 0, 'a' },
       { "language", required_argument, 0, 'l' },
       { "get-all", no_argument, 0, 'G' },
+      { "select-patches", required_argument, 0, 'S' },
+      { "force", no_argument, 0, 'f' },
       { 0, 0, 0, 0 }
     };
 
     int option_index = 0;
 
-    c = getopt_long( argc, argv, "qkrcgihdnsVDu:p:v:a:l:G", long_options,
+    c = getopt_long( argc, argv, "qkrcgihdnsIVDu:p:v:a:l:GS:f", long_options,
                      &option_index );
     if ( c < 0 ) break;
 
@@ -164,6 +180,9 @@ int main( int argc, char **argv )
         break;
       case 's':
         showPatches = true;
+        break;
+      case 'I':
+        showInstalled = true;
         break;
       case 'V':
         verbose = true;
@@ -198,6 +217,12 @@ int main( int argc, char **argv )
       case 'G':
         getAll = true;
         break;
+      case 'S':
+        selectionStr = optarg;
+        break;
+      case 'f':
+        force = true;
+        break;
       default:
         cerr << _("Error parsing command line.") << endl;
       case '?':
@@ -208,11 +233,24 @@ int main( int argc, char **argv )
 
   if ( debug ) verbose = true;
 
-  if ( getuid() != 0 && !checkUpdates && !quickCheckUpdates && !showConfig ) {
+  if ( getuid() != 0 && !checkUpdates && !quickCheckUpdates && !showConfig &&
+       !showInstalled ) {
     cerr << _("You need root permissions to run this command. Use the -q or -k\n"
               "options to check for the availabilty of updates without needing\n"
               "root permissions.") << endl;
     exit( 1 );
+  }
+
+  if ( showInstalled ) {
+    Y2PM::youPatchManager();
+    InstTarget &instTarget = Y2PM::instTarget();
+    const std::vector<PMYouPatchPtr> &patches = instTarget.getPatches();
+    std::vector<PMYouPatchPtr>::const_iterator it;
+    for( it = patches.begin(); it != patches.end(); ++it ) {
+      cout << (*it)->name() << "-" << (*it)->version() << endl;
+    }
+   
+    return 0;
   }
 
   int kinds = PMYouPatch::kind_invalid;
@@ -397,6 +435,26 @@ int main( int argc, char **argv )
   }
 
   you.selectPatches( kinds );
+
+  if ( selectionStr ) {
+    string patchesStr( selectionStr );
+    vector<string> patches;
+    stringutil::split( patchesStr, patches, "," );
+
+    PMManager::PMSelectableVec::const_iterator it1;
+    for( it1 = Y2PM::youPatchManager().begin(); it1 != Y2PM::youPatchManager().end(); ++it1 ) {      
+      if ( !force && !(*it1)->to_install() ) continue;
+
+      vector<string>::const_iterator it2;
+      for( it2 = patches.begin(); it2 != patches.end(); ++it2 ) {
+        if ( (*it2) == (*it1)->name() ) {
+          if ( force ) (*it1)->user_set_install();
+          break;
+        }
+      }
+      if ( it2 == patches.end() ) (*it1)->user_unset();
+    }
+  }
 
   if ( debug || showPatches ) {
     if ( verbose ) cout << _("Patches:") << endl;

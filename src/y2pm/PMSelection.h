@@ -31,6 +31,7 @@
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PkgArch.h>
+#include <y2pm/PMTypes.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -85,13 +86,15 @@ class PMSelection : public PMObject {
      * this Selection for a given locale. This is probaeely <b>not</b>,
      * what you want. See <code>inspacks_ptrs()</code>.
      **/
-    std::set<PMSelectablePtr>	inspacks_ptrs( const LangCode& locale );
+    std::set<PMSelectablePtr>	inspacks_ptrs( const LangCode & locale );
+    std::set<PMSelectablePtr>	inspacks_ptrs( const PM::LocaleSet & locales );
     /**
      * <code>PackageManager</code>s list of Selectables included in
      * this Selection for a given locale. This is probaeely <b>not</b>,
      * what you want. See <code>delpacks_ptrs()</code>.
      **/
-    std::set<PMSelectablePtr>	delpacks_ptrs( const LangCode& locale );
+    std::set<PMSelectablePtr>	delpacks_ptrs( const LangCode & locale );
+    std::set<PMSelectablePtr>	delpacks_ptrs( const PM::LocaleSet & locales );
 
 
     // physical access to the sel file.
@@ -129,6 +132,29 @@ class PMSelection : public PMObject {
      * operates with.
      **/
     std::set<PMSelectablePtr>	delpacks_ptrs();
+
+  public:
+
+    /**
+     * Compare two Selections by order value, then by name.
+     **/
+    static int compareByOrder( constPMSelectionPtr lhs, constPMSelectionPtr rhs ) {
+      if ( lhs == rhs )
+	return 0;
+      if ( ! ( lhs && rhs ) )
+	return( rhs ? -1 : 1 );
+      int res = lhs->order().compare( rhs->order() );
+      if ( res )
+	return res;
+      return lhs->name()->compare( rhs->name() );
+    }
+
+    /**
+     * Return whether compared by order lhs is less than rhs.
+     **/
+    static bool lessByOrder( constPMSelectionPtr lhs, constPMSelectionPtr rhs ) {
+      return( compareByOrder( lhs, rhs ) < 0 );
+    }
 
   public:
 

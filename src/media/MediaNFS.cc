@@ -140,6 +140,18 @@ PMError MediaNFS::getFile (const Pathname & filename) const
 
 ///////////////////////////////////////////////////////////////////
 //
+//	METHOD NAME : MediaNFS::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaNFS::getDir (const Pathname & dirname) const
+{
+  return MediaHandler::getDir( dirname );
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : MediaNFS::getDirInfo
 //	METHOD TYPE : PMError
@@ -147,9 +159,21 @@ PMError MediaNFS::getFile (const Pathname & filename) const
 //	DESCRIPTION : Asserted that media is attached and retlist is empty.
 //
 PMError MediaNFS::getDirInfo( std::list<std::string> & retlist,
-			     const Pathname & dirname, bool dots ) const
+			      const Pathname & dirname, bool dots ) const
 {
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaNFS::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaNFS::getDirInfo( PathInfo::dircontent & retlist,
+			   const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}

@@ -157,7 +157,12 @@ class RpmDb::Logfile {
   public:
     Logfile() { refUp(); }
     ~Logfile() { refDown(); }
-    ostream & operator()() { return _log; }
+    ostream & operator()( bool timestamp = false ) {
+      if ( timestamp ) {
+	_log << Date::form( "%Y-%m-%d %H:%M:%S ", Date::now() );
+      }
+      return _log;
+    }
     static void setFname( const Pathname & fname_r ) {
       if ( _refcnt )
 	closeLog();
@@ -1549,7 +1554,6 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
       report->progress( pd.init( -2, 100 ) ); // allow 1% for backup creation.
       if ( ! backupPackage( filename ) ) {
 	ERR << "backup of " << filename.asString() << " failed" << endl;
-	progresslog() << "backup of " << filename.asString() << " failed" << endl;
       }
       report->progress( pd.set( 0 ) ); // allow 1% for backup creation.
     } else {
@@ -1626,13 +1630,14 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 
     if ( rpm_status != 0 )  {
       // %s = filename of rpm package
-      progresslog() << stringutil::form(_("%s failed"), Pathname::basename(filename).c_str()) << endl;
-      ERR << "rpm failed, message was: " << rpmmsg << endl;
+      progresslog(/*timestamp*/true) << stringutil::form(_("%s install failed"), Pathname::basename(filename).c_str()) << endl;
       progresslog() << _("rpm output:") << endl << rpmmsg << endl;
+      ERR << "rpm failed, message was: " << rpmmsg << endl;
       err = Error::E_RpmDB_subprocess_failed;
+      err.setDetails( rpmmsg );
     } else {
       // %s = filename of rpm package
-      progresslog() << stringutil::form(_("%s installed ok"), Pathname::basename(filename).c_str()) << endl;
+      progresslog(/*timestamp*/true) << stringutil::form(_("%s installed ok"), Pathname::basename(filename).c_str()) << endl;
       if( ! rpmmsg.empty() ) {
 	progresslog() << _("Additional rpm output:") << endl << rpmmsg << endl;
       }
@@ -1662,6 +1667,7 @@ PMError RpmDb::removePackage( constPMPackagePtr package, unsigned flags )
 PMError RpmDb::removePackage( const string & name_r, unsigned flags )
 {
     FAILIFNOTINITIALIZED;
+    Logfile progresslog;
 
     MIL << "RpmDb::removePackage(" << name_r << "," << flags << ")" << endl;
 
@@ -1720,8 +1726,17 @@ PMError RpmDb::removePackage( const string & name_r, unsigned flags )
     PMError err;
 
     if ( rpm_status != 0 ) {
+      // %s = name of rpm package
+      progresslog(/*timestamp*/true) << stringutil::form(_("%s remove failed"), name_r.c_str()) << endl;
+      progresslog() << _("rpm output:") << endl << rpmmsg << endl;
       ERR << "rpm failed, message was: " << rpmmsg << endl;
       err =  Error::E_RpmDB_subprocess_failed;
+      err.setDetails( rpmmsg );
+    } else {
+      progresslog(/*timestamp*/true) << stringutil::form(_("%s remove ok"), name_r.c_str()) << endl;
+      if( ! rpmmsg.empty() ) {
+	progresslog() << _("Additional rpm output:") << endl << rpmmsg << endl;
+      }
     }
 
     report->stop( err );
@@ -1843,8 +1858,6 @@ bool RpmDb::backupPackage(const string& packageName)
 	return false;
     }
 
-    progresslog() << "create backup for " << packageName << endl;
-
     {
 	// build up archive name
 	time_t currentTime = time(0);
@@ -1928,6 +1941,7 @@ bool RpmDb::backupPackage(const string& packageName)
 	else
 	{
 	    MIL << "tar backup ok" << endl;
+	    progresslog(/*timestamp*/true) << stringutil::form(_("created backup %s"), backupFilename.asString().c_str()) << endl;
 	}
 
 	PathInfo::unlink(filestobackupfile);

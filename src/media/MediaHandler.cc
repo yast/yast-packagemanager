@@ -27,6 +27,9 @@
 
 using namespace std;
 
+// use directory.yast on every media (not just via ftp/http)
+#define NONREMOTE_DIRECTORY_YAST 1
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaHandler
@@ -259,36 +262,11 @@ PMError MediaHandler::provideDir( Pathname dirname ) const
     return Error::E_not_attached;
   }
 
-  list<string> filelist;
-  PMError err = dirInfo( filelist, dirname, false );
+  PMError err = getDir( dirname ); // pass to concrete handler
   if ( err ) {
     WAR << "provideDir(" << dirname << "): " << err << endl;
   } else {
     MIL << "provideDir(" << dirname << ")" << endl;
-
-    for ( list<string>::iterator it = filelist.begin(); it != filelist.end(); ++it ) {
-
-      Pathname filename = dirname + *it;
-      PMError res = getFile( filename ); // pass to concrete handler
-      switch ( res ) {
-      case Error::E_ok:
-	DBG << "provideDir: file(" << filename << ")" << endl;
-	break;
-      case Error::E_not_a_file:
-	DBG << "provideDir: file(" << filename << "): " << res << " SKIPPED" << endl;
-	break;
-      case Error::E_file_not_found:
-	// might be incorrect directory.yast
-	WAR << "provideDir: file(" << filename << "): " << res << endl;
-	break;
-      default:
-	ERR << "provideDir: file(" << filename << "): " << res << " ABORTING " << endl;
-	err = res;
-	break;
-      }
-      if ( err )
-	break; // abort
-    }
   }
 
   return err;
@@ -330,13 +308,88 @@ PMError MediaHandler::releasePath( Pathname pathname ) const
 //
 //	DESCRIPTION :
 //
-PMError MediaHandler::dirInfo( list<string> & retlist, Pathname dirname, bool dots ) const
+PMError MediaHandler::dirInfo( list<string> & retlist,
+			       const Pathname & dirname, bool dots ) const
 {
   retlist.clear();
+
   if ( !_isAttached ) {
     INT << Error::E_not_attached << " on dirInfo(" << dirname << ")" << endl;
     return Error::E_not_attached;
   }
+
+  PMError err = getDirInfo( retlist, dirname, dots ); // pass to concrete handler
+  if ( err ) {
+    WAR << "dirInfo(" << dirname << "): " << err << endl;
+  } else {
+    MIL << "dirInfo(" << dirname << ")" << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::dirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError MediaHandler::dirInfo( PathInfo::dircontent & retlist,
+			       const Pathname & dirname, bool dots ) const
+{
+  retlist.clear();
+
+  if ( !_isAttached ) {
+    INT << Error::E_not_attached << " on dirInfo(" << dirname << ")" << endl;
+    return Error::E_not_attached;
+  }
+
+  PMError err = getDirInfo( retlist, dirname, dots ); // pass to concrete handler
+  if ( err ) {
+    WAR << "dirInfo(" << dirname << "): " << err << endl;
+  } else {
+    MIL << "dirInfo(" << dirname << ")" << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::getDirectoryYast
+//	METHOD TYPE : PMError
+//
+PMError MediaHandler::getDirectoryYast( std::list<std::string> & retlist,
+					const Pathname & dirname, bool dots ) const
+{
+  retlist.clear();
+
+  PathInfo::dircontent content;
+  PMError err = getDirectoryYast( content, dirname, dots );
+
+  if ( ! err ) {
+    // convert to std::list<std::string>
+    for ( PathInfo::dircontent::const_iterator it = content.begin(); it != content.end(); ++it ) {
+      retlist.push_back( it->name );
+    }
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::getDirectoryYast
+//	METHOD TYPE : PMError
+//
+PMError MediaHandler::getDirectoryYast( PathInfo::dircontent & retlist,
+					const Pathname & dirname, bool dots ) const
+{
+  retlist.clear();
 
   // look for directory.yast
   Pathname dirFile = dirname + "directory.yast";
@@ -344,13 +397,6 @@ PMError MediaHandler::dirInfo( list<string> & retlist, Pathname dirname, bool do
   DBG << "provideFile(" << dirFile << "): " << err << endl;
 
   if ( err ) {
-    err = getDirInfo( retlist, dirname, dots ); // pass to concrete handler
-    if ( err ) {
-      WAR << "dirInfo(" << dirname << "): " << err << endl;
-    } else {
-      MIL << "dirInfo(" << dirname << ")" << endl;
-    }
-
     return err;
   }
 
@@ -363,13 +409,24 @@ PMError MediaHandler::dirInfo( list<string> & retlist, Pathname dirname, bool do
 
   string line;
   while( getline( dir, line ) ) {
+    if ( line.empty() ) continue;
     if ( line == "directory.yast" ) continue;
+
+    // Newer directory.yast append '/' to directory names
+    // Remaining entries are unspecified, although most probabely files.
+    PathInfo::file_type type = PathInfo::NOT_AVAIL;
+    if ( *line.rbegin() == '/' ) {
+      line.erase( line.end()-1 );
+      type = PathInfo::T_DIR;
+    }
+
     if ( dots ) {
       if ( line == "." || line == ".." ) continue;
     } else {
       if ( *line.begin() == '.' ) continue;
     }
-    retlist.push_back( line );
+
+    retlist.push_back( PathInfo::direntry( line, type ) );
   }
 
   return Error::E_ok;
@@ -386,7 +443,6 @@ ostream & operator<<( ostream & str, const MediaHandler & obj )
   str << obj.url() << ( obj.isAttached() ? "" : " not" )
     << " attached; localRoot \"" << obj.localRoot() << "\"";
   return str;
-
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -408,6 +464,24 @@ PMError MediaHandler::getFile( const Pathname & filename ) const
   return( info.isExist() ? Error::E_not_a_file : Error::E_file_not_found );
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//                    Default implementation of pure virtual.
+//
+PMError MediaHandler::getDir( const Pathname & dirname ) const
+{
+  PathInfo info( localPath( dirname ) );
+  if( info.isDir() ) {
+    return Error::E_ok;
+  }
+
+  return( info.isExist() ? Error::E_not_a_file : Error::E_file_not_found );
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -426,9 +500,52 @@ PMError MediaHandler::getDirInfo( std::list<std::string> & retlist,
     return Error::E_not_a_directory;
   }
 
+#if NONREMOTE_DIRECTORY_YAST
+  // use directory.yast if available
+  PMError err = getDirectoryYast( retlist, dirname, dots );
+  if ( ! err ) {
+    return Error::E_ok;
+  }
+#endif
+
+  // readdir
   int res = PathInfo::readdir( retlist, info.path(), dots );
   if ( res )
     return Error::E_system;
 
   return Error::E_ok;
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//                    Default implementation of pure virtual.
+//
+PMError MediaHandler::getDirInfo( PathInfo::dircontent & retlist,
+				  const Pathname & dirname, bool dots ) const
+{
+  PathInfo info( localPath( dirname ) );
+  if( ! info.isDir() ) {
+    return Error::E_not_a_directory;
+  }
+
+#if NONREMOTE_DIRECTORY_YAST
+  // use directory.yast if available
+  PMError err = getDirectoryYast( retlist, dirname, dots );
+  if ( ! err ) {
+    return Error::E_ok;
+  }
+#endif
+
+  // readdir
+  int res = PathInfo::readdir( retlist, info.path(), dots );
+  if ( res )
+    return Error::E_system;
+
+  return Error::E_ok;
+}
+

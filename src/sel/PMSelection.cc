@@ -112,6 +112,38 @@ PMSelection::~PMSelection()
 //
 //
 //	METHOD NAME : PMSelection::inspacks_ptrs
+//	METHOD TYPE : std::set<PMSelectablePtr>
+//
+std::set<PMSelectablePtr> PMSelection::inspacks_ptrs( const PM::LocaleSet & locales )
+{
+  set<PMSelectablePtr> ret;
+  for ( PM::LocaleSet::const_iterator it = locales.begin(); it != locales.end(); ++it ) {
+    set<PMSelectablePtr> res = inspacks_ptrs( *it );
+    ret.insert( res.begin(), res.end() );
+  }
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelection::delpacks_ptrs
+//	METHOD TYPE : std::set<PMSelectablePtr>
+//
+std::set<PMSelectablePtr> PMSelection::delpacks_ptrs( const PM::LocaleSet & locales )
+{
+  set<PMSelectablePtr> ret;
+  for ( PM::LocaleSet::const_iterator it = locales.begin(); it != locales.end(); ++it ) {
+    set<PMSelectablePtr> res = delpacks_ptrs( *it );
+    ret.insert( res.begin(), res.end() );
+  }
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelection::inspacks_ptrs
 //	METHOD TYPE : set<PMSelectablePtr>
 //
 //	DESCRIPTION :
@@ -119,13 +151,8 @@ PMSelection::~PMSelection()
 set<PMSelectablePtr> PMSelection::inspacks_ptrs()
 {
   set<PMSelectablePtr> ret = inspacks_ptrs( LangCode( "" ) );
-
-  for ( Y2PM::LocaleSet::const_iterator it = Y2PM::getRequestedLocales().begin();
-	it != Y2PM::getRequestedLocales().end(); ++it ) {
-    set<PMSelectablePtr> res = inspacks_ptrs( *it );
-    ret.insert( res.begin(), res.end() );
-  }
-
+  set<PMSelectablePtr> res = inspacks_ptrs( Y2PM::getRequestedLocales() );
+  ret.insert( res.begin(), res.end() );
   return ret;
 }
 
@@ -140,13 +167,8 @@ set<PMSelectablePtr> PMSelection::inspacks_ptrs()
 set<PMSelectablePtr> PMSelection::delpacks_ptrs()
 {
   set<PMSelectablePtr> ret = delpacks_ptrs( LangCode( "" ) );
-
-  for ( Y2PM::LocaleSet::const_iterator it = Y2PM::getRequestedLocales().begin();
-	it != Y2PM::getRequestedLocales().end(); ++it ) {
-    set<PMSelectablePtr> res = delpacks_ptrs( *it );
-    ret.insert( res.begin(), res.end() );
-  }
-
+  set<PMSelectablePtr> res = delpacks_ptrs( Y2PM::getRequestedLocales() );
+  ret.insert( res.begin(), res.end() );
   return ret;
 }
 

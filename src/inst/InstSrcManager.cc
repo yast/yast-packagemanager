@@ -461,12 +461,27 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
 
   ///////////////////////////////////////////////////////////////////
   // be friendly to slideshow
+  // - for non dir: URLs link to cache_media_dir (as ever)
+  // - for dir: URLs (multiple product CDs) link iff URL/suse/setup/slide is
+  //   a directory.
   ///////////////////////////////////////////////////////////////////
 #warning be friendly to slideshow hack
   if ( ! Y2PM::runningFromSystem() && ! idlist_r.empty() ) {
-    Pathname slink( cache_tmp_dir() + "CurrentMedia" );
-    PathInfo::unlink( slink );
-    PathInfo::symlink( (*idlist_r.begin())->cache_media_dir(), slink );
+    ISrcId csrc( *idlist_r.begin() );
+    if ( csrc->descr() ) {
+      Pathname ltarget;
+      const Url & curl( csrc->descr()->url() );
+      if ( curl.protocol() != Url::dir ) {
+	ltarget = csrc->cache_media_dir();
+      } else if ( PathInfo( curl.path() + "/suse/setup/slide" ).isDir() ) {
+	ltarget = curl.path();
+      }
+      if ( ! ltarget.empty() ) {
+	Pathname slink( cache_tmp_dir() + "CurrentMedia" );
+	PathInfo::unlink( slink );
+	PathInfo::symlink( ltarget, slink );
+      }
+    }
   }
 
   ///////////////////////////////////////////////////////////////////

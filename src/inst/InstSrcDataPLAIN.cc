@@ -248,6 +248,16 @@ PMError InstSrcDataPLAIN::providePkgToInstall( const Pathname & pkgfile_r, Pathn
   }
 
   path_r = media->localPath( pkgfile );
+
+  if ( _instSrc->isRemote() && ! RpmHeader::readPackage( path_r, /*checkDigest*/true ) ) {
+    err = Error::E_corupted_file;
+    err.setDetails( pkgfile.asString() );
+    PathInfo::unlink( path_r );
+    ERR << "Bad digest '" << path_r << "': " << err << endl;
+    path_r = Pathname();
+    return err;
+  }
+
   _instSrc->rememberPreviouslyDnlPackage( path_r );
 
   return PMError::E_ok;

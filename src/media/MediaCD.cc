@@ -87,9 +87,12 @@ MediaCD::MediaCD( const Url &      url_r,
     }
     else
     {
-	//default is /dev/cdrom
+	//default is /dev/cdrom; for dvd: /dev/dvd if it exists
 	//TODO: make configurable
-	const char* const device = "/dev/cdrom";
+        string device( "/dev/cdrom" );
+	if ( _url.protocol() == Url::dvd && PathInfo( "/dev/dvd" ).isBlk() ) {
+	  device = "/dev/dvd";
+	}
 	D__ << "use default device " << device << endl;
 	_devices.push_back(device);
     }
@@ -292,6 +295,18 @@ PMError MediaCD::getFile( const Pathname & filename ) const
 
 ///////////////////////////////////////////////////////////////////
 //
+//	METHOD NAME : MediaCD::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaCD::getDir (const Pathname & dirname) const
+{
+  return MediaHandler::getDir( dirname );
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : MediaCD::getDirInfo
 //	METHOD TYPE : PMError
@@ -300,6 +315,20 @@ PMError MediaCD::getFile( const Pathname & filename ) const
 //
 PMError MediaCD::getDirInfo( std::list<std::string> & retlist,
 			     const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaCD::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaCD::getDirInfo( PathInfo::dircontent & retlist,
+			   const Pathname & dirname, bool dots ) const
 {
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }

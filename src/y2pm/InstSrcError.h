@@ -79,7 +79,8 @@ class InstSrcError {
       E_data_bad_packages_du,
       E_data_bad_selection,
       // DataProvider
-      E_no_source
+      E_no_source,
+      E_corupted_file
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {

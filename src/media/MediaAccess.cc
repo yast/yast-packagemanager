@@ -140,19 +140,21 @@ Url MediaAccess::url() const
 }
 
 // close handler
-void
-MediaAccess::close (void)
+PMError
+MediaAccess::close ()
 {
   ///////////////////////////////////////////////////////////////////
   // !!! make shure handler gets properly deleted.
   // I.e. release attached media before deleting the handler.
   ///////////////////////////////////////////////////////////////////
+  PMError err;
   if ( _handler ) {
-    _handler->release();
-    MIL << "Close: " << *this << endl;
+    err = _handler->release();
+    (err?WAR:MIL) << "Close: " << *this << " (" << err << ")" << endl;
     delete _handler;
     _handler = 0;
   }
+  return err;
 }
 
 
@@ -282,6 +284,20 @@ MediaAccess::releasePath( const Pathname & pathname ) const
 // Return content of directory on media
 PMError
 MediaAccess::dirInfo( list<string> & retlist, const Pathname & dirname, bool dots ) const
+{
+  retlist.clear();
+
+  if ( !_handler ) {
+    INT << Error::E_not_open << " on dirInfo(" << dirname << ")" << endl;
+    return Error::E_not_open;
+  }
+
+  return _handler->dirInfo( retlist, dirname, dots );
+}
+
+// Return content of directory on media
+PMError
+MediaAccess::dirInfo( PathInfo::dircontent & retlist, const Pathname & dirname, bool dots ) const
 {
   retlist.clear();
 

@@ -145,6 +145,18 @@ PMError MediaSMB::getFile (const Pathname & filename) const
 
 ///////////////////////////////////////////////////////////////////
 //
+//	METHOD NAME : MediaSMB::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaSMB::getDir (const Pathname & dirname) const
+{
+  return MediaHandler::getDir( dirname );
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : MediaSMB::getDirInfo
 //	METHOD TYPE : PMError
@@ -157,4 +169,16 @@ PMError MediaSMB::getDirInfo( std::list<std::string> & retlist,
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaSMB::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaSMB::getDirInfo( PathInfo::dircontent & retlist,
+			   const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}

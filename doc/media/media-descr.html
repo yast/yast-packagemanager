@@ -105,7 +105,8 @@ In case of splitted media, it must be present of the first media
 of the set.<BR>
 <br>
 The <tt>patches</tt> file contains a single directory specification for
-the root of the patches directory tree.<br>
+the root of the patches directory tree and an optional list of exclusive
+products the patches apply to.<br>
 In case of splitted media, it must be present of the first media
 of the set.<BR>
 <br>
@@ -122,11 +123,12 @@ Proposal: Encode Vendor and Timestamp information in a file<BR>
 <TABLE border>
 <tr><td>File:</td><td><tt>media</tt></td></tr>
 <tr><td>Location</td><td> <tt>/media.<i>N</i>/</tt> directory on media</td></tr>
-<tr><td valign="top">Content</td><td>three lines of ASCII as follows<BR>
-  <i><tt>&lt;vendor&gt;</tt></i><br>
-  <i><tt>&lt;YYYYMMDDHHMMSS&gt;</tt></i><br>
+<tr><td valign="top">Content</td><td>two or more lines of ASCII as follows<BR>
+  <i><b><tt>&lt;vendor&gt;</tt></b></i><br>
+  <i><b><tt>&lt;YYYYMMDDHHMMSS&gt;</tt></b></i><br>
   <i>[<tt>&lt;media count&gt;</tt>]</i><br>
   <i>[<tt>&lt;media flags&gt;</tt>]</i><br>
+  <i>[<tt>&lt;media names&gt;</tt>]</i><br>
 </td></tr>
 </TABLE>
 <br>
@@ -139,20 +141,25 @@ specific. (It's the name of the vendor who created the media which might
 be different from a product vendor! It's just used as an additional key
 for media identification.)<BR>
 <br>
-The media count is needed if the installation data is
-split up on multiple (identical) medias. The <tt>media</tt> file on
-the first media should contain the total count of medias.<br>
-The media count is a numerical value (all characters are digits).<br>
-It is an optional information on the other media.<BR>
+All media of a media-set must provide identical vendor and timestamp
+information in the <tt>media</tt> file.<br>
+
+<H3>The <tt>/media.1/media</tt> file</H3>
+
+The <tt>/media.1/media</tt> file may contain additional information.<br>
+The remaining <tt>media</tt> files of a media-set may repeat this information,
+but it is not evaluated again.<BR>
 <br>
-A fourth line may contain flags further describing the media.<br>
+The <tt>&lt;media count&gt;</tt> is needed if the installation data is
+split up on multiple (identical) medias.<br>
+The media count is a numerical value (all characters are digits),
+and defaults to <tt>1</tt>.<BR>
+<br>
+<tt>&lt;media flags&gt;</tt> may further describe the media.<br>
 In order to distinguish the flags from the count line, the flags values
-start with a letter.<br>
+start with a letter. <br>
 <br>
-All media of a media-set must have identical vendor and data information
-in the <tt>media</tt> file.<br>
-<p></p>
-Currently defined flags
+Currently defined flags:<br>
 <TABLE border>
 <tr><th>flag</th><th>meaning</th></tr>
 <tr><td><tt>doublesided</tt></td><td>media is double sided,
@@ -160,6 +167,25 @@ Currently defined flags
 	and 'back side' for even-numbered media.<br>
 	The default is single-sided media.</td></tr>
 </table>
+<p>
+<tt>&lt;media names&gt;</tt> may define alternate strings to use when
+asking to insert a certain media.<br>
+They are defined as <i><tt>&lt;key&gt;&lt;whitespace&gt;&lt;value&gt;</tt></i>
+pairs, separated by <i><tt>\n</tt></i>.<br>
+<br>
+<TABLE border>
+<tr><th>key</th><th>value</th></tr>
+<tr><td><tt>MEDIA<i>&lt;N&gt;</i></tt></td><td>
+	UTF-8 encoded string to use when asking for media <i>&lt;N&gt;</i>.
+	</td></tr>
+<tr><td><tt>MEDIA<i>&lt;N&gt;.&lt;lang&gt;</i></tt></td><td>
+	UTF-8 encoded translation of <tt>MEDIA<i>&lt;N&gt;</i></tt> may be defined by appending
+	the ISO <i><tt>&lt;language&gt;</tt></i> or <i><tt>&lt;language&gt;_&lt;country&gt;</tt></i> code.
+	</td></tr>
+</table>
+
+
+
 <p></p>
 <H3>Example</H3>
 <pre>
@@ -170,7 +196,10 @@ products
 linux# cat /mnt/media.1/media
 SuSE Linux AG
 20020921153042
-7
+3
+MEDIA1 SUSE Linux 9.1 DVD 1
+MEDIA2 SUSE Linux 9.1 DVD 2
+MEDIA3 SUSE Linux 9.1 DVD 3
 linux#
 </pre>
 <p></p>
@@ -364,19 +393,32 @@ linux#
 <br>
 
 <!--------------------------------------------------------------------!>
+<a name=patches>
 <H2>The <tt>patches</tt> file</H2>
 This file contains a single directory name for the root of the
-patches directory contained on the media.<br>
+patches directory contained on the media and an optional list of exclusive
+products the patches apply to.<br>
 If this file is not present, the media's root directory
-is assumed.<br>
+is assumed and no restrictions about the products are made.<br>
 <br>
-The line starts with the directory name (relative to the media's
-root dir !), followed by whitespace (space or tab) followed by an
+The first line of the file starts with the directory name (relative to the
+media's root dir!), followed by whitespace (space or tab) followed by an
 optional comment with the description/patchlevel of the Patch CD.<br>
 A leading slash in the directory name is only needed to specify
 the root directory of the media.<br>
-<br>
-<BR>
+
+<p>
+Additional lines are used to specify exclusive products. If no additional lines
+are present, no exclusive products are assumed. If there are exclusive products
+the online or patch CD update ignores all products on the installed system
+which are not contained in the list of exclusive products. If there are no
+exclusive products all products on the installed system are used for the update.
+</p>
+
+<p>
+The exclusive products are listed as one product per line in the form of the
+product name and the product version separated by a dash.
+</p>
 Proposal:<BR>
 <TABLE border>
 <tr><td>File:</td><td><tt>patches</tt></td></tr>
@@ -384,7 +426,9 @@ Proposal:<BR>
 <tr><td valign="top">Content</td><td>one line of ASCII as follows<BR>
   <i><tt>&lt;directory&gt;</tt></i>
     <i>&lt;whitespace&gt;</i>
-    <i><tt>&lt;optional comment&gt;</tt></i>
+    <i><tt>&lt;optional comment&gt;</tt></i><BR>
+    zero or more lines specifying exclusive products:
+    <i><tt>&lt;productname&gt;-&lt;productversion&gt;</tt><i>
 </td></tr>
 </TABLE>
 <br>
@@ -395,6 +439,7 @@ linux# cat /mnt/media.1/patches
 / Patch-CD SuSE-SLES 7 (i386) Patchlevel 4
 linux# cat /mnt2/media.1/patches
 patches Patch-CD SuSE-SLOX 4 (i386) Patchlevel 1
+SUSE CORE-9
 </pre>
 <br>
 

@@ -136,6 +136,18 @@ PMError MediaDISK::getFile (const Pathname & filename) const
 
 ///////////////////////////////////////////////////////////////////
 //
+//	METHOD NAME : MediaDISK::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaDISK::getDir (const Pathname & dirname) const
+{
+  return MediaHandler::getDir( dirname );
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : MediaDISK::getDirInfo
 //	METHOD TYPE : PMError
@@ -148,4 +160,16 @@ PMError MediaDISK::getDirInfo( std::list<std::string> & retlist,
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaDISK::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaDISK::getDirInfo( PathInfo::dircontent & retlist,
+			   const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}

@@ -30,7 +30,8 @@ namespace PM {
 ;//////////////////////////////////////////////////////////////////
 
 struct RcValues {
-  PM::LocaleSet requestedLocales;
+  PM::LocaleSet      requestedLocales;
+  PM::CandidateOrder candidateOrder;
 };
 
 extern RcValues & rcValues(); // Y2PM.rcvalue.cc

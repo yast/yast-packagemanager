@@ -111,7 +111,7 @@ string PMYouPatch::kindLabel( Kind kind )
     case kind_security:
       return _("Security");
     case kind_patchlevel:
-      return _("Patchlevel");
+      return _("Patch Level");
     case kind_optional:
       return _("Optional");
     case kind_document:
@@ -185,7 +185,7 @@ list<string> PMYouPatch::insnotify() const
   list<string> text;
   
   text.push_back( _("Installing this patch will have no effect, because it") );
-  text.push_back( _("doesn't contain any updates to installed packages.") );
+  text.push_back( _("does not contain any updates for installed packages.") );
 
   return text;
 }

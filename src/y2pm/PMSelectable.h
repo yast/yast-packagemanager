@@ -24,6 +24,7 @@
 
 #include <y2pm/PMSelectablePtr.h>
 
+#include <y2pm/PMTypes.h>
 #include <y2pm/SelState.h>
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgArch.h>
@@ -57,6 +58,19 @@ class PMSelectable : public CountedRep {
 	bool replay();
 	bool diff() const;
     };
+
+  private:
+
+    friend class Y2PM;
+    static bool setCandidateOrder( PM::CandidateOrder neworder_r );
+
+    typedef bool (*ClistCompare)( const PMObjectPtr & lhs, const PMObjectPtr & rhs );
+
+    static ClistCompare _clistCompare;
+
+    static bool clistAVS( const PMObjectPtr & lhs, const PMObjectPtr & rhs );
+
+    static bool clistASV( const PMObjectPtr & lhs, const PMObjectPtr & rhs );
 
   private:
 

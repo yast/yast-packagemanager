@@ -137,23 +137,71 @@ inline void setAdd( PMManager::PMSelectableVec & lhs, const PMManager::PMSelecta
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMSelectionManager::syncToPkgMgr
+//	METHOD TYPE : PMError
+//
+PMError PMSelectionManager::syncToPkgMgr( PkgFates & fates_r )
+{
+  // First of all unset everyting collected in pkgUnmodified. Might be
+  // some of them are set again below, but we don't mind.
+  for ( PMSelectableVec::const_iterator it = fates_r.pkgUnmodified.begin(); it != fates_r.pkgUnmodified.end(); ++it ) {
+    (*it)->appl_unset();
+  }
+  // Now: all remaining modification requests are user requests!
+  fates_r.setNothingProcessed();
+
+
+  // always delete delpacks
+  for ( PMSelectableVec::const_iterator it = fates_r.pkgToDelete.begin(); it != fates_r.pkgToDelete.end(); ++it ) {
+    (*it)->appl_set_offSystem(); // hard delete
+  }
+  fates_r.processedToDelete();
+
+
+  // install inspacks
+  for ( PMSelectableVec::const_iterator it = fates_r.pkgToInstall.begin(); it != fates_r.pkgToInstall.end(); ++it ) {
+    if ( fates_r.didProcess( *it ) ) {
+      continue; // don't revert previous setting
+    }
+    (*it)->appl_set_install();
+  }
+  fates_r.processedToInstall();
+
+
+  // protect unmodified but installed inspacks from being deleted below,
+  // by setting them prosessed.
+  fates_r.processedOnSystem();
+
+
+  // remove deleted selections inspacks
+  for ( PMSelectableVec::const_iterator it = fates_r.pkgOffSystem.begin(); it != fates_r.pkgOffSystem.end(); ++it ) {
+    if ( fates_r.didProcess( *it ) ) {
+      continue; // don't revert previous setting
+    }
+    (*it)->appl_set_delete();
+  }
+
+  return PMError::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMSelectionManager::activate
 //	METHOD TYPE : PMError
 //
 PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
 {
-  ///////////////////////////////////////////////////////////////////
-  // Remember selection packages desired fate.
-  ///////////////////////////////////////////////////////////////////
+  PkgFates fates;
   // selections to install:
-  PMSelectableVec pkgToDelete;   // hard: get rid of it
-  PMSelectableVec pkgToInstall;  // hard: (re)install it
+  //     ToDelete   - hard: get rid of it
+  //     ToInstall  - hard: (re)install it
   // unmodified but installed selections: protect inspacks from deletion
-  PMSelectableVec pkgOnSystem;   // soft: Keep it OnSystem.
+  //     OnSystem   - soft: Keep it OnSystem.
   // selections to delete:
-  PMSelectableVec pkgOffSystem;  // soft: if no one minds, bring it OffSystem
+  //     OffSystem  - soft: if no one minds, bring it OffSystem
   // EVERYTHING ELSE:
-  PMSelectableVec pkgUnmodified; // is set to unmodified
+  //     Unmodified - is set to unmodified
 
   for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
     const PMSelectablePtr & sptr( *it );
@@ -169,16 +217,15 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
       case PMSelectable::TO_DELETE:
       case PMSelectable::UNMODIFIED: // for savety
 	if ( sptr->installedObj() ) {
-	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
-	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
+	  fates.addUnmodified( PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
+	  fates.addUnmodified( PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
 	}
 	break;
       case PMSelectable::TO_INSTALL:
 	if ( sptr->candidateObj() ) {
-	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->candidateObj() )->inspacks_ptrs() );
-	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->candidateObj() )->delpacks_ptrs() );
+	  fates.addUnmodified( PMSelectionPtr( sptr->candidateObj() )->inspacks_ptrs() );
+	  fates.addUnmodified( PMSelectionPtr( sptr->candidateObj() )->delpacks_ptrs() );
 	}
-	break;
 	break;
       }
     }
@@ -188,20 +235,20 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
       // E.g. state can't be TO_DELETE, if there's no installedObj.
     case PMSelectable::TO_DELETE:
       // set to delete
-      setAdd( pkgOffSystem, PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
-      setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
+      fates.addOffSystem( PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
+      fates.addUnmodified( PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
       break;
     case PMSelectable::UNMODIFIED:
       // keep an installed one
       if ( sptr->has_installed() ) {
-	setAdd( pkgOnSystem, PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
-	setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
+	fates.addOnSystem( PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
+	fates.addUnmodified( PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
       }
       break;
     case PMSelectable::TO_INSTALL:
       // set to install
-      setAdd( pkgToInstall, PMSelectionPtr( sptr->candidateObj() )->inspacks_ptrs() );
-      setAdd( pkgToDelete, PMSelectionPtr( sptr->candidateObj() )->delpacks_ptrs() );
+      fates.addToInstall( PMSelectionPtr( sptr->candidateObj() )->inspacks_ptrs() );
+      fates.addToDelete( PMSelectionPtr( sptr->candidateObj() )->delpacks_ptrs() );
       break;
     }
 
@@ -212,48 +259,7 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
   ///////////////////////////////////////////////////////////////////
   // Adjust packagemanager states
   ///////////////////////////////////////////////////////////////////
-  // First of all unset everyting collected in pkgUnmodified. Might be some of them
-  // are set again below, but we don't mind.
-  for ( PMSelectableVec::const_iterator it = pkgUnmodified.begin(); it != pkgUnmodified.end(); ++it ) {
-    (*it)->appl_unset();
-  }
-  // now all modification requests are user requests
-  PMSelectableVec pkgProcessed;
-
-
-  // always delete delpacks
-  for ( PMSelectableVec::const_iterator it = pkgToDelete.begin(); it != pkgToDelete.end(); ++it ) {
-    (*it)->appl_set_delete(); // hard delete
-  }
-  setAdd( pkgProcessed, pkgToDelete );
-  pkgToDelete.clear();
-
-
-  // install inspacks
-  for ( PMSelectableVec::const_iterator it = pkgToInstall.begin(); it != pkgToInstall.end(); ++it ) {
-    if ( pkgProcessed.find( *it ) != pkgProcessed.end() ) {
-      continue; // unmodified selections wants to keep it.
-    }
-    (*it)->appl_set_install();
-  }
-  setAdd( pkgProcessed, pkgToInstall );
-  pkgToInstall.clear();
-
-
-  // protect unmodified but installed inspacks
-  setAdd( pkgProcessed, pkgOnSystem );
-  pkgOnSystem.clear();
-
-
-  // remove deleted selections inspacks
-  for ( PMSelectableVec::const_iterator it = pkgOffSystem.begin(); it != pkgOffSystem.end(); ++it ) {
-    if ( pkgProcessed.find( *it ) != pkgProcessed.end() ) {
-      continue; // unmodified selections wants to keep it.
-    }
-    (*it)->appl_set_delete();
-  }
-
-  return PMError::E_ok;
+  return syncToPkgMgr( fates );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -266,6 +272,62 @@ PMError PMSelectionManager::requestedLocalesChanged( const PM::LocaleSet & addLo
 						     const PM::LocaleSet & delLocales_r )
 {
 #warning TBI PMSelectionManager::requestedLocalesChanged
+  PkgFates fates;
+  // !!! Adjust changes in language specific packages according to lastState
+  // (that's what's been synced to the PMPackageManager).
+
+  for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
+    const PMSelectablePtr & sptr( *it );
+
+    PMSelectable::Fate lstate = lastState( sptr );
+
+    switch ( lstate ) {
+    case PMSelectable::TO_DELETE:
+      // nothing to do
+      break;
+    case PMSelectable::UNMODIFIED:
+      if ( sptr->installedObj() ) {
+	PMSelectionPtr csel = sptr->installedObj();	// adjust installed selection
+	fates.addOnSystem( csel->inspacks_ptrs( addLocales_r ) );
+	fates.addOffSystem( csel->inspacks_ptrs( delLocales_r ) );
+      }
+      break;
+    case PMSelectable::TO_INSTALL:
+      if ( sptr->candidateObj() ) {
+	PMSelectionPtr csel = sptr->candidateObj();	// adjust selection to install
+	fates.addToInstall( csel->inspacks_ptrs( addLocales_r ) );
+	fates.addOffSystem( csel->inspacks_ptrs( delLocales_r ) );
+      }
+      break;
+    }
+  }
+
+  // process fates
+  fates.setNothingProcessed();
+
+  // added packages for selections to install are (re)installed
+  for ( PMSelectableVec::const_iterator it = fates.pkgToInstall.begin(); it != fates.pkgToInstall.end(); ++it ) {
+    (*it)->appl_set_install();
+  }
+  fates.processedToInstall();
+
+  // added packages for already installed selections are installed if missing
+  for ( PMSelectableVec::const_iterator it = fates.pkgOnSystem.begin(); it != fates.pkgOnSystem.end(); ++it ) {
+    if ( fates.didProcess( *it ) ) {
+      continue; // don't revert previous setting
+    }
+    (*it)->appl_set_onSystem();
+  }
+  fates.processedOnSystem();
+
+  // deleted packages are
+  for ( PMSelectableVec::const_iterator it = fates.pkgOffSystem.begin(); it != fates.pkgOffSystem.end(); ++it ) {
+    if ( fates.didProcess( *it ) ) {
+      continue; // don't revert previous setting
+    }
+    (*it)->appl_set_offSystem();
+  }
+
   return PMError::E_ok;
 }
 

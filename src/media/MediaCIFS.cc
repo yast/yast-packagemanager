@@ -145,6 +145,18 @@ PMError MediaCIFS::getFile (const Pathname & filename) const
 
 ///////////////////////////////////////////////////////////////////
 //
+//	METHOD NAME : MediaCIFS::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaCIFS::getDir (const Pathname & dirname) const
+{
+  return MediaHandler::getDir( dirname );
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : MediaCIFS::getDirInfo
 //	METHOD TYPE : PMError
@@ -157,4 +169,16 @@ PMError MediaCIFS::getDirInfo( std::list<std::string> & retlist,
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaCIFS::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaCIFS::getDirInfo( PathInfo::dircontent & retlist,
+			   const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}
