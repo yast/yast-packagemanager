@@ -270,7 +270,12 @@ Pathname PMYouPatchPaths::installDir()
 
 Pathname PMYouPatchPaths::externalRpmDir()
 {
-  return localDir() + "external/";
+  return localWriteDir() + "external/";
+}
+
+Pathname PMYouPatchPaths::filesDir()
+{
+  return localWriteDir() + "files/";
 }
 
 string PMYouPatchPaths::directoryFileName()

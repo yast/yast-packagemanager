@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 17 16:16:07 CEST 2003 - cschum@suse.de
+
+- Added support for "Files" tag in YOU patch files. 
+
+-------------------------------------------------------------------
 Mon Jun  9 01:05:03 CEST 2003 - ma@suse.de
 
 - Fixes to build with rpm-4. InstTarget is disabled, as lots of

@@ -7,13 +7,14 @@
 |                        |_|\__,_|____/ |_| |_____|                    |
 |                                                                      |
 |                               core system                            |
-|                                                        (C) SuSE GmbH |
+|                                                    (C) SuSE Linux AG |
 \----------------------------------------------------------------------/
 
   File:       PMYouPatch.h
 
   Author:     Michael Andres <ma@suse.de>
-  Maintainer: Michael Andres <ma@suse.de>
+              Cornelius Schumacher <cschum@suse.de>
+  Maintainer: Cornelius Schumacher <cschum@suse.de>
 
   Purpose: Defines the YouPatch object.
 
@@ -31,6 +32,23 @@
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PMPackagePtr.h>
+
+/**
+  Information about YOU patch extra files.
+*/
+class PMYouFile
+{
+  public:
+    PMYouFile( const std::string &name, const FSize &size )
+      : _name( name ), _size( size ) {}
+
+    std::string name() const { return _name; }
+    FSize size() const { return _size; }
+
+  private:
+    std::string _name;
+    FSize _size;
+};
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -190,6 +208,23 @@ class PMYouPatch : virtual public Rep, public PMObject {
     */
     bool packagesInstalled() const { return _packagesInstalled; }
 
+
+    /**
+      Set list of extra files.
+    */
+    void setFiles( const std::list<PMYouFile> &files );
+    
+    /**
+      Add extra file to patch.
+    */
+    void addFile( const PMYouFile &file );
+
+    /**
+      Return list of YOU patch extra files.
+    */
+    std::list<PMYouFile> files() const { return _files; }
+
+
   public:
 
     /**
@@ -222,6 +257,8 @@ class PMYouPatch : virtual public Rep, public PMObject {
     Pathname _localFile;
 
     bool _packagesInstalled;
+
+    std::list<PMYouFile> _files;
 
   public:
 

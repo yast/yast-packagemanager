@@ -168,9 +168,9 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   D__ << "Size: " << size << " RpmSize: " << rpmSize
       << " PatchRpmSize: " << patchRpmSize << endl;
 
-  _packageDataProvider->setSize( pkg, FSize( atoll( size.c_str() ) ) );
-  _packageDataProvider->setArchiveSize( pkg, FSize( atoll( rpmSize.c_str() ) ) );
-  _packageDataProvider->setPatchRpmSize( pkg, FSize( atoll( patchRpmSize.c_str() ) ) );
+  _packageDataProvider->setSize( pkg, FSize( size ) );
+  _packageDataProvider->setArchiveSize( pkg, FSize( rpmSize ) );
+  _packageDataProvider->setPatchRpmSize( pkg, FSize( patchRpmSize ) );
 
   value = tagValue( YOUPackageTagSet::OBSOLETES );
   list<PkgRelation> relations = PkgRelation::parseRelations( value );
@@ -249,6 +249,28 @@ PMError PMYouPatchInfo::parsePackages( const string &packages,
   return PMError();
 }
 
+PMError PMYouPatchInfo::parseFiles( const string &files,
+                                    const PMYouPatchPtr &patch )
+{
+  I__ << files << endl;
+
+  vector<string> fileList;
+  stringutil::split( files, fileList, "\n" );
+
+  vector<string>::const_iterator it;
+  for( it = fileList.begin(); it != fileList.end(); ++it ) {
+    D__ << "File: " << *it << endl;
+    vector<string> fileData;
+    stringutil::split( *it, fileData );
+    if ( fileData.size() != 2 ) {
+      return PMError( YouError::E_parse_error,
+                      "Error parsing 'Files' attribute" );
+    }
+    patch->addFile( PMYouFile( fileData[ 0 ], FSize( fileData[ 1 ] ) ) );
+  }
+
+  return PMError();
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -337,6 +359,10 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
       return error;
     }
 
+    value = tagMultiValue( YOUPatchTagSet::FILES, patchstream );
+    error = parseFiles( value, p );
+    if ( error ) return error;
+
     patches.push_back( p );
 
     return PMError();
@@ -397,7 +423,7 @@ PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches, bool reload,
         Pathname localPath = media.localPath( filePath );
         
         error = media.provideFile( filePath, !reload );
-        if ( error != PMError::E_ok ) {
+        if ( error ) {
             ERR << "ERR: " << error << ": " << filePath << endl;
             if ( error == MediaError::E_login_failed ) return error;
         } else {
@@ -415,13 +441,16 @@ PMError PMYouPatchInfo::readDir( list<PMYouPatchPtr> &patches, bool reload,
             D__ << "read patch: file: " << *it << endl;
             error = readFile( media.localPath( patchPath ), *it, patches );
             if ( error != PMError::E_ok ) {
-                ERR << "Error reading patch " << *it << endl;
                 media.release();
-                error.setDetails( "Patch: " + *it );
+                string details = "Patch '" + *it + "'";
+                if ( !error.details().empty() ) {
+                  details += ": " + error.details();
+                }
+                ERR << error << endl;
                 return error;
             }
+            DBG << "Successfully read " << *it << endl;
         }
-        DBG << "Successfully read " << *it << endl;
     }
     Y2PM::youPatchManager().instYou().progress( 100 );
 

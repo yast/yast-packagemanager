@@ -587,7 +587,8 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
   RpmDb rpm;
 
   list<PMPackagePtr> packages = patch->packages();
-  int progressTotal = packages.size() * 100 * 100/98;
+  list<PMYouFile> files = patch->files();
+  int progressTotal = ( packages.size() + files.size() ) * 100 * 100/98;
   int progressCurrent = 0;
 
   CurlCallbacks callbacks( this, progressTotal );
@@ -630,6 +631,20 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool reload,
         ERR << "Signature check failed for " << localRpm << endl;
         return PMError( YouError::E_bad_sig_rpm );
       }
+    }
+  }
+
+  list<PMYouFile>::const_iterator itFile;
+  for( itFile = files.begin(); itFile != files.end(); ++itFile ) {
+    callbacks.setBaseProgress( progressCurrent );
+    PMError error = patchProgress( progressCurrent * 100 / progressTotal );
+    if ( error ) return error;
+    progressCurrent += 100;
+
+    error = retrieveFile( *itFile, reload );
+    if ( error ) {
+      ERR << "Error retrieving file." << endl;
+      return error;
     }
   }
 
@@ -794,6 +809,41 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool reload,
   error.setDetails( details );
 
   return error;
+}
+
+PMError InstYou::retrieveFile( const PMYouFile &file, bool reload )
+{
+  DBG << "InstYou::retrieveFile: '" << file.name() << "'" << endl;
+
+  Url url( file.name() );
+
+  if ( !url.isValid() ) {
+    ERR << "Invalid URL: '" << url.asString() << "'" << endl;
+    return InstSrcError::E_bad_url;
+  }
+
+  int e = PathInfo::assert_dir( _paths->filesDir() );
+  if ( e ) {
+    ERR << "Can't create " << _paths->filesDir() << " (errno: "
+        << e << ")" << endl;
+    return PMError( InstSrcError::E_error );
+  }
+
+  Pathname path = url.getPath();
+  url.setPath( "" );
+
+  MediaAccess media;
+
+  PMError err = media.open( url, _paths->filesDir() );
+  if ( err ) return err;
+
+  err = media.attach();
+  if ( err ) return err;
+
+  err = media.provideFile( path, !reload );
+  if ( err ) return err;
+
+  return PMError();
 }
 
 PMError InstYou::removePackages()
