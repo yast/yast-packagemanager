@@ -22,11 +22,14 @@ Media access is handled by first openining (MediaAccess::open())
 a media. A media is specified by an URL. See doc/MediaAccess.xml
 for details.
 
-After opening, a MediaAccess object must be attached to
-(MediaAccess::attachTo()) a local directory. This can be seen
-as mounting the media device to a mount point. All files from
-the media are provided below this directory. In order to access
-a file, it must be explicitly requested (MediaAccess::provideFile()).
+After opening, a MediaAccess object must be attached by calling
+MediaAccess::attach(). This can be seen as mounting the media device
+to a mount point.
+The actual mount point (a directory) can be retrieved by calling
+MediaAccess:getAttachPoint() which returns a Pathname.
+All files from the media are provided below this directory.
+In order to access a file, it must be explicitly requested
+(MediaAccess::provideFile()).
 
 When requesting a file, the filename is interpreted as a path
 relative to the media 'root dir' as specified during MediaAccess::open().
@@ -36,13 +39,13 @@ Example:
 
 After
   MediaAccess::open("cd:/dev/cdrom:/cdpath/cddir");
-  MediaAccess::attachTo ("/local/cdpoint");
+  string attachDir = MediaAccess:getAttachPoint ();
 calling
   MediaAccess::provideFile ("suse/setup/descr/info");
-will copy
+will provide the file
   /cdpath/cddir/suse/setup/descr/info
 from CD device /dev/cdrom to
-  /local/cdpoint/suse/setup/descr/info
+  <attachDir>/suse/setup/descr/info
 on the local system.
 
 This file can then be handled by normal (C/C++) file i/o calls.
@@ -78,4 +81,16 @@ A 'stat' on a file without actually retrieving it can be done by
 MediaAccess::fileInfo()
 
 -----------------------------------------------------------
+
+Implementation
+--------------
+
+MediaAccess is the external API for accessing media
+
+Internally, the various kinds of supported media all implement a 
+common interface, defined by MediaHandler.
+So for the MediaAccess class, all media is represented as a MediaHandler.
+The concrete implementation for a media is subclassed from MediaHandler,
+inheriting (and implementing) it's interface.
+
 

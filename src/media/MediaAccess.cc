@@ -157,30 +157,30 @@ MediaAccess::close (void)
 const Pathname &
 MediaAccess::getAttachPoint (void) const
 {
-    return _destination;
+    return _handler->getAttachPoint();
 }
 
 
-// attach media to directory
+// attach media
 PMError
-MediaAccess::attachTo (const Pathname & to)
+MediaAccess::attach (void)
 {
-    PathInfo info (to);
-
-    if (!info.isDir())			// must be dir
-    {
-	D__ << to.asString() << " is no directory" << endl;
-	return Error::E_not_a_directory;
-    }
-
-    _destination = to;
+    PMError err;
 
     if (_handler == 0)
     {
 	return Error::E_not_open;
     }
+    if (!_handler->getAttachPoint().empty())
+    {
+	return Error::E_already_attached;
+    }
 
-    return _handler->attachTo (to);
+    err = _handler->attachTo (Pathname ("/var/adm/mount"));
+
+    if (err == Error::E_attachpoint_fixed)	// attached somewhere else
+	err = Error::E_ok;
+    return err;
 }
 
 // release attached media
@@ -208,9 +208,9 @@ MediaAccess::provideFile (const Pathname & filename) const
     {
 	return Error::E_not_open;
     }
-    if (_destination.empty())
+    if (_handler->getAttachPoint().empty())
     {
-	return Error::E_no_destination;
+	return Error::E_not_attached;
     }
     return _handler->provideFile (filename);
 }
@@ -226,11 +226,15 @@ MediaAccess::findFile (const Pathname & dirname, const string & pattern) const
 {
     if (_handler == 0)
     {
-	return 0;
+	return 0;  //Error::E_not_open;
     }
     if (pattern.empty())
     {
 	return 0;
+    }
+    if (_handler->getAttachPoint().empty())
+    {
+	return 0; //Error::E_not_attached;
     }
     return _handler->findFile (dirname, pattern);
 }
@@ -244,9 +248,9 @@ MediaAccess::dirInfo (const Pathname & filename) const
     {
 	return 0;
     }
-    if (_destination.empty())
+    if (_handler->getAttachPoint().empty())
     {
-	return 0;
+	return 0; //Error::E_not_attached;
     }
     return _handler->dirInfo (filename);
 }
@@ -259,9 +263,9 @@ MediaAccess::fileInfo (const Pathname & filename) const
     {
 	return 0;
     }
-    if (_destination.empty())
+    if (_handler->getAttachPoint().empty())
     {
-	return 0;
+	return 0; //Error::E_not_attached;
     }
     return _handler->fileInfo (filename);
 }
@@ -272,7 +276,7 @@ MediaAccess::fileInfo (const Pathname & filename) const
 PMError
 MediaAccess::cleanUp (const Pathname & filename) const
 {
-    Pathname fullname = _destination + filename;
+    Pathname fullname = _handler->getAttachPoint() + filename;
     PathInfo info (fullname);
 
     if (info.isDir())
@@ -310,7 +314,7 @@ MediaAccess::dumpOn( std::ostream & str ) const
 	case Unknown:
 	  break;
     }
-    str << tstr << "@" << _destination.asString() << endl;
+    str << tstr << "@" << _handler->getAttachPoint().asString() << endl;
     return str;
 }
 

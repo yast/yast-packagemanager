@@ -73,6 +73,14 @@ MediaHandler::dumpOn( ostream & str ) const
     return str;
 }
 
+// get destination for file retrieval
+const Pathname &
+MediaHandler::getAttachPoint (void) const
+{
+    return _attachPoint;
+}
+
+
 ///////////////////////////////////////////////////////////////////
 // PROTECTED
 //

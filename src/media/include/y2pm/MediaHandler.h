@@ -15,7 +15,8 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Abstract base class for 'physical' media access
+   Purpose:	Abstract base class for 'physical' media classes
+		like MediaCD, MediaDIR, ...
 
 /-*/
 #ifndef MediaHandler_h
@@ -50,7 +51,11 @@ class MediaHandler {
 
 	const Url _url;	// which device
 
-	Pathname _attachPoint;		// attached at
+	/**
+	 * this is where the media is actually "mounted"
+	 * all files are provided 'below' this directory
+	 */
+	Pathname _attachPoint;
 
 	/** scan directory 'dirname' for first file matching pattern
 	 * */
@@ -64,11 +69,18 @@ class MediaHandler {
 	// constructor
 	MediaHandler (const Url& url);
 
-	/** attach media at path */
-	virtual PMError attachTo (const Pathname & to) = 0;
+	/** attach media
+	    the 'hint' is a directory for attaching the media
+	    the concrete media handler is free to choose another
+	    directory and report this via Error::E_attachpoint_fixed
+
+	    For example, a local directory can't be attached to
+	    somewhere else.
+	 */
+	virtual PMError attachTo (const Pathname & hint) = 0;
 
 	/** return current attach directory */
-	virtual Pathname & getAttachPoint (void) { return _attachPoint; }
+	virtual const Pathname & getAttachPoint (void) const;
 
 	/** release attached media
 	 *
@@ -104,8 +116,8 @@ class MediaHandler {
 
 ///////////////////////////////////////////////////////////////////
 
-#define	MEDIA_HANDLER_API						\
-	PMError attachTo (const Pathname & path);			\
+#define	MEDIA_HANDLER_API					\
+	PMError attachTo (const Pathname & hint);		\
 	PMError release (bool eject = false);			\
 	PMError provideFile (const Pathname & filename) const;	\
 	const Pathname * findFile (const Pathname & dirname, const std::string & pattern) const;	\

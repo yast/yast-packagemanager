@@ -136,7 +136,6 @@ MediaCD::attachTo (const Pathname & to)
     // FIXME, issue "eject -t" to close the tray
     // really? mine does close automatically -- lnussel
 
-
     if(!_attachPoint.empty())
 	return Error::E_already_attached;
 
