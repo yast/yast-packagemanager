@@ -140,6 +140,8 @@ class PkgDu {
     PkgDu();
     ~PkgDu();
 
+    typedef PkgDuMaster::MountPoint MountPoint;
+
   private:
 
     /**

@@ -291,11 +291,22 @@ const set<PMPackageManager::MountPoint> & PMPackageManager::currentDu()
     return _du_master.mountpoints();
   }
 
+  // currently installed packages do not have du info ;(
+  //
+  // new install: add candidate
+  // replace:     ---
+  // delete:      sub candiadte (if one)
   for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
-    if ( (*it)->has_installed() )
-      PMPackagePtr( (*it)->installedObj() )->du_sub( _du_master );
-    if ( (*it)->has_candidate() )
-      PMPackagePtr( (*it)->candidateObj() )->du_add( _du_master );
+    const constPMSelectablePtr & sel( *it );
+    if ( sel->to_modify() ) {
+
+      if ( sel->to_install() && sel->has_candidate_only() ) {
+	PMPackagePtr( sel->candidateObj() )->du_add( _du_master );
+      } else if ( sel->to_delete() && sel->has_candidate() ) {
+	PMPackagePtr( sel->candidateObj() )->du_sub( _du_master );
+      }
+
+    }
   }
 
   DBG << _du_master << endl;
