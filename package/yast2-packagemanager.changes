@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Feb 14 17:12:59 CET 2005 - mir@suse.de
+
+- Bugfix: YOU did not work when Timezone contained no '/'
+          (#42021)
+  - Modified MediaAccess::localPath to shorten path if necessary
+  - Modified MediaCurl::getfile to use localPath instead of
+             homebrewn logic.
+- fixed rpm version check in configure.in.in
+- 2.11.17
+
+-------------------------------------------------------------------
 Sun Feb 13 19:38:14 CET 2005 - ma@suse.de
 
 - Introduced RPMINST_NOUPGRADE flag which allows to behave

@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/MediaHandler.h>
@@ -173,6 +174,86 @@ PMError MediaHandler::attach( bool next )
 
   return err;
 }
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	INTERNAL FUNCTION
+//	NAME: limitFileNamesInPath
+//      DESCR: Looks into pathname and looks if any path component
+//             is longer than maxLen. If it is, this component
+//             is replaced by a shortened one. The shortened 
+//             Pathname is returned.
+
+static Pathname limitFileNamesInPath(const Pathname &pathname, int maxLen)
+{
+    using namespace std;
+    if (maxLen > -1 && pathname.asString().length() > maxLen) {
+        string base = pathname.basename();
+        if (base.length() > maxLen) {
+            // too long. This will probably not happen very often,
+            // so this is not time critical.
+            //
+            // we will build the result as follows:
+            // first n chars + '~xxxx~' + last m chars
+            // such that total length will be below maxLen
+            // xxxx is a cheap hash of the chars cut away to
+            // guarantee (more or less ;-) uniqueness
+            // use 8 chars less to accomodate for adding the hash.
+            int cutAwayCount = base.length() - maxLen + 8;
+            int splitPos1 = maxLen / 2 - 4;
+            while ( (base[splitPos1] & 0x80) && splitPos1 > 0) {
+                // don't split within UTF8 encoding
+                --splitPos1;
+            }
+            int splitPos2 = splitPos1 + cutAwayCount;
+            while ( (base[splitPos2] & 0x80) && splitPos2 < maxLen-1) {
+                // don't split within UTF8 encoding
+                ++splitPos2;
+            }
+            int sum = 0;
+            for (int i=splitPos1; i<splitPos2; ++i) {
+                sum += base[i];
+            }
+            ostringstream os;
+            os << base.substr(0,splitPos1) 
+               << "~" << hex << (sum & (unsigned) 0xffff) << "~"
+               << base.substr(splitPos2);
+            string base2 = os.str();
+            WAR << "limitFileNamesInPath: " 
+                << "'" << base << "' -> '" << base2 << "'" << endl;
+            base = base2;
+        }
+        return limitFileNamesInPath(pathname.dirname(), maxLen) + base;
+    }
+    else
+        return pathname;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::localPath
+//	METHOD TYPE : Pathname
+//
+Pathname MediaHandler::localPath( const Pathname & pathname ) const {
+    if ( _localRoot.empty() )
+        return _localRoot;
+
+    // we must check maximum file name length
+    // this is important for fetching the suseservers, the
+    // url with all parameters can get too long (bug #42021)
+
+    int maxLen = pathconf(_localRoot.asString().c_str(),_PC_NAME_MAX);
+    WAR << "maxLen: " << maxLen << endl;
+    return _localRoot + limitFileNamesInPath(pathname.absolutename(),maxLen);
+}
+
+            
+                
+
 
 ///////////////////////////////////////////////////////////////////
 //

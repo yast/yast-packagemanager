@@ -327,12 +327,12 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 
     // Use absolute file name to prevent access of files outside of the
     // hierarchy below the attach point.
-    Pathname dest = attachPoint() + filename.absolutename();
+    Pathname dest = localPath(filename).absolutename();
 
-    string destNew = dest.asString() + ".new.yast.37456";
+    string destNew = localPath(filename.asString() + ".new.yast.37456").absolutename().asString();
 
-    D__ << "dest: " << dest << endl;
-    D__ << "destNew: " << destNew << endl;
+    WAR << "dest: " << dest << endl;
+    WAR << "destNew: " << destNew << endl;
 
     if( PathInfo::assert_dir( dest.dirname() ) )
     {
@@ -357,8 +357,8 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 
     FILE *file = fopen( destNew.c_str(), "w" );
     if ( !file ) {
-      ERR << "fopen failed" << endl;
-      return PMError( Error::E_write_error, destNew );
+        ERR << "fopen failed for file '" << destNew << "'" << endl;
+        return PMError( Error::E_write_error, destNew );
     }
 
     ret = curl_easy_setopt( _curl, CURLOPT_WRITEDATA, file );
