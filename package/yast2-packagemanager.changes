@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep 24 21:29:32 CEST 2003 - ma@suse.de
+
+- InstSrcManager::scanMedia: Assure media is immediately released after
+  scanning media.1/products. Otherwise slideshow symlink will fail.
+- 2.9.0
+
+-------------------------------------------------------------------
 Tue Sep 23 20:43:24 CEST 2003 - ma@suse.de
 
 - Provide a symlink to slideshow data during install or upadte.
