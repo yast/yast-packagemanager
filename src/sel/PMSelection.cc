@@ -38,6 +38,38 @@ IMPL_DERIVED_POINTER( PMSelection, PMObject, PMSolvable );
 
 ///////////////////////////////////////////////////////////////////
 //
+// PMSelection attribute retrieval via dataProvider, or default values.
+//
+///////////////////////////////////////////////////////////////////
+#define DP_GET(ATTR)         if ( _dataProvider ) return _dataProvider->ATTR( *this ); return PMSelectionDataProvider::ATTR()
+#define DP_ARG_GET(ATTR,ARG) if ( _dataProvider ) return _dataProvider->ATTR( *this, ARG ); return PMSelectionDataProvider::ATTR( ARG )
+// PMObject attributes
+std::string               PMSelection::summary    ( const std::string & lang ) const { DP_ARG_GET( summary, lang ); }
+std::list<std::string>    PMSelection::description( const std::string & lang ) const { DP_ARG_GET( description, lang ); }
+std::list<std::string>    PMSelection::insnotify  ( const std::string & lang ) const { DP_ARG_GET( insnotify, lang ); }
+std::list<std::string>    PMSelection::delnotify  ( const std::string & lang ) const { DP_ARG_GET( delnotify, lang ); }
+FSize                     PMSelection::size()            const { DP_GET( size ); }
+// PMSelection attributes
+std::string               PMSelection::category()        const { DP_GET( category ); }
+bool                      PMSelection::visible()         const { DP_GET( visible ); }
+std::list<std::string>    PMSelection::suggests()        const { DP_GET( suggests ); }
+std::list<PMSelectionPtr> PMSelection::suggests_ptrs()         { DP_GET( suggests_ptrs ); }
+std::list<std::string>    PMSelection::recommends()      const { DP_GET( recommends ); }
+std::list<PMSelectionPtr> PMSelection::recommends_ptrs()       { DP_GET( recommends_ptrs ); }
+std::list<std::string>    PMSelection::inspacks     ( const std::string& lang ) const { DP_ARG_GET( inspacks, lang ); }
+std::list<PMPackagePtr>   PMSelection::inspacks_ptrs( const std::string& lang )       { DP_ARG_GET( inspacks_ptrs, lang ); }
+std::list<std::string>    PMSelection::delpacks     ( const std::string& lang ) const { DP_ARG_GET( delpacks, lang ); }
+std::list<PMPackagePtr>   PMSelection::delpacks_ptrs( const std::string& lang )       { DP_ARG_GET( delpacks_ptrs, lang ); }
+FSize                     PMSelection::archivesize()     const { DP_GET( archivesize ); }
+std::string               PMSelection::order()           const { DP_GET( order ); }
+
+const bool                PMSelection::isBase()          const { DP_GET( isBase ); }
+#undef DP_ARG_GET
+#undef DP_GET
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : PMSelection::PMSelection
 //	METHOD TYPE : Constructor
@@ -51,67 +83,10 @@ PMSelection::PMSelection( const PkgName &    name_r,
     : PMObject( name_r, edition_r, arch_r )
     , _dataProvider( dataProvider_r )
 {
+  if ( !_dataProvider ) {
+    WAR << "NULL DataProvider for " << *this << endl;
+  }
 }
-
-void
-PMSelection::startRetrieval () const
-{
-    _dataProvider->startRetrieval ();
-}
-
-void
-PMSelection::stopRetrieval () const
-{
-    _dataProvider->stopRetrieval ();
-}
-
-// overlay virtual PMObject functions
-
-const std::string
-PMSelection::summary(const std::string& lang) const { return _dataProvider->summary(lang); }
-
-const std::list<std::string>
-PMSelection::description(const std::string& lang) const { return _dataProvider->description(lang); }
-
-const std::list<std::string>
-PMSelection::insnotify(const std::string& lang) const { return _dataProvider->insnotify(lang); }
-
-const std::list<std::string>
-PMSelection::delnotify(const std::string& lang) const { return _dataProvider->delnotify(lang); }
-
-const FSize
-PMSelection::size() const { return _dataProvider->size(); }
-
-/**
- * access functions for PMSelection attributes
- */
-
-const std::string
-PMSelection::category () const { return _dataProvider->category(); }
-const bool
-PMSelection::visible () const { return _dataProvider->visible(); }
-const std::list<std::string>
-PMSelection::suggests() const { return _dataProvider->suggests(); }
-const std::list<PMSelectionPtr>
-PMSelection::suggests_ptrs() const { return _dataProvider->suggests_ptrs(); }
-const std::list<std::string>
-PMSelection::recommends() const { return _dataProvider->recommends(); }
-const std::list<PMSelectionPtr>
-PMSelection::recommends_ptrs() const { return _dataProvider->recommends_ptrs(); }
-const std::list<std::string>
-PMSelection::inspacks(const std::string& lang) const { return _dataProvider->inspacks(lang); }
-const std::list<PMPackagePtr>
-PMSelection::inspacks_ptrs(const std::string& lang) const { return _dataProvider->inspacks_ptrs(lang); }
-const std::list<std::string>
-PMSelection::delpacks(const std::string& lang) const { return _dataProvider->delpacks(lang); }
-const std::list<PMPackagePtr>
-PMSelection::delpacks_ptrs(const std::string& lang) const { return _dataProvider->delpacks_ptrs(lang); }
-const FSize
-PMSelection::archivesize() const { return _dataProvider->archivesize(); }
-const std::string
-PMSelection::order() const { return _dataProvider->order(); }
-const bool
-PMSelection::isBase() const { return _dataProvider->isBase(); }
 
 ///////////////////////////////////////////////////////////////////
 //

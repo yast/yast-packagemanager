@@ -30,7 +30,7 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_DERIVED_POINTER(PMYouPackageDataProvider, PMPackageDataProvider, PMDataProvider );
+IMPL_DERIVED_POINTER(PMYouPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -57,51 +57,6 @@ PMYouPackageDataProvider::~PMYouPackageDataProvider()
 {
 }
 
-const std::string
-PMYouPackageDataProvider::summary() const
-{
-    return "";
-}
-
-const std::list<std::string>
-PMYouPackageDataProvider::description() const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMYouPackageDataProvider::insnotify() const
-{
-    return std::list<std::string>();
-}
-
-const std::list<std::string>
-PMYouPackageDataProvider::delnotify() const
-{
-    return std::list<std::string>();
-}
-
-const FSize
-PMYouPackageDataProvider::size() const
-{
-    return FSize(0);
-}
-
-const std::string PMYouPackageDataProvider::location() const
-{
-  return _patchInfo->location( _pkg );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMYouPackageDataProvider::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & PMYouPackageDataProvider::dumpOn( ostream & str ) const
-{
-  Rep::dumpOn( str );
-  return str;
+std::string PMYouPackageDataProvider::location( const PMPackage & pkg_r ) const {
+  return _patchInfo->location( mkPtr(pkg_r) );
 }

@@ -34,7 +34,6 @@
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMYouPackageDataProvider.h>
-#include <y2pm/PMYouPatchDataProvider.h>
 #include <y2pm/PMPackage.h>
 
 #include <y2pm/PMYouPatchInfo.h>
@@ -145,8 +144,6 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
 
   PMPackagePtr pkg( new PMPackage( name, edition, _paths->baseArch(),
                                    dataProvider ) );
-  dataProvider->setPackage( pkg );
-
   patch->addPackage( pkg );
 
   value = tagValue( YOUPackageTagSet::OBSOLETES );
@@ -246,7 +243,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     D__ << "path: " << path << " fileName: " << fileName << endl;
 
     string filePath = ( path + fileName ).asString();
-    
+
     TagParser parser;
     string tagstr;
 
@@ -309,16 +306,11 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     string version = fileName.substr( pos + 1, fileName.length() - pos );
 #else
     string name = fileName;
-    string version = "0";    
+    string version = "0";
 #endif
 
-    PMYouPatchDataProviderPtr dataProvider( new PMYouPatchDataProvider() );
-
     PMYouPatchPtr p( new PMYouPatch( PkgName( name ), PkgEdition( version ),
-                                     _paths->baseArch(),
-				     dataProvider ) );
-
-    dataProvider->setPatch( p );
+                                     _paths->baseArch() ) );
 
     p->setLocalFile( path + fileName );
 
@@ -493,12 +485,12 @@ string PMYouPatchInfo::translateLangCode( const LangCode &lang )
 
     const char **code = langmap;
     while( *code ) {
-      
+
       if ( LangCode( *code ) == lang ) {
         result = *(code + 1);
         break;
       }
-      
+
       code += 2;
     }
 

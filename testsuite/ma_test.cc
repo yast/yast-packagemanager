@@ -44,12 +44,24 @@ int main()
 
   InstSrcManager::ISrcIdList nids;
   PMError err = MGR.scanMedia( nids, url );
-  SEC << err << endl;
-  SEC << nids.size() << endl;
+  SEC << "scanMedia: " << nids.size() << "(" << err << ")" << endl;
+
+  if ( ! nids.size() ) {
+    MGR.getSources( nids );
+    SEC << "getSources " << nids.size() << endl;
+    if ( ! nids.size() ) {
+      SEC << "NO sources" << endl;
+    }
+  }
 
   if ( nids.size() ) {
     err = MGR.enableSource( *nids.begin() );
-    SEC << "enable: " <<  err << endl;
+    SEC << "enable source " << *nids.begin() << "(" << err << ")" << endl;
+
+    Y2PM::packageManager().setNothingSelected();
+
+    err = MGR.disableSource( *nids.begin() );
+    SEC << "disable source " << *nids.begin() << "(" << err << ")" << endl;
   }
 
   MIL << "END " << endl;

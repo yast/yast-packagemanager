@@ -47,27 +47,6 @@ class PMSolvable : virtual public Rep {
 
   public:
 
-    /**
-     * Attributes provided by PMSolvable
-     **/
-    enum PMSolvableAttribute
-    {
-	PMSLV_ATTR_BEGIN = 0,
-	ATTR_NAME = PMSLV_ATTR_BEGIN,
-	ATTR_VERSION,
-	ATTR_RELEASE,
-	ATTR_ARCH,
-	ATTR_REQUIRES,
-	ATTR_PREREQUIRES,
-	ATTR_PROVIDES,
-	ATTR_OBSOLETES,
-	ATTR_CONFLICTS,
-	// last entry:
-	PMSLV_NUM_ATTRIBUTES
-    };
-
-  public:
-
     ///////////////////////////////////////////////////////////////////
     //
     //	CLASS NAME : Provides_iterator

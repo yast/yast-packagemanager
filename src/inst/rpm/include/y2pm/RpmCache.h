@@ -11,5 +11,7 @@ struct rpmCache {
     std::string _url;
     std::string _os;
     std::string _sourcerpm;
+
+    rpmCache() : _installtime(0) {}
 };
 #endif // RpmCache_h

@@ -26,7 +26,6 @@
 
 #include <y2util/Pathname.h>
 
-#include <y2pm/PMYouPatchDataProviderPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
 
 #include <y2pm/PMObject.h>
@@ -42,28 +41,6 @@ class PMYouPatch : virtual public Rep, public PMObject {
   REP_BODY(PMYouPatch);
 
   public:
-
-    /**
-     * Attributes provided by PMYouPatch
-     **/
-    enum PMYouPatchAttribute {
-      PMYOU_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
-      ATTR_KIND = PMYOU_ATTR_BEGIN,
-      ATTR_SHORTDESCRIPTION,
-      ATTR_LONGDESCRIPTION,
-      ATTR_SIZE,
-      ATTR_BUILDTIME,
-      ATTR_MINYAST2VERSION,
-      // last entry
-      PMYOU_NUM_ATTRIBUTES
-    };
-
-	// overlay virtual PMObject functions
-	const std::string summary() const;
-	const std::list<std::string> description() const;
-	const std::list<std::string> insnotify() const;
-	const std::list<std::string> delnotify() const;
-	const FSize size() const;
 
     /**
      * Definitions for the kind of the patch.
@@ -181,40 +158,42 @@ class PMYouPatch : virtual public Rep, public PMObject {
      */
     Pathname localFile() const { return _localFile; }
 
+  public:
+
+    /**
+     * PMObject attributes that should be realized by each concrete Object.
+     * @see PMObject
+     **/
+    virtual std::string            summary()     const { return shortDescription(); }
+    virtual std::list<std::string> description() const {
+      std::list<std::string> ret;
+      ret.push_back( longDescription() );
+      return ret;
+    }
+    virtual std::list<std::string> insnotify()   const { return PMObject::insnotify(); }
+    virtual std::list<std::string> delnotify()   const { return PMObject::delnotify(); }
+    virtual FSize                  size()        const { return PMObject::size(); }
+
   private:
+
     std::string _shortDescription, _longDescription;
     std::string _preInformation, _postInformation;
     std::string _minYastVersion;
     Kind _kind;
     bool _updateOnlyInstalled;
     std::string _preScript, _postScript;
-    
+
     std::list<PMPackagePtr> _packages;
 
     Pathname _localFile;
-
-  protected:
-
-    PMYouPatchDataProviderPtr _dataProvider;
-
-  protected:
-
-    /**
-     * Provide DataProvider access to the underlying Object
-     **/
-    virtual PMDataProviderPtr dataProvider() const { return _dataProvider; }
 
   public:
 
     PMYouPatch( const PkgName &    name_r,
 		const PkgEdition & edition_r,
-                const PkgArch &arch_r,
-		PMYouPatchDataProviderPtr dataProvider_r );
+                const PkgArch &    arch_r );
 
     virtual ~PMYouPatch();
-
-    void startRetrieval() const;
-    void stopRetrieval() const;
 
   public:
 

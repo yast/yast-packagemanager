@@ -262,7 +262,6 @@ InstSrcDataUL::PkgTag2Package ( TagCacheRetrievalPtr pkgcache,
 
     PMULPackageDataProviderPtr dataprovider ( new PMULPackageDataProvider (pkgcache));
     PMPackagePtr package( new PMPackage (name, edition, arch, dataprovider));
-    dataprovider->setPackage (package);
 
     TaggedFile::Tag *tagptr;	// for SET_MULTI()
 
@@ -380,7 +379,12 @@ InstSrcDataUL::PkgTag2Package ( TagCacheRetrievalPtr pkgcache,
 	else
 	{
 	    // MIL << "Share " << single << " with " << sharewith << endl;
-	    dataprovider->setShared (candidates.front()->dataProvider());
+	  PMULPackageDataProviderPtr shareDP = getDataProvider( candidates.front() );
+	  if ( shareDP ) {
+	    dataprovider->setShared ( shareDP );
+	  } else {
+	    INT << "SUSPICIOUS: got NULL PackageDataProviderPtr to share" << endl;
+	  }
 	}
     }
 
@@ -423,8 +427,12 @@ InstSrcDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<
     }
 
     PMPackagePtr package = candidates.front();
-    PMULPackageDataProviderPtr dataprovider = package->dataProvider();
-    dataprovider->setLangCache (langcache);
+    PMULPackageDataProviderPtr dataprovider = getDataProvider( package );
+    if ( dataprovider ) {
+      dataprovider->setLangCache (langcache);
+    } else {
+      INT << "SUSPICIOUS: got NULL PackageDataProviderPtr for LangCache" << endl;
+    }
 
     TaggedFile::Tag *tagptr;		// for SET_MULTI()
 
@@ -480,7 +488,6 @@ InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, TaggedF
     PkgArch arch (splitted[3]);
 
     PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
-    dataprovider->setSelection (selection);
     TagCacheRetrievalPtr selcache = dataprovider->getCacheRetrieval();
     if (!selcache)
     {
@@ -975,8 +982,11 @@ InstSrcDataUL::fillSelections (std::list<PMSelectionPtr>& all_selections, std::l
 	 selIt != all_selections.end(); ++selIt)
     {
 //	MIL << "fillSelection (" << (*selIt)->name() << ")" << endl;
-	PMULSelectionDataProviderPtr selDp = (*selIt)->dataProvider();
-
+        PMULSelectionDataProviderPtr selDp = getDataProvider( *selIt );
+	if ( !selDp ) {
+	  INT << "SUSPICIOUS: got NULL SelectionDataProviderPtr to fill" << endl;
+	  continue;
+	}
 	selDp->_ptrs_attr_SUGGESTS = lookupSelections (all_selections, (*selIt)->suggests());
 	selDp->_ptrs_attr_RECOMMENDS = lookupSelections (all_selections, (*selIt)->recommends());
 
@@ -1002,34 +1012,6 @@ InstSrcDataUL::fillSelections (std::list<PMSelectionPtr>& all_selections, std::l
 	}
     }
     return err;
-}
-///////////////////////////////////////////////////////////////////
-// PUBLIC
-///////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcDataUL::InstSrcDataUL
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION :
-//
-InstSrcDataUL::InstSrcDataUL()
-{
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcDataUL::~InstSrcDataUL
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-InstSrcDataUL::~InstSrcDataUL()
-{
 }
 
 PMError InstSrcDataUL::readMediaFile(const Pathname& product_dir, MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count)
@@ -1324,3 +1306,47 @@ PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
 
     return err;
 }
+
+///////////////////////////////////////////////////////////////////
+// PUBLIC
+///////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::InstSrcDataUL
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+InstSrcDataUL::InstSrcDataUL()
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::~InstSrcDataUL
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+InstSrcDataUL::~InstSrcDataUL()
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::loadObjects
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcDataUL::loadObjects()
+{
+
+  return Error::E_no_instsrcdata_on_media;
+}
+

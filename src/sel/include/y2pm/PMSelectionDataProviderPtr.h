@@ -22,13 +22,13 @@
 #ifndef PMSelectionDataProviderPtr_h
 #define PMSelectionDataProviderPtr_h
 
-#include <y2pm/PMDataProviderPtr.h>
+#include <y2util/RepDef.h>
 
 ///////////////////////////////////////////////////////////////////
 //	CLASS NAME : PMSelectionDataProviderPtr
 //	CLASS NAME : constPMSelectionDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(PMSelectionDataProvider, PMDataProvider, PMDataProvider );
+DEFINE_BASE_POINTER(PMSelectionDataProvider);
 
 #endif // PMSelectionDataProviderPtr_h
 

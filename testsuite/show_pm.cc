@@ -113,8 +113,6 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     if (!p)
 	return;
 
-    p->startRetrieval();
-
     show_pmobject ((PMObjectPtr)p, only_cached);
 
     cout << "Buildtime: " << p->buildtime() << endl;
@@ -122,7 +120,6 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
 
     if (only_cached)
     {
-	p->stopRetrieval();
 	return;
     }
     cout << "Buildhost: " << p->buildhost() << endl;
@@ -147,7 +144,6 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
     cout << "Location: '" << p->location() << "'" << endl;
     cout << "MediaNr: " << p->medianr () << endl;
     cout << "Keywords: " << strlist2string(p->keywords()) << endl;
-    p->stopRetrieval();
     cout << "========" << endl;
     return;
 }
@@ -156,7 +152,6 @@ show_pmpackage (PMPackagePtr p, bool only_cached)
 void
 show_pmselection (PMSelectionPtr s)
 {
-    s->startRetrieval();
     show_pmobject ((PMObjectPtr)s);
 
     char *locales[] = { "", "de", "en", "cs", "es", "fr", "gl", "hu", "it", "ja", "nl", "pt", "sv", "tr", "ru", "cz", 0 };
@@ -183,7 +178,6 @@ show_pmselection (PMSelectionPtr s)
 	pos++;
     }
     cout << "========" << endl;
-    s->stopRetrieval();
     return;
 }
 

@@ -39,34 +39,36 @@
 //	CLASS NAME : PMULPackageDataProvider
 /**
  * @short Realizes PackageDataProvider for UnitedLinux packages format
- * @see DataProvider
+ *
+ * InstSrcDataUL uses a per Package DataProvider. Thus it's always the same
+ * Package that calls the interface, and it's ok to store Package related data
+ * here.
+ *
+ * @see PMPackageDataProvider
  **/
 class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
 
     friend class InstSrcDataUL;
+
     protected:
 
-	// the data belongs to this package
-	PMPackagePtr _package;
-
 	// PMObject
-
-	TagRetrievalPos _attr_SUMMARY;
-	TagRetrievalPos _attr_DESCRIPTION;
-	TagRetrievalPos _attr_INSNOTIFY;
-	TagRetrievalPos _attr_DELNOTIFY;
-	FSize _attr_SIZE;
+	TagRetrievalPos		_attr_SUMMARY;
+	TagRetrievalPos		_attr_DESCRIPTION;
+	TagRetrievalPos		_attr_INSNOTIFY;
+	TagRetrievalPos		_attr_DELNOTIFY;
+	FSize			_attr_SIZE;
 
 	// PMPackage
-	Date _attr_BUILDTIME;
+	Date			_attr_BUILDTIME;
 	// BUILDHOST
 	// INSTALLTIME
 	// DISTRIBUTION
 	// VENDOR
-	TagRetrievalPos _attr_LICENSE;
+	TagRetrievalPos		_attr_LICENSE;
 	// PACKAGER
-	YStringTreeItem *_attr_GROUP;
+	YStringTreeItem *	_attr_GROUP;
 	// CHANGELOG
 	// URL
 	// OS
@@ -74,15 +76,15 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// POSTIN
 	// PREUN
 	// POSTUN
-	TagRetrievalPos _attr_SOURCERPM;
-	FSize _attr_ARCHIVESIZE;
-	TagRetrievalPos _attr_AUTHORS;
+	TagRetrievalPos		_attr_SOURCERPM;
+	FSize			_attr_ARCHIVESIZE;
+	TagRetrievalPos		_attr_AUTHORS;
 	// FILENAMES
-	TagRetrievalPos _attr_RECOMMENDS;
-	TagRetrievalPos _attr_SUGGESTS;
-	TagRetrievalPos _attr_LOCATION;
-	int _attr_MEDIANR;
-	TagRetrievalPos _attr_KEYWORDS;
+	TagRetrievalPos		_attr_RECOMMENDS;
+	TagRetrievalPos		_attr_SUGGESTS;
+	TagRetrievalPos		_attr_LOCATION;
+	int			_attr_MEDIANR;
+	TagRetrievalPos		_attr_KEYWORDS;
 
 	// retrieval pointer for packages data
 	TagCacheRetrievalPtr _package_retrieval;
@@ -94,65 +96,57 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	PMULPackageDataProviderPtr _fallback_provider;
 
     public:
-	void setValue( PMPackage::PMPackageAttribute attr_r, std::string& value_r );
-	void setValue( PMPackage::PMPackageAttribute attr_r, std::streampos begin, std::streampos end);
-
-    public:
 
 	PMULPackageDataProvider (TagCacheRetrievalPtr package_retrieval);
 	virtual ~PMULPackageDataProvider();
 
-	void setPackage ( PMPackagePtr package ) { _package = package; }
+    public:
+
 	void setLangCache ( TagCacheRetrievalPtr language_retrieval ) { _language_retrieval = language_retrieval; }
 	void setShared ( PMULPackageDataProviderPtr provider_r ) { _fallback_provider = provider_r; }
 
-	void startRetrieval() const;
-	void stopRetrieval() const;
-
-	/**
-	 * access functions for PMObject attributes
-	 */
-
-	const std::string summary () const;
-	const std::list<std::string> description () const;
-	const std::list<std::string> insnotify () const;
-	const std::list<std::string> delnotify () const;
-	const FSize size () const;
-
-	/**
-	 * access functions for PMPackage attributes
-	 */
-
-	const Date buildtime () const;
-	const std::string buildhost () const { return PMPackageDataProvider::buildhost(); }
-	const Date installtime () const { return PMPackageDataProvider::installtime(); }
-	const std::string distribution () const { return PMPackageDataProvider::distribution(); }
-	const std::string vendor () const { return PMPackageDataProvider::vendor(); }
-	const std::string license () const;
-	const std::string packager () const { return PMPackageDataProvider::packager(); }
-	const std::string group () const;
-	const YStringTreeItem *group_ptr () const;
-	const std::list<std::string> changelog () const { return PMPackageDataProvider::changelog(); }
-	const std::string url () const { return PMPackageDataProvider::url(); }
-	const std::string os () const { return PMPackageDataProvider::os(); }
-	const std::list<std::string> prein () const { return PMPackageDataProvider::prein(); }
-	const std::list<std::string> postin () const { return PMPackageDataProvider::postin(); }
-	const std::list<std::string> preun () const { return PMPackageDataProvider::preun(); }
-	const std::list<std::string> postun () const { return PMPackageDataProvider::postun(); }
-	const std::string sourcerpm () const;
-	const FSize archivesize () const;
-	const std::list<std::string> authors () const;
-	const std::list<std::string> filenames () const { return PMPackageDataProvider::filenames(); }
-	// suse packages values
-	const std::list<std::string> recommends () const;
-	const std::list<std::string> suggests () const;
-	const std::string location () const;
-	const int medianr () const;
-	const std::list<std::string> keywords () const;
-
     public:
 
-	virtual std::ostream & dumpOn( std::ostream & str ) const;
+	/**
+	 * Package attributes InstSrcDataUL is able to provide.
+	 * @see PMPackageDataProvider
+	 **/
+
+	// PMObject attributes
+	virtual std::string            summary     ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> description ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> insnotify   ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> delnotify   ( const PMPackage & pkg_r ) const;
+	virtual FSize                  size        ( const PMPackage & pkg_r ) const;
+
+	// PMPackage attributes
+	virtual Date                   buildtime   ( const PMPackage & pkg_r ) const;
+	//virtual std::string            buildhost   ( const PMPackage & pkg_r ) const;
+	//virtual Date                   installtime ( const PMPackage & pkg_r ) const;
+	//virtual std::string            distribution( const PMPackage & pkg_r ) const;
+	//virtual std::string            vendor      ( const PMPackage & pkg_r ) const;
+	virtual std::string            license     ( const PMPackage & pkg_r ) const;
+	//virtual std::string            packager    ( const PMPackage & pkg_r ) const;
+	virtual std::string            group       ( const PMPackage & pkg_r ) const;
+	virtual YStringTreeItem *      group_ptr   ( const PMPackage & pkg_r ) const;
+	//virtual std::list<std::string> changelog   ( const PMPackage & pkg_r ) const;
+	//virtual std::string            url         ( const PMPackage & pkg_r ) const;
+	//virtual std::string            os          ( const PMPackage & pkg_r ) const;
+	//virtual std::list<std::string> prein       ( const PMPackage & pkg_r ) const;
+	//virtual std::list<std::string> postin      ( const PMPackage & pkg_r ) const;
+	//virtual std::list<std::string> preun       ( const PMPackage & pkg_r ) const;
+	//virtual std::list<std::string> postun      ( const PMPackage & pkg_r ) const;
+	virtual std::string            sourcerpm   ( const PMPackage & pkg_r ) const;
+	virtual FSize                  archivesize ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> authors     ( const PMPackage & pkg_r ) const;
+	//virtual std::list<std::string> filenames   ( const PMPackage & pkg_r ) const;
+	// suse packages values
+	virtual std::list<std::string> recommends  ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> suggests    ( const PMPackage & pkg_r ) const;
+	virtual std::string            location    ( const PMPackage & pkg_r ) const;
+	virtual int                    medianr     ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const;
+
 };
 
 ///////////////////////////////////////////////////////////////////

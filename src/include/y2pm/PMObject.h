@@ -28,7 +28,6 @@
 #include <y2pm/PMSolvable.h>
 
 #include <y2pm/PMSelectablePtr.h>
-#include <y2pm/PMDataProviderPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -46,47 +45,19 @@ class PMObject : virtual public Rep, public PMSolvable {
 
     PMSelectablePtr _selectable;
 
-  protected:
-
-    /**
-     * Access to the concrete Objects DataProvider for attribute retrieval.
-     **/
-    virtual PMDataProviderPtr dataProvider() const = 0;
-
   public:
 
     /**
-     * Attributes provided by PMObject
+     * PMObject attributes that should be realized by each concrete Object.
+     * Mostly because the UI likes to have some data to show. If there are
+     * no data a concrete Object could provide, call PMObjects default
+     * implementation.
      **/
-    enum PMObjectAttribute {
-	PMOBJ_ATTR_BEGIN = PMSLV_NUM_ATTRIBUTES,
-	ATTR_SUMMARY = PMOBJ_ATTR_BEGIN,
-	ATTR_DESCRIPTION,
-	ATTR_INSNOTIFY,			// notification on install
-	ATTR_DELNOTIFY,			// notification on delete
-	ATTR_SIZE, // installed size
-	// last entry:
-	PMOBJ_NUM_ATTRIBUTES
-    };
-
-	/**
-	 * hint before accessing multiple attributes
-	 */
-	virtual void startRetrieval() const = 0;
-
-	/**
-	 * hint after accessing multiple attributes
-	 */
-	virtual void stopRetrieval() const = 0;
-
-    /**
-     * access functions for attributes
-     */
-    virtual const std::string summary() const = 0;
-    virtual const std::list<std::string> description() const = 0;
-    virtual const std::list<std::string> insnotify() const = 0;
-    virtual const std::list<std::string> delnotify() const = 0;
-    virtual const FSize size() const = 0;
+    virtual std::string            summary()     const = 0;
+    virtual std::list<std::string> description() const = 0;
+    virtual std::list<std::string> insnotify()   const = 0;
+    virtual std::list<std::string> delnotify()   const = 0;
+    virtual FSize                  size()        const = 0;
 
   public:
 
@@ -143,7 +114,7 @@ class PMObject : virtual public Rep, public PMSolvable {
      * selectable - in which case something has gone wrong badly anyway).
      **/
     PMObjectPtr getInstalledObj() const;
-    
+
     /**
      * Convenience method: Retrieve the candidate instance of this
      * selectable. This may be a brother of this object or this object itself
@@ -158,14 +129,14 @@ class PMObject : virtual public Rep, public PMSolvable {
      * Not to be confused with isInstalledObj() !
      **/
     bool hasInstalledObj() const;
-    
+
     /**
      * Convenience method: Check if there is any candidate instance of this
      * selectable - this instance or any of its brothers.
      * Not to be confused with isCandidateObj() !
      **/
     bool hasCandidateObj() const;
-    
+
 
   public:
 

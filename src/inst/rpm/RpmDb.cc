@@ -619,7 +619,7 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
 //
 // refreshes _packages
 //
-const std::list<PMPackagePtr>& 
+const std::list<PMPackagePtr>&
 RpmDb::getPackages (void)
 {
     string rpmquery;
@@ -663,7 +663,7 @@ RpmDb::getPackages (void)
     // the package data
     //
     // Values except summary must neither contain ',' nor ';'
-    // 
+    //
     rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};%{RPMTAG_ARCH};";
     rpmquery += "[%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},];";
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
@@ -745,7 +745,6 @@ RpmDb::getPackages (void)
 				edi,
 				PkgArch(pkgattribs[RPM_ARCH]),
 			        dataprovider);
-	    dataprovider->setPackage (p);
 
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type provides;
@@ -1497,7 +1496,7 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 
 	if( pos2 >= msg.length() )
 	    break;
-	
+
 	file1 = msg.substr(0,pos1);
 	file2 = msg.substr(pos2);
 	string out;

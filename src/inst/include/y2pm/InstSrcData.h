@@ -35,6 +35,9 @@
 #include <y2pm/InstSrcDescrPtr.h>
 #include <y2pm/MediaAccessPtr.h>
 
+#include <y2pm/PMPackageDataProviderPtr.h>
+#include <y2pm/PMSelectionDataProviderPtr.h>
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstSrcData
@@ -64,24 +67,24 @@ class InstSrcData: virtual public Rep, public InstData {
     bool _propagating;
 
     /**
-     * Adjust backreferences to InstSrc.
+     * Adjust backreferences to InstSrc. Call loadObjects().
      **/
-    void _instSrc_attach( const InstSrcPtr & instSrc_r );
+    PMError _instSrc_attach( const InstSrcPtr & instSrc_r );
 
     /**
      * Clear backreferences to InstSrc.
      **/
-    void _instSrc_detach();
+    PMError _instSrc_detach();
 
     /**
      * Propagate Objects to Manager classes.
      **/
-    void _instSrc_propagate();
+    PMError _instSrc_propagate();
 
     /**
      * Withdraw Objects from Manager classes.
      **/
-    void _instSrc_withdraw();
+    PMError _instSrc_withdraw();
 
   public:
 
@@ -108,12 +111,33 @@ class InstSrcData: virtual public Rep, public InstData {
   protected:
 
     /**
-     * Call concrete InstSrcData to propagate Objects to Manager classes.
-     * Data may be retrieved from cache (if supported and present), or from media.
+     * InstSrcData is alowed to retrieve an Objects DataProviderPtr.
+     **/
+    static PMPackageDataProviderPtr   getDataProvider( const PMPackagePtr & obj_r );
+
+    /**
+     * InstSrcData is alowed to retrieve an Objects DataProviderPtr.
+     **/
+    static PMSelectionDataProviderPtr getDataProvider( const PMSelectionPtr & obj_r );
+
+  protected:
+
+    /**
+     * Call concrete InstSrcData to load it's Object lists, either from
+     * media or from cache (if present). Do not propaget them yet.
+     *
+     * Return E_ok if concrete InstSrcData is able to propagate Objects.
      *
      * InstSrc is attached.
      **/
-    virtual void propagateObjects();
+    virtual PMError loadObjects() = 0;
+
+    /**
+     * Call concrete InstSrcData to propagate Objects to Manager classes.
+     *
+     * InstSrc is attached.
+     **/
+    virtual PMError propagateObjects();
 
     /**
      * Call concrete InstSrcData to withdraw Objects from Manager classes.
@@ -122,7 +146,7 @@ class InstSrcData: virtual public Rep, public InstData {
      * necessary to go out of scope. InstSrc will detach immediately after
      * this.
      **/
-    virtual void withdrawObjects();
+    virtual PMError withdrawObjects();
 
   public:
 

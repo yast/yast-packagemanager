@@ -27,7 +27,7 @@
 //	CLASS NAME : PMULPackageDataProviderPtr
 //	CLASS NAME : constPMULPackageDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMDataProvider);
+DEFINE_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMPackageDataProvider);
 
 #endif // PMULPackageDataProviderPtr_h
 
