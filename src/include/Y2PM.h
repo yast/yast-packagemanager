@@ -263,6 +263,18 @@ class Y2PM {
 	 * return number of sucessfully installed packages
 	 * */
 	static int commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining);
+
+	/**
+	 * install a single rpm file
+	 * uses callbacks !
+	 */
+	static PMError installFile (const Pathname& path);
+
+	/**
+	 * remove a single package by name
+	 * uses callbacks !
+	 */
+	static PMError removePackage (const std::string& pkgname);
 };
 
 ///////////////////////////////////////////////////////////////////
