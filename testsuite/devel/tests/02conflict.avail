@@ -1,0 +1,93 @@
+Name: p2
+Edition: 1.0-1
+
+Name: sendmail
+Edition: 2.0-1
+Provides: MTA
+Conflicts: MTA
+
+Name: bar
+Edition: 2.0-1
+Conflicts: foo
+
+Name: libident-dev
+Edition: 2.0-1
+Requires: libident = 2.0-1
+
+Name: libident
+Edition: 2.0-1
+
+Name: libc6
+Edition: 2.1.0-1
+
+Name: baz
+Edition: 1.0-1
+Conflicts: foo <= 1.2
+
+Name: foo
+Edition: 2.0-1
+
+Name: baz2
+Edition: 1.0-1
+Provides: baz21
+
+Name: foo2
+Edition: 2.0-1
+Conflicts: baz22
+
+Name: baz3
+Edition: 1.0-1
+Provides: baz31
+
+Name: foo3
+Edition: 2.0-1
+Conflicts: baz31
+
+Name: test3
+Edition: 1.0-1
+Conflicts: test2
+
+Name: test4
+Edition: 1.0-1
+Conflicts: test2
+Provides: test2
+
+Name: requirerer
+Edition: 2.0-1
+Requires: required < 3.0
+
+Name: required
+Edition: 2.0-1
+
+Name: requirerer2
+Edition: 2.0-1
+Requires: required2 < 3.0, required2a
+
+Name: required2
+Edition: 2.0-1
+
+Name: requirerer3
+Edition: 1.0-1
+Requires: required3
+
+Name: required3
+Edition: 2.0-1
+
+Name: libfoo
+Edition: 1.1-1
+
+Name: libfoog
+Edition: 1.1-1
+Conflicts: libfoo < 1.1
+
+Name: libfoo-dev
+Edition: 1.1-1
+Requires: libfoog = 1.1-1
+
+Name: libfoo-altdev
+Edition: 1.1-1
+Requires: libfoo = 1.1-1
+
+Name: foouser
+Edition: 1.0-2
+Requires: libfoog

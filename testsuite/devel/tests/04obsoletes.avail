@@ -1,0 +1,52 @@
+Name: foonew
+Edition: 2.0-1
+Obsoletes: foo
+
+Name: fooc
+Edition: 1.0-1
+Conflicts: foo
+
+Name: barnew
+Edition: 2.0-1
+Obsoletes: bar
+Provides: bar
+
+Name: barc
+Edition: 1.0-1
+Conflicts: bar
+
+Name: baznew
+Edition: 2.0-1
+Obsoletes: baz
+Provides: baz
+
+Name: bazc
+Edition: 1.0-1
+Conflicts: baz <= 1.2
+
+Name: libfoo2
+Edition: 2.0-1
+Obsoletes: libfoo
+
+Name: libbar2
+Edition: 2.0-1
+Obsoletes: libbar
+Provides: libbar
+
+Name: libbaz2
+Edition: 2.0-1
+Obsoletes: libbaz
+
+Name: somemore
+Edition: 2.0-1
+Requires: libbaz2
+
+Name: A
+Edition: 1.0-1
+
+Name: B
+Edition: 1.0-1
+Obsoletes: A, C
+
+Name: C
+Edition: 1.0-1

@@ -1,0 +1,123 @@
+--- Test 1
+
+Name: bash
+Edition: 2.0.2-1
+From-Input-List: yes
+
+--- Test 2
+
+Name: amd
+Edition: upl102-11
+From-Input-List: yes
+
+Name: libgdbm
+Edition: 1.17-1
+Referers: amd requires libgdbm
+
+Name: libc6
+Edition: 2.0.7-1
+Is-Upgrade-From: 2.0.5-1
+Referers: libgdbm requires libc6 >= 2.0.7
+
+--- Test 3
+
+Name: libc6
+Edition: 2.0.7-1
+Is-Upgrade-From: 2.0.5-1
+Referers: foo1 requires libc6 >= 2.0.6
+
+Name: foo1
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo1 requires bar1
+
+Name: bar1
+Edition: -*-UNSPEC-*-
+Referers: foo1 requires bar1
+Not-Available: any
+
+--- Test 4
+
+Name: foo2
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2 requires bar2 >= 1.0
+
+Name: bar2
+Edition: -*-UNSPEC-*-
+Referers: foo2 requires bar2 >= 1.0
+Not-Available: >= 1.0
+
+--- Test 5
+
+Name: bar2
+Edition: -*-UNSPEC-*-
+Referers: foo2a requires bar2 >= 1.0, foo2b requires bar2 <= 1.1, foo2c requires bar2 > 1.0
+Not-Available: (1.0,1.1]
+
+Name: bar3
+Edition: -*-UNSPEC-*-
+Referers: foo2a requires bar3 = 2.0
+Not-Available: [2.0,2.0]
+
+Name: foo2a
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2a requires bar2 >= 1.0, foo2a requires bar3 = 2.0
+
+Name: foo2b
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2b requires bar2 <= 1.1
+
+Name: foo2c
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2c requires bar2 > 1.0
+
+--- Test 6
+
+Name: bar2
+Edition: -*-UNSPEC-*-
+Referers: foo2d requires bar2 > 2.0, foo2e requires bar2 <= 1.0
+Not-Available: (2.0,1.0] (impossible)
+
+Name: foo2d
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2d requires bar2 > 2.0
+
+Name: foo2e
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2e requires bar2 <= 1.0
+
+--- Test 7
+
+Name: foo3
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: bash
+Edition: 2.0.2-1
+Referers: foo3 requires /bin/sh
+
+--- Test 8
+
+Name: foo4
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: foo3
+Edition: 1.0-1
+Referers: foo4 requires /usr/bin/bar
+
+Name: bash
+Edition: 2.0.2-1
+Referers: foo3 requires /bin/sh
+
+--- Test 9
+
+Name: foo5
+Edition: 1.0-1
+From-Input-List: yes

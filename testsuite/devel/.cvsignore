@@ -16,3 +16,4 @@ test_rpmdb
 test_selections
 test_updateinf
 testinstall
+autosolvertest
