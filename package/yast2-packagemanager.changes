@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 29 17:32:03 CEST 2003 - ma@suse.de
+
+- Sort package candidate list by (arch->version->InsrSrc priority).
+  (#26002)
+
+-------------------------------------------------------------------
 Fri Aug 29 17:08:59 CEST 2003 - ma@suse.de
 
 - Move away any old database before the first package is going to

@@ -265,22 +265,31 @@ bool PMSelectable::clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & r
   if ( rhs->prefererCandidate() )
     return false; // rhs always best.
 
-  if ( lhs->edition() > rhs->edition() )
-    return true; // lhs better version
+  ///////////////////////////////////////////////////////////////////
+  // arch
+  ///////////////////////////////////////////////////////////////////
+  int acmp = PkgArch::compare( lhs->arch(), rhs->arch() );
+  if ( acmp < 0 )
+    return true; // lhs better arch
 
-  if ( lhs->edition() == rhs->edition() ) {
-    int acmp = PkgArch::compare( lhs->arch(), rhs->arch() );
-    if ( acmp < 0 )
-      return true; // lhs better arch
+  if ( acmp == 0 ) {
+    ///////////////////////////////////////////////////////////////////
+    // version
+    ///////////////////////////////////////////////////////////////////
+    if ( lhs->edition() > rhs->edition() )
+      return true; // lhs better version
 
-    if ( acmp == 0 ) {
+    if ( lhs->edition() == rhs->edition() ) {
+      ///////////////////////////////////////////////////////////////////
+      // instSrc priority
+      ///////////////////////////////////////////////////////////////////
       if ( lhs->instSrcRank() < rhs->instSrcRank() )
 	return true; // lhs lower rank -> higher priority
-
-      // ran out of sort criteria
     }
   }
-
+  ///////////////////////////////////////////////////////////////////
+  // ran out of sort criteria
+  ///////////////////////////////////////////////////////////////////
   return false;
 }
 
