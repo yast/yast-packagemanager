@@ -29,7 +29,7 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/RpmLibHeaderPtr.h>
 
-class PkgHeaderCache;
+class RpmLibHeaderCache;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -49,7 +49,7 @@ class InstSrcDataPLAIN : virtual public Rep, public InstSrcData {
 
   private:
 
-    PkgHeaderCache & _cache;
+    RpmLibHeaderCache & _cache;
 
     /**
      * List of Packages on this source

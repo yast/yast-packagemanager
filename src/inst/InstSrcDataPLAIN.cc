@@ -30,7 +30,8 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaAccess.h>
-#include <y2pm/RpmLibDb.h>
+#include <y2pm/RpmLibHeaderCache.h>
+#include <y2pm/RpmLibHeader.h>
 #include <y2pm/Timecount.h>
 
 #include <Y2PM.h>
@@ -92,9 +93,9 @@ IMPL_DERIVED_POINTER(InstSrcDataPLAIN,InstSrcData,InstSrcData);
 //	DESCRIPTION :
 //
 InstSrcDataPLAIN::InstSrcDataPLAIN( const Pathname & cachefile_r )
-    : _cache( * new PkgHeaderCache( cachefile_r ) )
+    : _cache( * new RpmLibHeaderCache( cachefile_r ) )
 {
-  if ( !_cache.openCache() ) {
+  if ( !_cache.open() ) {
     ERR << "Failed to open cache " << cachefile_r << endl;
     return;
   }
@@ -107,7 +108,7 @@ InstSrcDataPLAIN::InstSrcDataPLAIN( const Pathname & cachefile_r )
   int      isSource;
   for ( constRpmLibHeaderPtr iter = _cache.getFirst( pkgfile, isSource, hpos );
 	iter; iter = _cache.getNext( pkgfile, isSource, hpos ) ) {
-    //DBG << "At " << hpos << (isSource?" src ":" bin ") << iter << " for " << pkgfile << endl;
+    D__ << "At " << hpos << (isSource?" src ":" bin ") << iter << " for " << pkgfile << endl;
 
     if ( isSource ) {
       INT << "No yet able to handle .src.rpm." << endl;
@@ -336,7 +337,7 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
     Pathname c_file( cdir + "IS_PLAINcache" );
 
-    int res = PkgHeaderCache::buildPkgHeaderCache( c_file, pkgroot );
+    int res = RpmLibHeaderCache::buildHeaderCache( c_file, pkgroot );
     if ( res < 0 ) {
       ERR << "Failed to create cache " << c_file << " (" << res << ")" << endl;
       PathInfo::unlink( c_file );
@@ -352,9 +353,9 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   // looks good? So create descr.
   ///////////////////////////////////////////////////////////////////
 
-  PkgHeaderCache cache( cpath.path() );
+  RpmLibHeaderCache cache( cpath.path() );
 
-  if ( ! cache.openCache() ) {
+  if ( ! cache.open() ) {
     ERR << "Invalid cache " << cpath << endl;
     PathInfo::unlink( cpath.path() );
     return Error::E_isrc_cache_invalid;
@@ -363,7 +364,7 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   InstSrcDescrPtr ndescr( new InstSrcDescr );
 #warning which descr data to provide for InstSrcDataPLAIN?
 
-  ndescr->set_media_id( stringutil::numstring( cache.cacheCdate() ) );
+  ndescr->set_media_id( stringutil::numstring( cache.cdate() ) );
   ndescr->set_media_count( 1 );
   ndescr->set_content_label( mediaurl_r.asString( /*path*/true, /*options*/false ) + product_dir_r.asString() );
   ndescr->set_content_descrdir( "/" );
@@ -414,6 +415,8 @@ PMError InstSrcDataPLAIN::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr
   if ( !cpath.isFile() ) {
     ERR << "No cachefile found in " << cdir << endl;
     return Error::E_isrc_cache_invalid;
+  } else {
+    MIL << "Using cachefile " << cpath << endl;
   }
 
   ///////////////////////////////////////////////////////////////////

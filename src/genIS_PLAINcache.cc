@@ -5,7 +5,8 @@
 #include <y2util/PathInfo.h>
 #include <y2util/stringutil.h>
 
-#include <y2pm/RpmLibDb.h>
+#include <y2pm/RpmLibHeaderCache.h>
+#include <y2pm/RpmLibHeader.h>
 
 using namespace std;
 
@@ -52,7 +53,7 @@ int main( int argc, char *argv[] )
   Pathname pkgrootdir;
   Pathname cachefile;
   bool     force = false;
-  PkgHeaderCache::buildOpts options;
+  RpmLibHeaderCache::buildOpts options;
 
   if ( argc <= 1 ) {
     cerr << "genIS_PLAINcache: missing operand" << endl;
@@ -129,7 +130,7 @@ int main( int argc, char *argv[] )
   }
 
   MIL << "Start package scan in " << pkgrootdir << endl;
-  int res = PkgHeaderCache::buildPkgHeaderCache( cachefile, pkgrootdir, options );
+  int res = RpmLibHeaderCache::buildHeaderCache( cachefile, pkgrootdir, options );
   if ( res < 0 ) {
     cerr << "genIS_PLAINcache: failed to create cache '" << cachefile << "' (" << res << ")" << endl;
     ERR << "Exit: -> 4 " << cachefile << " (" << res << ")" << endl;

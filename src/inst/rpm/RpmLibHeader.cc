@@ -29,6 +29,7 @@
 #include <y2util/PathInfo.h>
 
 #include <y2pm/RpmLibHeader.h>
+#include <y2pm/binHeader.h>
 #include <y2pm/PkgDu.h>
 
 using namespace std;
@@ -44,90 +45,17 @@ IMPL_BASE_POINTER(RpmLibHeader);
 
 ///////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : RpmLibHeader::stringList
-/**
- *
- **/
-class RpmLibHeader::stringList {
-  stringList            ( const stringList & );
-  stringList & operator=( const stringList & );
-  private:
-    unsigned cnt;
-    char **  val;
-    void clear() {
-      if ( val )
-	free( val );
-      val = 0;
-      cnt = 0;
-    }
-  public:
-    stringList()
-      : cnt( 0 ), val( 0 )
-    {}
-    ~stringList() { clear(); }
-    unsigned set( char ** val_r, int_32 cnt_r ) {
-      clear();
-      val = val_r;
-      cnt = val ? cnt_r : 0;
-      return cnt;
-    }
-    unsigned size() const { return cnt; }
-    std::string operator[]( const unsigned idx_r ) const {
-      return( idx_r < cnt ? val[idx_r] : "" );
-    }
-};
+#define has_tag        _hdr->has_tag
+#define int_list       _hdr->int_list
+#define string_list    _hdr->string_list
+#define int_val        _hdr->int_val
+#define string_val     _hdr->string_val
+#define stringList_val _hdr->stringList_val
 
-///////////////////////////////////////////////////////////////////
+typedef binHeader::tag        tag;
+typedef binHeader::intList    intList;
+typedef binHeader::stringList stringList;
 
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : RpmLibHeader::intList
-/**
- *
- **/
-class RpmLibHeader::intList {
-  intList            ( const intList & );
-  intList & operator=( const intList & );
-  private:
-    unsigned cnt;
-    void *   val;
-    int_32   type;
-  public:
-    intList()
-      : cnt( 0 ), val( 0 ), type( RPM_NULL_TYPE )
-    {}
-    unsigned set( void * val_r, int_32 cnt_r, int_32 type_r ) {
-      val = val_r;
-      cnt = val ? cnt_r : 0;
-      type = type_r;
-      return cnt;
-    }
-    unsigned size() const { return cnt; }
-    int operator[]( const unsigned idx_r ) const {
-      if ( idx_r < cnt ) {
-	switch ( type ) {
-	case RPM_CHAR_TYPE:
-	  return ((char*)val)[idx_r];
-	case RPM_INT8_TYPE:
-	  return ((int_8*)val)[idx_r];
-	case RPM_INT16_TYPE:
-	  return ((int_16*)val)[idx_r];
-	case RPM_INT32_TYPE:
-	  return ((int_32*)val)[idx_r];
-	}
-      }
-      return 0;
-    }
-};
-
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : RpmLibHeader
-//
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
@@ -138,15 +66,31 @@ class RpmLibHeader::intList {
 //
 //	DESCRIPTION :
 //
-RpmLibHeader::RpmLibHeader( Header h, bool isSrc )
-    : _h( h )
+RpmLibHeader::RpmLibHeader( binHeader::Header h_r, bool isSrc )
+    : _hdr( h_r ? new binHeader( h_r ) : 0 )
     , _isSrc( isSrc )
 {
-  if ( !_h ) {
+  if ( !_hdr ) {
     INT << "OOPS: NULL HEADER created!" << endl;
   }
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibHeader::RpmLibHeader
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+RpmLibHeader::RpmLibHeader( binHeaderPtr hdr_r, bool isSrc )
+    : _hdr( hdr_r )
+    , _isSrc( isSrc )
+{
+  if ( !_hdr ) {
+    INT << "OOPS: NULL HEADER created!" << endl;
+  }
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -158,175 +102,88 @@ RpmLibHeader::RpmLibHeader( Header h, bool isSrc )
 //
 RpmLibHeader::~RpmLibHeader()
 {
-  if ( _h ) {
-    headerFree( _h );
-  }
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::has_tag
-//	METHOD TYPE : bool
+//	METHOD NAME : RpmLibHeader::dumpOn
+//	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-bool RpmLibHeader::has_tag( tag tag_r ) const
+ostream & RpmLibHeader::dumpOn( ostream & str ) const
 {
-  return ::headerIsEntry( _h, tag_r );
+  Rep::dumpOn( str );
+  return str << _hdr << '{' << tag_name() << "-" << tag_edition() << ( _isSrc ? ".src}" : "}");
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::int_list
-//	METHOD TYPE : unsigned
+//	METHOD NAME : RpmLibHeader::tag_name
+//	METHOD TYPE : PkgName
 //
 //	DESCRIPTION :
 //
-unsigned RpmLibHeader::int_list( tag tag_r, intList & lst_r ) const
+PkgName RpmLibHeader::tag_name() const
 {
-  int_32 type = 0;
-  int_32 cnt  = 0;
-  void * val  = 0;
-  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
-
-  if ( val ) {
-    switch ( type ) {
-    case RPM_NULL_TYPE:
-      return lst_r.set( 0, 0, type );
-    case RPM_CHAR_TYPE:
-    case RPM_INT8_TYPE:
-    case RPM_INT16_TYPE:
-    case RPM_INT32_TYPE:
-      return lst_r.set( val, cnt, type );
-
-    case RPM_STRING_ARRAY_TYPE:
-      free( val );
-      // fall through
-    default:
-      INT << "RPM_TAG MISSMATCH: RPM_INT32_TYPE " << tag_r << " got type " << type << endl;
-    }
-  }
-  return lst_r.set( 0, 0, RPM_NULL_TYPE );
+  return PkgName( string_val( RPMTAG_NAME ) );
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::string_list
-//	METHOD TYPE : unsigned
+//	METHOD NAME : RpmLibHeader::tag_edition
+//	METHOD TYPE : PkgEdition
 //
 //	DESCRIPTION :
 //
-unsigned RpmLibHeader::string_list( tag tag_r, stringList & lst_r ) const
+PkgEdition RpmLibHeader::tag_edition() const
 {
-  int_32 type = 0;
-  int_32 cnt  = 0;
-  void * val  = 0;
-  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
-
-  if ( val ) {
-    switch ( type ) {
-    case RPM_NULL_TYPE:
-      return lst_r.set( 0, 0 );
-    case RPM_STRING_ARRAY_TYPE:
-      return lst_r.set( (char**)val, cnt );
-
-    default:
-      INT << "RPM_TAG MISSMATCH: RPM_STRING_ARRAY_TYPE " << tag_r << " got type " << type << endl;
-    }
-  }
-  return lst_r.set( 0, 0 );
+  return PkgEdition( int_val   ( RPMTAG_EPOCH ),
+		     string_val( RPMTAG_VERSION ),
+		     string_val( RPMTAG_RELEASE ),
+		     int_val   ( RPMTAG_BUILDTIME ) );
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::int_val
-//	METHOD TYPE : int
+//	METHOD NAME : RpmLibHeader::tag_arch
+//	METHOD TYPE : PkgArch
 //
 //	DESCRIPTION :
 //
-int RpmLibHeader::int_val( tag tag_r ) const
+PkgArch RpmLibHeader::tag_arch() const
 {
-  int_32 type = 0;
-  int_32 cnt  = 0;
-  void * val  = 0;
-  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
-
-  if ( val ) {
-    switch ( type ) {
-    case RPM_NULL_TYPE:
-      return 0;
-    case RPM_CHAR_TYPE:
-      return *((char*)val);
-    case RPM_INT8_TYPE:
-      return *((int_8*)val);
-    case RPM_INT16_TYPE:
-      return *((int_16*)val);
-    case RPM_INT32_TYPE:
-      return *((int_32*)val);
-
-    case RPM_STRING_ARRAY_TYPE:
-      free( val );
-      // fall through
-    default:
-      INT << "RPM_TAG MISSMATCH: RPM_INT32_TYPE " << tag_r << " got type " << type << endl;
-    }
-  }
-  return 0;
+  return PkgArch( string_val( RPMTAG_ARCH ) );
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::string_val
-//	METHOD TYPE : std::string
+//	METHOD NAME : RpmLibHeader::tag_installtime
+//	METHOD TYPE : Date
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::string_val( tag tag_r ) const
+Date RpmLibHeader::tag_installtime() const
 {
-  int_32 type = 0;
-  int_32 cnt  = 0;
-  void * val  = 0;
-  ::headerGetEntry( _h, tag_r, &type, &val, &cnt );
-
-  if ( val ) {
-    switch ( type ) {
-    case RPM_NULL_TYPE:
-      return "";
-    case RPM_STRING_TYPE:
-      return (char*)val;
-
-    case RPM_STRING_ARRAY_TYPE:
-      free( val );
-      // fall through
-    default:
-      INT << "RPM_TAG MISSMATCH: RPM_STRING_TYPE " << tag_r << " got type " << type << endl;
-    }
-  }
-  return "";
+  return int_val( RPMTAG_INSTALLTIME );
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::stringList_val
-//	METHOD TYPE : std::list<std::string>
+//	METHOD NAME : RpmLibHeader::tag_buildtime
+//	METHOD TYPE : Date
 //
 //	DESCRIPTION :
 //
-std::list<std::string> RpmLibHeader::stringList_val( tag tag_r ) const
+Date RpmLibHeader::tag_buildtime() const
 {
-  std::list<std::string> ret;
-  stringList             lines;
-  unsigned count = string_list( tag_r, lines );
-  for ( unsigned i = 0; i < count; ++i ) {
-    ret.push_back( lines[i] );
-  }
-  return ret;
+  return int_val( RPMTAG_BUILDTIME );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -431,88 +288,6 @@ PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( tag tag_r, FileDeps::F
   }
 
   return ret;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibHeader::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & RpmLibHeader::dumpOn( ostream & str ) const
-{
-  Rep::dumpOn( str );
-  return str << '{' << tag_name() << "-" << tag_edition() << ( _isSrc ? ".src}" : "}");
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibHeader::tag_name
-//	METHOD TYPE : PkgName
-//
-//	DESCRIPTION :
-//
-PkgName RpmLibHeader::tag_name() const
-{
-  return PkgName( string_val( RPMTAG_NAME ) );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibHeader::tag_edition
-//	METHOD TYPE : PkgEdition
-//
-//	DESCRIPTION :
-//
-PkgEdition RpmLibHeader::tag_edition() const
-{
-  return PkgEdition( int_val   ( RPMTAG_EPOCH ),
-		     string_val( RPMTAG_VERSION ),
-		     string_val( RPMTAG_RELEASE ),
-		     int_val   ( RPMTAG_BUILDTIME ) );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibHeader::tag_arch
-//	METHOD TYPE : PkgArch
-//
-//	DESCRIPTION :
-//
-PkgArch RpmLibHeader::tag_arch() const
-{
-  return PkgArch( string_val( RPMTAG_ARCH ) );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibHeader::tag_installtime
-//	METHOD TYPE : Date
-//
-//	DESCRIPTION :
-//
-Date RpmLibHeader::tag_installtime() const
-{
-  return int_val( RPMTAG_INSTALLTIME );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibHeader::tag_buildtime
-//	METHOD TYPE : Date
-//
-//	DESCRIPTION :
-//
-Date RpmLibHeader::tag_buildtime() const
-{
-  return int_val( RPMTAG_BUILDTIME );
 }
 
 ///////////////////////////////////////////////////////////////////
