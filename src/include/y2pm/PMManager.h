@@ -22,6 +22,7 @@
 #include <iosfwd>
 #include <set>
 #include <map>
+#include <list>
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PMSelectable.h>
@@ -56,6 +57,29 @@ class PMManager {
 
   private:
 
+    typedef std::list<PMSelectable::SavedState> SavedList;
+
+    SavedList _savedList;
+
+  public:
+
+    /**
+     * Save current selection.
+     **/
+    void SaveState();
+
+    /**
+     * Restore previously saved selection.
+     **/
+    bool RestoreState();
+
+    /**
+     * Forgett a previously saved selection.
+     **/
+    void ClearSaveState();
+
+  private:
+
     /**
      * Concrete Manager has to assert that the passed ObjectPtr actually references the
      * correct type of Object (PackageManager e.g. will handle nothing else but Packages).
@@ -82,6 +106,8 @@ class PMManager {
     /**
      * Remove superfluous empty Selecatables. To be called after Objects
      * were removed from Selectables.
+     *
+     * This clears any saved state!
      **/
     void poolAdjust();
 
@@ -186,7 +212,7 @@ class PMManager {
      * @return true if no conflicts where found (i.e no bad)
      * */
     bool solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, bool filter_conflicts_with_installed = false);
-    
+
     /**
      * resolve dependencies for all packages that are marked for installation
      * or are available with newer version
@@ -220,7 +246,7 @@ class PMManager {
 
     /**
      * compute relative space requirement
-     * 
+     *
      * size = 0
      * if to install
      *    if has_installed
