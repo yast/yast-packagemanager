@@ -18,6 +18,7 @@
 /-*/
 
 #include <iostream>
+#include <list>
 
 #include <y2util/Y2SLog.h>
 
@@ -328,37 +329,6 @@ bool PMSelectable::isEmpty() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMSelectable::check
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :
-//
-void PMSelectable::check() const
-{
-  if ( isEmpty() )
-    E__ << "  EMPTY SELEECTABLE" << endl;
-
-  if ( _installedObj && _installedObj->_selectable != this )
-	E__ << "  _installedObj wrong selectable-> " << _installedObj->_selectable << endl;
-  if ( _candidateObj && _candidateObj->_selectable != this )
-	E__ << "  _candidateObj wrong selectable-> " << _candidateObj->_selectable << endl;
-  for ( PMObjectList::const_iterator it = _candidateList.begin(); it != _candidateList.end(); ++it ) {
-    if ( *it ) {
-      if ( (*it)->_selectable != this )
-	E__ << "  in clist wrong selectable-> " << (*it)->_selectable << " for " << *it << endl;
-    } else {
-      E__ << "  NULL object in clist" << endl;
-    }
-  }
-  if ( _candidateObj && _candidateList.empty() )
-    E__ << "  _candidateObj but empty clist" << endl;
-  if ( !_candidateObj && _candidateList.size() )
-    E__ << "  clist but no candidate" << endl;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : PMSelectable::chooseCandidateObj
 //	METHOD TYPE : void
 //
@@ -424,26 +394,6 @@ bool PMSelectable::setUserCandidate( const PMObjectPtr & obj_r )
 
   return true;
 }
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMSelectable::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & PMSelectable::dumpOn( ostream & str ) const
-{
-  str << _name << '[' << Rep::dumpOn( str )
-    << "(inst:" << _installedObj << ")"
-    << "(cand:" << _candidateObj << ")"
-    << "(avai:" << _candidateList.size() << ")"
-    << "(state:" << _state << ")"
-    << ']';
-  return str;
-}
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -564,5 +514,119 @@ PMSelectable::UI_Status PMSelectable::status() const
 
   // _state.to_delete
   return S_Del;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::set_status
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::set_status( const UI_Status state_r )
+{
+  bool ret = intern_set_status( state_r, true );
+
+#warning SET_STATUS CHECKS ENABLED
+  if ( ret && status() != state_r ) {
+    INT << "SET_STATUS MISSMATCH: wanted " << state_r << " got " << status() << endl;
+  }
+
+  return intern_set_status( state_r, true );
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : std::ostream &
+**
+**	DESCRIPTION :
+*/
+std::ostream & operator<<( std::ostream & str, PMSelectable::UI_Status obj )
+{
+  switch ( obj ) {
+#define ENUM_OUT(V) case PMSelectable::##V: return str << #V; break
+
+    ENUM_OUT( S_Del );
+    ENUM_OUT( S_Install );
+    ENUM_OUT( S_Update );
+    ENUM_OUT( S_NoInst );
+    ENUM_OUT( S_KeepInstalled );
+    ENUM_OUT( S_Auto );
+    ENUM_OUT( S_Taboo );
+
+#undef ENUM_OUT
+  }
+
+  return str << "UI_Status(UNKNOWN)";
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::dumpOn
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+ostream & PMSelectable::dumpOn( ostream & str ) const
+{
+  str << _name << '[' << Rep::dumpOn( str )
+    << "(inst:" << _installedObj << ")"
+    << "(cand:" << _candidateObj << ")"
+    << "(avai:" << _candidateList.size() << ")"
+    << "(state:" << _state << ")"
+    << ']';
+  return str;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::check
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectable::check() const
+{
+  bool goterr = false;
+#define CHKLOG if ( !goterr ) { goterr = true; INT << "CHECK FAILED: " << this << endl; } INT << "    "
+
+  if ( isEmpty() ) {
+    CHKLOG << "EMPTY SELEECTABLE" << endl;
+  }
+
+  if ( _installedObj && _installedObj->_selectable != this )
+	CHKLOG << "_installedObj wrong selectable-> " << _installedObj->_selectable << endl;
+  if ( _candidateObj && _candidateObj->_selectable != this )
+	CHKLOG << "_candidateObj wrong selectable-> " << _candidateObj->_selectable << endl;
+  if ( _userCandidateObj && _userCandidateObj->_selectable != this )
+	CHKLOG << "_userCandidateObj wrong selectable-> " << _candidateObj->_selectable << endl;
+  for ( PMObjectList::const_iterator it = _candidateList.begin(); it != _candidateList.end(); ++it ) {
+    if ( *it ) {
+      if ( (*it)->_selectable != this )
+	CHKLOG << "in clist wrong selectable-> " << (*it)->_selectable << " for " << *it << endl;
+    } else {
+      CHKLOG << "NULL object in clist" << endl;
+    }
+  }
+
+  if ( _candidateList.empty() ) {
+    if ( _candidateObj )
+      CHKLOG << "_candidateObj but empty clist" << endl;
+    if ( _userCandidateObj )
+      CHKLOG << "_userCandidateObj but empty clist" << endl;
+  }
+
+  bool hi = _installedObj;
+  bool hc = _candidateObj;
+  if ( hi != _state.has_installed() || hc != _state.has_candidate() ) {
+    CHKLOG << "state <-> object missmatch";
+  }
+
 }
 

@@ -323,16 +323,15 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
 //
 void PMManager::checkPool() const
 {
-  // adjust BitFields of added items
-
   // test whether to remove empty items
 
 
   if ( _itemPool.size() == _items.size() )
     S__ << "Pool size " << _items.size() << endl;
   else
-    E__ << "Pool size missmatch " << _itemPool.size() << " <-> " << _items.size() << endl;
+    INT << "Pool size missmatch " << _itemPool.size() << " <-> " << _items.size() << endl;
 
+  Rep::dumpRepStats( S__ ) << endl;
 
   for ( unsigned i = 0; i < _items.size(); ++i ) {
     PMSelectablePtr c = _items[i];
@@ -348,6 +347,7 @@ void PMManager::checkPool() const
       c->check();
     }
   }
+
 }
 
 /******************************************************************
@@ -362,5 +362,21 @@ ostream & operator<<( ostream & str, const PMManager & obj )
 {
   str << "PMManager" << endl;
   return str;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::setNothingSelected
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMManager::setNothingSelected()
+{
+  DBG << "setNothingSelected" << endl;
+  for ( unsigned i = 0; i < _items.size(); ++i ) {
+    _items[i]->setNothingSelected();
+  }
 }
 

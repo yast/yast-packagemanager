@@ -224,6 +224,8 @@ class PMSelectable : virtual public Rep {
       S_Taboo,               // hide candidateObj so it can't be installed. ( have no installedObj )
     };
 
+    friend std::ostream & operator<<( std::ostream & str, UI_Status obj );
+
   private:
 
     /**
@@ -245,7 +247,7 @@ class PMSelectable : virtual public Rep {
     /**
      * If possible, trigger action according to state_r.
      **/
-    bool set_status( const UI_Status state_r ) { return intern_set_status( state_r, true ); }
+    bool set_status( const UI_Status state_r );
 
     /**
      * Test whether set_status(state_r) would succseed..
@@ -256,6 +258,13 @@ class PMSelectable : virtual public Rep {
      * Return the current ui_status (no flags returned)
      **/
     UI_Status status() const;
+
+  public:
+
+    /**
+     * Set to neither install nor delete (keeps taboo)
+     **/
+    void setNothingSelected() { _state.user_unset( true ); }
 
   public:
 
