@@ -58,6 +58,9 @@ std::string YouError::errtext( const unsigned e )
   case E_write_youservers_failed: return _("Error writing youservers file.");
   case E_read_youservers_failed: return _("Error reading youservers file.");
   case E_user_abort: return _("User aborted operation.");
+  case E_user_skip: return _("User selected skip.");
+  case E_user_skip_all: return _("User selected skip all.");
+  case E_user_retry: return _("User selected retry.");
   case E_parse_error: return _("Error parsing patch description.");
   case E_script_failed: return _("Script failed.");
   case E_prescript_failed: return _("Prescript failed.");
