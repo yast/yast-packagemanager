@@ -1,0 +1,18 @@
+--- Test 1
+
+Name: cups-client
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: lsb
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: lprng
+Edition: 1.0-1
+From-Input-List: yes
+Referers: lsb-1.0-1 requires /usr/bin/lpr
+Conflicts-With: cups-client-1.0-1 conflicts with lprng, lprng-1.0-1 conflicts with cups-client
+Remove-To-Solve-Conflict: cups-client
+Remove-Referers: lsb
+

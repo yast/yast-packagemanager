@@ -429,6 +429,7 @@ static bool parse_one_tag( istream& is, DbHeader& hdr, int *lineno,
 			is.putback(c);
 		return false;
 	}
+	if(is.eof()) return false;
 	if (is_override && (c == '+' || c == '-' || c == '!')) {
 		switch( c ) {
 		  case '+':	override_mode = Tag::ADD; break;
@@ -659,6 +660,16 @@ static std::list<PMPackagePtr> read_package_list(string file)
     return pkglist;
 }
 
+/** alternatives handling */
+static map<PkgName,Alternatives::AltDefaultList> altdefaults;
+
+static Alternatives::AltDefaultList alternatives_callback( PkgName name )
+{
+    if(altdefaults.find(name) != altdefaults.end())
+	return altdefaults[name];
+    return Alternatives::AltDefaultList();
+}
+
 struct Test {
 	Test() : altmode(PkgDep::ASK_ALWAYS) {};
 	PkgDep::alternatives_mode altmode;
@@ -688,15 +699,22 @@ static void read_test_file( string filename, TestList& tests )
 
 		// phi compat stuff
 		if (word == "CLEAR_DEFAULTS" ) {
+			altdefaults.clear();
 			continue;
 		}
 		else if (word == "DEFINE_DEFAULTS") {
+			Alternatives::AltDefaultList defs;
 			while( is ) {
 				is.get(c);
 				if (c == '\n')
 					break;
 				is >> word;
+				if(!word.empty())
+				    defs.push_back(PkgName(word));
 			}
+			PkgName n = defs.front();
+			defs.pop_front();
+			altdefaults[n] = defs;
 			continue;
 		}
 		if (word.substr(0,12) == "ALTHANDLING=") {
@@ -749,6 +767,20 @@ static void setPkgStates(struct Test& t)
     }
 }
 
+
+// sort results according to name and edition
+class ResultSortCriterion
+{
+    public:
+	bool operator()(const PkgDep::Result& l, const PkgDep::Result& r)
+	{
+	    int res = l.name->compare( r.name );
+	    if ( res != 0 )
+		return( res < 0 );
+	    return( l.edition < r.edition );
+	}
+};
+
 int main(int argc, char* argv[])
 {
     if(argc<2)
@@ -790,7 +822,12 @@ int main(int argc, char* argv[])
 
 	PkgDep::set_default_alternatives_mode(p->altmode);
 
+	// FIXME: alternatives_callback
+
 	Y2PM::packageManager().solveInstall(good, bad, false);
+
+	good.sort(ResultSortCriterion());
+	bad.sort(ResultSortCriterion());
 
 	for( PkgDep::ResultList::const_iterator p = good.begin();
 	     p != good.end(); ++p ) {
