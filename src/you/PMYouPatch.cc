@@ -66,6 +66,15 @@ PMYouPatch::~PMYouPatch()
 {
 }
 
+const std::string
+PMYouPatch::summary() const { return _dataProvider->summary(); }
+const std::list<std::string>
+PMYouPatch::description() const { return _dataProvider->description(); }
+const std::list<std::string>
+PMYouPatch::insnotify() const { return _dataProvider->insnotify(); }
+const std::list<std::string>
+PMYouPatch::delnotify() const { return _dataProvider->delnotify(); }
+
 ///////////////////////////////////////////////////////////////////
 //
 //

@@ -103,8 +103,8 @@ PMULPackageDataProvider::getValue( constPMObjectPtr obj_r,
 	case PMPackage::ATTR_SUGGESTS:
 	    pos_ptr = &attr_SUGGESTS;
 	break;
-	case PMPackage::ATTR_AUTHOR:
-	    pos_ptr = &attr_AUTHOR;
+	case PMPackage::ATTR_AUTHORS:
+	    pos_ptr = &attr_AUTHORS;
 	break;
 	case PMPackage::ATTR_KEYWORDS:
 	    pos_ptr = &attr_KEYWORDS;
@@ -275,7 +275,7 @@ PMULPackageDataProvider::setAttributeValue(
 	case PMPackage::ATTR_SUMMARY:	  SET_RETRIEVAL (SUMMARY,begin,end); break;
 	case PMPackage::ATTR_RECOMMENDS:  SET_RETRIEVAL (RECOMMENDS,begin,end); break;
 	case PMPackage::ATTR_SUGGESTS:	  SET_RETRIEVAL (SUGGESTS,begin,end); break;
-	case PMPackage::ATTR_AUTHOR:	  SET_RETRIEVAL (AUTHOR,begin,end); break;
+	case PMPackage::ATTR_AUTHORS:	  SET_RETRIEVAL (AUTHORS,begin,end); break;
 	case PMPackage::ATTR_KEYWORDS:	  SET_RETRIEVAL (KEYWORDS,begin,end); break;
 	case PMPackage::ATTR_DESCRIPTION: SET_RETRIEVAL (DESCRIPTION,begin,end); break;
 	case PMPackage::ATTR_INSNOTIFY:	  SET_RETRIEVAL (INSNOTIFY,begin,end); break;

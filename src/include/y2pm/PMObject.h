@@ -68,7 +68,15 @@ class PMObject : virtual public Rep, public PMSolvable {
     };
 
     /**
-     * Get attribute name as string.
+     * access functions for attributes
+     */
+    virtual const std::string summary() const = 0;
+    virtual const std::list<std::string> description() const = 0;
+    virtual const std::list<std::string> insnotify() const = 0;
+    virtual const std::list<std::string> delnotify() const = 0;
+
+    /**
+     * Get PMObject attribute name as string.
      **/
     std::string getAttributeName(PMObjectAttribute attr) const;
 

@@ -35,6 +35,15 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	virtual ~PMYouPackageDataProvider();
 
 	/**
+	 * access functions for PMObject attributes
+	 */
+
+	const std::string summary() const;
+	const std::list<std::string> description() const;
+	const std::list<std::string> insnotify() const;
+	const std::list<std::string> delnotify() const;
+
+	/**
 	 * Object attribute retrieval. (DataProvider interface)
 	 * @see PMDataProvider
 	 * @see PMObject

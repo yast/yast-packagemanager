@@ -153,7 +153,7 @@ InstSrcData_UL::PkgTag2Package( TagCacheRetrieval *pkgcache,
     SET_SINGLE (SOURCERPM);
     SET_SINGLE (GROUP);
     SET_SINGLE (LICENSE);
-    SET_MULTI (AUTHOR);
+    SET_MULTI (AUTHORS);
     SET_MULTI (KEYWORDS);
 
 #undef SET_VALUE

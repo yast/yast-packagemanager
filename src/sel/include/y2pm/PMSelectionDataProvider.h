@@ -47,6 +47,15 @@ class PMSelectionDataProvider : virtual public Rep, public PMDataProvider  {
 
   public:
 
+	/**
+	 * access functions for PMObject attributes
+	 */
+
+	const std::string summary() const;
+	const std::list<std::string> description() const;
+	const std::list<std::string> insnotify() const;
+	const std::list<std::string> delnotify() const;
+
     /**
      * Selection attribute retrieval.
      * @see PMSelection
