@@ -52,8 +52,6 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 
     _packagetagset = new YOUPackageTagSet();
 
-    _patchFiles = new list<string>;
-
     _packageProvider = new PMYouPackageDataProvider();
 
     _paths = new PMYouPatchPaths("noproduct","noversion","noarch");
@@ -61,7 +59,6 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 
 PMYouPatchInfo::~PMYouPatchInfo()
 {
-    delete _patchFiles;
     delete _packagetagset;
     delete _patchtagset;
 }
@@ -327,36 +324,31 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     D__ << "Attach point: " << media->localRoot() << endl;
 
-    list<string> * patchFiles = new list<string>;
-    error = media->dirInfo( *patchFiles, patchPath );
-    if ( error ) {
-      if ( error == MediaAccess::Error::E_not_supported_by_media )
-	W__ << "dirInfo not supproted on " << media << ": " << error << endl;
-      delete patchFiles;
-      patchFiles = 0;
-    }
+    list<string> patchFiles;
 
-    if ( !patchFiles ) {
-      W__ << "dirInfo failed." << endl;
-      error = media->provideFile( patchPath + "directory" );
-      if ( error != PMError::E_ok ) {
-        E__ << "no directory file found." << endl;
+    error = media->provideFile( patchPath + "directory" );
+    if ( error ) {
+      W__ << "no directory file found." << endl;
+
+      error = media->dirInfo( patchFiles, patchPath );
+      if ( error ) {
+        if ( error == MediaAccess::Error::E_not_supported_by_media ) {
+	  E__ << "dirInfo not supported on " << media << ": " << error << endl;
+        }
         return error;
       }
+    } else {
       Pathname dirFile = media->localRoot() + patchPath + "directory";
-
-      patchFiles = _patchFiles;
-      _patchFiles->clear();
 
       string buffer;
       ifstream in( dirFile.asString().c_str() );
       while( getline( in, buffer ) ) {
-        _patchFiles->push_back( buffer );
+        patchFiles.push_back( buffer );
       }
     }
 
     list<string>::const_iterator it;
-    for( it = patchFiles->begin(); it != patchFiles->end(); ++it ) {
+    for( it = patchFiles.begin(); it != patchFiles.end(); ++it ) {
         if ( *it == "." || *it == ".." || *it == "directory" ) continue;
         error = media->provideFile( patchPath + *it );
         if ( error != PMError::E_ok ) {
