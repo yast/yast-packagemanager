@@ -1164,22 +1164,22 @@ void RpmDb::run_rpm(const RpmArgVec& options,
     const char* argv[args.size()+options.size()+2];
     unsigned argc = 0;
 
-    D__ << "rpm command: ";
+//    D__ << "rpm command: ";
 
     for(RpmArgVec::iterator it=args.begin();it<args.end();++it)
     {
 	argv[argc++]=*it;
-	D__ << *it << " ";
+//	D__ << *it << " ";
     }
     for(RpmArgVec::const_iterator it2=options.begin();it2<options.end();++it2)
     {
 	argv[argc++]=*it2;
-	D__ << *it2 << " ";
+//	D__ << *it2 << " ";
     }
 
     argv[argc] = 0;
 
-    D__ << endl;
+//    D__ << endl;
 
     if ( process != NULL )
     {
