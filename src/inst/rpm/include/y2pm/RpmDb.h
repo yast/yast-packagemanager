@@ -40,6 +40,8 @@
 
 #include <y2pm/InstTargetError.h>
 
+#include <y2pm/FileDeps.h>
+
 /**
  * @short Interface to the rpm program
  */
@@ -62,6 +64,8 @@ class RpmDb: virtual public Rep
 	bool _packages_valid;
 
 	Pathname _backuppath;
+
+	FileDeps::FileNames _filerequires;
 
     public:
 
@@ -381,9 +385,12 @@ class RpmDb: virtual public Rep
 	 *
 	 * @param depstr string to evaluate
 	 * @param deps reference to a list which will be cleared and filled with dependencies
+	 * @param files reference to a FileNames set where to store found file relations
+	 * @param fill_files whether to actually use the files parameter
 	 * */
 	void rpmdeps2rellist ( const std::string& depstr,
-			PMSolvable::PkgRelList_type& deps);
+			PMSolvable::PkgRelList_type& deps,
+			FileDeps::FileNames& files, bool fill_files = false);
 
 	/** wrapper for _progressfunc, does nothing if it's unset
 	 * */
