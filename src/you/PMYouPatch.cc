@@ -10,12 +10,12 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       PMPackage.cc
+  File:       PMYouPatch.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose: Defines the Package object.
+  Purpose: Defines the YouPatch object.
 
 /-*/
 
@@ -23,103 +23,82 @@
 
 #include <y2util/Y2SLog.h>
 
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackageDataProvider.h>
+#include <y2pm/PMYouPatch.h>
+#include <y2pm/PMYouPatchDataProvider.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMPackage
+//	CLASS NAME : PMYouPatch
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_DERIVED_POINTER( PMPackage, PMObject, PMSolvable );
+IMPL_DERIVED_POINTER( PMYouPatch, PMObject, PMSolvable );
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackage::PMPackage
+//	METHOD NAME : PMYouPatch::PMYouPatch
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-PMPackage::PMPackage( const PkgName &    name_r,
-		      const PkgEdition & edition_r,
-		      const PkgArch &    arch_r )
+PMYouPatch::PMYouPatch( const PkgName &    name_r,
+			const PkgEdition & edition_r )
     : PMObject( name_r, edition_r )
-    , _arch( arch_r )
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackage::~PMPackage
+//	METHOD NAME : PMYouPatch::~PMYouPatch
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-PMPackage::~PMPackage()
+PMYouPatch::~PMYouPatch()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackage::getAttributeName
-//	METHOD TYPE : std::string
+//	METHOD NAME : PMYouPatch::getAttributeName
+//	METHOD TYPE : string
 //
 //	DESCRIPTION :
 //
-std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
+string PMYouPatch::getAttributeName( PMYouPatchAttribute attr ) const
 {
   switch ( attr ) {
 
 #define ENUM_OUT(V) case ATTR_##V: return #V; break
-    ENUM_OUT( BUILDTIME );
-    ENUM_OUT( BUILDHOST );
-    ENUM_OUT( INSTALLTIME );
-    ENUM_OUT( DISTRIBUTION );
-    ENUM_OUT( VENDOR );
-    ENUM_OUT( LICENSE );
-    ENUM_OUT( PACKAGER );
-    ENUM_OUT( GROUP );
-    ENUM_OUT( CHANGELOG );
-    ENUM_OUT( URL );
-    ENUM_OUT( OS );
-    ENUM_OUT( ARCH );
-    ENUM_OUT( PREIN );
-    ENUM_OUT( POSTIN );
-    ENUM_OUT( PREUN );
-    ENUM_OUT( POSTUN );
-    ENUM_OUT( SOURCERPM );
-    ENUM_OUT( ARCHIVESIZE );
-    ENUM_OUT( AUTHOR );
-    ENUM_OUT( FILENAMES );
+    //ENUM_OUT( WAHTEVER_IS_FIRST );
 #undef ENUM_OUT
 
   ///////////////////////////////////////////////////////////////////
   // no default: let compiler warn '... not handled in switch'
   ///////////////////////////////////////////////////////////////////
-  case PKG_NUM_ATTRIBUTES:
+  case YOU_NUM_ATTRIBUTES:
     // illegal attr value
     break;
   }
   // HERE: illegal attr value or forgott do adjust switch.
-  ERR << "Illegal PackageAttribute(" << attr << ')' << endl;
+  ERR << "Illegal YouPatchAttribute(" << attr << ')' << endl;
   return "";
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackage::getAttributeValue
+//	METHOD NAME : PMYouPatch::getAttributeValue
 //	METHOD TYPE : PkgAttributeValue
 //
 //	DESCRIPTION :
 //
-PkgAttributeValue PMPackage::getAttributeValue( PMPackageAttribute attr ) const
+PkgAttributeValue PMYouPatch::getAttributeValue( PMYouPatchAttribute attr ) const
 {
   if ( !_dataProvider ) {
     ERR << "No DataProvider for " << *this << endl;
@@ -131,14 +110,14 @@ PkgAttributeValue PMPackage::getAttributeValue( PMPackageAttribute attr ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackage::dumpOn
+//	METHOD NAME : PMYouPatch::dumpOn
 //	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-ostream & PMPackage::dumpOn( ostream & str ) const
+ostream & PMYouPatch::dumpOn( ostream & str ) const
 {
-  PMObject::dumpOn( str ) << '(' << _arch << ')';
+  PMObject::dumpOn( str );
   return str;
 }
 

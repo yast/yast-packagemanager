@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src
 #
 
-SUBDIRS = include inst pkg media libPkgDep
+SUBDIRS = include inst pkg sel you media libPkgDep
 
 AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
 
@@ -10,6 +10,8 @@ AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include			\
 		pkg/include		\
+		sel/include	\
+		you/include	\
 		inst/include		\
 		inst/rpm/include	\
 		media/include		\

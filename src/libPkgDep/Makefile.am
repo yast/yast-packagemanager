@@ -8,6 +8,8 @@ noinst_LTLIBRARIES = libPkgDep.la
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
 		pkg/include	\
+		sel/include	\
+		you/include	\
 		inst/include	\
 		media/include	\
 		libPkgDep/include \
