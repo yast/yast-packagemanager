@@ -101,6 +101,7 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 	<td>These name, version, and release identify a selection unambiguously and are used as a key.<br>
 	The architecture is optional and defaults to <i>all architectures</i><br>
 	If it's given, is must match (<b>FIXME:</b> 'uname -a' or DEFAULTBASE ?)</td></tr>
+<tr><td valign=top>=Sum</td><td valign=top><i>summary</i></td><td>one line label in default language</td></tr>
 <tr><td valign=top>=Sum.<i>lang</i></td><td valign=top><i>summary</i></td><td>one line language specific label</td></tr>
 <tr><td valign=top>=Cat</i></td><td valign=top><i>category</i></td><td>category (aka 'type of') selection<br>
 	can be '<tt>base</tt>' (only one base selection can be choosen) or any other
@@ -118,7 +119,8 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 <tr><td valign=top>+Prv<br>-Prv</td><td valign=top><i>selections</i></td><td>selections provided</td></tr>
 <tr><td valign=top>+Con<br>-Con</td><td valign=top><i>selections</i></td><td>selections conflicting</td></tr>
 <tr><td valign=top>+Obs<br>-Obs</td><td valign=top><i>selections</i></td><td>selections obsoleted</td></tr>
-<tr><td valign=top>+Sug<br>-Sug</td><td valign=top><i>selections</i></td><td>selections suggested</td></tr>
+<tr><td valign=top>+Rec<br>-Rec</td><td valign=top><i>selections</i></td><td>recommended selections</td></tr>
+<tr><td valign=top>+Sug<br>-Sug</td><td valign=top><i>selections</i></td><td>suggested selections</td></tr>
 <tr><td valign=top>=Siz</td><td valign=top><i>pkgsize</i> <i>instsize</i></td><td>size in bytes</td></tr>
 <tr><td valign=top>+Ins</i><br>-Ins</i></td><td valign=top><i>packages list</i></td><td>list of packages to install</td></tr>
 <tr><td valign=top>+Ins.<i>lang</i><br>-Ins.<i>lang</i></td><td valign=top><i>packages list</i></td><td>list of packages to install if given language is active</td></tr>
