@@ -323,6 +323,8 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
     
     if ( !tagset )
 	return false;
+
+    // TODO: set ok=false if the result string is empty (are all values required ???)
     
     // architecture
     t = tagset->getTagByIndex( InstSrcMediaTags::ARCH );
@@ -374,9 +376,10 @@ bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::
 	if ( multi.size() >= 3 )
 	{
 	    std::list<std::string>::iterator multi_pos = multi.begin();
-	    if ( !(*multi_pos).empty() )	ndescr->set_media_vendor( *multi_pos++ );
-	    if ( !(*multi_pos).empty() )	ndescr->set_media_id( *multi_pos++ );
-	    if ( !(*multi_pos).empty() ) 	ndescr->set_media_count( *multi_pos++ );
+	    //  only check if ( !(*multi_pos).empty() ) if an empty string is an error
+	    ndescr->set_media_vendor( *multi_pos++ );
+	    ndescr->set_media_id( *multi_pos++ );
+	    ndescr->set_media_count( *multi_pos++ );
 	}
 	else
 	{
