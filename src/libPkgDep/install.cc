@@ -119,6 +119,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			}
 			error = true;
 
+			// confirm assume_installed == cand instead of NULL?
 			res.add_conflict(obs->pkg(),obs->relation(),*this,obs->pkg(),NULL,RelInfo::OBSOLETION);
 		}
 	}
@@ -502,6 +503,13 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg, PMSolvablePtr newpkg, 
 			bool obsdoesntmatter = false;
 			D__ << "    requirement: " << req->relation()
 				 << " by installed/accepted " << req->pkg()->name() << endl;
+
+
+			if(oldpkg == req->pkg())
+			{
+				D__ << "    satisfied, requires it's own provides" << endl;
+				obsdoesntmatter = true;
+			}
 
 			// check if newpkg obsoletes found package, in this
 			// case requirements of the found one do not matter
