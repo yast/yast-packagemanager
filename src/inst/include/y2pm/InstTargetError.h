@@ -67,7 +67,14 @@ class InstTargetError {
       E_SelDB_file_not_found,
       E_SelDB_file_bad_magic,
       E_SelDB_install_failed,
-      E_SelDB_not_installed
+      E_SelDB_not_installed,
+      //
+      E_ProdDB_already_open,
+      E_ProdDB_open_failed,
+      E_ProdDB_not_open,
+      E_ProdDB_file_bad_magic,
+      E_ProdDB_install_failed,
+      E_ProdDB_not_installed
     };
 };
 

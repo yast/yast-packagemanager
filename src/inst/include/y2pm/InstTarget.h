@@ -46,8 +46,11 @@
 #include <y2pm/PMYouPatchPtr.h>
 #include <y2pm/InstTargetError.h>
 #include <y2pm/InstData.h>	 // InstTarget implements InstData
-#include <y2pm/RpmDb.h>		 // InstTarget is tied to RpmDb atm
-#include <y2pm/InstTargetSelDBPtr.h>// Installed Selections
+
+#include <y2pm/RpmDb.h>		      // InstTarget is tied to RpmDb atm
+#include <y2pm/InstTargetProdDBPtr.h> // Installed Products
+#include <y2pm/InstSrcDescrPtr.h>
+#include <y2pm/InstTargetSelDBPtr.h>  // Installed Selections
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -260,6 +263,43 @@ class InstTarget: virtual public Rep, public InstData {
 
     private:
       ///////////////////////////////////////////////////////////////////
+      // Product related interface
+      ///////////////////////////////////////////////////////////////////
+
+      /**
+       * Selection database
+       **/
+      InstTargetProdDBPtr _proddb;
+
+    public:
+
+      /**
+       * Return list of installed Products (reverse sorted by
+       * installation time).
+       **/
+      const std::list<constInstSrcDescrPtr> & getProducts() const;
+
+      /**
+       * Return true if Product isd_r is installed. Actually if
+       * an InstSrcDescr with same product name and version
+       * is installed.
+       **/
+      bool isInstalledProduct( const constInstSrcDescrPtr & isd_r ) const;
+
+      /**
+       * Install Product. That's nothing but copying the InstSrcDescr
+       * into the local ProductDB.
+       **/
+      PMError installProduct( const constInstSrcDescrPtr & isd_r );
+
+      /**
+       * Removes Product from ProductDB. I.e. an installed Product with
+       * the same product name and version as isd_r.
+       **/
+      PMError removeProduct( const constInstSrcDescrPtr & isd_r );
+
+    private:
+      ///////////////////////////////////////////////////////////////////
       // Selection related interface
       ///////////////////////////////////////////////////////////////////
 
@@ -274,14 +314,7 @@ class InstTarget: virtual public Rep, public InstData {
        * generate PMSelection objects for each selection on the source
        * @return list of PMSelectionPtr on this source
        **/
-      virtual const std::list<PMSelectionPtr>& getSelections (void) const;
-
-
-      /**
-       * Install Selection. That's nothing but copying the Selection
-       * file into the local SelectionDB.
-       **/
-      PMError installSelection( const Pathname & selfile_r );
+      virtual const std::list<PMSelectionPtr> & getSelections() const;
 
       /**
        * Return true if Selection selfile_r is installed. Actually
@@ -289,6 +322,12 @@ class InstTarget: virtual public Rep, public InstData {
        * is installed.
        **/
       bool isInstalledSelection( const Pathname & selfile_r ) const;
+
+      /**
+       * Install Selection. That's nothing but copying the Selection
+       * file into the local SelectionDB.
+       **/
+      PMError installSelection( const Pathname & selfile_r );
 
       /**
        * Removes a file named $(basename selfile_r) from the

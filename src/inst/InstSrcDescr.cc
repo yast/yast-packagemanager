@@ -132,11 +132,8 @@ bool InstSrcDescr::sameContentProduct( const constInstSrcDescrPtr & rhs,
 ostream & InstSrcDescr::dumpOn( ostream & str ) const
 {
   Rep::dumpOn( str ) << "(";
-  str << " type: "        << _type;
-  str << " url: "         << _url;
-  str << " product dir: " << _product_dir;
-  str << " product: "     << _content_product;
-  str << " vendor: "      << _content_vendor;
+  str << _type << ":" << _content_product;
+  str << " from " << _url << "(" << _product_dir << ")";
 
   return str << ")";
 }
@@ -247,11 +244,11 @@ private:
 //
 //
 //	METHOD NAME : InstSrcDescr::writeStream
-//	METHOD TYPE : std::ostream & str
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-std::ostream & InstSrcDescr::writeStream( std::ostream & str ) const
+PMError InstSrcDescr::writeStream( std::ostream & str ) const
 {
   str << TypeTag << ": " << InstSrc::toString(_type) << endl;
   str << UrlTag << ": " << _url << endl;
@@ -329,7 +326,7 @@ std::ostream & InstSrcDescr::writeStream( std::ostream & str ) const
   // datadir
   str << DataDirTag << ": " << _content_datadir << endl;
 
-  return str;
+  return ( str.good() ? Error::E_ok : Error::E_error );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -371,18 +368,15 @@ PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
 **
 **	DESCRIPTION :
 */
-static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset )
+static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet & tagset )
 {
     bool ok = true;
-    CommonPkdParser::Tag* t = 0;
-
-    if ( !tagset )
-	return false;
+    CommonPkdParser::Tag * t = 0;
 
     // TODO: set ok=false if the result string is empty (are all values required ???)
 
     // default activate
-    t = tagset->getTagByIndex(DescrTagSet::ACTIVATE);
+    t = tagset.getTagByIndex(DescrTagSet::ACTIVATE);
     if ( t )
     {
 	if (  t->Data() == "1" )
@@ -400,7 +394,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // type
-    t = tagset->getTagByIndex(DescrTagSet::TYPE);
+    t = tagset.getTagByIndex(DescrTagSet::TYPE);
     if ( t )
     {
 	InstSrc::Type type = InstSrc::fromString( t->Data() );
@@ -412,7 +406,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // media data
-    t = tagset->getTagByIndex(DescrTagSet::MEDIA);
+    t = tagset.getTagByIndex(DescrTagSet::MEDIA);
     if ( t )
     {
 	std::list<std::string> multi = t->MultiData();
@@ -437,7 +431,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // URL
-    t = tagset->getTagByIndex(DescrTagSet::URL);
+    t = tagset.getTagByIndex(DescrTagSet::URL);
     if ( t )
     {
 	Url url( t->Data() );
@@ -449,7 +443,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // product dir
-    t = tagset->getTagByIndex(DescrTagSet::PRODUCTDIR);
+    t = tagset.getTagByIndex(DescrTagSet::PRODUCTDIR);
     if ( t )
     {
 	Pathname dir( t->Data() );
@@ -461,7 +455,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // content file data
-    t = tagset->getTagByIndex(DescrTagSet::PRODUCT);
+    t = tagset.getTagByIndex(DescrTagSet::PRODUCT);
     if ( t )
     {
 	std::list<std::string> multi = t->MultiData();
@@ -487,7 +481,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // default base
-    t = tagset->getTagByIndex(DescrTagSet::DEFBASE);
+    t = tagset.getTagByIndex(DescrTagSet::DEFBASE);
     if ( t )
     {
 	ndescr->set_content_defaultbase( t->Data() );
@@ -498,7 +492,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // archmap
-    t = tagset->getTagByIndex(DescrTagSet::ARCH);
+    t = tagset.getTagByIndex(DescrTagSet::ARCH);
     if ( t )
     {
         InstSrcDescr::ArchMap arch;
@@ -523,7 +517,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // _content_requires
-    t = tagset->getTagByIndex(DescrTagSet::REQUIRES);
+    t = tagset.getTagByIndex(DescrTagSet::REQUIRES);
     if ( t )
     {
 	ndescr->set_content_requires( PkgRelation::fromString( t->Data() ) );
@@ -534,7 +528,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // content label
-     t = tagset->getTagByIndex(DescrTagSet::LABEL);
+     t = tagset.getTagByIndex(DescrTagSet::LABEL);
     if ( t )
     {
 	ndescr->set_content_label( t->Data() );
@@ -545,7 +539,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // labelmap
-    t = tagset->getTagByIndex(DescrTagSet::LABELMAP);
+    t = tagset.getTagByIndex(DescrTagSet::LABELMAP);
     if ( t )
     {
 	InstSrcDescr::LabelMap label;
@@ -567,7 +561,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // linguas
-    t = tagset->getTagByIndex(DescrTagSet::LINGUAS);
+    t = tagset.getTagByIndex(DescrTagSet::LINGUAS);
     if ( t )
     {
 	std::list<std::string> multi = t->MultiData();
@@ -586,7 +580,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // timezone
-     t = tagset->getTagByIndex(DescrTagSet::TIMEZONE);
+     t = tagset.getTagByIndex(DescrTagSet::TIMEZONE);
     if ( t )
     {
 	ndescr->set_content_timezone( t->Data() );
@@ -597,7 +591,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // descrdir
-    t = tagset->getTagByIndex(DescrTagSet::DESCRDIR);
+    t = tagset.getTagByIndex(DescrTagSet::DESCRDIR);
     if ( t )
     {
 	ndescr->set_content_descrdir( Pathname(t->Data()) );
@@ -608,7 +602,7 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
     }
 
     // datadir
-    t = tagset->getTagByIndex(DescrTagSet::DATADIR);
+    t = tagset.getTagByIndex(DescrTagSet::DATADIR);
     if ( t )
     {
 	ndescr->set_content_datadir( Pathname(t->Data()) );
@@ -623,6 +617,78 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcDescr::readStream
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & str )
+{
+  ndescr_r    = 0;
+  PMError err = Error::E_ok;
+
+  if ( !str ) {
+    return Error::E_open_file;
+  }
+
+  InstSrcDescrPtr ndescr( new InstSrcDescr );
+
+  ///////////////////////////////////////////////////////////////////
+  // parse stream and fill into ndescr
+  ///////////////////////////////////////////////////////////////////
+
+  TagParser   parser;
+  std::string tagstr;
+  DescrTagSet tagset;
+
+  bool repeatassign = false;
+  bool parse        = true;
+
+  while( parse && parser.lookupTag( str ) )
+  {
+    tagstr = parser.startTag();
+
+    do
+    {
+      switch( tagset.assign( tagstr.c_str(), parser, str ) )
+      {
+      case CommonPkdParser::Tag::ACCEPTED:
+	repeatassign = false;
+	break;
+      case CommonPkdParser::Tag::REJECTED_NOMATCH:
+	repeatassign = false;
+	break;
+      case CommonPkdParser::Tag::REJECTED_FULL:
+	tagset.clear();
+	repeatassign = true;
+	err = Error::E_error;
+	break;
+      case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+	repeatassign = false;
+	parse = false;
+	break;
+      }
+    } while( repeatassign );
+  }
+
+  if( ! (parse && fillInstSrcDescr( ndescr, tagset )) ) {
+    return Error::E_bad_cache_descr;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // done
+  ///////////////////////////////////////////////////////////////////
+
+  if ( !err ) {
+    ndescr_r = ndescr;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcDescr::readCache
 //	METHOD TYPE : PMError
 //
@@ -631,9 +697,6 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
 PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & cache_dir_r )
 {
     ndescr_r = 0;
-    PMError err = Error::E_ok;
-
-    InstSrcDescrPtr ndescr( new InstSrcDescr );
 
     ///////////////////////////////////////////////////////////////////
     // parse _cache_file and fill into ndescr
@@ -641,75 +704,19 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 
     Pathname fileName = cache_dir_r + _cache_file;
 
-    TagParser parser;
-    std::string tagstr;
-
     std::ifstream mediaCacheStream( fileName.asString().c_str() );
 
-    if( !mediaCacheStream )
-    {
-	return Error::E_open_file;
+    if( !mediaCacheStream ) {
+      ERR << "Can't open file " << fileName << endl;
+      return Error::E_open_file;
     }
 
-    CommonPkdParser::TagSet* tagset;
-    tagset = new DescrTagSet();
+    PMError err = readStream( ndescr_r, mediaCacheStream );
 
-    bool repeatassign = false;
-    bool parse = true;
-
-    while( parse && parser.lookupTag( mediaCacheStream ) )
-    {
-	tagstr = parser.startTag();
-
-	do
-	{
-	    switch( tagset->assign( tagstr.c_str(), parser, mediaCacheStream ) )
-	    {
-		case CommonPkdParser::Tag::ACCEPTED:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOMATCH:
-		    repeatassign = false;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_FULL:
-		    tagset->clear();
-		    repeatassign = true;
-		    err = Error::E_error;
-		    break;
-		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
-		    repeatassign = false;
-		    parse = false;
-		    break;
-	    }
-	} while( repeatassign );
-
-    }
-
-    if( parse )
-    {
-	// fill the InstSrcDescr object
-	bool ok = fillInstSrcDescr( ndescr, tagset );
-
-	MIL << "Parsing data from " <<  fileName << ", result: " << (ok?"true":"false") << std::endl;
-
-	if ( !ok )
-	{
-	    err = Error::E_error;
-	}
-    }
-    else
-	MIL << "*** parsing was aborted ***" << std::endl;
-
-    tagset->clear();
-
-
-    ///////////////////////////////////////////////////////////////////
-    // done
-    ///////////////////////////////////////////////////////////////////
-
-    if ( err == Error::E_ok )
-    {
-	ndescr_r = ndescr;
+    if ( err ) {
+      ERR << "Error parsing file " << fileName << " " << err << endl;
+      ndescr_r = 0;
+      return Error::E_bad_cache_descr;
     }
 
     return err;

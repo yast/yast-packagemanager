@@ -78,6 +78,13 @@ std::string InstTargetError::errtext( const unsigned e )
   ENUM_OUT( E_SelDB_install_failed );
   ENUM_OUT( E_SelDB_not_installed );
 
+  ENUM_OUT( E_ProdDB_already_open );
+  ENUM_OUT( E_ProdDB_open_failed );
+  ENUM_OUT( E_ProdDB_not_open );
+  ENUM_OUT( E_ProdDB_file_bad_magic );
+  ENUM_OUT( E_ProdDB_install_failed );
+  ENUM_OUT( E_ProdDB_not_installed );
+
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////
   // no default: let compiler warn '... not handled in switch'

@@ -34,6 +34,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstTargetProdDB.h>
 #include <y2pm/InstTargetSelDB.h>
 #include <y2pm/PMYouPatchPaths.h>
 #include <y2pm/PMYouPatchInfo.h>
@@ -52,6 +53,7 @@ InstTarget::InstTarget ( ) :
     _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
     _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
     _patchesInitialized( false ),
+    _proddb( new InstTargetProdDB ),
     _seldb( new InstTargetSelDB )
 {
     _rpmdb = new RpmDb();
@@ -73,6 +75,7 @@ PMError InstTarget::init (const Pathname & rootpath, bool createnew)
 {
     _rootdir = rootpath;
 
+    _proddb->open( _rootdir, true );
     _seldb->open( _rootdir, true );
 
     return _rpmdb->initDatabase(_rootdir.asString(), createnew);
@@ -259,6 +262,62 @@ PMError InstTarget::executeScript( const Pathname &scriptname )
 }
 
 ///////////////////////////////////////////////////////////////////
+// Product related interface
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::getProducts
+//	METHOD TYPE : const std::list<constInstSrcDescrPtr> &
+//
+//	DESCRIPTION :
+//
+const std::list<constInstSrcDescrPtr> & InstTarget::getProducts() const
+{
+  return _proddb->getProducts();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::isInstalledProduct
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool InstTarget::isInstalledProduct( const constInstSrcDescrPtr & isd_r ) const
+{
+  return _proddb->isInstalled( isd_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::installProduct
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstTarget::installProduct( const constInstSrcDescrPtr & isd_r )
+{
+  return _proddb->install( isd_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::removeProduct
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstTarget::removeProduct( const constInstSrcDescrPtr & isd_r )
+{
+  return _proddb->remove( isd_r );
+}
+
+///////////////////////////////////////////////////////////////////
 // Selection related interface
 ///////////////////////////////////////////////////////////////////
 
@@ -272,8 +331,20 @@ PMError InstTarget::executeScript( const Pathname &scriptname )
 //
 const list<PMSelectionPtr> & InstTarget::getSelections() const
 {
-  // untill _seldb is ready
-  return InstData::getSelections();
+  return _seldb->getSelections();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::isInstalledSelection
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool InstTarget::isInstalledSelection( const Pathname & selfile_r ) const
+{
+  return _seldb->isInstalled( selfile_r );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -287,20 +358,6 @@ const list<PMSelectionPtr> & InstTarget::getSelections() const
 PMError InstTarget::installSelection( const Pathname & selfile_r )
 {
   return _seldb->install( selfile_r );
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstTarget::isInstalledSelection
-//	METHOD TYPE : bool
-//
-//	DESCRIPTION :
-//
-bool InstTarget::isInstalledSelection( const Pathname & selfile_r ) const
-{
-  return _seldb->isInstalled( selfile_r );
 }
 
 ///////////////////////////////////////////////////////////////////

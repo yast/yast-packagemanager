@@ -34,7 +34,8 @@ liby2pminstsrc_la_SOURCES = \
 	\
 	InstTarget.cc			\
 	InstTargetError.cc		\
-	InstTargetSelDB.cc
+	InstTargetSelDB.cc		\
+	InstTargetProdDB.cc
 
 
 liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la

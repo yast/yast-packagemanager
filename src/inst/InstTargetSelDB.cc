@@ -25,6 +25,7 @@
 #include <y2util/PathInfo.h>
 
 #include <y2pm/InstTargetSelDB.h>
+#include <y2pm/PMSelection.h>
 
 using namespace std;
 
@@ -246,5 +247,5 @@ PMError InstTargetSelDB::remove( const Pathname & selfile_r )
 //
 ostream & InstTargetSelDB::dumpOn( ostream & str ) const
 {
-  return str <<  "SelectionDB(" << _db << ")" << endl;
+  return str <<  "SelectionDB(" << _db << ")";
 }
