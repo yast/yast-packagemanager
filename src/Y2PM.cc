@@ -534,7 +534,7 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 
 	bool is_remote = (*it)->isRemote();		// if current package source is remote
 
-	string pkgname = (*it)->name() + ".spm";
+	string pkgname = (*it)->name().asString() + ".spm";
 
         Pathname path;
 
