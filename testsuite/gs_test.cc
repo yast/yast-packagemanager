@@ -34,7 +34,6 @@ int main()
     Url url( "http://www.suse.de/" );
     Pathname dir( "/aa/bb" );
     
-    descr->set_base_arch( arch );
     descr->set_type( type );
     descr->set_media_vendor( string( "SuSE" ) );
     descr->set_media_id( string( "12432" ) );
@@ -47,10 +46,12 @@ int main()
     descr->set_product_dir ( dir );
 
     InstSrcDescr::ArchMap archmap;
-    list<Pathname> paths;
-    paths.push_back( Pathname("/aa/bb") );
-    paths.push_back( Pathname("/cc/dd") );
-    archmap["i586"] = paths;
+    list<PkgArch> archs;
+    archs.push_back( PkgArch ("i586") );
+    archs.push_back( PkgArch ("i486") );
+    archs.push_back( PkgArch ("i386") );
+    archs.push_back( PkgArch ("noarch") );
+    archmap[PkgArch("i586")] = archs;
     descr->set_content_archmap( archmap );
 
     InstSrcDescr::LabelMap labelmap;

@@ -798,12 +798,12 @@ void progresscallback(int p, void* nix)
 void rpminstall(vector<string>& argv)
 {
     vector<string>::iterator it=argv.begin();
-    list<string> pkgs;
+    list<Pathname> pkgs;
     ++it; // first one is function name itself
 
     for(;it!=argv.end();++it)
     {
-	pkgs.push_back(*it);
+	pkgs.push_back (Pathname (*it));
     }
 
     Y2PM::instTarget().setPackageInstallProgressCallback(progresscallback, NULL);
