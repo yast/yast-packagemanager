@@ -96,6 +96,7 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
 	  E__ << "attachpoint is not a directory: " << adir << endl;
 	  return Error::E_bad_attachpoint;
 	}
+        _preferred_attach_point = apoint;
     }
     else
     {

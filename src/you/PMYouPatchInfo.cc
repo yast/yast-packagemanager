@@ -82,7 +82,6 @@ Url PMYouPatchPaths::patchUrl()
 ///////////////////////////////////////////////////////////////////
 
 PMYouPatchInfo::PMYouPatchInfo( const string &lang )
-  : _paths( 0 )
 {
     _patchtagset = new YOUPatchTagSet( lang );
     _patchtagset->setEncoding(CommonPkdParser::Tag::UTF8);
@@ -92,11 +91,13 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
     _patchFiles = new list<string>;
     
     _packageProvider = new PMYouPackageDataProvider();
-//    _packageProvider = PMYouPackageDataProviderPtr( new PMYouPackageDataProvider() );
+
+    _paths = new PMYouPatchPaths("noproduct","noversion","noarch");
 }
 
 PMYouPatchInfo::~PMYouPatchInfo()
 {
+    delete _paths;
     delete _patchFiles;
     delete _packagetagset;
     delete _patchtagset;
@@ -121,15 +122,40 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   PkgName name( value.substr( 0, pos ) );
 
   value = tagValue( YOUPackageTagSet::VERSION );
-  PkgEdition edition( value );
+  string version;
+  string release;
 
-  string archValue;
-  if ( _paths ) archValue = _paths->arch();
-  PkgArch arch( archValue );  
+  pos = value.rfind( '-' );
+  if ( pos < 0 ) {
+    version = value;
+    release = "0";
+  } else {
+    version = value.substr( 0, pos );
+    release = value.substr( pos + 1, value.length() - pos );
+  }
 
-  PMPackagePtr pkg( new PMPackage( name, edition, arch, _packageProvider ) );
+  PkgEdition edition( version, release );
+
+  PMPackagePtr pkg( new PMPackage( name, edition, _paths->arch(),
+                                   _packageProvider ) );
   patch->addPackage( pkg );
 
+  value = tagValue( YOUPackageTagSet::OBSOLETES );
+  list<PkgRelation> relations = PkgRelation::parseRelations( value );
+  pkg->setObsoletes( relations );
+  
+  value = tagValue( YOUPackageTagSet::REQUIRES );
+  relations = PkgRelation::parseRelations( value );
+  pkg->setRequires( relations );
+  
+  value = tagValue( YOUPackageTagSet::PROVIDES );
+  relations = PkgRelation::parseRelations( value );
+  pkg->setProvides( relations );
+  
+  value = tagValue( YOUPackageTagSet::CONFLICTS );
+  relations = PkgRelation::parseRelations( value );
+  pkg->setConflicts( relations );
+  
   return PMError();
 }
 
@@ -271,8 +297,8 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     // ma: NULL PMYouPatchDataProviderPtr provided to be able to compile.
     // Finaly we should make shure that there is one, or we don't need it at all.
-    PMYouPatchPtr p( new PMYouPatch( PkgName( name ),
-                                     PkgEdition( version.c_str() ),
+    PMYouPatchPtr p( new PMYouPatch( PkgName( name ), PkgEdition( version ),
+                                     _paths->arch(),
 				     PMYouPatchDataProviderPtr() ) );
 
     string value = tagValue( YOUPatchTagSet::KIND );
@@ -384,6 +410,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 PMError PMYouPatchInfo::getPatches( PMYouPatchPaths *paths,
                                     list<PMYouPatchPtr> &patches )
 {
+    delete _paths;
     _paths = paths;
     return readDir( paths->patchUrl(), paths->patchPath(), patches );
 }

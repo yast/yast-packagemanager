@@ -52,13 +52,13 @@ class PMYouPatchPaths {
     void setPatchUrl( const Url & );
     Url patchUrl();
 
-    std::string arch() const { return _arch; }
+    PkgArch arch() const { return _arch; }
 
   private:
     Pathname _patchPath;
     Url _patchUrl;
     
-    std::string _arch;
+    PkgArch _arch;
 };
 
 
