@@ -126,6 +126,11 @@ class InstSrcDescr : public CountedRep {
      **/
     unsigned _default_rank;
 
+    /**
+     * whether base packages for deltas should be fetched from this source
+     * */
+    bool _usefordeltas;
+
     ///////////////////////////////////////////////////////////////////
     // media file ( _url / media.N / media )
     ///////////////////////////////////////////////////////////////////
@@ -187,6 +192,7 @@ class InstSrcDescr : public CountedRep {
 
     bool                 default_activate()    const { return _default_activate; }
     unsigned             default_rank()        const { return _default_rank; }
+    bool                 usefordeltas()        const { return _usefordeltas; }
 
     const Vendor &       media_vendor()        const { return _media_vendor; }
     const std::string &  media_id()            const { return _media_id; }
@@ -247,6 +253,7 @@ class InstSrcDescr : public CountedRep {
 
     void set_default_activate( bool val_r )                   { _default_activate = val_r; }
     void set_default_rank( unsigned val_r )                   { _default_rank = val_r; }
+    void set_usefordeltas( bool val_r )                       { _usefordeltas = val_r; }
 
     void set_media_vendor( const Vendor & val_r )             { _media_vendor = val_r; }
     void set_media_id( const std::string & val_r )            { _media_id = val_r; }

@@ -63,6 +63,7 @@ InstSrcDescr::InstSrcDescr()
     : _type               ( InstSrc::T_UNKNOWN )
     , _default_activate   ( true )
     , _default_rank       ( NO_RANK )
+    , _usefordeltas	  ( true )
     , _media_count        ( 0 )
     , _media_doublesided  ( false )
     , _content_distproduct( PkgName(), PkgEdition() )
@@ -151,6 +152,7 @@ static const std::string UrlTag		= "URL";
 static const std::string ProdDirTag	= "ProductDir";
 static const std::string DefActTag	= "Default_activate";
 static const std::string DefRankTag	= "Default_rank";
+static const std::string UseForDeltasTag= "UseForDeltas";
 static const std::string MediaTag	= "Media";
 static const std::string ProductTag	= "Product";
 static const std::string ArchTag	= "Arch";
@@ -186,6 +188,7 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   str << "=" << ProdDirTag << ": " << _product_dir << endl;
   str << "=" << DefActTag << ": " << (_default_activate?"1":"0") << endl;
   str << "=" << DefRankTag << ": " << _default_rank << endl;
+  str << "=" << UseForDeltasTag << ": " << (_usefordeltas?"1":"0") << endl;
   // data from media file
 #warning let F_Media read/write data
   str << "+" << MediaTag << ":" << endl;
@@ -360,6 +363,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 
     enum Tags { TYPE, URL, PRODUCTDIR,
 	        ACTIVATE, RANK,
+		FORDELTAS,
 	        MEDIA, PRODUCT, DEFBASE, ARCH,
 		REQUIRES, LANGUAGE, LABEL, LABELMAP, LINGUAS, TIMEZONE, DESCRDIR, DATADIR,
 		FLAGS, RELNOTESURL,
@@ -372,6 +376,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     tagset.addTag (ProdDirTag,  	PRODUCTDIR, TaggedFile::SINGLE);	// product dir below _url
     tagset.addTag (DefActTag,		ACTIVATE,   TaggedFile::SINGLE);	// 1 = true (default activated), 0 = false
     tagset.addTag (DefRankTag,		RANK,       TaggedFile::SINGLE);	// RankValue, if provided
+    tagset.addTag (UseForDeltasTag,	FORDELTAS,  TaggedFile::SINGLE);	// 1 = true, 0 = false
     tagset.addTag (MediaTag,		MEDIA,	    TaggedFile::MULTI);		// _media_vendor, _media_id, _media_count
     tagset.addTag (ProductTag,		PRODUCT,    TaggedFile::MULTI);		// _content_product, _content_distproduct, _content_baseproduct, _content_vendor
     tagset.addTag (DefBaseTag,		DEFBASE,    TaggedFile::SINGLE);	// _content_defaultbase
@@ -409,6 +414,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 
     ndescr->set_default_activate (GET_STRING(ACTIVATE) == "1");
     ndescr->set_type ( InstSrc::fromString (GET_STRING(TYPE)));
+    ndescr->set_usefordeltas (GET_STRING(FORDELTAS) == "1");
 
     string val = GET_STRING(RANK);
     if ( val.size() ) {
