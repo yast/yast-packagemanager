@@ -172,7 +172,7 @@ void InstYou::selectPatches( int kinds )
          && hasNewPackages( *it, false ) ) {
       PMSelectablePtr selectable = (*it)->getSelectable();
       if ( !selectable ) {
-        I__ << "Patch has no selectable." << endl;
+        INT << "Patch has no selectable." << endl;
         return;
       }
       yastPatch = selectable;
@@ -189,7 +189,7 @@ void InstYou::selectPatches( int kinds )
       if ( ( (*it)->kind() & kinds ) && hasNewPackages( *it, true ) ) {
         PMSelectablePtr selectable = (*it)->getSelectable();
         if ( !selectable ) {
-          I__ << "Patch has no selectable." << endl;
+          INT << "Patch has no selectable." << endl;
           return;
         }
       
@@ -202,6 +202,42 @@ void InstYou::selectPatches( int kinds )
           D__ << "Select patch: " << (*it)->fullName() << endl;
           selectable->user_set_install();
         }
+      }
+    }
+  }
+}
+
+void InstYou::updatePackageStates()
+{
+  list<PMYouPatchPtr>::const_iterator it;
+  for ( it = _patches.begin(); it != _patches.end(); ++it ) {
+    bool toInstall = false;
+    PMSelectablePtr selectable = (*it)->getSelectable();
+    if ( selectable && selectable->to_install() &&
+         *it == selectable->candidateObj() ) {
+      toInstall = true;
+    }
+
+    list<PMPackagePtr> packages = (*it)->packages();
+    list<PMPackagePtr>::const_iterator itPkg;
+    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+      bool pkgToInstall = toInstall;
+
+      if ( (*it)->updateOnlyInstalled() && !(*itPkg)->hasInstalledObj() ) {
+        pkgToInstall = false;
+      }
+
+      PMSelectablePtr selectablePkg = (*itPkg)->getSelectable();
+      if ( selectablePkg ) {
+        if ( pkgToInstall ) {
+          selectablePkg->setUserCandidate( *itPkg );
+          selectablePkg->user_set_install();
+        } else {
+          selectablePkg->clrUserCandidate();
+          selectablePkg->user_unset();
+        }
+      } else {
+        INT << "Package has no Selectable." << endl;
       }
     }
   }

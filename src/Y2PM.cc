@@ -30,6 +30,7 @@
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/PMYouPatchManager.h>
+#include <y2pm/InstYou.h>
 
 using namespace std;
 
