@@ -61,6 +61,7 @@ class InstSrc: virtual public Rep {
      **/
     void _mgr_attach();
 
+    ///////////////////////////////////////////////////////////////////
   public:
 
     /**
@@ -68,6 +69,38 @@ class InstSrc: virtual public Rep {
      **/
     typedef InstSrcError Error;
 
+    ///////////////////////////////////////////////////////////////////
+  public:
+
+    /**
+     * Unique InstSrc ID
+     **/
+    typedef unsigned  UniqueID;
+
+    /**
+     * No or invalid unique InstSrc ID
+     **/
+    static const UniqueID noID;
+
+    /**
+     * @return The unique InstSrc ID
+     **/
+    UniqueID srcID() const { return _srcID; }
+
+  private:
+
+    /**
+     * Static counter to create unique InstSrc IDs
+     **/
+    static UniqueID _SRCID;
+
+    /**
+     * The unique InstSrc ID
+     **/
+    const UniqueID _srcID;
+
+    ///////////////////////////////////////////////////////////////////
+  public:
     /**
      * Known types of InstSrc.
      *
@@ -105,16 +138,6 @@ class InstSrc: virtual public Rep {
   private:
 
     /**
-     * Static counter to create unique InstSrc IDs
-     **/
-    static unsigned _SRCID;
-
-    /**
-     * Unique InstSrc ID
-     **/
-    const unsigned _srcID;
-
-    /**
      * Cachedir to use.
      **/
     Pathname _cache;
@@ -123,7 +146,6 @@ class InstSrc: virtual public Rep {
      * If true, delete cachedir in destructor.
      **/
     bool _cache_deleteOnExit;
-
 
     /**
      * If true, data and description cache directories should be created
@@ -269,11 +291,6 @@ class InstSrc: virtual public Rep {
     InstSrcDataPtr _data;
 
   public:
-
-    /**
-     * Unique InstSrc ID
-     **/
-    unsigned srcID() const { return _srcID; }
 
     /**
      * Const access to installation source description

@@ -513,8 +513,8 @@ static void commitCkeckMediaGpg( PMPackagePtr pkg_r )
   if ( Y2PM::instTarget().rootdir() == "/" )
     return;
 
-  static set<unsigned> known_Srces;
-  static set<string>   known_pubkeys;
+  static set<InstSrc::UniqueID> known_Srces;
+  static set<string> known_pubkeys;
   static string prefix( "gpg-pubkey-" );
   static string ext( ".asc" );
 

@@ -58,7 +58,8 @@ IMPL_BASE_POINTER(InstSrc);
 
 ///////////////////////////////////////////////////////////////////
 
-unsigned InstSrc::_SRCID( 0 );
+const InstSrc::UniqueID InstSrc::noID( UniqueID(-1) );
+InstSrc::UniqueID       InstSrc::_SRCID( 0 );
 
 const Pathname InstSrc::_c_descr_dir( "DESCRIPTION" );
 const Pathname InstSrc::_c_data_dir ( "DATA" );
