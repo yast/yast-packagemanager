@@ -11,6 +11,7 @@
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/MediaAccess.h>
+#include <y2pm/PMPackage.h>
 
 using namespace std;
 
@@ -83,6 +84,11 @@ int main( int argc, char **argv )
       cout << "PATCH: " << (*it)->name() << " (" << (*it)->shortDescription()
            << ")" << endl;
 //      (*it)->dumpOn( cout );
+      list<PMPackagePtr> packages = (*it)->packages();
+      list<PMPackagePtr>::const_iterator it2;
+      for( it2 = packages.begin(); it2 != packages.end(); ++it2 ) {
+        cout << "  PKG: " << (*it2)->name() << endl;
+      }
     }
   }
 
