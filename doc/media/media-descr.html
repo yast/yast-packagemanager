@@ -488,5 +488,19 @@ default.sel
 linux#
 </pre>
 
+<!------------------------------------------------------------------!>
+<H2>Reading directories</H2>
+<P>When YaST reads a directory by first listing its content, it looks for a file
+<tt>directory.yast</tt> and takes its content as directory listing, if it
+exists. If it doesn't exist, it tries to list the directory by using the media
+backend. Listing directories isn't supported by all backends, e.g. the HTTP
+backend doesn't support directory listings. So directories which are required to
+be listable by YaST for all media have to include the <tt>directory.yast</tt>
+file.</P>
+
+<P>The file can be created by <tt>ls &gt;directory.yast</tt>. YaST ignores the
+<tt>directory.yast</tt> entry itself and the <tt>.</tt> and <tt>..</tt> entries.
+</P>
+
 </BODY>
 </HTML>
