@@ -49,6 +49,8 @@ class Y2PM {
 
     static Pathname _instTarget_rootdir;
 
+    static Pathname _system_rootdir;
+
     static LangCode _preferred_locale;
 
   private:
@@ -74,6 +76,32 @@ class Y2PM {
      **/
     static LangCode & getPreferredLocale () { return _preferred_locale; }
     static void setPreferredLocale (LangCode & preferred_locale) { _preferred_locale = preferred_locale; }
+
+
+    /**
+     * The local machine's rootdir. "/" if running from system.
+     * Something like "/mnt" during installation/update or "" (empty),
+     * if system root was not yet mounted.
+     *
+     * Not necessarily the same as _instTarget_rootdir (e.g. if we'd install into a
+     * local directory).
+     **/
+    static const Pathname & systemRoot() { return _system_rootdir; }
+
+    /**
+     *
+     **/
+    static bool haveSystem() { return ! _system_rootdir.empty(); }
+
+    /**
+     * If false, root is ramdisk, and system to install is (or will be) mounted
+     * below _system_rootdir. Need to know this e.g. in InstSrc to determine,
+     * wheter to write a chache on 'enable' or to wait until system to be installed
+     * is available below _system_rootdir.
+     **/
+    static bool runningFromSystem() { return( _system_rootdir == "/" ); }
+
+  public:
 
     /**
      * Access to the installation target

@@ -17,6 +17,61 @@ const char* op_str[GE+1] = { "none","==","!=","<","<=",">",">=" };
 const std::string PkgEdition::_str_UNSPEC(  "EDITION-UNSPEC" );
 const std::string PkgEdition::_str_MAXIMUM( "EDITION-MAXIMUM");
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgEdition::xconstruct
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PkgEdition::xconstruct( type_enum xtype, int buildtime, int metahash,
+			     int epoch, const std::string & v, const std::string & r )
+{
+  type       = xtype;
+  _epoch     = epoch;
+  _buildtime = buildtime;
+  _metahash  = metahash;
+  _version   = v;
+  _release   = r;
+
+  if ( type == MAXIMUM || type == UNSPEC )
+    return;
+
+  if ( type == EPOCH && ! _epoch )
+    type = NORMAL; // 0 means 'no epoch'
+
+  // check whether to strip release from version
+
+  string::size_type sep = _version.rfind( '-' );
+
+  if ( sep != string::npos ) {
+    if ( _release.empty() ) {
+      _release = _version.substr( sep+1 );
+    } else {
+      INT << "Explicit release overrides release coded in version: v '" << v << "' r '" << r << "'" << endl;
+    }
+    _version.erase( sep );
+  }
+
+  // check whether epoch coded in version
+
+  sep = _version.find( ':' );
+
+  if ( sep != string::npos ) {
+    if ( type == EPOCH ) {
+      INT << "Explicit epoch overrides epoch coded in version: v '" << v << "' e '" << epoch << "'" << endl;
+    } else {
+      int e = atoi( _version.substr( sep ).c_str() );
+      if ( e ) {
+	type = EPOCH;
+	_epoch = e;
+      }
+    }
+    _version.erase( 0, sep+1 );
+  }
+}
+
 //
 // compare two editions
 //
@@ -75,7 +130,7 @@ bool PkgEdition::edition_eq( const PkgEdition& e2 ) const
 	}
 	if ((type == EPOCH) && (e2.type == EPOCH) && (_epoch != e2._epoch))
 		return false;
-	
+
 	// empty means any version matches
 	if(_version.empty() || e2._version.empty())
 	    return true;
@@ -256,24 +311,7 @@ PkgEdition PkgEdition::fromString( string s )
   if ( s == _str_MAXIMUM ) {
     return PkgEdition( MAXIMUM );
   }
-
-  string::size_type e_sep = s.find( ':' );
-  string::size_type r_sep = s.rfind( '-' );
-
-  string r;
-  if ( r_sep != string::npos ) {
-    r = s.substr( r_sep+1 );
-    s.erase( r_sep );
-  }
-
-  if ( e_sep != string::npos ) {
-    string v = s.substr( e_sep+1 );;
-    s.erase( e_sep );
-    int e = atoi( s.c_str() );
-    return PkgEdition( e, v.c_str(), r.c_str() );
-  }
-
-  return PkgEdition( s.c_str(), r.c_str() );
+  return PkgEdition( s );
 }
 
 

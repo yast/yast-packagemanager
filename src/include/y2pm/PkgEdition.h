@@ -40,31 +40,67 @@ class PkgEdition {
 
 	int rpmvercmp( const std::string & a, const std::string & b ) const;
 
-	// helper for copy constructor
-	// assert _version/_release are empty srings on MAXIMUM and UNSPEC type.
+	/**
+	 * Helper for Constructor
+	 *
+	 * String form for an edition is <code>[epoch:]version-release</code>,
+	 * where (optional) epoch is a number, and neither version nor release
+	 * may contain a '-'. This form may be passed to the version string
+	 * <code>v</code>.
+	 *
+	 * In constructors providing an 'int e' epoch value, an epoch part within
+	 * the version string <code>v</code> is not allowed (ignored).
+	 *
+	 * In constructors providing an nonempty release string <code>r</code>,
+	 * a release part within the version string <code>v</code> is
+	 *  not allowed (ignored).
+	 * <pre>
+	 * Construct PkgEdition: epoch 3, version 1.0 release 1
+	 *     PkgEdition( "3:1.0-1" )
+	 *     PkgEdition( "3:1.0", "1" )
+	 *     PkgEdition( 3, "1.0-1" )
+	 *     PkgEdition( 3, "1.0", "1" )
+	 * </pre>
+	 *
+	 * Assert _version/_release are empty srings on MAXIMUM and UNSPEC type.
+	 **/
 	void xconstruct( type_enum xtype, int buildtime, int metahash,
-			 int epoch, const std::string & v, const std::string & r ) {
-	 	type = xtype;
-		_epoch = epoch;
-		_buildtime = buildtime;
-		_metahash = metahash;
-		_version = v;
-		_release = r;
-	}
+			 int epoch, const std::string & v, const std::string & r );
 
   public:
+
+        /**
+	 * Constructor
+	 * @see #xconstruct
+	 **/
 	PkgEdition( const std::string & v = "", const std::string & r = "" ) {
 		xconstruct(NORMAL,0,0,0,v,r);
 	}
+        /**
+	 * Constructor
+	 * @see #xconstruct
+	 **/
 	PkgEdition( int e, const std::string & v, const std::string & r = "" ) {
 		xconstruct(EPOCH,0,0,e,v,r);
 	}
+        /**
+	 * Constructor
+	 * @see #xconstruct
+	 **/
 	PkgEdition( int buildtime, int metahash, const std::string & v, const std::string & r = "" ) {
 		xconstruct(NORMAL,buildtime,metahash,0,v,r);
 	}
+        /**
+	 * Constructor
+	 * @see #xconstruct
+	 **/
 	PkgEdition( int buildtime, int metahash, int e, const std::string & v, const std::string & r = "" ) {
 		xconstruct(EPOCH,buildtime,metahash,e,v,r);
 	}
+        /**
+	 * Constructor
+	 * @see #xconstruct
+	 **/
 	PkgEdition( type_enum t ) {
 		assert( t == MAXIMUM || t == UNSPEC );
 		xconstruct(t,0,0,0,"","");
