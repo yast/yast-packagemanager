@@ -748,8 +748,15 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
     string localestr = (const std::string&)locale;
     if (localestr.size() < 2)
 	localestr = "en";
-    Pathname localename = filename.extend ("." + localestr);
-    err = media_r->provideFile ( localename );
+
+    Pathname localename = filename.extend(".en");
+    err = media_r->provideFile( localename ); // always provide .en as fallback;
+
+    if ( localestr != "en" ) {
+      localename = filename.extend ("." + localestr);
+      err = media_r->provideFile ( localename );
+    }
+
     while ( err )
     {
 	if (localestr == "en")				// already english locale
