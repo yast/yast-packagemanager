@@ -75,6 +75,12 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname localDir();
 
     /**
+      Return directory used as attach point for media interface, i.e. for
+      mounting CDs or NFS servers or for downloading files via FTP, HTTP etc.
+    */
+    Pathname attachPoint();
+
+    /**
       Return directory where information about installed patches is stored.
     */
     Pathname installDir();

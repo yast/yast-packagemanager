@@ -124,16 +124,19 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   string value = tagValue( YOUPackageTagSet::FILENAME );
 
   if ( value.empty() ) {
-    D__ << "No Filename. Skipping this package." << endl;
+    DBG << "No Filename. Skipping this package." << endl;
     return PMError();
   }
 
+  string nameStr;
   unsigned int pos = value.find( ".rpm" );
   if ( pos < 0 ) {
-    E__ << "No '.rpm' in '" << value << "'" << endl;
-    return PMError( InstSrcError::E_error );
+    DBG << "No '.rpm' in '" << value << "'" << endl;
+    nameStr = value;
+  } else {
+    nameStr = value.substr( 0, pos );
   }
-  PkgName name( value.substr( 0, pos ) );
+  PkgName name( nameStr );
 
   value = tagValue( YOUPackageTagSet::PKGVERSION );
   string version;
@@ -247,7 +250,7 @@ PMError PMYouPatchInfo::parsePackages( const string &packages,
 PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
                                   list<PMYouPatchPtr> &patches )
 {
-    D__ << "path: " << path << " fileName: " << fileName << endl;
+    DBG << "path: " << path << " fileName: " << fileName << endl;
 
     string filePath = ( path + fileName ).asString();
 
@@ -256,7 +259,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 
     ifstream patchstream( filePath.c_str() );
     if( !patchstream ) {
-	E__ << "file not found" << endl;
+	ERR << "file not found" << endl;
 	return PMError( InstSrcError::E_bad_url );
     }
 
@@ -267,7 +270,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     D__ << "assignstatus: " << status << endl;
 
     if ( status != TaggedFile::ACCEPTED_FULL ) {
-        E__ << "Parse Error" << endl;
+        ERR << "Parse Error" << endl;
         return PMError( InstSrcError::E_error );
     }
 
@@ -339,14 +342,14 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                                  list<PMYouPatchPtr> &patches, bool checkSig )
 {
-    int err = PathInfo::assert_dir( _paths->localDir() );
+    int err = PathInfo::assert_dir( _paths->attachPoint() );
     if ( err ) {
-      ERR << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
+      ERR << "Can't create " << _paths->attachPoint() << " (errno: " << err << ")"
           << endl;
       return PMError( InstSrcError::E_error );
     }
 
-    PMError error = _media.open( baseUrl, _paths->localDir() );
+    PMError error = _media.open( baseUrl, _paths->attachPoint() );
     if ( error != PMError::E_ok ) {
       ERR << "MediaAccess::open() failed." << endl;
       return error;
@@ -409,14 +412,14 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
             if ( checkSig ) {
                 string filePath = ( path + *it ).asString();
-                D__ << "Check signature of '" << filePath << "'" << endl;
+                DBG << "Check signature of '" << filePath << "'" << endl;
                 if ( !gpg.check_file( filePath ) ) {
                     ERR << "Signature check for '" << filePath << "' failed."
                         << endl;
                     _media.release();
                     return PMError( YouError::E_bad_sig_file );
                 }
-                D__ << "Signature ok." << endl;
+                DBG << "Signature ok." << endl;
             }
 
             D__ << "read patch: file: " << *it << endl;
