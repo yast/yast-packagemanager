@@ -44,6 +44,8 @@ InstYou::InstYou()
   _paths = new PMYouPatchPaths("Dummy","1.0","i386");
 #warning FIXME: get language information
   _info = new PMYouPatchInfo( "german" );
+
+  init();
 }
 
 InstYou::InstYou( const PMYouPatchInfoPtr &info,
@@ -51,10 +53,17 @@ InstYou::InstYou( const PMYouPatchInfoPtr &info,
 {
   _info = info;
   _paths = paths;
+
+  init();
 }
 
 InstYou::~InstYou()
 {
+}
+
+void InstYou::init()
+{
+  _selectedPatchesIt = _selectedPatches.begin();
 }
 
 PMError InstYou::servers( list<Url> &servers )
@@ -115,6 +124,8 @@ void InstYou::selectPatches( int kinds )
       }
     }
   }
+
+  _selectedPatchesIt = _selectedPatches.begin();
 }
 
 PMError InstYou::retrievePackages()
@@ -151,6 +162,25 @@ PMError InstYou::retrievePackages()
   return PMError();
 }
 
+PMYouPatchPtr InstYou::nextPatch()
+{
+  if ( _selectedPatchesIt == _selectedPatches.end() ) {
+    return PMYouPatchPtr();
+  }
+
+  return *_selectedPatchesIt;
+}
+
+PMError InstYou::installNextPatch()
+{
+  if ( _selectedPatchesIt == _selectedPatches.end() ) {
+    E__ << "No more patches." << endl;
+    return PMError( InstSrcError::E_error );
+  }
+
+  return installPatch( *_selectedPatchesIt++ );  
+}
+
 PMError InstYou::installPatches( bool dryrun )
 {
   list<PMYouPatchPtr>::const_iterator itPatch;
@@ -158,30 +188,37 @@ PMError InstYou::installPatches( bool dryrun )
        ++itPatch ) {
     D__ << "INSTALL: " << (*itPatch)->name() << endl;
     
-    list<string> packageFileNames;
-    
-    list<PMPackagePtr> packages = (*itPatch)->packages();
-    list<PMPackagePtr>::const_iterator itPkg;
-    for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      Pathname fileName = _media.localPath( _paths->rpmPath( *itPkg ) );
-      packageFileNames.push_back( fileName.asString() );
-      D__ << "  rpm -i --force --nodeps "
-          << fileName << endl;      
-      if ( dryrun ) {
-        cout << "INSTALL: " << fileName << endl;
-      }
-    }
-    
-    if ( !dryrun ) {
-      PMError error = Y2PM::instTarget().installPackages( packageFileNames );
-      if ( error ) {
-        E__ << "Installation of RPMs of patch " << (*itPatch)->name()
-            << "failed" << endl;
-        return error;
-      }
+    PMError error = installPatch( *itPatch, dryrun );
+    if ( error ) return error;
+  }
+
+  return PMError();
+}
+
+PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
+{
+  list<string> packageFileNames;
+
+  list<PMPackagePtr> packages = patch->packages();
+  list<PMPackagePtr>::const_iterator itPkg;
+  for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+    Pathname fileName = _media.localPath( _paths->rpmPath( *itPkg ) );
+    packageFileNames.push_back( fileName.asString() );
+    D__ << "install " << fileName << endl;      
+    if ( dryrun ) {
+      cout << "INSTALL: " << fileName << endl;
     }
   }
 
+  if ( !dryrun ) {
+    PMError error = Y2PM::instTarget().installPackages( packageFileNames );
+    if ( error ) {
+      E__ << "Installation of RPMs of patch " << patch->name()
+          << "failed" << endl;
+      return error;
+    }
+  }
+  
   return PMError();
 }
 
@@ -224,4 +261,6 @@ void InstYou::filterPatchSelection()
        ++itPatch ) {
     cerr << "Install: " << (*itPatch)->name() << endl;
   }
+
+  _selectedPatchesIt = _selectedPatches.begin();
 }
