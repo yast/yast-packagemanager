@@ -19,6 +19,7 @@ pkginclude_HEADERS =	\
 	InstTargetError.h	\
 	InstTarget.h		\
 	InstTargetSelDB.h InstTargetSelDBPtr.h	\
+	InstTargetProdDB.h InstTargetProdDBPtr.h \
 	InstSrcTags.h		\
 	PMULPackageDataProvider.h PMULPackageDataProviderPtr.h	\
 	PMULSelectionDataProvider.h PMULSelectionDataProviderPtr.h

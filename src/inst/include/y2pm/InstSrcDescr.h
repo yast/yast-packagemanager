@@ -253,12 +253,17 @@ public:
      **/
     PMError writeCache( const Pathname & cache_dir_r ) const;
 
-  private:
+  public:
 
     /**
-     * Used by writeCache to actually write the data.
+     * Used by readCache to actually read data from stream.
      **/
-    std::ostream & writeStream( std::ostream & str ) const;
+    static PMError readStream( InstSrcDescrPtr & ndescr_r, std::istream & str );
+
+    /**
+     * Used by writeCache to actually write the data to stream.
+     **/
+    PMError writeStream( std::ostream & str ) const;
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       InstTargetSelDB.h
+  File:       InstTargetProdDB.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -18,26 +18,28 @@
   Purpose:
 
 /-*/
-#ifndef InstTargetSelDB_h
-#define InstTargetSelDB_h
+#ifndef InstTargetProdDB_h
+#define InstTargetProdDB_h
 
 #include <iosfwd>
+#include <list>
+#include <map>
 
 #include <y2util/Pathname.h>
 
-#include <y2pm/InstTargetSelDBPtr.h>
+#include <y2pm/InstTargetProdDBPtr.h>
 #include <y2pm/InstTargetError.h>
 
-#include <y2pm/PMSelectionPtr.h>
+#include <y2pm/InstSrcDescrPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : InstTargetSelDB
+//	CLASS NAME : InstTargetProdDB
 /**
  *
  **/
-class InstTargetSelDB : virtual public Rep {
-  REP_BODY(InstTargetSelDB);
+class InstTargetProdDB : virtual public Rep {
+  REP_BODY(InstTargetProdDB);
 
   public:
 
@@ -48,45 +50,53 @@ class InstTargetSelDB : virtual public Rep {
 
   private:
 
-    static const Pathname _db_path;
+    static const Pathname    _db_path;
+    static const std::string _db_stem;
+    static const unsigned    _db_nwidth;
 
   private:
 
     const Pathname _db;
+    unsigned       _nextIdx;
 
-    std::list<PMSelectionPtr> _sellist;
+    std::map<unsigned,constInstSrcDescrPtr> _prodmap;
+    std::list<constInstSrcDescrPtr>         _prodlist;
 
   private:
 
     PMError assert_open() const;
 
-    PMError check_file( const Pathname & selfile_r ) const;
+    std::string db_file_name( unsigned num_r ) const;
+    bool        is_db_file_name( const std::string & fname_r ) const;
 
-    Pathname db_file( const Pathname & selfile_r ) const;
+    Pathname    db_file( const std::string & fname_r ) const;
+
+    PMError     read_db_file( const std::string & fname_r,
+			      unsigned & idx_r, InstSrcDescrPtr & ndescr_r ) const;
 
   public:
 
-    InstTargetSelDB();
+    InstTargetProdDB();
 
-    ~InstTargetSelDB();
+    ~InstTargetProdDB();
 
   public:
 
     PMError open( const Pathname & system_root_r = "/", const bool create_r = false );
 
-    bool isOpen() const { return !_db.empty(); }
+    bool isOpen() const { return _nextIdx; }
 
     const Pathname & dbPath() const { return _db; }
 
-    const std::list<PMSelectionPtr> & getSelections() const { return _sellist; }
+    const std::list<constInstSrcDescrPtr> & getProducts() const { return _prodlist; }
 
   public:
 
-    bool isInstalled( const Pathname & selfile_r ) const;
+    bool isInstalled( const constInstSrcDescrPtr & isd_r ) const;
 
-    PMError install( const Pathname & selfile_r );
+    PMError install( const constInstSrcDescrPtr & isd_r );
 
-    PMError remove( const Pathname & selfile_r );
+    PMError remove( const constInstSrcDescrPtr & isd_r );
 
   public:
 
@@ -95,4 +105,5 @@ class InstTargetSelDB : virtual public Rep {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // InstTargetSelDB_h
+#endif // InstTargetProdDB_h
+
