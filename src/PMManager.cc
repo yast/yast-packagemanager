@@ -69,6 +69,7 @@ void PMManager::clearAll()
   }
   _items.clear();
   _itemPool.clear();
+  _savedList.clear();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -294,6 +295,12 @@ void PMManager::poolAdjust()
   DBG << "START Pool size " << _items.size() << endl;
   Rep::dumpRepStats( DBG ) << endl;
 
+  ///////////////////////////////////////////////////////////////////
+  // Clear any saved state!
+  ///////////////////////////////////////////////////////////////////
+  ClearSaveState();
+  ///////////////////////////////////////////////////////////////////
+
   for ( PMSelectableVec::iterator it = begin(); it != end(); /*advanced inside*/ ) {
     if ( ! (*it) ) {
       INT << "  Null selectable" << endl;
@@ -307,7 +314,6 @@ void PMManager::poolAdjust()
       // delete tdel
       if ( (*tdel)->rep_cnt() != 2 )
 	DBG << "(OUTSIDE REFERENCED) ";
-//      DBG << "Going to delete " << *tdel << endl;
 
       // pool first
       PMSelectablePool::iterator iter = _itemPool.find( (*tdel)->name() );
@@ -370,6 +376,80 @@ ostream & operator<<( ostream & str, const PMManager & obj )
 {
   str << "PMManager" << endl;
   return str;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::SaveState
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMManager::SaveState()
+{
+  _savedList.clear();
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    _savedList.push_back( PMSelectable::SavedState( *it ) );
+  }
+  DBG << "SaveState for " << _savedList.size() << " objects (" << size() << ")" << endl;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::RestoreState
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMManager::RestoreState()
+{
+  if ( _savedList.size() != size() ) {
+    INT << "size check failed: saved " << _savedList.size() << ", current " << size() << endl;
+    return false;
+  }
+
+  if ( !size() )
+    return true; // nothing to do
+
+  // quick check if mayReplay
+  for ( SavedList::iterator it = _savedList.begin(); it != _savedList.end(); ++it ) {
+    if ( ! it->mayReplay() ) {
+      INT << "mayReplay failed on " << it->_item << endl;
+      _savedList.clear();
+      return false;
+    }
+  }
+
+  // replay
+  for ( SavedList::iterator it = _savedList.begin(); it != _savedList.end(); ++it ) {
+    if ( ! it->replay() ) {
+      INT << "Replay failed on " << it->_item << endl;
+      INT << "Replay failed: set nothing selected in case something is messed up!" << endl;
+      _savedList.clear();
+      setNothingSelected();
+      checkPool();
+      return false;
+    }
+  }
+
+  checkPool();
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::ClearSaveState
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMManager::ClearSaveState()
+{
+  _savedList.clear();
+  DBG << "SaveState cleared!" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -42,9 +42,25 @@ class PMSelectable : virtual public Rep {
 
     typedef std::list<PMObjectPtr>  PMObjectList;
 
+    class SavedState {
+      public:
+	SavedState() {}
+      private:
+	friend class PMManager;
+
+	PMSelectablePtr _item;
+	SelState        _state;
+	PMObjectPtr     _userCandidateObj;
+
+	SavedState( const PMSelectablePtr & item_r );
+	bool mayReplay();
+	bool replay();
+    };
+
   private:
 
     friend class PMManager;
+    friend class SavedState;
 
     PMManager * _manager;
     SelState    _state;

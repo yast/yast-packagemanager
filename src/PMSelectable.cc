@@ -418,7 +418,6 @@ void PMSelectable::chooseCandidateObj()
 void PMSelectable::clearCandidateObj()
 {
   if ( _candidateObj ) {
-    DBG << "clearCandidate " << _candidateObj << endl;
     _candidateObj = 0;
   }
   _state.set_has_candidate( false );
@@ -739,5 +738,63 @@ void PMSelectable::check() const
   if ( hi != _state.has_installed() || hc != _state.has_candidate() ) {
     CHKLOG( "state <-> object missmatch" );
   }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::SavedState::SavedState
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+PMSelectable::SavedState::SavedState( const PMSelectablePtr & item_r )
+    : _item( item_r )
+{
+  if ( _item ) {
+    _state            = _item->_state;
+    _userCandidateObj = _item->_userCandidateObj;
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::SavedState::mayReplay
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::SavedState::mayReplay()
+{
+  if ( ! ( _item && _item->_manager ) )
+    return false;
+
+  if ( _userCandidateObj
+       && ! (    _userCandidateObj->hasSelectable()
+	      && _userCandidateObj->getSelectable() == _item ) )
+    return false;
+
+  if ( _state.has_installed() != _item->_state.has_installed() )
+    return false;
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::SavedState::replay
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::SavedState::replay()
+{
+  _item->clearCandidateObj();
+  _item->_userCandidateObj = _userCandidateObj;
+  _item->_state            = _state;
+  _item->chooseCandidateObj();
+  return true;
 }
 
