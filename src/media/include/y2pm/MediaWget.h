@@ -15,8 +15,8 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Implementation class for MediaHandler
-		This class handles access FTP, HTTP and HTTPS servers
+   Purpose:	Implementation class for FTP, HTTP and HTTPS MediaHandler
+
 /-*/
 #ifndef MediaWget_h
 #define MediaWget_h
@@ -26,22 +26,23 @@
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaWget
+/**
+ * @short Implementation class for FTP, HTTP and HTTPS MediaHandler
+ * @see MediaHandler
+ **/
 class MediaWget : public MediaHandler {
 
-    public:
-	/** constructor
-	 *
-	 * @param url Url to base directory
-	 * */
-	MediaWget (const Url& url);
+  protected:
 
-	MEDIA_HANDLER_API
+    MEDIA_HANDLER_API;
 
-	~MediaWget();
+  public:
 
-    public:
+    MediaWget( const Url &      url_r,
+	       const Pathname & attach_point_hint_r,
+	       MediaAccess::MediaType type_r );
 
-	std::ostream & dumpOn( std::ostream & str ) const;
+    virtual ~MediaWget() { release(); }
 };
 
 ///////////////////////////////////////////////////////////////////

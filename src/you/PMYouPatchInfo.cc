@@ -116,15 +116,15 @@ PMError PMYouPatchPaths::requestServers( const string &url, const string &file )
 
   PMError error = media.open( u );
   if ( error ) return error;
-  
+
   error = media.attach();
   if ( error ) return error;
 
   error = media.provideFile( f );
   if ( error ) return error;
 
-  string line;  
-  ifstream in( ( media.getAttachPoint() + f ).asString().c_str() );
+  string line;
+  ifstream in( ( media.localPath( f ) ).asString().c_str() );
   while( getline( in, line ) ) {
     if ( *line.begin() != '#' ) {
       Url url( line );
@@ -132,7 +132,7 @@ PMError PMYouPatchPaths::requestServers( const string &url, const string &file )
       D__ << "Mirror url: " << url.asString() << endl;
     }
   }
-  
+
   return PMError();
 }
 
@@ -175,7 +175,7 @@ PMYouPatchInfo::PMYouPatchInfo( const string &lang )
     _packagetagset = new YOUPackageTagSet();
 
     _patchFiles = new list<string>;
-    
+
     _packageProvider = new PMYouPackageDataProvider();
 
     _paths = new PMYouPatchPaths("noproduct","noversion","noarch");
@@ -229,19 +229,19 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   value = tagValue( YOUPackageTagSet::OBSOLETES );
   list<PkgRelation> relations = PkgRelation::parseRelations( value );
   pkg->setObsoletes( relations );
-  
+
   value = tagValue( YOUPackageTagSet::REQUIRES );
   relations = PkgRelation::parseRelations( value );
   pkg->setRequires( relations );
-  
+
   value = tagValue( YOUPackageTagSet::PROVIDES );
   relations = PkgRelation::parseRelations( value );
   pkg->setProvides( relations );
-  
+
   value = tagValue( YOUPackageTagSet::CONFLICTS );
   relations = PkgRelation::parseRelations( value );
   pkg->setConflicts( relations );
-  
+
   return PMError();
 }
 
@@ -442,9 +442,19 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       return error;
     }
 
-    D__ << "Attach point: " << media->getAttachPoint() << endl;
+    D__ << "Attach point: " << media->localRoot() << endl;
 
-    const list<string> *patchFiles = media->dirInfo ( patchPath );
+#warning
+#warning Check changes due to new MediaAccess::dirInfo interace.
+    list<string> * patchFiles = new list<string>;
+    error = media->dirInfo( *patchFiles, patchPath );
+    if ( error ) {
+      if ( error == MediaAccess::Error::E_not_supported_by_media )
+	W__ << "dirInfo not supproted on " << media << ": " << error << endl;
+      delete patchFiles;
+      patchFiles = 0;
+    }
+#warning
 
     if ( !patchFiles ) {
       W__ << "dirInfo failed." << endl;
@@ -453,7 +463,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
         E__ << "no directory file found." << endl;
         return error;
       }
-      Pathname dirFile = media->getAttachPoint() + patchPath + "directory";
+      Pathname dirFile = media->localRoot() + patchPath + "directory";
 
       patchFiles = _patchFiles;
       _patchFiles->clear();
@@ -473,7 +483,7 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
             E__ << error << patchPath + *it << endl;
             cerr << "ERR: " << *it << endl;
         } else {
-            Pathname path = media->getAttachPoint() + patchPath;
+            Pathname path = media->localRoot() + patchPath;
             D__ << "read patch: file: " << *it << endl;
             error = readFile( path, *it, patches );
             if ( error != PMError::E_ok ) {

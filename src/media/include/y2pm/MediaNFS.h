@@ -15,33 +15,34 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Implementation class for MediaHandler
-		This class handles access to NFS media
+   Purpose:	Implementation class for NFS MediaHandler
+
 /-*/
 #ifndef MediaNFS_h
 #define MediaNFS_h
-
-#include <string>
 
 #include <y2pm/MediaHandler.h>
 
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaNFS
+/**
+ * @short Implementation class for NFS MediaHandler
+ * @see MediaHandler
+ **/
 class MediaNFS : public MediaHandler {
 
-    public:
-	// constructor
+  protected:
 
-	MediaNFS (const Url& url);
+    MEDIA_HANDLER_API;
 
-	MEDIA_HANDLER_API
+  public:
 
-	~MediaNFS();
+    MediaNFS( const Url&       url_r,
+	      const Pathname & attach_point_hint_r,
+	      MediaAccess::MediaType type_r );
 
-    public:
-
-	std::ostream & dumpOn( std::ostream & str ) const;
+    virtual ~MediaNFS() { release(); }
 };
 
 ///////////////////////////////////////////////////////////////////

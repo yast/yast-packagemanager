@@ -15,8 +15,8 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Implementation class for MediaHandler
-		This class handles access to DISK media
+   Purpose:	Implementation class for DISK MediaHandler
+
 /-*/
 #ifndef MediaDISK_h
 #define MediaDISK_h
@@ -26,25 +26,30 @@
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaDISK
+/**
+ * @short Implementation class for DISK MediaHandler
+ * @see MediaHandler
+ **/
 class MediaDISK : public MediaHandler {
 
-	unsigned long _mountflags;
+  private:
 
-	std::string _device;
-	std::string _filesystem;
+    unsigned long _mountflags;
 
-    public:
-	// constructor
+    std::string _device;
+    std::string _filesystem;
 
-	MediaDISK (const Url& url);
+  protected:
 
-	MEDIA_HANDLER_API
+    MEDIA_HANDLER_API;
 
-	~MediaDISK();
+  public:
 
-    public:
+    MediaDISK( const Url &      url_r,
+	       const Pathname & attach_point_hint_r,
+	       MediaAccess::MediaType type_r );
 
-	std::ostream & dumpOn( std::ostream & str ) const;
+    virtual ~MediaDISK() { release(); }
 };
 
 ///////////////////////////////////////////////////////////////////

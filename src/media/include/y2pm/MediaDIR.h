@@ -15,8 +15,7 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Implementation class for MediaHandler
-		This class handles access to directory media
+   Purpose:	Implementation class for DIR MediaHandler.
 
 /-*/
 #ifndef MediaDIR_h
@@ -28,20 +27,23 @@
 //
 //	CLASS NAME : MediaDIR
 
+/**
+ * @short Implementation class for DIR MediaHandler
+ * @see MediaHandler
+ **/
 class MediaDIR : public MediaHandler {
 
-    public:
-	// constructor
+  protected:
 
-	MediaDIR (const Url& url);
+    MEDIA_HANDLER_API;
 
-	MEDIA_HANDLER_API
+  public:
 
-	~MediaDIR();
+    MediaDIR( const Url &      url_r,
+	      const Pathname & attach_point_hint_r,
+	      MediaAccess::MediaType type_r );
 
-    public:
-
-	std::ostream & dumpOn( std::ostream & str ) const;
+    virtual ~MediaDIR() { release(); }
 };
 
 ///////////////////////////////////////////////////////////////////

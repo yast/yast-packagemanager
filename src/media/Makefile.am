@@ -23,8 +23,8 @@ liby2pmMedia_la_SOURCES = \
 	MediaError.cc		\
 	MediaAccess.cc		\
 	MediaHandler.cc		\
-	MediaCD.cc		\
 	MediaDIR.cc		\
+	MediaCD.cc		\
 	MediaNFS.cc		\
 	MediaDISK.cc		\
 	MediaSMB.cc		\

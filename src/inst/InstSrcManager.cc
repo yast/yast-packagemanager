@@ -153,8 +153,8 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   // look if there's a /media.1/products file
   ///////////////////////////////////////////////////////////////////
   ProductSet products;
-#if 0
-  MediaAccess::ProvideFile pfile( media, "/media.1/products" );
+#if 1
+  MediaAccess::FileProvider pfile( media, "/media.1/products" );
   if ( pfile.error() ) {
     // no products file: default ProductEntry is /
     products.insert( ProductEntry() );

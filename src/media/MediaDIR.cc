@@ -41,46 +41,18 @@ using namespace std;
 //	METHOD NAME : MediaDIR::MediaDIR
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
+//	DESCRIPTION : Attach point is always '/', as files are not copied.
+//                    Thus attach_point_hint_r is ignored.
 //
-MediaDIR::MediaDIR (const Url& url)
-    : MediaHandler (url)
+MediaDIR::MediaDIR( const Url &      url_r,
+		    const Pathname & /*attach_point_hint_r*/,
+		    MediaAccess::MediaType type_r )
+    : MediaHandler( url_r, url_r.getPath(),
+		    false, // attachPoint_is_mediaroot
+		    false, // does_download
+		    type_r )
 {
 }
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaDIR::~MediaDIR
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-MediaDIR::~MediaDIR()
-{
-	/*
-    if (_attachPoint != "") {	// release if still mounted
-	release ();
-    }
-    */
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaDIR::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream &
-MediaDIR::dumpOn( ostream & str ) const
-{
-    return MediaHandler::dumpOn(str);
-}
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -88,70 +60,56 @@ MediaDIR::dumpOn( ostream & str ) const
 //	METHOD NAME : MediaDIR::attachTo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : attach media at path
+//	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError
-MediaDIR::attachTo (const Pathname & to)
+PMError MediaDIR::attachTo()
 {
-    MIL << "MediaDIR::attachTo (" << to << ")" << endl;
-    // attach point is always / as files are not copied
-    _attachPoint = _url.getPath();
-
-    return Error::E_attachpoint_fixed;
+  return Error::E_ok;
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDIR::release
+//	METHOD NAME : MediaDIR::releaseFrom
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : release attached media
+//	DESCRIPTION : Asserted that media is attached.
 //
-PMError
-MediaDIR::release (bool eject)
+PMError MediaDIR::releaseFrom( bool eject )
 {
-    _attachPoint = "";
-    return Error::E_ok;
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaDIR::getFile
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaDIR::getFile( const Pathname & filename ) const
+{
+  return MediaHandler::getFile( filename );
 }
 
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDIR::provideFile
+//	METHOD NAME : MediaDIR::getDirInfo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
-//	provide file denoted by path to 'attached path'
-//	filename is interpreted relative to the attached url
-//	and a path prefix is preserved to destination
-
-PMError
-MediaDIR::provideFile (const Pathname & filename) const
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaDIR::getDirInfo( std::list<std::string> & retlist,
+			      const Pathname & dirname, bool dots ) const
 {
-    // no retrieval needed, DIR is mounted at destination
-MIL << "MediaDIR::provideFile (" << filename << ")" << endl;
-    if(!_url.isValid())
-	return Error::E_bad_url;
-
-    Pathname src = _url.getPath();
-MIL << "_url.getPath(" << src << ") filename (" << filename << ")" << endl;
-    src += filename;
-
-    PathInfo info(src);
-
-    if(!info.isFile())
-    {
-	    D__ << src.asString() << " does not exist" << endl;
-	    return Error::E_file_not_found;
-    }
-MIL << "OK(" << src << ")" << endl;
-    return Error::E_ok;
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-
+#if 0
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -173,22 +131,6 @@ MediaDIR::findFile (const Pathname & dirname, const string & pattern) const
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaDIR::getDirectory
-//	METHOD TYPE : const std::list<std::string> *
-//
-//	DESCRIPTION :
-//	get directory denoted by path to Attribute::A_StringArray
-
-const std::list<std::string> *
-MediaDIR::dirInfo (const Pathname & dirname) const
-{
-    return readDirectory (dirname);
-}
-
-
-
-///////////////////////////////////////////////////////////////////
-//
 //
 //	METHOD NAME : MediaDIR::getInfo
 //	METHOD TYPE : const PathInfo *
@@ -203,3 +145,4 @@ MediaDIR::fileInfo (const Pathname & filename) const
     return new PathInfo (filename);
 }
 
+#endif

@@ -15,8 +15,8 @@
    Author:	Klaus Kaempf <kkaempf@suse.de>
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
-   Purpose:	Implementation class for MediaHandler
-		This class handles access to CDROM media
+   Purpose:	Implementation class for CD/DVD MediaHandler
+
 /-*/
 #ifndef MediaCD_h
 #define MediaCD_h
@@ -26,31 +26,34 @@
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaCD
+/**
+ * @short Implementation class for CD/DVD MediaHandler
+ * @see MediaHandler
+ **/
 class MediaCD : public MediaHandler {
 
-    private:
+  private:
 
-	unsigned long _mountflags;
+    unsigned long _mountflags;
 
-	typedef std::list<std::string> DeviceList;
-	/** list of devices to try to mount */
-	DeviceList _devices;
-	
-	/** which device has been mounted */
-	std::string _mounteddevice;
+    typedef std::list<std::string> DeviceList;
+    /** list of devices to try to mount */
+    DeviceList _devices;
 
-    public:
-	// constructor
+    /** which device has been mounted */
+    std::string _mounteddevice;
 
-	MediaCD (const Url& url);
+  protected:
 
-	MEDIA_HANDLER_API
+    MEDIA_HANDLER_API;
 
-	~MediaCD();
+  public:
 
-    public:
+    MediaCD( const Url &      url_r,
+	     const Pathname & attach_point_hint_r,
+	     MediaAccess::MediaType type_r );
 
-	std::ostream & dumpOn( std::ostream & str ) const;
+    virtual ~MediaCD() { release(); }
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -53,8 +53,13 @@ using namespace std;
 //
 //	DESCRIPTION :
 //
-MediaCD::MediaCD (const Url& url)
-    : MediaHandler (url)
+MediaCD::MediaCD( const Url &      url_r,
+		  const Pathname & attach_point_hint_r,
+		  MediaAccess::MediaType type_r )
+    : MediaHandler( url_r, attach_point_hint_r,
+		    true,  // attachPoint_is_mediaroot
+		    false, // does_download
+		    type_r )
 {
     Url::OptionMapType options = _url.getOptions();
     Url::OptionMapType::iterator it;
@@ -90,59 +95,21 @@ MediaCD::MediaCD (const Url& url)
     }
 }
 
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaCD::~MediaCD
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-MediaCD::~MediaCD()
-{
-    if (_attachPoint != "") {
-	release ();
-    }
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaCD::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream &
-MediaCD::dumpOn( ostream & str ) const
-{
-    return MediaHandler::dumpOn(str);
-}
-
-
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : MediaCD::attachTo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : attach media at path
+//	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError
-MediaCD::attachTo (const Pathname & to)
+PMError MediaCD::attachTo()
 {
     // FIXME, issue "eject -t" to close the tray
     // really? mine does close automatically -- lnussel
 
-    if(!_attachPoint.empty())
-	return Error::E_already_attached;
-
-    _attachPoint = to;
-
     Mount mount;
-    const char *mountpoint = _attachPoint.asString().c_str();
+    const char *mountpoint = attachPoint().asString().c_str();
     bool mountsucceeded = false;
     PMError ret = Error::E_ok;
 
@@ -190,7 +157,6 @@ MediaCD::attachTo (const Pathname & to)
 
     if(!mountsucceeded)
     {
-	_attachPoint = "";
 	_mounteddevice.erase();
 	return ret;
     }
@@ -201,24 +167,23 @@ MediaCD::attachTo (const Pathname & to)
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaCD::release
+//	METHOD NAME : MediaCD::releaseFrom
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : release attached media
+//	DESCRIPTION : Asserted that media is attached.
 //
-PMError
-MediaCD::release (bool eject)
+PMError MediaCD::releaseFrom( bool eject )
 {
     if(_mounteddevice.empty())
     {
 	return Error::E_not_attached;
     }
 
-    MIL << "umount " << _attachPoint.asString() << endl;
+    MIL << "umount " << attachPoint() << endl;
 
     Mount mount;
     PMError ret;
-    if ((ret = mount.umount(_attachPoint.asString())) != Error::E_ok)
+    if ((ret = mount.umount(attachPoint().asString())) != Error::E_ok)
     {
 	MIL << "failed: " <<  ret << endl;
 	return ret;
@@ -237,7 +202,6 @@ MediaCD::release (bool eject)
 	}
     }
 
-    _attachPoint = "";
     _mounteddevice.erase();
 
     return Error::E_ok;
@@ -246,71 +210,35 @@ MediaCD::release (bool eject)
 
 ///////////////////////////////////////////////////////////////////
 //
-//	METHOD NAME : MediaCD::provideFile
+//	METHOD NAME : MediaCD::getFile
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
-//	get file denoted by path to 'attached path'
-//	filename is interpreted relative to the attached url
-//	and a path prefix is preserved to destination
-
-PMError
-MediaCD::provideFile (const Pathname & filename) const
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaCD::getFile( const Pathname & filename ) const
 {
-    // no retrieval needed, CD is mounted at destination
-
-    if(!_url.isValid())
-	return Error::E_bad_url;
-
-    if(_attachPoint.asString().empty())
-	return Error::E_not_attached;
-
-    Pathname src = _attachPoint;
-    src += _url.getPath();
-    src += filename;
-
-    PathInfo info(src);
-
-    if(!info.isFile())
-    {
-	    D__ << src.asString() << " does not exist" << endl;
-	    return Error::E_file_not_found;
-    }
-    return Error::E_ok;
+  return MediaHandler::getFile( filename );
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaCD::findFile
+//	METHOD NAME : MediaCD::getDirInfo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
-//	find file denoted by pattern
-//	filename is interpreted relative to the attached url
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
 //
-//	pattern is a string with an optional trailing '*'
-//
+PMError MediaCD::getDirInfo( std::list<std::string> & retlist,
+			     const Pathname & dirname, bool dots ) const
+{
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
+}
 
+#if 0
 const Pathname *
 MediaCD::findFile (const Pathname & dirname, const string & pattern) const
 {
     return scanDirectory (dirname, pattern);
-}
-
-
-///////////////////////////////////////////////////////////////////
-//
-//	METHOD NAME : MediaCD::getDirectory
-//	METHOD TYPE : const std::list<std::string> *
-//
-//	DESCRIPTION :
-//	get directory denoted by path to Attribute::A_StringArray
-
-const std::list<std::string> *
-MediaCD::dirInfo (const Pathname & dirname) const
-{
-    return readDirectory (dirname);
 }
 
 
@@ -329,3 +257,4 @@ MediaCD::fileInfo (const Pathname & filename) const
     // no retrieval needed, CD is mounted at destination
     return new PathInfo (filename);
 }
+#endif
