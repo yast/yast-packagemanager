@@ -771,7 +771,7 @@ PMError InstYou::processPatches()
 	argv[i] = NULL;
       }
 
-      log(string(_("Applying delta")) + " ... ");
+      log(delta->_pkg->name().asString() + ": " + string(_("Applying delta")) + " ... ");
 
       error = patchProgress( 0 );
       if ( error ) return error;
@@ -1406,17 +1406,29 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     if(_usedeltas)
     {
       bool havefullrpm = false;
-      // check if full rpm is already downloaded (#47807)
+      // check if full or patch rpm is already downloaded (#47807)
       if(!_settings->reloadPatches())
       {
-	Pathname rpmPath = patch->product()->rpmPath( *itPkg, false );
-        Pathname localRpm = _media.localPath( rpmPath );
-	PathInfo pi( localRpm );
-	if(pi.isExist())
+	bool repeat_with_patchrpm = false;
+	do
 	{
-	  havefullrpm = true;
-	  DBG << (*itPkg)->name() << " already on disk, not using delta" << endl;
-	}
+	  Pathname rpmPath = patch->product()->rpmPath( *itPkg, repeat_with_patchrpm );
+
+	  if(_media.provideFile( rpmPath, true, true) == MediaError::E_ok)
+	  {
+	    havefullrpm = true;
+	    DBG << (*itPkg)->name() << " already on disk, not using delta" << endl;
+	  }
+
+	  if(!havefullrpm && repeat_with_patchrpm == false)
+	  {
+	    repeat_with_patchrpm = hasPatchRpm( *itPkg );
+	  }
+	  else
+	  {
+	    repeat_with_patchrpm = false;
+	  }
+	} while(repeat_with_patchrpm);
       }
 
       if(!havefullrpm)
@@ -1597,23 +1609,30 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
   bool patchRpm = hasPatchRpm( pkg );
 
   PMError error( YouError::E_error );
-  Pathname rpmPath;
+  Pathname rpmPath = product->rpmPath( pkg, false );
 
   bool gotRpm = false;
   string md5;
 
+  // no need to download patch rpm if full rpm is already there (#47807)
+  if(_media.provideFile( rpmPath, !_settings->reloadPatches(), true ) == MediaError::E_ok)
+  {
+    patchRpm = false;
+  }
+
   if ( patchRpm ) {
     // If the package has a version installed, try to get patch RPM first.
-    rpmPath = product->rpmPath( pkg, patchRpm );
-    D__ << "Trying retrieving '" << _settings->patchUrl() << "/" << rpmPath
+    Pathname patchRpmPath = product->rpmPath( pkg, patchRpm );
+    D__ << "Trying retrieving '" << _settings->patchUrl() << "/" << patchRpmPath
         << "'" << endl;
-    error = _media.provideFile( rpmPath, !_settings->reloadPatches() );
+    error = _media.provideFile( patchRpmPath, !_settings->reloadPatches() );
     if ( error ) {
       WAR << "Retrieving RPM '" << pkg->name() << "' failed: " << error
           << endl;
       if ( error == MediaError::E_user_abort ) return error;
     } else {
       gotRpm = true;
+      rpmPath = patchRpmPath;
     }
     md5 = pkg->patchRpmMD5();
   }
@@ -1623,7 +1642,6 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
   }
 
   if ( !gotRpm || _settings->getAll() ) {
-    rpmPath = product->rpmPath( pkg, false );
     D__ << "Retrieving '" << _settings->patchUrl() << "/" << rpmPath
         << "'" << endl;
     error = _media.provideFile( rpmPath, !_settings->reloadPatches() );

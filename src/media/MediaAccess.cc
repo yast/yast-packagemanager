@@ -225,13 +225,16 @@ MediaAccess::release( bool eject )
 // filename is interpreted relative to the attached url
 // and a path prefix is preserved to destination
 PMError
-MediaAccess::provideFile( const Pathname & filename, bool cached ) const
+MediaAccess::provideFile( const Pathname & filename, bool cached, bool checkonly) const
 {
   if ( cached ) {
     PathInfo pi( localPath( filename ) );
     if ( pi.isExist() )
       return Error::E_ok;
   }
+
+  if(checkonly)
+    return Error::E_error;
 
   if ( !_handler ) {
     INT << Error::E_not_open << " on provideFile(" << filename << ")" << endl;

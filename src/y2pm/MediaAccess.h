@@ -164,8 +164,12 @@ class MediaAccess : public CountedRep {
          *                the file already exists and doesn't download it again
          *                if it does. Currently only the existence is checked,
          *                no other file attributes.
+	 * @param checkonly If this and 'cached' are set to true only the
+	 *                  existence of the file is checked but it's not
+	 *                  downloaded. If 'cached' is unset an errer is
+	 *                  returned always.
 	 **/
-	PMError provideFile( const Pathname & filename, bool cached = false ) const;
+	PMError provideFile( const Pathname & filename, bool cached = false, bool checkonly = false ) const;
 
 	/**
 	 * Remove filename below attach point IFF handler downloads files
