@@ -95,6 +95,7 @@ PMError PMYouServers::requestServers( const string &u )
       url += "?product=" + _patchPaths->product();
       url += "&version=" + _patchPaths->version();
       url += "&basearch=" + string( _patchPaths->baseArch() );
+      url += "&arch=" + string( _patchPaths->arch() );
       url += "&business=";
       if ( _patchPaths->businessProduct() ) url += "1";
       else url += "0";
