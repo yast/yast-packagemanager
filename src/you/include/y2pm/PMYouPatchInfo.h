@@ -55,12 +55,17 @@ class PMYouPatchInfo : virtual public Rep {
      *
      * @param lang  language to be parsed.
      **/
-    PMYouPatchInfo( const std::string &lang = "" );
+    PMYouPatchInfo( PMYouPatchPathsPtr paths, const std::string &lang = "" );
 
     /**
      * Destructor
      **/
     ~PMYouPatchInfo();
+
+    /**
+      Get directory file listing all available patches.
+    */
+    PMError getDirectory();
 
     /**
      * Get patches from specified location.
@@ -70,20 +75,17 @@ class PMYouPatchInfo : virtual public Rep {
      * @param reload    If true, reload patch files from server.
      * @param checkSig  If true, check GPG signature of patch info files.
      **/
-    PMError getPatches( PMYouPatchPathsPtr paths,
-                        std::list<PMYouPatchPtr> &patches,
+    PMError getPatches( std::list<PMYouPatchPtr> &patches,
                         bool reload = true, bool checkSig = true );
     
     /**
      * Read patch info files from directory.
      *
      * @param baseUrl    Base of URL where patches are located.
-     * @param patchPath  Path of patch directory relative to baseUrl.
      * @param patches    List of patch objects where the results are stored.
      * @param checkSig   If true, check GPG signature of patch info files.
      **/
-    PMError readDir( const Url &baseUrl, const Pathname &patchPath,
-                     std::list<PMYouPatchPtr> &patches, bool reload = true,
+    PMError readDir( std::list<PMYouPatchPtr> &patches, bool reload = true,
                      bool checkSig = true );
 
     /**
@@ -121,7 +123,7 @@ class PMYouPatchInfo : virtual public Rep {
     PMError readDirectoryFile( const Pathname &,
                                std::list<std::string> &patchFiles );
 
-    PMError processMediaDir( const Url & );
+    PMError processMediaDir();
 
   protected:
     std::string tagValueLocale ( YOUPatchTagSet::Tags tagIndex,
@@ -149,6 +151,11 @@ class PMYouPatchInfo : virtual public Rep {
     MediaAccess _media;
 
     PMYouPackageDataProviderPtr _packageDataProvider;
+    
+    std::list<std::string> _patchFiles;
+    
+    bool _doneMediaDir;
+    bool _doneDirectory;
 };
 
 ///////////////////////////////////////////////////////////////////
