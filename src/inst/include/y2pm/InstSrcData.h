@@ -62,11 +62,6 @@ class InstSrcData: virtual public Rep, public InstData {
     friend class InstSrc;
 
     /**
-     * ParseDataUL fills the data
-     */
-    friend class ParseDataUL;    
-
-    /**
      * Backreference to InstSrc
      **/
     InstSrcPtr _instSrc;
@@ -105,13 +100,6 @@ class InstSrcData: virtual public Rep, public InstData {
   protected:
 
     /**
-     * actual data for this InstSrc
-     */
-    std::list<PMSelectionPtr> _selections;
-    std::list<PMPackagePtr> _packages;
-    std::list<PMYouPatchPtr> _patches;
-
-    /**
      * Call concrete InstSrcData to propagate Objects to Manager classes.
      **/
     virtual void propagateObjects();
@@ -140,19 +128,19 @@ class InstSrcData: virtual public Rep, public InstData {
      * generate PMSelection objects for each selection on the source
      * @return list of PMSelectionPtr on this source
      */
-    virtual const std::list<PMSelectionPtr>& getSelections (void) const;
+    virtual const std::list<PMSelectionPtr>& getSelections (void) const = 0;
 
     /**
      * generate PMPackage objects for each Item on the source/target
      * @return list of PMPackagePtr on this source
      * */
-    virtual const std::list<PMPackagePtr>& getPackages (void) const;
+    virtual const std::list<PMPackagePtr>& getPackages (void) const = 0;
 
     /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source
      */
-    virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
+    virtual const std::list<PMYouPatchPtr>& getPatches (void) const = 0;
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 

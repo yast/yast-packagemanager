@@ -10,24 +10,24 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       ParseDataULPtr.h
+  File:       InstSrcDataULPtr.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose: Declaration of pointer classes constParseDataULPtr and ParseDataULPtr.
+  Purpose: Declaration of pointer classes constInstSrcDataULPtr and InstSrcDataULPtr.
 
 /-*/
-#ifndef ParseDataULPtr_h
-#define ParseDataULPtr_h
+#ifndef InstSrcDataULPtr_h
+#define InstSrcDataULPtr_h
 
-#include <y2util/RepDef.h>
+#include <y2pm/InstSrcDataPtr.h>
 
 ///////////////////////////////////////////////////////////////////
-//	CLASS NAME : ParseDataULPtr
-//	CLASS NAME : constParseDataULPtr
+//	CLASS NAME : InstSrcDataULPtr
+//	CLASS NAME : constInstSrcDataULPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_BASE_POINTER(ParseDataUL);
+DEFINE_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
 
-#endif // ParseDataULPtr_h
+#endif // InstSrcDataULPtr_h
 

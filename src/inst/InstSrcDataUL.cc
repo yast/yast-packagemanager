@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       ParseDataUL.cc
+  File:       InstSrcDataUL.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -30,7 +30,7 @@
 
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
-#include <y2pm/ParseDataUL.h>
+#include <y2pm/InstSrcDataUL.h>
 #include <y2pm/PMULPackageDataProvider.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/PMULSelectionDataProvider.h>
@@ -47,12 +47,10 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
-//	CLASS NAME : ParseDataULPtr
-//	CLASS NAME : constParseDataULPtr
+//	CLASS NAME : InstSrcDataULPtr
+//	CLASS NAME : constInstSrcDataULPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_BASE_POINTER(ParseDataUL);
-
-
+IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
 
 ///////////////////////////////////////////////////////////////////
 // private
@@ -63,7 +61,7 @@ IMPL_BASE_POINTER(ParseDataUL);
 //	DESCRIPTION : lookup selection names to PMSelectionPtr
 //
 std::list<PMSelectionPtr>
-ParseDataUL::lookupSelections (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections)
+InstSrcDataUL::lookupSelections (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections)
 {
     std::list<PMSelectionPtr> selection_ptrs;
 
@@ -97,7 +95,7 @@ ParseDataUL::lookupSelections (const std::list<PMSelectionPtr> all_selections, c
 //	DESCRIPTION : lookup package names to PMPackagePtr
 //
 std::list<PMPackagePtr>
-ParseDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages)
+InstSrcDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages)
 {
     std::list<PMPackagePtr> package_ptrs;
 
@@ -122,7 +120,7 @@ ParseDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const s
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : ParseDataUL::Tag2PkgRelList
+//	METHOD NAME : InstSrcDataUL::Tag2PkgRelList
 //	METHOD TYPE : int
 //
 //	DESCRIPTION : convert list of strings (denoting dependencies)
@@ -130,7 +128,7 @@ ParseDataUL::lookupPackages (const std::list<PMPackagePtr> all_packages, const s
 //		      return number of dependencies found
 
 int
-ParseDataUL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist)
+InstSrcDataUL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist)
 {
     int count = 0;
     pkgrellist.clear();
@@ -150,7 +148,7 @@ ParseDataUL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std:
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : ParseDataUL::PkgTag2Package
+//	METHOD NAME : InstSrcDataUL::PkgTag2Package
 //	METHOD TYPE : PMPackagePtr
 //
 //	DESCRIPTION : pass packages data from tagset to pgkcache
@@ -160,12 +158,12 @@ ParseDataUL::Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std:
 //		 * packagelist is used for finding shared packages
 
 PMPackagePtr
-ParseDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
+InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
 				CommonPkdParser::TagSet * tagset,
 				const std::list<PMPackagePtr>& packages )
 {
     // PACKAGE
-    string single ((tagset->getTagByIndex(ParseDataULPkgTags::PACKAGE))->Data());
+    string single ((tagset->getTagByIndex(InstSrcDataULPkgTags::PACKAGE))->Data());
 
     std::vector<std::string> splitted;
 
@@ -189,7 +187,7 @@ ParseDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
 #define SET_POS(tagname,start,stop) \
     do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(ParseDataULPkgTags::tagname)
+    tagset->getTagByIndex(InstSrcDataULPkgTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 
@@ -234,7 +232,7 @@ ParseDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
     // SHAREWITH, package to share data with
     // FIXME: does not support forwared shared declarations
 
-    string sharewith ((tagset->getTagByIndex(ParseDataULPkgTags::SHAREWITH))->Data());
+    string sharewith ((tagset->getTagByIndex(InstSrcDataULPkgTags::SHAREWITH))->Data());
     if (!sharewith.empty())
     {
 //MIL << "Share " << package->name() << "-" << package->version() << "-" << package->release() << "." << package->arch() << endl;
@@ -260,7 +258,7 @@ ParseDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : ParseDataUL::LangTag2Package
+//	METHOD NAME : InstSrcDataUL::LangTag2Package
 //	METHOD TYPE : void
 //
 //	DESCRIPTION : * pass packages.lang data from tagset to langcache
@@ -268,10 +266,10 @@ ParseDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
 //		 * Multi line values are passed by file position (on-demand read)
 
 void
-ParseDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, CommonPkdParser::TagSet * tagset)
+InstSrcDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, CommonPkdParser::TagSet * tagset)
 {
     // PACKAGE
-    string single ((tagset->getTagByIndex(ParseDataULLangTags::PACKAGE))->Data());
+    string single ((tagset->getTagByIndex(InstSrcDataULLangTags::PACKAGE))->Data());
 
     std::vector<std::string> splitted;
     stringutil::split (single, splitted, " ", false);
@@ -294,7 +292,7 @@ ParseDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<PM
 #define SET_POS(tagname,start,stop) \
     do { dataprovider->_attr_##tagname.set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(ParseDataULLangTags::tagname)
+    tagset->getTagByIndex(InstSrcDataULLangTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
 
@@ -313,16 +311,16 @@ ParseDataUL::LangTag2Package (TagCacheRetrievalPtr langcache, const std::list<PM
 ///////////////////////////////////////////////////////////////////
 // PRIVATE
 //
-//	METHOD NAME : ParseDataUL::Tag2Selection
+//	METHOD NAME : InstSrcDataUL::Tag2Selection
 //	METHOD TYPE : PMSelectionPtr
 //
 //	DESCRIPTION : pass selection data from tagset to PMSelection
 
 PMSelectionPtr
-ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset)
+InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset)
 {
     // SELECTION
-    string single ((tagset->getTagByIndex(ParseDataULSelTags::SELECTION))->Data());
+    string single ((tagset->getTagByIndex(InstSrcDataULSelTags::SELECTION))->Data());
 
     std::vector<std::string> splitted;
 
@@ -352,7 +350,7 @@ ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkd
 #define SET_LPOS(tagname,start,stop,lang) \
     do { dataprovider->_attr_##tagname[lang].set (start, stop); } while (0)
 #define GET_TAG(tagname) \
-    tagset->getTagByIndex(ParseDataULSelTags::tagname)
+    tagset->getTagByIndex(InstSrcDataULSelTags::tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); \
 	 SET_POS (tagname, tagptr->posDataStart(), tagptr->posDataEnd()); } while (0)
@@ -405,12 +403,11 @@ ParseDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkd
 
 
 PMError
-ParseDataUL::parsePackages (InstSrcDataPtr & ndata,
-		MediaAccessPtr media_r, const Pathname & descr_dir_r )
+InstSrcDataUL::parsePackages (std::list<PMPackagePtr>& packages,
+		MediaAccessPtr media_r, const Pathname& descr_dir_r )
 {
     PMError err;
     int count = 0;
-    std::list<PMPackagePtr>& packages = ndata->_packages;
     std::string tagstr;
 
     ///////////////////////////////////////////////////////////////////
@@ -440,7 +437,7 @@ ParseDataUL::parsePackages (InstSrcDataPtr & ndata,
 	return InstSrcError::E_open_file;
     }
 
-    CommonPkdParser::TagSet* tagset = new ParseDataULPkgTags ();
+    CommonPkdParser::TagSet* tagset = new InstSrcDataULPkgTags ();
     bool parse = true;
     TagParser & parser = pkgcache->getParser();
 
@@ -498,12 +495,11 @@ ParseDataUL::parsePackages (InstSrcDataPtr & ndata,
 
 
 PMError
-ParseDataUL::parsePackagesLang (InstSrcDataPtr & ndata,
-		MediaAccessPtr media_r, const Pathname & descr_dir_r)
+InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
+		MediaAccessPtr media_r, const Pathname& descr_dir_r)
 {
     PMError err;
     int count = 0;
-    std::list<PMPackagePtr>& packages = ndata->_packages;
     std::string tagstr;
 
     // --------------------------------
@@ -539,7 +535,7 @@ ParseDataUL::parsePackagesLang (InstSrcDataPtr & ndata,
 	return InstSrcError::E_open_file;
     }
 
-    CommonPkdParser::TagSet* tagset = new ParseDataULLangTags ();
+    CommonPkdParser::TagSet* tagset = new InstSrcDataULLangTags ();
     bool parse = true;
     TagParser & parser = langcache->getParser();
 
@@ -596,8 +592,8 @@ ParseDataUL::parsePackagesLang (InstSrcDataPtr & ndata,
 
 
 PMError
-ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
-		MediaAccessPtr media_r, const Pathname & descr_dir_r )
+InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
+		MediaAccessPtr media_r, const Pathname& descr_dir_r )
 {
     PMError err;
 
@@ -651,12 +647,11 @@ ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
     }
     MIL << "*** Expecting " << selection_names.size() << " selections ***" << endl;
 
-    std::list<PMSelectionPtr>& selections = ndata->_selections;
     int count = 0;
     std::ifstream selection_stream;
 
     std::string tagstr;
-    CommonPkdParser::TagSet* tagset = new ParseDataULSelTags ();
+    CommonPkdParser::TagSet* tagset = new InstSrcDataULSelTags ();
     bool parse = true;
 
     for (std::list<std::string>::iterator selfile = selection_names.begin();
@@ -738,40 +733,39 @@ ParseDataUL::parseSelections (InstSrcDataPtr & ndata,
 // for suggests, inspacks, delpacks
 
 PMError
-ParseDataUL::fillSelections (InstSrcDataPtr & ndata)
+InstSrcDataUL::fillSelections (std::list<PMSelectionPtr>& all_selections, std::list<PMPackagePtr>& all_packages)
 {
     PMError err;
 
-    for (std::list<PMSelectionPtr>::iterator selIt = ndata->_selections.begin();
-	 selIt != ndata->_selections.end(); ++selIt)
+    for (std::list<PMSelectionPtr>::iterator selIt = all_selections.begin();
+	 selIt != all_selections.end(); ++selIt)
     {
 	MIL << "fillSelection (" << (*selIt)->name() << ")" << endl;
 	PMULSelectionDataProviderPtr selDp = (*selIt)->dataProvider();
-#if 1
-	selDp->_ptrs_attr_SUGGESTS = lookupSelections (ndata->getSelections(), (*selIt)->suggests());
-	selDp->_ptrs_attr_RECOMMENDS = lookupSelections (ndata->getSelections(), (*selIt)->recommends());
+
+	selDp->_ptrs_attr_SUGGESTS = lookupSelections (all_selections, (*selIt)->suggests());
+	selDp->_ptrs_attr_RECOMMENDS = lookupSelections (all_selections, (*selIt)->recommends());
 
 	for (map <std::string,TagCacheRetrievalPos>::iterator tagIt = selDp->_attr_INSPACKS.begin();
 	     tagIt != selDp->_attr_INSPACKS.end(); ++tagIt)
 	{
 	    // get language packages
-	    std::list<std::string> packages = (*selIt)->inspacks (tagIt->first);
-	    if (!packages.empty())
+	    std::list<std::string> inspackages = (*selIt)->inspacks (tagIt->first);
+	    if (!inspackages.empty())
 	    {
-		selDp->_ptrs_attr_INSPACKS[tagIt->first] = lookupPackages (ndata->getPackages(), packages);
+		selDp->_ptrs_attr_INSPACKS[tagIt->first] = lookupPackages (all_packages, inspackages);
 	    }
 	}
 	for (map <std::string,TagCacheRetrievalPos>::iterator tagIt = selDp->_attr_DELPACKS.begin();
 	     tagIt != selDp->_attr_DELPACKS.end(); ++tagIt)
 	{
 	    // get language packages
-	    std::list<std::string> packages = (*selIt)->delpacks (tagIt->first);
-	    if (!packages.empty())
+	    std::list<std::string> delpackages = (*selIt)->delpacks (tagIt->first);
+	    if (!delpackages.empty())
 	    {
-		selDp->_ptrs_attr_DELPACKS[tagIt->first] = lookupPackages (ndata->getPackages(), packages);
+		selDp->_ptrs_attr_DELPACKS[tagIt->first] = lookupPackages (all_packages, delpackages);
 	    }
 	}
-#endif
     }
     return err;
 }
@@ -783,40 +777,40 @@ ParseDataUL::fillSelections (InstSrcDataPtr & ndata)
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : ParseDataUL::ParseDataUL
+//	METHOD NAME : InstSrcDataUL::InstSrcDataUL
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-ParseDataUL::ParseDataUL()
+InstSrcDataUL::InstSrcDataUL()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : ParseDataUL::~ParseDataUL
+//	METHOD NAME : InstSrcDataUL::~InstSrcDataUL
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-ParseDataUL::~ParseDataUL()
+InstSrcDataUL::~InstSrcDataUL()
 {
 }
 
 //////////////////////////////////////////////////////////////////
+// static
 //
-//
-//	METHOD NAME : ParseDataUL::tryGetDescr
+//	METHOD NAME : InstSrcDataUL::tryGetDescr
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION : try to read content data (describing the product)
 //			and fill InstSrcDescrPtr class
 //
-PMError ParseDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
+PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				     MediaAccessPtr media_r, const Pathname & product_dir_r )
 {
-    MIL << "ParseDataUL::tryGetDescr(" << product_dir_r << ")" << endl;
+    MIL << "InstSrcDataUL::tryGetDescr(" << product_dir_r << ")" << endl;
 
     ndescr_r = 0;
     PMError err;
@@ -953,37 +947,42 @@ PMError ParseDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
 
 ///////////////////////////////////////////////////////////////////
+// static
 //
-//
-//	METHOD NAME : ParseDataUL::tryGetData
+//	METHOD NAME : InstSrcDataUL::tryGetData
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-PMError ParseDataUL::tryGetData( InstSrcDataPtr & ndata_r,
+PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
 				    MediaAccessPtr media_r, const Pathname & descr_dir_r )
 {
-    MIL << "ParseDataUL::tryGetData(" << descr_dir_r << ")" << endl;
+    MIL << "InstSrcDataUL::tryGetData(" << descr_dir_r << ")" << endl;
 
     ndata_r = 0;
     PMError err;
 
-    InstSrcDataPtr ndata( new InstSrcData );
+    //-----------------------------------------------------
+    // create instance of _own_ class
+    //-----------------------------------------------------
+
+    InstSrcDataUL *ulptr = new InstSrcDataUL();
+    InstSrcDataPtr ndata( ulptr );
 
     // parse <DESCRDIR>/packages
-    if (!parsePackages (ndata, media_r, descr_dir_r))
+    if (!parsePackages (ulptr->_packages, media_r, descr_dir_r))
     {
 	// parse <DESCRDIR>/packages.<lang>
-	parsePackagesLang (ndata, media_r, descr_dir_r);
+	parsePackagesLang (ulptr->_packages, media_r, descr_dir_r);
     }
 
     // parse <DESCRDIR>/selections and <DESCRDIR>/*.sel
-    parseSelections (ndata, media_r, descr_dir_r);
+    parseSelections (ulptr->_selections, media_r, descr_dir_r);
 
     // fill selections with caching data
     // set up lists of PMSelectionPtr and PMPackagePtr
     // for suggests, inspacks, delpacks
-    fillSelections (ndata);
+    fillSelections (ulptr->_selections, ulptr->_packages);
 
     ///////////////////////////////////////////////////////////////////
     // done
@@ -991,13 +990,20 @@ PMError ParseDataUL::tryGetData( InstSrcDataPtr & ndata_r,
 
     if ( !err )
     {
+	//-----------------------------------------------------
+	// keep instance of _own_ class
+	//-----------------------------------------------------
+
 	ndata_r = ndata;			// keep ndata alive
 	MIL << "tryGetDataUL sucessful" << endl;
-	MIL << ndata_r->_packages.size() << " packages" << endl;
-	MIL << ndata_r->_selections.size() << " selections" << endl;
+	MIL << ndata->getPackages().size() << " packages" << endl;
+	MIL << ndata->getSelections().size() << " selections" << endl;
     }
     else
     {
+	//-----------------------------------------------------
+	// destroy instance of _own_ class
+	//-----------------------------------------------------
 						// destroy ndata
 	ERR << "tryGetData failed: " << err << endl;
     }
@@ -1005,4 +1011,62 @@ PMError ParseDataUL::tryGetData( InstSrcDataPtr & ndata_r,
     return err;
 }
 
+//---------------------------------------------------------------------...
+// protected
+
+/**
+ * write media content data to cache file
+ * @param pathname of corresponding InstSrcDescr cache file
+ * @return pathname of written cache
+ * writes content cache data to an ascii file
+ */
+
+const Pathname
+InstSrcDataUL::writeCache (const Pathname &descrpathname)
+{
+    return InstSrcData::writeCache (descrpathname);
+}
+
+//---------------------------------------------------------------------...
+// public
+
+/**
+ * generate PMSelection objects for each Item on the source
+ * @return list of PMSelectionPtr on this source
+ * */
+const std::list<PMSelectionPtr>&
+InstSrcDataUL::getSelections() const
+{
+    return _selections;
+}
+
+/**
+ * generate PMPackage objects for each Item on the source
+ * @return list of PMPackagePtr on this source
+ * */
+const std::list<PMPackagePtr>&
+InstSrcDataUL::getPackages() const
+{
+    MIL << "InstSrcDataUL::getPackages(" << _packages.size() << ")" << endl;
+    return _packages;
+}
+
+/**
+ * generate PMSolvable objects for each patch on the target
+ * @return list of PMSolvablePtr on this target
+ */
+const std::list<PMYouPatchPtr>&
+InstSrcDataUL::getPatches (void) const
+{
+    MIL << "InstSrcDataUL::getPatches()" << endl;
+    return _patches;
+}
+
+
+std::ostream &
+InstSrcDataUL::dumpOn( std::ostream & str ) const
+{
+    Rep::dumpOn( str );
+    return str;
+}
 

@@ -96,7 +96,7 @@ class PMSelection : virtual public Rep, public PMObject {
     PMSelectionDataProviderPtr _dataProvider;
 
   protected:
-    friend class ParseDataUL;
+    friend class InstSrcDataUL;
     /**
      * Provide DataProvider access to the underlying Object
      **/

@@ -44,7 +44,7 @@
 class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
 
-    friend class ParseDataUL;
+    friend class InstSrcDataUL;
     protected:
 
 	// the data belongs to this package

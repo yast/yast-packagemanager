@@ -35,7 +35,7 @@
 #include <y2pm/InstSrcDescr.h>
 
 #include <y2pm/InstSrcData.h>
-#include <y2pm/ParseDataUL.h>
+#include <y2pm/InstSrcDataUL.h>
 
 using namespace std;
 
@@ -128,16 +128,12 @@ PMError InstSrc::enableSource()
   switch ( _descr->type() ) {
 
     case T_UnitedLinux:
-	{
-	    ParseDataULPtr parser ( new ParseDataUL() );
-	    err = parser->tryGetData( ndata, _media, _descr->descrdir() );
-	}
-
-      break;
+	err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
+	break;
 
     case T_TEST_DIST:
-      err = InstSrcData::tryGetData( ndata, _media, _descr->descrdir() );
-      break;
+	err = InstSrcData::tryGetData( ndata, _media, _descr->descrdir() );
+	break;
 
     ///////////////////////////////////////////////////////////////////
     // no default: let compiler warn '... not handled in switch'
@@ -487,15 +483,12 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
     switch ( ctype ) {
 
     case T_UnitedLinux:
-	{
-	    ParseDataULPtr parser ( new ParseDataUL );
-	    err = parser->tryGetDescr( ndescr, _media, product_dir_r );
-	}
-      break;
+	err = InstSrcDataUL::tryGetDescr( ndescr, _media, product_dir_r );
+	break;
 
     case T_TEST_DIST:
-      err = InstSrcData::tryGetDescr( ndescr, _media, product_dir_r );
-      break;
+	err = InstSrcData::tryGetDescr( ndescr, _media, product_dir_r );
+	break;
 
     ///////////////////////////////////////////////////////////////////
     // no default: let compiler warn '... not handled in switch'
