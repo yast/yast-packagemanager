@@ -26,6 +26,8 @@
 
 #include <y2util/Y2SLog.h>
 
+#include <Y2PM.h>
+
 #include <y2pm/InstSrcError.h>
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/MediaAccess.h>
@@ -36,6 +38,44 @@
 
 using namespace std;
 
+static const char *langmap[] = {
+        "en_GB"         , "english",
+        "en_US"         , "english",
+        "en"            , "english",
+        "de_DE"         , "german",
+        "de_CH"         , "german",
+        "de"            , "german",
+        "fr"            , "french",
+        "br_FR"         , "french",
+        "fr_FR"         , "french",
+        "fr_CH"         , "french",
+        "it"            , "italian",
+        "it_IT"         , "italian",
+        "es"            , "spanish",
+        "es_ES"         , "spanish",
+        "nl"            , "dutch",
+        "nl_NL"         , "dutch",
+        "pt"            , "portuguese",
+        "pt_PT"         , "portuguese",
+        "pt_BR"         , "brazilian",
+        "hu"            , "hungarian",
+        "hu_HU"         , "hungarian",
+        "pl"            , "polish",
+        "pl_PL"         , "polish",
+        "el_GR"         , "greek",
+        "tr_TR"         , "turkish",
+        "tr"            , "turkish",
+        "ru"            , "russian",
+        "ru_RU"         , "russian",
+        "ru_RU.KOI8-R"  , "russian",
+        "cs"            , "czech",
+        "cs_CZ"         , "czech",
+        "ja"            , "japanese",
+        "ja_JP"         , "japanese",
+        "ko"            , "korean",
+        "ko_KR"         , "korean",
+        0               , 0
+};
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -47,7 +87,10 @@ IMPL_BASE_POINTER(PMYouPatchInfo);
 
 PMYouPatchInfo::PMYouPatchInfo( const string &lang )
 {
-    _patchtagset = new YOUPatchTagSet( lang );
+    LangCode langCode( lang );
+    if ( lang.empty() ) langCode = Y2PM::getPreferredLocale();
+
+    _patchtagset = new YOUPatchTagSet( translateLangCode( langCode ) );
     _patchtagset->setEncoding(CommonPkdParser::Tag::UTF8);
 
     _packagetagset = new YOUPackageTagSet();
@@ -410,4 +453,24 @@ string PMYouPatchInfo::tagValue( YOUPackageTagSet::Tags tagIndex )
     }
 
     return tag->Data();
+}
+
+string PMYouPatchInfo::translateLangCode( const LangCode &lang )
+{
+    string result = lang;
+
+    const char **code = langmap;
+    while( *code ) {
+      
+      if ( LangCode( *code ) == lang ) {
+        result = *(code + 1);
+        break;
+      }
+      
+      code += 2;
+    }
+
+    D__ << "Translated " << lang << " to " << result << endl;
+
+    return result;
 }

@@ -60,6 +60,8 @@ class PMYouPatchPaths : virtual public Rep {
 
     Pathname localDir();
 
+    Pathname installDir();
+
     std::string product();
     
     std::string version();

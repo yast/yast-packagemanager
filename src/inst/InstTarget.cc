@@ -35,6 +35,7 @@
 #include <y2util/Y2SLog.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/PMYouPatchPaths.h>
+#include <y2pm/PMYouPatchInfo.h>
 
 using namespace std;
 
@@ -48,7 +49,8 @@ using namespace std;
  */
 InstTarget::InstTarget ( ) :
     _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
-    _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE)
+    _rpmremoveflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE),
+    _patchesInitialized( false )
 {
     _rpmdb = new RpmDb();
 }
@@ -163,13 +165,27 @@ InstTarget::getPackages (void) const
 }
 
 /**
- * generate PMSolvable objects for each patch on the target
- * @return list of PMSolvablePtr on this target
+ * generate PMYouPatch objects for each patch on the target
+ * @return list of PMYouPatchPtr on this target
  */
 const std::list<PMYouPatchPtr>&
 InstTarget::getPatches (void) const
 {
-    return InstData::getPatches();
+    if ( !_patchesInitialized ) {
+#warning FIXME: Get product info from InstTarget::descr    
+        PMYouPatchPaths paths;
+        PMYouPatchInfo patchInfo;
+
+        Url u( "dir://" + ( getRoot() + paths.installDir() ).asString() );
+        Pathname path;
+                
+        PMError error = patchInfo.readDir( u, path, _patches );
+        if ( error ) {
+            E__ << "Error reading patch info for installed patches." << endl;
+        }
+    }
+
+    return _patches;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -264,8 +280,7 @@ PMError InstTarget::installPatch( const Pathname &filename )
     PMYouPatchPaths paths;
 
     Pathname dest = getRoot();
-    dest += paths.localDir();
-    dest += "installed/";
+    dest += paths.installDir();
 
     int err = PathInfo::assert_dir( dest );
     if ( err ) {

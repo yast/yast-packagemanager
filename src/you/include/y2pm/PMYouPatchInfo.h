@@ -27,6 +27,7 @@
 #include <y2util/CommonPkdParser.h>
 #include <y2util/Url.h>
 #include <y2util/Pathname.h>
+#include <y2util/LangCode.h>
 
 #include <y2pm/PMError.h>
 #include <y2pm/MediaAccess.h>
@@ -53,7 +54,7 @@ class PMYouPatchInfo : virtual public Rep {
      *
      * @param lang  language to be parsed.
      **/
-    PMYouPatchInfo( const std::string &lang );
+    PMYouPatchInfo( const std::string &lang = "" );
 
     /**
      * Destructor
@@ -97,6 +98,8 @@ class PMYouPatchInfo : virtual public Rep {
      **/
     PMError parsePackages( const std::string &packages,
                            const PMYouPatchPtr &patch );
+
+    static std::string translateLangCode( const LangCode &lang );
 
   protected:
     std::string tagValue( YOUPatchTagSet::Tags tag );

@@ -146,8 +146,8 @@ class InstTarget: virtual public Rep, public InstData {
 	virtual const std::list<PMPackagePtr>& getPackages (void) const;
 
 	/**
-	 * generate PMSolvable objects for each patch on the source
-	 * @return list of PMSolvablePtr on this source
+	 * generate PMYouPatch objects for each patch on the source
+	 * @return list of PMYouPatchPtr on this source
 	 */
 	virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
 
@@ -258,6 +258,9 @@ class InstTarget: virtual public Rep, public InstData {
 
 	/** rpm database */
 	RpmDbPtr _rpmdb;
+
+        mutable std::list<PMYouPatchPtr> _patches;
+        mutable bool _patchesInitialized;
 };
 
 ///////////////////////////////////////////////////////////////////
