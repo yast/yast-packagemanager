@@ -25,7 +25,7 @@ struct fromBrokeninstalled {
 	    {
 		if(p->edition() == res.edition)
 		{
-		    DBG << "remove " << res.name << " from goodlist" << endl;
+		    D__ << "remove " << res.name << " from goodlist" << endl;
 		    return true;
 		}
 	    }
@@ -83,6 +83,8 @@ bool PkgDep::upgrade(
 	unsigned numinconsistent = 0;
 	set<PMSolvablePtr> noinstcandidates;
 	set<PMSolvablePtr> brokeninstalled;
+
+#warning function unusable
 	
 	D__ << "Starting upgrade\n";
 
@@ -316,7 +318,7 @@ bool PkgDep::solvesystemnoauto(
 		}
 	    }
 	    
-	    DBG << "moving inconsistent from installed to candidates: ";
+	    D__ << "moving inconsistent from installed to candidates: ";
 	    i_for( PkgSet::, bit, brokeninstalled. )
 	    {
 		if(installed.includes(bit->value->name()))
@@ -331,14 +333,14 @@ bool PkgDep::solvesystemnoauto(
 			D__ << (*it)->name() << " ";
 		    }
 		    */
-		    DBG << (bit->value->name()) << " ";
+		    D__ << (bit->value->name()) << " ";
 		    installed.remove( bit->value );
 		    candidates.add( bit->value );
 		}
 		else
 		    INT << bit->value->name() << " not in installed" << endl;
 	    }
-	    DBG << endl;
+	    D__ << endl;
 	}
 
 	// try installation of the candidates

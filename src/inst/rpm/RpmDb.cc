@@ -29,6 +29,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <map>
 
 #include <y2util/Date.h>
 #include <y2util/FSize.h>
@@ -532,7 +533,9 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 //
 void
 RpmDb::rpmdeps2rellist ( const string& depstr,
-		PMSolvable::PkgRelList_type& deps)
+		PMSolvable::PkgRelList_type& deps,
+		FileDeps::FileNames& files,
+		bool fill_files)
 {
     enum rpmdep
     {
@@ -619,13 +622,20 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
 
 	}
 
-	PkgRelation dep(PkgName(cdep_Ci.name),cdep_Ci.compare,PkgEdition::fromString(cdep_Ci.version));
+	{
+	    PkgName name(cdep_Ci.name);
 
-//	D__ << dep << endl;
+	    if(cdep_Ci.name.substr(0,1) == "/")
+	    {
+		files.insert(name);
+	    }
 
-	dep.setPreReq(cdep_Ci.isprereq);
+	    PkgRelation dep(name,cdep_Ci.compare,PkgEdition::fromString(cdep_Ci.version));
 
-	deps.push_back(dep);
+	    dep.setPreReq(cdep_Ci.isprereq);
+
+	    deps.push_back(dep);
+	}
 
 	cdep_Ci.clear();
     }
@@ -710,6 +720,9 @@ RpmDb::getPackages (void)
     string value;
     string output;
 
+    typedef map<PkgNameEd, PMSolvablePtr> nameed2ptr_t; // used for filereqs
+    nameed2ptr_t mypackages;
+
     output = process->receiveLine();
 
     //
@@ -762,11 +775,15 @@ RpmDb::getPackages (void)
 			    buildtime );
 
 	    PMRpmPackageDataProviderPtr dataprovider = new PMRpmPackageDataProvider (this);
+	    PkgName name(pkgattribs[RPM_NAME]);
 	    PMPackagePtr p = new PMPackage(
-				PkgName(pkgattribs[RPM_NAME]),
+				name,
 				edi,
 				PkgArch(pkgattribs[RPM_ARCH]),
 			        dataprovider);
+
+	    
+	    mypackages[PkgNameEd(name,edi)] = p;
 
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type provides;
@@ -775,10 +792,10 @@ RpmDb::getPackages (void)
 
 	    PMSolvable::PkgRelList_type dummy;
 
-	    rpmdeps2rellist (pkgattribs[RPM_REQUIRES], requires);
-	    rpmdeps2rellist (pkgattribs[RPM_PROVIDES], provides);
-	    rpmdeps2rellist (pkgattribs[RPM_OBSOLETES], obsoletes);
-	    rpmdeps2rellist (pkgattribs[RPM_CONFLICTS], conflicts);
+	    rpmdeps2rellist (pkgattribs[RPM_REQUIRES], requires, _filerequires, true);
+	    rpmdeps2rellist (pkgattribs[RPM_PROVIDES], provides, _filerequires);
+	    rpmdeps2rellist (pkgattribs[RPM_OBSOLETES], obsoletes, _filerequires);
+	    rpmdeps2rellist (pkgattribs[RPM_CONFLICTS], conflicts, _filerequires, true);
 
 	    p->setRequires (requires);
 	    p->setProvides (provides);
@@ -802,6 +819,33 @@ RpmDb::getPackages (void)
     {
 	ERR << "RpmDB subprocess stop failed" << endl;
     }
+
+    // for all files
+    for(FileDeps::FileNames::iterator fileit = _filerequires.begin();
+	fileit != _filerequires.end(); ++fileit)
+    {
+	// query rpm, returns name-version-edition
+	string str = belongsTo(string(*fileit));
+	
+	if(str.empty())
+	    continue;
+	
+	PkgNameEd nameed = PkgNameEd::fromString(str);
+
+	nameed2ptr_t::iterator pkgit = mypackages.find(nameed);
+
+	if(pkgit == mypackages.end())
+	    continue;
+
+	PMSolvablePtr ptr = pkgit->second;
+
+	if(ptr == NULL)
+	    { INT << "ptr can not be NULL" << endl; continue; }
+
+	D__ << nameed.name << " provides " << *fileit << endl;
+	ptr->addProvides(*fileit);
+    }
+
     _packages_valid = true;
     return _packages;
 }
