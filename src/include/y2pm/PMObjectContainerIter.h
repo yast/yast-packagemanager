@@ -19,7 +19,6 @@
 #ifndef PMObjectContainerIter_h
 #define PMObjectContainerIter_h
 
-#include <iosfwd>
 #include <vector>
 #include <list>
 #include <set>
@@ -34,12 +33,13 @@
  * A PMObjectContainerIter allows to iterate various container classes
  * containing PMObjectPtr or derived classes. The concrete container to
  * iterate is passed as const & to the constructor and hidden inside a
- * pivate helperclass.
+ * pivate helper class.
  *
  * The public interface allows to iterate all PMObjectPtr stored in the
  * container whithout need to know the concrete containers type.
  *
  * Example:
+ *
  * <PRE>
  * void DoSomething( PMObjectContainerIter iter_r )
  * {
@@ -52,20 +52,24 @@
  * }
  * ...
  * {
- *   std::list<PMObjectPtr> objlist;
- *   std::set<PMPackagePtr> pkgset;
+ *   std::list&lt;PMObjectPtr> objlist;
+ *   std::set&lt;PMPackagePtr> pkgset;  // PMPackagePtr inherits PMObjectPtr
  *   ...
  *   DoSomething( objlist );
  *   DoSomething( pkgset );
  *   ...
  * }
- * </PRE>
+ * </PRE><P>
  *
- * @short Helperclass to iterate vector/list/set of PMObjectPtr.
+ * <B>Adding a new container type</B> is quite simple.<CODE>class PMObjectContainerIter::ContBase</CODE>
+ * defines the interface any helper class must provide. Create, or use an appropriate existing,
+ * helper class derived from <CODE>PMObjectContainerIter::ContBase</CODE>. Provide a constructor
+ * that takes the new container type as argument, creates the helper class from it, and stores it
+ * in <CODE>_cont</CODE>.
+ *
+ * @short Helperclass to iterate various container types of PMObjectPtr.
  **/
 class PMObjectContainerIter {
-
-  friend std::ostream & operator<<( std::ostream & str, const PMObjectContainerIter & obj );
 
   private:
 
@@ -76,36 +80,32 @@ class PMObjectContainerIter {
       public:
 	ContBase() {}
 	virtual ~ContBase() {}
-	virtual ContBase * clone() const = 0;
+	virtual ContBase *  clone()    const = 0;
       public:
-	virtual void setBegin() = 0;
-	virtual void setNext() = 0;
-	virtual bool atEnd() const = 0;
-	virtual PMObjectPtr get() const = 0;
-	virtual unsigned size() const = 0;
+	virtual void        setBegin()       = 0;
+	virtual void        setNext()        = 0;
+	virtual bool        atEnd()    const = 0;
+	virtual PMObjectPtr get()      const = 0;
+	virtual unsigned    size()     const = 0;
     };
 
     /**
      * @short Helper class hiding a std::vector, list or set.
      **/
-    template <class Ptr> class Cont : public ContBase {
+    template <class Ptr> class StdCont : public ContBase {
       private:
 	const Ptr &                  _cont;
 	typename Ptr::const_iterator _iter;
       public:
-	Cont( const Ptr & cont_r ) : _cont( cont_r ) {
-	  _iter = cont_r.begin();
-	}
-	virtual ~Cont() {}
-	virtual ContBase * clone() const {
-	  return new Cont( *this );
-	}
+	StdCont( const Ptr & cont_r ) : _cont( cont_r ) { _iter = cont_r.begin(); }
+	virtual ~StdCont() {}
+	virtual ContBase *  clone()    const { return new StdCont( *this ); }
       public:
- 	virtual void setBegin() { _iter = _cont.begin(); }
-	virtual void setNext() { ++_iter; }
-	virtual bool atEnd() const { return ( _iter == _cont.end() ); }
-	virtual PMObjectPtr get() const { return *_iter; }
-	virtual unsigned size() const { return _cont.size(); }
+ 	virtual void        setBegin()       { _iter = _cont.begin(); }
+	virtual void        setNext()        { ++_iter; }
+	virtual bool        atEnd()    const { return ( _iter == _cont.end() ); }
+	virtual PMObjectPtr get()      const { return *_iter; }
+	virtual unsigned    size()     const { return _cont.size(); }
    };
 
   private:
@@ -115,25 +115,26 @@ class PMObjectContainerIter {
   public:
 
     PMObjectContainerIter( const std::vector<PMObjectPtr> & cont_r ) {
-      _cont = new Cont<std::vector<PMObjectPtr> >( cont_r );
+      _cont = new StdCont<std::vector<PMObjectPtr> >( cont_r );
     }
     PMObjectContainerIter( const std::list<PMObjectPtr> & cont_r ) {
-      _cont = new Cont<std::list<PMObjectPtr> >( cont_r );
+      _cont = new StdCont<std::list<PMObjectPtr> >( cont_r );
     }
     PMObjectContainerIter( const std::set<PMObjectPtr> & cont_r ) {
-      _cont = new Cont<std::set<PMObjectPtr> >( cont_r );
+      _cont = new StdCont<std::set<PMObjectPtr> >( cont_r );
     }
 
     PMObjectContainerIter( const std::vector<PMPackagePtr> & cont_r ) {
-      _cont = new Cont<std::vector<PMPackagePtr> >( cont_r );
+      _cont = new StdCont<std::vector<PMPackagePtr> >( cont_r );
     }
     PMObjectContainerIter( const std::list<PMPackagePtr> & cont_r ) {
-      _cont = new Cont<std::list<PMPackagePtr> >( cont_r );
+      _cont = new StdCont<std::list<PMPackagePtr> >( cont_r );
     }
     PMObjectContainerIter( const std::set<PMPackagePtr> & cont_r ) {
-      _cont = new Cont<std::set<PMPackagePtr> >( cont_r );
+      _cont = new StdCont<std::set<PMPackagePtr> >( cont_r );
     }
 
+  public:
 
     PMObjectContainerIter( const PMObjectContainerIter & rhs ) : _cont( 0 ) {
       if ( rhs._cont ) {
@@ -165,7 +166,7 @@ class PMObjectContainerIter {
     void setBegin() { _cont->setBegin(); }
 
     /**
-     * Advance iterator.
+     * Advance iterator to next element.
      **/
     void setNext() { _cont->setNext(); }
 
@@ -180,6 +181,15 @@ class PMObjectContainerIter {
      **/
     PMObjectPtr operator * () const { return _cont->get(); }
 
+    /**
+     * Access the PMObject referenced by the PMObjectPtr located at the current
+     * iterator position. If atEnd() is true, the behaviour is undefined.
+     * It's a shortcut for <CODE>(*iter)-></CODE>.
+     *
+     * Keep in mind that <CODE>operator -></CODE>is special. The <CODE>PMObjectPtr</CODE>
+     * returned is in fact an intermediate result to which the base semantics of
+     * <CODE>-></CODE> is then applied, yielding a result.
+     **/
     PMObjectPtr operator -> () const { return _cont->get(); }
 
     /**

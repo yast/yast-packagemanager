@@ -24,10 +24,6 @@
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMObject.h>
 
-#ifndef Y2LOG
-#define Y2LOG __FILE__
-#endif
-
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////

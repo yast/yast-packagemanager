@@ -4,8 +4,13 @@
 
 SUBDIRS = include
 
-CPPFLAGS = -DY2LOG=__FILE__
-INCLUDES = -I$(top_srcdir)/src/include -I$(QTDIR)/include -I$(includedir) -I$(top_srcdir)/src/media/include
+# first look into source tree, then into $(includedir)
+INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
+		include	\
+		pkg/include	\
+		inst/include	\
+		media/include	\
+	   ) -I$(includedir) -I$(QTDIR)/include
 
 lib_LTLIBRARIES = liby2pmMedia.la
 

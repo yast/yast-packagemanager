@@ -19,10 +19,6 @@
 
 #include <iostream>
 
-#ifndef Y2LOG
-#define Y2LOG __FILE__
-#endif
-
 #include <y2util/Y2SLog.h>
 #include <y2pm/PMPackageManager.h>
 
