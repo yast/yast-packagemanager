@@ -19,8 +19,20 @@
                 The tag sets are needed for the TagParser. 
 /-*/
 
+#ifndef InstSrcTags_h
+#define InstSrcTags_h
+
 #include <fstream>
 #include <y2util/CommonPkdParser.h>
+
+
+const std::string ArchTag = "=Arch";
+const std::string TypeTag = "=Type";
+const std::string UrlTag  = "=URL";
+const std::string ProdDirTag = "=ProductDir";
+const std::string DefActTag = "=Default_activate";
+const std::string MediaBTag = "+Media";
+const std::string MediaETag = "-Media";
 
 
 ///////////////////////////////////////////////////////////////////
@@ -50,13 +62,13 @@ public:
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
-	createTag( "=Arch", ARCH );
-	createTag( "=Type", TYPE );
-	createTag( "=URL", URL );
-	createTag( "=ProductDir", PRODUCTDIR );
-	createTag( "=Default_activate", ACTIVATE );
-	t = createTag( "+Media", MEDIA );
-	t->setEndTag("-Media");
+	createTag( ArchTag, ARCH );
+	createTag( TypeTag, TYPE );
+	createTag( UrlTag, URL );
+	createTag( ProdDirTag, PRODUCTDIR );
+	createTag( DefActTag, ACTIVATE );
+	t = createTag( MediaBTag, MEDIA );
+	t->setEndTag( MediaETag );
     };
 
 private:
@@ -72,3 +84,5 @@ private:
     }
     
 };
+
+#endif // InstSrcTags_h
