@@ -2,8 +2,8 @@
 # Makefile.am for packagemanager/src
 #
 
-#SUBDIRS = include inst pkg sel you media libPkgDep query
-SUBDIRS = include media inst pkg sel you  libPkgDep
+SUBDIRS = include inst pkg sel you media libPkgDep query
+#SUBDIRS = include media inst pkg sel you  libPkgDep
 
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
