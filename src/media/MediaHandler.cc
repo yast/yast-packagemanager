@@ -47,11 +47,10 @@ using namespace std;
 //
 MediaHandler::MediaHandler ( const Url &      url_r,
 			     const Pathname & attach_point_r,
-			     const bool       attachPoint_is_mediaroot_r,
+			     const Pathname & urlpath_below_attachpoint_r,
 			     const bool       does_download_r )
     : _attachPoint( attach_point_r )
     , _tmp_attachPoint( false )
-    , _attachPoint_is_mediaroot( attachPoint_is_mediaroot_r )
     , _does_download( does_download_r )
     , _isAttached( false )
     , _url( url_r )
@@ -114,9 +113,7 @@ MediaHandler::MediaHandler ( const Url &      url_r,
   ///////////////////////////////////////////////////////////////////
 
   if ( !_attachPoint.empty() ) {
-    _localRoot = _attachPoint;
-    if ( _attachPoint_is_mediaroot )
-      _localRoot += _url.path();
+    _localRoot = _attachPoint + urlpath_below_attachpoint_r;
   }
 }
 
@@ -183,7 +180,7 @@ PMError MediaHandler::attach( bool next )
 //	NAME: limitFileNamesInPath
 //      DESCR: Looks into pathname and looks if any path component
 //             is longer than maxLen. If it is, this component
-//             is replaced by a shortened one. The shortened 
+//             is replaced by a shortened one. The shortened
 //             Pathname is returned.
 
 static Pathname limitFileNamesInPath(const Pathname &pathname, int maxLen)
@@ -217,11 +214,11 @@ static Pathname limitFileNamesInPath(const Pathname &pathname, int maxLen)
                 sum += base[i];
             }
             ostringstream os;
-            os << base.substr(0,splitPos1) 
+            os << base.substr(0,splitPos1)
                << "~" << hex << (sum & (unsigned) 0xffff) << "~"
                << base.substr(splitPos2);
             string base2 = os.str();
-            WAR << "limitFileNamesInPath: " 
+            WAR << "limitFileNamesInPath: "
                 << "'" << base << "' -> '" << base2 << "'" << endl;
             base = base2;
         }
@@ -251,8 +248,8 @@ Pathname MediaHandler::localPath( const Pathname & pathname ) const {
     return _localRoot + limitFileNamesInPath(pathname.absolutename(),maxLen);
 }
 
-            
-                
+
+
 
 
 ///////////////////////////////////////////////////////////////////

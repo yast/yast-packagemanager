@@ -46,7 +46,7 @@ using namespace std;
 MediaNFS::MediaNFS( const Url &      url_r,
 		    const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
-		    false, // attachPoint_is_mediaroot
+		    "/", // urlpath at attachpoint
 		    false ) // does_download
 {
 }

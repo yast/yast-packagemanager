@@ -28,13 +28,31 @@
 //	CLASS NAME : MediaSMB
 /**
  * @short Implementation class for SMB MediaHandler
+ *
+ * NOTE: The implementation currently serves both, "smbfs"
+ * and "cifs". The only difference is the vfstype passed to
+ * the mount command.
  * @see MediaHandler
  **/
 class MediaSMB : public MediaHandler {
 
+  private:
+
+    /**
+     * vfstype for mount. This is either "smbfs"
+     * or "cifs" (rewritten by MediaCIFS).
+     **/
+    const char* _vfstype;
+
   protected:
 
     MEDIA_HANDLER_API;
+
+    /**
+     * MediaCIFS rewrites the vfstype to "cifs"
+     * within it's constructor.
+     **/
+    void mountAsCIFS() { _vfstype = "cifs"; }
 
   public:
 

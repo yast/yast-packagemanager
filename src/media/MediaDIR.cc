@@ -47,7 +47,7 @@ using namespace std;
 MediaDIR::MediaDIR( const Url &      url_r,
 		    const Pathname & /*attach_point_hint_r*/ )
     : MediaHandler( url_r, url_r.path(),
-		    false, // attachPoint_is_mediaroot
+		    "/", // urlpath at attachpoint
 		    false ) // does_download
 {
 }

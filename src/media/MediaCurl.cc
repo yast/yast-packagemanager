@@ -66,7 +66,7 @@ static inline string escapedPath( string path_r ) {
 MediaCurl::MediaCurl( const Url &      url_r,
 		      const Pathname & attach_point_hint_r )
     : MediaHandler( url_r, attach_point_hint_r,
-		    false, // attachPoint_is_mediaroot
+		    "/", // urlpath at attachpoint
 		    true ), // does_download
       _curl( 0 ), _connected( false )
 {

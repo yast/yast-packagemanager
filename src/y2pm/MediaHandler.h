@@ -68,16 +68,11 @@ class MediaHandler {
 	bool _tmp_attachPoint;
 
 	/**
-	 * True if the medias root dir will be attached to _attachPoint (e.g. CD).
-	 * If so, filenames are relative to '_attachPoint + _url.getPath()'.
-	 *
-	 * If not (e.g. DIR, NFS) filenames are relative to '_attachPoint'.
-	 **/
-	bool _attachPoint_is_mediaroot;
-
-	/**
-	 * Dependent on _attachPoint_is_mediaroot either _attachPoint or
-	 * '_attachPoint + _url.getPath()'.
+	 * The local directory that corresponds to the media url.
+	 * With NFS it's the '_attachPoint', as the directory on the
+	 * server is mounted. With CD/DVD it's 'attach point+_url.path()'
+	 * because the CDs root directory is mounted. And with CIFS
+	 * it's '_url.path() without the shares name'.
 	 **/
 	Pathname _localRoot;
 
@@ -236,7 +231,7 @@ class MediaHandler {
 	 **/
 	MediaHandler ( const Url&       url_r,
 		       const Pathname & attach_point_r,
-		       const bool       attachPoint_is_mediaroot_r,
+		       const Pathname & urlpath_below_attachpoint_r,
 		       const bool       does_download_r );
 
 	/**
