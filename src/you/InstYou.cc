@@ -155,7 +155,21 @@ void InstYou::init()
   _installedPatches = 0;
 
   SysConfig syscfg( "onlineupdate" );
-  _usedeltas = syscfg.readBoolEntry("YOU_USE_DELTAS", true);
+
+  string usedeltas = syscfg.readEntry("YOU_USE_DELTAS");
+
+  if(usedeltas.empty() || usedeltas == "yes")
+  {
+    _usedeltas = ANY_DELTAS;
+  }
+  else if(usedeltas == "filesystem")
+  {
+    _usedeltas = ONLY_FS_DELTAS;
+  }
+  else
+  {
+    _usedeltas = NO_DELTAS;
+  }
 
   if(_usedeltas)
   {
@@ -276,23 +290,6 @@ PMError InstYou::retrievePatchInfo()
       bool havedelta = false;
       if(_usedeltas)
       {
-#if 0
-	std::list<PMPackageDelta> d = (*itPkg)->deltas();
-	std::list<PMPackageDelta>::iterator it = d.begin();
-	std::list<PMPackageDelta>::iterator end = d.end();
-	for(; it != end; ++it)
-	{
-	  PMPackagePtr basepkg = getPackageForDelta((*itPkg), *it);
-	  if(basepkg)
-	  {
-	    DBG << "delta " << it->filename() << " fits "
-	      <<  basepkg->nameEd() << ", new size" << it->size() << endl;
-	    _info->packageDataProvider()->setArchiveSize( *itPkg, it->size() );
-	    havedelta = true;
-	    break;
-	  }
-	}
-#endif
 	DeltaToApply* delta = FetchSuitableDelta(*itPatch, *itPkg, true);
 	if(delta)
 	{
@@ -1264,6 +1261,9 @@ static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackage
  * */
 InstYou::DeltaToApply* InstYou::FetchSuitableDelta(PMYouPatchPtr patch, PMPackagePtr pkg, bool quickcheck)
 {
+  if(!_usedeltas)
+    return NULL;
+
   std::list<PMPackageDelta> d = pkg->deltas();
   std::list<PMPackageDelta>::iterator it = d.begin();
   std::list<PMPackageDelta>::iterator end = d.end();
@@ -1278,7 +1278,7 @@ InstYou::DeltaToApply* InstYou::FetchSuitableDelta(PMYouPatchPtr patch, PMPackag
       from_filesystem = true;
       fetch_delta = true;
     }
-    else
+    else if(_usedeltas == ANY_DELTAS)
     {
       basepkg = getPackageForDelta(pkg, *it);
       if(basepkg)

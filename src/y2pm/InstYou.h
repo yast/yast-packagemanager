@@ -369,7 +369,12 @@ class InstYou {
 
     int _currentMediaNumber;
     
-    bool _usedeltas;
+    enum
+    {
+      NO_DELTAS = 0,  // never use deltas
+      ONLY_FS_DELTAS, // use deltas if they apply to installed files
+      ANY_DELTAS,     // also use deltas that require a base rpm
+    } _usedeltas;
 
   public:
     class DeltaToApply;
