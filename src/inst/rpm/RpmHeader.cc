@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       RpmLibHeader.cc
+  File:       RpmHeader.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -21,6 +21,8 @@
 
 extern "C" {
 #include <rpm/rpmlib.h>
+#include <rpm/rpmts.h>
+#include <netinet/in.h>
 }
 
 #include <iostream>
@@ -30,131 +32,132 @@ extern "C" {
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
 
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeader.h>
 #include <y2pm/PkgDu.h>
 
 using namespace std;
 
 #undef Y2LOG
-#define Y2LOG "RpmLibHeader"
+#define Y2LOG "RpmHeader"
 
 ///////////////////////////////////////////////////////////////////
-//	CLASS NAME : RpmLibHeaderPtr
-//	CLASS NAME : constRpmLibHeaderPtr
+//	CLASS NAME : RpmHeaderPtr
+//	CLASS NAME : constRpmHeaderPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(RpmLibHeader,binHeader,binHeader);
+IMPL_DERIVED_POINTER(RpmHeader,binHeader,binHeader);
 
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::RpmLibHeader
+//	METHOD NAME : RpmHeader::RpmHeader
 //	METHOD TYPE : Constructor
 //
 //	DESCRIPTION :
 //
-RpmLibHeader::RpmLibHeader( Header h_r, bool isSrc )
+RpmHeader::RpmHeader( Header h_r )
     : binHeader( h_r )
-    , _isSrc( isSrc )
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::RpmLibHeader
+//	METHOD NAME : RpmHeader::RpmHeader
 //	METHOD TYPE : Constructor
 //
-RpmLibHeader::RpmLibHeader( binHeaderPtr & rhs, bool isSrc )
+RpmHeader::RpmHeader( binHeaderPtr & rhs )
     : binHeader( rhs )
-    , _isSrc( isSrc )
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::~RpmLibHeader
+//	METHOD NAME : RpmHeader::~RpmHeader
 //	METHOD TYPE : Destructor
 //
 //	DESCRIPTION :
 //
-RpmLibHeader::~RpmLibHeader()
+RpmHeader::~RpmHeader()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::readPackage
-//	METHOD TYPE : constRpmLibHeaderPtr
+//	METHOD NAME : RpmHeader::readPackage
+//	METHOD TYPE : constRpmHeaderPtr
 //
-#warning OLD RPMAPI CHECK IT
-static int rpmReadPackageHeader(FD_t fd, Header * hdr, int * isSource, int * major, int * minor ) {
-  INT << "Illegal use of old api: " << __FUNCTION__ << endl;
-  * hdr = 0;
-  * isSource = 0;
-  * major = 0;
-  * minor = 0;
-  return -1;
-}
-constRpmLibHeaderPtr RpmLibHeader::readPackage( const Pathname & path_r )
+constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r )
 {
   PathInfo file( path_r );
   if ( ! file.isFile() ) {
     ERR << "Not a file: " << file << endl;
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
-  FD_t fd = ::Fopen( file.asString().c_str(), "r" );
+  FD_t fd = ::Fopen( file.asString().c_str(), "r.ufdio" );
   if ( fd == 0 || ::Ferror(fd) ) {
     ERR << "Can't open file for reading: " << file << " (" << ::Fstrerror(fd) << ")" << endl;
     if ( fd )
       ::Fclose( fd );
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
-  Header nh    = 0;
-  int isSource = 0;
-  int major    = 0;
-  int minor    = 0;
-
-  int res = ::rpmReadPackageHeader( fd, &nh, &isSource, &major, &minor );
-  ::Fclose( fd );
-  if ( res || !nh ) {
-    ERR << "Error reading: " << file << (res==1?" (bad magic)":"") << endl;
-    return (RpmLibHeader*)0;
+  rpmts ts = rpmtsCreate();
+  Header nh = 0;
+  int res = ::rpmReadPackageFile( ts, fd, path_r.asString().c_str(), &nh );
+  ts = rpmtsFree(ts);
+  if ( ! nh ) {
+    WAR << "Error reading header from " << path_r << " error(" << res << ")" << endl;
+    ::Fclose( fd );
+    return (RpmHeader*)0;
   }
 
-  constRpmLibHeaderPtr h( new RpmLibHeader( nh, isSource ) );
-  MIL << major << "." << minor << "-" << (isSource?"src ":"bin ") << h << " from " << path_r << endl;
+  constRpmHeaderPtr h( new RpmHeader( nh ) );
+  headerFree( nh ); // clear reference set in ReadPackageFile
+
+  MIL << h << " from " << path_r << endl;
   return h;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::dumpOn
+//	METHOD NAME : RpmHeader::dumpOn
 //	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-ostream & RpmLibHeader::dumpOn( ostream & str ) const
+ostream & RpmHeader::dumpOn( ostream & str ) const
 {
   binHeader::dumpOn( str );
-  return binHeader::dumpOn( str ) << '{' << tag_name() << "-" << tag_edition() << ( _isSrc ? ".src}" : "}");
+  return binHeader::dumpOn( str ) << '{' << tag_name() << "-" << tag_edition() << ( isSrc() ? ".src}" : "}");
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmHeader::isSrc
+//	METHOD TYPE : bool
+//
+bool RpmHeader::isSrc() const
+{
+  return has_tag( RPMTAG_SOURCEPACKAGE );
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_name
+//	METHOD NAME : RpmHeader::tag_name
 //	METHOD TYPE : PkgName
 //
 //	DESCRIPTION :
 //
-PkgName RpmLibHeader::tag_name() const
+PkgName RpmHeader::tag_name() const
 {
   return PkgName( string_val( RPMTAG_NAME ) );
 }
@@ -162,12 +165,12 @@ PkgName RpmLibHeader::tag_name() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_edition
+//	METHOD NAME : RpmHeader::tag_edition
 //	METHOD TYPE : PkgEdition
 //
 //	DESCRIPTION :
 //
-PkgEdition RpmLibHeader::tag_edition() const
+PkgEdition RpmHeader::tag_edition() const
 {
   return PkgEdition( int_val   ( RPMTAG_EPOCH ),
 		     string_val( RPMTAG_VERSION ),
@@ -178,12 +181,12 @@ PkgEdition RpmLibHeader::tag_edition() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_arch
+//	METHOD NAME : RpmHeader::tag_arch
 //	METHOD TYPE : PkgArch
 //
 //	DESCRIPTION :
 //
-PkgArch RpmLibHeader::tag_arch() const
+PkgArch RpmHeader::tag_arch() const
 {
   return PkgArch( string_val( RPMTAG_ARCH ) );
 }
@@ -191,12 +194,12 @@ PkgArch RpmLibHeader::tag_arch() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_installtime
+//	METHOD NAME : RpmHeader::tag_installtime
 //	METHOD TYPE : Date
 //
 //	DESCRIPTION :
 //
-Date RpmLibHeader::tag_installtime() const
+Date RpmHeader::tag_installtime() const
 {
   return int_val( RPMTAG_INSTALLTIME );
 }
@@ -204,12 +207,12 @@ Date RpmLibHeader::tag_installtime() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_buildtime
+//	METHOD NAME : RpmHeader::tag_buildtime
 //	METHOD TYPE : Date
 //
 //	DESCRIPTION :
 //
-Date RpmLibHeader::tag_buildtime() const
+Date RpmHeader::tag_buildtime() const
 {
   return int_val( RPMTAG_BUILDTIME );
 }
@@ -217,12 +220,12 @@ Date RpmLibHeader::tag_buildtime() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::PkgRelList_val
+//	METHOD NAME : RpmHeader::PkgRelList_val
 //	METHOD TYPE : unsigned
 //
 //	DESCRIPTION :
 //
-PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( tag tag_r, FileDeps::FileNames * freq_r ) const
+PMSolvable::PkgRelList_type RpmHeader::PkgRelList_val( tag tag_r, FileDeps::FileNames * freq_r ) const
 {
   PMSolvable::PkgRelList_type ret;
 
@@ -321,12 +324,12 @@ PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( tag tag_r, FileDeps::F
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_provides
+//	METHOD NAME : RpmHeader::tag_provides
 //	METHOD TYPE : PMSolvable::PkgRelList_type
 //
 //	DESCRIPTION :
 //
-PMSolvable::PkgRelList_type RpmLibHeader::tag_provides( FileDeps::FileNames * freq_r ) const
+PMSolvable::PkgRelList_type RpmHeader::tag_provides( FileDeps::FileNames * freq_r ) const
 {
   return PkgRelList_val( RPMTAG_PROVIDENAME, freq_r );
 }
@@ -334,12 +337,12 @@ PMSolvable::PkgRelList_type RpmLibHeader::tag_provides( FileDeps::FileNames * fr
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_requires
+//	METHOD NAME : RpmHeader::tag_requires
 //	METHOD TYPE : PMSolvable::PkgRelList_type
 //
 //	DESCRIPTION :
 //
-PMSolvable::PkgRelList_type RpmLibHeader::tag_requires( FileDeps::FileNames * freq_r ) const
+PMSolvable::PkgRelList_type RpmHeader::tag_requires( FileDeps::FileNames * freq_r ) const
 {
   return PkgRelList_val( RPMTAG_REQUIRENAME, freq_r );
 }
@@ -347,12 +350,12 @@ PMSolvable::PkgRelList_type RpmLibHeader::tag_requires( FileDeps::FileNames * fr
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_conflicts
+//	METHOD NAME : RpmHeader::tag_conflicts
 //	METHOD TYPE : PMSolvable::PkgRelList_type
 //
 //	DESCRIPTION :
 //
-PMSolvable::PkgRelList_type RpmLibHeader::tag_conflicts( FileDeps::FileNames * freq_r ) const
+PMSolvable::PkgRelList_type RpmHeader::tag_conflicts( FileDeps::FileNames * freq_r ) const
 {
   return PkgRelList_val( RPMTAG_CONFLICTNAME, freq_r );
 }
@@ -360,12 +363,12 @@ PMSolvable::PkgRelList_type RpmLibHeader::tag_conflicts( FileDeps::FileNames * f
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_obsoletes
+//	METHOD NAME : RpmHeader::tag_obsoletes
 //	METHOD TYPE : PMSolvable::PkgRelList_type
 //
 //	DESCRIPTION :
 //
-PMSolvable::PkgRelList_type RpmLibHeader::tag_obsoletes( FileDeps::FileNames * freq_r ) const
+PMSolvable::PkgRelList_type RpmHeader::tag_obsoletes( FileDeps::FileNames * freq_r ) const
 {
   return PkgRelList_val( RPMTAG_OBSOLETENAME, freq_r );
 }
@@ -373,12 +376,12 @@ PMSolvable::PkgRelList_type RpmLibHeader::tag_obsoletes( FileDeps::FileNames * f
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_size
+//	METHOD NAME : RpmHeader::tag_size
 //	METHOD TYPE : FSize
 //
 //	DESCRIPTION :
 //
-FSize RpmLibHeader::tag_size() const
+FSize RpmHeader::tag_size() const
 {
   return int_val( RPMTAG_SIZE );
 }
@@ -386,12 +389,12 @@ FSize RpmLibHeader::tag_size() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_archivesize
+//	METHOD NAME : RpmHeader::tag_archivesize
 //	METHOD TYPE : FSize
 //
 //	DESCRIPTION :
 //
-FSize RpmLibHeader::tag_archivesize() const
+FSize RpmHeader::tag_archivesize() const
 {
   return int_val( RPMTAG_ARCHIVESIZE );
 }
@@ -399,12 +402,12 @@ FSize RpmLibHeader::tag_archivesize() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_summary
+//	METHOD NAME : RpmHeader::tag_summary
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_summary() const
+std::string RpmHeader::tag_summary() const
 {
   return string_val( RPMTAG_SUMMARY );
 }
@@ -412,12 +415,12 @@ std::string RpmLibHeader::tag_summary() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_description
+//	METHOD NAME : RpmHeader::tag_description
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_description() const
+std::string RpmHeader::tag_description() const
 {
   return string_val( RPMTAG_DESCRIPTION );
 }
@@ -425,12 +428,12 @@ std::string RpmLibHeader::tag_description() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_group
+//	METHOD NAME : RpmHeader::tag_group
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_group() const
+std::string RpmHeader::tag_group() const
 {
   return string_val( RPMTAG_GROUP );
 }
@@ -438,12 +441,12 @@ std::string RpmLibHeader::tag_group() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_vendor
+//	METHOD NAME : RpmHeader::tag_vendor
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_vendor() const
+std::string RpmHeader::tag_vendor() const
 {
   return string_val( RPMTAG_VENDOR );
 }
@@ -451,12 +454,12 @@ std::string RpmLibHeader::tag_vendor() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_distribution
+//	METHOD NAME : RpmHeader::tag_distribution
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_distribution() const
+std::string RpmHeader::tag_distribution() const
 {
   return string_val( RPMTAG_DISTRIBUTION );
 }
@@ -464,12 +467,12 @@ std::string RpmLibHeader::tag_distribution() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_license
+//	METHOD NAME : RpmHeader::tag_license
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_license() const
+std::string RpmHeader::tag_license() const
 {
   return string_val( RPMTAG_LICENSE );
 }
@@ -477,12 +480,12 @@ std::string RpmLibHeader::tag_license() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_buildhost
+//	METHOD NAME : RpmHeader::tag_buildhost
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_buildhost() const
+std::string RpmHeader::tag_buildhost() const
 {
   return string_val( RPMTAG_BUILDHOST );
 }
@@ -490,12 +493,12 @@ std::string RpmLibHeader::tag_buildhost() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_packager
+//	METHOD NAME : RpmHeader::tag_packager
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_packager() const
+std::string RpmHeader::tag_packager() const
 {
   return string_val( RPMTAG_PACKAGER );
 }
@@ -503,12 +506,12 @@ std::string RpmLibHeader::tag_packager() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_url
+//	METHOD NAME : RpmHeader::tag_url
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_url() const
+std::string RpmHeader::tag_url() const
 {
   return string_val( RPMTAG_URL );
 }
@@ -516,12 +519,12 @@ std::string RpmLibHeader::tag_url() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_os
+//	METHOD NAME : RpmHeader::tag_os
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_os() const
+std::string RpmHeader::tag_os() const
 {
   return string_val( RPMTAG_OS );
 }
@@ -529,12 +532,12 @@ std::string RpmLibHeader::tag_os() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_prein
+//	METHOD NAME : RpmHeader::tag_prein
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_prein() const
+std::string RpmHeader::tag_prein() const
 {
   return string_val( RPMTAG_PREIN );
 }
@@ -542,12 +545,12 @@ std::string RpmLibHeader::tag_prein() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_postin
+//	METHOD NAME : RpmHeader::tag_postin
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_postin() const
+std::string RpmHeader::tag_postin() const
 {
   return string_val( RPMTAG_POSTIN );
 }
@@ -555,12 +558,12 @@ std::string RpmLibHeader::tag_postin() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_preun
+//	METHOD NAME : RpmHeader::tag_preun
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_preun() const
+std::string RpmHeader::tag_preun() const
 {
   return string_val( RPMTAG_PREUN );
 }
@@ -568,12 +571,12 @@ std::string RpmLibHeader::tag_preun() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_postun
+//	METHOD NAME : RpmHeader::tag_postun
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_postun() const
+std::string RpmHeader::tag_postun() const
 {
   return string_val( RPMTAG_POSTUN );
 }
@@ -581,12 +584,12 @@ std::string RpmLibHeader::tag_postun() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_sourcerpm
+//	METHOD NAME : RpmHeader::tag_sourcerpm
 //	METHOD TYPE : std::string
 //
 //	DESCRIPTION :
 //
-std::string RpmLibHeader::tag_sourcerpm() const
+std::string RpmHeader::tag_sourcerpm() const
 {
   return string_val( RPMTAG_SOURCERPM );
 }
@@ -594,12 +597,12 @@ std::string RpmLibHeader::tag_sourcerpm() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_filenames
+//	METHOD NAME : RpmHeader::tag_filenames
 //	METHOD TYPE : std::list<std::string>
 //
 //	DESCRIPTION :
 //
-std::list<std::string> RpmLibHeader::tag_filenames() const
+std::list<std::string> RpmHeader::tag_filenames() const
 {
   std::list<std::string> ret;
 
@@ -620,12 +623,12 @@ std::list<std::string> RpmLibHeader::tag_filenames() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_changelog
+//	METHOD NAME : RpmHeader::tag_changelog
 //	METHOD TYPE : PkgChangelog
 //
 //	DESCRIPTION :
 //
-PkgChangelog RpmLibHeader::tag_changelog() const
+PkgChangelog RpmHeader::tag_changelog() const
 {
   PkgChangelog ret;
 
@@ -646,12 +649,12 @@ PkgChangelog RpmLibHeader::tag_changelog() const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeader::tag_du
+//	METHOD NAME : RpmHeader::tag_du
 //	METHOD TYPE : PkgDu &
 //
 //	DESCRIPTION :
 //
-PkgDu & RpmLibHeader::tag_du( PkgDu & dudata_r ) const
+PkgDu & RpmHeader::tag_du( PkgDu & dudata_r ) const
 {
   dudata_r.clear();
   stringList basenames;

@@ -39,7 +39,7 @@
 #include <y2pm/PMPackagePtr.h>
 
 #include <y2pm/InstTargetError.h>
-#include <y2pm/RpmLibHeaderPtr.h>
+#include <y2pm/RpmHeaderPtr.h>
 #include <y2pm/FileDeps.h>
 
 ///////////////////////////////////////////////////////////////////
@@ -74,13 +74,9 @@ class RpmDb: virtual public Rep
   public:
 
     /**
-     * set logfile for progress log.
-     *
-     * @param filename file to log into, empty to disable logging
-     *
-     * @return true if file was successfully opened
-     * */
-    bool setInstallationLogfile( const Pathname & filename );
+     * Set logfile for progress log. Empty filename to disable logging.
+     **/
+    static bool setInstallationLogfile( const Pathname & filename );
 
     ///////////////////////////////////////////////////////////////////
     //
@@ -242,7 +238,86 @@ class RpmDb: virtual public Rep
      **/
     PMError rebuildDatabase();
 
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Cached RPM database retrieval via librpm.
+    //
+    ///////////////////////////////////////////////////////////////////
+  private:
 
+    class Packages;
+
+    Packages & _packages;
+
+    FileDeps::FileNames _filerequires;
+
+  public:
+
+    /**
+     * If necessary build, and return the list of all installed packages.
+     **/
+    const std::list<PMPackagePtr> & getPackages();
+
+    /**
+     * Hack to lookup required and conflicting file relations.
+     **/
+    void traceFileRel( const PkgRelation & rel_r );
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Direct RPM database retrieval via librpm.
+    //
+    ///////////////////////////////////////////////////////////////////
+  public:
+
+    /**
+     * Return true if at least one package owns a certain file.
+     **/
+    bool hasFile( const std::string & file_r ) const;
+
+    /**
+     * Return true if at least one package provides a certain tag.
+     **/
+    bool hasProvides( const std::string & tag_r ) const;
+
+    /**
+     * Return true if at least one package requires a certain tag.
+     **/
+    bool hasRequiredBy( const std::string & tag_r ) const;
+
+    /**
+     * Return true if at least one package conflicts with a certain tag.
+     **/
+    bool hasConflicts( const std::string & tag_r ) const;
+
+    /**
+     * Return true if package is installed.
+     **/
+    bool hasPackage( const PkgName & name_r ) const;
+
+    /**
+     * Get an installed packages data from rpmdb. Package is
+     * identified by name. Data returned via result are NULL,
+     * if packge is not installed (PMError is not set), or RPM database
+     * could not be read (PMError is set).
+     **/
+    PMError getData( const PkgName & name_r,
+		     constRpmHeaderPtr & result_r ) const;
+
+    /**
+     * Get an installed packages data from rpmdb. Package is
+     * identified by name and edition. Data returned via result are NULL,
+     * if packge is not installed (PMError is not set), or RPM database
+     * could not be read (PMError is set).
+     **/
+    PMError getData( const PkgName & name_r, const PkgEdition & ed_r,
+		     constRpmHeaderPtr & result_r ) const;
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    //
+    //
+    ///////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////
     //
     ///////////////////////////////////////////////////////////////////
@@ -300,12 +375,6 @@ class RpmDb: virtual public Rep
     bool _warndirexists;
 
     /**
-     * helper for queryPackage
-     * */
-    bool queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::string& result_r);
-    bool queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::list<std::string>& result_r);
-
-    /**
      * handle rpm messages like "/etc/testrc saved as /etc/testrc.rpmorig"
      *
      * @param line rpm output starting with warning:
@@ -359,87 +428,6 @@ class RpmDb: virtual public Rep
       CHK_OTHER_FAILURE     = 0x40  // rpm failed for some reason
       };
 
-    ///////////////////////////////////////////////////////////////////
-    //
-    // Cached RPM database retrieval via librpm.
-    //
-    ///////////////////////////////////////////////////////////////////
-  private:
-
-    class Packages;
-
-    Packages & _packages;
-
-    FileDeps::FileNames _filerequires;
-
-  public:
-
-    /**
-     * If necessary build, and return the list of all installed packages.
-     **/
-    const std::list<PMPackagePtr> & getPackages();
-
-    ///////////////////////////////////////////////////////////////////
-    //
-    // Direct RPM database retrieval via librpm.
-    //
-    ///////////////////////////////////////////////////////////////////
-  public:
-
-    /**
-     * Return true if at least one package owns a certain file.
-     **/
-    bool hasFile( const std::string & file_r ) const;
-
-    /**
-     * Return true if at least one package provides a certain tag.
-     **/
-    bool hasProvides( const std::string & tag_r ) const;
-
-    /**
-     * Return true if at least one package requires a certain tag.
-     **/
-    bool hasRequiredBy( const std::string & tag_r ) const;
-
-    /**
-     * Return true if at least one package conflicts with a certain tag.
-     **/
-    bool hasConflicts( const std::string & tag_r ) const;
-
-    /**
-     * Return true if package is installed.
-     **/
-    bool hasPackage( const PkgName & name_r ) const;
-
-    /**
-     * Get an installed packages data from rpmdb. Package is
-     * identified by name. Data returned via result are NULL,
-     * if packge is not installed (PMError is not set), or RPM database
-     * could not be read (PMError is set).
-     **/
-    PMError getData( const PkgName & name_r,
-		     constRpmLibHeaderPtr & result_r ) const;
-
-    /**
-     * Get an installed packages data from rpmdb. Package is
-     * identified by name and edition. Data returned via result are NULL,
-     * if packge is not installed (PMError is not set), or RPM database
-     * could not be read (PMError is set).
-     **/
-    PMError getData( const PkgName & name_r, const PkgEdition & ed_r,
-		     constRpmLibHeaderPtr & result_r ) const;
-
-    /**
-     * Get an accessible packages data from disk. Data returned via
-     * result are NULL on any error.
-     **/
-    static PMError getData( const Pathname & path, constRpmLibHeaderPtr & result_r );
-
-    ///////////////////////////////////////////////////////////////////
-    //
-    //
-    //
-    ///////////////////////////////////////////////////////////////////
 
     /**
      * Check rpm with rpm --checksig
@@ -451,11 +439,6 @@ class RpmDb: virtual public Rep
      * @return checkPackageResult
     */
     unsigned checkPackage (const Pathname& filename, std::string version = "", std::string md5 = "" );
-
-    /**
-     * Hack to lookup required and conflicting file relations.
-     **/
-    void traceFileRel( const PkgRelation & rel_r );
 
     /** install rpm package
      *
@@ -552,29 +535,6 @@ class RpmDb: virtual public Rep
      * checkPackageResult
      * */
     static std::string checkPackageResult2string(unsigned code);
-
-  private: // to cleanup
-    /**
-     * general query of an installed package
-     *
-     * @param package constPMPackagePtr to package
-     * @param format query format as rpm understands it
-     * @param result_r std::string& for single-line values
-     *	  or std::list<std::string>& for multi-line values
-    */
-    bool queryPackage (constPMPackagePtr package, const char *format, std::string& result_r);
-    bool queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r);
-
-    /**
-     * general query of an available package file
-     *
-     * @param path full path to an rpm file
-     * @param format query format as rpm understands it
-     * @param result_r std::string& for single-line values
-     *	  or std::list<std::string>& for multi-line values
-    */
-    bool queryPackage (const Pathname& path, const char *format, std::string& result_r);
-    bool queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r);
 
   public:
 

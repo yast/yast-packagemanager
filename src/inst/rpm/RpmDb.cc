@@ -71,6 +71,23 @@ inline string stringPath( const Pathname & root_r, const Pathname & sub_r )
 /******************************************************************
 **
 **
+**	FUNCTION NAME : testCB
+**	FUNCTION TYPE : static void
+*/
+static void testCB( const ProgressCounter & pc, void * )
+{
+  int mod = pc.max()/3;
+  if ( !mod )
+     mod = 1;
+  if ( pc.state() == ProgressCounter::st_value && pc.val() % mod )
+    return;
+  DBG << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
+      << pc.val() << " " << pc.precent() << "%" << endl;
+}
+
+/******************************************************************
+**
+**
 **	FUNCTION NAME : operator<<
 **	FUNCTION TYPE : ostream &
 */
@@ -92,23 +109,6 @@ ostream & operator<<( ostream & str, const RpmDb::DbStateInfoBits & obj )
 #undef ENUM_OUT
   }
   return str;
-}
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : testCB
-**	FUNCTION TYPE : static void
-*/
-static void testCB( const ProgressCounter & pc, void * )
-{
-  int mod = pc.max()/3;
-  if ( !mod )
-     mod = 1;
-  if ( pc.state() == ProgressCounter::st_value && pc.val() % mod )
-    return;
-  DBG << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
-      << pc.val() << " " << pc.precent() << "%" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -193,6 +193,18 @@ unsigned RpmDb::Logfile::_refcnt = 0;
 
 ///////////////////////////////////////////////////////////////////
 //
+//
+//	METHOD NAME : RpmDb::setInstallationLogfile
+//	METHOD TYPE : bool
+//
+bool RpmDb::setInstallationLogfile( const Pathname & filename )
+{
+  Logfile::setFname( filename );
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
 //	CLASS NAME : RpmDb::Packages
 /**
  * Helper class for RpmDb::getPackages() to build the
@@ -266,11 +278,11 @@ ProgressCounter::Callback RpmDb::_cb_installPkg( testCB );
 //
 RpmDb::RpmDb()
     : _dbStateInfo( DbSI_NO_INIT )
+    , _packages( * new Packages ) // delete in destructor
 #warning LET old dbname block everything until db init, pkg install/delete are checked.
     , _backuppath ("/var/adm/backup")
     , _packagebackups(false)
     , _warndirexists(false)
-    , _packages( * new Packages ) // delete in destructor
 {
    process = 0;
    exit_code = -1;
@@ -1027,7 +1039,7 @@ bool RpmDb::hasPackage( const PkgName & name_r ) const
 //	DESCRIPTION :
 //
 PMError RpmDb::getData( const PkgName & name_r,
-			constRpmLibHeaderPtr & result_r ) const
+			constRpmHeaderPtr & result_r ) const
 {
   librpmDb::db_const_iterator it;
   it.findPackage( name_r );
@@ -1044,7 +1056,7 @@ PMError RpmDb::getData( const PkgName & name_r,
 //	DESCRIPTION :
 //
 PMError RpmDb::getData( const PkgName & name_r, const PkgEdition & ed_r,
-			constRpmLibHeaderPtr & result_r ) const
+			constRpmHeaderPtr & result_r ) const
 {
   librpmDb::db_const_iterator it;
   it.findPackage( name_r, ed_r  );
@@ -1052,28 +1064,21 @@ PMError RpmDb::getData( const PkgName & name_r, const PkgEdition & ed_r,
   return it.dbError();
 }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmDb::getData
-//	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
-//
-PMError RpmDb::getData( const Pathname & path, constRpmLibHeaderPtr & result_r )
-{
-  result_r = RpmLibHeader::readPackage( path );
-  return( result_r ? Error::E_ok : Error::E_error );
-}
-
 /*--------------------------------------------------------------*/
 /* Checking the source rpm <rpmpath> with rpm --chcksig and     */
 /* the version number.						*/
 /*--------------------------------------------------------------*/
 unsigned
-RpmDb::checkPackage (const Pathname& packagePath, string version, string md5 )
+RpmDb::checkPackage (const Pathname & packagePath, string version, string md5 )
 {
     unsigned result = 0;
+
+    if ( ! version.empty() ) {
+      constRpmHeaderPtr h( RpmHeader::readPackage( packagePath ) );
+      if ( ! h || PkgEdition( version ) != h->tag_edition() ) {
+	result |= CHK_INCORRECT_VERSION;
+      }
+    }
 
     if(!md5.empty())
     {
@@ -1182,115 +1187,7 @@ RpmDb::checkPackage (const Pathname& packagePath, string version, string md5 )
 	result |= CHK_OTHER_FAILURE;
     }
 
-    if ( !version.empty() )
-    {
-
-	string value;
-	queryPackage (path, "%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}", value);
-
-	D__ <<  "comparing version " << version << " <-> " << value << endl;
-	if ( version != value )
-	{
-	    result |= CHK_INCORRECT_VERSION;
-	}
-    }
-
     return ( result );
-}
-
-
-/*--------------------------------------------------------------*/
-/* Query the current package using the specified query format	*/
-/*--------------------------------------------------------------*/
-
-bool
-RpmDb::queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::string& result_r)
-{
-    RpmArgVec opts(4);
-
-    int argc = 0;
-    opts[argc++] = qparam;
-    if (format != 0)
-    {
-	if (queryformat)
-	{
-	    opts[argc++] = "--queryformat";
-	}
-	opts[argc++] = format;
-    }
-    opts[argc++] = package.c_str();
-    if (argc < 4)
-	opts[argc] = 0;
-
-    run_rpm (opts, ExternalProgram::Discard_Stderr);
-
-    if ( process == NULL )
-	return false;
-
-    systemReadLine (result_r);
-    systemStatus();
-
-    return true;
-}
-
-bool
-RpmDb::queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::list<std::string>& result_r)
-{
-    RpmArgVec opts(4);
-
-    if(! initialized() ) return false;
-
-    int argc = 0;
-    opts[argc++] = qparam;
-    if (format != 0)
-    {
-	if (queryformat)
-	{
-	    opts[argc++] = "--queryformat";
-	}
-	opts[argc++] = format;
-    }
-    opts[argc++] = package.c_str();
-    if (argc < 4)
-	opts[argc] = 0;
-
-    run_rpm (opts, ExternalProgram::Discard_Stderr);
-
-    if ( process == NULL )
-	return false;
-
-    string line;
-    while (systemReadLine (line))
-    {
-	result_r.push_back (line);
-    }
-    systemStatus();
-
-    return true;
-}
-
-bool
-RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::string& result_r)
-{
-    return queryRPM (pkg2rpm (package), "-q", format, true, result_r);
-}
-
-bool
-RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r)
-{
-    return queryRPM (pkg2rpm (package), "-q", format, true, result_r);
-}
-
-bool
-RpmDb::queryPackage (const Pathname& path, const char *format, std::string& result_r)
-{
-    return queryRPM (path.asString(), "-qp", format, true, result_r);
-}
-
-bool
-RpmDb::queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r)
-{
-    return queryRPM (path.asString(), "-qp", format, true, result_r);
 }
 
 // determine changed files of installed package
@@ -1404,12 +1301,6 @@ RpmDb::run_rpm(const RpmArgVec& options,
   argv[argc] = 0;
 
   // Launch the program with default locale
-  I__ << "Lauch:";
-  for ( argc = 0; argv[argc]; ++argc ) {
-    I__ << ' ' << argv[argc];
-  }
-  I__ << endl;
-
   process = new ExternalProgram(argv, disp, false, -1, true);
   return;
 }
@@ -1591,9 +1482,9 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
     // %s = filename of rpm package
     // progresslog() << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
 
+    run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
     ProgressCounter pcnt( _cb_installPkg );
     pcnt.start( 100 );
-    run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
 
     string line;
     string rpmmsg;
@@ -1602,7 +1493,6 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 
     while (systemReadLine(line))
     {
-      WAR << line << endl;
 	if (line.substr(0,2)=="%%")
 	{
 	    int percent;
@@ -1612,7 +1502,7 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 	else
 	    rpmmsg += line+'\n';
 
-	if( line.substr(0,8) == "warning:" || line.substr(0,6) == "error:" )
+	if( line.substr(0,8) == "warning:" )
 	{
 	    configwarnings.push_back(line);
 	}
@@ -1684,6 +1574,9 @@ PMError RpmDb::removePackage( const string & label, unsigned flags )
 	opts.push_back("--nodeps");
     if (flags & RPMINST_JUSTDB)
 	opts.push_back("--justdb");
+    if (flags & RPMINST_FORCE) {
+      WAR << "IGNORE OPTION: 'rpm -e' does not support '--force'" << endl;
+    }
 
     opts.push_back(label.c_str());
 
@@ -1697,10 +1590,10 @@ PMError RpmDb::removePackage( const string & label, unsigned flags )
 
     while (systemReadLine(line))
     {
-      WAR << line << endl;
 	rpmmsg += line+'\n';
     }
     int rpm_status = systemStatus();
+
 #warning UNRELIABLE RETURNCODE
     if (rpm_status != 0)
     {
@@ -1771,59 +1664,21 @@ RpmDb::checkPackageResult2string(unsigned code)
     return msg;
 }
 
-bool RpmDb::setInstallationLogfile( const Pathname& filename )
-{
-  Logfile::setFname( filename );
-  return true;
-}
-
-#if 0
-/******************************************************************
-**
-**
-**	FUNCTION NAME : operator<<
-**	FUNCTION TYPE : std::ostream &
-**
-*/
-std::ostream & operator<<( std::ostream & str, const
-RpmDb::DbStatus & obj )
-{
-#define ENUM_OUT(V) case RpmDb::V: return str << #V; break
-  switch ( obj ) {
-    ENUM_OUT( RPMDB_OK );
-    ENUM_OUT( RPMDB_NOT_FOUND );
-    ENUM_OUT( RPMDB_OLD_VERSION );
-    ENUM_OUT( RPMDB_NEW_CREATED );
-    ENUM_OUT( RPMDB_ERROR_CREATED );
-    ENUM_OUT( RPMDB_ERROR_CHECK_OLD_VERSION );
-    ENUM_OUT( RPMDB_ERROR_MKDIR );
-    ENUM_OUT( RPMDB_ERROR_INITDB );
-    ENUM_OUT( RPMDB_ERROR_COPY_TMPDB );
-    ENUM_OUT( RPMDB_ERROR_REBUILDDB );
-    ENUM_OUT( RPMDB_ERROR_NOT_INITIALIZED );
-    ENUM_OUT( RPMDB_ERROR_SUBPROCESS_FAILED );
-  // default: let compiler warn 'not handled in switch'
-  case RpmDb::RPMDB_NUM_ERRORS: break;
-  }
-  return str << "RPMDB_ERROR_UNKNOWN";
-#undef ENUM_OUT
-}
-#endif
-
 bool
-RpmDb::backupPackage(const Pathname& filename)
+RpmDb::backupPackage( const Pathname & filename )
 {
-    string package;
-    if(!queryPackage(filename,"%{NAME}",package))
+    constRpmHeaderPtr h( RpmHeader::readPackage( filename ) );
+
+    if( !h )
     {
 	ERR << "querying "
-	    << filename.asString()
+	    << filename
 	    << " for its name failed, no backup possible" << endl;
 	return false;
     }
     else
     {
-	return backupPackage(package);
+	return backupPackage( h->tag_name() );
     }
 }
 

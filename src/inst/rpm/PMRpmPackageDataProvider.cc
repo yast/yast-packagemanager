@@ -24,7 +24,7 @@
 
 #include <y2pm/PMRpmPackageDataProvider.h>
 #include <y2pm/RpmDb.h>
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeader.h>
 #include <y2pm/PMPackageManager.h>
 
 #include <Y2PM.h>
@@ -41,10 +41,10 @@ IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMPackageD
 // static class members
 
 PMPackagePtr         PMRpmPackageDataProvider::_cachedPkg;
-constRpmLibHeaderPtr PMRpmPackageDataProvider::_cachedData;
+constRpmHeaderPtr PMRpmPackageDataProvider::_cachedData;
 
 #define TRY_CACHE(fnc) \
-  constRpmLibHeaderPtr h = fillCache( mkPtr(pkg_r) ); \
+  constRpmHeaderPtr h = fillCache( mkPtr(pkg_r) ); \
   if ( !h ) return PMPackageDataProvider::fnc()
 
 ///////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ PMRpmPackageDataProvider::~PMRpmPackageDataProvider()
 //
 //	DESCRIPTION :
 //
-void PMRpmPackageDataProvider::loadStaticData( constRpmLibHeaderPtr h )
+void PMRpmPackageDataProvider::loadStaticData( constRpmHeaderPtr h )
 {
   if ( !h ) {
     INT << "Got NULL static data from RpmDb!" << endl;
@@ -99,7 +99,7 @@ void PMRpmPackageDataProvider::loadStaticData( constRpmLibHeaderPtr h )
 /**
  * fill _theCache with data from package
  */
-inline constRpmLibHeaderPtr
+inline constRpmHeaderPtr
 PMRpmPackageDataProvider::fillCache( PMPackagePtr package ) const
 {
   if ( package != _cachedPkg ) {
@@ -259,7 +259,7 @@ PMRpmPackageDataProvider::filenames ( const PMPackage & pkg_r ) const
 //
 void PMRpmPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) const
 {
-  constRpmLibHeaderPtr h = fillCache (mkPtr(pkg_r));
+  constRpmHeaderPtr h = fillCache (mkPtr(pkg_r));
   if ( !h )
     PMPackageDataProvider::du( dudata_r );
   else

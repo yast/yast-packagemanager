@@ -21,7 +21,7 @@ noinst_LTLIBRARIES = liby2pminstrpmsrc.la
 
 liby2pminstrpmsrc_la_SOURCES = 	\
 	binHeader.cc binHeaderCache.cc \
-	RpmLibHeader.cc RpmLibHeaderCache.cc \
+	RpmHeader.cc RpmHeaderCache.cc \
 	RpmDb.cc \
 	librpmDb.cc librpmDb.cv3.cc \
 	PMRpmPackageDataProvider.cc

@@ -36,15 +36,17 @@ extern "C" {
 
 #include <iostream>
 #include <fstream>
-
-#include <string.h>
+#include <string>
 
 #include <y2util/Y2SLog.h>
+
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstTargetProdDB.h>
 #include <y2pm/InstTargetSelDB.h>
 #include <y2pm/PMYouPatchPaths.h>
 #include <y2pm/PMYouPatchInfo.h>
+
+#include <Y2PM.h>
 
 using namespace std;
 
@@ -58,14 +60,14 @@ InstTarget::Callbacks *InstTarget::_callbacks = 0;
  * (running in inst-sys) or "/whatever" if installing into
  * a directory
  */
-InstTarget::InstTarget ( ) :
-    _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE),
-    _rpmremoveflags(RpmDb::RPMINST_NODEPS),
-    _patchesInitialized( false ),
-    _proddb( new InstTargetProdDB ),
-    _seldb( new InstTargetSelDB )
+InstTarget::InstTarget ( )
+    : _rpmdb( new RpmDb() )
+    , _rpminstflags(RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE)
+    , _rpmremoveflags(RpmDb::RPMINST_NODEPS)
+    , _patchesInitialized( false )
+    , _proddb( new InstTargetProdDB )
+    , _seldb( new InstTargetSelDB )
 {
-    _rpmdb = new RpmDb();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -89,6 +91,20 @@ PMError InstTarget::init ( const Pathname & rootpath, bool createnew)
     _seldb->open( _rootdir, createnew );
 
     return _rpmdb->initDatabase( _rootdir );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::finish
+//	METHOD TYPE : PMError
+//
+PMError InstTarget::finish()
+{
+  _rpmdb->setInstallationLogfile("");
+  PMError ret = _rpmdb->closeDatabase();
+  _rootdir = "";
+  return ret;
 }
 
 PMError InstTarget::bringIntoCleanState()
@@ -275,12 +291,12 @@ PMError InstTarget::installPackages (const std::list<Pathname>& filenames, unsig
 
 PMError InstTarget::removePackage (const std::string& label, unsigned flags)
 {
-    return _rpmdb->removePackage (label, flags?flags:_rpminstflags);
+    return _rpmdb->removePackage (label, flags?flags:_rpmremoveflags);
 }
 
 PMError InstTarget::removePackage (constPMPackagePtr package, unsigned flags)
 {
-    return _rpmdb->removePackage (package, flags?flags:_rpminstflags);
+    return _rpmdb->removePackage (package, flags?flags:_rpmremoveflags);
 }
 
 PMError InstTarget::removePackages (const std::list<std::string>& labels, unsigned flags)
@@ -310,22 +326,14 @@ const std::string& InstTarget::getRoot() const
     return _rootdir.asString();
 }
 
-
-void InstTarget::setPackageInstallProgressCallback(void (*func)(int,void*), void* data)
-{
-#warning CALLBACK DISABLED
-    //_rpmdb->setProgressCallback(func,data);
-}
-
-void InstTarget::setRebuildDBProgressCallback(void (*func)(int,void*), void* data)
-{
-#warning CALLBACK DISABLED
-    //_rpmdb->setRebuildDBProgressCallback(func,data);
-}
-
 bool InstTarget::setInstallationLogfile(const std::string& logfile)
 {
-    return _rpmdb->setInstallationLogfile(logfile);
+#warning DIRTY HACK TO FINISH TARGET on logfile close.
+  if ( logfile.empty() ) {
+    Y2PM::instTargetFinish();
+    return true;
+  }
+  return _rpmdb->setInstallationLogfile(logfile);
 }
 
 PMError InstTarget::installPatch( const Pathname &filename )

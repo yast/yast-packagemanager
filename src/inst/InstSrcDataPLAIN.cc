@@ -30,8 +30,8 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaAccess.h>
-#include <y2pm/RpmLibHeaderCache.h>
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeaderCache.h>
+#include <y2pm/RpmHeader.h>
 #include <y2pm/Timecount.h>
 
 #include <Y2PM.h>
@@ -93,7 +93,7 @@ IMPL_DERIVED_POINTER(InstSrcDataPLAIN,InstSrcData,InstSrcData);
 //	DESCRIPTION :
 //
 InstSrcDataPLAIN::InstSrcDataPLAIN( const Pathname & cachefile_r )
-    : _cache( * new RpmLibHeaderCache( cachefile_r ) )
+    : _cache( * new RpmHeaderCache( cachefile_r ) )
 {
   if ( !_cache.open() ) {
     ERR << "Failed to open cache " << cachefile_r << endl;
@@ -106,7 +106,7 @@ InstSrcDataPLAIN::InstSrcDataPLAIN( const Pathname & cachefile_r )
   unsigned hpos;
   Pathname pkgfile;
   int      isSource;
-  for ( constRpmLibHeaderPtr iter = _cache.getFirst( pkgfile, isSource, hpos );
+  for ( constRpmHeaderPtr iter = _cache.getFirst( pkgfile, isSource, hpos );
 	iter; iter = _cache.getNext( pkgfile, isSource, hpos ) ) {
     D__ << "At " << hpos << (isSource?" src ":" bin ") << iter << " for " << pkgfile << endl;
 
@@ -189,9 +189,9 @@ ostream & InstSrcDataPLAIN::dumpOn( ostream & str ) const
 //
 //
 //	METHOD NAME : InstSrcDataPLAIN::getHeaderAt
-//	METHOD TYPE : constRpmLibHeaderPtr
+//	METHOD TYPE : constRpmHeaderPtr
 //
-constRpmLibHeaderPtr InstSrcDataPLAIN::getHeaderAt( unsigned _cachepos ) const
+constRpmHeaderPtr InstSrcDataPLAIN::getHeaderAt( unsigned _cachepos ) const
 {
   return _cache.getAt( _cachepos );
 }
@@ -337,7 +337,7 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
     Pathname c_file( cdir + "IS_PLAINcache" );
 
-    int res = RpmLibHeaderCache::buildHeaderCache( c_file, pkgroot );
+    int res = RpmHeaderCache::buildHeaderCache( c_file, pkgroot );
     if ( res < 0 ) {
       ERR << "Failed to create cache " << c_file << " (" << res << ")" << endl;
       PathInfo::unlink( c_file );
@@ -353,7 +353,7 @@ PMError InstSrcDataPLAIN::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   // looks good? So create descr.
   ///////////////////////////////////////////////////////////////////
 
-  RpmLibHeaderCache cache( cpath.path() );
+  RpmHeaderCache cache( cpath.path() );
 
   if ( ! cache.open() ) {
     ERR << "Invalid cache " << cpath << endl;

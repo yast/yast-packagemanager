@@ -154,12 +154,20 @@ Pathname root( "/tmp/rpmdbs" );
 Pathname dbPath( "/mand" );
 Pathname db3path( root+dbPath+"packages.rpm" );
 
-static void testCB( const ProgressCounter & pc, void * )
+static void instPkgCb( int pc, void * )
 {
-  if ( pc.state() == ProgressCounter::st_value && pc.val() % 25 )
-    return;
-  SEC << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
-	<< pc.val() << " " << pc.precent() << "%" << endl;
+  INT << "  at " << pc << "%" << endl;
+}
+
+void Pdb() {
+  {
+    librpmDb::db_const_iterator it;
+    unsigned cnt = 0;
+    for ( ; *it; ++it ) {
+      ++cnt;
+    }
+    SEC << "db_const_iterator: " << cnt << " " << it.dbError() << endl;
+  }
 }
 
 /******************************************************************
@@ -168,6 +176,7 @@ int mmain( int argc, const char * argv[] );
 int main( int argc, const char * argv[] ) {
   Y2Logging::setLogfileName("-");
   SEC << "START" << endl;
+  int ret = 0;
 
   if ( 0 ) {
     Y2PM::noAutoInstSrcManager();
@@ -184,22 +193,18 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  int ret = mmain( argc, argv );
+  _hdr_debug = -1;
+  constRpmHeaderPtr h( RpmHeader::readPackage( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm" ) );
+  SEC << h << endl;
+  h = RpmHeader::readPackage( "/Local/packages/test/RPMS/test-3-1.src.rpm" );
+  SEC << h << endl;
+
+  //ret = mmain( argc, argv );
+
+  TMGR.setInstallationLogfile( "" );
 
   SEC << "STOP -> " << ret << endl;
   return ret;
-}
-
-void Pdb() {
-  {
-    librpmDb::db_const_iterator it;
-    unsigned cnt = 0;
-    for ( ; *it; ++it ) {
-      ++cnt;
-    }
-    SEC << "db_const_iterator: " << cnt << " " << it.dbError() << endl;
-  }
-  librpmDb::dbRelease();
 }
 
 /******************************************************************
@@ -213,10 +218,7 @@ void Pdb() {
 int mmain( int argc, const char * argv[] )
 {
   _rpmdb_debug = 0;
-
-  unsigned V3toV4Written = 0;
-  unsigned V3toV4Errors = 0;
-  ProgressCounter pcnt( testCB );
+  _hdr_debug = -1;
 
   int Finst = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE;
   int Fdel  = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE;

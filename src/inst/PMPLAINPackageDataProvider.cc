@@ -25,7 +25,7 @@
 #include <y2pm/PMPLAINPackageDataProvider.h>
 #include <y2pm/InstSrcDataPLAIN.h>
 #include <y2pm/InstSrcDescr.h>
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeader.h>
 #include <y2pm/PMPackageManager.h>
 
 #include <Y2PM.h>
@@ -43,10 +43,10 @@ IMPL_DERIVED_POINTER(PMPLAINPackageDataProvider, PMPackageDataProvider, PMPackag
 ///////////////////////////////////////////////////////////////////
 
 PMPackagePtr         PMPLAINPackageDataProvider::_cachedPkg;
-constRpmLibHeaderPtr PMPLAINPackageDataProvider::_cachedData;
+constRpmHeaderPtr PMPLAINPackageDataProvider::_cachedData;
 
 #define TRY_CACHE(fnc) \
-  constRpmLibHeaderPtr h = fillCache( mkPtr(pkg_r) ); \
+  constRpmHeaderPtr h = fillCache( mkPtr(pkg_r) ); \
   if ( !h ) return PMPackageDataProvider::fnc()
 
 ///////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ PMPLAINPackageDataProvider::~PMPLAINPackageDataProvider()
 //	METHOD NAME : PMPLAINPackageDataProvider::loadStaticData
 //	METHOD TYPE : void
 //
-void PMPLAINPackageDataProvider::loadStaticData( constRpmLibHeaderPtr h )
+void PMPLAINPackageDataProvider::loadStaticData( constRpmHeaderPtr h )
 {
   if ( !h ) {
     INT << "Got NULL static data from RpmDb!" << endl;
@@ -97,11 +97,11 @@ void PMPLAINPackageDataProvider::loadStaticData( constRpmLibHeaderPtr h )
 //
 //
 //	METHOD NAME : PMPLAINPackageDataProvider::fillCache
-//	METHOD TYPE : constRpmLibHeaderPtr
+//	METHOD TYPE : constRpmHeaderPtr
 //
 //      strore packages rpm header in cache
 //
-inline constRpmLibHeaderPtr PMPLAINPackageDataProvider::fillCache( PMPackagePtr package ) const
+inline constRpmHeaderPtr PMPLAINPackageDataProvider::fillCache( PMPackagePtr package ) const
 {
   if ( package != _cachedPkg ) {
     _cachedData = _instSrcData->getHeaderAt( _cachepos );
@@ -173,7 +173,7 @@ PkgSplitSet PMPLAINPackageDataProvider::splitprovides( const PMPackage & pkg_r )
 Date
 PMPLAINPackageDataProvider::buildtime ( const PMPackage & pkg_r ) const
 {
-  // take directly from PkgEdition, RpmLibHeader sets it
+  // take directly from PkgEdition, RpmHeader sets it
   return Date( pkg_r.edition().buildtime() );
 }
 
@@ -363,7 +363,7 @@ bool PMPLAINPackageDataProvider::isRemote( const PMPackage & pkg_r ) const
 //
 void PMPLAINPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) const
 {
-  constRpmLibHeaderPtr h = fillCache (mkPtr(pkg_r));
+  constRpmHeaderPtr h = fillCache (mkPtr(pkg_r));
   if ( !h )
     PMPackageDataProvider::du( dudata_r );
   else

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jul 30 00:56:24 CEST 2003 - ma@suse.de
+
+- Support for rpm4
+- 2.8.3
+
+-------------------------------------------------------------------
 Tue Jul 29 15:32:02 CEST 2003 - cschum@suse.de
 
 - MediaAccess::dirInfo(): If a file "directory.yast" exists in the
@@ -42,7 +48,7 @@ Tue Jun 24 11:21:34 CEST 2003 - cschum@suse.de
 -------------------------------------------------------------------
 Tue Jun 17 16:16:07 CEST 2003 - cschum@suse.de
 
-- Added support for "Files" tag in YOU patch files. 
+- Added support for "Files" tag in YOU patch files.
 
 -------------------------------------------------------------------
 Mon Jun  9 01:05:03 CEST 2003 - ma@suse.de

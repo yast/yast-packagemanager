@@ -30,7 +30,7 @@ extern "C" {
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/librpmDb.h>
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeader.h>
 
 using namespace std;
 
@@ -526,7 +526,7 @@ class librpmDb::db_const_iterator::D {
     constlibrpmDbPtr     _dbptr;
     PMError              _dberr;
 
-    constRpmLibHeaderPtr _hptr;
+    constRpmHeaderPtr _hptr;
     rpmdbMatchIterator   _mi;
 
     D( constlibrpmDbPtr dbptr_r )
@@ -591,7 +591,7 @@ class librpmDb::db_const_iterator::D {
 	destroy();
 	return false;
       }
-      _hptr = new RpmLibHeader( h );
+      _hptr = new RpmHeader( h );
       return true;
     }
 
@@ -686,9 +686,9 @@ unsigned librpmDb::db_const_iterator::dbHdrNum() const
 //
 //
 //	METHOD NAME : librpmDb::db_const_iterator::operator*
-//	METHOD TYPE : const constRpmLibHeaderPtr &
+//	METHOD TYPE : const constRpmHeaderPtr &
 //
-const constRpmLibHeaderPtr & librpmDb::db_const_iterator::operator*() const
+const constRpmHeaderPtr & librpmDb::db_const_iterator::operator*() const
 {
   return _d._hptr;
 }
