@@ -1194,8 +1194,6 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
   int ret = internal_commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r, installrank_r );
 
   // Release all source media
-
-  MIL << "Commiting packages..." << endl;
   instSrcManager().releaseAllMedia();
 
   if ( ! mediaNr_r ) {
