@@ -36,13 +36,3 @@ liby2pmMedia_la_LIBADD = -ly2util
 
 
 EXTRA_DIST = Make.defines
-#
-# MOVE IT TO TESTSUITE
-# needs liby2pm to link
-#
-# noinst_PROGRAMS = media_test.prg
-#
-# media_test_prg_SOURCES = media_test.cc
-# media_test_prg_LDADD = liby2pmMedia.la
-#for debuggin
-# media_test_prg_LDFLAGS = -static

@@ -56,7 +56,7 @@ class PMSelectionManager : public PMManager {
     std::list<PMSelectablePtr> _currently_actives;
     LangCode _currently_preferred_locale;
     std::list<LangCode> _currently_requested_locales;
- 
+
   private:
 
     /**
@@ -98,7 +98,14 @@ class PMSelectionManager : public PMManager {
     void resetSelection (PMSelectionPtr selection, PMPackageManager & package_mgr);
 
   public:
+
+    /**
+     * activate the selection
+     * (go through package list of selection and select/deselect
+     * all packages -> needs PMPackageManager)
+     */
     PMError activate (PMPackageManager & package_mgr);
+
 };
 
 ///////////////////////////////////////////////////////////////////

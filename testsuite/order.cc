@@ -95,6 +95,7 @@ int main( int argc, char *argv[] )
     }
 
     PkgSet candidates;
+    PkgSet installed;
 
     const std::list<PMPackagePtr>& packages = nsrc->data()->getPackages();
 
@@ -119,7 +120,7 @@ int main( int argc, char *argv[] )
 	    candidates.add(*it);
     }
 
-    InstallOrder order(candidates);
+    InstallOrder order(candidates,installed);
     MIL << "computing installation order" << endl;
 //    Y2SLog::dbg_enabled_bm = true;
     order.startrdfs();

@@ -26,6 +26,7 @@
 
 #include <y2pm/InstTargetSelDB.h>
 #include <y2pm/PMSelection.h>
+#include <y2pm/ULSelectionParser.h>
 
 using namespace std;
 
@@ -100,8 +101,53 @@ PMError InstTargetSelDB::open( const Pathname & system_root_r, const bool create
 
   // looks good
   const_cast<Pathname&>(_db) = db.path();
+  PMError err = rescan();
 
-  MIL << *this << endl;
+  MIL << *this << " " << _sellist.size() << " selections installed" << endl;
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTargetSelDB::rescan
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstTargetSelDB::rescan()
+{
+  PMError err = assert_open();
+  if ( err ) {
+    return err;
+  }
+
+  _sellist.clear();
+
+  list<string> content;
+  PathInfo::readdir( content, _db, /*dots*/false );
+  for ( list<string>::iterator it = content.begin(); it != content.end(); ++it ) {
+    string::size_type ext = it->find( ".sel" );
+    if ( ext != string::npos && ext == it->size()-4 ) {
+
+      ULSelectionParser parser( 0 );
+      PMSelectionPtr    nsel;
+      err = parser.fromPath( db_file( *it ), nsel );
+
+      if ( err ) {
+	WAR << "Error parsing selection " << *it << " (" << err << ")" << endl;
+      } else if ( !nsel ) {
+	WAR << "Selection without data " << *it << " (" << err << ")" << endl;
+      } else {
+	_sellist.push_back( nsel );
+	DBG << "Parse found " << nsel << endl;
+      }
+
+    } else {
+      WAR << "Skip non selection file: " << *it << endl;
+    }
+  }
+
   return Error::E_ok;
 }
 

@@ -93,8 +93,9 @@ class InstYou {
      *
      * @param checkSig  If true check signatures of downloaded packages and
      *                  scripts.
+     * @param noExternal If true, external packages aren't downloaded.
      */
-    PMError retrievePatches( bool checkSig = true );
+    PMError retrievePatches( bool checkSig = true, bool noExternal = false );
     
     /**
      * Get first selected patch.
@@ -170,8 +171,10 @@ class InstYou {
 
   protected:
     PMError installPatch( const PMYouPatchPtr &, bool dryrun = false );
-    PMError retrievePatch( const PMYouPatchPtr &, bool checkSig = true );
-    PMError retrievePackage( const PMPackagePtr &pkg );
+    PMError retrievePatch( const PMYouPatchPtr &, bool checkSig = true,
+                           bool noExternal = false );
+    PMError retrievePackage( const PMPackagePtr &pkg, bool noExternal = false );
+    PMError retrieveScript( const std::string &script, bool checkSig );
 
     /**
      * check, if patch has new packages.

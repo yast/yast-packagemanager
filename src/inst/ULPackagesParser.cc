@@ -751,7 +751,6 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
     err = media_r->provideFile ( localename );
     while ( err )
     {
-
 	if (localestr == "en")				// already english locale
 	{
 	    WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;
@@ -769,6 +768,7 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 	localename = filename.extend (".en");		// fallback to packages.en
 	WAR << "Fallback to '" << localename << "'" << endl;
 	err = media_r->provideFile ( localename );
+	if (err)
 	{
 	    have_locale = false;
 	    WAR << "Media can't provide '" << localename << "' : " << err.errstr() << endl;

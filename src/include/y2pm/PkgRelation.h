@@ -48,6 +48,11 @@ class PkgRelation {
 	bool isPreReq() const { return _isprereq; }
 
 	/**
+	 * True, if this is a file dependency
+	 **/
+	bool isFileRel() const { return( _name->size() && _name->at( 0 ) == '/' ); }
+
+	/**
 	 * Write out asString()
 	 **/
 	friend std::ostream& operator<<(std::ostream&, const PkgRelation&);

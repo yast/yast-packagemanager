@@ -221,8 +221,7 @@ PMError InstTargetProdDB::open( const Pathname & system_root_r, const bool creat
       _prodlist.push_front( it->second ); // reversed by id
     }
     _nextIdx = ( _prodmap.empty() ? 1 : _prodmap.rbegin()->first + 1 );
-    DBG << *this << ": nextId " << _nextIdx << endl;
-    MIL << *this << endl;
+    MIL << *this << " " << _prodlist.size() << " products installed" << endl;
   } else {
     _prodmap.clear();
     _prodlist.clear();

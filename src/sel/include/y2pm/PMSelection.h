@@ -24,9 +24,8 @@
 #include <iosfwd>
 #include <string>
 
-#include <y2util/LangCode.h>
+#include <y2pm/PMSelectionDataProvider.h> // should introduce all attribute data types.
 
-#include <y2pm/PMSelectionDataProviderPtr.h>
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMPackagePtr.h>
 
@@ -82,6 +81,9 @@ class PMSelection : virtual public Rep, public PMObject {
     std::string			order()            const;
 
     const bool			isBase()           const;
+
+    // physical access to the sel file.
+    PMError provideSelToInstall( Pathname & ) const;
 
   protected:
 

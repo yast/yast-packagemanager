@@ -58,6 +58,7 @@ static LangCode getLangEnvironment()
 
 Pathname Y2PM::_instTarget_rootdir( "/" );
 Pathname Y2PM::_system_rootdir    ( "/" );
+bool Y2PM::_cache_to_ramdisk( true );
 LangCode Y2PM::_preferred_locale (getLangEnvironment());
 std::list<LangCode> Y2PM::_requested_locales;
 PkgArch Y2PM::_base_arch;
@@ -99,6 +100,8 @@ Y2PM::CallBacks::CallBacks()
     _package_done_data = NULL;
     _rebuilddb_progress_func = NULL;
     _rebuilddb_progress_data = NULL;
+    _source_change_func = NULL;
+    _source_change_data = NULL;
 };
 
 
@@ -178,6 +181,18 @@ Y2PM::setRebuildDBProgressCallback(void (*func)(int percent, void*), void* data)
     instTarget().setRebuildDBProgressCallback(func, data);
 }
 
+
+/**
+ * called when switching sources during package commit (install loop)
+ * informal callback for user interface, no user interaction necessary
+ * */
+void
+Y2PM::setSourceChangeCallback(void (*func)(InstSrcManager::ISrcId srcid, int medianr, void*), void* data)
+{
+    _callbacks._source_change_func = func;
+    _callbacks._source_change_data = data;
+}
+
 ///////////////////////////////////////////////////////////////////
 
 
@@ -205,24 +220,27 @@ InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
 {
     if ( !_instTarget )
     {
-	MIL << "Launch InstTarget... ()" << endl;
+	MIL << "Launch InstTarget..." << endl;
 	_instTarget = new InstTarget ();
 	MIL << "Created InstTarget" << endl;
     }
 
     if (do_start)
     {
-	WAR << "Fake InstTarget and load installed Packages..." << endl;
+	MIL << "Init InstTarget at '" << root << "'..." << endl;
 	_instTarget_rootdir = root;
 	PMError dbstat = Y2PM::instTarget().init(_instTarget_rootdir, false);
 	if( dbstat != InstTargetError::E_ok )
 	{
 	    ERR << "error initializing target: " << dbstat << endl;
+#warning error value dropped
 	}
 	else
 	{
 	    // this will start the package manager
 	    Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
+	    // this will start the Selection manager
+	    Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections () );
 	}
     }
 
@@ -360,7 +378,7 @@ PMYouPatchManager & Y2PM::youPatchManager()
 //
 int
 Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
-	std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r)
+	std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r, InstSrcManager::ISrcIdList installrank)
 {
     int count = 0;
     bool go_on = true;
@@ -373,7 +391,15 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
     std::list<PMPackagePtr> inslist;
     std::list<PMPackagePtr> srclist;
 
-    packageManager().getPackagesToInsDel (dellist, inslist, srclist);	// compute order
+    if (installrank.empty())
+    {
+	packageManager().getPackagesToInsDel (dellist, inslist, srclist);	// compute order
+    }
+    else
+    {
+	MIL << "ranked install !" << endl; 
+	packageManager().getPackagesToInsDel (dellist, inslist, srclist, installrank);	// compute order
+    }
 
     for (std::list<PMPackagePtr>::iterator it = dellist.begin();
 	 it != dellist.end(); ++it)
@@ -399,11 +425,13 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
     // install loop
 
     unsigned int current_src_media = 0;
+    constInstSrcPtr current_src_ptr = 0;
+    unsigned int pkgmedianr = 0;
 
     for (std::list<PMPackagePtr>::iterator it = inslist.begin();
 	 it != inslist.end(); ++it)
     {
-	unsigned int pkgmedianr = (*it)->medianr();
+	pkgmedianr = (*it)->medianr();
 	if ((media_nr > 0)
 	    && (pkgmedianr != media_nr))
 	{
@@ -414,6 +442,23 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 
 	bool is_remote = (*it)->isRemote();
 	string fullname = (*it)->nameEd();
+
+	if (((*it)->source() != current_src_ptr)	// source or media change
+	    || (pkgmedianr != current_src_media))
+	{
+	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
+		&& (current_src_ptr != 0))
+	    {
+		InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
+		ptr->releaseMedia (true);	// release if removable (CD/DVD)
+	    }
+
+	    current_src_ptr = (*it)->source();
+	    if (_callbacks._source_change_func != 0)
+	    {
+		(*_callbacks._source_change_func)(current_src_ptr, pkgmedianr, _callbacks._source_change_data);
+	    }
+	}
 
 	if (is_remote
 	    && (_callbacks._provide_start_func != 0))
@@ -437,19 +482,23 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 		    remaining_r.push_back ((*it)->name());
 		    ++it;
 		}
-		return count;
 	    }
 	    break;
-	    case InstSrcError::E_skip_media:		// skip current
+	    case InstSrcError::E_skip_media:		// skip current for this source
 	    {
 		while (it != inslist.end())
 		{
-		    if ((*it)->medianr() != pkgmedianr)	// break on next media
+		    if (((*it)->medianr() != pkgmedianr)		// break on next media
+			|| (current_src_ptr != (*it)->source()))	// or next source
+		    {
+			--it;
 			break;
+		    }
 		    remaining_r.push_back ((*it)->name());
 		    ++it;
 		}
-		continue;			// go on with next package
+		if (it != inslist.end())
+		    continue;			// go on with next package/source
 	    }
 	    break;
 	    default:
@@ -458,6 +507,10 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 		continue;
 	        break;
 	}
+
+	// skip_media or cancel_media might have advanced the iterator until the end
+	if (it == inslist.end())
+	    break;
 
 	if (_callbacks._package_start_func)
 	{
@@ -545,6 +598,12 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 
     } // loop over inslist
 
+    if (current_src_ptr != 0)
+    {
+	InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
+	ptr->releaseMedia (false);		// release any media
+    }
+
     // copy remaining sources to srcremaining_r
 
     for (std::list<PMPackagePtr>::iterator it = srclist.begin();
@@ -563,7 +622,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 //	METHOD NAME : Y2PM::installFile
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION : install a single rpm file,  uses callbacks !
+//	DESCRIPTION : install a single, locally availabe rpm file, uses callbacks !
 PMError
 Y2PM::installFile (const Pathname& path)
 {

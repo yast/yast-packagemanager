@@ -111,6 +111,18 @@ class PMSolvable : virtual public Rep {
     // relations of the package
     PkgRelList_type _requires, _conflicts, _provides, _obsoletes;
 
+  private:
+
+    /**
+     * Hack to let InstTarget lookup required and conflicting file relations.
+     **/
+    void traceFileRel( const PkgRelation & rel_r ) const;
+    void traceFileRel( const PkgRelList_type & rellist_r ) const {
+      for ( PkgRelList_type::const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
+	traceFileRel( *it );
+      }
+    }
+
   public:
 
     /**
@@ -162,6 +174,7 @@ class PMSolvable : virtual public Rep {
     const PkgRelList_type& setRequires(const PkgRelList_type& requires)
     {
       _requires = requires;
+      traceFileRel( _requires );
       return _requires;
     }
 
@@ -190,14 +203,17 @@ class PMSolvable : virtual public Rep {
     const PkgRelList_type& setConflicts(const PkgRelList_type& conflicts)
     {
       _conflicts = conflicts;
+      traceFileRel( _conflicts );
       return _conflicts;
     }
 
+    // Unused? If not check for FileRel.
     /**
      * add a requires relation to the front
      */
     const PkgRelation& addRequires(const PkgRelation& r) {
       _requires.push_front(r);
+      traceFileRel( r );
       return *(_requires.begin());
     }
 

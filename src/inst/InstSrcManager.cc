@@ -215,8 +215,25 @@ Pathname InstSrcManager::genSrcCacheName() const
 //
 PMError InstSrcManager::scanProductsFile( const Pathname & file_r, ProductSet & pset_r ) const
 {
-#warning TBD Actually scan products file.
-  pset_r.insert( ProductEntry() );
+  ifstream pfile( file_r.asString().c_str() );
+  while ( pfile.good() ) {
+
+    string value = stringutil::getline( pfile, /*trimed*/true );
+    if ( pfile.bad() ) {
+      ERR << "Error parsing " << file_r << endl;
+      return InstSrcError::E_no_instsrc_on_media;
+    }
+    if ( pfile.fail() ) {
+      break; // no data on last line
+    }
+    string tag = stringutil::stripFirstWord( value );
+
+    if ( tag.size() ) {
+      pset_r.insert( ProductEntry( tag, value ) );
+    }
+
+  }
+
   return Error::E_ok;
 }
 
@@ -392,13 +409,14 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   ProductSet products;
 
   MediaAccess::FileProvider pfile( media, "/media.1/products" );
-  if ( pfile.error() ) {
-    // no products file: default ProductEntry is /
-    products.insert( ProductEntry() );
-  } else {
+  if ( ! pfile.error() ) {
     // scan products file
     MIL << "Found '/media.1/products'." << endl;
     scanProductsFile( pfile(), products );
+  }
+  if ( products.empty() ) {
+    // scan error or no products file
+    products.insert( ProductEntry() );
   }
 
   media = 0; // release media
@@ -409,19 +427,13 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   PMError scan_err;
 
   for ( ProductSet::const_iterator iter = products.begin(); iter != products.end(); ++iter ) {
-    InstSrcPtr nsrc;
-    Pathname   srccache( genSrcCacheName() );
 
-    if ( (scan_err = InstSrc::vconstruct( nsrc, srccache, mediaurl_r, iter->_dir)) ) {
-      // no InstSrc found
-    } else {
-      ISrcId nid = poolAdd( nsrc );
-      if ( nid ) {
-	idlist_r.push_back( nid );
-      } else {
-        scan_err = Error::E_isrc_cache_duplicate;
-      }
+    ISrcId nid;
+    scan_err = scanMedia( nid, mediaurl_r, iter->_dir );
+    if ( nid ) {
+      idlist_r.push_back( nid );
     }
+
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -429,6 +441,36 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   ///////////////////////////////////////////////////////////////////
   DBG << "scanMedia " << mediaurl_r << " found " << idlist_r.size() << " InstSrc(es)" << endl;
   return scan_err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::scanMedia
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::scanMedia( ISrcId & isrc_r, const Url & mediaurl_r, const Pathname & product_dir_r )
+{
+  isrc_r = 0;
+
+  MIL << "scanMedia " << mediaurl_r << " (" << product_dir_r << ")" << endl;
+
+  PMError    err;
+  InstSrcPtr nsrc;
+  Pathname   srccache( genSrcCacheName() );
+
+  err = InstSrc::vconstruct( nsrc, srccache, mediaurl_r, product_dir_r );
+
+  if ( ! err ) {
+    isrc_r = poolAdd( nsrc );
+    if ( ! isrc_r ) {
+      err = Error::E_isrc_cache_duplicate;
+    }
+  } // else no InstSrc found
+
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -640,7 +682,7 @@ PMError InstSrcManager::deleteSource( ISrcId & isrc_r )
     delsrc = *it;
     _knownSources.erase( it );
   }
-
+  delsrc->disableSource();
   delsrc->_cache_deleteOnExit = true;
   MIL << "set to delete " << delsrc << " (RefCnt " << delsrc->rep_cnt()  << ")" << endl;
   if ( delsrc->rep_cnt() > 1 ) {
@@ -668,8 +710,7 @@ PMError InstSrcManager::rewriteUrl( const ISrcId isrc_r, const Url & newUrl_r )
 
   InstSrcPtr it( lookupId( isrc_r ) );
   if ( it ) {
-    it->descr()->set_url( newUrl_r );
-    return it->writeDescrCache();
+    return it->changeUrl (newUrl_r);
   }
 
   WAR << "bad ISrcId " << isrc_r << endl;
@@ -712,6 +753,24 @@ ostream & operator<<( ostream & str, const InstSrcManager & obj )
   }
   str << "=====================================" << endl;
   return str;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::disableAllSources
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void InstSrcManager::disableAllSources()
+{
+  MIL << "Going to disable all InstSrc'es..." << endl;
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    if ( (*it)->enabled() ) {
+      DBG << *it << ": " << (*it)->disableSource() << endl;
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -832,5 +891,3 @@ PMError InstSrcManager::intern_cacheCopyTo( const Pathname & newRoot_r )
 
   return Error::E_ok;
 }
-
-

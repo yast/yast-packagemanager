@@ -68,6 +68,9 @@ FSize                     PMSelection::archivesize()     const { DP_GET( archive
 std::string               PMSelection::order()           const { DP_GET( order ); }
 
 const bool                PMSelection::isBase()          const { DP_GET( isBase ); }
+
+// physical access to the sel file.
+PMError PMSelection::provideSelToInstall( Pathname & path ) const { DP_ARG_GET( provideSelToInstall, path ); }
 #undef DP_ARG_GET
 #undef DP_GET
 ///////////////////////////////////////////////////////////////////

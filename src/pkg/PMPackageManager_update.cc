@@ -170,7 +170,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 
     bool probabely_dropped = false;
 
-    D__ << "REPLACEMENT FOR " << installed << endl;
+    DBG << "REPLACEMENT FOR " << installed << endl;
 
     // if installed not SuSE -> no action ???
 
@@ -186,23 +186,26 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	if ( installed->edition() < candidate->edition() ) {
 	  // new version
 	  state->appl_set_install();
-	  D__ << " ==> INSTALL (new version): " << candidate << endl;
+	  DBG << " ==> INSTALL (new version): " << candidate << endl;
 	  ++opt_stats_r.chk_to_update;
 	} else {
 	  // check whether to downgrade:
 	  // both must have vendor 'SuSE' and candidates buildtime must be
 	  // newer.
-	  if (installed->buildtime() < candidate->buildtime() ) {
-	    if (installed->vendor().isSuSE()
-		&& candidate->vendor().isSuSE()) {
+	  if ( installed->buildtime() < candidate->buildtime() ) {
+	    if (    installed->vendor().isSuSE()
+		 && candidate->vendor().isSuSE() ) {
 	      state->appl_set_install();
 	      DBG << " ==> INSTALL (SuSE version downgrade): " << candidate << endl;
 	      ++opt_stats_r.chk_to_downgrade;
 	    } else {
-	      DBG << " ==> (candidate older)" << candidate << endl;
-	      ++opt_stats_r.chk_to_keep_old;
+	      DBG << " ==> (foreign downgrade)" << candidate << endl;
+	      ++opt_stats_r.chk_to_keep_downgrade;
 	      _update_items.insert( state );
 	    }
+	  } else {
+	    DBG << " ==> (keep installed)" << candidate << endl;
+	    ++opt_stats_r.chk_to_keep_installed;
 	  }
 	}
       } else {
@@ -397,10 +400,11 @@ std::ostream & operator<<( std::ostream & str, const PMUpdateStats & obj )
   str << "chk_already_toins    " << obj.chk_already_toins << endl;
   str << "chk_to_update        " << obj.chk_to_update << endl;
   str << "chk_to_downgrade     " << obj.chk_to_downgrade << endl;
-  str << "chk_to_keep_old      " << obj.chk_to_keep_old << endl;
+  str << "chk_to_keep_downgrade" << obj.chk_to_keep_downgrade << endl;
+  str << "chk_to_keep_installed" << obj.chk_to_keep_installed << endl;
   str << "--------------------------" << endl;
   str << "avcand               "
-    <<  ( obj.chk_already_toins + obj.chk_to_update + obj.chk_to_downgrade + obj.chk_to_keep_old )
+    <<  ( obj.chk_already_toins + obj.chk_to_update + obj.chk_to_downgrade + obj.chk_to_keep_downgrade + obj.chk_to_keep_installed )
       << endl;
   str << endl;
   str << "chk_keep_foreign     " << obj.chk_keep_foreign << endl;

@@ -113,6 +113,13 @@ class InstSrc: virtual public Rep {
      **/
     bool _cache_deleteOnExit;
 
+
+    /**
+     * If true, data and description cache directories should be created
+     * and used. (false during installation, when no system is present)
+     **/
+    bool _may_use_cache;
+
     /**
      * Subpath (below _cache) to cached InstSrcDescr.
      **/
@@ -132,6 +139,11 @@ class InstSrc: virtual public Rep {
      * Helper function to combine _cache and subpaths.
      **/
     Pathname cachePath( const Pathname & sub_r ) const { return( _cache + sub_r ); }
+
+    /**
+     * for remote package provide
+     **/
+    mutable Pathname previouslyDnlPackage;
 
   public:
 
@@ -158,12 +170,6 @@ class InstSrc: virtual public Rep {
     Pathname cache_media_dir() const { return cachePath( _c_media_dir ); }
 
   private:
-
-    /**
-     * If true, data and description cache directories should be created
-     * and used. (false during installation, when no system is present)
-     **/
-    bool mayUseCache() const;
 
     /**
      * Used by InstSrc::vconstruct to set up an InstSrc from
@@ -199,16 +205,9 @@ class InstSrc: virtual public Rep {
 			    Type type_r );
 
     /**
-     * Sync InstSrcDescr and InstSrcData to cache. descr_only_r is
-     * mainly used by InstSrcManager if data stored in InstSrcDescr
-     * were changed (e.g. default_activate).
+     * Sync InstSrcDescr to cache.
      **/
-    PMError writeCache( const bool descr_only_r = false );
-
-    /**
-     * Short for writeCache( true ). Sync InstSrcDescr to cache.
-     **/
-    PMError writeDescrCache() { return writeCache( /*descr_only*/true ); }
+    PMError writeDescrCache();
 
   protected:
 
@@ -350,7 +349,7 @@ class InstSrc: virtual public Rep {
 	/**
 	 * provide file via medianr and path
 	 *
-	 * path is relavite to the media root
+	 * path is relative to the media root
 	 *
 	 * returns error code
 	 * return local path in file_r
@@ -359,10 +358,35 @@ class InstSrc: virtual public Rep {
 	PMError provideFile (int medianr, const Pathname& path, Pathname& file_r) const;
 
 	/**
+	 * provide directory via medianr and path
+	 *
+	 * path is relative to the media root
+	 *
+	 * returns error code
+	 * return local path in dir_r
+	 * uses media change callback
+	 */
+	PMError provideDir (int medianr, const Pathname& path, Pathname& dir_r) const;
+
+	/**
 	 * is the media for this source is remote
 	 * and package provide takes some time
 	 */
 	bool isRemote (void) const;
+
+	/**
+	 * change URL
+	 * close current media and re-open with new media
+	 *
+	 */
+	PMError changeUrl (const Url & newUrl_r);
+
+
+	/**
+	 * release media. if_removable is true: release if CD/DVD only.
+	 *
+	 **/
+	PMError releaseMedia( bool if_removable_r = false );
 
   public:
 

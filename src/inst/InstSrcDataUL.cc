@@ -58,12 +58,12 @@ IMPL_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
 
 
 PMError
-InstSrcDataUL::readMediaFile(const Pathname& product_dir, MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count)
+InstSrcDataUL::readMediaFile(MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count)
 {
     vendor = id = string();
     count = 0;
 
-    Pathname filename = product_dir + stringutil::form("/media.%d/media", number);
+    Pathname filename = stringutil::form("/media.%d/media", number);
 
     MediaAccess::FileProvider contentfile( media_r, filename );
     if ( contentfile.error() ) {
@@ -143,7 +143,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	string vendor;
 	string id;
 	unsigned count,
-	err = readMediaFile(product_dir_r, media_r, 1, vendor, id, count);
+	err = readMediaFile(media_r, 1, vendor, id, count);
 	if(err != PMError::E_ok )
 	    return err;
 
@@ -155,7 +155,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
 	if(count == 0)
 	{
-	    WAR << "Media count in media.1/media may not be zero. Assume 1" << endl;
+	    WAR << "Media count in /media.1/media may not be zero. Assume 1" << endl;
 	    count = 1;
 	}
 
@@ -178,8 +178,8 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	return InstSrcError::E_open_file;
     }
 
-    PkgName pname, bname;
-    PkgEdition pversion, bversion;	// base product
+    PkgName pname, dname, bname;		// product, dist, base
+    PkgEdition pversion, dversion, bversion;	// product, dist, base
     InstSrcDescr::ArchMap archmap;
     InstSrcDescr::LabelMap labelmap;
 
@@ -199,6 +199,14 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	else if (tag == "VERSION")
 	{
 	    pversion = PkgEdition (value);
+	}
+	else if (tag == "DISTPRODUCT")
+	{
+	    dname = PkgName (value);
+	}
+	else if (tag == "DISTVERSION")
+	{
+	    dversion = PkgEdition (value);
 	}
 	else if (tag == "BASEPRODUCT")
 	{
@@ -282,6 +290,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     }
 
     ndescr->set_content_product (PkgNameEd (pname, pversion));
+    ndescr->set_content_distproduct (PkgNameEd (dname, dversion));
     ndescr->set_content_baseproduct (PkgNameEd (bname, bversion));
     ndescr->set_content_archmap (archmap);
     ndescr->set_content_labelmap (labelmap);
@@ -308,12 +317,46 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 //	DESCRIPTION :
 //
 PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndata_r,
-				MediaAccessPtr media_r, const Pathname & descr_dir_r,
-				const std::list<PkgArch>& allowed_archs, const LangCode& locale)
+				   MediaAccessPtr media_r, Pathname descr_dir_r,
+				   const std::list<PkgArch>& allowed_archs, const LangCode& locale)
 {
     MIL << "InstSrcDataUL::tryGetData(" << descr_dir_r << ")" << endl;
 
     ndata_r = 0;
+
+    //-----------------------------------------------------
+    // Check or create cache, if we're allowed to use one.
+    //-----------------------------------------------------
+    bool late_cache = false;
+    {
+      PathInfo cpath( source->cache_data_dir() );
+      if ( cpath.isDir() && !initDataCache( cpath.path(), source ) ) {
+	// fake to setup from cache
+	media_r     = new MediaAccess();
+	descr_dir_r = "/descr";
+
+	string f_url( "dir:///" );
+	f_url += source->cache_data_dir().asString();
+
+	PMError err;
+	if ( (err = media_r->open( f_url, source->cache_media_dir() )) ) {
+	  ERR << "(F)Failed to open " << f_url << " " << err << endl;
+	  return err;
+	}
+
+	if ( (err = media_r->attach()) ) {
+	  ERR << "(F)Failed to attach media: " << err << endl;
+	  return err;
+	}
+	MIL << "(F)Use cache " << media_r << endl;
+      } else {
+	MIL << "(F)No cache. Use media " << media_r << endl;
+	if ( cpath.isDir() && source->isRemote() ) {
+	  // create cache after everything needed is downloaded.
+	  late_cache = true;
+	}
+      }
+    }
 
     //-----------------------------------------------------
     // create instance of _own_ class
@@ -354,6 +397,22 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
     }
     if (pkgerr) return pkgerr;
     if (selerr) return selerr;
+
+    if ( late_cache ) {
+      PathInfo srcdir( source->media()->localPath( source->descr()->descrdir() ) );
+      if ( !srcdir.isDir() ) {
+	ERR << "Cannot access descr dir on media: " << srcdir << endl;
+      } else {
+	int ret = PathInfo::copy_dir( srcdir.path(), source->cache_data_dir() );
+	if ( ret ) {
+	  ERR << "Copy cache data failed: copyDir returned " << ret << endl;
+	  PathInfo::recursive_rmdir( source->cache_data_dir() + "descr" );
+	} else {
+	  MIL << source << " wrote late cache " << source->cache_data_dir() << endl;
+	}
+      }
+    }
+
     return PMError::E_ok;
 }
 
@@ -433,6 +492,73 @@ InstSrcDataUL::loadObjects()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcDataUL::initDataCache
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcDataUL::initDataCache( const Pathname & cache_dir_r, const InstSrcPtr source_r )
+{
+  PathInfo destdir( cache_dir_r );
+  if ( !destdir.isDir() ) {
+    WAR << "Cache disabled: cachedir does not exist: " << destdir << endl;
+    return Error::E_error;
+  }
+
+  destdir( cache_dir_r + "descr" );
+  if ( destdir.isExist() ) {
+    MIL << "Cache data already exist: " << destdir << endl;
+    return Error::E_ok;
+  }
+
+  if ( !source_r || !source_r->media() ) {
+      ERR << "No InstSrc or no instSrc media" << endl;
+      return Error::E_error;
+  }
+
+  if ( !source_r->media()->isOpen() ) {
+    PMError ret = source_r->media()->open( source_r->descr()->url(),
+					   source_r->cache_media_dir() );
+    if ( ret ) {
+      ERR << "Failed to open media " << source_r->descr()->url() << ": " << ret << endl;
+      return Error::E_error;
+    }
+  }
+
+  if ( !source_r->media()->isAttached() ) {
+    PMError ret = source_r->media()->attach();
+    if ( ret ) {
+      ERR << "Failed to attach media: " << ret << endl;
+      return Error::E_error;
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Now copy data to cache_dir_r
+  ///////////////////////////////////////////////////////////////////
+
+#warning Fix: late provide for FTP/HTTP
+  PathInfo srcdir( source_r->media()->localPath( source_r->descr()->descrdir() ) );
+  if ( !srcdir.isDir() ) {
+    ERR << "Cannot access descr dir on media: " << srcdir << endl;
+    return Error::E_error;
+  }
+
+#warning Fix: assume dir named descr
+  int ret = PathInfo::copy_dir( srcdir.path(), cache_dir_r );
+  if ( ret ) {
+    ERR << "Copy cache data failed: copyDir returned " << ret << endl;
+    PathInfo::recursive_rmdir( cache_dir_r + "descr" );
+    return Error::E_error;
+  }
+
+  MIL << source_r << " wrote cache " << cache_dir_r << endl;
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcDataUL::writeCache
 //	METHOD TYPE : PMError
 //
@@ -453,25 +579,35 @@ InstSrcDataUL::writeCache( const Pathname & cache_dir_r ) const
     return Error::E_ok;
   }
 
-  if ( !attached() || !_instSrc->media() || !_instSrc->media()->isOpen() ) {
-    ERR << "Not attached to InstSrc or instSrc media not open" << endl;
-    return Error::E_error;
+  if ( !attached() ) {
+      ERR << "Not attached to InstSrc" << endl;
+      return Error::E_error;
   }
 
-  // uggly: missing provide stuff...
-  PathInfo srcdir( _instSrc->media()->localPath( _instSrc->descr()->descrdir() ) );
-  if ( !srcdir.isDir() ) {
-    ERR << "Cannot access descr dir on media: " << srcdir << endl;
-    return Error::E_error;
-  }
+  ///////////////////////////////////////////////////////////////////
+  // If we've got a local cache, copy it's content.
+  // Otherwise init from media.
+  ///////////////////////////////////////////////////////////////////
 
-  int ret = PathInfo::copy_dir( srcdir.path(), cache_dir_r );
-  if ( ret ) {
-    ERR << "Copy cache data failed: copyDir returned " << ret << endl;
-    return Error::E_error;
+  PathInfo srcdir( _instSrc->cache_data_dir() + "descr" );
+  if ( srcdir.isDir() ) {
+
+    int ret = PathInfo::copy_dir( srcdir.path(), cache_dir_r );
+    if ( ret ) {
+      ERR << "Copy cache data failed: copyDir returned " << ret << endl;
+      PathInfo::recursive_rmdir( cache_dir_r + "descr" );
+      return Error::E_error;
+    }
+
+  } else {
+
+    PMError err = initDataCache( cache_dir_r, _instSrc );
+    if ( err ) {
+      return err;
+    }
+
   }
 
   MIL << *this << " wrote cache " << cache_dir_r << endl;
   return Error::E_ok;
 }
-

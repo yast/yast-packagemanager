@@ -101,7 +101,7 @@ class InstSrcDescr : virtual public Rep {
     InstSrc::Type _type;
 
     /**
-     * Url for media access (media's root dir)
+     * Url for media access (media's root dir, for packages)
      **/
     Url _url;
 
@@ -137,6 +137,7 @@ class InstSrcDescr : virtual public Rep {
     ///////////////////////////////////////////////////////////////////
 
     PkgNameEd   _content_product;
+    PkgNameEd   _content_distproduct;
     PkgNameEd   _content_baseproduct;
     Vendor      _content_vendor;
 
@@ -185,6 +186,7 @@ class InstSrcDescr : virtual public Rep {
     const unsigned &     media_count()         const { return _media_count; }
 
     const PkgNameEd &    content_product()     const { return _content_product; }
+    const PkgNameEd &    content_distproduct() const { return _content_distproduct; }
     const PkgNameEd &    content_baseproduct() const { return _content_baseproduct; }
     const Vendor &       content_vendor()      const { return _content_vendor; }
     const std::string &  content_defaultbase() const { return _content_defaultbase; }
@@ -238,6 +240,7 @@ class InstSrcDescr : virtual public Rep {
     void set_media_count( unsigned val_r )                  { _media_count = val_r; }
 
     void set_content_product( const PkgNameEd & val_r )     { _content_product = val_r; }
+    void set_content_distproduct( const PkgNameEd & val_r ) { _content_distproduct = val_r; }
     void set_content_baseproduct( const PkgNameEd & val_r ) { _content_baseproduct = val_r; }
     void set_content_vendor( const Vendor & val_r )         { _content_vendor = val_r; }
     void set_content_defaultbase( const std::string & val_r ) { _content_defaultbase = val_r; }

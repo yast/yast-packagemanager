@@ -596,6 +596,7 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 void
 RpmDb::rpmdeps2rellist ( const string& depstr,
 		PMSolvable::PkgRelList_type& deps,
+		PkgName who, bool dropselfdep,
 		FileDeps::FileNames& files,
 		bool fill_files)
 {
@@ -692,11 +693,16 @@ RpmDb::rpmdeps2rellist ( const string& depstr,
 		files.insert(name);
 	    }
 
-	    PkgRelation dep(name,cdep_Ci.compare,PkgEdition::fromString(cdep_Ci.version));
-
-	    dep.setPreReq(cdep_Ci.isprereq);
-
-	    deps.push_back(dep);
+	    if(dropselfdep && name == who)
+	    {
+		_I__("DEPCHECK") << name << " has dependency on it self" << endl;
+	    }
+	    else
+	    {
+		PkgRelation dep(name,cdep_Ci.compare,PkgEdition::fromString(cdep_Ci.version));
+		dep.setPreReq(cdep_Ci.isprereq);
+		deps.push_back(dep);
+	    }
 	}
 
 	cdep_Ci.clear();
@@ -780,7 +786,7 @@ RpmDb::getPackages (void)
     string value;
     string output;
 
-    PkgSet mypackages;
+    PkgSet              mypackages;
 
     output = process->receiveLine();
 
@@ -850,10 +856,10 @@ RpmDb::getPackages (void)
 
 	    PMSolvable::PkgRelList_type dummy;
 
-	    rpmdeps2rellist (pkgattribs[RPM_REQUIRES], requires, _filerequires, true);
-	    rpmdeps2rellist (pkgattribs[RPM_PROVIDES], provides, _filerequires);
-	    rpmdeps2rellist (pkgattribs[RPM_OBSOLETES], obsoletes, _filerequires);
-	    rpmdeps2rellist (pkgattribs[RPM_CONFLICTS], conflicts, _filerequires, true);
+	    rpmdeps2rellist (pkgattribs[RPM_REQUIRES], requires, name, false, _filerequires, true);
+	    rpmdeps2rellist (pkgattribs[RPM_PROVIDES], provides, name, false, _filerequires);
+	    rpmdeps2rellist (pkgattribs[RPM_OBSOLETES], obsoletes, name, true, _filerequires);
+	    rpmdeps2rellist (pkgattribs[RPM_CONFLICTS], conflicts, name, true, _filerequires, true);
 
 	    p->setRequires (requires);
 	    p->setProvides (provides);
@@ -867,7 +873,7 @@ RpmDb::getPackages (void)
 
 	    _packages.push_back (p);
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
-//	    D__ << p << endl;
+	    // D__ << p << endl;
 	}
 
 	output = process->receiveLine();
@@ -884,11 +890,13 @@ RpmDb::getPackages (void)
     {
 	// query rpm, returns name-version-edition
 	string str = belongsTo(string(*fileit));
-	WAR << "belongs to returned " << str << " for " << *fileit << endl;
-	
-	if(str.empty())
-	    continue;
-	
+
+	if( str.empty() ) {
+	  _DBG("FileRel") << *fileit << " not provided" << endl;
+	  continue;
+	}
+	_DBG("FileRel") << *fileit << " by " << str << endl;
+
 	PkgNameEd nameed = PkgNameEd::fromString(str);
 	PkgName name = nameed.name;
 	PkgEdition edi = nameed.edition;
@@ -898,14 +906,12 @@ RpmDb::getPackages (void)
 	if(ptr == NULL)
 	    { INT << "ptr can not be NULL" << endl; continue; }
 
-	D__ << ptr->name() << " provides " << *fileit << endl;
 	ptr->addProvides(*fileit);
     }
 
     _packages_valid = true;
     return _packages;
 }
-
 
 #if 0
 /*--------------------------------------------------------------*/
@@ -1495,6 +1501,46 @@ RpmDb::belongsTo (const Pathname& name, bool full_name)
     return result;
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::traceFileRel
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void RpmDb::traceFileRel( const PkgRelation & rel_r )
+{
+  if ( ! rel_r.isFileRel() )
+    return;
+
+  if ( ! _filerequires.insert( rel_r.name() ).second )
+    return; // already got it in _filerequires
+
+  if ( ! _packages_valid )
+    return; // collect only. Evaluated in first call to getPackages()
+
+  //
+  // packages already initialized. Must check and insert here
+  //
+  string str = belongsTo( rel_r.name().asString() );
+
+  if ( str.size() ) {
+    _DBG("FileRel") << rel_r << " by " << str << endl;
+    PkgNameEd nameed = PkgNameEd::fromString( str );
+
+    for ( list<PMPackagePtr>::iterator it = _packages.begin(); it != _packages.end(); ++it ) {
+      if ( (*it)->name() == nameed.name ) {
+	(*it)->addProvides( rel_r.name() );
+	return;
+      }
+    }
+    _INT("FileRel") << "Missed " << rel_r << " <-- " << str << endl;
+
+  } else {
+    _DBG("FileRel") << rel_r << " is not provided" << endl;
+  }
+}
 
 // determine changed files of installed package
 bool
@@ -2064,7 +2110,7 @@ RpmDb::backupPackage(const string& packageName)
     {
 	return false;
     }
-    
+
     _progresslogstream << "create backup for " << packageName << endl;
 
     {
@@ -2103,9 +2149,16 @@ RpmDb::backupPackage(const string& packageName)
 	for (FileList::const_iterator cit = fileList.begin();
 	    cit != fileList.end(); ++cit)
 	{
-	    DBG << "saving file "<< *cit << endl;
-	    fp << *cit << endl;
+	    string name = *cit;
+	    if ( name[0] == '/' )
+	    {
+		// remove slash, file must be relative to -C parameter of tar
+		name = name.substr( 1 );
+	    }
+	    D__ << "saving file "<< name << endl;
+	    fp << name << endl;
 	}
+	fp.close();
 
 	const char* const argv[] =
 	{
@@ -2125,7 +2178,7 @@ RpmDb::backupPackage(const string& packageName)
 	ExternalProgram tar(argv, ExternalProgram::Stderr_To_Stdout, false, -1, true);
 
 	string tarmsg;
-	
+
 	// TODO: its probably possible to start tar with -v and watch it adding
 	// files to report progress
 	for (string output = tar.receiveLine(); output.length() ;output = tar.receiveLine())
@@ -2145,7 +2198,6 @@ RpmDb::backupPackage(const string& packageName)
 	    MIL << "tar backup ok" << endl;
 	}
 
-	fp.close();
 	PathInfo::unlink(filestobackupfile);
     }
 

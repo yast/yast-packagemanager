@@ -16,7 +16,7 @@
    Maintainer:	Klaus Kaempf <kkaempf@suse.de>
 
    Purpose:	Implementation class for MediaHandler
-		This class handles access to CD or DVD media
+		This class handles access to CD media
 /-*/
 
 #include <iostream>
@@ -160,7 +160,7 @@ PMError MediaCD::attachTo(bool next)
 	    if( ret == Error::E_ok )
 	    {
 		mountsucceeded = true;
-		MIL << "succeded" << endl;
+		MIL << " succeded" << endl;
 		_mounteddevice = *it;
 		_lastdev = count;
 	    }

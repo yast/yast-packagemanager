@@ -67,6 +67,8 @@ class PMYouPatchPaths : virtual public Rep {
 
     Pathname scriptPath( const std::string &scriptName );
 
+    Pathname localScriptPath( const std::string &scriptName );
+
     /**
       Return local base directory for you related files.
     */
@@ -77,7 +79,11 @@ class PMYouPatchPaths : virtual public Rep {
     */
     Pathname installDir();
 
+    Pathname externalRpmDir();
+
     Pathname localSuseServers();
+
+    std::string directoryFileName();
 
     std::string product();
     

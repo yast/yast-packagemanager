@@ -33,6 +33,7 @@
 #include <Y2PM.h>
 
 #include <y2pm/InstSrc.h>
+#include <y2pm/InstSrcError.h>
 
 #include <y2pm/MediaAccess.h>
 #include <y2pm/InstSrcDescr.h>
@@ -67,6 +68,7 @@ const Pathname InstSrc::_c_media_dir( "MEDIA" );
 //	DESCRIPTION :
 InstSrc::InstSrc()
     : _cache_deleteOnExit( false )
+    , _may_use_cache( true )
     , _mediachangefunc (0)
     , _mediachangedata (0)
     , _medianr (0)
@@ -84,12 +86,6 @@ InstSrc::InstSrc()
 //
 InstSrc::~InstSrc()
 {
-#warning ****************************************
-#warning ** FORCE _cache_deleteOnExit until InstSrcMgr ready
-  //INT << "FORCE _cache_deleteOnExit until InstSrcMgr ready" << endl;
-  //_cache_deleteOnExit = true;
-#warning ****************************************
-
   MIL << "Delete InstSrc " << *this << "(" << (_cache_deleteOnExit ? "delete " : "keep " ) << _cache << ")" << endl;
 
   if ( _media )
@@ -100,21 +96,13 @@ InstSrc::~InstSrc()
 
   if ( _cache_deleteOnExit ) {
     PathInfo::recursive_rmdir( _cache );
+  } else {
+    // cleanup below media_dir
+    PathInfo mediadir( cache_media_dir(), PathInfo::LSTAT );
+    if ( mediadir.isDir() ) {
+      PathInfo::clean_dir( mediadir.path() );
+    }
   }
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrc::mayUseCache
-//	METHOD TYPE : bool
-//
-//	DESCRIPTION :
-//
-bool InstSrc::mayUseCache() const
-{
-#warning by now cache enabled if runningFromSystem
-  return Y2PM::runningFromSystem();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -187,35 +175,7 @@ PMError InstSrc::enableSource()
   switch ( _descr->type() ) {
 
   case T_UnitedLinux:
-    ndata = new InstSrcDataUL;
-    // FAKE
-    {
-      MediaAccessPtr f_media    = _media;
-      Pathname       f_descrdir = _descr->descrdir();
-
-      PathInfo cpath( cache_data_dir() + "descr/packages" );
-      if ( cpath.isFile() ) {
-	f_media    = new MediaAccess();
-	f_descrdir = "/descr";
-
-	string f_url( "dir:///" );
-	f_url += cache_data_dir().asString();
-
-	if ( (err = f_media->open( f_url, cache_media_dir() )) ) {
-	  ERR << "(F)Failed to open " << f_url << " " << err << endl;
-	  return err;
-	}
-
-	if ( (err = f_media->attach()) ) {
-	  ERR << "(F)Failed to attach media: " << err << endl;
-	  return err;
-	}
-	MIL << "(F)Use cache " << cpath << endl;
-      }
-      err = InstSrcDataUL::tryGetData( this, ndata, f_media, f_descrdir, archIt->second, Y2PM::getPreferredLocale() );
-    }
-    // EKAF
-    // err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
+    err = InstSrcDataUL::tryGetData( this, ndata, _media, _descr->descrdir(), archIt->second, Y2PM::getPreferredLocale() );
     break;
 
     ///////////////////////////////////////////////////////////////////
@@ -246,7 +206,7 @@ PMError InstSrc::enableSource()
     _data = ndata;
     _data->_instSrc_attach( this );
     _data->_instSrc_propagate();    // propagate Objects to Manager classes.
-    writeCache();
+    writeDescrCache();
   }
 
   return err;
@@ -282,7 +242,7 @@ PMError InstSrc::disableSource()
   if (_media)
   {
     if (_media->isAttached())
-	_media->release();
+      _media->release();
     _media->close();
   }
 
@@ -290,31 +250,32 @@ PMError InstSrc::disableSource()
   _data->_instSrc_detach();   // clear backreferences to InstSrc.
   _data = 0;
 
+  // cleanup below media_dir
+  PathInfo mediadir( cache_media_dir(), PathInfo::LSTAT );
+  if ( mediadir.isDir() ) {
+    PathInfo::clean_dir( mediadir.path() );
+  }
+
   return err;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrc::writeCache
+//	METHOD NAME : InstSrc::writeDescrCache
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-PMError InstSrc::writeCache( const bool descr_only_r )
+PMError InstSrc::writeDescrCache()
 {
-#warning errorchecks
-  if ( ! mayUseCache() ) {
+  if ( ! _may_use_cache ) {
     MIL << "WriteCache disabled" << endl;
     return Error::E_src_cache_disabled;
   }
 
   if ( _descr ) {
     _descr->writeCache( cache_descr_dir() );
-  }
-
-  if ( _data && ! descr_only_r ) {
-    _data->writeCache( cache_data_dir() );
   }
 
   return Error::E_ok;
@@ -443,7 +404,7 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
   // create media_dir. descr/data dir, if mayUseCache
   ///////////////////////////////////////////////////////////////////
 
-  if ( mayUseCache() ) {
+  if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() ) {
     res = PathInfo::assert_dir( cache_descr_dir(), 0700 );
     if ( res ) {
       ERR << "Unable to create descr_dir " << cache_descr_dir() << " (errno " << res << ")" << endl;
@@ -456,6 +417,7 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
       return Error::E_cache_dir_create;
     }
   } else {
+    _may_use_cache = false;
     MIL << "descr/data caches disabled" << endl;
   }
 
@@ -656,7 +618,6 @@ PMError
 InstSrc::provideMedia (int medianr) const
 {
     PMError err;
-
     string reply;
 
     // if the url ends with digits, try re-opening with
@@ -680,7 +641,7 @@ InstSrc::provideMedia (int medianr) const
 		err = _media->open (url, cache_media_dir());
 		if (err != MediaError::E_ok)
 		{
-		    MIL << "open (" << url << ") failed" << endl;
+		    ERR << "open (" << url << ") failed: " << err << endl;
 		}
 		else
 		{
@@ -696,31 +657,33 @@ InstSrc::provideMedia (int medianr) const
 	if (err == MediaError::E_ok)
 	{
 	    // open media file
-	    std::ifstream media (_media->localPath (mediafile).asString().c_str());
-	    if (media)
+	    std::ifstream mediaf (_media->localPath (mediafile).asString().c_str());
+	    if (mediaf)
 	    {
 		char vendor[200];
 		char id[200];
 		vendor[0] = 0;
 		id[0] = 0;
-		if ((media.getline (vendor, 200, '\n'))
+		if ((mediaf.getline (vendor, 200, '\n'))
 		    && (string (vendor) == _descr->media_vendor()))	// check vendor
 		{
-		    if ((media.getline (id, 200, '\n'))
+		    if ((mediaf.getline (id, 200, '\n'))
 			&& (string (id) == _descr->media_id()))		// check id
 		    {
 			InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
 			ptr->_medianr = medianr;			// everything ok
+			mediaf.close();
 			break;
 		    }
 		}
+		mediaf.close();
 		MIL << "vendor '" << vendor << "' id '" << id << "'" << endl;
 		if (_mediachangefunc != 0)
 		{
 		    string error = string(vendor) + " != " + (const std::string &)(_descr->media_vendor());
 		    if (id[0] != 0)
 		    {
-			error = error + "\n" + id + " != " + _descr->media_id();
+			error = error + "<br>\n" + id + " != " + _descr->media_id();
 		    }
 
 		    //---------------------------------------------------------
@@ -741,7 +704,6 @@ InstSrc::provideMedia (int medianr) const
 
 		    if (changereply == "S")			// skip
 		    {
-			MIL << "skip media" << endl;
 			return InstSrcError::E_skip_media;
 		    }
 		    else if (changereply == "I")		// ignore
@@ -753,8 +715,7 @@ InstSrc::provideMedia (int medianr) const
 		    }
 		    else if (changereply == "C")		// cancel installation
 		    {
-			MIL << "cancel media" << endl;
-			return InstSrcError::E_skip_media;
+			return InstSrcError::E_cancel_media;
 		    }
 		    else if (changereply.empty())
 		    {
@@ -781,7 +742,17 @@ InstSrc::provideMedia (int medianr) const
 
 	_media->release();
 
+	if (_media->attach (true) == PMError::E_ok)	// retry next device of media
+	    continue;
+
 	std::string path = url.getPath();
+
+	if (!triedReOpen)
+	{
+	    while (path[path.size()-1] == '/')		// erase trailing '/'
+		path.erase (path.size()-1);
+	}
+
 	if (!triedReOpen
 	    && isdigit(path[path.size()-1]))
 	{
@@ -828,7 +799,7 @@ InstSrc::provideMedia (int medianr) const
 	else if (changereply == "C")		// cancel installation
 	{
 	    MIL << "cancel media" << endl;
-	    return InstSrcError::E_skip_media;
+	    return InstSrcError::E_cancel_media;
 	}
 	else if (changereply.empty())
 	{
@@ -870,7 +841,7 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir,
     if (err != PMError::E_ok)
 	return err;
 
-    Pathname filename = _descr->content_datadir() + dir + name;
+    Pathname filename = _descr->datadir() + dir + name;
     err = _media->provideFile (filename);
 
     if (err != PMError::E_ok)
@@ -879,6 +850,16 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir,
 	return err;
     }
     path_r = _media->localPath (filename);
+
+#warning Hack not to keep more than one downloaded package
+    if ( isRemote() && previouslyDnlPackage != path_r ) {
+	if(! previouslyDnlPackage.empty())
+	{
+	    PathInfo::unlink( previouslyDnlPackage );
+	}
+	previouslyDnlPackage = path_r;
+    }
+
     return PMError::E_ok;
 }
 
@@ -913,6 +894,33 @@ InstSrc::provideFile (int medianr, const Pathname& path, Pathname& file_r) const
 /******************************************************************
 **
 **
+**	FUNCTION NAME : provideDir
+**	FUNCTION TYPE : PMError
+**
+**	DESCRIPTION : provide directory by medianr and relative path
+**		return local path in dir_r
+*/
+PMError
+InstSrc::provideDir (int medianr, const Pathname& path, Pathname& dir_r) const
+{
+    PMError err = provideMedia (medianr);
+    if (err != InstSrcError::E_ok)
+	return err;
+
+    err = _media->provideDir (path);
+    if (err != PMError::E_ok)
+    {
+	ERR << "Media can't provide '" << path << "': " << err.errstr() << endl;
+	return err;
+    }
+    dir_r = _media->localPath (path);
+    return PMError::E_ok;
+}
+
+
+/******************************************************************
+**
+**
 **	FUNCTION NAME : isRemote
 **	FUNCTION TYPE : bool
 **
@@ -925,6 +933,62 @@ InstSrc::isRemote () const
 	   || (_media->type() == MediaAccess::HTTP)
 	   || (_media->type() == MediaAccess::HTTPS);
 
+}
+
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : changeUrl
+**	FUNCTION TYPE : bool
+**
+**	DESCRIPTION : change Url of media
+*/
+PMError
+InstSrc::changeUrl (const Url & newUrl_r)
+{
+    MIL << "changeUrl (" << newUrl_r << ")" << endl;
+    if ( !newUrl_r.isValid() )
+    {
+	WAR << "Won't change to invalid url: " << newUrl_r << endl;
+	return InstSrcError::E_bad_url;
+    }
+
+    _descr->set_url( newUrl_r );
+    writeDescrCache();
+
+    if (_media->isOpen())
+    {
+	_medianr = 0;
+	_media->release();
+	_media->close();
+	return _media->open (newUrl_r, cache_media_dir());
+    }
+    return PMError::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrc::releaseMedia
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError
+InstSrc::releaseMedia( bool if_removable_r )
+{
+  _medianr = 0;
+
+  if ( !_media->isAttached() )
+    return Error::E_ok;
+
+  if ( if_removable_r
+       && _media->type() != MediaAccess::CD
+       && _media->type() != MediaAccess::DVD )
+    return Error::E_ok;
+
+  return _media->release();
 }
 
 

@@ -438,6 +438,29 @@ class PMSelectable : virtual public Rep {
      * Used by ostream::operator<< to print some debug lines
      **/
     virtual std::ostream & dumpOn( std::ostream & str ) const;
+
+
+  public:
+
+    /**
+     * Test method like 'by_user()'
+     **/
+    typedef bool (PMSelectable::*Test_method)() const;
+
+    /**
+     * General test function
+     **/
+    typedef bool (*Test_fnc)( const constPMSelectablePtr & sel_r );
+
+    /**
+     * Evaluates a Test_method
+     **/
+    static bool test( const constPMSelectablePtr & sel_r, Test_method fnc_r ) {
+      if ( sel_r && fnc_r )
+	return (sel_r.operator->()->*fnc_r)();
+      return false;
+    }
+
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -77,14 +77,13 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	/**
 	 * read media.X/media file
 	 *
-	 * @param product_dir base directory
 	 * @param media_r MediaAccessPtr
 	 * @param number the X in media.X
 	 * @param vendor where to store vendor
 	 * @param id where to store id
 	 * @param count where to store count
 	 * */
-	static PMError readMediaFile(const Pathname& product_dir, MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count);
+	static PMError readMediaFile(MediaAccessPtr media_r, unsigned number, std::string& vendor, std::string& id, unsigned& count );
 
   public:
 
@@ -108,7 +107,7 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
   public:
 
     /**
-     * Write data to cache, if necessary
+     * Write data to cache.
      **/
     virtual PMError writeCache( const Pathname & cache_dir_r ) const;
 
@@ -136,8 +135,16 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
      * or NULL and PMError set.
      **/
     static PMError tryGetData( const InstSrcPtr source, InstSrcDataPtr & ndata_r,
-			MediaAccessPtr media_r, const Pathname & descr_dir_r,
-			const std::list<PkgArch>& allowed_archs, const LangCode& locale);
+			       MediaAccessPtr media_r, Pathname descr_dir_r,
+			       const std::list<PkgArch>& allowed_archs, const LangCode& locale);
+
+  private:
+
+    /**
+     * If cache is not disabled, assert that it actualy contains data. If still empty,
+     * initialize cache from InstSrc's media. Called from tryGetData().
+     **/
+    static PMError initDataCache( const Pathname & cache_dir_r, const InstSrcPtr source_r );
 
 };
 

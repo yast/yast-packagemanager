@@ -47,13 +47,13 @@ product and <tt>http://sdb.suse.de/download/</tt> for the business products.</p>
 
 Downloaded files are stored locally under the directory <tt>/var/lib/YaST2/you/</tt>.
 The description files for installed patches are stored at
-<tt>/var/lib/YaST2/you/installed</tt>. There is no product specifig path added to the path
+<tt>/var/lib/YaST2/you-installed</tt>. There is no product specifig path added to the path
 to the installed patches.
 
 <h4>Product dependent paths</h4>
 
-<p>The path to the description files and the other patch data depends on the installe
-dproduct. The base path is <tt>&lt;basearch&gt;/update/&lt;version&gt;</tt> for the box
+<p>The path to the description files and the other patch data depends on the installed
+product. The base path is <tt>&lt;basearch&gt;/update/&lt;version&gt;</tt> for the box
 product, and <tt>&lt;basearch&gt;/update/&lt;productname&gt;/&lt;version&gt;</tt> for the
 business products. <tt>&lt;version&gt</tt> is the version of the installed product.
 <tt>&lt;productname&gt;</tt> is the name of the installed product.</p>
@@ -81,6 +81,28 @@ base architecture is used. As a last fallback <tt>noarch</tt> is used.</p>
 <p>Example: i586 RPMs for the i386 version of the 8.1. box product are stored to
 <tt>/var/lib/YaST2/you/i386/update/8.1/rpm/i586/</tt>.</p>
 
+<h4>RPM file name</h4>
+
+<p>The file name for the RPM which is looked for on the server is constructed from entries
+of the <tt>Packages</tt> section of the patch description file as
+<tt>&lt;name&gt;-&lt;version&gt;.&lt;arch&gt;.rpm</tt>. <tt>&lt;name&gt</tt> is the
+value of <tt>Filename:</tt> stripped by the <tt>.rpm</tt> suffix. <tt>&lt;version&gt</tt>
+is the value of <tt>Version:</tt>.</p>
+
+<p><tt>&lt;arch&gt</tt> is determined by the installed system. If there already is a
+version of the RPM installed on the system, its architecture is used. If not, a list of
+compatible architectures is gone through.</p>
+
+<p>If there is a patch RPM present with the name
+<tt>&lt;name&gt;-&lt;version&gt;.&lt;arch&gt;.patch.rpm</tt> and a previous version of the
+package is already installed, the patch RPM is used for the update.</p>
+
+<p>The first RPM matching the criteria which is found on the server is downloaded and
+installed.</p>
+
+<p>If the <tt>InstPath:</tt> tag has a non-empty value this value is used as URL to an
+external RPM. The RPM file specified by the URL is downloaded and installed. No automatic
+processing of download path or file name takes place.</p>
 
 <h4>Path to scripts</h4>
 
@@ -110,6 +132,9 @@ and installed in the order of the names in this file.</p>
 
 <pre>
 Kind: [security|recommended|optional|document|YaST2]
+
+Patchname: &lt;name&gt;
+Patchversion: &lt;version&lt;
 
 Shortdescription.&lt;language&gt; : &lt;short description; one line&gt;
 
@@ -177,8 +202,140 @@ Oboletes:      ..
 Segakcap:
 </pre>
 
+<table border="1" cellpadding="2">
+<caption>Patch description tags</caption>
+<tr><th>Tag</th><th>Possible values</th><th>Description</th></tr>
+<tr>
+  <td>Kind</td>
+  <td>one of the strings "security", "recommended", "optional",
+      "document" or "YaST2"</td>
+  <td>Type of patch. See the <a href="#preselection">section about selection of patches</a>
+      for details.</td>
+</tr>
+<tr>
+  <td>Patchname</td>
+  <td>string</td>
+  <td>Name of the patch. All patches having the same name are handled as different versions
+      of the same patch.</td>
+</tr>
+<tr>
+  <td>Patchversion</td>
+  <td>string of the form <tt>&lt;version&gt;-&lt;release&gt;</tt></td>
+  <td>Version of the patch.</td>
+</tr>
+<tr>
+  <td>Shortdescription</td>
+  <td>string</td>
+  <td>One-line summary of the patch</td>
+</tr>
+<tr>
+  <td>Longdescription</td>
+  <td>string</td>
+  <td>Multi-line description of the patch</td>
+</tr>
+<tr>
+  <td>Preinformation</td>
+  <td>string</td>
+  <td>Multi-line message, which is shown before installing the patch</td>
+</tr>
+<tr>
+  <td>Postinformation</td>
+  <td>string</td>
+  <td>Multi-line message, which is shown after installing the patch</td>
+</tr>
+<tr>
+  <td>Size</td>
+  <td>Integer</td>
+  <td>Size of patch in KByte</td>
+</tr>
+<tr>
+  <td>UpdateOnlyInstalled</td>
+  <td>"true" or "false"</td>
+  <td>If set to "true", only packages are installed which already are installed in a previous
+      version</td>
+</tr>
+<tr>
+  <td>Prescript</td>
+  <td>file name</td>
+  <td>Name of script to be executed before installing the RPMs of the patch.</td>
+</tr>
+<tr>
+  <td>Postscript</td>
+  <td>file name</td>
+  <td>Name of script to be executed after installing the RPMs of the patch.</td>
+</tr>
+<tr>
+  <td>Packages</td>
+  <td>list of tagged values</td>
+  <td>Set of package informations, see <a href="#packageformat">package tag description</a> for
+      details.</td>
+</tr>
+</table>
 
-<h3>Which patch will be preselected for installation?</h3>
+<a name="packageformat">
+<table border="1" cellpadding="2">
+<caption>Package description tags</caption>
+<tr><th>Tag</th><th>Possible values</th><th>Description</th></tr>
+<tr>
+  <td>Filename</td>
+  <td>String of the form <tt>&lt;RPM name&gt;.rpm</tt></td>
+  <td>Name of the RPM. The <tt>.rpm</tt> suffix has to be present, but isn't used anywhere.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>string of the form <tt>&lt;version&gt;-&lt;release&gt;</tt></td>
+  <td>Version of the RPM</td>
+<tr>
+  <td>Requires</td>
+  <td>string</td>
+  <td>List of "Requires" from RPM separated by spaces</td>
+</tr>
+<tr>
+  <td>Provides</td>
+  <td>string</td>
+  <td>List of "Provides" from RPM separated by spaces</td>
+</tr>
+<tr>
+  <td>Obsoletes</td>
+  <td>string</td>
+  <td>List of "Obsoletes"from RPM separated by spaces</td>
+</tr>
+<tr>
+  <td>Label</td>
+  <td>string</td>
+  <td>One line description of the RPM</td>
+</tr>
+<tr>
+  <td>Size</td>
+  <td>integer</td>
+  <td>Size of RPM in Bytes</td>
+</tr>
+<tr>
+  <td>Buildtime</td>
+  <td>integer</td>
+  <td>Build time as extracted from RPM</td>
+</tr>
+<tr>
+  <td>RpmGroup</td>
+  <td>string</td>
+  <td>RPM group as extracted from RPM</td>
+</tr>
+</table>
+</a>
+
+
+
+<h3>Patch names and versions</h3>
+
+<p>If the <tt>Patchname:</tt> tag is present its value will be used as name for the patch. If
+it is empty or missig the file name of the patch description file is used as name. If the
+<tt>Patchversion:</tt> tag is present, its value will be used as version of the patch. If it
+is empty or missing the version will be set to "0".</p>
+
+<p>If there is more than one patch with the same name, only the patch with the highest
+version will be offered for installation.</p>
+
+<h3><a name="preselection">Which patch will be preselected for installation?</a></h3>
 
 <p>There are some criterions for preselecting patches which will be installed
 by YOU:
@@ -194,13 +351,10 @@ by YOU:
 <!--  <li>One or more packages have a flag ( "Category" ) which is a installed package.</li>-->
 </ul>
 
-<!--
 <p>If the flag "UpdateOnlyInstalled" is not defined or is false, ALL packages of the
 patch will be installed.
-If this flag is "true", only packages will be updated which are already installed
-and have a older version OR the package has a flag ( "Category" ) which is a installed package.
+If this flag is "true", only packages will be updated which are already installed.
 </p>
--->
 
 <h3>Executing scripts within a patch</h3>
 <p>There is the possibility to run scripts while installing packages. The script from the
@@ -209,13 +363,29 @@ and have a older version OR the package has a flag ( "Category" ) which is a ins
 downloaded from the <tt>scripts</tt> subdirectory and stored localy before execution.</p>
 
 
-<h2>Using the online update from the command line</h2>
+<h2>Usage</h2>
+
+<h3>GUI version</h3>
+
+<p>The online update can be started from the YaST2 control center by selecting the corresponding
+icon.</p>
+
+<p>The GUI version of the online update can also be started by command line: <tt>yast2
+online_update [.url &lt;url&gt;] [.nosigcheck]</tt>. With the <tt>.url</tt> argument the given
+URL is selected as source for the patches. If the argument <tt>.nosigcheck</tt> is present the
+signatures of the downloaded files aren't checked.</p>
+
+
+<h3>Command line version without GUI</h3>
 
 <pre>
-online-update [-u url] [-p product] [-v version] [-a arch] [-d] [-s] [-n] [security]
-  [recommended] [document] [optional]
+Usage: online-update [-u url] [-p product] [-v version] [-a arch] [-d] [-s] [-n] [-g]
+  [-i] [security] [recommended] [document] [optional]
 
 -u url      Base URL of directory tree used to get patches from.
+
+-g          Only download patches, don't install.
+-i          Install downloaded patches, don't download.
 
 -p product  Name of product to get patches for.
 -v version  Version of product to get patches for.
@@ -232,46 +402,22 @@ security | recommended | document | optional   Types of patches to be installed.
 </pre>
 
 
-<h2>Using the GUI version of the online update</h2>
-
-<p>The online update can be started from the YaST2 control center by selecting the corresponding
-icon.</p>
-
-<p>The GUI version of the online update can also be started by command line: <tt>yast2
-online_update [.url &lt;url&gt;] [.nosigcheck]</tt>. With the <tt>.url</tt> argument the given
-URL is selected as source for the patches. If the argument <tt>.nosigcheck</tt> is present the
-signatures of the downloaded files aren't checked.</p>
-
-
 <h1>Patch CD Update</h1>
 
-<em>The patch CD update isn't tested with the new online update yet. It might not work.</em>
-
-<h2>Overview</h2>
 <p>There is also the possibilty to provide the patches on a CD ROM. 
 Insert the CD ROM with the patches and start the "Patch CD update" 
-in YaST2 Control Center.
- 
-<h2>Description</h2>
-The patch structure and the directories where the patches are located are exactly
+in YaST2 Control Center. This is euivalent to start the online update with the URL
+<tt>cd:///</tt>. You can start the Patch CD Update from the command line with <tt>yast2
+online_update .cd_default</tt>.</p>
+
+<p>The patch structure and the directories where the patches are located are exactly
 the same as on the ftp server.
 The path on CD ROM starts with the {ARCHITECTURE} directory,
 e.g. the path on ftp server is:
-<p>/pub/suse/{ARCHITECTURE}/update/{SuSE-Version}/patches/*
+<tt>/pub/suse/{ARCHITECTURE}/update/{SuSE-Version}/patches/*</tt>,
+the directory structure on the CD ROM is:
+<tt>{ARCHITECTURE}/update/{SuSE-Version}/patches/*</tt>.</p>
 
-<p>the directory structure on the CD ROM is:
-<p>{ARCHITECTURE}/update/{SuSE-Version}/patches/* 
-
-<h3>Additional hint</h3>
-<p> First step in Patch CD Update is to copy all available patch descriptions
-(for the patches which are not yet installed) from the CD to the harddisk. 
-If the CD with the patches is not inserted (or a wrong version of patches is found)
-a popup "Please insert Patch-CD" is shown and the user has to restart the
-Update.
-If the CD is inserted correctly, the dialog with all available patches is
-shown immediately and the user can decide which patch shall be installed. 
-<br>
-<br>
 <hr>
 <address><a href="mailto:cschum@suse.de">Cornelius Schumacher</a></address>
 </body>

@@ -54,7 +54,7 @@ inline MediaAccess::ProtocolTypes MediaAccess::_init_protocolTypes()
   ret.insert( ProtocolTypes::value_type( "dvd",   DVD ) );
   ret.insert( ProtocolTypes::value_type( "nfs",   NFS ) );
   ret.insert( ProtocolTypes::value_type( "dir",   DIR ) );
-  ret.insert( ProtocolTypes::value_type( "disk",  DISK ) );
+  ret.insert( ProtocolTypes::value_type( "hd",    DISK ) );
   ret.insert( ProtocolTypes::value_type( "ftp",   FTP ) );
   ret.insert( ProtocolTypes::value_type( "smb",   SMB ) );
   ret.insert( ProtocolTypes::value_type( "http",  HTTP ) );
@@ -239,6 +239,29 @@ MediaAccess::releaseFile( const Pathname & filename ) const
     return Error::E_ok;
 
   return _handler->releaseFile( filename );
+}
+
+// provide directory tree denoted by path to attach dir
+//
+// dirname is interpreted relative to the attached url
+// and a path prefix is preserved to destination
+PMError
+MediaAccess::provideDir (const Pathname & dirname) const
+{
+  if ( !_handler )
+    return Error::E_not_open;
+
+  return _handler->provideDir( dirname );
+}
+
+
+PMError
+MediaAccess::releaseDir( const Pathname & dirname ) const
+{
+  if ( !_handler )
+    return Error::E_ok;
+
+  return _handler->releaseDir( dirname );
 }
 
 PMError

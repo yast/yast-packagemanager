@@ -92,6 +92,10 @@ class InstSrcManager {
     struct ProductEntry {
       Pathname    _dir;
       std::string _name;
+      ProductEntry( const Pathname & dir_r = "/", const std::string & name_r = std::string() ){
+	_dir  = dir_r;
+	_name = name_r;
+      }
       bool operator<( const ProductEntry & rhs ) const {
 	return( _dir.asString() < rhs._dir.asString() );
       }
@@ -173,10 +177,21 @@ class InstSrcManager {
   public:
 
     /**
-     * Access media. Detect kind of InstSrc(es) available on media, and
-     * load their descriptions. (add them to ISrcPool)
+     * Access media. Detect kind of InstSrc(es) available on media by scanning
+     * /media.1/products if available. Otherwise assume the InstSrc is located
+     * directly below mediaurl.
+     *
+     * Load the InstSrc(es) (add them to ISrcPool).
      **/
     PMError scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r );
+
+    /**
+     * Load a certain InstSrc located on mediaurl in product_dir.
+     *
+     * This is what the above scanMedia function calls, for each product
+     * found in a /media.1/products file.
+     **/
+    PMError scanMedia( ISrcId & isrc_r, const Url & mediaurl_r, const Pathname & product_dir_r );
 
     /**
      * Enable InstSrc. Let it provide it's Objects to the Manager classes.
@@ -257,6 +272,11 @@ class InstSrcManager {
      * Should be replaced by some Iterator.
      **/
     void getSources( ISrcIdList & idlist_r, const bool enabled_only = false ) const;
+
+    /**
+     * Disable all InstSrc'es.
+     **/
+    void disableAllSources();
 
     /**
      * Used during installation/Upadte (where caching is disabled)

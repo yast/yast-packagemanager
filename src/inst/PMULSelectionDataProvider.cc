@@ -397,7 +397,7 @@ PMULSelectionDataProvider::visible ( const PMSelection & sel_r ) const
 std::list<std::string>
 PMULSelectionDataProvider::suggests( const PMSelection & sel_r ) const
 {
-    return sellist2strlist (_ptrs_attr_SUGGESTS);
+    return _attr_SUGGESTS;
 }
 
 std::list<PMSelectionPtr>
@@ -410,7 +410,7 @@ PMULSelectionDataProvider::suggests_ptrs( const PMSelection & sel_r ) const
 std::list<std::string>
 PMULSelectionDataProvider::recommends( const PMSelection & sel_r ) const
 {
-    return sellist2strlist (_ptrs_attr_RECOMMENDS);
+    return _attr_RECOMMENDS;
 }
 
 std::list<PMSelectionPtr>
@@ -459,4 +459,11 @@ bool
 PMULSelectionDataProvider::isBase ( const PMSelection & sel_r ) const
 {
     return _attr_ISBASE;
+}
+
+PMError
+PMULSelectionDataProvider::provideSelToInstall( const PMSelection & sel_r, Pathname & path_r ) const
+{
+  path_r = _selection_retrieval->getName();
+  return PMError::E_ok;
 }
