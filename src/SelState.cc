@@ -92,7 +92,7 @@ void SelState::set_has_candidate( bool b )
       clr( B_F_TABOO );
     }
   } else {
-    clr( B_IS_C );
+    clr( B_IS_C | B_F_SRCINS );
     if ( to_install() )
       user_unset( true );
   }
@@ -186,6 +186,42 @@ bool SelState::user_clr_taboo( const bool doit )
     if ( doit ) {
       clr( B_F_TABOO );
     }
+  }
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : SelState::user_set_srcins
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool SelState::user_set_srcins( const bool doit )
+{
+  if ( ! has_candidate() )
+    return false;
+  if ( doit ) {
+    set( B_F_SRCINS );
+  }
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : SelState::user_clr_srcins
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool SelState::user_clr_srcins( const bool doit )
+{
+  if ( doit ) {
+    clr( B_F_SRCINS );
   }
 
   return true;

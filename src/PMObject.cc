@@ -83,10 +83,10 @@ PMObject::~PMObject()
 //
 ostream & PMObject::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str );
-  str << '{' << name() << '-' << edition() << '-' << arch() << ' ';
+  PMSolvable::dumpOn( str );
+  str << '{';
   if ( _selectable )
-    str << _selectable->Rep::dumpOn( str );
+    str << "managed by " << _selectable->rep_id();
   else
     str << "unmanaged";
 

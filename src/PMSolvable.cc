@@ -193,48 +193,10 @@ bool PMSolvable::doesProvide(const PkgRelation& rel) const
 //
 //	DESCRIPTION :
 //
-ostream & PMSolvable::dumpOn( ostream & os ) const
+ostream & PMSolvable::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( os );
-  os << endl;
-  os << "Name: " << _name << endl;
-  os << "Edition: " << _edition << endl;
-  if (_requires.size())
-    os << "Requires: " << _requires << endl;
-  if (_conflicts.size())
-    os << "Conflicts: " << _conflicts << endl;
-  if (_provides.size())
-    os << "Provides: " << _provides << endl;
-  if (_obsoletes.size())
-    os << "Obsoletes: " << _obsoletes << endl;
-
-  //	os << "Size: " << _size << endl;
-
-#if 0
-  for( unsigned i = 0; i < Package::N_STRS; ++i ) {
-    if (!pkg.strings[i] || pkg.strings[i]->empty())
-      continue;
-    // we need a named object for the tag name here, because egcs-2.91.66
-    // otherwise gets confused with the temporary string and a SIGSEGV is
-    // the result.
-    string tagn = Tag::tagname(Package::str_tags[i]);
-    os << tagn << ": " << modify_newlines(*pkg.strings[i]) << endl;
-  }
-  for( unsigned i = 0; i < Package::N_BINS; ++i ) {
-    if (!pkg.binfields[i] || !pkg.binfields[i]->contents)
-      continue;
-    // we need a named object for the tag name here, because egcs-2.91.66
-    // otherwise gets confused with the temporary string and a SIGSEGV is
-    // the result.
-    string tagn = Tag::tagname(Package::bin_tags[i]);
-    os << tagn << ": "<< hex << setfill('0');
-    for( unsigned j = 0; j < pkg.binfields[i]->size; ++j ) {
-      os << setw(2) << (unsigned)(pkg.binfields[i]->contents[j]);
-    }
-    os << dec << setfill(' ') << endl;
-  }
-#endif
-  return os;
+  Rep::dumpOn( str );
+  return str << '{' << nameEdArch() << '}';
 }
 
 /******************************************************************

@@ -41,12 +41,14 @@ IMPL_DERIVED_POINTER( PMPackage, PMObject, PMSolvable );
 //
 ///////////////////////////////////////////////////////////////////
 #define DP_GET(ATTR) if ( _dataProvider ) return _dataProvider->ATTR( *this ); return PMPackageDataProvider::ATTR()
+#define DP_ARG_GET(ATTR,ARG) if ( _dataProvider ) return _dataProvider->ATTR( *this, ARG ); return PMPackageDataProvider::ATTR( ARG )
 // PMObject attributes
 std::string            PMPackage::summary()      const { DP_GET( summary ); }
 std::list<std::string> PMPackage::description()  const { DP_GET( description ); }
 std::list<std::string> PMPackage::insnotify()    const { DP_GET( insnotify ); }
 std::list<std::string> PMPackage::delnotify()    const { DP_GET( delnotify ); }
 FSize                  PMPackage::size()         const { DP_GET( size ); }
+bool                   PMPackage::providesSources() const { DP_GET( providesSources ); }
 // PMPackage attributes
 std::list<std::string> PMPackage::splitprovides()const { DP_GET( splitprovides ); }
 Date                   PMPackage::buildtime()    const { DP_GET( buildtime ); }
@@ -80,11 +82,9 @@ std::list<std::string> PMPackage::du()	         const { DP_GET( du ); }
 // package file comes from remote
 bool		       PMPackage::isRemote()	 const { DP_GET( isRemote ); }
 // physical access to the rpm file.
-PMError                PMPackage::providePkgToInstall(Pathname& path) const
-{
-    if ( _dataProvider ) return _dataProvider->providePkgToInstall( *this, path );
-    return PMPackageDataProvider::providePkgToInstall(path);
-}
+PMError                PMPackage::providePkgToInstall(Pathname& path) const { DP_ARG_GET( providePkgToInstall, path ); }
+// physical access to the src.rpm file.
+PMError                PMPackage::provideSrcPkgToInstall(Pathname& path) const { DP_ARG_GET( provideSrcPkgToInstall, path ); }
 #undef DP_GET
 ///////////////////////////////////////////////////////////////////
 

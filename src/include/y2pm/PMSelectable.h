@@ -267,6 +267,23 @@ class PMSelectable : virtual public Rep {
   public:
 
     /**
+     * True if candidate object provides sources to install
+     **/
+    bool providesSources() const;
+
+    /**
+     * Set whether to install available sources.
+     **/
+    bool set_source_install( const bool install_r );
+
+    /**
+     * True if available sources would be installed.
+     **/
+    bool source_install() const { return _state.is_srcins(); }
+
+  public:
+
+    /**
      * Set to neither install nor delete (keeps taboo)
      **/
     void setNothingSelected() { _state.user_unset( true ); }
