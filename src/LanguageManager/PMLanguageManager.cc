@@ -101,6 +101,30 @@ void PMLanguageManager::postPSI()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMLanguageManager::selectableNotify
+//	METHOD TYPE : void
+//
+void PMLanguageManager::selectableNotify( constPMSelectablePtr item_r,
+					  SelState old_r, SelState new_r )
+{
+  if ( PMSelectable::fate( old_r ) != PMSelectable::fate( new_r ) ) {
+    LangCode langCode( PMLanguagePtr( item_r->theObject() )->langCode() );
+    PMError err;
+
+    if ( item_r->is_onSystem() ) {
+      err = Y2PM::addRequestedLocales( langCode );
+    } else {
+      err = Y2PM::delRequestedLocales( langCode );
+    }
+    if ( err ) {
+      WAR << err << ": " << item_r->name() << old_r << " -> " << new_r << endl;
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMLanguageManager::rescan
 //	METHOD TYPE : void
 //
@@ -113,7 +137,6 @@ void PMLanguageManager::rescan()
   // derive available locales from installed/available selections
   for ( PMSelectableVec::const_iterator it = Y2PM::selectionManager().begin();
 	it != Y2PM::selectionManager().end(); ++it ) {
-    SEC << *it << endl;
 
     PMSelectionPtr sel = (*it)->installedObj();
     if ( sel ) {

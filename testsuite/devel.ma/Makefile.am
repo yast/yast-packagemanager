@@ -11,7 +11,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		media/include		\
 		query/include		\
 		libPkgDep/include	\
-	   ) -I$(includedir) -I/Local/ma/yast2/current/source/core/wfm/src
+	   ) -I$(includedir)
 
 LDADD = $(top_builddir)/src/liby2pm.la
 
@@ -31,7 +31,7 @@ ma_test_bin_SOURCES = ma_test.cc
 ma_test_bin_LDADD = $(LDADD)
 
 wfm_test_bin_SOURCES = wfm_test.cc
-wfm_test_bin_LDADD = $(LDADD) /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
+wfm_test_bin_LDADD = $(LDADD)
 
 rpmtest_bin_SOURCES = rpmtest.cc
 rpmtest_bin_LDADD = $(LDADD)

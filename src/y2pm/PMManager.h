@@ -132,6 +132,11 @@ class PMManager {
      **/
     virtual void postPRC() {;}
 
+    /**
+     * Receives trigger from Selectable on state change
+     **/
+    virtual void selectableNotify( constPMSelectablePtr item_r, SelState old_r, SelState new_r );
+
   private:
 
     /**
@@ -298,7 +303,7 @@ class PMManager {
     //bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
 
 
-//    bool solveEverythingRight(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
+    //bool solveEverythingRight(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
 
     /**
      * determine whether installed system is consistent
