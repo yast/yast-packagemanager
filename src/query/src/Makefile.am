@@ -11,7 +11,8 @@ INCLUDES = -I$(top_srcdir)/src -I$(includedir)
 
 noinst_LTLIBRARIES = liby2pmquery.la
 
-liby2pmquery_la_SOURCES = QueryScanner.cc QueryParser.cc QueryError.cc Query.cc
+liby2pmquery_la_SOURCES = QueryScanner.cc QueryParser.cc QueryError.cc \
+  Query.cc querycodes.h lookuptable.h
 liby2pmquery_la_LDFLAGS = -version-info 2:0
 
 $(srcdir)/QueryScanner.cc:  $(srcdir)/lookuptable.h
