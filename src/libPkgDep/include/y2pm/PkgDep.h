@@ -118,10 +118,26 @@ class PkgDep {
 	struct Notes;
 
 	/**
-	 * solver result
+	 * solver result, explains why a certain package was
+	 * installed/removed
 	 * */
-	struct Result {
+	struct Result
+	{
+		/**
+		 * what kind of action this result stands for
+		 * @param Res_Install pertains package that should
+		 * be installed
+		 * @param Res_Remove pertains package that should
+		 * be removed
+		 * @param Res_IsInstalled pertains package that is
+		 * already installed
+		 * */
+		enum { Res_Install, Res_Remove, Res_IsInstalled }
+		pertains;
+
+		/** name, solvable->name if solvable != 0 */
 		PkgName name;
+		/** edition, solvable->edition if solvable != 0 */
 		PkgEdition edition;
 
 		/**
@@ -169,6 +185,10 @@ class PkgDep {
 		void add_notes( const Notes& notes );
 	};
 
+	/**
+	 * solver result, explains why a certain package could not
+	 * be installed/removed
+	 * */
 	struct ErrorResult : public Result {
 		/**
 		 * true if this pkg is required but not available,
@@ -188,11 +208,11 @@ class PkgDep {
 		SolvableList remove_to_solve_conflict;
 
 		ErrorResult(const PkgDep& pkgdep, PMSolvablePtr pkg)
-			: Result(pkgdep,pkg), not_available(false) {}
+			: Result(pkgdep,pkg), not_available(false), state_change_not_possible(false) {}
 		ErrorResult(const PkgDep& pkgdep, const PkgName& name)
-			: Result(pkgdep,name), not_available(false) {}
+			: Result(pkgdep,name), not_available(false), state_change_not_possible(false) {}
 		ErrorResult(const Result& res)
-			: Result(res), not_available(false) {}
+			: Result(res), not_available(false), state_change_not_possible(false) {}
 
 		void add_unresolvable( PkgName n, const PkgRelation& rel );
 		void add_conflict( const PkgRevRelation& rrel,
@@ -207,6 +227,12 @@ class PkgDep {
 						   bool is_conflict = true );
 		void add_alternative( PkgName n, alternative_kind k );
 		void add_notes( const Notes& notes );
+
+		/**
+		 * package should be set to auto install, but the
+		 * user's decission prevented that
+		 * */
+		bool state_change_not_possible;
 	};
 
 	friend class Result;
@@ -262,11 +288,14 @@ class PkgDep {
 		bool upgrade_to_solve_conflict : 1;
 		bool install_to_avoid_break : 1;
 		bool not_available : 1;
+		bool inconsistent : 1; // only for installed packages
 		IRelInfoList referers;
 		NeededEditionRange not_avail_range;
 
 		Notes() : from_input(false), upgrade_to_solve_conflict(false),
-			install_to_avoid_break(false), not_available(false) {}
+			install_to_avoid_break(false),
+			not_available(false), inconsistent(false)
+			{}
 	};
 
 	typedef hash<PkgName,Notes> Notes_type;
@@ -312,6 +341,8 @@ class PkgDep {
 	NameList i_obsoleted;
 	ResultList *good;
 	ErrorResultList *bad;
+
+	bool _install_installed;
 
 	// -------------------------- private methods --------------------------
 	// install.cc
@@ -384,11 +415,12 @@ public:
 		: alt_mode(m), installed(PkgSet(DTagListI0())),
 		  available(*default_avail) {}
 */
-	/** install packages (if good result, add candidates to installed set) */
-	// does not throw -- ln
+	/**
+	 * install packages (if good result, add candidates to installed set)
+	 * */
 	bool install( PkgSet& candidates,
 				  ResultList& good, ErrorResultList& bad,
-				  bool commit_to_installed = true );
+				  bool commit_to_installed = true);
 	/** remove a list of packages; the 'pkgs' list will be extended by all
 	 * packages that have to be removed, too, to make the installed set
 	 * consistent again */
@@ -402,13 +434,17 @@ public:
 	 * @param to_remove which packages will be removed
 	 * @param all if true candidates will be extended by
 	 * packages with newer versions available
+	 * @param none if true, candidates will not be used at all
 	 * @param max_remove maximum number of packages that will
 	 * automatically be removed
 	 * */
 	bool upgrade(	PkgSet&candidates, ResultList& out_good,
 			ErrorResultList& out_bad, SolvableList& to_remove,
-			bool all = false,
+			bool all = false, bool none = false,
 			unsigned max_remove = default_max_remove );
+
+	bool solvesystemnoauto(
+		PkgSet &candidates, ResultList& out_good, ErrorResultList& out_bad );
 
 
 	/** return current installed set for inspection */
@@ -442,6 +478,13 @@ public:
 	{
 	    _unresolvable_callback = callback;
 	}
+
+	/**
+	 * whether to try to solve already installed Packages if
+	 * they are in the candidates list for installation
+	 * */
+	void install_installed(bool yes)
+	    { _install_installed = yes; }
 
 	static void set_default_alternatives_mode( alternatives_mode m ) {
 		default_alternatives_mode = m;

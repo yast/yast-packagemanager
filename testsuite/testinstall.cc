@@ -46,6 +46,7 @@ using namespace std;
 
 static int _verbose = 0;
 static int _maxremove = -1;
+static bool _showtimes = false;
 
 static string _instlog;
 static string _rootdir = "/";
@@ -54,8 +55,6 @@ static bool _initialized = false;
 
 static vector<string> nullvector;
 
-#define DOINIT \
-    if(!_initialized) init(nullvector);
 
 //void installold(vector<string>& argv);
 void install(vector<string>& argv);
@@ -74,32 +73,39 @@ void deselect(vector<string>& argv);
 void upgrade(vector<string>& argv);
 void showstate(vector<string>& argv);
 void setmaxremove(vector<string>& argv);
+void solveinstall(vector<string>& argv);
+void solve(vector<string>& argv);
+void showtimes(vector<string>& argv);
 
 struct Funcs {
     const char* name;
     void (*func)(vector<string>&);
+    bool need_init;
     const char* helptext;
 };
 
 static struct Funcs func[] = {
 //    { "installold",    installold,    "simulated install of a package, direct PkgDep" },
-    { "install",    install,    "simulated install of a package, through manager" },
-    { "rpminstall", rpminstall, "install rpm files" },
-    { "consistent", consistent, "check consistency" },
-    { "init",       init,       "initialize packagemanager" },
-    { "show",       show,       "show package info" },
-    { "remove",     remove,     "simulate remove packages" },
-    { "help",       help,       "this screen" },
-    { "verbose",    verbose,    "set verbosity level" },
-    { "debug",      debug,      "switch on/off debug" },
-    { "instlog",    instlog,    "set installation log file" },
-    { "setroot",    setroot,    "set root directory for operation" },
-    { "source",     source,     "scan media for inst sources" },
-    { "deselect",   deselect,   "deselect packages marked for installation" },
-    { "upgrade",    upgrade,    "upgrade whole system" },
-    { "showstate",  showstate,  "show state of package or all if none specified" },
-    { "setmaxremove",  setmaxremove,  "set maximum number of packages that will be removed on upgrade" },
-    { NULL,         NULL,       NULL }
+    { "install",	install,	1,	"select packages for installation" },
+    { "solveinstall",	solveinstall,	1,	"solve installation" },
+    { "rpminstall",	rpminstall,	1,	"install rpm files" },
+    { "consistent",	consistent,	1,	"check consistency" },
+    { "init",		init,		1,	"initialize packagemanager" },
+    { "show",		show,		1,	"show package info" },
+    { "remove",		remove,		1,	"select package for removal" },
+    { "help",		help,		0,	"this screen" },
+    { "verbose",	verbose,	0,	"set verbosity level" },
+    { "debug",		debug,		0,	"switch on/off debug" },
+    { "instlog",	instlog,	1,	"set installation log file" },
+    { "setroot",	setroot,	0,	"set root directory for operation" },
+    { "source",		source,		1,	"scan media for inst sources" },
+    { "deselect",	deselect,	1,	"deselect packages marked for installation" },
+    { "upgrade",	upgrade,	1,	"upgrade whole system" },
+    { "showstate",	showstate,	1,	"show state of package or all if none specified" },
+    { "setmaxremove",	setmaxremove,	1,	"set maximum number of packages that will be removed on upgrade" },
+    { "solve",		solve,		1,	"solve" },
+    { "showtimes",	showtimes,	0,	"showtimes" },
+    { NULL,		NULL,		0,	NULL }
 };
 
 void usage(char **argv) {
@@ -177,6 +183,13 @@ void verbose(vector<string>& argv)
     cout << "verbose level set to " << _verbose << endl;
 }
 
+void showtimes(vector<string>& argv)
+{
+    _showtimes = _showtimes?false:true;
+
+    cout << "show times " << (_showtimes?"enabled":"disabled") << endl;
+}
+
 void setmaxremove(vector<string>& argv)
 {
     if(argv.size()<2)
@@ -213,8 +226,6 @@ void debug(vector<string>& argv)
 
 void show(vector<string>& argv)
 {
-    DOINIT
-
     PMPackageManager& manager = Y2PM::packageManager();
     vector<string>::iterator it=argv.begin();
     ++it; // first one is function name itself
@@ -330,10 +341,8 @@ void init(vector<string>& argv)
     }
     _initialized = true;
 
-    TimeClass t;
     cout << "initializing packagemanager ... " << endl;
 
-    t.startTimer();
     Y2PM::packageManager(false);
     PMError dbstat = Y2PM::instTarget().init(_rootdir, false);
     if( dbstat != InstTargetError::E_ok )
@@ -344,11 +353,6 @@ void init(vector<string>& argv)
     {
 	Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages () );
     }
-
-    t.stopTimer();
-
-    cout << "done in " << t.getTimer() << " seconds" << endl;
-
 }
 
 void help(vector<string>& argv)
@@ -429,8 +433,6 @@ static PMSolvable::PkgRelList_type& addprovidescallback(constPMSolvablePtr& ptr)
 
 PkgSet* getInstalled()
 {
-    DOINIT
-
     PkgSet* set = new PkgSet();
     set->setAdditionalProvidesCallback(addprovidescallback);
 
@@ -451,8 +453,6 @@ PkgSet* getInstalled()
 /** not implemented yet */
 PkgSet* getAvailable()
 {
-    DOINIT
-
     PkgSet* set = new PkgSet();
     set->setAdditionalProvidesCallback(addprovidescallback);
     return set;
@@ -532,14 +532,6 @@ int printbadlist(PkgDep::ErrorResultList& bad)
 
 void install(vector<string>& argv)
 {
-    DOINIT
-
-    PkgDep::ResultList good;
-    PkgDep::ErrorResultList bad;
-
-    int numinst=0,numbad=0;
-    bool success = false;
-
     for (unsigned i=1; i < argv.size() ; i++) {
 	string pkg = stringutil::trim(argv[i]);
 
@@ -563,26 +555,29 @@ void install(vector<string>& argv)
 		(s==PMSelectable::S_Install?"installation":"update")) << endl;
 	}
     }
+}
 
-    TimeClass t;
-    t.startTimer();
+void solveinstall(vector<string>& argv)
+{
+    int numinst=0,numbad=0;
+    bool success = false;
+
+    PkgDep::ResultList good;
+    PkgDep::ErrorResultList bad;
 
     success = Y2PM::packageManager().solveInstall(good, bad);
 
-    t.stopTimer();
 
     numbad = printbadlist(bad);
     numinst = printgoodlist(good);
 
     cout << "***" << endl;
     cout << numbad << " bad, " << numinst << " to install" << endl;
-    cout << "Time consumed: " << t.getTimer() << endl;
 }
 
 #if 0
 void installold(vector<string>& argv)
 {
-    DOINIT
 
     // build sets
     PkgSet empty;
@@ -685,10 +680,8 @@ void installold(vector<string>& argv)
 }
 #endif
 
-void remove(vector<string>& argv)
+void removephi(vector<string>& argv)
 {
-    DOINIT
-
 //    PMPackageManager& manager = Y2PM::packageManager();
     vector<string>::iterator it=argv.begin();
     ++it; // first one is function name itself
@@ -732,8 +725,22 @@ void remove(vector<string>& argv)
 
 void consistent(vector<string>& argv)
 {
-    DOINIT
+    int numbad=0;
+    bool success = false;
 
+    PkgDep::ErrorResultList bad;
+
+    success = Y2PM::packageManager().solveConsistent(bad);
+
+    numbad = printbadlist(bad);
+
+    cout << "***" << endl;
+    cout << numbad << " bad" << endl;
+}
+
+/*
+void consistent(vector<string>& argv)
+{
     PkgSet *installed = NULL;
     PkgSet *available = NULL;
 
@@ -762,11 +769,10 @@ void consistent(vector<string>& argv)
 	cout << "everything allright" << endl;
     }
 }
+*/
 
 void deselect(vector<string>& argv)
 {
-    DOINIT
-
     for (unsigned i=1; i < argv.size() ; i++)
     {
 	string pkg = stringutil::trim(argv[i]);
@@ -812,8 +818,6 @@ void rpminstall(vector<string>& argv)
 
 void upgrade(vector<string>& argv)
 {
-    DOINIT
-
     PkgDep::ResultList good;
     PkgDep::ErrorResultList bad;
     PkgDep::SolvableList to_remove;
@@ -845,12 +849,7 @@ void upgrade(vector<string>& argv)
 	}
     }
 
-    TimeClass t;
-    t.startTimer();
-
     success = Y2PM::packageManager().solveUpgrade(good, bad, to_remove);
-
-    t.stopTimer();
 
     numbad = printbadlist(bad);
     numinst = printgoodlist(good);
@@ -862,13 +861,12 @@ void upgrade(vector<string>& argv)
     {
 	cout << "*** upgrade failed, manual intervention required to solve conflicts ***" << endl;
     }
-    cout << "Time consumed: " << t.getTimer() << endl;
 }
 
 void showstate(vector<string>& argv)
 {
 
-    char* statestr[] = { " T", " D", " U", " I", "AD", "AU", "AI", " X", " N" };
+    char* statestr[] = { "= ", " -", " >", " +", "a-", "a>", "a+", " i", " N" };
     
     PMManager::PMSelectableVec selectables;
     PMManager::PMSelectableVec::const_iterator begin, end;
@@ -920,14 +918,59 @@ void showstate(vector<string>& argv)
     }
 }
 
+void remove(vector<string>& argv)
+{
+    for (unsigned i=1; i < argv.size() ; i++)
+    {
+	string pkg = stringutil::trim(argv[i]);
+
+	if(pkg.empty()) continue;
+	
+	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
+	if(!selp)
+	{
+	    std::cout << "package " << pkg << " is not available.\n";
+	    continue;
+	}
+	
+	if(!selp->set_status(PMSelectable::S_Del))
+	{
+	    cout << stringutil::form("coult not mark %s for deletion", pkg.c_str()) << endl;
+	}
+    }
+}
+
+void solve(vector<string>& argv)
+{
+    PkgDep::ResultList good;
+    PkgDep::ErrorResultList bad;
+    PkgDep::SolvableList to_remove;
+
+    int numinst=0,numrem=0,numbad=0;
+    bool success = false;
+
+//    success = Y2PM::packageManager().solveEverythingRight(good, bad, to_remove);
+
+    cout << "doesnt work" << endl;
+
+    numbad = printbadlist(bad);
+    numinst = printgoodlist(good);
+    numrem = printremovelist(to_remove);
+
+    cout << "***" << endl;
+    cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
+    if(!success)
+    {
+	cout << "*** selection broken, manual intervention required to solve conflicts ***" << endl;
+    }
+}
+
 int main( int argc, char *argv[] )
 {
     char prompt[]="y2pm > ";
 
     char* buf = NULL;
     string inputstr;
-
-    DOINIT
 
     cout << "type help for help, ^D to exit" << endl << endl;
 
@@ -944,15 +987,22 @@ int main( int argc, char *argv[] )
 	if(inputstr.empty()) goto readnext;
 
 	if(RpmDb::tokenize(inputstr, ';', 0, cmds) < 1)
-	    { break; }
+	{
+	    cout << "invalid input" << endl;
+	    goto readnext;
+	}
 
 	for(vector<string>::iterator vit = cmds.begin(); vit != cmds.end(); ++vit)
 	{
 	    vector<string> argv;
 	    unsigned i;
-	    if(RpmDb::tokenize(stringutil::trim(*vit), ' ', 0, argv) < 1)
+	    string cmd = stringutil::trim(*vit);
+	    if(cmd.empty())
+		continue;
+	    if(RpmDb::tokenize(cmd, ' ', 0, argv) < 1)
 	    {
-		break;
+		cout << "invalid input" << endl;
+		continue;
 	    }
 	    for(i=0; func[i].name; i++)
 	    {
@@ -961,7 +1011,19 @@ int main( int argc, char *argv[] )
 	    }
 	    if(func[i].func)
 	    {
+		TimeClass t;
+		if(func[i].need_init && !_initialized && func[i].func != init)
+		{
+		    if(_showtimes) t.startTimer();
+		    init(nullvector);
+		    if(_showtimes) t.stopTimer();
+		    if(_showtimes) cout << "time: " << t.getTimer() << endl;
+		}
+
+		if(_showtimes) t.startTimer();
 		func[i].func(argv);
+		if(_showtimes) t.stopTimer();
+		if(_showtimes) cout << "time: " << t.getTimer() << endl;
 	    }
 	    else
 	    {

@@ -194,8 +194,20 @@ class PMManager {
      *
      * @return false if upgrade failed (probably due to max_remove). Results
      * may not be reliable and manual intervention is required
+     *
+     * DO NOT USE ATM
      * */
     bool solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
+
+
+//    bool solveEverythingRight(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, PkgDep::SolvableList &to_remove);
+
+    /**
+     * determine whether installed system is consistent
+     *
+     * @param bad broken packages
+     * */
+    bool solveConsistent(PkgDep::ErrorResultList& bad);
 
     /**
      * set maximum number of packages that will be automatically selected for

@@ -4,6 +4,7 @@
 using namespace std;
 
 PkgDep::Result::Result( const PkgDep& pkgdep, PMSolvablePtr pkg )
+    : pertains(Res_Install)
 {
 	PkgName n = pkg->name();
 	name = n;
@@ -29,6 +30,7 @@ PkgDep::Result::Result( const PkgDep& pkgdep, PMSolvablePtr pkg )
 }
 
 PkgDep::Result::Result( const PkgDep& pkgdep, const PkgName& n )
+    : pertains(Res_Install)
 {
 	name = n;
 	edition = PkgEdition(PkgEdition::UNSPEC);
@@ -80,6 +82,7 @@ void PkgDep::Result::add_notes( const Notes& notes )
 	ci_for( IRelInfoList::, n, notes.referers. ) {
 		referers.push_back( RelInfo(n->pkg->name(), n->rel) );
 	}
+	if(notes.inconsistent) pertains = Res_IsInstalled;
 }
 
 void PkgDep::ErrorResult::add_notes( const Notes& notes )

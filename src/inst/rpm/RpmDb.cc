@@ -747,6 +747,8 @@ RpmDb::getPackages (void)
 				PkgArch(pkgattribs[RPM_ARCH]),
 			        dataprovider);
 
+	if(pkgattribs[RPM_NAME] == "libpng")
+	    ERR << value << endl;
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type provides;
 	    PMSolvable::PkgRelList_type obsoletes;
