@@ -754,7 +754,7 @@ InstSrc::provideMedia (int medianr) const
 	}
 	else
 	{
-	    MIL << "provideFile failed: " << err.errstr() << endl;
+            MIL << "Media can't provide '" << mediafile << "': " << err.errstr() << endl;
 	}
 
 	_media->release();
