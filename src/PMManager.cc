@@ -595,66 +595,11 @@ bool PMManager::anyMatch( PMSelectable::Test_fnc fnc_r ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMManager::updateAllInstalled
-//	METHOD TYPE : unsigned int
+//	METHOD NAME : PMManager::readSettings
+//	METHOD TYPE : void
 //
-//	DESCRIPTION : go through all objects and set those 'to_install'
-//		      which have an installed and a (newer) candidate
-//		      return number of affected (installed,deleted) selectables
+//	DESCRIPTION :
 //
-unsigned int
-PMManager::updateAllInstalled (bool only_newer)
-{
-#warning Whats it good for?
-    unsigned int count = 0;
-
-    for (PMSelectableVec::iterator it = _items.begin();
-	 it != _items.end(); ++it)
-    {
-	if ((*it)->by_user()			// don't touch user choices
-	    || (*it)->is_taboo()		// neither taboos
-	    || !(*it)->has_both_objects())	// only if both exists
-	{
-	    continue;
-	}
-
-	// set all affected objects to_install()
-
-	if (!only_newer
-	    || (*it)->installedObj()->edition() < (*it)->candidateObj()->edition())
-	{
-	    (*it)->appl_set_install();
-	    count++;
-
-	    PMObjectPtr candidate = (*it)->candidateObj();
-
-	    // look for matching provides/obsoletes
-
-	    for (PMSolvable::PkgRelList_type::const_iterator prvIt = candidate->provides().begin();
-		 prvIt != candidate->provides().end(); ++prvIt)
-	    {
-		for (PMSolvable::PkgRelList_type::const_iterator obsIt = candidate->obsoletes().begin();
-		     obsIt != candidate->obsoletes().end(); ++obsIt)
-		{
-		    if (*prvIt == *obsIt)
-		    {
-			PMSelectablePtr target = getItem ((const std::string&)((*obsIt).name()));
-			if (target
-			    && !target->is_taboo()
-			    && !target->by_user())
-			{
-			    target->appl_set_delete();
-			    count++;
-			}
-		    }  // provides == obsoletes
-		} // loop over obsoletes
-	    } // loop over provides
-	} // if affected by version
-    } // loop over selectables
-
-    return count;
-}
-
 void PMManager::readSettings()
 {
   Pathname file = settingsFile();
@@ -691,6 +636,14 @@ void PMManager::readSettings()
   }
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::writeSettings
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
 void PMManager::writeSettings()
 {
   D__ << "writeSettings()" << endl;
