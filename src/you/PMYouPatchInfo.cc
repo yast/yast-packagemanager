@@ -45,47 +45,6 @@
 
 using namespace std;
 
-static const char *langmap[] = {
-        "en_GB"         , "english",
-        "en_US"         , "english",
-        "en"            , "english",
-        "de_DE"         , "german",
-        "de_CH"         , "german",
-        "de"            , "german",
-        "fr"            , "french",
-        "br_FR"         , "french",
-        "fr_FR"         , "french",
-        "fr_CH"         , "french",
-        "it"            , "italian",
-        "it_IT"         , "italian",
-        "es"            , "spanish",
-        "es_ES"         , "spanish",
-        "nl"            , "dutch",
-        "nl_NL"         , "dutch",
-        "pt"            , "portuguese",
-        "pt_PT"         , "portuguese",
-        "pt_BR"         , "brazilian",
-        "hu"            , "hungarian",
-        "hu_HU"         , "hungarian",
-        "pl"            , "polish",
-        "pl_PL"         , "polish",
-        "el_GR"         , "greek",
-        "tr_TR"         , "turkish",
-        "tr"            , "turkish",
-        "ru"            , "russian",
-        "ru_RU"         , "russian",
-        "ru_RU.KOI8-R"  , "russian",
-        "cs"            , "czech",
-        "cs_CZ"         , "czech",
-        "ja"            , "japanese",
-        "ja_JP"         , "japanese",
-        "ko"            , "korean",
-        "ko_KR"         , "korean",
-        0               , 0
-};
-
-const std::string PMYouPatchInfo::_defaultLocale = "english";
-
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMYouPatchInfo
@@ -94,14 +53,9 @@ const std::string PMYouPatchInfo::_defaultLocale = "english";
 
 IMPL_BASE_POINTER(PMYouPatchInfo);
 
-PMYouPatchInfo::PMYouPatchInfo( PMYouPatchPathsPtr paths, const string &lang )
+PMYouPatchInfo::PMYouPatchInfo( PMYouPatchPathsPtr paths )
   : _doneMediaDir( false ), _doneDirectory( false )
 {
-    _lang = LangCode( lang );
-    if ( lang.empty() ) _lang = Y2PM::getPreferredLocale();
-
-    _locale = translateLangCode( _lang );
-
     _packageTagSet.setAllowMultipleSets( true );
     _packageTagSet.setAllowUnknownTags( true );
 
@@ -652,8 +606,9 @@ string PMYouPatchInfo::tagMultiValue( YOUPatchTagSet::Tags tagIndex,
 string PMYouPatchInfo::tagValueLocale( YOUPatchTagSet::Tags tagIndex,
                                        std::istream &input )
 {
-    string result = tagValue( tagIndex, input, _locale );
-    if ( result.empty() ) result = tagValue( tagIndex, input, _defaultLocale );
+    string result = tagValue( tagIndex, input, _paths->locale() );
+    if ( result.empty() )
+      result = tagValue( tagIndex, input, _paths->defaultLocale() );
     
     return result;
 }
@@ -685,26 +640,6 @@ string PMYouPatchInfo::tagValue( YOUPackageTagSet::Tags tagIndex )
 
     string result = tag->Data();
     
-    return result;
-}
-
-string PMYouPatchInfo::translateLangCode( const LangCode &lang )
-{
-    string result = lang;
-
-    const char **code = langmap;
-    while( *code ) {
-
-      if ( LangCode( *code ) == lang ) {
-        result = *(code + 1);
-        break;
-      }
-
-      code += 2;
-    }
-
-    D__ << "Translated " << lang << " to " << result << endl;
-
     return result;
 }
 

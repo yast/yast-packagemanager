@@ -47,6 +47,7 @@ void usage()
        << "-p product  Name of product to get patches for." << endl
        << "-v version  Version of product to get patches for." << endl
        << "-a arch     Base architecture of product to get patches for." << endl
+       << "-l langcode Language used to show patch descriptions." << endl
        << endl
        << "-r          Reload patches from server." << endl
        << "-d          Dry run. Only get patches, don't install them." << endl
@@ -208,13 +209,15 @@ int main( int argc, char **argv )
   else arch = "i386";
 
   PMYouPatchPathsPtr patchPaths = new PMYouPatchPaths( product, version, arch );
-  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( patchPaths, lang );
+  PMYouPatchInfoPtr patchInfo = new PMYouPatchInfo( patchPaths );
 
   InstYou you( patchInfo, patchPaths );
 
   if ( !productStr && !versionStr && !archStr ) {
     you.initProduct();
   }
+
+  patchPaths->setLangCode( LangCode( lang ) );
 
   if ( showConfig ) {
     cout << "Product:      " << you.paths()->product() << endl;
@@ -225,7 +228,7 @@ int main( int argc, char **argv )
            << ( you.paths()->businessProduct() ? "Yes" : "No" ) << endl;
       cout << "Distribution: " << you.paths()->distProduct() << endl;
     }
-    cout << "Language:     " << you.patchInfo()->langCode() << endl;
+    cout << "Language:     " << you.paths()->langCode() << endl;
     cout << "Directory:    " << you.paths()->directoryFileName() << endl;
   
     exit( 0 );

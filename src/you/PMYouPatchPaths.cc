@@ -42,6 +42,45 @@
 
 using namespace std;
 
+static const char *langmap[] = {
+        "en_GB"         , "english",
+        "en_US"         , "english",
+        "en"            , "english",
+        "de_DE"         , "german",
+        "de_CH"         , "german",
+        "de"            , "german",
+        "fr"            , "french",
+        "br_FR"         , "french",
+        "fr_FR"         , "french",
+        "fr_CH"         , "french",
+        "it"            , "italian",
+        "it_IT"         , "italian",
+        "es"            , "spanish",
+        "es_ES"         , "spanish",
+        "nl"            , "dutch",
+        "nl_NL"         , "dutch",
+        "pt"            , "portuguese",
+        "pt_PT"         , "portuguese",
+        "pt_BR"         , "brazilian",
+        "hu"            , "hungarian",
+        "hu_HU"         , "hungarian",
+        "pl"            , "polish",
+        "pl_PL"         , "polish",
+        "el_GR"         , "greek",
+        "tr_TR"         , "turkish",
+        "tr"            , "turkish",
+        "ru"            , "russian",
+        "ru_RU"         , "russian",
+        "ru_RU.KOI8-R"  , "russian",
+        "cs"            , "czech",
+        "cs_CZ"         , "czech",
+        "ja"            , "japanese",
+        "ja_JP"         , "japanese",
+        "ko"            , "korean",
+        "ko_KR"         , "korean",
+        0               , 0
+};
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMYouPatchPaths
@@ -102,7 +141,7 @@ void PMYouPatchPaths::init( const string &product, const string &version,
 }
 
 void PMYouPatchPaths::init( const string &path )
-{  
+{
   _config = 0;
 
   if ( _businessProduct  ) {
@@ -116,6 +155,8 @@ void PMYouPatchPaths::init( const string &path )
   _scriptPath = path + "/scripts/";
 
   MediaCurl::setCookieFile( cookiesFile() );
+
+  setLangCode( LangCode() );
 }
 
 PMError PMYouPatchPaths::initProduct()
@@ -353,4 +394,43 @@ string PMYouPatchPaths::youUrl()
 {
   if ( _youUrl.empty() ) return "http://www.suse.de/cgi-bin/suseservers.cgi";
   else return _youUrl;
+}
+
+void PMYouPatchPaths::setLangCode( const LangCode &l )
+{
+  D__ << "Set lang code: " << l << endl;
+
+  _lang = l;
+
+  if ( _lang.asString().empty() ) _lang = Y2PM::getPreferredLocale();
+}
+
+string PMYouPatchPaths::locale() const
+{
+  return translateLangCode( _lang );
+}
+
+string PMYouPatchPaths::defaultLocale() const
+{
+  return "english";
+}
+
+string PMYouPatchPaths::translateLangCode( const LangCode &lang )
+{
+    string result = lang;
+
+    const char **code = langmap;
+    while( *code ) {
+
+      if ( LangCode( *code ) == lang ) {
+        result = *(code + 1);
+        break;
+      }
+
+      code += 2;
+    }
+
+    D__ << "Translated " << lang << " to " << result << endl;
+
+    return result;
 }
