@@ -101,6 +101,21 @@ PMError MediaCurl::attachTo (bool next)
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
 
+
+  if ( _url.protocol() == Url::https ) {
+      WAR << "Disable certificate verification for https." << endl;
+      ret = curl_easy_setopt( _curl, CURLOPT_SSL_VERIFYPEER, 0 );
+      if ( ret != 0 ) {
+	  return PMError( Error::E_curl_setopt_failed, _curlError );
+      }
+
+      ret = curl_easy_setopt( _curl, CURLOPT_SSL_VERIFYHOST, 0 );
+      if ( ret != 0 ) {
+	  return PMError( Error::E_curl_setopt_failed, _curlError );
+      }
+  }
+
+
   /*---------------------------------------------------------------*
    CURLOPT_USERPWD: [user name]:[password]
 
