@@ -34,6 +34,11 @@ using namespace std;
 //
 PMPackageManager::PMPackageManager()
 {
+    _rpmGroupsTree = new YRpmGroupsTree();
+
+#if 0
+    _rpmGroupsTree->addFallbackRpmGroups();
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -46,6 +51,9 @@ PMPackageManager::PMPackageManager()
 //
 PMPackageManager::~PMPackageManager()
 {
+    if ( _rpmGroupsTree )
+	delete _rpmGroupsTree;
+    
     MIL << "PMPackageManager::~PMPackageManager()" << endl;
 }
 
