@@ -310,7 +310,7 @@ PMError InstSrc::writeDescrCache()
   }
 
   if ( _descr ) {
-    _descr->writeCache( cache_descr_dir() );
+    return _descr->writeCache( cache_descr_dir() );
   }
 
   return Error::E_ok;
