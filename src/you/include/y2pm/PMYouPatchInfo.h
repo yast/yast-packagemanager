@@ -52,13 +52,26 @@ class PMYouPatchPaths {
     void setPatchUrl( const Url & );
     Url patchUrl();
 
-    PkgArch arch() const { return _arch; }
+    PkgArch arch();
+
+    bool businessProduct();
+
+    PMError requestServers( const std::string &url = "",
+                            const std::string &file = "" );
+
+    std::list<Url> servers();
+    
+    Url defaultServer();
 
   private:
     Pathname _patchPath;
     Url _patchUrl;
     
     PkgArch _arch;
+    
+    std::list<Url> _servers;
+
+    bool _businessProduct;
 };
 
 

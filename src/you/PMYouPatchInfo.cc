@@ -45,8 +45,10 @@ PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
                                   const string &arch )
   : _arch( arch )
 {
+  _businessProduct = ( product != "SuSE-Linux" );
+
   _patchPath = arch + "/update/";
-  if ( product != "SuSE-Linux" ) {
+  if ( _businessProduct  ) {
     _patchPath += product + "/";
     _patchUrl = Url( "http://support.suse.de/" );
   } else {
@@ -74,6 +76,87 @@ Url PMYouPatchPaths::patchUrl()
 {
   return _patchUrl;
 }
+
+PkgArch PMYouPatchPaths::arch()
+{
+  return _arch;
+}
+
+bool PMYouPatchPaths::businessProduct()
+{
+  return _businessProduct;
+}
+
+PMError PMYouPatchPaths::requestServers( const string &url, const string &file )
+{
+  D__ << "url: '" << url << "' file: '" << file << "'" << endl;
+
+  Url u;
+  if ( url.empty() ) {
+    u = Url( "http://www.suse.de/de/support/download/" );
+  } else {
+    u = url;
+    if ( !u.isValid() ) return InstSrcError::E_bad_url;
+  }
+
+  Pathname f;
+  if ( file.empty() ) {
+    if ( businessProduct() ) {
+      f = "suseservers_http.txt";
+    } else {
+      f = "suseservers.txt";
+    }
+  } else {
+    f = file;
+  }
+
+  D__ << "url: '" << u << "' file: '" << f.asString() << "'" << endl;
+
+  MediaAccess media;
+
+  PMError error = media.open( u );
+  if ( error ) return error;
+  
+  error = media.attach();
+  if ( error ) return error;
+
+  error = media.provideFile( f );
+  if ( error ) return error;
+
+  string line;  
+  ifstream in( ( media.getAttachPoint() + f ).asString().c_str() );
+  while( !in.eof() ) {
+    in >> line;
+    cerr << "LINE: '" << line << "'" << endl;
+  }
+  
+  return PMError();
+}
+
+list<Url> PMYouPatchPaths::servers()
+{
+  if ( _servers.size() == 0 ) {
+    list<Url> servers;
+    servers.push_back( defaultServer() );
+    return servers;
+  } else {
+    return _servers;
+  }
+}
+
+Url PMYouPatchPaths::defaultServer()
+{
+  if ( _servers.size() == 0 ) {
+    if ( businessProduct() ) {
+      return Url( "http://sdb.suse.de/download/" );
+    } else {
+      return Url( "ftp://ftp.suse.com/pub/suse/" );
+    }
+  } else {
+    return *_servers.begin();
+  }
+}
+
 
 ///////////////////////////////////////////////////////////////////
 //
