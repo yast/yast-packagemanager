@@ -2077,7 +2077,7 @@ RpmDb::backupPackage(const string& packageName)
 	return true;
     }
 
-    if (PathInfo::assert_dir(_backuppath) != 0)
+    if (PathInfo::assert_dir(_rootdir + _backuppath) != 0)
     {
 	return false;
     }
