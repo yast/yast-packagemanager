@@ -47,7 +47,7 @@ struct PkgDbExcp {
 	virtual ~PkgDbExcp() {}
 	const char *opname() { return name.c_str(); }
 	virtual void print( ostream& os ) const;
-	
+
 	friend ostream& operator<<( ostream& os, const PkgDbExcp& e );
 };
 
@@ -142,7 +142,7 @@ class PMFakeVendorPackageDataProvider : public PMPackageDataProvider  {
 	{
 	    return _vendor;
 	}
-	
+
 	virtual Vendor vendor( const PMPackage & pkg_r ) const
 	{
 	    return _vendor;
@@ -252,7 +252,7 @@ PMPackagePtr DbHeader::toPackage()
 	PMSolvable::PkgRelList_type rellist;
 	std::list<std::string> pkglist;
 	pkglist = relstring2strings(it->second);
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"Requires");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	pkg->setRequires(rellist);
     }
 
@@ -263,7 +263,7 @@ PMPackagePtr DbHeader::toPackage()
 	PMSolvable::PkgRelList_type rellist;
 	std::list<std::string> pkglist;
 	pkglist = relstring2strings(it->second);
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"Provides");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	pkg->setProvides(rellist);
     }
 
@@ -286,7 +286,7 @@ PMPackagePtr DbHeader::toPackage()
 	PMSolvable::PkgRelList_type rellist;
 	std::list<std::string> pkglist;
 	pkglist = relstring2strings(it->second);
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"Conflicts");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	pkg->setConflicts(rellist);
     }
 
@@ -296,7 +296,7 @@ PMPackagePtr DbHeader::toPackage()
 	PMSolvable::PkgRelList_type rellist;
 	std::list<std::string> pkglist;
 	pkglist = relstring2strings(it->second);
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"Obsoletes");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	pkg->setObsoletes(rellist);
     }
 
@@ -327,10 +327,10 @@ static void parse_relation( string s, const struct tag_desc *td,
 	}
 	else
 		name = s;
-	
+
 	const char *p = name.c_str();
 	hdr.extend_tag( Tag( td->tag, &p ));
-	
+
 	if (td->tag2 != RPMTAG_DISCARD || td->tag3 != RPMTAG_DISCARD) {
 		int_32 v;
 		if (rel.length() == 0)
@@ -365,7 +365,7 @@ static void parse_edition( string str, int& epoch, string& version,
 						   string& release )
 {
 	size_t pos;
-	
+
 	if ((pos = str.find_first_not_of( "0123456789" )) > 0 &&
 		pos != string::npos && str[pos] == ':') {
 		epoch = atoi(str.c_str());
@@ -411,7 +411,7 @@ static bool parse_one_tag( istream& is, DbHeader& hdr, int *lineno,
 	if (is.eof() || is.fail())
 		// no more tags -> end of header
 		return false;
-	
+
 	char c;
 	string tagname, value;
 	Tag::ovmode override_mode = Tag::NONE;
@@ -449,7 +449,7 @@ static bool parse_one_tag( istream& is, DbHeader& hdr, int *lineno,
 	}
 	else
 		tagname += c;
-	
+
 	while( is.good() ) {
 		is.get(c);
 		if (c == ':')
@@ -543,7 +543,7 @@ static bool parse_one_tag( istream& is, DbHeader& hdr, int *lineno,
 			throw PkgDbReadTagExcp( string("unknown tag name \"") +
 									tagname + "\"", prev_line );
 		tagno = td->tag;
-		
+
 		if (!td->is_array) {
 			if (td->type == RPM_STRING_TYPE) {
 				hdr.add_tag( Tag(td->tag, td->type, (void *)value.c_str(), 1));
@@ -635,7 +635,7 @@ PMError read_package_list(PMInserter<PMPackagePtr>& dest, string file)
     int lineno = 0;
 
     is.open(file.c_str());
-    
+
     if(!is)
     {
 	err = PMError::E_error;
@@ -660,7 +660,7 @@ PMError read_package_list(PMInserter<PMPackagePtr>& dest, string file)
     {
 	stringstream s;
 	s << file << ": " << e << endl;
-	
+
 	err = PMError::E_error;
 	err.setDetails(s.str());
 	return err;

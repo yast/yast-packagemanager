@@ -82,7 +82,6 @@ class RpmHeader : public binHeader {
     Date       tag_buildtime()   const;
 
     /**
-     * Dependencies referencing the package itself are filtered out.
      * If <code>freq_r</code> is not NULL, file dependencies found are inserted.
      **/
     PMSolvable::PkgRelList_type tag_provides ( FileDeps::FileNames * freq_r = 0 ) const;
