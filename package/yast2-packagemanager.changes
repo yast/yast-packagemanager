@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Dec 02 12:15:16 CET 2002 - arvin@suse.de
+
+- added openssl to neededforbuild (libcurl needs it)
+
+-------------------------------------------------------------------
 Thu Nov 14 10:13:41 CET 2002 - cschum@suse.de
 
 - Use libcurl as media backend for FTP and HTTP instead of wget.
