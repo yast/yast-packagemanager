@@ -372,11 +372,16 @@ class InstTarget: virtual public Rep, public InstData {
 
     private:
       /**
-       * Selection database
+       * Products database
        **/
       InstTargetProdDBPtr _proddb;
 
     public:
+
+      /**
+       * Return true if products database is accessible.
+       **/
+      bool mayAccessProducts() const;
 
       /**
        * Return list of installed Products (reverse sorted by
@@ -417,6 +422,11 @@ class InstTarget: virtual public Rep, public InstData {
     public:
 
       /**
+       * Return true if selection database is accessible.
+       **/
+      bool mayAccessSelections() const;
+
+      /**
        * generate PMSelection objects for each selection on the source
        * @return list of PMSelectionPtr on this source
        **/
@@ -450,8 +460,28 @@ class InstTarget: virtual public Rep, public InstData {
 
     /**
      * Fallback for Packagemanager in case no one initialized the
-     * 'df' info for disk usage calculation. Returns an emty set
-     * if _rootdir is not yet set.
+     * 'df' info for disk usage calculation. Returns an empty set
+     * if <code>_rootdir</code> is not yet set.
+     *
+     * <table border=2>
+     * <tr bgcolor="#BEEAE0"><th colspan=6><code>/proc/mounts</code></tr>
+     * <tr bgcolor="#BEEAE0"><th>Filesystem<th>Mounted on<th>Type<th>Options<th>&nbsp;<th>&nbsp;</tr>
+     * <tr><td>rootfs<td>/<td>rootfs<td>rw<td>0<td>0</tr>
+     * <tr bgcolor="#BEEAE0"><td>/dev/root<td>/<td>reiserfs<td>rw<td>0<td>0</tr>
+     * <tr><td>proc<td>/proc<td>proc<td>rw<td>0<td>0</tr>
+     * <tr><td>devpts<td>/dev/pts<td>devpts<td>rw<td>0<td>0</tr>
+     * <tr bgcolor="#BEEAE0"><td>/dev/hda5<td>/boot<td>ext2<td>rw<td>0<td>0</tr>
+     * <tr><td>shmfs<td>/dev/shm<td>shm<td>rw<td>0<td>0</tr>
+     * <tr><td>usbdevfs<td>/proc/bus/usb<td>usbdevfs<td>rw<td>0<td>0</tr>
+     * <tr><td>automount(pid3743)<td>/suse<td>autofs<td>rw<td>0<td>0</tr>
+     * <tr bgcolor="#BEEAE0"><td>wotan:/real-home/ma<td>/suse/ma<td>nfs<td>rw,nosuid,v2,rsize=8192,wsize=8192,hard,intr,udp,nolock,addr=wotan<td>0<td>0</tr>
+     * </table>
+     *
+     * Taken into account are entries,
+     * <ul>
+     * <li>whose filesystem contains a <code>'/'</code>
+     * <li>whose mountpoint is at or below the current <code>_rootdir</code>
+     * </ul>
      **/
     std::set<PkgDuMaster::MountPoint> getMountPoints() const;
 
