@@ -41,8 +41,8 @@ namespace InstSrcManagerCallbacks {
 					   const string & error,
 					   const string & url,
 					   const string & product,
-					   int expected,
-					   int current ) {
+					   int current,
+					   int expected ) {
     return "";
   }
 
