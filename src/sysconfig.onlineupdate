@@ -43,7 +43,7 @@ YOU_MANUAL_SELECTION="yes"
 # If set to "yes" YOU will delete the downloaded RPM archives after installing
 # them to the system.
 #
-YOU_REMOVE_SOURCE_PACKAGES="no"
+YOU_REMOVE_SOURCE_PACKAGES="yes"
 
 ## Type: list(yes,no,filesystem)
 ## Default: yes

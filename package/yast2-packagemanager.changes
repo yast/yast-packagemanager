@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan  5 16:25:52 CET 2005 - mir@suse.de
+
+- changed default for YOU_REMOVE_SOURCE_PACKAGES (#49349)
+- 2.11.6
+
+-------------------------------------------------------------------
 Wed Dec 15 14:49:10 CET 2004 - arvin@suse.de
 
 - disable certificate verification for https in YOU (no bug number)
