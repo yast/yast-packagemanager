@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec 15 14:49:10 CET 2004 - arvin@suse.de
+
+- disable certificate verification for https in YOU (no bug number)
+
+-------------------------------------------------------------------
 Fri Dec 10 15:37:04 CET 2004 - ma@suse.de
 
 - Passing username and password via environment smbmount/mount.cifs
