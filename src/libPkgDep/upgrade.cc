@@ -40,11 +40,11 @@ bool PkgDep::upgrade(
 		// for all installed packages...
 		ci_for( PkgSet::, p, installed. ) {
 			PkgName iname = p->key;
-			const Solvable *ipkg = p->value;
+			PMSolvablePtr ipkg = p->value;
 			bool added = false;
 
 			// if there's a newer version available, make it a candidate
-			const Solvable *upgrade;
+			PMSolvablePtr upgrade;
 			if (available.includes(iname) &&
 				(upgrade = available[iname])->edition() > ipkg->edition()) {
 				DBG( iname << ": upgrade from " << ipkg->edition()
@@ -97,7 +97,7 @@ bool PkgDep::upgrade(
 			// it
 			if (p->not_available) {
 				DBG(p->name <<" is not available, deselecting its referers\n");
-				deselect_referers( "<none>", candidates, p->referers, out_good, out_bad);
+				deselect_referers( PkgName("<none>"), candidates, p->referers, out_good, out_bad);
 			}
 
 			// alternatives possible: simply choose first one

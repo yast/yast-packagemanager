@@ -3,14 +3,17 @@
 
 #include <list>
 #include <y2util/hash.h>
-#include <y2util/RefObject.h>
-#include <y2pm/Solvable.h>
+#include <y2pm/PMSolvablePtr.h>
 #include <y2pm/PkgRevRel.h>
+
+inline size_t hashfun( const PkgName & ustr_r ) {
+    return hashfun( (const Ustring &)ustr_r );
+}
 
 
 class PkgSet {
   public:
-	typedef hash<PkgName,const Solvable*> PkgList_type;
+	typedef hash<PkgName,PMSolvablePtr> PkgList_type;
 	typedef PkgList_type::iterator iterator;
 	typedef PkgList_type::const_iterator const_iterator;
 
@@ -21,8 +24,6 @@ class PkgSet {
 	typedef hash<PkgName,RevRelList_type> InvRel_type;
 	typedef InvRel_type::iterator InvRel_iterator;
 	typedef InvRel_type::const_iterator InvRel_const_iterator;
-
-	typedef RefObject<PkgSet> Ref;
 
   private:
 	// list of pointers to package contained in this set (the pointers go into
@@ -46,24 +47,24 @@ class PkgSet {
 	bool empty() { return contents.empty(); }
 
 	// add a single package
-	void add( const Solvable *pkg, bool force = false );
+	void add( PMSolvablePtr pkg, bool force = false );
 	// remove a package
-	void remove( const Solvable *pkg );
+	void remove( PMSolvablePtr pkg );
 	void remove( PkgName name ) {
-		const Solvable *pkg = lookup(name);
+		PMSolvablePtr pkg = lookup(name);
 		if (pkg)
 			remove( pkg );
 	}
 
 	// notification from PkgPool that a pkg has a new provides
-	void new_provides( const Solvable *pkg, const PkgRelation& prov );
+	void new_provides( PMSolvablePtr pkg, const PkgRelation& prov );
 
 	// look up a package by name
-	const Solvable *lookup( PkgName name ) const {
-		const HashElt<PkgName,const Solvable *> *p = contents.find(name);
+	PMSolvablePtr lookup( const PkgName& name ) const {
+		const HashElt<PkgName,PMSolvablePtr > *p = contents.find(name);
 		return p ? p->value : NULL;
 	}
-	const Solvable *operator[] ( PkgName name ) const { return lookup(name); }
+	PMSolvablePtr operator[] ( const PkgName& name ) const { return lookup(name); }
 	// package contained in this set?
 	bool includes( const PkgName& name ) const {
 		return contents.exists(name);

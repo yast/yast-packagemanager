@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src
 #
 
-SUBDIRS = include inst pkg media
+SUBDIRS = include inst pkg media libPkgDep
 
 AM_CXXFLAGS = -DY2LOG=\"packagemanager\"
 
@@ -31,6 +31,6 @@ liby2pm_la_SOURCES = Y2PM.cc \
 
 liby2pm_la_LDFLAGS = -version-info 2:0
 
-liby2pm_la_LIBADD = -ly2util inst/liby2pminstsrc.la pkg/liby2pmpkg.la media/liby2pmMedia.la
+liby2pm_la_LIBADD = -ly2util inst/liby2pminstsrc.la pkg/liby2pmpkg.la media/liby2pmMedia.la libPkgDep/libPkgDep.la
 #liby2pm_la_LIBADD = PMSolver/libPMSolver.la PMMgr/libPMMgr.la -ly2util
 
