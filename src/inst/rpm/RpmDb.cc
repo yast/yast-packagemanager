@@ -1269,8 +1269,8 @@ RpmDb::queryChangedFiles(FileList & fileList, const string& packageName)
 /* as specified  by disp					*/
 /*--------------------------------------------------------------*/
 void
-RpmDb::run_rpm(const RpmArgVec& options,
-		       ExternalProgram::Stderr_Disposition disp)
+RpmDb::run_rpm (const RpmArgVec& opts,
+		ExternalProgram::Stderr_Disposition disp)
 {
     if ( process ) {
 	delete process;
@@ -1292,20 +1292,12 @@ RpmDb::run_rpm(const RpmArgVec& options,
     args.push_back("--dbpath");
     args.push_back(_dbPath.asString().c_str());
 
-    unsigned int argc = 0;
-    const char* argv[args.size() + options.size() + 1];
+    const char* argv[args.size() + opts.size() + 1];
 
-    for (RpmArgVec::const_iterator it1=args.begin();it1<args.end();++it1)
-    {
-	argv[argc++]=*it1;
-    }
-
-    for (RpmArgVec::const_iterator it2=options.begin();it2<options.end();++it2)
-    {
-	argv[argc++]=*it2;
-    }
-
-    argv[argc] = 0;
+    const char** p = argv;
+    p = copy (args.begin (), args.end (), p);
+    p = copy (opts.begin (), opts.end (), p);
+    *p = 0;
 
     // Invalidate all outstanding database handles in case
     // the database gets modified.
