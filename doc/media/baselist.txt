@@ -1,7 +1,11 @@
 List of bases for systems
 -------------------------
 
-Processor	Kernel		User		Base
-ia64		64bit		64bit		uname -a (ia64)
-s390		32bit		32bit		uname -a (s390)
-s390x		64bit		64bit		uname -a (s390x)
+Processor	Kernel	User		Base	ARCH.
+ia64		64bit	64bit		ia64	uname -a (ia64)
+s390		32bit	32bit		s390	uname -a (s390)
+s390x		64bit	64bit		s390	uname -a (s390x)
+sparc		32bit	32bit		sparc	uname -a (sparc32)
+sparc		64bit	32bit		sparc	uname -a (sparc64)
+sparc		64bit	64bit		sparc	uname -a (sparc64)
+
