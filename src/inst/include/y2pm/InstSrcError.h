@@ -79,6 +79,10 @@ class InstSrcError {
       // DataProvider
       E_no_source
     };
+
+    friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
+      return str << PMError( obj );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////

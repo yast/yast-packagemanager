@@ -78,6 +78,10 @@ class MediaError {
       E_attachpoint_fixed,
       E_not_supported_by_media
     };
+
+    friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
+      return str << PMError( obj );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////
