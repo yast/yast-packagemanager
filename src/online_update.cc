@@ -258,6 +258,13 @@ int main( int argc, char **argv )
     cout << "Version:      " << you.paths()->version() << endl;
     cout << "Architecture: " << you.paths()->baseArch() << endl;
     if ( verbose || debug ) {
+      cout << "Arch list: ";
+      std::list<PkgArch> archs = patchPaths->archs();
+      std::list<PkgArch>::const_iterator it;
+      for( it = archs.begin(); it != archs.end(); ++it ) {
+        cout << (*it).asString() << " ";
+      }
+      cout << endl;
       cout << "Business Product: "
            << ( you.paths()->businessProduct() ? "Yes" : "No" ) << endl;
       cout << "Distribution: " << you.paths()->distProduct() << endl;
