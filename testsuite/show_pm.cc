@@ -49,7 +49,7 @@ show_pmsolvable (PMSolvablePtr p)
 }
 
 void
-show_pmobject (PMPackagePtr p)
+show_pmobject (PMObjectPtr p)
 {
     show_pmsolvable (p);
     cout << "-- Object --" << endl;
@@ -65,7 +65,7 @@ show_pmobject (PMPackagePtr p)
 void
 show_pmpackage (PMPackagePtr p)
 {
-    show_pmobject (p);
+    show_pmobject ((PMObjectPtr)p);
 
     cout << "Buildtime: " << p->buildtime() << endl;
     cout << "Buildhost: " << p->buildhost() << endl;
@@ -90,7 +90,24 @@ show_pmpackage (PMPackagePtr p)
     cout << "Suggests: " << list2string(p->suggests()) << endl;
     cout << "Location: " << p->location() << endl;
     cout << "Keywords: " << list2string(p->keywords()) << endl;
+    cout << "========" << endl;
+    return;
+}
 
+
+void
+show_pmselection (PMSelectionPtr s)
+{
+    show_pmobject ((PMObjectPtr)s);
+
+    cout << "Category: " << s->category () << endl;
+    cout << "Visible: " << s->visible () << endl;
+    cout << "Suggests: " << list2string(s->suggests()) << endl;
+    cout << "InsPacks: " << list2string(s->inspacks("")) << endl;
+    cout << "DelPacks: " << list2string(s->delpacks("")) << endl;
+    cout << "Archivesize: " << s->archivesize() << endl;
+    cout << "Sortby: " << s->sortby() << endl;
+    cout << "========" << endl;
     return;
 }
 

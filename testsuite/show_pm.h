@@ -13,12 +13,15 @@
 #include <string>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSelection.h>
+#include <y2pm/PMSelectionPtr.h>
 
 
 std::string list2string (const std::list<std::string>& slist, const char *sep = " ");
 void show_pmsolvable (PMSolvablePtr p);
 void show_pmobject (PMObjectPtr p);
 void show_pmpackage (PMPackagePtr p);
+void show_pmselection (PMSelectionPtr s);
 
 #endif //SHOW_PM_H
 
