@@ -2,16 +2,21 @@
 
 # neededforbuild  autoconf automake gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr
 
-Provides:	libpkg libpkg-devel
-Obsoletes:	libpkg libpkg-devel
-Provides:	yast2-agent-package yast2-agent-package-devel
-Obsoletes:	yast2-agent-package yast2-agent-package-devel
-Provides:	yast2-agent-you yast2-agent-you-devel
-Obsoletes:	yast2-agent-you yast2-agent-you-devel
-Provides:	yast2-agent-targetpkg yast2-agent-targetpkg-devel
-Obsoletes:	yast2-agent-targetpkg yast2-agent-targetpkg-devel
-Provides:	yast2-core-clients yast2-core-clients-devel
-Obsoletes:	yast2-core-clients yast2-core-clients-devel
+Provides:	libpkg
+Obsoletes:	libpkg
+Provides:	yast2-agent-package
+Obsoletes:	yast2-agent-package
+Provides:	yast2-agent-you
+Obsoletes:	yast2-agent-you
+Provides:	yast2-agent-targetpkg
+Obsoletes:	yast2-agent-targetpkg
+Provides:	yast2-core-clients
+Obsoletes:	yast2-core-clients
+Provides:	yast2-agent-ftp
+Obsoletes:	yast2-agent-ftp
+Provides:	yast2-agent-http
+Obsoletes:	yast2-agent-http
+
 Provides:	yast2-db-groups
 Obsoletes:	yast2-db-groups
 
@@ -24,8 +29,20 @@ Summary:	-
 @HEADER-DEVEL@
 Summary:	-
 
-# FIXME: required for logging only
-Requires: yast2-core
+Provides:	libpkg-devel
+Obsoletes:	libpkg-devel
+Provides:	yast2-agent-package-devel
+Obsoletes:	yast2-agent-package-devel
+Provides:	yast2-agent-you-devel
+Obsoletes:	yast2-agent-you-devel
+Provides:	yast2-agent-targetpkg-devel
+Obsoletes:	yast2-agent-targetpkg-devel
+Provides:	yast2-core-clients-devel
+Obsoletes:	yast2-core-clients-devel
+Provides:	yast2-agent-ftp-devel
+Obsoletes:	yast2-agent-ftp-devel
+Provides:	yast2-agent-http-devel
+Obsoletes:	yast2-agent-http-devel
 
 %description devel
 -
