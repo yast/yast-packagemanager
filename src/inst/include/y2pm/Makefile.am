@@ -7,10 +7,11 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
-	InstSrc.h InstSrcPtr.h	\
-	InstSrcData.h InstSrcDataPtr.h	\
-	DataOldSuSE.h	\
-	InstSrcDescr.h	InstSrcDescrPtr.h
+	InstSrcError.h	\
+	InstSrc.h	InstSrcPtr.h		\
+	InstSrcData.h	InstSrcDataPtr.h	\
+	InstSrcDescr.h	InstSrcDescrPtr.h	\
+	DataOldSuSE.h
 
 #<INSTALL-HEADER-TARGET>
 

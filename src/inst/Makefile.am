@@ -16,7 +16,9 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 
 noinst_LTLIBRARIES = liby2pminstsrc.la
 
-liby2pminstsrc_la_SOURCES =
+liby2pminstsrc_la_SOURCES =	\
+	InstSrcError.cc
+
 #	\
 #	InstSrc.cc \
 #	InstSrcData.cc \
