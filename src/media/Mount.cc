@@ -54,9 +54,10 @@ Mount::~Mount()
 }
 
 PMError Mount::mount ( const string& source,
-			    const string& target,
-			    const string& filesystem,
-			    const string& options)
+		       const string& target,
+		       const string& filesystem,
+		       const string& options,
+		       const Environment& environment )
 {
     const char *const argv[] = {
 	"/bin/mount",
@@ -69,7 +70,7 @@ PMError Mount::mount ( const string& source,
 
     PMError err;
 
-    this->run(argv, ExternalProgram::Stderr_To_Stdout);
+    this->run(argv, environment, ExternalProgram::Stderr_To_Stdout);
 
     if ( process == NULL )
     {
@@ -205,8 +206,8 @@ PMError Mount::umount (const string& path)
     return( err );
 }
 
-void Mount::run(const char *const *argv,
-		       ExternalProgram::Stderr_Disposition disp)
+void Mount::run( const char *const *argv, const Environment& environment,
+		 ExternalProgram::Stderr_Disposition disp )
 {
   exit_code = -1;
 
@@ -217,7 +218,7 @@ void Mount::run(const char *const *argv,
   }
   // Launch the program
 
-  process = new ExternalProgram(argv, disp, false, -1, true);
+  process = new ExternalProgram(argv, environment, disp, false, -1, true);
 }
 
 /*--------------------------------------------------------------*/
