@@ -1346,7 +1346,36 @@ InstSrcDataUL::~InstSrcDataUL()
 //
 PMError InstSrcDataUL::loadObjects()
 {
+  return Error::E_error;
+#if 0
+  if ( !_instSrc->descr() ) {
+    return E_src_no_description;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // init global settings
+  ///////////////////////////////////////////////////////////////////
+
+  _descr_dir = _instSrc->descr()->descrdir();
+  _data_dir  = _instSrc->descr()->datadir();
+
+#warning Check lang setup. Should use SrcDescr?
+  char * lang = getenv ("LANG");
+  if ( lang ) {
+    _default_langcode = lang;
+    if ( _default_langcode.length() > 3 )
+      _default_langcode.erase( 3 );
+  } else {
+    _default_langcode = _fallback_langcode;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // determine whether to read data from cache or media
+  ///////////////////////////////////////////////////////////////////
+
+  bool useCache = false;
 
   return Error::E_no_instsrcdata_on_media;
+#endif
 }
 

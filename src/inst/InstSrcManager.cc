@@ -197,7 +197,18 @@ PMError InstSrcManager::initSrcPool()
   PMError err;
 #warning need SrcPool init (scandir for IS_CACHE_*?)
 
-  scanSrcCache( cache_root_dir() + "testcache" );
+  list<string> retlist;
+  int res = PathInfo::readdir( retlist, cache_root_dir(), false );
+  if ( res ) {
+    ERR << "Error reading InstSrc cache at " << cache_root_dir() << " (errno " << res << ")" << endl;
+  } else {
+    for ( list<string>::iterator it = retlist.begin(); it != retlist.end(); ++it ) {
+      DBG << "Check '" << *it << "'" << endl;
+      if ( it->find( "IS_CACHE_" ) == 0 ) {
+	scanSrcCache( cache_root_dir() + *it );
+      }
+    }
+  }
 
   return err;
 }
