@@ -29,15 +29,19 @@ int main( int argc, char **argv )
   MIL << "START" << endl;
 
   const char *readFile = 0;
+  bool getServers = false;
 
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "hf:" );
+    c = getopt( argc, argv, "hsf:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
       case 'f':
         readFile = optarg;
+        break;
+      case 's':
+        getServers = true;
         break;
       default:
         cerr << "Error parsing command line." << endl;
@@ -46,6 +50,25 @@ int main( int argc, char **argv )
         cout << "Usage: " << argv[0] << " [-f patchfile]" << endl;
         exit( 1 );
     }
+  }
+
+  if ( getServers ) {
+    PMYouPatchPaths paths( "eins", "zwei", "drei" );
+
+    PMError error = paths.requestServers();
+    if ( error ) {
+      cerr << "requestServers failed: " << error << endl;
+      return 1;
+    }
+    
+    list<Url> servers = paths.servers();
+    
+    list<Url>::const_iterator itServers;
+    for( itServers = servers.begin(); itServers != servers.end(); ++itServers ) {
+      cout << "URL: " << itServers->asString() << endl;
+    }
+    
+    return 0;
   }
 
   PMYouPatchInfo patchInfo( "german" );
