@@ -412,20 +412,17 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig )
 
 PMError InstYou::retrievePackage( const PMPackagePtr &pkg )
 {
-  list<string> archs;
+  list<PkgArch> archs = _paths->archs();
 
   if ( pkg->hasInstalledObj() ) {
-    archs.push_back( pkg->getInstalledObj()->arch() );
+    archs.push_front( pkg->getInstalledObj()->arch() );
   }
-  
-  archs.push_back( _paths->baseArch() );
-  archs.push_back( "noarch" );
 
   PMError error;
   Pathname rpmPath;
-  list<string>::const_iterator it;
+  list<PkgArch>::const_iterator it;
   for( it = archs.begin(); it != archs.end(); ++it ) {
-    D__ << *it << endl;
+    D__ << "ARCH: " << *it << endl;
     
     // If the package has a version installed, try to get patch RPM first.
     bool pkgHasInstalledObj = pkg->hasInstalledObj();
