@@ -66,6 +66,7 @@ std::string YouError::errtext( const unsigned e )
   case E_postscript_failed: return N_("Postscript failed.");
   case E_rpm_failed: return N_("rpm failed.");
   case E_install_failed: return N_("Installation failed.");
+  case E_empty_location: return N_("Package location is empty.");
   };
 
   return stringutil::numstring( e );
