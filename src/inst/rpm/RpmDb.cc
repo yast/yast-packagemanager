@@ -1713,9 +1713,11 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 
     if(_packagebackups)
     {
+	_progresslogstream << "create backup for " << filename.asString() << endl;
 	if(!backupPackage(filename))
 	{
 	    ERR << "backup of " << filename.asString() << " failed" << endl;
+	    _progresslogstream << "backup of " << filename.asString() << " failed" << endl;
 	}
     }
 
@@ -1993,8 +1995,6 @@ RpmDb::backupPackage(const string& packageName)
     bool ret = true;
     Pathname backupFilename;
     Pathname filestobackupfile = _backuppath+FILEFORBACKUPFILES;
-
-    DBG << packageName << endl;
 
     if (_backuppath.empty())
     {
