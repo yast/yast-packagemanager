@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
 #include <y2pm/MediaDISK.h>
 
 #include <sys/types.h>
@@ -29,8 +30,6 @@
 #include <dirent.h>
 
 using namespace std;
-
-#define TMPMNT "/tmp/mnt"
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -50,15 +49,8 @@ MediaDISK::MediaDISK (const Url& url)
     : MediaHandler (url)
     , _mountflags (MS_RDONLY)
 {
-	Url::OptionMapType::iterator it;
-	Url::OptionMapType options;
-	it = options.find("device");
-	if(it != options.end())
-		_device = it->second;
-	
-	it = options.find("filesystem");
-	if(it != options.end())
-		_filesystem = it->second;
+	_device = _url.getOption("device");
+	_filesystem = _url.getOption("filesystem");
 }
 
 
@@ -121,16 +113,20 @@ MediaDISK::attachTo (const Pathname & to)
 
     const char *mountpoint = to.asString().c_str();
 
-    Pathname dirpath = string (TMPMNT);
-    dirpath += _url.getPath();
-
-    const char *dirpoint = dirpath.asString().c_str();
-
-    if (mount (_device.c_str(), TMPMNT, _filesystem.c_str(), 0, 0) != 0) {
-	if (mount (dirpoint, mountpoint, _filesystem.c_str(), _mountflags|MS_BIND, 0) != 0) {
-	    return E_system;
-	}
+    MIL << "try mount " << _device
+	<< " to " << mountpoint
+	<< " filesystem " << _filesystem << ": ";
+    if(!::mount (_device.c_str(), mountpoint, _filesystem.c_str(), _mountflags, NULL))
+    {
+	MIL << "succeded" << endl;
     }
+    else
+    {
+	D__ << strerror(errno) << endl;
+	MIL << "failed" << endl;
+	return E_system;
+    }
+
     _attachPoint = to;
 
     return E_none;
@@ -148,11 +144,17 @@ MediaDISK::attachTo (const Pathname & to)
 MediaResult
 MediaDISK::release (bool eject)
 {
-    if (umount (_attachPoint.asString().c_str()) != 0) {
-	if (umount (TMPMNT) != 0) {
-	    return E_system;
-	}
+    if(_attachPoint.asString().empty())
+    {
+	return E_not_attached;
     }
+    
+    MIL << "umount " << _attachPoint.asString() << endl;
+
+    if (umount (_attachPoint.asString().c_str()) != 0) {
+	    return E_system;
+    }
+
     _attachPoint = "";
     return E_none;
 }
@@ -171,7 +173,23 @@ MediaDISK::release (bool eject)
 MediaResult
 MediaDISK::provideFile (const Pathname & filename) const
 {
-    // no retrieval needed, NFS path is mounted at destination
+    // no retrieval needed, disk is mounted at destination
+    //
+    if(!_url.isValid())
+	return E_bad_url;
+
+    Pathname src = _attachPoint;
+    src += _url.getPath();
+    src += filename;
+
+    PathInfo info(src);
+    
+    if(!info.isFile())
+    {
+	    D__ << src.asString() << " does not exist" << endl;
+	    return E_file_not_found;
+    }
+
     return E_none;
 }
 
