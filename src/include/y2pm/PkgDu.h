@@ -349,7 +349,7 @@ class PkgDuMaster {
     /**
      * Increment _count.
      **/
-    void newcount() { _count = ++_counter; }
+    void newcount();
 
   private:
 

@@ -102,7 +102,7 @@ int main()
     mountpoints.insert( PkgDuMaster::MountPoint( "/usr",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
     mountpoints.insert( PkgDuMaster::MountPoint( "/usr/local", FSize(4,FSize::K), FSize(1,FSize::G) ) );
     mountpoints.insert( PkgDuMaster::MountPoint( "/var",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    PMGR.setMountPoints( mountpoints );
+    //PMGR.setMountPoints( mountpoints );
   }
   PkgDuMaster dum( PMGR.getDu() );
   _t.start( "1st DU calculation" );

@@ -184,11 +184,11 @@ bool PkgDuMaster::MountPoint::assignData( const MountPoint & rhs ) const
 ostream & operator<<( ostream & str, const PkgDuMaster::MountPoint & obj )
 {
   str
-    << "| T:" << obj.total()            .form( FSize::K, 10 )
-    << "| U:" << obj.initial_used()     .form( FSize::K, 10 )
-    << "| A:" << obj.initial_available().form( FSize::K, 10 )
-    << "| p:" << obj.pkg_diff()         .form( FSize::K, 10 )
-    << "| u:" << obj.pkg_used()         .form( FSize::K, 10 )
+    << "| T:" << obj.total()            .form( FSize::K, 11 )
+    << "| U:" << obj.initial_used()     .form( FSize::K, 11 )
+    << "| A:" << obj.initial_available().form( FSize::K, 11 )
+    << "| p:" << obj.pkg_diff()         .form( FSize::K, 11 )
+    << "| u:" << obj.pkg_used()         .form( FSize::K, 11 )
     << "| " << obj._mountpoint;
   return str;
 }
@@ -275,6 +275,20 @@ unsigned PkgDuMaster::resetStats()
   }
   _pkg_diff = 0;
   return _mountpoints.size();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PkgDuMaster::newcount
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PkgDuMaster::newcount()
+{
+  _count = ++_counter;
+  MIL << *this;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Jan 31 17:05:15 CET 2003 - ma@suse.de
+
+- Fixes in testsuite to compile.
+- Fall back to InstTarget::getMountPoints, if 'df' info for
+  packagemanagers disk usage calculation has not been initialized.
+- 2.7.7
+
+-------------------------------------------------------------------
 Thu Jan 30 19:20:01 CET 2003 - ma@suse.de
 
 - Overworked disk usage calculation.

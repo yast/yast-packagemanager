@@ -160,14 +160,20 @@ class PMPackageManager : public PMManager {
      *
      * This does not update the statistics! It's the info of any previous
      * updateDu().
+     *
+     * <b>Note:</b> If the current mountpoint set is empty, we try to get
+     * one from InstTarget.
      **/
-    const PkgDuMaster & getDu() const { return _du_master; }
+    const PkgDuMaster & getDu();
 
     /**
      * Calculate disk usage based on previously provided 'df' info.
      *
      * Returns PkgDuMaster, that contains not just the mountpoints set,
      * but overall disk usage info (not spillted to partitions).
+     *
+     * <b>Note:</b> If the current mountpoint set is empty, we try to get
+     * one from InstTarget.
      **/
     const PkgDuMaster & updateDu();
 

@@ -29,6 +29,11 @@
 
 /-*/
 
+extern "C" {
+#include <unistd.h>
+#include <sys/statvfs.h>
+}
+
 #include <iostream>
 #include <fstream>
 
@@ -497,3 +502,84 @@ void InstTarget::SpaceTotal(FSize& total, FSize& used)
 	}
     }
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTarget::getMountPoints
+//	METHOD TYPE : std::set<PkgDuMaster::MountPoint>
+//
+//	DESCRIPTION :
+//
+std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
+{
+  std::set<PkgDuMaster::MountPoint> ret;
+
+  if ( _rootdir.empty() ) {
+    INT << "InstTarget not yet initialized (empty rootdir)" << endl;
+  } else {
+    ifstream procmounts( "/proc/mounts" );
+
+    if ( !procmounts ) {
+      WAR << "Unable to read /proc/mounts" << endl;
+    } else {
+
+      string prfx;
+      if ( _rootdir.asString() != "/" )
+	prfx = _rootdir.asString(); // rootdir not /
+
+      while ( procmounts ) {
+	string l = stringutil::getline( procmounts );
+	if ( !(procmounts.fail() || procmounts.bad()) ) {
+	  // data to consume
+
+	  std::vector<std::string> words;
+	  if ( stringutil::split( l, words ) < 2 ) {
+	    WAR << "Suspicious entry in /proc/mounts: " << l << endl;
+	    continue;
+	  }
+
+	  if ( words[0].find( '/' ) == string::npos ) {
+	    DBG << "Discard mount point : " << l << endl;
+	    continue;
+	  }
+
+	  // words[1] contains the mountpoint. stat it and get the data
+	  string mp = words[1];
+	  if ( prfx.size() ) {
+	    if ( mp.compare( 0, prfx.size(), prfx ) != 0 ) {
+	      // mountpoint not below rootdir
+	      DBG << "Unwanted mount point : " << l << endl;
+	      continue;
+	    }
+	    // strip prfx
+	    mp.erase( 0, prfx.size() );
+	    if ( mp.empty() ) {
+	      mp = "/";
+	    } else if ( mp[0] != '/' ) {
+	      // mountpoint not below rootdir
+	      DBG << "Unwanted mount point : " << l << endl;
+	      continue;
+	    }
+	  }
+
+	  struct statvfs sb;
+	  if ( statvfs( words[1].c_str(), &sb ) != 0 ) { // statvfs full path!
+	    WAR << "Unable to statvfs(" << words[1] << "); errno " << errno << endl;
+	    ret.insert( PkgDuMaster::MountPoint( mp ) );
+	  } else {
+	    ret.insert( PkgDuMaster::MountPoint( mp,
+						 sb.f_bsize,
+						 FSize(sb.f_blocks)*sb.f_bsize,
+						 FSize(sb.f_blocks - sb.f_bfree)*sb.f_bsize ) );
+
+	  }
+	}
+      }
+      DBG << ret << endl;
+    }
+  }
+
+  return ret;
+}
+
