@@ -36,6 +36,7 @@
 #include <string>
 
 #include <y2util/Pathname.h>
+#include <y2util/FSize.h>
 
 #include <y2pm/PMError.h>
 
@@ -332,7 +333,14 @@ class InstTarget: virtual public Rep, public InstData {
          */
         PMError executeScript( const Pathname &scriptname );
 
-	// TODO: more function, like df, du etc.
+	/**
+	 * dumb function that just sums up space on all mounted local
+	 * filesystems below root directory
+	 *
+	 * @param total (out) total available space
+	 * @param used (out) used space
+	 * */
+	void SpaceTotal(FSize& total, FSize& used);
 
 
 
