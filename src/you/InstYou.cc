@@ -732,8 +732,12 @@ PMError InstYou::retrieveScript( const string &script, bool reload,
       ERR << "Signature check failed for script " << sourceScript << endl;
       return PMError( YouError::E_bad_sig_file, sourceScript );
     } else {
-      ERR << "gpg call failed" << endl;
-      return PMError( YouError::E_missing_sig_file, sourceScript );
+      WAR << "gpg call failed" << endl;
+      PathInfo pi( destScript );
+      if ( !pi.isExist() ) {
+        ERR << "Missing signature." << endl;
+        return PMError( YouError::E_missing_sig_file, sourceScript );
+      }
     }
   }
   
