@@ -27,5 +27,7 @@ $(srcdir)/lookuptable.h: $(top_srcdir)/src/query/tools/keywords.h
 
 $(srcdir)/QueryScanner.cc:  $(srcdir)/lookuptable.h
 
+EXTRA_DIST = lookuptable.h
+
 clean-local:
 	rm -f lookuptable.h
