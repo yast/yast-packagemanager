@@ -2,6 +2,7 @@
 Thu Nov 20 11:50:17 CET 2003 - ma@suse.de
 
 - MediaCD: Missed to close device if CDROMEJECT/CDROMCLOSETRAY failed.
+- 2.9.6
 
 -------------------------------------------------------------------
 Thu Nov 13 22:59:57 CET 2003 - ma@suse.de
