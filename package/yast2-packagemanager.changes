@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov  2 18:13:13 CET 2004 - lnussel@suse.de
+
+- don't download delta if full package is already on disk (#47807)
+
+-------------------------------------------------------------------
 Fri Oct 29 15:44:57 CEST 2004 - mvidner@suse.cz
 
 - Added pkgconfig support.
