@@ -30,6 +30,9 @@ void usage()
        << " [optional]"
        << endl << endl
        << "-u url      Base URL of directory tree used to get patches from." << endl
+       << "            Supported protocols: http, ftp, smb, nfs, cd, dvd, dir." << endl
+       << "            Examples: 'ftp://ftp.suse.com/pub/suse', 'cd:///'," << endl
+       << "                      'dir:///var/lib/YaST2/you/mnt'" << endl
        << endl
        << "-g          Only download patches, don't install." << endl
        << "-i          Install downloaded patches, don't download." << endl
