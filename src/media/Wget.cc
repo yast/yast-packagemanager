@@ -18,6 +18,9 @@
 
 /*
  * $Log$
+ * Revision 1.5  2002/08/12 13:26:27  cschum
+ * Return ok, when the http server sent an ok.
+ *
  * Revision 1.4  2002/08/02 11:11:27  ma
  * Malplaced 'N_()' macro removed.
  *
@@ -55,6 +58,7 @@
 #include <y2util/Y2SLog.h>
 #include <y2pm/Wget.h>
 
+#define HTTP_OK "200 OK"
 #define WRONGUSER "401 Unauthorized"
 #define AUTHREQUIRED "401 Authorization Required"
 #define NOTFOUND "404 Not Found"
@@ -244,6 +248,10 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
       if  ( value.find ( CONNREFUSED ) != string::npos )
       {
 	  ok = WGET_ERROR_CONNECT;
+      }
+      if ( value.find( HTTP_OK ) != string::npos )
+      {
+	  ok = WGET_OK;
       }
 
 	// ftp
