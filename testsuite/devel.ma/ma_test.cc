@@ -33,8 +33,15 @@ ostream & operator <<( ostream & str, const list<string> & t ) {
   return str;
 }
 
+ostream & operator<<( ostream & str, const PkgSplitSet & obj ) {
+  for ( PkgSplitSet::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+    str << *it << endl;
+  }
+  return str;
+}
+
 void dataDump( ostream & str, constPMPackagePtr p ) {
-  str << p << endl;
+  str << p << " ++++++++++++++++++++++++++++" << endl;
   str << "SUMMARY:       " << p->summary() << endl;
   str << "DESCRIPTION:   " << p->description() << endl;
   str << "INSNOTIFY:     " << p->insnotify() << endl;
@@ -68,6 +75,15 @@ void dataDump( ostream & str, constPMPackagePtr p ) {
   str << "LOCATION:      " << p->location() << endl;
   str << "MEDIANR:       " << p->medianr() << endl;
   str << "KEYWORDS:      " << p->keywords() << endl;
+  str << "INSTSOURCE:    " << p->source() << endl;
+  str << "IS REMOTE:     " << p->isRemote() << endl;
+  str << "PROVIDES:      " << p->provides().size() << endl;
+  str << "REQUIRES:      " << p->requires().size() << endl;
+  str << "CONFLICTS:     " << p->conflicts().size() << endl;
+  str << "OBSOLETES:     " << p->obsoletes().size() << endl;
+  str << "PREREQUIRES:   " << p->prerequires().size() << endl;
+  str << "SPLITPROVIDES: " << p->splitprovides().size() << endl;
+  str << "---------------" << endl;
 }
 
 void dummyDU()
@@ -85,6 +101,15 @@ void dummyDU()
   mountpoints.insert( PkgDuMaster::MountPoint( "/var",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
   MIL << mountpoints;
   PMGR.setMountPoints( mountpoints );
+}
+
+InstSrcManager::ISrcId newSrc( const string & url_r ) {
+  Url url( url_r );
+  InstSrcManager::ISrcIdList idlist;
+  Timecount _t( url_r.c_str() );
+  PMError err = ISM.scanMedia( idlist, url_r );
+  ( err ? ERR : MIL ) << "newSrc: " << idlist.size() << " (" << err << ")" << endl;
+  return( idlist.size() ? *idlist.begin() : 0 );
 }
 
 ostream & dumpPkgWhatIf( ostream & str, bool all = false )
@@ -111,52 +136,6 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
-
-class Logfile {
-  Logfile( const Logfile & );
-  Logfile & operator=( const Logfile & );
-  private:
-    static ofstream _log;
-    static unsigned _refcnt;
-    static Pathname _fname;
-    static void openLog() {
-      if ( !_fname.empty() ) {
-	_log.clear();
-	_log.open( _fname.asString().c_str(), std::ios::out|std::ios::app );
-	if( !_log )
-	  ERR << "Could not open logfile '" << _fname << "'" << endl;
-      }
-    }
-    static void closeLog() {
-      _log.clear();
-      _log.close();
-    }
-    static void refUp() {
-      if ( !_refcnt )
-	openLog();
-      ++_refcnt;
-    }
-    static void refDown() {
-      --_refcnt;
-      if ( !_refcnt )
-	closeLog();
-    }
-  public:
-    Logfile() { refUp(); }
-    ~Logfile() { refDown(); }
-    ostream & operator()() { return _log; }
-    static void setFname( const Pathname & fname_r ) {
-      if ( _refcnt )
-	closeLog();
-      _fname = fname_r;
-      if ( _refcnt )
-	openLog();
-    }
-};
-Pathname Logfile::_fname;
-ofstream Logfile::_log;
-unsigned Logfile::_refcnt = 0;
-
 /******************************************************************
 **
 **
@@ -170,54 +149,40 @@ int main()
   Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
 
-  {
-    Logfile flog;
-    flog() << "test1" << endl;
-    flog.setFname( "." );
-    flog() << "test2" << endl;
-  }
-  Logfile::setFname( "log_test" );
-  {
-    Logfile flog;
-    flog() << "test3";
-    {
-      Logfile flog2;
-      Logfile::setFname( "log_test2" );
-      flog2() << "test4" << endl;
-    }
-    flog() << endl;
-  }
-  {
-    Logfile::setFname( "" );
-    Logfile flog;
-    flog() << "not" << endl;
-  }
-
-  SEC << "STOP" << endl;
-  return 0;
-
-
-
-
-
-
-
-
-
-  //Y2PM::noAutoInstSrcManager();
-  Timecount _t( "Launch InstTarget" );
-  Y2PM::instTarget(true,"/");
-  _t.start( "Launch PMPackageManager" );
-  Y2PM::packageManager();
-  _t.start( "Launch PMSelectionManager" );
-  Y2PM::selectionManager();
+  Y2PM::noAutoInstSrcManager();
+  Timecount _t("",false);
+  //_t.start( "Launch InstTarget" );
+  //Y2PM::instTarget(true,"/");
+  //_t.start( "Launch PMPackageManager" );
+  //Y2PM::packageManager();
+  //_t.start( "Launch PMSelectionManager" );
+  //Y2PM::selectionManager();
   _t.start( "Launch InstSrcManager" );
   Y2PM::instSrcManager();
   _t.stop();
-  INT << "Total Packages "   << PMGR.size() << endl;
-  INT << "Total Selections " << SMGR.size() << endl;
+  //INT << "Total Packages "   << PMGR.size() << endl;
+  //INT << "Total Selections " << SMGR.size() << endl;
 
-  SEC << ISM.cacheCopyTo( "/tmp/mnt" ) << endl;
+  InstSrcManager::ISrcId nid = newSrc( "dir:////tmp/PLAIN" );
+  MIL << "New ID: " << nid << endl;
+  MIL << ISM.enableSource( nid ) << endl;
+
+  PMPackagePtr fst;
+  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
+    if ( (*it)->has_candidate() ) {
+      dataDump( MIL, (*it)->candidateObj() );
+      if ( !fst )
+	fst = (*it)->candidateObj();
+    }
+  }
+
+  if ( fst ) {
+    Pathname loc;
+    SEC << "Bin : " << fst->providePkgToInstall( loc ) << endl;
+    MIL << "    : " << loc << endl;
+    SEC << "Src : " << fst->provideSrcPkgToInstall( loc ) << endl;
+    MIL << "    : " << loc << endl;
+  }
 
   SEC << "STOP" << endl;
   return 0;
