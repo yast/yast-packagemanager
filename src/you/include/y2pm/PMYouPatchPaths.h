@@ -213,6 +213,11 @@ class PMYouPatchPaths : virtual public Rep {
     std::list<PkgArch> archs();
 
     /**
+      Return architecture.
+    */
+    PkgArch arch();
+
+    /**
       Return whether the product is a business product or not. Business products
       require authentification on the server.
     */
@@ -257,6 +262,7 @@ class PMYouPatchPaths : virtual public Rep {
     std::string _distProduct;
 
     std::list<PkgArch> _archs;
+    PkgArch _arch;
     
     std::string _youUrl;
     bool _businessProduct;

@@ -151,8 +151,8 @@ PMError PMYouPatchPaths::initProduct()
   }
 
   InstSrcDescr::ArchMap archMap = descr->content_archmap();
-  string basearch = instTarget.baseArch();
-  _archs = archMap[ basearch ];
+  _arch = instTarget.baseArch();
+  _archs = archMap[ _arch ];
 
   return PMError();
 }
@@ -295,6 +295,11 @@ bool PMYouPatchPaths::businessProduct()
 list<PkgArch> PMYouPatchPaths::archs()
 {
   return _archs;
+}
+
+PkgArch PMYouPatchPaths::arch()
+{
+  return _arch;
 }
 
 string PMYouPatchPaths::youUrl()
