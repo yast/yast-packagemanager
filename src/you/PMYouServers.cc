@@ -36,6 +36,7 @@
 #include <y2pm/PMSelectable.h>
 #include <y2pm/PMYouSettings.h>
 #include <y2pm/PMYouProduct.h>
+#include <y2pm/MediaCallbacks.h>
 
 #include <y2pm/PMYouServers.h>
 
@@ -332,6 +333,10 @@ PMError PMYouServers::requestServers( bool check )
           << endl;
     }
     
+    // Disable media callbacks
+    ReportRedirect<MediaCallbacks::DownloadProgressCallback>
+      saver( MediaCallbacks::downloadProgressReport, 0 );
+
     PMError error = MediaAccess::getFile( Url( url ), cachedYouServers() );
     if ( error ) {
       if ( error == MediaError::E_write_error ) {

@@ -155,6 +155,10 @@ PMError InstYou::retrievePatchDirectory()
     _settings->setUsernamePassword( _username, _password );
   }
 
+  // Disable media callbacks
+  ReportRedirect<MediaCallbacks::DownloadProgressCallback>
+    saver( MediaCallbacks::downloadProgressReport, 0 );
+
   PMError error = _info->getDirectory( true );
 
   return error;
@@ -169,6 +173,10 @@ PMError InstYou::retrievePatchInfo()
   if ( !_username.empty() && !_password.empty() ) {
     _settings->setUsernamePassword( _username, _password );
   }
+
+  // Disable media callbacks
+  ReportRedirect<MediaCallbacks::DownloadProgressCallback>
+    saver( MediaCallbacks::downloadProgressReport, 0 );
 
   PMError error = _info->getPatches( _patches );
   if ( error ) {
