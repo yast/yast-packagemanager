@@ -3,6 +3,7 @@
 SUBDIRS = include
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
+AM_LDFLAGS = -L$(libdir)
 
 noinst_LTLIBRARIES = libPkgDep.la
 
