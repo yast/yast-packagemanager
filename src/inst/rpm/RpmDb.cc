@@ -29,16 +29,20 @@
 #include <list>
 #include <vector>
 
+#include <y2util/Date.h>
+#include <y2util/FSize.h>
 #include <y2util/Y2SLog.h>
 #include <y2util/TagParser.h>
 #include <y2util/Pathname.h>
 #include <y2util/PathInfo.h>
 #include <y2util/ExternalDataSource.h>
+
 #include <y2pm/RpmDb.h>
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMRpmPackageDataProvider.h>
+#include <y2pm/PMRpmPackageDataProviderPtr.h>
 
 #ifndef _
 #define _(X) X
@@ -113,7 +117,8 @@ RpmDb::~RpmDb()
 /* If Flag "createNew" is set, than it will be created, if not	*/
 /* exist --> returns DbNewCreated if successfully created 	*/
 /*--------------------------------------------------------------*/
-PMError RpmDb::initDatabase( bool createNew )
+PMError
+RpmDb::initDatabase( bool createNew )
 {
     Pathname     dbFilename;
     struct stat  dummyStat;
@@ -140,10 +145,10 @@ PMError RpmDb::initDatabase( bool createNew )
 	    RpmArgVec opts(1);
 	    opts[0] = "--initdb";
 
-	    run_rpm(opts);
+	    run_rpm (opts);
 
 	    string rpmerrormsg, str;
-	    while(systemReadLine(str))
+	    while (systemReadLine (str))
 	    {
 		rpmerrormsg+=str;
 	    }
@@ -180,9 +185,9 @@ PMError RpmDb::initDatabase( bool createNew )
        opts[1] = "rpm";
        string output;
 
-       run_rpm(opts);
+       run_rpm (opts);
        string rpmmsg, str;
-       while(systemReadLine(str))
+       while (systemReadLine (str))
        {
 	   rpmmsg+=str;
        }
@@ -216,13 +221,12 @@ PMError RpmDb::initDatabase( bool createNew )
        }
     }
 
-    _dataprovider = new PMRpmPackageDataProvider(this);
-
     return dbStatus;
 }
 
 // rebuild rpm database
-PMError RpmDb::rebuildDatabase()
+PMError
+RpmDb::rebuildDatabase()
 {
     RpmArgVec opts(1);
     PMError status = Error::E_ok;
@@ -233,10 +237,10 @@ PMError RpmDb::rebuildDatabase()
 
     opts[0] = "--rebuilddb";
 
-    run_rpm(opts);
+    run_rpm (opts);
 
     string rpmerrormsg, str;
-    while(systemReadLine(str))
+    while (systemReadLine(str))
     {
 	rpmerrormsg+=str;
     }
@@ -255,7 +259,8 @@ PMError RpmDb::rebuildDatabase()
 /* If copyOldRpm == true than the rpm-database from		*/
 /* /var/lib/rpm will be copied.					*/
 /*--------------------------------------------------------------*/
-PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
+PMError
+RpmDb::createTmpDatabase ( bool copyOldRpm )
 {
     FAILIFNOTINITIALIZED
 
@@ -305,7 +310,7 @@ PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
    {
       RpmArgVec opts(1);
       opts[0] = "--initdb";
-      run_rpm(opts);
+      run_rpm (opts);
       if ( systemStatus() != 0 )
       {
 	 // error
@@ -336,9 +341,9 @@ PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
 
       if ( !err )
       {
-	  RpmArgVec opts(1);
-	  opts[0] = "--rebuilddb";
-	  run_rpm(opts);
+	 RpmArgVec opts(1);
+	 opts[0] = "--rebuilddb";
+	 run_rpm (opts);
 	 if ( systemStatus() != 0 )
 	 {
 	    // error
@@ -367,7 +372,8 @@ PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
 /* Installing the rpm-database to /var/lib/rpm, if the		*/
 /* current has been created by "createTmpDatabase".		*/
 /*--------------------------------------------------------------*/
-PMError RpmDb::installTmpDatabase( void )
+PMError
+RpmDb::installTmpDatabase( void )
 {
     FAILIFNOTINITIALIZED
 
@@ -465,7 +471,9 @@ PMError RpmDb::installTmpDatabase( void )
 }
 
 // split in into pieces seperated by sep, return vector out
-unsigned RpmDb::tokenize(const string& in, char sep, vector<string>& out)
+//
+unsigned
+RpmDb::tokenize(const string& in, char sep, vector<string>& out)
 {
     unsigned count = 0;
     string::size_type pos1=0, pos2=0;
@@ -488,9 +496,12 @@ unsigned RpmDb::tokenize(const string& in, char sep, vector<string>& out)
 }
 
 
-// parse string of the form name/number/version into rellist. number is the rpm
-// number representing the operator <, <=, = etc.
-void RpmDb::rpmdeps2rellist ( const string& depstr,
+// parse string of the form "name,number,version" into rellist.
+// number is the rpm number representing the operator <, <=, = etc.
+// See output of rpm -q --queryformat [%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},] <package>
+//
+void
+RpmDb::rpmdeps2rellist ( const string& depstr,
 		PMSolvable::PkgRelList_type& deps)
 {
     enum rpmdep
@@ -595,37 +606,48 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 }
 
 // fill pkglist with installed packages
-PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
+PMError
+RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 {
     string rpmquery;
 
     FAILIFNOTINITIALIZED
 
     // this enum tells the position in rpmquery string
+    //
+    // see pkgattribs[] below
+    //
     enum {
+	// PMSolvable
 	RPM_NAME,
 	RPM_VERSION,
 	RPM_RELEASE,
-	RPM_SIZE,
-	RPM_BUILDTIME,
-	RPM_GROUP,
 	RPM_ARCH,
 	RPM_REQUIRES,
 	RPM_PROVIDES,
 	RPM_OBSOLETES,
 	RPM_CONFLICTS,
-
+	RPM_BUILDTIME,		// passed to PkgEdition()
 	NUM_RPMTAGS
     };
 
-    // this must match the enum
-    rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};";
-    rpmquery += "%{RPMTAG_SIZE};%{RPMTAG_BUILDTIME};%{RPMTAG_GROUP};";
-    rpmquery += "%{RPMTAG_ARCH};";
+    //
+    // Start RPM process
+    //
+
+    // build up query for all relevant data (for a PMObject)
+    // all other data is read on-demand by the dataprovider
+    //
+    // !! the query order must match the enum !!
+    // The query must end with "\\n" in order to separate
+    // the package data
+    //
+    rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};%{RPMTAG_ARCH};";
     rpmquery += "[%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},];";
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
     rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
     rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},]";
+    rpmquery += "%{BUILDTIME};";
     rpmquery += "\\n";
 
     RpmArgVec opts(4);
@@ -633,9 +655,9 @@ PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     opts[1] = "-a";
     opts[2] = "--queryformat";
     opts[3] = rpmquery.c_str();
-    run_rpm(opts, ExternalProgram::Discard_Stderr);
+    run_rpm (opts, ExternalProgram::Discard_Stderr);
 
-    if(!process)
+    if (!process)
 	return Error::E_RpmDB_subprocess_failed;
 
     string value;
@@ -643,11 +665,18 @@ PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 
     output = process->receiveLine();
 
+    //
+    // now loop over all packages reported by the rpm process
+    // and create (properly filled) PMPackage instances
+    //
+
     while ( output.length() > 0)
     {
 	string::size_type         ret;
 
 	// extract \n
+	// the queryformat specified "\n" as the package separator
+
 	ret = output.find_first_of ( "\n" );
 	if ( ret != string::npos )
 	{
@@ -660,9 +689,14 @@ PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 
 //	D__ << "stdout: " << value << endl;
 
+	//
+	// parse output to pkgattribs
+	// the queryformat specified ";" as the value separator
+	//
+
 	vector<string> pkgattribs;
 
-	tokenize(value,';',pkgattribs);
+	tokenize (value, ';', pkgattribs);
 
 	if( pkgattribs.size() != NUM_RPMTAGS )
 	{
@@ -674,23 +708,19 @@ PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 	    if(!pkgattribs[RPM_BUILDTIME].empty())
 	    {
 		// XXX: use strtol instead?
-		buildtime = atoi(pkgattribs[RPM_BUILDTIME].c_str());
+		buildtime = atoi (pkgattribs[RPM_BUILDTIME].c_str());
 	    }
 	    PkgEdition edi( buildtime, 0,
-			    pkgattribs[RPM_VERSION].c_str(),
-			    pkgattribs[RPM_RELEASE].c_str()
-			);
+			    pkgattribs[RPM_VERSION],
+			    pkgattribs[RPM_RELEASE]);
+
+	    PMRpmPackageDataProviderPtr dataprovider = new PMRpmPackageDataProvider (this);
 	    PMPackagePtr p = new PMPackage(
 				PkgName(pkgattribs[RPM_NAME]),
 				edi,
 				PkgArch(pkgattribs[RPM_ARCH]),
-			        _dataprovider);
-
-	    if(_dataprovider != NULL)
-	    {
-		_dataprovider->setAttributeValue(p,PMPackage::ATTR_SIZE,pkgattribs[RPM_SIZE]);
-		_dataprovider->setAttributeValue(p,PMPackage::ATTR_GROUP,pkgattribs[RPM_GROUP]);
-	    }
+			        dataprovider);
+	    dataprovider->setPackage (p);
 
 	    PMSolvable::PkgRelList_type requires;
 	    PMSolvable::PkgRelList_type provides;
@@ -699,17 +729,17 @@ PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 
 	    PMSolvable::PkgRelList_type dummy;
 
-	    rpmdeps2rellist(pkgattribs[RPM_REQUIRES],requires);
-	    rpmdeps2rellist(pkgattribs[RPM_PROVIDES],provides);
-	    rpmdeps2rellist(pkgattribs[RPM_OBSOLETES],obsoletes);
-	    rpmdeps2rellist(pkgattribs[RPM_CONFLICTS],conflicts);
+	    rpmdeps2rellist (pkgattribs[RPM_REQUIRES], requires);
+	    rpmdeps2rellist (pkgattribs[RPM_PROVIDES], provides);
+	    rpmdeps2rellist (pkgattribs[RPM_OBSOLETES], obsoletes);
+	    rpmdeps2rellist (pkgattribs[RPM_CONFLICTS], conflicts);
 
-	    p->setRequires(requires);
-	    p->setProvides(provides);
-	    p->setObsoletes(obsoletes);
-	    p->setConflicts(conflicts);
+	    p->setRequires (requires);
+	    p->setProvides (provides);
+	    p->setObsoletes (obsoletes);
+	    p->setConflicts (conflicts);
 
-	    pkglist.push_back(p);
+	    pkglist.push_back (p);
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
 //	    D__ << p << endl;
 	}
@@ -731,7 +761,8 @@ PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 /* Check package, if it is correctly installed.			*/
 /* Returns false, if an error has been occured.			*/
 /*--------------------------------------------------------------*/
-bool RpmDb::checkPackage ( string packageName, FileList &fileList )
+bool
+RpmDb::checkPackage ( string packageName, FileList &fileList )
 {
    bool ok = true;
    struct stat  dummyStat;
@@ -788,7 +819,8 @@ bool RpmDb::checkPackage ( string packageName, FileList &fileList )
 /* Evaluate all files of a package which have to be installed.  */
 /* ( are listed in the rpm-DB )					*/
 /*--------------------------------------------------------------*/
-bool RpmDb::queryInstalledFiles ( FileList &fileList, string packageName )
+bool
+RpmDb::queryInstalledFiles ( FileList &fileList, string packageName )
 {
    bool ok = true;
    const char *const opts[] = {
@@ -839,7 +871,8 @@ bool RpmDb::queryInstalledFiles ( FileList &fileList, string packageName )
 /* Evaluate all directories of a package which have been installed. */
 /* ( are listed in the rpm-DB )					    */
 /*------------------------------------------------------------------*/
-bool RpmDb::queryDirectories ( FileList &fileList, string packageName )
+bool
+RpmDb::queryDirectories ( FileList &fileList, string packageName )
 {
    bool ok = true;
    const char *const opts[] = {
@@ -922,7 +955,8 @@ bool RpmDb::queryDirectories ( FileList &fileList, string packageName )
 /* Checking the source rpm <rpmpath> with rpm --chcksig and     */
 /* the version number.						*/
 /*--------------------------------------------------------------*/
-unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
+unsigned
+RpmDb::checkPackage( string packagePath, string version, string md5 )
 {
     unsigned result = 0;
 
@@ -1035,7 +1069,8 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
     if ( !version.empty() )
     {
 
-	string value = queryPackage("%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}",packagePath,false).firstLine();
+	string value;
+	queryPackage (packagePath, "%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}", value);
 
 	D__ <<  "comparing version " << version << " <-> " << value << endl;
 	if ( version != value )
@@ -1051,54 +1086,77 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
 /*--------------------------------------------------------------*/
 /* Query the current package using the specified query format	*/
 /*--------------------------------------------------------------*/
-PkgAttributeValue RpmDb::queryPackage(const char *format, string packageName, bool installed)
+
+bool
+RpmDb::queryPackage (const std::string& package, const char *qparam, const char *format, std::string& result_r)
 {
-    PkgAttributeValue value;
     RpmArgVec opts(4);
 
-    if(!_initialized) return value;
+    if(!_initialized) return false;
 
-    if(installed)
-	opts[0] = "-q";
-    else
-	opts[0] = "-qp";
+    opts[0] = qparam;
     opts[1] = "--queryformat";
     opts[2] = format;
-    opts[3] = packageName.c_str();
-    run_rpm(opts, ExternalProgram::Discard_Stderr);
+    opts[3] = package.c_str();
+    run_rpm (opts, ExternalProgram::Discard_Stderr);
 
-  if ( process == NULL )
-     return value;
+    if ( process == NULL )
+	return false;
 
-  string line;
-  /*
-  char buffer[4096];
-  size_t nread;
-  while ( nread = process->receive(buffer, sizeof(buffer)), nread != 0)
-    value.append(buffer, nread);
-*/
-  while(systemReadLine(line))
-  {
-    value.push_back(line);
-  }
-  systemStatus();
-/*
-  if ( value.length() >= 1 && value.at(value.length()-1) == ' ' )
-  {
-     if ( value.length() > 1 )
-     {
-	// remove last blank
-	string dummy = value.substr(0,value.length()-1);
-	value = dummy;
-     }
-     else
-     {
-	value = "";
-     }
-  }
-  */
+    systemReadLine (result_r);
+    systemStatus();
 
-  return value;
+    return true;
+}
+
+bool
+RpmDb::queryPackage (const std::string& package, const char *qparam, const char *format, std::list<std::string>& result_r)
+{
+    RpmArgVec opts(4);
+
+    if(!_initialized) return false;
+
+    opts[0] = qparam;
+    opts[1] = "--queryformat";
+    opts[2] = format;
+    opts[3] = package.c_str();
+    run_rpm (opts, ExternalProgram::Discard_Stderr);
+
+    if ( process == NULL )
+	return false;
+
+    string line;
+    while (systemReadLine (line))
+    {
+	result_r.push_back (line);
+    }
+    systemStatus();
+
+    return true;
+}
+
+bool
+RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::string& result_r)
+{
+    return queryPackage ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, result_r);
+}
+
+bool
+RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r)
+{
+    return queryPackage ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, result_r);
+}
+
+bool
+RpmDb::queryPackage (const Pathname& path, const char *format, std::string& result_r)
+{
+    return queryPackage (path.asString(), "-qp", format, result_r);
+}
+
+bool
+RpmDb::queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r)
+{
+    return queryPackage (path.asString(), "-qp", format, result_r);
 }
 
 #if 0
@@ -1106,7 +1164,8 @@ PkgAttributeValue RpmDb::queryPackage(const char *format, string packageName, bo
 /* Evaluate all files of a package which have been changed	*/
 /* since last installation or update.				*/
 /*--------------------------------------------------------------*/
-bool RpmDb::queryChangedFiles ( FileList &fileList, string packageName )
+bool
+RpmDb::queryChangedFiles ( FileList &fileList, string packageName )
 {
    bool ok = true;
 
@@ -1176,7 +1235,8 @@ bool RpmDb::queryChangedFiles ( FileList &fileList, string packageName )
 /* Run rpm with the specified arguments, handling stderr	*/
 /* as specified  by disp					*/
 /*--------------------------------------------------------------*/
-void RpmDb::run_rpm(const RpmArgVec& options,
+void
+RpmDb::run_rpm(const RpmArgVec& options,
 		       ExternalProgram::Stderr_Disposition disp)
 {
 
@@ -1221,7 +1281,8 @@ void RpmDb::run_rpm(const RpmArgVec& options,
 /*--------------------------------------------------------------*/
 /* Read a line from the rpm process				*/
 /*--------------------------------------------------------------*/
-bool RpmDb::systemReadLine(string &line)
+bool
+RpmDb::systemReadLine(string &line)
 {
     line.erase();
 
@@ -1243,7 +1304,8 @@ bool RpmDb::systemReadLine(string &line)
 /* Return the exit status of the rpm process, closing the	*/
 /* connection if not already done				*/
 /*--------------------------------------------------------------*/
-int RpmDb::systemStatus()
+int
+RpmDb::systemStatus()
 {
    if ( process == NULL )
       return -1;
@@ -1261,14 +1323,16 @@ int RpmDb::systemStatus()
 /*--------------------------------------------------------------*/
 /* Forcably kill the rpm process				*/
 /*--------------------------------------------------------------*/
-void RpmDb::systemKill()
+void
+RpmDb::systemKill()
 {
   if (process) process->kill();
 }
 
 
 // inststall package filename with flags iflags
-PMError RpmDb::installPackage(const string& filename, unsigned flags)
+PMError
+RpmDb::installPackage(const string& filename, unsigned flags)
 {
     RpmArgVec opts;
 
@@ -1328,7 +1392,8 @@ PMError RpmDb::installPackage(const string& filename, unsigned flags)
 }
 
 // remove package named label
-PMError RpmDb::removePackage(const string& label, unsigned flags)
+PMError
+RpmDb::removePackage(const string& label, unsigned flags)
 {
     RpmArgVec opts;
 
@@ -1366,7 +1431,8 @@ PMError RpmDb::removePackage(const string& label, unsigned flags)
     return Error::E_ok;
 }
 
-string RpmDb::checkPackageResult2string(unsigned code)
+string
+RpmDb::checkPackageResult2string(unsigned code)
 {
     string msg;
     // begin of line characters
@@ -1434,7 +1500,8 @@ string RpmDb::checkPackageResult2string(unsigned code)
 **	FUNCTION TYPE : std::ostream &
 **
 */
-std::ostream & operator<<( std::ostream & str, const RpmDb::DbStatus & obj )
+std::ostream & operator<<( std::ostream & str, const
+RpmDb::DbStatus & obj )
 {
 #define ENUM_OUT(V) case RpmDb::V: return str << #V; break
   switch ( obj ) {
