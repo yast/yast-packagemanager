@@ -101,6 +101,8 @@ pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
 	PMYouServersPtr.h		\
 	PMYouProduct.h			\
 	PMYouProductPtr.h		\
+        PMYouMedia.h                    \
+        PMYouMediaPtr.h                 \
 	YouError.h
 
 #<INSTALL-HEADER-TARGET>

@@ -335,6 +335,12 @@ class InstYou {
 
     bool hasPatchRpm( const PMPackagePtr &pkg );
 
+    /**
+      Verify that media with given number is present. If not the function asks
+      the user to insert the correct one by using callbacks.
+    */
+    PMError verifyMediaNumber( int number, int lastNumber );
+
   private:
     PMYouPatchInfoPtr _info;
     PMYouSettingsPtr _settings;

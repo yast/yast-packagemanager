@@ -40,6 +40,7 @@
 #include <y2pm/PMYouProduct.h>
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/PMYouSettings.h>
+#include <y2pm/PMYouMedia.h>
 
 using namespace std;
 
@@ -618,6 +619,14 @@ PMError PMYouPatchInfo::processMediaDir()
       string errMsg = "Attach point: " + media.localRoot().asString();
       error.setDetails( errMsg );
       return error;
+    }
+
+    PMYouMediaPtr mediaInstance = new PMYouMedia( media );
+    error = mediaInstance->readInfo( 1 );
+    if ( error ) {
+      _settings->setMasterMedia( 0 );
+    } else {
+      _settings->setMasterMedia( mediaInstance );
     }
 
     Pathname path = _settings->mediaPatchesFile();

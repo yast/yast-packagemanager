@@ -46,27 +46,26 @@ namespace InstSrcManagerCallbacks {
      * - found media number (0 == none)
      * return "": retry, "S": skip, "C" cancel, "I" ignore, "E" eject, else new url
      **/
-    virtual std::string changeMedia( constInstSrcPtr instSrc,
-				     const std::string & error,
+    virtual std::string changeMedia( const std::string & error,
 				     const std::string & url,
 				     const std::string & product,
 				     int current,
-				     int expected ) = 0;
+				     int expected,
+                                     bool doublesided ) = 0;
   };
 
   class MediaChangeReport : public Report<MediaChangeCallback> {
     virtual bool isSet() {
       return MediaChangeCallback::isSet();
     }
-    virtual std::string changeMedia( constInstSrcPtr instSrc,
-				     const std::string & error,
+    virtual std::string changeMedia( const std::string & error,
 				     const std::string & url,
 				     const std::string & product,
 				     int current,
-				     int expected ) {
-      return MediaChangeCallback::changeMedia( instSrc,
-					       error, url, product,
-					       current, expected  );
+				     int expected,
+                                     bool doublesided ) {
+      return MediaChangeCallback::changeMedia( error, url, product,
+					       current, expected, doublesided );
     }
   };
 

@@ -32,6 +32,7 @@
 
 #include <y2pm/PMYouServers.h>
 #include <y2pm/PMYouProductPtr.h>
+#include <y2pm/PMYouMediaPtr.h>
 
 #include <y2pm/PMYouSettingsPtr.h>
 
@@ -73,6 +74,16 @@ class PMYouSettings : public CountedRep
       distproduct) and initialize object accordingly.
     */
     PMError initProduct();
+
+    /**
+      Set master media. This is used as reference for testing other media
+      instances.
+    */
+    void setMasterMedia( const PMYouMediaPtr & );
+    /**
+      Return master media.
+    */
+    PMYouMediaPtr masterMedia();
 
     /**
       Set path prefix. This is the path read from the file "media.1/patches". It
@@ -299,6 +310,7 @@ class PMYouSettings : public CountedRep
     void init();
 
   private:
+    PMYouMediaPtr _masterMedia;
     Pathname _pathPrefix;
 
     PMYouServer _patchServer;

@@ -47,6 +47,8 @@
 #include <y2pm/MediaCurl.h>
 #include <y2pm/PMYouProduct.h>
 #include <y2pm/PMLocale.h>
+#include <y2pm/PMYouMedia.h>
+#include <y2pm/InstSrcManagerCallbacks.h>
 
 #include <y2pm/InstYou.h>
 
@@ -346,6 +348,8 @@ void InstYou::updatePackageStates()
 
 PMError InstYou::attachSource()
 {
+  if ( _media.isAttached() ) return PMError::E_ok;
+
   int err = PathInfo::assert_dir( _settings->attachPoint() );
   if ( err ) {
     ERR << "Can't create " << _settings->attachPoint() << " (errno: " << err << ")"
@@ -414,15 +418,10 @@ PMError InstYou::processPatches()
   PMError error;
 
   while( patch ) {
-
-    INT << "TODO: Check for right media ID" << endl;
-
     D__ << "Media number, current: " << _currentMediaNumber << " last: "
         << lastMediaNumber << endl;
 
     if ( _currentMediaNumber > 0 && _currentMediaNumber != lastMediaNumber ) {
-      INT << "TODO: Check for media " << _currentMediaNumber << endl;
-      
       PMError error = installPatches( patchesToInstall );
       if ( error ) {
         ERR << "Install Patches (media " << _currentMediaNumber << "): "
@@ -430,6 +429,12 @@ PMError InstYou::processPatches()
         return error;
       }
       patchesToInstall.clear();
+
+      error = verifyMediaNumber( _currentMediaNumber, lastMediaNumber );
+      if ( error ) {
+        ERR << "Media not found: " << _currentMediaNumber << endl;
+        return error;
+      }
       
       lastMediaNumber = _currentMediaNumber;
     }
@@ -518,6 +523,8 @@ PMError InstYou::processPatches()
     log( _("Download finished.\n") );
     log( "\n" );
   }
+
+  disconnect();
 
   error = installPatches( patchesToInstall );
 
@@ -773,22 +780,20 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
   error = patchProgress( 99 );
   if ( error ) return error;
 
-  // TOOD: Execute script before marking patch as installed
-
   if ( !_settings->dryRun() ) {
+    error = executeScript( patch->postScript(), patch->product() );
+    D__ << "Postscript: " << error << endl;
+    if ( error ) {
+      if ( error == YouError::E_user_abort ) return error;
+      else return PMError( YouError::E_postscript_failed, error.details() );
+    }
+
     error = Y2PM::instTarget().installPatch( patch->localFile() );
     if ( error ) {
       E__ << "Error installing patch info." << endl;
       return PMError( YouError::E_install_failed,
                       patch->localFile().asString() );
     }
-  }
-
-  error = executeScript( patch->postScript(), patch->product() );
-  D__ << "Postscript: " << error << endl;
-  if ( error ) {
-    if ( error == YouError::E_user_abort ) return error;
-    else return PMError( YouError::E_postscript_failed, error.details() );
   }
 
   error = patchProgress( 100 );
@@ -1595,4 +1600,61 @@ void InstYou::filterArchitectures( PMYouPatchPtr &patch )
   }
 
   patch->setPackages( packages );
+}
+
+PMError InstYou::verifyMediaNumber( int number, int lastNumber )
+{
+  D__ << "verifyMediaNumber: " << number << " last: " << lastNumber << endl;
+
+  PMYouMediaPtr masterMedia = _settings->masterMedia();
+
+  if ( !masterMedia ) return PMError::E_ok;
+
+  PMError error = attachSource();
+  if ( error ) return error;
+
+  PMYouMediaPtr mediaInstance = new PMYouMedia( _media );
+  error = mediaInstance->readInfo( number );
+  if ( error ) {
+    WAR << "Unable to read media info: " << error << endl;
+  }
+
+  while ( !mediaInstance->isPartOf( masterMedia ) ) {
+    InstSrcManagerCallbacks::MediaChangeReport::Send
+        callback( InstSrcManagerCallbacks::mediaChangeReport );
+
+    log( stringutil::form( _("Request media %d."), number ) );
+    log( " " );
+  
+    if ( callback->isSet() ) {
+      string errorStr = _("Media not found");
+      string productStr = _("YOU Patch CD");
+      string result = callback->changeMedia( errorStr, "", productStr,
+                                             lastNumber, number,
+                                             masterMedia->doubleSided() );
+      if ( result == "" || result == "I" ) {
+        log( _("Ok.\n") );
+        // retry
+      } else if ( result == "S" ) {
+        log( _("Skip.\n") );
+        return YouError::E_user_skip;
+      } else if ( result == "C" ) {
+        log( _("Abort.\n") );
+        return YouError::E_user_abort;
+      } else if ( result == "E" ) {
+        log( _("Eject media.\n") );
+        // TODO: Eject
+      }
+    } else {
+      log( _("Failed.\n") );
+      return YouError::E_wrong_media;
+    }
+    
+    PMError error = mediaInstance->readInfo( number );
+    if ( error ) {
+      WAR << "Unable to read media info: " << error << endl;
+    }
+  }
+
+  return PMError::E_ok;
 }
