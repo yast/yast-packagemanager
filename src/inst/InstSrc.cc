@@ -64,7 +64,7 @@ const Pathname InstSrc::_c_media_dir( "MEDIA" );
 InstSrc::InstSrc()
     : _cache_deleteOnExit( false )
 {
-  MIL << "New InstSrc" << endl;
+  MIL << "New InstSrc " << *this << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ InstSrc::InstSrc()
 //
 InstSrc::~InstSrc()
 {
-  MIL << "Delete InstSrc (" << (_cache_deleteOnExit ? "delete " : "keep " ) << _cache << ")" << endl;
+  MIL << "Delete InstSrc " << *this << "(" << (_cache_deleteOnExit ? "delete " : "keep " ) << _cache << ")" << endl;
 
   if ( _media )
     _media->close();
@@ -97,6 +97,8 @@ InstSrc::~InstSrc()
 //
 PMError InstSrc::enableSource()
 {
+  MIL << "Enable InstSrc " << *this << endl;
+
   ///////////////////////////////////////////////////////////////////
   // pre checks
   ///////////////////////////////////////////////////////////////////
@@ -151,6 +153,8 @@ PMError InstSrc::enableSource()
   ///////////////////////////////////////////////////////////////////
   if ( !err ) {
     _data = ndata;
+    _data->_instSrc_atach( this ); // adjust backreferences to InstSrc.
+    _data->_instSrc_propagate();   // propagate Objects to Manager classes.
   }
 
   return err;
@@ -166,19 +170,32 @@ PMError InstSrc::enableSource()
 //
 PMError InstSrc::disableSource()
 {
+  MIL << "Disable InstSrc " << *this << endl;
+
+  ///////////////////////////////////////////////////////////////////
+  // pre checks
+  ///////////////////////////////////////////////////////////////////
+
+  if ( !_data ) {
+    ERR << "Not enabled." << endl;
+    return Error::E_src_not_enabled;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  // Remove back references to InstSrc in _data. Otherwise we
+  // wont get zero refcounts.
+  ///////////////////////////////////////////////////////////////////
   PMError err;
 
-#warning TBD save way to detach the InstSrcData
-  // back references in _data to this and _media must be cleared, otherwise we
-  // wont get zero refcounts.
-
+  _data->_instSrc_withdraw(); // withdraw Objects from Manager classes.
+  _data->_instSrc_detach();   // clear backreferences to InstSrc.
   _data = 0;
 
   return err;
 }
 
 #if 0
-//-----------------------------
+/-----------------------------
 // general functions
 
 /**
@@ -462,12 +479,12 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
 PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & product_dir_r,
 				 Type type_r )
 {
-  PMError err;
   MIL << "Look for InstSrc type " << type_r << " on media " << mediaurl_r << endl;
 
   ///////////////////////////////////////////////////////////////////
   // prepare media
   ///////////////////////////////////////////////////////////////////
+  PMError err;
   _media = new MediaAccess;
 
   if ( (err = _media->open( mediaurl_r, cache_media_dir() )) ) {
@@ -518,13 +535,10 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
       ndescr = 0;
     }
 
-    if ( autodetect ) {
-      if ( !ndescr ) {
-	WAR << "No InstSrc type " << ctype << " found" << endl;
-      }
-    } else {
-      break; // no autodetect
-    }
+    if ( !autodetect || ndescr )
+      break; // no autodetect or found descr: break to preserve ctype
+    else
+      WAR << "No InstSrc type " << ctype << " found" << endl;
 
   } // for
 
@@ -631,12 +645,12 @@ ostream & operator<<( ostream & str, const InstSrc::Type obj )
 PMError InstSrc::vconstruct( InstSrcPtr & nsrc_r, const Pathname & cachedir_r )
 {
   nsrc_r = 0;
-  PMError err;
   MIL << "Create InstSrc from cache " << cachedir_r << endl;
 
   ///////////////////////////////////////////////////////////////////
   // read cache
   ///////////////////////////////////////////////////////////////////
+  PMError err;
   InstSrcPtr nsrc( new InstSrc );
 
   if ( (err = nsrc->_init_openCache( cachedir_r )) ) {
@@ -667,7 +681,6 @@ PMError InstSrc::vconstruct( InstSrcPtr & nsrc_r, const Pathname & cachedir_r,
 			     Type type_r )
 {
   nsrc_r = 0;
-  PMError err;
   MIL << "Create InstSrc type " << type_r
     << " from media " << mediaurl_r << " (" << product_dir_r << ")"
     << " using cache " << cachedir_r << endl;
@@ -684,6 +697,7 @@ PMError InstSrc::vconstruct( InstSrcPtr & nsrc_r, const Pathname & cachedir_r,
   ///////////////////////////////////////////////////////////////////
   // init cache
   ///////////////////////////////////////////////////////////////////
+  PMError err;
   InstSrcPtr nsrc( new InstSrc );
 
   if ( (err = nsrc->_init_newCache( cachedir_r )) ) {

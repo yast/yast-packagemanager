@@ -32,8 +32,8 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 
-#warning FIX _CACHE_ROOT_DIR ( "/tmp/test_test" )
-Pathname InstSrcManager::_cache_root_dir( "/tmp/test_test" );
+#warning FIX _CACHE_ROOT_DIR ( "/var/adm/YaST/InstSrcManager" )
+Pathname InstSrcManager::_cache_root_dir( "/var/adm/YaST/InstSrcManager" );
 
 const Pathname InstSrcManager::_cache_tmp_dir( "tmp" );
 
@@ -153,7 +153,7 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   // look if there's a /media.1/products file
   ///////////////////////////////////////////////////////////////////
   ProductSet products;
-#if 1
+
   MediaAccess::FileProvider pfile( media, "/media.1/products" );
   if ( pfile.error() ) {
     // no products file: default ProductEntry is /
@@ -163,9 +163,7 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
     MIL << "Found '/media.1/products'." << endl;
     scanProductsFile( pfile(), products );
   }
-#else
-  products.insert( ProductEntry() );
-#endif
+
   ///////////////////////////////////////////////////////////////////
   // scan products found
   ///////////////////////////////////////////////////////////////////

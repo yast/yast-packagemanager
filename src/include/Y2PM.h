@@ -25,12 +25,11 @@
 #include <iosfwd>
 #include <string>
 
-//#include <y2pm/InstTarget.h>
-//#include <y2pm/InstSrcManager.h>
+#include <y2pm/InstTarget.h>
+#include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/PMYouPatchManager.h>
-#include <y2pm/InstTarget.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -43,35 +42,39 @@ class Y2PM {
 
   private:
 
-    //static InstTarget * _instTarget;
+    ///////////////////////////////////////////////////////////////////
+    // global settings
+    ///////////////////////////////////////////////////////////////////
 
-    //static InstSrcManager * _instSrcManager;
+    static Pathname _instTarget_rootdir;
+
+  private:
+
+    ///////////////////////////////////////////////////////////////////
+    // components provided
+    ///////////////////////////////////////////////////////////////////
+
+    static InstTarget * _instTarget;
+
+    static InstSrcManager * _instSrcManager;
 
     static PMPackageManager * _packageManager;
 
     static PMSelectionManager * _selectionManager;
 
     static PMYouPatchManager * _youPatchManager;
-    
-    static InstTarget * _instTarget;
-
-    static std::string * _rootdir;
 
   public:
 
-#if 0
     /**
      * Access to the installation target
      **/
     static InstTarget & instTarget();
-#endif
 
-#if 0
     /**
      * Access to the installation source manager
      **/
     static InstSrcManager & instSrcManager();
-#endif
 
     /**
      * Access to the Package manager
@@ -88,17 +91,11 @@ class Y2PM {
      **/
     static PMYouPatchManager & youPatchManager();
 
-    /**
-     * Access to InstTarget
-     * */
-    static InstTarget & instTarget();
+  private:
 
-    /**
-     * set path where root fs is mounted
-     * */
-    static bool setRoot(const std::string& r);
-
-    private:
+    ///////////////////////////////////////////////////////////////////
+    // CallBacks
+    ///////////////////////////////////////////////////////////////////
 
 	/**
 	 * callbacks and their data
@@ -106,13 +103,13 @@ class Y2PM {
 	struct CallBacks
 	{
 	    CallBacks();
-	    
+
 	    /**
 	     * called right before package 'name' is installed
 	     * */
 	    void (*_installation_package_start_func)(const std::string& name);
 	    void* _installation_package_start_data;
-	    
+
 	    /**
 	     * called multiple times during package installation, 'progress' is the
 	     * already installed percentage
@@ -131,7 +128,7 @@ class Y2PM {
 	static CallBacks _callbacks;
 
     public:
-    
+
 	/**
 	 * called right before package 'name' is installed
 	 * */

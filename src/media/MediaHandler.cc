@@ -192,9 +192,11 @@ PMError MediaHandler::release( bool eject )
 //
 PMError MediaHandler::provideFile( const Pathname & filename ) const
 {
+  D__ << filename << endl;
   if ( !_isAttached )
     return Error::E_not_attached;
 
+  D__ << filename.absolutename() << endl;
   return getFile( filename.absolutename() ); // pass to concrete handler
 }
 
@@ -290,7 +292,9 @@ MediaHandler::dumpOn( ostream & str ) const
 //
 PMError MediaHandler::getFile( const Pathname & filename ) const
 {
+  D__ << filename << endl;
   PathInfo info( localPath( filename ) );
+  D__ << info << endl;
   if( ! info.isFile() ) {
     return Error::E_file_not_found;
   }

@@ -330,7 +330,6 @@ InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, Common
 //	DESCRIPTION :
 //
 InstSrcData_UL::InstSrcData_UL()
-    : InstSrcData ("")
 {
 }
 
@@ -346,21 +345,7 @@ InstSrcData_UL::~InstSrcData_UL()
 {
 }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcData_UL::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & InstSrcData_UL::dumpOn( ostream & str ) const
-{
-  Rep::dumpOn( str );
-  return str;
-}
-
-///////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcData_UL::tryGetDescr
@@ -409,7 +394,6 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   while (content.good())
   {
     char lbuf[201];
-
     if (!content.getline (lbuf, 200, '\n'))
     {
       if (content.eof())
@@ -420,11 +404,11 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     }
 
     char *lptr = lbuf;
-    while (!isblank (*lptr)) lptr++;
+    while (*lptr && !isblank (*lptr)) lptr++;
     if (*lptr == 0)		// empty value
 	continue;
     *lptr++ = 0;
-    while (isblank (*lptr)) lptr++;
+    while (*lptr && isblank (*lptr)) lptr++;
     if (*lptr == 0)		// empty value
 	continue;
     char *vptr = lptr;		// vptr == value
@@ -529,9 +513,10 @@ PMError InstSrcData_UL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   ///////////////////////////////////////////////////////////////////
   // done
   ///////////////////////////////////////////////////////////////////
-  if ( !err ) {
+  if ( ! err ) {
     ndescr_r = ndescr;
   }
+
   return err;
 }
 
@@ -554,7 +539,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
     PMError err;
 
     std::list<PMPackagePtr> *packagelist = new (std::list<PMPackagePtr>);
-    InstSrcDataPtr ndata( new InstSrcData (media_r) );
+    InstSrcDataPtr ndata( new InstSrcData );
     std::string tagstr;
 
     ///////////////////////////////////////////////////////////////////

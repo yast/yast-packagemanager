@@ -231,79 +231,23 @@ class InstSrc: virtual public Rep {
 
     /**
      * From InstSrcManager: Provide concrete InstSrcData according to Type
-     * info stored in _descr. InstSrcData must be able to provide lists of
-     * packages, selection, etc. located on the media.
+     * info stored in _descr. InstSrcData must provide Objects located on
+     * the media to the appropriate Manager classes.
      **/
     PMError enableSource();
 
     /**
-     * From InstSrcManager:
+     * From InstSrcManager: Release concrete InstSrcData. InstSrcData must
+     * withdraw provided Objects from Manager classes.
      **/
     PMError disableSource();
 
-#if 0
-    bool initialized() const { return( _descr != 0 ); }
-
-    PMError may_scan( const Pathname & cachedir_r );
-
-    //-----------------------------
-    // general functions
-
     /**
-     * clean up, e.g. remove all caches
-     */
-    bool Erase();
+     * True if enabled (i.e. providing data to Manager classes ).
+     **/
+    bool enabled() const { return _data; }
 
-    /**
-     * @return description of Installation source
-     * This is needed by the InstSrcMgr
-     */
-    const InstSrcDescr *getDescription() const;
-
-    /**
-     * register this source (store cache files etc)
-     * return pathname of saved content file
-     */
-    const Pathname registerSource (void) const;
-
-    //-----------------------------
-    // activation status
-
-    /**
-     * return activation status
-     */
-    bool getActivation() const;
-
-    /**
-     * temporary (de)activate source
-     */
-    void setActivation (bool yesno);
-
-    //-----------------------------
-    // source content access
-
-    /**
-     * return the number of selections on this source
-     */
-    int numSelections() const;
-
-    /**
-     * return the number of packages on this source
-     */
-    int numPackages() const;
-
-    /**
-     * return the number of patches on this source
-     */
-    int numPatches() const;
-
-    /**
-     * generate PMSolvable objects for each patch on the source
-     * @return list of PMSolvablePtr on this source
-     */
-    const std::list<PMSolvablePtr> *getPatches() const;
-#endif
-
+#if 1
     /**
      * generate PMSelection objects for each selection on the source
      * @return list of PMSelectionPtr on this source
@@ -321,6 +265,7 @@ class InstSrc: virtual public Rep {
      * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
      */
     const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr> *packages, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "") const;
+#endif
 
   public:
 

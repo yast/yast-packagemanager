@@ -39,7 +39,6 @@
 
 #include <y2pm/PMError.h>
 
-#include <y2pm/InstTargetPtr.h>		// pointer to self
 #include <y2pm/MediaAccessPtr.h>	// physical media access class
 
 #include <y2pm/PMPackagePtr.h>
@@ -54,8 +53,28 @@
 /**
  *
  **/
-class InstTarget: virtual public Rep {
-  REP_BODY(InstTarget);
+class InstTarget {
+
+    public:
+
+        /**
+	 * default error class
+	 **/
+        typedef InstTargetError Error;
+
+    private:
+
+        friend class Y2PM;
+	/**
+	 * constructor
+	 * @param rootpath, path to root ("/") of target system
+	 * Usually "/" if the InstTarget object is actually running
+	 * inside the target. But might be "/mnt" during installation
+	 * (running in inst-sys) or "/whatever" if installing into
+	 * a directory
+	 */
+        InstTarget( const Pathname & rootpath );
+        ~InstTarget();
 
     public:
 
@@ -74,55 +93,6 @@ class InstTarget: virtual public Rep {
 	 * @see RpmDb::checkPackageResult
 	 * */
 	typedef enum RpmDb::checkPackageResult checkPackageResult;
-
-        /**
-	 * default error class
-	 **/
-        typedef InstTargetError Error;
-
-    protected:
-
-#if 0
-
-    /**
-     * direct media access
-     * these denote the source medias actually in use
-     * on the target. They only share the URL with
-     * the installation sources but run in a different
-     * environment and are attached to different directories
-     */
-    std::list <MediaAccess> *_medias;
-
-    /**
-     * description of target
-     * implemented as a list since it basically is a copy
-     * of all source descriptions of sources which are
-     * installed on the target.
-     */
-    std::list <InstDescr> *_descrs;
-
-    /**
-     * content of media
-     * this describes the content of the target
-     */
-    InstData *_data;
-#endif
-
-    public:
-	/**
-	 * constructor
-	 * @param rootpath, path to root ("/") of target system
-	 * Usually "/" if the InstTarget object is actually running
-	 * inside the target. But might be "/mnt" during installation
-	 * (running in inst-sys) or "/whatever" if installing into
-	 * a directory
-	 */
-	InstTarget ( const std::string & rootpath );
-
-	/**
-	 * destructor
-	 */
-	~InstTarget();
 
     public:
 
@@ -265,8 +235,6 @@ class InstTarget: virtual public Rep {
 	 * */
 	void setPackageInstallProgressCallback(void (*func)(double,void*), void* data);
 
-	std::ostream & dumpOn( std::ostream & str ) const;
-
 	/**
 	 * @return destination root directory of target system
 	 * */
@@ -294,9 +262,6 @@ class InstTarget: virtual public Rep {
 	/** rpm database */
 	RpmDbPtr _rpmdb;
 
-    private:
-	// forbidden
-	InstTarget ();
 };
 
 ///////////////////////////////////////////////////////////////////

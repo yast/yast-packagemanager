@@ -54,32 +54,65 @@ class InstSrcData: virtual public Rep {
      **/
     typedef InstSrcError Error;
 
-
-#if 1
   private:
-    InstData *_data;
+
+    /**
+     * InstSrc triggers certain actions to perfom
+     **/
+    friend class InstSrc;
+
+    /**
+     * Backreference to InstSrc
+     **/
+    InstSrcPtr _instSrc;
+
+    /**
+     * True after _instSrc_propagate, false after _instSrc_withdraw
+     **/
+    bool _propagating;
+
+    /**
+     * Adjust backreferences to InstSrc.
+     **/
+    void _instSrc_atach( const InstSrcPtr & instSrc_r );
+
+    /**
+     * Clear backreferences to InstSrc.
+     **/
+    void _instSrc_detach();
+
+    /**
+     * Propagate Objects to Manager classes.
+     **/
+    void _instSrc_propagate();
+
+    /**
+     * Withdraw Objects from Manager classes.
+     **/
+    void _instSrc_withdraw();
 
   public:
 
-
-    /**
-     * HACK to compile
-     **/
-    InstSrcData(){}
-
-    /**
-     * constructor
-     * initialization with new media
-     */
-    InstSrcData (MediaAccessPtr media_r);
-
-    /**
-     * constructor
-     * initialization with known media
-     */
-    InstSrcData (const Pathname & contentcachefile);
+    InstSrcData();
 
     virtual ~InstSrcData();
+
+  protected:
+
+    /**
+     * Call concrete InstSrcData to propagate Objects to Manager classes.
+     **/
+    virtual void propagateObjects() {}
+
+    /**
+     * Call concrete InstSrcData to withdraw Objects from Manager classes.
+     **/
+    virtual void withdrawObjects() {}
+
+#if 1
+  private:
+
+    InstData *_data;
 
   public:
 
@@ -148,6 +181,8 @@ class InstSrcData: virtual public Rep {
     const std::list<PMSolvablePtr> *getPatches (void) const;
 #endif
 
+  public:
+
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 
   public:
@@ -162,6 +197,15 @@ class InstSrcData: virtual public Rep {
     static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
 
+    /**
+     * Any concrete InstSrcData must realize this, as it knows the expected
+     * layout on the media. Expect MediaAccessPtr to be open and attached.
+     *
+     * Return the InstSrcData retrieved from the media via ndescr_r,
+     * or NULL and PMError set. <b>InstSrcData must not provide the objects
+     * retieved to any Manager class.</b> This is to be done on explicit request
+     * via propagateObjects only.
+     **/
     static PMError tryGetData( InstSrcDataPtr & ndata_r,
 			       MediaAccessPtr media_r, const Pathname & descr_dir_r );
 };
