@@ -129,12 +129,17 @@ representation, RDF is preferred.<br>
 <br>
 RDF is the proposed format by various source (i.e. <A HREF="http://rpmfind.net/linux/rpm2html/">rpm2html</A>
 and <A HREF="http://reno.cis.upenn.edu/~rahul/standards/packrdf/packformat.html">LSB packagedata format</A>).
-The increase in overall size is enormous and not really suitable for a compact
-cache on a distribution CD. The current RDF package databases on the internet
-contain a single file per package. For SuSE aaa_base the RDF description is 56k !<BR>
+For the full format, the increase in overall size is enormous and not really suitable for a compact
+cache on a distribution CD. The current RDF package databases (meant for
+online access via the internet) contain a single file per package.
+For SuSE aaa_base the RDF description is 56kbytes and contains the full file
+list and changelog.<BR>
 Since this document defines primarily the CD package cache for SuSE 8.1 and
 we're open to support other formats in the future, we should wait with RDF
 until a common format is defined by LSB.<BR>
+Another promising project besides the LSB efforts is
+<A HREF="http://gnupdate.org/">gnupdate</A>, which will eventually supported
+in the future.<br>
 <br>
 Binary data might be compact, but has endian problems and isn't readable with 'less'.<BR>
 <br>
@@ -161,6 +166,10 @@ All keyword,value pairs inbetween belong to the package named in the first
 <li>The file starts with a header defining the syntactical version of the
 data</li>
 </ul>
+<br>
+File encoding is ASCII.<BR>
+File is line based.<BR>
+Lines starting with '<tt>#</tt>' are ignored.<BR>
 
 <p></p>
 <H2>Header keywords</H2>
