@@ -83,6 +83,28 @@ PMError InstYou::initProduct()
   return _paths->initProduct();
 }
 
+PMError InstYou::initDu()
+{
+  std::set<PkgDuMaster::MountPoint> mountpoints;
+
+  std::string dname = "download area";
+
+  long long dfree = 0LL;
+  long long dused = 0LL;
+
+  dfree = 5000;
+  dused = 10000;
+
+  long long dirsize = dfree + dused;
+  
+  PkgDuMaster::MountPoint point (dname, FSize (4096), FSize (dirsize), FSize (dused));
+  mountpoints.insert (point);
+
+  Y2PM::packageManager().setMountPoints(mountpoints);
+
+  return PMError();
+}
+
 PMError InstYou::servers( list<Url> &servers )
 {
   PMYouServers youServers( _paths );
@@ -174,8 +196,7 @@ PMError InstYou::retrievePatchInfo( const Url &url, bool reload,
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
       D__ << "  Package: " << (*itPkg)->summary() << endl;
-      if ( hasPatchRpm( *itPkg ) ) {
-        
+      if ( hasPatchRpm( *itPkg ) ) {        
         _info->packageDataProvider()->setArchiveSize( *itPkg, (*itPkg)->patchRpmSize() );
         D__ << "    Using patch RPM" << endl;
       }
@@ -243,6 +264,8 @@ void InstYou::selectPatches( int kinds )
 
 void InstYou::updatePackageStates()
 {
+  _totalDownloadSize = 0;
+
   list<PMYouPatchPtr>::const_iterator it;
   for ( it = _patches.begin(); it != _patches.end(); ++it ) {
     bool toInstall = false;
@@ -266,6 +289,7 @@ void InstYou::updatePackageStates()
         if ( pkgToInstall ) {
           selectablePkg->setUserCandidate( *itPkg );
           selectablePkg->user_set_install();
+          _totalDownloadSize += (*itPkg)->archivesize();
         } else {
           selectablePkg->clrUserCandidate();
           selectablePkg->user_unset();
@@ -275,6 +299,8 @@ void InstYou::updatePackageStates()
       }
     }
   }
+
+  D__ << _totalDownloadSize << endl;
 }
 
 PMError InstYou::attachSource()

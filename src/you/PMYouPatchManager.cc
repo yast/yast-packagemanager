@@ -132,3 +132,8 @@ Pathname PMYouPatchManager::settingsFile() const
 {
   return "/var/lib/YaST2/you/settings";
 }
+
+FSize PMYouPatchManager::totalDownloadSize()
+{
+  return instYou().totalDownloadSize();
+}

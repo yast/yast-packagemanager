@@ -345,6 +345,8 @@ PMYouPatchManager & Y2PM::youPatchManager()
 
     _youPatchManager->instYou().initProduct();
 
+    _youPatchManager->instYou().initDu();
+
     list<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
 
     _youPatchManager->poolSetInstalled( patches );

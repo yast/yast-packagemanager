@@ -78,6 +78,12 @@ class PMYouPatchManager : public PMManager {
     */
     bool securityUpdatesAvailable();
 
+    /**
+      Return total size of data to be downloaded based on current selection of
+      patches.
+    */
+    FSize totalDownloadSize();
+
   private:
     InstYou *_instYou;
 
