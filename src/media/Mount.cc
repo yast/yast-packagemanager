@@ -22,10 +22,11 @@
 #include <unistd.h>
 #include <errno.h>
 #include <iostream>
-#include <string>
 #include <fstream>
+#include <string>
 
 #include <y2util/ExternalDataSource.h>
+#include <y2util/stringutil.h>
 #include <y2util/Y2SLog.h>
 #include <y2pm/Mount.h>
 
@@ -244,4 +245,51 @@ int Mount::Status()
 void Mount::Kill()
 {
   if (process) process->kill();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Mount::splitOptions
+//	METHOD TYPE : Options
+//
+Mount::Options Mount::splitOptions( const std::string & options_r )
+{
+  Options ret;
+  vector<string> opts;
+  stringutil::split( options_r, opts, "," );
+
+  for ( unsigned i = 0; i < opts.size(); ++i ) {
+    string::size_type pos = opts[i].find( "=" );
+    if ( pos == string::npos ) {
+      ret[opts[i]] = "";
+    } else {
+      ret[opts[i].substr( 0, pos )] = opts[i].substr( pos+1 );
+    }
+  }
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Mount::joinOptions
+//	METHOD TYPE : std::string
+//
+std::string Mount::joinOptions( const Options & options_r )
+{
+  string ret;
+
+  for ( Options::const_iterator it = options_r.begin(); it != options_r.end(); ++it ) {
+    if ( !ret.empty() ) {
+      ret += ",";
+    }
+    ret += it->first;
+    if ( !it->second.empty() ) {
+      ret += "=" + it->second;
+    }
+  }
+
+  return ret;
 }
