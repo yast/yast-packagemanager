@@ -29,7 +29,9 @@ Url::Url(const string& url)
     access = media_access_handlers[access_str];
 
     if(access==NULL)
-	throw PkgDbExcp("unkown url");
+	handled=false;
+    else
+	handled=true;
 
     _access = access;
     _path = url.substr(pos+3);

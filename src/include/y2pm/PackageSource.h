@@ -71,10 +71,13 @@ class Url
 //	Url(const Url&);
 	MediaAccess _access;
 	std::string _path;
+	bool handled;
     public:
 	Url(const std::string& url);
 	MediaAccess getAccess();
 	const std::string& getPath() const;
+	// returns true if a MediaAccess for that url exists
+	bool isHandled() { return handled; }
 };
 
 // Base class for all data providers
