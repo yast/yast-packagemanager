@@ -19,7 +19,7 @@ LDFLAGS = -static
 
 CLEANFILES = *.exe
 
-noinst_PROGRAMS = \
+EXTRA_PROGRAMS = \
 	ma_test.exe	\
 	rpmtest.exe
 
@@ -31,4 +31,4 @@ rpmtest_exe_SOURCES = rpmtest.cc
 #rpmtest_exe_LDADD = $(top_builddir)/src/liby2pm.la
 #rpmtest_exe_LDFLAGS = -static
 
-
+ALL: $(EXTRA_PROGRAMS)
