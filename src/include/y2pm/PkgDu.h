@@ -33,7 +33,7 @@
 //
 //	CLASS NAME : PkgDuMaster
 /**
- *
+ * @short PMPackageManager helper to collect disk usage info.
  **/
 class PkgDuMaster {
 
@@ -57,6 +57,7 @@ class PkgDuMaster {
 	mutable FSize     _used;
       public:
 	// statistics counted by add/sub
+	// contains the change of diskusage
 	mutable FSize     _pkgusage;
       public:
 	MountPoint( const std::string & mountpoint_r,
@@ -114,6 +115,21 @@ class PkgDuMaster {
 
     const std::set<MountPoint> & mountpoints() const { return _mountpoints; }
 
+  private:
+
+    FSize _total;
+
+  public:
+
+    /**
+     * Contains the overall change of diskusage
+     **/
+    const FSize & total() const { return _total; }
+
+    void add( const FSize & szs_r ) { _total += szs_r; }
+
+    void sub( const FSize & szs_r ) { _total -= szs_r; }
+
   public:
 
     friend std::ostream & operator<<( std::ostream & str, const PkgDuMaster & obj );
@@ -126,7 +142,7 @@ class PkgDuMaster {
 //
 //	CLASS NAME : PkgDu
 /**
- *
+ * @short PMPackage helper to calculate and provide du information.
  **/
 class PkgDu {
 
