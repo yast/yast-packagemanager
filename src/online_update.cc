@@ -1,3 +1,10 @@
+/*
+  YaST Online Update (YOU) command line tool
+
+  Textdomain "packagemanager"
+
+*/
+
 #include <getopt.h>
 
 #include <iomanip>
@@ -22,46 +29,48 @@
 #include <y2pm/PMYouServers.h>
 #include <y2pm/YouError.h>
 #include <y2pm/PMYouProduct.h>
+#include <y2pm/PMLocale.h>
 
 using namespace std;
 
 void usage()
 {
-  cout << "Usage: online-update [options] [types]"
+  cout << _("Usage: online-update [options] [types]")
        << endl << endl
-       << "-u, --url URL            Base URL of directory tree used to get patches from." << endl
-       << "                         Supported protocols: http, ftp, smb, nfs, cd, dvd, file." << endl
-       << "                         If no protocol is given a local file is assumed." << endl
-       << "                         Examples: 'ftp://ftp.suse.com/pub/suse', 'cd:///'," << endl
-       << "                                   'file:/var/lib/YaST2/you/mnt'" << endl
-       << "                                   '/var/lib/YaST2/you/mnt'" << endl
+       << _("-u, --url URL            Base URL of directory tree used to get patches from.\n"
+            "                         Supported protocols: http, ftp, smb, nfs, cd, dvd, file.\n"
+            "                         If no protocol is given a local file is assumed.\n"
+            "                         Examples: 'ftp://ftp.suse.com/pub/suse', 'cd:///',\n"
+            "                                   'file:/var/lib/YaST2/you/mnt'\n"
+            "                                   '/var/lib/YaST2/you/mnt'") << endl
        << endl
-       << "-g, --download-only      Only download patches, don't install." << endl
-       << "-G, --get-all            Retrieve all available patches and packages for the" << endl
-       << "                         given product, don't install" << endl
-       << "-i, --install-only       Install downloaded patches, don't download." << endl
+       << _("-g, --download-only      Only download patches, don't install.") << endl
+       << _("-G, --get-all            Retrieve all available patches and packages for the\n"
+            "                         given product, don't install.") << endl
+       << _("-i, --install-only       Install downloaded patches, don't download.") << endl
        << endl
-       << "-q, --quick-check        Quick check for new updates. Doesn't check for types" << endl
-       << "                         of updates." << endl
-       << "-k, --check              Check for new updates." << endl
+       << _("-q, --quick-check        Quick check for new updates. Doesn't check for types\n"
+            "                         of updates.") << endl
+       << _("-k, --check              Check for new updates.") << endl
        << endl
-       << "-c, --show-config        Show configuration. Don't do anything." << endl
+       << _("-c, --show-config        Show configuration. Don't do anything.") << endl
        << endl
-       << "-p, --product PRODUCT    Name of product to get patches for." << endl
-       << "-v, --version VERSION    Version of product to get patches for." << endl
-       << "-a, --architecture ARCH  Base architecture of product to get patches for." << endl
-       << "-l, --language LANGCODE  Language used to show patch descriptions." << endl
+       << _("-p, --product PRODUCT    Name of product to get patches for.") << endl
+       << _("-v, --version VERSION    Version of product to get patches for.") << endl
+       << _("-a, --architecture ARCH  Base architecture of product to get patches for.") << endl
+       << _("-l, --language LANGCODE  Language used to show patch descriptions.") << endl
        << endl
-       << "-r, --reload             Reload patches from server." << endl
-       << "-d, --dry-run            Dry run. Only get patches, don't install them." << endl
-       << "-n, --no-sig-check       No signature check of downloaded files." << endl
+       << _("-r, --reload             Reload patches from server.") << endl
+       << _("-d, --dry-run            Dry run. Only get patches, don't install them.") << endl
+       << _("-n, --no-sig-check       No signature check of downloaded files.") << endl
        << endl
-       << "-s, --show-patches       Show list of patches (Additionaly use -d to only show list " << endl
-       << "                         of patches without installing them)." << endl
-       << "-V, --verbose            Be verbose." << endl
-       << "-D, --debug              Debug output." << endl
+       << _("-s, --show-patches       Show list of patches (Additionaly use -d to only show list\n"
+            "                         of patches without installing them).") << endl
+       << _("-V, --verbose            Be verbose.") << endl
+       << _("-D, --debug              Debug output.") << endl
        << endl
-       << "security | recommended | document | optional   Types of patches to be installed." << endl;
+       << "security | recommended | document | optional   "
+       << _("Types of patches to be installed.") << endl;
   exit( 1 );
 }
 
@@ -75,6 +84,9 @@ void usage()
 */
 int main( int argc, char **argv )
 {
+  setlocale(LC_ALL, "" );
+  PMLocale::setTextdomain();
+
   MIL << "CMD: online_update";
   for ( int i = 1; i < argc; ++i ) MIL << " " << argv[ i ];
   MIL << endl;
@@ -187,7 +199,7 @@ int main( int argc, char **argv )
         getAll = true;
         break;
       default:
-        cerr << "Error parsing command line." << endl;
+        cerr << _("Error parsing command line.") << endl;
       case '?':
       case 'h':
         usage();
@@ -195,9 +207,9 @@ int main( int argc, char **argv )
   }
 
   if ( getuid() != 0 && !checkUpdates && !quickCheckUpdates && !showConfig ) {
-    cerr << "You need root permissions to run this command. Use the -q or -k\n"
-         << "options to check for the availabilty of updates without needing\n"
-         << "root permissions." << endl;
+    cerr << _("You need root permissions to run this command. Use the -q or -k\n"
+              "options to check for the availabilty of updates without needing\n"
+              "root permissions.") << endl;
     exit( 1 );
   }
 
@@ -273,31 +285,31 @@ int main( int argc, char **argv )
     list<PMYouProductPtr>::const_iterator itProd;
     for( itProd = products.begin(); itProd != products.end(); ++itProd ) {
       PMYouProductPtr prod = *itProd;
-      cout << "Product " << i;
+      cout << _("Product ") << i;
       if ( ( products.size() > 1 ) &&  ( i == 0 ) ) {
-        cout << " (primary product)";
+        cout << _(" (primary product)");
       }
       cout << endl;
-      cout << "  Name:      " << prod->product() << endl;
-      cout << "  Version:      " << prod->version() << endl;
-      cout << "  Architecture: " << prod->baseArch() << endl;
+      cout << _("  Name:      ") << prod->product() << endl;
+      cout << _("  Version:      ") << prod->version() << endl;
+      cout << _("  Architecture: ") << prod->baseArch() << endl;
       if ( verbose || debug ) {
-        cout << "  Arch list: ";
+        cout << _("  Arch list: ");
         std::list<PkgArch> archs = prod->archs();
         std::list<PkgArch>::const_iterator it;
         for( it = archs.begin(); it != archs.end(); ++it ) {
           cout << (*it).asString() << " ";
         }
         cout << endl;
-        cout << "  Business Product: "
-             << ( prod->businessProduct() ? "Yes" : "No" ) << endl;
-        cout << "  Distribution: " << prod->distProduct() << endl;
-        cout << "  YOU Path: " << prod->patchPath() << endl;
+        cout << _("  Business Product: ")
+             << ( prod->businessProduct() ? _("Yes") : _("No") ) << endl;
+        cout << _("  Distribution: ") << prod->distProduct() << endl;
+        cout << _("  YOU Path: ") << prod->patchPath() << endl;
       }
       ++i;
     }
-    cout << "Language:     " << you.settings()->langCode() << endl;
-    cout << "Directory:    " << you.settings()->directoryFileName() << endl;
+    cout << _("Language:     ") << you.settings()->langCode() << endl;
+    cout << _("Directory:    ") << you.settings()->directoryFileName() << endl;
   
     exit( 0 );
   }
@@ -311,7 +323,7 @@ int main( int argc, char **argv )
   } else {
     if ( urlStr ) {
       if ( !Url( urlStr ).isValid() ) {
-        cerr << "Error: URL '" << urlStr << "' is not valid." << endl;
+        cerr << _("Error: URL '") << urlStr << _("' is not valid.") << endl;
         exit( -1 );
       }
       server.setUrl( urlStr );
@@ -319,7 +331,7 @@ int main( int argc, char **argv )
       PMYouServers youServers( you.settings() );
       error = youServers.requestServers( checkUpdates || quickCheckUpdates );
       if ( error ) {
-        cerr << "Error while requesting servers: " << error << endl;
+        cerr << _("Error while requesting servers: ") << error << endl;
         exit( -1 );
       }
       server = youServers.currentServer();
@@ -329,29 +341,29 @@ int main( int argc, char **argv )
   settings->setPatchServer( server );
 
   if ( verbose ) {
-    cout << "Server URL: " << server.url() << endl;
-    cout << "Server Name: " << server.name() << endl;
-    cout << "Directory File: " << server.directory() << endl;
+    cout << _("Server URL: ") << server.url() << endl;
+    cout << _("Server Name: ") << server.name() << endl;
+    cout << _("Directory File: ") << server.directory() << endl;
     int i = 0;
     list<PMYouProductPtr>::const_iterator itProd;
     for( itProd = products.begin(); itProd != products.end(); ++itProd ) {
-      cout << "Path " << i++ << ": " << (*itProd)->patchPath() << endl;
+      cout << _("Path ") << i++ << ": " << (*itProd)->patchPath() << endl;
     }
   }
 
   if ( quickCheckUpdates ) {
     int updates = you.quickCheckUpdates();
     if ( updates < 0 ) {
-      cerr << "Unable to check for updates." << endl;
+      cerr << _("Unable to check for updates.") << endl;
       return -1;
     } else if ( updates == 0 ) {
-      cout << "No new updates available." << endl;
+      cout << _("No new updates available.") << endl;
       return 0;
     } else if ( updates == 1 ) {
-      cout << "1 new update available." << endl;
+      cout << _("1 new update available.") << endl;
       return 1;
     } else {
-      cout << updates << " new updates available." << endl;
+      cout << updates << _(" new updates available.") << endl;
       return 1;
     }
   }
@@ -373,44 +385,44 @@ int main( int argc, char **argv )
 
   error = you.retrievePatchInfo();
   if ( error ) {
-    cerr << "Error retrieving patches: " << error << endl;
+    cerr << _("Error retrieving patches: ") << error << endl;
     exit( -1 );
   }
 
   you.selectPatches( kinds );
 
   if ( debug || showPatches ) {
-    if ( verbose ) cout << "Patches:" << endl;
+    if ( verbose ) cout << _("Patches:") << endl;
     you.showPatches( verbose );
   }
 
   if ( checkUpdates ) {
     if ( Y2PM::youPatchManager().securityUpdatesAvailable() ) {
-      cout << "Security updates available." << endl;
+      cout << _("Security updates available.") << endl;
       return 2;
     } else if ( Y2PM::youPatchManager().updatesAvailable() ) {
-      cout << "Updates available." << endl;
+      cout << _("Updates available.") << endl;
       return 1;
     } else {
-      cout << "No updates available." << endl;
+      cout << _("No updates available.") << endl;
     }
     return 0;
   }
 
   error = you.retrievePatches();
   if ( error ) {
-    cerr << "Error retrieving patches: " << error << endl;
+    cerr << _("Error retrieving patches: ") << error << endl;
     exit( -1 );
   }
 
   if ( getAll || ( autoGet && !autoInstall ) ) {
-    if ( verbose ) cout << "Got patches." << endl;
+    if ( verbose ) cout << _("Got patches.") << endl;
     return 0;
   }
 
   error = you.installPatches();
   if ( error ) {
-    cerr << "Error installing packages: " << error << endl;
+    cerr << _("Error installing packages: ") << error << endl;
     exit( -1 );
   }
 

@@ -17,19 +17,17 @@
 
   Purpose: Definition of "You" error values.
 
+  Textdomain "packagemanager"
+
 /-*/
 
 #include <iostream>
 
 #include <y2pm/YouError.h>
+#include <y2pm/PMLocale.h>
 
 using namespace std;
 
-///////////////////////////////////////////////////////////////////
-#ifndef N_
-#  define N_(STR) STR
-#endif
-///////////////////////////////////////////////////////////////////
 
 const std::string YouError::errclass( "You" );
 
@@ -54,22 +52,22 @@ std::string YouError::errtext( const unsigned e )
   // more specific errors start here:
   // case E_some_err:	return N_("some text");
   ///////////////////////////////////////////////////////////////////
-  case E_bad_sig_file:  return N_("File has invalid signature.");
-  case E_bad_sig_rpm:   return N_("RPM has invalid signature.");
-  case E_get_youservers_failed: return N_("Error getting youservers file.");
-  case E_write_youservers_failed: return N_("Error writing youservers file.");
-  case E_read_youservers_failed: return N_("Error reading youservers file.");
-  case E_user_abort: return N_("User aborted operation.");
-  case E_parse_error: return N_("Error parsing patch description.");
-  case E_script_failed: return N_("Script failed.");
-  case E_prescript_failed: return N_("Prescript failed.");
-  case E_postscript_failed: return N_("Postscript failed.");
-  case E_rpm_failed: return N_("rpm failed.");
-  case E_install_failed: return N_("Installation failed.");
-  case E_empty_location: return N_("Package location is empty.");
-  case E_read_mediapatches_failed: return N_("Error getting media.1/patches file.");
-  case E_callback_missing: return N_("No callback function is set.");
-  case E_missing_sig_file: return N_("Missing signature.");
+  case E_bad_sig_file:  return _("File has invalid signature.");
+  case E_bad_sig_rpm:   return _("RPM has invalid signature.");
+  case E_get_youservers_failed: return _("Error getting youservers file.");
+  case E_write_youservers_failed: return _("Error writing youservers file.");
+  case E_read_youservers_failed: return _("Error reading youservers file.");
+  case E_user_abort: return _("User aborted operation.");
+  case E_parse_error: return _("Error parsing patch description.");
+  case E_script_failed: return _("Script failed.");
+  case E_prescript_failed: return _("Prescript failed.");
+  case E_postscript_failed: return _("Postscript failed.");
+  case E_rpm_failed: return _("rpm failed.");
+  case E_install_failed: return _("Installation failed.");
+  case E_empty_location: return _("Package location is empty.");
+  case E_read_mediapatches_failed: return _("Error getting media.1/patches file.");
+  case E_callback_missing: return _("No callback function is set.");
+  case E_missing_sig_file: return _("Missing signature.");
   };
 
   return stringutil::numstring( e );
