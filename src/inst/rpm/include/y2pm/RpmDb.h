@@ -199,11 +199,6 @@ class RpmDb: virtual public Rep
 	std::string queryCurrentDBPath ( void ) { return dbPath.asString(); };
 
 	/**
-	 * query all cache values
-	 */
-	bool queryCache (constPMPackagePtr package, struct rpmCache *theCache);
-
-	/**
 	 * query system for provided tag (rpm -q --whatprovides)
 	 */
 	bool isProvided (const std::string& tag);
