@@ -451,3 +451,38 @@ PMManager::updateAllInstalled (bool only_newer)
     return count;
 }
 
+FSize PMManager::SpaceDifference()
+{
+    FSize size = 0;
+    for ( PMManager::PMSelectableVec::iterator it = this->begin(); it != this->end(); ++it )
+    {
+	if((*it)->to_install())
+	{
+	    // sub installed
+	    if((*it)->has_installed())
+	    {
+		PMObjectPtr ptr = (*it)->installedObj();
+		if(ptr)
+		    size -= ptr->size();
+		else
+		    { INT << "ptr is NULL" << endl; }
+	    }
+	    // add new
+	    PMObjectPtr ptr = (*it)->candidateObj();
+	    if(!ptr)
+		{ INT << "ptr is NULL" << endl; }
+
+	    size += ptr->size();
+	}
+	else if((*it)->to_delete())
+	{
+	    PMObjectPtr ptr = (*it)->installedObj();
+	    if(ptr)
+		size -= ptr->size();
+	    else
+		{ INT << "ptr is NULL" << endl; }
+	}
+    }
+
+    return size;
+}

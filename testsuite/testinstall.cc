@@ -82,6 +82,7 @@ void solve(vector<string>& argv);
 void showtimes(vector<string>& argv);
 void createbackups(vector<string>& argv);
 void rebuilddb(vector<string>& argv);
+void du(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -113,6 +114,7 @@ static struct Funcs func[] = {
     { "showtimes",	showtimes,	0,	"showtimes" },
     { "createbackups",	createbackups,	0,	"createbackups" },
     { "rebuilddb",	rebuilddb,	1,	"rebuild rpm db" },
+    { "du",		du,		1,	"display disk space forecast" },
     { NULL,		NULL,		0,	NULL }
 };
 
@@ -212,6 +214,10 @@ void createbackups(vector<string>& argv)
     cout << "create backups " << (_createbackups?"enabled":"disabled") << endl;
 }
 
+void du(vector<string>& argv)
+{
+    cout << Y2PM::packageManager().SpaceDifference() << endl;
+}
 
 void rebuilddb(vector<string>& argv)
 {
