@@ -77,6 +77,18 @@ string PMYouPackageDataProvider::instSrcLabel( const PMPackage & pkg ) const
   return label;
 }
 
+void PMYouPackageDataProvider::setSummary( const PMPackagePtr &pkg, const std::string &label )
+{
+  _summaries[ pkg ] = label;
+}
+
+string PMYouPackageDataProvider::summary( const PMPackage & pkg ) const
+{
+  map<PMPackagePtr,string>::const_iterator it = _summaries.find( mkPtr( pkg ) );
+  if ( it == _summaries.end() ) return string();
+  else return it->second;
+}
+
 FSize PMYouPackageDataProvider::size( const PMPackage &pkg ) const
 {
   map<PMPackagePtr,FSize>::const_iterator it = _sizes.find( mkPtr( pkg ) );

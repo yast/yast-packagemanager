@@ -56,6 +56,7 @@ class YOUPackageTagSet : public TaggedFile::TagSet
   public:
     enum Tags {
       FILENAME,
+      LABEL,
       SERIES,
       RPMNAME,
       INSTPATH,
