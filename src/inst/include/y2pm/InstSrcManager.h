@@ -279,6 +279,19 @@ class InstSrcManager {
     void disableAllSources();
 
     /**
+     * Let a certain InstSrc release it's media.
+     * if_removable is true: release if CD/DVD only.
+     * @return Error returned by @ref InstSrc::releaseMedia
+     **/
+    PMError releaseMedia( const ISrcId isrc_r, bool if_removable_r = false ) const;
+
+    /**
+     * Let all InstSrc'es release their media.
+     * if_removable is true: release if CD/DVD only.
+     **/
+    PMError releaseAllMedia( bool if_removable_r = false ) const;
+
+    /**
      * Used during installation/Upadte (where caching is disabled)
      * to install the caches on the system. So InstSrc'es will be
      * available in the running system after boot.
