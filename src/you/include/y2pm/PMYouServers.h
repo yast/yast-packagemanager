@@ -72,8 +72,10 @@ class PMYouServers : virtual public Rep {
 
     /**
       Get list of YOU servers from CGI script on the master server.
+      If check is true the server list is going to be used to check the
+      availability of updates but not to axtually download them.
     */
-    PMError requestServers();
+    PMError requestServers( bool check = false );
 
     /**
       Return list of known servers.

@@ -34,6 +34,7 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectable.h>
+#include <y2pm/MediaCurl.h>
 
 #include <y2pm/PMYouPatchPaths.h>
 
@@ -49,7 +50,7 @@ IMPL_BASE_POINTER(PMYouPatchPaths);
 
 PMYouPatchPaths::PMYouPatchPaths()
 {
-  init("SuSE-Linux","8.1","i386");
+  init("SuSE-Linux","8.2","i386");
 }
 
 PMYouPatchPaths::PMYouPatchPaths( const string &product, const string &version,
@@ -111,6 +112,8 @@ void PMYouPatchPaths::init( const string &path )
   _patchPath = path + "/patches/";
   _rpmPath = path + "/rpm/";
   _scriptPath = path + "/scripts/";
+
+  MediaCurl::setCookieFile( cookiesFile() );
 }
 
 PMError PMYouPatchPaths::initProduct()
@@ -228,7 +231,32 @@ Pathname PMYouPatchPaths::localDir()
   return "/var/lib/YaST2/you/";
 }
 
+Pathname PMYouPatchPaths::localWriteDir()
+{
+  if ( getuid() == 0 ) {
+    return localDir();
+  } else {
+    Pathname path = getenv( "HOME" );
+    path += ".yast2/you";
+    int err = PathInfo::assert_dir( path );
+    if ( err ) {
+      ERR << "Unable to assert '" << path << "' errno: " << err << endl;
+    }
+    return path;
+  }
+}
+
 Pathname PMYouPatchPaths::attachPoint()
+{
+  Pathname path = localWriteDir() + "mnt/";
+  int err = PathInfo::assert_dir( path );
+  if ( err ) {
+    ERR << "Unable to assert '" << path << "' errno: " << err << endl;
+  }
+  return path;
+}
+
+Pathname PMYouPatchPaths::rootAttachPoint()
 {
   return localDir() + "mnt/";
 }
@@ -250,7 +278,7 @@ string PMYouPatchPaths::directoryFileName()
 
 Pathname PMYouPatchPaths::cookiesFile()
 {
-  return localDir() + "cookies";
+  return localWriteDir() + "cookies";
 }
 
 Pathname PMYouPatchPaths::configFile()

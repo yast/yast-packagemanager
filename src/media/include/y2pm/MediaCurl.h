@@ -46,6 +46,8 @@ class MediaCurl : public MediaHandler {
 
     virtual ~MediaCurl() { release(); }
 
+    static void setCookieFile( const Pathname & );
+
   private:
     CURL *_curl;
     char _curlError[ CURL_ERROR_SIZE ]; 
@@ -53,6 +55,8 @@ class MediaCurl : public MediaHandler {
     std::string _userpwd;
     std::string _proxy;
     std::string _proxyuserpwd;
+
+    static Pathname _cookieFile;
 };
 
 ///////////////////////////////////////////////////////////////////

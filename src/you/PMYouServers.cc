@@ -69,10 +69,10 @@ Pathname PMYouServers::localYouServers()
 
 Pathname PMYouServers::cachedYouServers()
 {
-  return _patchPaths->localDir() + "youservers";
+  return _patchPaths->localWriteDir() + "youservers";
 }
 
-PMError PMYouServers::requestServers()
+PMError PMYouServers::requestServers( bool check )
 {
   string lastServer = _patchPaths->config()->readEntry( "LastServer" );
   if ( !lastServer.empty() ) {
@@ -90,10 +90,15 @@ PMError PMYouServers::requestServers()
     url += "&version=" + _patchPaths->version();
     url += "&basearch=" + string( _patchPaths->baseArch() );
     url += "&arch=" + string( _patchPaths->arch() );
+    
     url += "&business=";
     if ( _patchPaths->businessProduct() ) url += "1";
     else url += "0";
-
+    
+    url += "&check=";
+    if ( check ) url += "1";
+    else url += "0";
+    
     url += "&distproduct=" + _patchPaths->distProduct();
 
     addPackageVersion( "yast2-online-update", url );
