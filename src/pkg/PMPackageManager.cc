@@ -219,6 +219,25 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 }
 
 
+static bool
+suse_vendor (constPMPackagePtr package)
+{
+    if (!package)
+	return true;
+
+    string vendor = package->vendor();
+    if (vendor.empty()
+	|| (vendor.size() < 4)
+	|| (vendor.substr (0,4) != "SuSE"))
+    {
+	DBG << "vendor '" << vendor << "'" << endl;
+	return false;
+    }
+    return true;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -230,11 +249,14 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 //		Handle splitprovides
 //		Mark packages appl_delete or appl_install accordingly
 //
+//		return non-suse packages for which an update candidate exists in noinstall_r
+//		return non-suse packages for which an obsolete exists in nodelete_r
+//
 void
-PMPackageManager::doUpdate (std::list<PMPackagePtr>& noupdate_r, std::list<PMPackagePtr>& unknowns_r)
+PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r)
 {
-    noupdate_r.clear();
-    unknowns_r.clear();
+    noinstall_r.clear();
+    nodelete_r.clear();
 
     DBG << "doUpdate..." << endl;
 
@@ -245,10 +267,9 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noupdate_r, std::list<PMPac
 	//-----------------------------------------------------------------
 	// pre check: candidate ? taboo ? user ? non-suse ?
 
-	if ((*it)->has_installed_only())
+	if (!(*it)->has_candidate())
 	{
 	    DBG << "no candidate" << endl;
-	    noupdate_r.push_back ((*it)->installedObj());
 	    continue;
 	}
 	if ((*it)->is_taboo())			// skip taboo
@@ -262,22 +283,14 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noupdate_r, std::list<PMPac
 	    continue;
 	}
 
-	PMPackagePtr installed = (*it)->installedObj();
-	string vendor = installed->vendor();
-	if (vendor.empty()
-	    || (vendor.size() < 4)
-	    || (vendor.substr (0,4) != "SuSE"))
-	{
-	    DBG << "vendor '" << vendor << "'" << endl;
-	    unknowns_r.push_back (installed);
-	}
-
 	PMPackagePtr candidate = (*it)->candidateObj();
 	if (!candidate)
 	{
 	    DBG << "no candidate" << endl;
 	    continue;
 	}
+
+	PMPackagePtr installed = (*it)->installedObj();
 
 	//-----------------------------------------------------------------
 	// check splitprovides
@@ -288,18 +301,27 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noupdate_r, std::list<PMPac
 	{
 	    // *splitit = "rpmname:/path/to/file"
 	    DBG << "split ? '" << *splitit << "'" <<endl;
+
 	    string::size_type colonpos = (*splitit).find (":");
 	    if (colonpos == string::npos)
 	    {
 		ERR << "Bad !" << endl;
 		continue;
 	    }
+
 	    // check if rpm exists in target which provides the file
+	    // compare only the rpm name, not the edition
+
+	    string name = (*splitit).substr (0, colonpos);
 	    string rpmname = Y2PM::instTarget().belongsTo (Pathname ((*splitit).substr (colonpos+1)));
-	    if (rpmname == (*splitit).substr (0, colonpos))
+	    if ((name.compare (0, name.size(), rpmname) == 0)		// name matches
+		&& (rpmname[name.size()] == '-'))			// up to edition separator
 	    {
 		DBG << "Yes !" << endl;
-		(*it)->appl_set_install ();
+		if (suse_vendor (installed))
+		    (*it)->appl_set_install ();
+		else
+		    noinstall_r.push_back (installed);
 		break;
 	    }
 
@@ -308,16 +330,23 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noupdate_r, std::list<PMPac
 	//-----------------------------------------------------------------
 	// check for newer candidate
 
+
 #warning TDB checks edition only
 	if (installed->edition() < candidate->edition())
 	{
 	    DBG << "Edition " << PkgEdition::toString(installed->edition()) << " < " << PkgEdition::toString(candidate->edition()) << endl;
-	    (*it)->appl_set_install ();
+	    if (suse_vendor (installed))
+		(*it)->appl_set_install ();
+	    else
+		noinstall_r.push_back (installed);
 	}
 	else if (installed->buildtime() < candidate->buildtime())
 	{
 	    DBG << "Buildtime " << installed->buildtime() << " < " << candidate->buildtime() << endl;
-	    (*it)->appl_set_install ();
+	    if (suse_vendor (installed))
+		(*it)->appl_set_install ();
+	    else
+		noinstall_r.push_back (installed);
 	}
 
 	//-----------------------------------------------------------------
@@ -334,7 +363,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noupdate_r, std::list<PMPac
 		DBG << "not found" << endl;
 		continue;
 	    }
-	    if (obsslc->has_candidate_only())				// not installed
+	    if (!obsslc->has_installed())				// not installed
 	    {
 		DBG << "not installed" << endl;
 		continue;
@@ -345,8 +374,35 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noupdate_r, std::list<PMPac
 		DBG << "taboo/user" << endl;
 		continue;
 	    }
+
 	    DBG << "delete!" << endl;
-	    obsslc->appl_set_delete();
+	    PMPackagePtr installed = obsslc->installedObj();
+	    if (suse_vendor (installed))
+		obsslc->appl_set_delete();
+	    else
+		nodelete_r.push_back (installed);
+
+	    //-------------------------------------------------------
+	    // if the current candidate isn't selected for installation yet,
+	    // look for a matching provides
+
+	    if (!(*it)->to_install())
+	    {
+		const PMSolvable::PkgRelList_type provides = candidate->provides();
+		for (PMSolvable::PkgRelList_const_iterator prvit = provides.begin();
+		     prvit != provides.end(); ++prvit)
+		{
+		    if ((*obsit) != (*prvit))
+			continue;
+
+		    DBG << "matching provides" << endl;
+
+		    if (suse_vendor (installed))
+			(*it)->appl_set_install ();
+		    else
+			noinstall_r.push_back (installed);
+		}    
+	    }
 
 	} // obsoletes loop
 
