@@ -3,4 +3,5 @@ Makefile.in
 *.o
 .libs
 .deps
+maketable
 lookuptable.h
