@@ -80,7 +80,7 @@ class Query : virtual public Rep {
 	 * determine type of value
 	 */
 	int typeOfValue (struct qvalue *value, int type_hint,
-		PMSelectablePtr selectable,
+		PMSelectablePtr selectable, BitMask& mask_r,
 		std::list<std::string>& vlist, std::string & vstring,
 		Date& vdate, PkgEdition& vversion, FSize& vsize);
 
@@ -95,6 +95,7 @@ class Query : virtual public Rep {
 	bool checkPackage (PMPackagePtr package, struct qnode *query);
 
 	BitMask findCandidate (PMSelectablePtr selectable);
+	PMPackagePtr findByMask (PMSelectablePtr selectable, BitMask& mask_r);
 
 	bool compareVersion (const PkgEdition& left, enum operation op, const PkgEdition& right);
 	bool compareString (const std::string& left, enum operation op, const std::string& right);
