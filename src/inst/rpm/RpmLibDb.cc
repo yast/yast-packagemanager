@@ -21,7 +21,6 @@
 extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 }
 
 #include "RpmLib.h"
@@ -51,145 +50,6 @@ bool RpmLibDb::_globalInitialized = false;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : RpmLibDb::const_header_set
-//
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : RpmLibDb::const_header_set::index_set
-/**
- * Wrapper for librpm struct dbiIndexSet to handle necessary dbiFreeIndexRecord calls.
- **/
-class RpmLibDb::const_header_set::index_set {
-  index_set            ( const index_set & ); // no copy
-  index_set & operator=( const index_set & ); // no assign
-  public:
-    std::vector<unsigned> _idxSet;
-  public:
-    index_set( dbiIndexSet & idxSet_r ) {
-      if ( idxSet_r.count ) {
-	_idxSet.resize( idxSet_r.count );
-	for ( int i = 0; i < idxSet_r.count; ++i ) {
-	  _idxSet[i] = idxSet_r.recs[i].recOffset;
-	}
-      }
-      ::dbiFreeIndexRecord( idxSet_r );
-      idxSet_r.count = 0;
-      idxSet_r.recs = 0;
-    }
-};
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::const_header_set::const_header_set
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION :
-//
-RpmLibDb::const_header_set::const_header_set( rpmdb dbptr_r, const index_set & idxSet_r )
-    : _dbptr( dbptr_r )
-{
-  if ( _dbptr ) {
-    _idxSet = idxSet_r._idxSet;
-  }
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::const_header_set::operator[]
-//	METHOD TYPE : constRpmLibHeaderPtr
-//
-//	DESCRIPTION :
-//
-constRpmLibHeaderPtr RpmLibDb::const_header_set::operator[]( const unsigned idx_r ) const
-{
-  if ( _dbptr && idx_r < size() ) {
-    Header nh = ::rpmdbGetRecord( _dbptr, _idxSet[idx_r] );
-    if ( nh )
-      return new RpmLibHeader( nh );
-    else
-      ERR << "Bad record number " << _idxSet[idx_r] << " in rpmdb" << endl;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : RpmLibDb::const_iterator
-//
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::const_iterator::const_iterator
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION :
-//
-RpmLibDb::const_iterator::const_iterator( rpmdb dbptr_r )
-    : _hptr( 0 )
-    , _dbptr( dbptr_r )
-    , _recnum( 0 )
-{
-  if ( _dbptr )
-    setrec( ::rpmdbFirstRecNum( _dbptr ) );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::const_iterator::setrec
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :
-//
-void RpmLibDb::const_iterator::setrec( int recnum_r )
-{
-  if ( recnum_r > 0 ) {
-    _recnum  = recnum_r;
-    Header nh = ::rpmdbGetRecord( _dbptr, _recnum );
-    if ( nh )
-      _hptr = new RpmLibHeader( nh );
-    else {
-      _hptr = 0;
-      ERR << "Bad record number " << _recnum << " in rpmdb" << endl;
-    }
-  } else {
-    _recnum = 0;
-    _dbptr = 0;
-    _hptr = 0;
-  }
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::const_iterator::operator++
-//	METHOD TYPE : void
-//
-//	DESCRIPTION :
-//
-void RpmLibDb::const_iterator::operator++()
-{
-  if ( _dbptr )
-    setrec( ::rpmdbNextRecNum( _dbptr, _recnum ) );
-}
-
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : RpmLibDb
-//
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
 //
 //	METHOD NAME : RpmLibDb::RpmLibDb
 //	METHOD TYPE : Constructor
@@ -198,7 +58,6 @@ void RpmLibDb::const_iterator::operator++()
 //
 RpmLibDb::RpmLibDb( const Pathname & dbPath_r, const bool no_open_r )
     : _dbPath( dbPath_r )
-    , _db( 0 )
     , _dbOpenError( Error::E_RpmLib_db_not_open )
 {
   if ( !_globalInitialized ) {
@@ -236,7 +95,7 @@ PMError RpmLibDb::globalInit()
     return Error::E_ok;
   }
 
-  int rc = ::rpmReadConfigFiles( 0, 0 );
+  int rc = ::rpmReadConfigFiles( NULL, NULL );
   if ( rc ) {
     ERR << "rpmReadConfigFiles returned: " << rc << endl;
     return Error::E_RpmLib_read_config_failed;
@@ -268,9 +127,11 @@ PMError RpmLibDb::dbOpen()
     return _dbOpenError;
   }
 
+#warning Check whether to split root from _dbPath
   ::addMacro(NULL, "_dbpath", NULL, _dbPath.asString().c_str(), RMIL_CMDLINE);
 
-  int rc = ::rpmdbOpen( 0, &_db, O_RDONLY, 0644 );
+  int rc = 0;
+  _db = librpmDb::access( rc );
   if ( rc ) {
     ERR << *this << " rpmdbOpen returned: " << rc << endl;
     _dbOpenError = Error::E_RpmLib_dbopen_failed; // set it before calling dbClose
@@ -292,189 +153,12 @@ PMError RpmLibDb::dbOpen()
 PMError RpmLibDb::dbClose()
 {
   if ( _db ) {
-    ::rpmdbClose( _db );
     _db = 0;
     if ( !_dbOpenError )
       _dbOpenError = Error::E_RpmLib_db_not_open;
   }
   return Error::E_ok;
 }
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findByFile
-//	METHOD TYPE : RpmLibDb::const_header_set
-//
-//	DESCRIPTION :
-//
-RpmLibDb::const_header_set RpmLibDb::findByFile( const std::string & file_r ) const
-{
-  if ( ! file_r[0] == '/' )
-    return const_header_set();
-
-  dbiIndexSet idxSet;
-  switch ( ::rpmdbFindByFile( _db, file_r.c_str(), &idxSet ) ) {
-  case 0:
-    return const_header_set( _db, idxSet );
-
-  case -1:
-    WAR << "Error reading a database record" << endl;
-  }
-  return const_header_set();
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findByProvides
-//	METHOD TYPE : RpmLibDb::const_header_set
-//
-//	DESCRIPTION :
-//
-RpmLibDb::const_header_set RpmLibDb::findByProvides( const std::string & tag_r ) const
-{
-  dbiIndexSet idxSet;
-  switch ( ::rpmdbFindByProvides( _db, tag_r.c_str(), &idxSet ) ) {
-  case 0:
-    return const_header_set( _db, idxSet );
-
-  case -1:
-    WAR << "Error reading a database record" << endl;
-  }
-  return const_header_set();
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findByRequiredBy
-//	METHOD TYPE : RpmLibDb::const_header_set
-//
-//	DESCRIPTION :
-//
-RpmLibDb::const_header_set RpmLibDb::findByRequiredBy( const std::string & tag_r ) const
-{
-  dbiIndexSet idxSet;
-  switch ( ::rpmdbFindByRequiredBy( _db, tag_r.c_str(), &idxSet ) ) {
-  case 0:
-    return const_header_set( _db, idxSet );
-
-  case -1:
-    WAR << "Error reading a database record" << endl;
-  }
-  return const_header_set();
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findByConflicts
-//	METHOD TYPE : RpmLibDb::const_header_set
-//
-//	DESCRIPTION :
-//
-RpmLibDb::const_header_set RpmLibDb::findByConflicts( const std::string & tag_r ) const
-{
-  dbiIndexSet idxSet;
-  switch ( ::rpmdbFindByConflicts( _db, tag_r.c_str(), &idxSet ) ) {
-  case 0:
-    return const_header_set( _db, idxSet );
-
-  case -1:
-    WAR << "Error reading a database record" << endl;
-  }
-  return const_header_set();
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findAllPackages
-//	METHOD TYPE : RpmLibDb::const_header_set
-//
-//	DESCRIPTION :
-//
-RpmLibDb::const_header_set RpmLibDb::findAllPackages( const PkgName & name_r ) const
-{
-  dbiIndexSet idxSet;
-  switch ( ::rpmdbFindPackage( _db, name_r->c_str(), &idxSet ) ) {
-  case 0:
-    return const_header_set( _db, idxSet );
-
-  case -1:
-    WAR << "Error reading a database record" << endl;
-  }
-  return const_header_set();
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findPackage
-//	METHOD TYPE : constRpmLibHeaderPtr
-//
-//	DESCRIPTION :
-//
-constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgName & name_r ) const
-{
-  constRpmLibHeaderPtr h;
-  const_header_set result( findAllPackages( name_r ) );
-  for ( unsigned i = 0; i < result.size(); ++i ) {
-    if ( !h || h->tag_installtime() < result[i]->tag_installtime() ) {
-      h = result[i];
-    }
-  }
-  return h;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findPackage
-//	METHOD TYPE : constRpmLibHeaderPtr
-//
-//	DESCRIPTION :
-//
-constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgName & name_r, const PkgEdition & ed_r ) const
-{
-  const_header_set result( findAllPackages( name_r ) );
-  for ( unsigned i = 0; i < result.size(); ++i ) {
-    constRpmLibHeaderPtr h = result[i];
-    if ( ed_r == h->tag_edition() )
-      return h;
-  }
-  return 0;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findPackage
-//	METHOD TYPE : constRpmLibHeaderPtr
-//
-//	DESCRIPTION :
-//
-constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgNameEd & which_r ) const
-{
-  return findPackage( which_r.name, which_r.edition );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : RpmLibDb::findPackage
-//	METHOD TYPE : constRpmLibHeaderPtr
-//
-//	DESCRIPTION :
-//
-constRpmLibHeaderPtr RpmLibDb::findPackage( const constPMPackagePtr & which_r ) const
-{
-  if ( !which_r )
-    return 0;
-  return findPackage( which_r->name(), which_r->edition() );
-}
-
 
 /******************************************************************
 **
@@ -493,6 +177,132 @@ ostream & operator<<( ostream & str, const RpmLibDb & obj )
     str << (obj._globalInitialized ? "closed" : "noinit" );
 
   return str << ')';
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::hasFile
+//	METHOD TYPE : bool
+//
+bool RpmLibDb::hasFile( const std::string & file_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  return it.findByFile( file_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::hasProvides
+//	METHOD TYPE : bool
+//
+bool RpmLibDb::hasProvides( const std::string & tag_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  return it.findByProvides( tag_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::hasRequiredBy
+//	METHOD TYPE : bool
+//
+bool RpmLibDb::hasRequiredBy( const std::string & tag_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  return it.findByRequiredBy( tag_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::hasConflicts
+//	METHOD TYPE : bool
+//
+bool RpmLibDb::hasConflicts( const std::string & tag_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  return it.findByConflicts( tag_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::hasPackage
+//	METHOD TYPE : bool
+//
+bool RpmLibDb::hasPackage( const PkgName & name_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  return it.findPackage( name_r );
+}
+
+#warning CLEANUP findPackage
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findPackage
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgName & name_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  it.findPackage( name_r );
+  return *it;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findPackage
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgName & name_r, const PkgEdition & ed_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  it.findPackage( name_r, ed_r );
+  return *it;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findPackage
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr RpmLibDb::findPackage( const PkgNameEd & which_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  it.findPackage( which_r );
+  return *it;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmLibDb::findPackage
+//	METHOD TYPE : constRpmLibHeaderPtr
+//
+constRpmLibHeaderPtr RpmLibDb::findPackage( const constPMPackagePtr & which_r ) const
+{
+  librpmDb::db_const_iterator it( _db );
+  it.findPackage( which_r );
+  return *it;
+}
+
+
+#warning CHECK IT
+
+static int rpmReadPackageHeader(FD_t fd, Header * hdr, int * isSource, int * major, int * minor ) {
+  INT << "Illegal use of old api: " << __FUNCTION__ << endl;
+  * hdr = 0;
+  * isSource = 0;
+  * major = 0;
+  * minor = 0;
+  return -1;
 }
 
 ///////////////////////////////////////////////////////////////////

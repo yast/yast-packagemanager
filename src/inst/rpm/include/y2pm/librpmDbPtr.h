@@ -10,22 +10,39 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       RpmLib.h
+  File:       librpmDbPtr.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose: Private includes to acces librpm. Not for public header files.
+  Purpose: Declaration of pointer classes constlibrpmDbPtr and librpmDbPtr.
 
 /-*/
-#ifndef RpmLib_h
-#define RpmLib_h
+#ifndef librpmDbPtr_h
+#define librpmDbPtr_h
 
-extern "C" {
-#include <rpm/rpmlib.h>
-#include <rpm/rpmdb.h>
-#include <rpm/rpmmacro.h>
-#include <fcntl.h>
-}
+#include <y2util/RepDef.h>
 
-#endif // RpmLib_h
+///////////////////////////////////////////////////////////////////
+//	CLASS NAME : librpmDbPtr
+//	CLASS NAME : constlibrpmDbPtr
+///////////////////////////////////////////////////////////////////
+DEFINE_BASE_POINTER(librpmDb);
+
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref librpmDb *></code>
+ *
+ * <b>See:</> @ref librpmDb
+ **/
+class librpmDbPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref librpmDb *></code>
+ *
+ * <b>See:</> @ref librpmDb
+ **/
+class constlibrpmDbPtr {};
+#endif // just for kdoc
+
+#endif // librpmDbPtr_h
+

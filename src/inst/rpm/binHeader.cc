@@ -113,6 +113,9 @@ std::string binHeader::stringList::operator[]( const unsigned idx_r ) const {
 binHeader::binHeader( Header h )
     : _h( h )
 {
+  if ( _h ) {
+    ::headerLink( _h );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -134,7 +137,7 @@ binHeader::~binHeader()
 //	METHOD NAME : binHeader::assertHeader
 //	METHOD TYPE : void
 //
-inline bool binHeader::assertHeader()
+bool binHeader::assertHeader()
 {
   if ( !_h ) {
     _h = ::headerNew();
@@ -156,7 +159,7 @@ inline bool binHeader::assertHeader()
 //
 bool binHeader::has_tag( tag tag_r ) const
 {
-  return( haveHeader() && ::headerIsEntry( _h, tag_r ) );
+  return( !empty() && ::headerIsEntry( _h, tag_r ) );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -169,7 +172,7 @@ bool binHeader::has_tag( tag tag_r ) const
 //
 unsigned binHeader::int_list( tag tag_r, intList & lst_r ) const
 {
-  if ( haveHeader() ) {
+  if ( !empty() ) {
     int_32 type = 0;
     int_32 cnt  = 0;
     void * val  = 0;
@@ -206,7 +209,7 @@ unsigned binHeader::int_list( tag tag_r, intList & lst_r ) const
 //
 unsigned binHeader::string_list( tag tag_r, stringList & lst_r ) const
 {
-  if ( haveHeader() ) {
+  if ( !empty() ) {
     int_32 type = 0;
     int_32 cnt  = 0;
     void * val  = 0;
@@ -237,7 +240,7 @@ unsigned binHeader::string_list( tag tag_r, stringList & lst_r ) const
 //
 int binHeader::int_val( tag tag_r ) const
 {
-  if ( haveHeader() ) {
+  if ( !empty() ) {
     int_32 type = 0;
     int_32 cnt  = 0;
     void * val  = 0;
@@ -277,7 +280,7 @@ int binHeader::int_val( tag tag_r ) const
 //
 std::string binHeader::string_val( tag tag_r ) const
 {
-  if ( haveHeader() ) {
+  if ( !empty() ) {
     int_32 type = 0;
     int_32 cnt  = 0;
     void * val  = 0;
@@ -313,7 +316,7 @@ std::list<std::string> binHeader::stringList_val( tag tag_r ) const
 {
   std::list<std::string> ret;
 
-  if ( haveHeader() ) {
+  if ( !empty() ) {
     stringList lines;
     unsigned count = string_list( tag_r, lines );
     for ( unsigned i = 0; i < count; ++i ) {

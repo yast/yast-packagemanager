@@ -11,6 +11,7 @@ pkginclude_HEADERS =	\
 	binHeaderCache.h \
 	RpmLibHeader.h RpmLibHeaderPtr.h \
 	RpmLibHeaderCache.h \
+	librpmDb.h librpmDbPtr.h \
 	RpmLibDb.h \
 	RpmDb.h \
 	RpmDbPtr.h \

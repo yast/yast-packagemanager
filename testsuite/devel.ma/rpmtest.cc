@@ -140,53 +140,6 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
 
 /******************************************************************
  ******************************************************************/
-struct pdata {
-  unsigned at;
-  bool     isSrc;
-  Pathname pkgfile;
-  pdata();
-  pdata( const Pathname & citem_r, const int & isSource_r, const unsigned & at_r ) {
-    pkgfile = citem_r;
-    isSrc = isSource_r;
-    at = at_r;
-  }
-  bool operator==( const pdata & rhs ) const {
-    return( at == rhs.at );
-  }
-  bool operator<( const pdata & rhs ) const {
-    return( at < rhs.at );
-  }
-  bool operator!=( const pdata & rhs ) const { return( ! operator==( rhs ) ); }
-};
-
-void cachetest( const Pathname cachefile_r )
-{
-  Timecount _t( cachefile_r.asString().c_str() );
-
-  vector<pdata> data;
-
-  PkgHeaderCache _cache( cachefile_r );
-  if ( !_cache.openCache() ) {
-    ERR << "Failed to open cache " << cachefile_r << endl;
-    return;
-  } else {
-    MIL << "Opened cache " << cachefile_r << endl;
-  }
-
-  unsigned hpos;
-  Pathname pkgfile;
-  int      isSource;
-  for ( constRpmLibHeaderPtr iter = _cache.getFirst( pkgfile, isSource, hpos );
-	iter; iter = _cache.getNext( pkgfile, isSource, hpos ) ) {
-    data.push_back( pdata( pkgfile, isSource, hpos ) );
-    DBG << "At " << hpos << (isSource?" src ":" bin ") << iter << " for " << pkgfile << endl;
-  }
-
-  MIL << " Ok:" << _cache.cacheOk() << " Got:" << data.size() << endl;
-  _cache.closeCache();
-}
-
-void DoTest();
 
 /******************************************************************
 **
@@ -215,220 +168,34 @@ int main()
   INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  InstSrcManager::ISrcId nid( newSrc( "dir:////tmp/PLAINRPM" ) );
-  ISM.enableSource( nid );
-
-  //DoTest();
+  //InstSrcManager::ISrcId nid( newSrc( "ftp://cml.suse.cz/testing/msvec/CD1" ) );
+  //ISM.enableSource( nid );
+  //
   //SEC << "STOP" << endl;
-  //INT << "===============================================" << endl;
+  //return 0;
 
-  //cachetest( "/tmp/PLAIN/IS_PLAINcache" );
-  //cachetest( "/tmp/PLAIN/IS_PLAINcache.gz" );
+  //InstSrcManager::ISrcId nid( newSrc( "dir:////Local/packages/test/RPMS" ) );
+  //ISM.enableSource( nid );
+
+  PMSelectablePtr P( PMGR["test"] );
+  P->user_clr_taboo();
+  MIL << P << endl;
+  for ( PMSelectable::PMObjectList::const_iterator it = P->av_begin(); it != P->av_end(); ++it ) {
+    PMObjectPtr obj( *it );
+    DBG << obj << endl;
+    if ( obj->release() == "11" ) {
+      MIL << "SetUserCandidate: " <<  P->setUserCandidate( obj ) << endl;
+      break;
+    }
+  }
+  MIL << P << endl;
+
+  PMUpdateStats opt_stats;
+  PMGR.doUpdate( opt_stats );
+
+  MIL << P << endl;
 
   SEC << "STOP" << endl;
   return 0;
-}
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-extern "C" {
-#include <rpm/rpmlib.h>
-#include <rpm/rpmmacro.h>
-#include <fcntl.h>
-}
-
-int XFtell( FD_t _fd ) {
-  FILE * fp = (FILE *)fdGetFp(_fd);
-  if ( fp ) {
-    int rc = ftell( fp );
-    return rc;
-  }
-  int fd = Fileno(_fd);
-  if ( fd >= 0 ) {
-    int rc = lseek( fd, 0, SEEK_CUR );
-    return rc;
-  }
-  WAR << "no fd/fp" << -1 << endl;
-  return -1;
-}
-
-void dread( FD_t fd ) {
-  if ( fd == 0 || ::Ferror(fd) ) {
-    ERR << "Can't open: " << ::Fstrerror(fd) << endl;
-    return;
-  }
-  unsigned at = ::XFtell( fd );
-  (at==0?DBG:ERR) << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  char magic[1024];
-  memset( magic, 0, 1024 );
-  size_t got = ::Fread( magic, sizeof(char), 6, fd );
-  (got==6?DBG:ERR) << " got " << got << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-  DBG << "  >>" << magic << "<<" << endl;
-
-  at = ::Fseek( fd, 1, SEEK_CUR );
-  at = ::XFtell( fd );
-  (at==7?DBG:ERR) << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  memset( magic, 0, 1024 );
-  got = ::Fread( magic, sizeof(char), 4, fd );
-  (got==3?DBG:ERR) << " got " << got << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-  DBG << "  >>" << magic << "<<" << endl;
-
-  at = ::Fseek( fd, 1, SEEK_SET );
-  at = ::XFtell( fd );
-  (at==1?DBG:ERR) << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  memset( magic, 0, 1024 );
-  got = ::Fread( magic, sizeof(char), 2, fd );
-  (got==2?DBG:ERR) << " got " << got << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-  DBG << "  >>" << magic << "<<" << endl;
-
-  at = ::XFtell( fd );
-  (at==3?DBG:ERR) << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-  INT << "STOP" << endl;
-}
-
-extern "C" {
-#include <netinet/in.h>
-struct entryInfo {
-    int_32 tag;
-    int_32 type;
-    int_32 offset;              /* Offset from beginning of data segment,
-                                   only defined on disk */
-    int_32 count;
-};
-}
-
-Header hdread( FD_t fd ) {
-  if ( fd == 0 || ::Ferror(fd) ) {
-    ERR << "Can't open: " << ::Fstrerror(fd) << endl;
-    return 0;
-  }
-  unsigned at = ::XFtell( fd );
-  (at==0?DBG:ERR) << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  ::Fseek( fd, 64, SEEK_SET );
-  at = ::XFtell( fd );
-  (at==64?DBG:ERR) << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  char sig[] = "xxxxxxxx";
-  size_t got = ::Fread( sig, sizeof(char), 8, fd );
-  if ( got != 8 ) {
-    if ( got || ::Ferror(fd) ) {
-      ERR << "Error reading entry (" << ::Fstrerror(fd) << ")" << endl;
-    }
-    return 0;
-  }
-  if ( sig[0] != '@' || sig[7] != '@' ) {
-    ERR << "Invalid entry." << endl;
-    return 0;
-  }
-  sig[7] = '\0';
-  unsigned count = atoi( &sig[1] );
-
-  char citem[count+1];
-  if ( ::Fread( citem, sizeof(char), count, fd ) != count ) {
-    ERR << "Error reading entry data (" << ::Fstrerror(fd) << ")" << endl;
-    return 0;
-  }
-  citem[count] = '\0';
-
-  at = ::XFtell( fd );
-  (at==64+8+count?DBG:ERR) << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  ////////////////////////////////////////////////////////////////////////////////
-  static const int_32 header_magic = 0x01e8ad8e;
-  bool magicp = true; // HEADER_MAGIC_YES
-  int_32 block[4];
-  int_32 il, dl;
-  unsigned totalSize = 0;
-
-  unsigned xxx;
-
-  count = (magicp ? 4 : 2) * sizeof(int_32);
-  if ( (xxx=::Fread( block, sizeof(char), count, fd )) != count ) {
-    ERR << "Error reading header info " << xxx << " <-> " << count << " (" << ::Fstrerror(fd) << ")" << endl;
-    return 0;
-  }
-  DBG << "Read header info " << xxx << " <-> " << count << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  count = 0;
-
-  if ( magicp ) {
-    if ( block[count] != header_magic ) {
-      ERR << "Error bad header magic " << stringutil::hexstring( block[count] )
-	<< " (" << stringutil::hexstring( header_magic ) << ")" << endl;
-      return 0;
-    }
-    count += 2;
-  }
-
-  il = ntohl( block[count++] );
-  dl = ntohl( block[count++] );
-
-  totalSize = (2*sizeof(int_32)) + (il * sizeof(struct entryInfo)) + dl;
-  if (totalSize > (32*1024*1024)) {
-    ERR << "Error header ecxeeds 32Mb limit (" << totalSize << ")" << endl;
-    return NULL;
-  }
-  DBG << "header size " << totalSize << endl;
-
-  char * data = new char[totalSize];
-  int_32 * p = (int_32 *)data;
-  Header h = 0;
-
-  *p++ = htonl(il);
-  *p++ = htonl(dl);
-  totalSize -= (2*sizeof(int_32));
-
-  if ( ::Fread( (char *)p, sizeof(char), totalSize, fd ) != totalSize ) {
-    ERR << "Error reading header data (" << ::Fstrerror(fd) << ")" << endl;
-  } else {
-    h = ::headerLoad( data );
-    if ( !h ) {
-      ERR << "Error loading header data" << endl;
-    }
-  }
-
-  delete [] data;
-
-  ////////////////////////////////////////////////////////////////////////////////
-  (h==0?ERR:DBG) << " header " << h << endl;
-
-  at = ::XFtell( fd );
-  DBG << " at " << at << ": " << ::Ferror(fd) << " (" << ::Fstrerror(fd) << ")" << endl;
-
-  INT << "STOP" << endl;
-  return NULL;
-}
-
-void DoTest() {
-
-  FD_t nfd = ::Fopen( "/tmp/PLAIN/IS_PLAINcache", "r" );
-  INT << "START r /tmp/PLAIN/IS_PLAINcache" << endl;
-  hdread( nfd );
-  Fclose( nfd );
-
-  FD_t gzbd = ::Fopen( "/tmp/PLAIN/IS_PLAINcache.gz", "r.fdio" );
-  FD_t gzfd = ::Fdopen( gzbd, "r.gzdio"  );
-  INT << "START r.gzdio /tmp/PLAIN/IS_PLAINcache.gz" << endl;
-  hdread( gzfd );
-  Fclose( gzbd );
-
-#if 0
-  FD_t nfd = ::Fopen( "test", "r" );
-  INT << "START r" << endl;
-  dread( nfd );
-  Fclose( nfd );
-
-  FD_t gzbd = ::Fopen( "test.gz", "r.fdio" );
-  FD_t gzfd = ::Fdopen( gzbd, "r.gzdio"  );
-  INT << "START r.gzdio" << endl;
-  dread( gzfd );
-  Fclose( gzbd );
-#endif
 }
 

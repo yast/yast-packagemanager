@@ -23,50 +23,18 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/Date.h>
+#include <y2util/PathInfo.h>
 #include <y2util/stringutil.h>
 
 #include <y2pm/binHeaderCache.h>
 #include <y2pm/binHeader.h>
+
 #include "RpmLib.h"
-extern "C" {
-#include <netinet/in.h>
-  // from rpm: lib/header.c
-  struct entryInfo {
-    int_32 tag;
-    int_32 type;
-    int_32 offset;              /* Offset from beginning of data segment,
-				   only defined on disk */
-    int_32 count;
-  };
-}
 
 using namespace std;
 
 #undef Y2LOG
 #define Y2LOG "binHeaderCache"
-
-/******************************************************************
-**
-**
-**	FUNCTION NAME : gzipped
-**	FUNCTION TYPE : bool
-*/
-static bool gzipped( const Pathname & file )
-{
-  bool ret = false;
-  int fd = open( file.asString().c_str(), O_RDONLY );
-  if ( fd != -1 ) {
-    const int magicSize = 2;
-    unsigned char magic[magicSize];
-    if ( read( fd, magic, magicSize ) == magicSize ) {
-      if ( magic[0] == 0037 && magic[1] == 0213 ) {
-	ret = true;
-      }
-    }
-    close( fd );
-  }
-  return ret;
-}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -121,17 +89,28 @@ bool binHeaderCache::Cache::open( const Pathname & file_r )
 {
   close();
 
-  if ( gzipped( file_r ) ) {
-    FD_t fd1 = ::Fopen( file_r.asString().c_str(), "r.ufdio"  );
-    if ( fd1 == 0 || ::Ferror(fd1) ) {
-      ERR << "Can't open cache for reading: " << file_r << " (" << ::Fstrerror(fd1) << ")" << endl;
-      if ( fd1 )
-	::Fclose( fd1 );
-      return false;
+  switch ( PathInfo::zipType( file_r ) ) {
+  case PathInfo::ZT_NONE:
+    {
+      fd = ::Fopen( file_r.asString().c_str(), "r.fdio"  );
+      DBG << "PLAIN: open 'r.fdio' " << fd << endl;
     }
-    fd = ::Fdopen( fd1, "r.gzdio"  );
-  } else {
-    fd = ::Fopen( file_r.asString().c_str(), "r"  );
+    break;
+  case PathInfo::ZT_GZ:
+    {
+      fd = ::Fopen( file_r.asString().c_str(), "r.gzdio"  );
+      DBG << "GZIP: open 'r.gzdio' " << fd << endl;
+    }
+    break;
+  case PathInfo::ZT_BZ2:
+    {
+      ERR << "BZIP2 is not supported: " << file_r << endl;
+#warning Check BZIP2 support
+      break;
+      fd = ::Fopen( file_r.asString().c_str(), "r.bzdio"  );
+      DBG << "BZIP2: open 'r.bzdio' " << fd << endl;
+    }
+    break;
   }
 
   if ( fd == 0 || ::Ferror(fd) ) {
@@ -163,18 +142,35 @@ void binHeaderCache::Cache::close()
 //	METHOD NAME : binHeaderCache::Cache::tell
 //	METHOD TYPE : pos
 //
+extern "C" {
+  typedef struct X_FDSTACK_s {
+    FDIO_t	io;
+    void *	fp;
+    int		fdno;
+  } XFDSTACK_t;
+  struct X_FD_s {
+    int		nrefs;
+    int		flags;
+    int		magic;
+#define	XFDMAGIC	0x04463138
+    int		nfps;
+    XFDSTACK_t	fps[8];
+  };
+}
 binHeaderCache::pos binHeaderCache::Cache::tell() const
 {
   pos rc = npos;
 
-  FILE * fd_fp = (FILE *)fdGetFp( fd );
-  if ( fd_fp ) {
-    rc = ::ftell( fd_fp );
-  } else {
-    int fd_fd = ::Fileno( fd );
-    if ( fd_fd >= 0 ) {
-      rc = ::lseek( fd_fd, 0, SEEK_CUR );
-    }
+  struct X_FD_s * xfd = (struct X_FD_s*)fd;
+
+  if ( !xfd || xfd->magic != XFDMAGIC) {
+    INT << "magic(" << XFDMAGIC << ") failed: " << xfd->magic << endl;
+    return rc;
+  }
+
+  if ( xfd->fps[xfd->nfps].io == fpio ) {
+    FILE * fp = (FILE *)xfd->fps[xfd->nfps].fp;
+    rc = ftell(fp);
   }
 
   if ( rc == npos )
@@ -237,6 +233,17 @@ unsigned binHeaderCache::Cache::readData( void * buf_r, unsigned count_r )
 //	METHOD NAME : binHeaderCache::Cache::readHeader
 //	METHOD TYPE : Header
 //
+extern "C" {
+#include <netinet/in.h>
+  // from rpm: lib/header.c
+  struct entryInfo {
+    int_32 tag;
+    int_32 type;
+    int_32 offset;              /* Offset from beginning of data segment,
+				   only defined on disk */
+    int_32 count;
+  };
+}
 Header binHeaderCache::Cache::readHeader( bool magicp )
 {
   static const int_32 rpm_header_magic = 0x01e8ad8e;

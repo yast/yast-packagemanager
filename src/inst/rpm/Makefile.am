@@ -23,6 +23,7 @@ liby2pminstrpmsrc_la_SOURCES = 	\
 	binHeader.cc binHeaderCache.cc \
 	RpmLibHeader.cc RpmLibHeaderCache.cc \
 	RpmDb.cc \
+	librpmDb.cc \
 	RpmLibDb.cc \
 	PMRpmPackageDataProvider.cc
 

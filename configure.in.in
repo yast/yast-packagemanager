@@ -14,8 +14,6 @@ if [[ "$yast_found_libcurl" = "no" ]]; then
  AC_MSG_ERROR(Headers for libcurl are missing. Please install the package curl-devel.)
 fi
 
-AC_CHECK_HEADERS(db_185.h db1/db.h)
-
 yast_found_libpopt=no
 AC_CHECK_HEADER(popt.h,[yast_found_libpopt=yes])
 if [[ "$yast_found_libpopt" = "no" ]]; then
@@ -23,9 +21,26 @@ if [[ "$yast_found_libpopt" = "no" ]]; then
 fi
 
 yast_found_librpm=no
-AC_CHECK_HEADER(rpm/rpmio.h,[yast_found_librpm=yes])
+AC_CHECK_HEADER(rpm/rpmdb.h,[yast_found_librpm=yes])
+if [[ "$yast_found_librpm" = "yes" ]]; then
+  AC_MSG_CHECKING(for DB_VERSION 4.1)
+  AC_TRY_RUN([
+	#include <rpm/rpmdb.h>
+	#include <stdio.h>
+	int main() {
+	  if ( DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 1 )
+	    return 0;
+	  fprintf( stderr, "Expected DB_VERSION 4.1. Found %d.%d\n", DB_VERSION_MAJOR, DB_VERSION_MINOR );
+	  return 1;
+	}
+  ],
+  [yast_found_librpm=yes],
+  [yast_found_librpm=no],
+  [yast_found_librpm=no])
+  AC_MSG_RESULT($yast_found_librpm)
+fi
 if [[ "$yast_found_librpm" = "no" ]]; then
- AC_MSG_ERROR(Headers for librpm are missing. Please install the package rpm-devel.)
+  AC_MSG_ERROR(Please install the package rpm-devel >= 4.1.1.)
 fi
 
 ## and generate the output

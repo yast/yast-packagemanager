@@ -23,6 +23,7 @@ Provides:	yast2-db-groups
 Obsoletes:	yast2-db-groups
 
 PreReq:    	%fillup_prereq
+Requires:	rpm >= 4.1.1
 
 @HEADER@
 Summary:	-
@@ -49,6 +50,8 @@ Provides:	yast2-agent-ftp-devel
 Obsoletes:	yast2-agent-ftp-devel
 Provides:	yast2-agent-http-devel
 Obsoletes:	yast2-agent-http-devel
+
+Requires:	rpm-devel >= 4.1.1
 
 %description devel
 -
