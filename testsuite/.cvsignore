@@ -8,17 +8,3 @@ tmp.log*
 .libs
 *.log
 *.sum
-*.test
-test_rpmdb
-testinstall
-test_patchinfo
-test_content
-test_packages
-test_selections
-test_you
-test_query
-gs_test
-order
-test_updateinf
-media_test
-checkpatch

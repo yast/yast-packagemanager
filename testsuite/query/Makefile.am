@@ -1,7 +1,6 @@
 #
 # Makefile.am for packagemanager/testsuite
 #
-
 AUTOMAKE_OPTIONS = dejagnu
 PACKAGE = query
 
