@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcDataCommonPkd.cc
+   File:       DataCommonPkd.cc
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
@@ -23,13 +23,15 @@
 
 #include <y2util/CommonPkdParser.h>
 #include <y2util/Y2SLog.h>
-#include <y2pm/InstSrcDataCommonPkd.h>
+#include <y2pm/DataCommonPkd.h>
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PMPackage.h>
 
 using namespace std;
+
+//--------------------------------------------------------------------
 
 #define CREATETAG(tagname,num) \
 t = new CommonPkdParser::Tag(tagname,CommonPkdParser::Tag::ACCEPTONCE); \
@@ -83,40 +85,6 @@ public:
     }
 };
 
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : InstSrcDataCommonPkd
-//
-///////////////////////////////////////////////////////////////////
-
-IMPL_HANDLES(InstSrcDataCommonPkd);
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcDataCommonPkd::InstSrcDataCommonPkd
-//	METHOD TYPE : Constructor
-//
-//	DESCRIPTION :
-//
-InstSrcDataCommonPkd::InstSrcDataCommonPkd(MediaInfoPtr media_r)
-	:InstSrcData(media_r)
-{
-  D__ << endl;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcDataCommonPkd::~InstSrcDataCommonPkd
-//	METHOD TYPE : Destructor
-//
-//	DESCRIPTION :
-//
-InstSrcDataCommonPkd::~InstSrcDataCommonPkd()
-{
-}
-
 
 // TODO ugly, needs to be class member
 
@@ -124,7 +92,9 @@ InstSrcDataCommonPkd::~InstSrcDataCommonPkd()
 //
 // Check wheter a string defines a valid DepCompare. ('!=' is not supported by rpm)
 //
-inline rel_op string2DepCompare( const string & str_tr ) {
+inline rel_op
+string2DepCompare( const string & str_tr )
+{
 
   enum DepCompare { // ('!=' is not supported by rpm)
     DNONE = 0x00,
@@ -272,7 +242,7 @@ static inline PMPackagePtr createPMPackageFromTagset( CommonPkdParser::TagSet* t
   return p;
 }
 
-std::list<PMPackagePtr> InstSrcDataCommonPkd::getPackages()
+std::list<PMPackagePtr> DataCommonPkd::getPackages()
 {
     std::list<PMPackagePtr> pkglist;
     //FIXME get path somehow
@@ -343,16 +313,121 @@ std::list<PMPackagePtr> InstSrcDataCommonPkd::getPackages()
 
     return pkglist;
 }
+//--------------------------------------------------------------------
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : DataCommonPkd
+//
+///////////////////////////////////////////////////////////////////
+
+IMPL_HANDLES(DataCommonPkd);
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcDataCommonPkd::dumpOn
+//	METHOD NAME : DataCommonPkd::DataCommonPkd
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+DataCommonPkd::DataCommonPkd (const MediaAccess *media)
+	:_media (media)
+{
+    D__ << endl;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : DataCommonPkd::~DataCommonPkd
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+DataCommonPkd::~DataCommonPkd()
+{
+}
+
+//-----------------------------
+// source content access
+
+/**
+ * return the number of selections on this source
+ */
+int
+DataCommonPkd::numSelections() const
+{
+    // no selections in common.pkd
+    return 0;
+}
+
+
+/**
+ * return the number of packages on this source
+ */
+int
+DataCommonPkd::numPackages() const
+{
+    return 0;
+}
+
+
+/**
+ * return the number of patches on this source
+ */
+int
+DataCommonPkd::numPatches() const
+{
+    return 0;
+}
+
+
+/**
+ * generate PMSolvable objects for each selection on the source
+ * @return list of PMSolvablePtr on this source
+ */
+std::list<PMSolvablePtr>
+DataCommonPkd::getSelections()
+{
+    std::list<PMSolvablePtr> x;
+    return x;
+}
+
+
+/**
+ * generate PMPackage objects for each Item on the source
+ * @return list of PMPackagePtr on this source
+ * */
+std::list<PMPackagePtr>
+DataCommonPkd::getPackages()
+{
+    std::list<PMPackagePtr> x;
+    return x;
+}
+
+
+/**
+ * generate PMSolvable objects for each patch on the source
+ * @return list of PMSolvablePtr on this source
+ */
+std::list<PMSolvablePtr>
+DataCommonPkd::getPatches()
+{
+    std::list<PMSolvablePtr> x;
+    return x;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : DataCommonPkd::dumpOn
 //	METHOD TYPE : ostream &
 //
 //	DESCRIPTION :
 //
-ostream & InstSrcDataCommonPkd::dumpOn( ostream & str ) const
+ostream & DataCommonPkd::dumpOn( ostream & str ) const
 {
   Rep::dumpOn( str );
   return str;

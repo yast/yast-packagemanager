@@ -16,6 +16,6 @@ noinst_LTLIBRARIES = liby2pminstsrc.la
 liby2pminstsrc_la_SOURCES = 	\
 	InstSrc.cc \
 	InstSrcData.cc \
-	InstSrcDataCommonPkd.cc \
+	DataCommonPkd.cc \
 	InstSrcDescr.cc \
 	InstSrcManager.cc

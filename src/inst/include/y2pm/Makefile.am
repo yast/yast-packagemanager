@@ -1,5 +1,5 @@
 #
-# Makefile.am for liby2util/src/include/y2pm
+# Makefile.am for packagemanager/src/include/y2pm
 #
 
 pkgincludedir = $(includedir)/y2pm
@@ -9,7 +9,7 @@ pkgincludedir = $(includedir)/y2pm
 pkginclude_HEADERS =	\
 	InstSrc.h InstSrcPtr.h	\
 	InstSrcData.h InstSrcDataPtr.h	\
-	InstSrcDataCommonPkd.h InstSrcDataCommonPkdPtr.h	\
+	DataCommonPkd.h CommonPkdPtr.h	\
 	InstSrcDescr.h	InstSrcDescrPtr.h
 
 #<INSTALL-HEADER-TARGET>

@@ -67,7 +67,7 @@ InstSrc::InstSrc ( const std::string & mediaurl )
     }
 
     // retrieve description data from media
-    _descr = new InstSrcDescr (media);
+    _descr = new InstSrcDescr (_media);
     if (_descr == 0)
 	abort();
 

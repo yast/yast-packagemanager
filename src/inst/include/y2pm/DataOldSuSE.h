@@ -10,61 +10,45 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-   File:       InstSrcData.h
+   File:       DataOldSuSE.h
 
    Author:     Michael Andres <ma@suse.de>
    Maintainer: Michael Andres <ma@suse.de>
 
-    Purpose:	Works on a MediaInfoPtr, has access to physical package
-		descriptions, creates PMSolvable objects from descriptions
+    Purpose:	Handle media content in common.pkd format
+
 /-*/
-#ifndef InstSrcData_h
-#define InstSrcData_h
+#ifndef DataOldSuSE_h
+#define DataOldSuSE_h
 
 #include <iosfwd>
-#include <list>
-
-#include <y2util/Pathname.h>
 
 #include <y2pm/MediaAccess.h>
 
-#include <y2pm/InstSrcDataPtr.h>
-#include <y2pm/PMPackagePtr.h>
-#include <y2pm/PMSolvablePtr.h>
+#include <y2pm/PMSolvable.h>
+#include <y2pm/PMPackage.h>
+
+#include <y2pm/DataOldSuSEPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : InstSrcData
-class InstSrcData: virtual public Rep {
-  REP_BODY(InstSrcData)
+//	CLASS NAME : DataOldSuSE
+/**
+ *
+ **/
+class DataOldSuSE: virtual public Rep {
+  REP_BODY(DataOldSuSE)
+
+  private:
+    const MediaAccess *media;
 
   public:
 
-    /**
-     * constructor
-     * initialization with new media
-     */
-    InstSrcData (const MediaAccess *media);
+    DataOldSuSE (const MediaAccess *media);
 
-    /**
-     * constructor
-     * initialization with known media
-     */
-    InstSrcData (const Pathname & contentcachefile);
-
-    virtual ~InstSrcData();
+    virtual ~DataOldSuSE();
 
   public:
-
-    //-----------------------------
-    // cache file handling
-    /**
-     * write media content data to cache file
-     * @param pathname of corresponding InstSrcDescr cache file
-     * @return pathname of written cache
-     * writes content cache data to an ascii file
-     */
-    const Pathname writeCache (const Pathname &descrpathname);
 
     //-----------------------------
     // source content access
@@ -107,5 +91,5 @@ class InstSrcData: virtual public Rep {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // InstSrcData_h
+#endif // DataOldSuSE_h
 
