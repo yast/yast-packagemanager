@@ -14,15 +14,15 @@ bool PkgDep::install( PkgSet& in_candidates,
 	bad = &out_bad;
 	candidates = &in_candidates;
 	vinstalled = installed;
-	to_check = deque<const Package*>();
+	to_check = deque<const Solvable*>();
 	notes = Notes_type();
 	i_obsoleted = NameList();
 	
 	ci_for( PkgSet::, c, candidates-> ) {
 		PkgName candname = c->key;
-		const Package *cand = c->value;
+		const Solvable *cand = c->value;
 
-		const Package *instd = installed[candname];
+		const Solvable *instd = installed[candname];
 		if (instd && instd->edition() == cand->edition()) {
 			// is already installed in this version -- drop it
 			DBG( candname << " is already installed in same version "
@@ -37,7 +37,7 @@ bool PkgDep::install( PkgSet& in_candidates,
 
 	do {
 		while( !to_check.empty() ) {
-			const Package *pkg = to_check.front();
+			const Solvable *pkg = to_check.front();
 			add_package( pkg );
 			to_check.pop_front();
 		}
@@ -79,7 +79,7 @@ struct ResultEqName {
 	bool operator() ( const PkgDep::Result& res ) { return res.name == name; }
 };
 
-void PkgDep::add_package( const Package *cand )
+void PkgDep::add_package( const Solvable *cand )
 {
 	PkgName candname = cand->name();
 	if (!candidates->includes( candname ))
@@ -105,7 +105,7 @@ void PkgDep::add_package( const Package *cand )
 	// if yes, check if requirements would be broken by the replacement
 	// (conflict-by-obsoletion); otherwise, remove the obsoleted package from
 	// vinstalled
-	ci_for( Package::PkgRelList_, obs, cand->obsoletes_ ) {
+	ci_for( Solvable::PkgRelList_, obs, cand->obsoletes_ ) {
 		PkgName oname = obs->name();
 		if (vinstalled.includes(oname)) {
 			DBG( "installed/accepted " << oname << " obsoleted by "
@@ -125,14 +125,14 @@ void PkgDep::add_package( const Package *cand )
 	
 	// first check if something already installed conflicts with the new
 	// package
-	ci_for( Package::Provides_, prov, cand->all_provides_ ) {
+	ci_for( Solvable::Provides_, prov, cand->all_provides_ ) {
 		RevRel_for( vinstalled.conflicted()[(*prov).name()], confl ) {
 			if (confl->relation().matches( *prov )) {
 				DBG( "Conflict of candidate " << *prov
 					 << " provided by " << candname
 					 << " with \"Conflicts: " << confl->relation()
 					 << "\" by " << confl->pkg()->name() << endl );
-				if (const Package *upgrade =
+				if (const Solvable *upgrade =
 					try_upgrade_conflictor( confl->pkg(), *prov )) {
 					do_upgrade_for_conflict( upgrade );
 				}
@@ -145,14 +145,14 @@ void PkgDep::add_package( const Package *cand )
 	}
 
 	// check if the new package conflicts with something installed
-	ci_for( Package::PkgRelList_, confl, cand->conflicts_ ) {
+	ci_for( Solvable::PkgRelList_, confl, cand->conflicts_ ) {
 		RevRel_for( vinstalled.provided()[confl->name()], prov ) {
 			if (confl->matches( prov->relation() )) {
 				DBG( "Conflict of installed/accepted " << prov->relation()
 					 << " provided by " << prov->pkg()->name()
 					 << " with \"Conflicts: " << *confl
 					 << "\" by " << candname << endl );
-				if (const Package *upgrade =
+				if (const Solvable *upgrade =
 					try_upgrade_conflicted( prov->pkg(), *confl )) {
 					do_upgrade_for_conflict( upgrade );
 				}
@@ -199,7 +199,7 @@ void PkgDep::add_package( const Package *cand )
 	
 	// then check if requirements are present; if not, try to find them in the
 	// available set
-	ci_for( Package::PkgRelList_, req, cand->requires_ ) {
+	ci_for( Solvable::PkgRelList_, req, cand->requires_ ) {
 		PkgName reqname = req->name();
 
 		if (!strncmp(req->name(),"rpmlib(",strlen("rpmlib(")))
@@ -265,16 +265,16 @@ void PkgDep::add_package( const Package *cand )
 	}
 }
 
-size_t hashfun( const Package * const & pkg ){
+size_t hashfun( const Solvable * const & pkg ){
         return size_t(pkg);
 }
 
 PkgDep::search_result
-PkgDep::search_for_provider( const PkgRelation& req, const Package *referer,
+PkgDep::search_for_provider( const PkgRelation& req, const Solvable *referer,
 							 ErrorResult *res )
 {
 	RevRelList providers;
-	noval_hash<const Package *> seen;
+	noval_hash<const Solvable *> seen;
 		
 	RevRel_for( available.provided()[req.name()], prov ) {
 		if (seen.exists(prov->pkg()))
@@ -303,7 +303,7 @@ PkgDep::search_for_provider( const PkgRelation& req, const Package *referer,
 	}
 	else if (providers.size() == 1) {
 		// exactly one package satisfies our requirement -> add it
-		const Package *provider = providers.front().pkg();
+		const Solvable *provider = providers.front().pkg();
 		DBG( "Exactly one provider for " << req
 			 << " found, adding " << provider->name()
 			 << " as candidate\n" );
@@ -334,19 +334,19 @@ PkgDep::search_for_provider( const PkgRelation& req, const Package *referer,
 	}
 }
 
-bool PkgDep::check_for_broken_reqs( const Package *oldpkg,
-									const Package *newpkg,
+bool PkgDep::check_for_broken_reqs( const Solvable *oldpkg,
+									const Solvable *newpkg,
 									ErrorResult &res )
 {
 	bool error = false;
 	
-	ci_for( Package::Provides_, prov, oldpkg->all_provides_) {
+	ci_for( Solvable::Provides_, prov, oldpkg->all_provides_) {
 		DBG( "  checking provided name " << (*prov).name() << endl );
 		RevRel_for( vinstalled.required()[(*prov).name()], req ) {
 			DBG( "    requirement: " << req->relation()
 				 << " by installed/accepted " << req->pkg()->name() << endl );
 			if (!req_ok_after_upgrade( req->relation(), oldpkg, newpkg )) {
-				if (const Package *upgrade = try_upgrade_requirerer(
+				if (const Solvable *upgrade = try_upgrade_requirerer(
 						req->pkg(), oldpkg, newpkg )) {
 					do_upgrade_for_conflict( upgrade );
 				}
@@ -374,11 +374,11 @@ bool PkgDep::check_for_broken_reqs( const Package *oldpkg,
 }
 
 bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
-								   const Package *oldpkg,
-								   const Package *newpkg )
+								   const Solvable *oldpkg,
+								   const Solvable *newpkg )
 {
 	// check if newpkg satisfies the requirement
-	ci_for( Package::Provides_, prov, newpkg->all_provides_) {
+	ci_for( Solvable::Provides_, prov, newpkg->all_provides_) {
 		if ((*prov).name() == rel.name() && (*prov).matches( rel )) {
 			DBG( "    satisfied by upgrade " << newpkg->name() <<
 				 " with Provides: " << *prov << endl );
@@ -395,7 +395,7 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
 		}
 	}
 		
-	// check if an installed package satifies it
+	// check if an installed Solvable satifies it
 	RevRel_for( installed.provided()[rel.name()], prov2 ) {
 		// skip oldpkg (which is to be replaced) and packages that are
 		// candidates

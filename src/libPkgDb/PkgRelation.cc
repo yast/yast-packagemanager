@@ -1,11 +1,11 @@
 #include <cstdio>
 #include <cstring>
+#include <y2pm/Solvable.h>
 #include <y2pm/PkgRelation.h>
-#include <y2pm/Package.h>
 
 using namespace std;
 
-bool PkgRelation::matches( const Package* pkg ) const
+bool PkgRelation::matches( const Solvable* pkg ) const
 {
 	if (pkg->name() != _name)
 		return false;

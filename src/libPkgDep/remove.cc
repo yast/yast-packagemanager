@@ -5,7 +5,7 @@ using namespace std;
 
 void PkgDep::remove( NameList& pkgs )
 {
-	typedef list<const Package *> PkgPList;
+	typedef list<const Solvable *> PkgPList;
 	PkgPList pkgs_p;
 	
 	ci_for( NameList::, name, pkgs. ) {
@@ -19,8 +19,8 @@ void PkgDep::remove( NameList& pkgs )
 	}
 }
 
-void PkgDep::virtual_remove_package( const Package *pkg, NameList& to_remove,
-				 const Package *assume_instd ) const
+void PkgDep::virtual_remove_package( const Solvable *pkg, NameList& to_remove,
+				 const Solvable *assume_instd ) const
 {
 	PkgSet set = vinstalled;
 	if (assume_instd)
@@ -29,7 +29,7 @@ void PkgDep::virtual_remove_package( const Package *pkg, NameList& to_remove,
 }
 	
 
-void PkgDep::remove_package( PkgSet *set, const Package *pkg,
+void PkgDep::remove_package( PkgSet *set, const Solvable *pkg,
 				 NameList& to_remove ) const
 {
 	DBG( "removing package " << pkg->name() << endl );
@@ -45,7 +45,7 @@ void PkgDep::remove_package( PkgSet *set, const Package *pkg,
 	if (!already_present)
 		to_remove.push_back( pkg->name() );
 	
-	ci_for( Package::Provides_, prov, pkg->all_provides_) {
+	ci_for( Solvable::Provides_, prov, pkg->all_provides_) {
 		DBG( "  checking provided name " << (*prov).name() << endl );
 		RevRel_for( set->required()[(*prov).name()], req1 ) {
 			DBG( "    requirement: " << req1->relation()

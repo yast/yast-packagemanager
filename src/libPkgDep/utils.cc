@@ -36,7 +36,7 @@ unsigned PkgDep::count_providers_for(
 	return providers;
 }
 
-const Package *PkgDep::try_upgrade_conflictor( const Package *pkg,
+const Solvable *PkgDep::try_upgrade_conflictor( const Solvable *pkg,
 											   const PkgRelation& provides )
 {
 	PkgName name = pkg->name();
@@ -44,12 +44,12 @@ const Package *PkgDep::try_upgrade_conflictor( const Package *pkg,
 	DBG( "Trying to upgrade conflictor " << name << "-" << pkg->edition()
 		 << " to solve confl source provides " << provides << std::endl );
 	// if no different version is available, we can't upgrade
-	const Package *upgrade = available_upgrade(pkg);
+	const Solvable *upgrade = available_upgrade(pkg);
 	if (!upgrade)
 		return NULL;
 
 	bool still_conflicts = false;
-	ci_for( Package::PkgRelList_, confl, upgrade->conflicts_ ) {
+	ci_for( Solvable::PkgRelList_, confl, upgrade->conflicts_ ) {
 		if (confl->matches( provides )) {
 			still_conflicts = true;
 			break;
@@ -58,7 +58,7 @@ const Package *PkgDep::try_upgrade_conflictor( const Package *pkg,
 	return still_conflicts ? NULL : upgrade;
 }
 
-const Package *PkgDep::try_upgrade_conflicted( const Package *pkg,
+const Solvable *PkgDep::try_upgrade_conflicted( const Solvable *pkg,
 											   const PkgRelation& confl )
 {
 	PkgName name = pkg->name();
@@ -66,7 +66,7 @@ const Package *PkgDep::try_upgrade_conflicted( const Package *pkg,
 	DBG( "Trying to upgrade provider " << name << "-" << pkg->edition()
 		 << " to solve conflict " << confl << "\n" );
 	// if no different version is available, we can't upgrade
-	const Package *upgrade = available_upgrade(pkg);
+	const Solvable *upgrade = available_upgrade(pkg);
 	if (!upgrade)
 		return NULL;
 
@@ -74,7 +74,7 @@ const Package *PkgDep::try_upgrade_conflicted( const Package *pkg,
 	// provided version doesn't match the conflict anymore. Check all names
 	// the upgrade provides if they still match the conflict.
 	bool still_conflicts = false;
-	ci_for( Package::Provides_, prov, upgrade->all_provides_ ) {
+	ci_for( Solvable::Provides_, prov, upgrade->all_provides_ ) {
 		if (confl.matches( *prov )) {
 			still_conflicts = true;
 			break;
@@ -83,15 +83,15 @@ const Package *PkgDep::try_upgrade_conflicted( const Package *pkg,
 	return still_conflicts ? NULL : upgrade;
 }
 
-const Package *PkgDep::try_upgrade_requirerer(
-	const Package *pkg, const Package *oldpkg, const Package *newpkg
+const Solvable *PkgDep::try_upgrade_requirerer(
+	const Solvable *pkg, const Solvable *oldpkg, const Solvable *newpkg
 ) {
 	PkgName name = pkg->name();
 
 	DBG( "Trying to upgrade requirerer " << name << "-" << pkg->edition()
 		 << " to solve broken requirement\n" );
 	// if no different version is available, we can't upgrade
-	const Package *upgrade = available_upgrade(pkg);
+	const Solvable *upgrade = available_upgrade(pkg);
 	if (!upgrade) {
 		DBG( "no upgrade available for " << pkg->name() << "\n");
 		return NULL;
@@ -100,7 +100,7 @@ const Package *PkgDep::try_upgrade_requirerer(
 	// check if all requirements of upgrade that have oldpkg or newpkg as
 	// target are now satisfied
 	bool requirements_ok = true;
-	ci_for( Package::PkgRelList_, req, upgrade->requires_ ) {
+	ci_for( Solvable::PkgRelList_, req, upgrade->requires_ ) {
 		if ((req->name() == oldpkg->name() || req->name() == newpkg->name()) &&
 			!req_ok_after_upgrade( *req, oldpkg, newpkg )) {
 			requirements_ok = false;
@@ -110,9 +110,9 @@ const Package *PkgDep::try_upgrade_requirerer(
 	return requirements_ok ? upgrade : NULL;
 }
 
-const Package *PkgDep::available_upgrade( const Package *pkg )
+const Solvable *PkgDep::available_upgrade( const Solvable *pkg )
 {
-	const Package *upgrade;
+	const Solvable *upgrade;
 
 	// if no different version is available, we can't upgrade
 	if (!available.includes(pkg->name()) ||
@@ -123,7 +123,7 @@ const Package *PkgDep::available_upgrade( const Package *pkg )
 	return upgrade;
 }
 
-void PkgDep::do_upgrade_for_conflict( const Package *upgrade )
+void PkgDep::do_upgrade_for_conflict( const Solvable *upgrade )
 {
 	assert( upgrade != NULL );
 	PkgName name = upgrade->name();
@@ -141,22 +141,22 @@ void PkgDep::do_upgrade_for_conflict( const Package *upgrade )
 	}
 }
 
-bool PkgDep::has_conflict_with( const PkgRelation& prov, const Package *pkg )
+bool PkgDep::has_conflict_with( const PkgRelation& prov, const Solvable *pkg )
 {
-	ci_for( Package::PkgRelList_, confl, pkg->conflicts_ ) {
+	ci_for( Solvable::PkgRelList_, confl, pkg->conflicts_ ) {
 		if (confl->matches( prov ))
 			return true;
 	}
 	return false;
 }
 
-void PkgDep::add_referer( const PkgName& name, const Package *referer,
+void PkgDep::add_referer( const PkgName& name, const Solvable *referer,
 						  const PkgRelation& rel )
 {
 	notes[name].referers.push_back( IRelInfo(referer,rel) );
 }
 
-void PkgDep::add_not_available(const Package *referer, const PkgRelation& rel )
+void PkgDep::add_not_available(const Solvable *referer, const PkgRelation& rel )
 {
 	PkgName name = rel.name();
 	

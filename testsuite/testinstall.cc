@@ -103,6 +103,7 @@ int main( int argc, char *argv[] )
     }
 */
     // construct PkgDep object
+    PkgDep::set_default_alternatives_mode(PkgDep::AUTO_IF_NO_DEFAULT);
     PkgDep engine( installed, *available );
 
     // call upgrade

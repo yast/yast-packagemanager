@@ -4,13 +4,13 @@
 #include <list>
 #include <y2util/hash.h>
 #include <y2util/RefObject.h>
-#include <y2pm/Package.h>
+#include <y2pm/Solvable.h>
 #include <y2pm/PkgRevRel.h>
 
 
 class PkgSet {
   public:
-	typedef hash<PkgName,const Package*> PkgList_type;
+	typedef hash<PkgName,const Solvable*> PkgList_type;
 	typedef PkgList_type::iterator iterator;
 	typedef PkgList_type::const_iterator const_iterator;
 
@@ -39,31 +39,31 @@ class PkgSet {
 	// make a set consisting of all packages with one of the given tags
 //	PkgSet( const DistTagList& tags );
 
-	PkgSet( PackageDataProvider* provider );
+//	PkgSet( PackageDataProvider* provider );
 	~PkgSet();
 	// default copy constructor and assigment are ok
 	//
 	bool empty() { return contents.empty(); }
 
 	// add a single package
-	void add( const Package *pkg, bool force = false );
+	void add( const Solvable *pkg, bool force = false );
 	// remove a package
-	void remove( const Package *pkg );
+	void remove( const Solvable *pkg );
 	void remove( PkgName name ) {
-		const Package *pkg = lookup(name);
+		const Solvable *pkg = lookup(name);
 		if (pkg)
 			remove( pkg );
 	}
 
 	// notification from PkgPool that a pkg has a new provides
-	void new_provides( const Package *pkg, const PkgRelation& prov );
+	void new_provides( const Solvable *pkg, const PkgRelation& prov );
 
 	// look up a package by name
-	const Package *lookup( PkgName name ) const {
-		const HashElt<PkgName,const Package *> *p = contents.find(name);
+	const Solvable *lookup( PkgName name ) const {
+		const HashElt<PkgName,const Solvable *> *p = contents.find(name);
 		return p ? p->value : NULL;
 	}
-	const Package *operator[] ( PkgName name ) const { return lookup(name); }
+	const Solvable *operator[] ( PkgName name ) const { return lookup(name); }
 	// package contained in this set?
 	bool includes( const PkgName& name ) const {
 		return contents.exists(name);

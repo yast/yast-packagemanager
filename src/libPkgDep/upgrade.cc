@@ -40,11 +40,11 @@ bool PkgDep::upgrade(
 		// for all installed packages...
 		ci_for( PkgSet::, p, installed. ) {
 			PkgName iname = p->key;
-			const Package *ipkg = p->value;
+			const Solvable *ipkg = p->value;
 			bool added = false;
 
 			// if there's a newer version available, make it a candidate
-			const Package *upgrade;
+			const Solvable *upgrade;
 			if (available.includes(iname) &&
 				(upgrade = available[iname])->edition() > ipkg->edition()) {
 				DBG( iname << ": upgrade from " << ipkg->edition()

@@ -4,7 +4,7 @@
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
 
-class Package;
+class Solvable;
 
 class PkgRelation {
 	PkgName _name;
@@ -24,7 +24,7 @@ class PkgRelation {
 
 	// return true if this relation holds given a package (providing itself)
 	// or another relation (which is a provides relation)
-	bool matches( const Package* pkg ) const;
+	bool matches( const Solvable* pkg ) const;
 	bool matches( const PkgRelation& rel ) const;
 
 	bool operator==( const PkgRelation& r2 ) {

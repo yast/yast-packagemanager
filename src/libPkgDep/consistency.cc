@@ -8,7 +8,7 @@ bool PkgDep::consistent( ErrorResultList& failures )
 
 	// for all installed packages...
 	ci_for( PkgSet::, _pkg, installed. ) {
-		const Package *pkg = _pkg->value;
+		const Solvable *pkg = _pkg->value;
 		ErrorResult err(*this,pkg);
 		if (!pkg_consistent( pkg, &err ))
 			failures.push_back( err );
@@ -19,12 +19,12 @@ bool PkgDep::consistent( ErrorResultList& failures )
 
 
 // checks one package for consistency
-bool PkgDep::pkg_consistent( const Package *pkg, ErrorResult *err )
+bool PkgDep::pkg_consistent( const Solvable *pkg, ErrorResult *err )
 {
 	bool error = false;
 
 	// for all requirements of the current package
-	ci_for( Package::PkgRelList_, req, pkg->requires_ ) {
+	ci_for( Solvable::PkgRelList_, req, pkg->requires_ ) {
 		bool match_found = false;
 
 		if (!strncmp(req->name(),"rpmlib(",strlen("rpmlib(")))
@@ -43,7 +43,7 @@ bool PkgDep::pkg_consistent( const Package *pkg, ErrorResult *err )
 		}
 	}
 	// for all conflicts of the current package
-	ci_for( Package::PkgRelList_, confl, pkg->conflicts_ ) {
+	ci_for( Solvable::PkgRelList_, confl, pkg->conflicts_ ) {
 		RevRel_for( installed.provided()[confl->name()], prov ) {
 			if (confl->matches( prov->relation() ) && prov->pkg() != pkg) {
 				if (err)

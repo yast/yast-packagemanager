@@ -1,7 +1,7 @@
 #include <functional>
 
 #include <y2pm/PkgSet.h>
-#include <y2pm/Package.h>
+#include <y2pm/Solvable.h>
 #include <PkgDb.h>
 
 using namespace std;
@@ -17,7 +17,7 @@ PkgSet::PkgSet( const DistTagList& tags )
 	PkgPool.attach_set( this );
 }
 */
-
+/*
 PkgSet::PkgSet( PackageDataProvider* provider )
 {
 	for( PkgDb::const_iterator p = PkgPool.begin(); p != PkgPool.end(); ++p ) {
@@ -27,7 +27,7 @@ PkgSet::PkgSet( PackageDataProvider* provider )
 	}
 	PkgPool.attach_set( this );
 }
-
+*/
 PkgSet::~PkgSet() {
 	PkgPool.detach_set( this );
 }
@@ -36,9 +36,9 @@ PkgSet::~PkgSet() {
 	for( Package::PkgRelList_const_iterator var = pkg->field##_begin();	\
 	     var != pkg->field##_end(); ++p )
 
-void PkgSet::add( const Package *pkg, bool force )
+void PkgSet::add( const Solvable *pkg, bool force )
 {
-	if (const Package *opkg = lookup(pkg->name())) {
+	if (const Solvable *opkg = lookup(pkg->name())) {
 		// the same name is already contained in this set
 		// keep the already contained package if its edition is greater or
 		// equal; otherwise replace it
@@ -67,15 +67,15 @@ void PkgSet::add( const Package *pkg, bool force )
 }
 
 class RevRel_By {
-	const Package *pkg;
+	const Solvable *pkg;
   public:
-	RevRel_By( const Package *p ) : pkg(p) {}
+	RevRel_By( const Solvable *p ) : pkg(p) {}
 	bool operator() ( const PkgRevRelation& rrel ) {
 		return rrel.pkg() == pkg;
 	}
 };
 
-void PkgSet::remove( const Package *pkg )
+void PkgSet::remove( const Solvable *pkg )
 {
 	if (!contents.erase( pkg->name() ))
 		return; // wasn't contained
@@ -97,7 +97,7 @@ void PkgSet::remove( const Package *pkg )
 }
 
 
-void PkgSet::new_provides( const Package *pkg, const PkgRelation& prov )
+void PkgSet::new_provides( const Solvable *pkg, const PkgRelation& prov )
 {
 	if (!includes(pkg->name()) ||
 		lookup(pkg->name())->edition() != pkg->edition())

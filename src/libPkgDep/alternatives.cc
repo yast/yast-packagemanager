@@ -6,7 +6,7 @@ using namespace std;
 
 void PkgDep::handle_alternative( const AltInfo& alt_info )
 {
-	const Package *cand = alt_info.pkg;
+	const Solvable *cand = alt_info.pkg;
 	PkgName reqname = alt_info.req.name();
 	
 	// Has this alternative already been handled? This can happen because
@@ -15,7 +15,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	// that we can add the 2nd and following packages as referers.
 	if (cand && alts_handled.exists(reqname)) {
 		if (vinstalled.provided()[reqname].size() != 0) {
-			const Package *first_provider
+			const Solvable *first_provider
 				= vinstalled.provided()[reqname].front().pkg();
 			DBG( "Alternative for " << reqname << " already handled -- "
 				 "adding reference from " << cand->name() << " on "
@@ -60,7 +60,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		}
 	}
 
-	const Package *use_pkg = NULL;
+	const Solvable *use_pkg = NULL;
 	switch( alt_mode ) {
 
 	  case ASK_ALWAYS:
@@ -92,9 +92,9 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 					DBG( "not available -- skipping\n" );
 					continue;
 				}
-				const Package *pkg = available[*def];
+				const Solvable *pkg = available[*def];
 				bool found_match = false;
-				ci_for( Package::Provides_, prov, pkg->all_provides_ ) {
+				ci_for( Solvable::Provides_, prov, pkg->all_provides_ ) {
 					if (alt_info.req.matches( *prov )) {
 						found_match = true;
 						break;

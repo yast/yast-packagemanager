@@ -107,7 +107,7 @@ class PkgDep {
 		// another upgrade/obsoletion
 		bool install_to_avoid_break : 1;
 
-		Result(const PkgDep& pkgdep, const Package *pkg);
+		Result(const PkgDep& pkgdep, const Solvable *pkg);
 		Result(const PkgDep& pkgdep, const PkgName& name);
 		void add_notes( const Notes& notes );
 	};
@@ -126,7 +126,7 @@ class PkgDep {
 		//
 		NameList remove_to_solve_conflict;
 
-		ErrorResult(const PkgDep& pkgdep, const Package *pkg)
+		ErrorResult(const PkgDep& pkgdep, const Solvable *pkg)
 			: Result(pkgdep,pkg), not_available(false) {}
 		ErrorResult(const PkgDep& pkgdep, const PkgName& name)
 			: Result(pkgdep,name), not_available(false) {}
@@ -136,13 +136,13 @@ class PkgDep {
 		void add_unresolvable( PkgName n, const PkgRelation& rel );
 		void add_conflict( const PkgRevRelation& rrel,
 						   const PkgDep& dep,
-						   const Package *to_remove,
-						   const Package *assume_instd,
+						   const Solvable *to_remove,
+						   const Solvable *assume_instd,
 						   bool is_conflict = true );
 		void add_conflict( PkgName n, const PkgRelation& rel,
 						   const PkgDep& dep,
-						   const Package *to_remove,
-						   const Package *assume_instd,
+						   const Solvable *to_remove,
+						   const Solvable *assume_instd,
 						   bool is_conflict = true );
 		void add_alternative( PkgName n, alternative_kind k );
 		void add_notes( const Notes& notes );
@@ -162,10 +162,10 @@ class PkgDep {
 	enum search_result { NONE, ONE, MULTI };
 
 	struct IRelInfo {
-		const Package *pkg;
+		const Solvable *pkg;
 		PkgRelation rel;
 
-		IRelInfo( const Package *p, PkgRelation r ) : pkg(p), rel(r) {}
+		IRelInfo( const Solvable *p, PkgRelation r ) : pkg(p), rel(r) {}
 	};
 
 	typedef std::list<IRelInfo> IRelInfoList;
@@ -190,12 +190,12 @@ class PkgDep {
 	typedef Notes_type::const_iterator Notes_const_iterator;
 
 	struct AltInfo {
-		const Package *pkg;
+		const Solvable *pkg;
 		PkgRelation req;
 		RevRelList providers;
 		ErrorResult result;
 		
-		AltInfo( const Package *p, const PkgRelation& r, const RevRelList& l,
+		AltInfo( const Solvable *p, const PkgRelation& r, const RevRelList& l,
 				 const ErrorResult& rs )
 			: pkg(p), req(r), providers(l), result(rs) {}
 	};
@@ -218,7 +218,7 @@ class PkgDep {
 	PkgSet vinstalled;
 	PkgSet *candidates;
 	Notes_type notes;
-	std::deque<const Package *> to_check;
+	std::deque<const Solvable *> to_check;
 	AltInfoList alts_to_check;
 	noval_hash<PkgName> alts_handled;
 	NameList i_obsoleted;
@@ -227,46 +227,46 @@ class PkgDep {
 
 	// -------------------------- private methods --------------------------
 	// install.cc
-	void add_package( const Package *cand );
+	void add_package( const Solvable *cand );
 	search_result search_for_provider( const PkgRelation& req,
-									   const Package *referer,
+									   const Solvable *referer,
 									   ErrorResult *res );
-	bool check_for_broken_reqs( const Package *oldpkg, const Package *newpkg,
+	bool check_for_broken_reqs( const Solvable *oldpkg, const Solvable *newpkg,
 								ErrorResult &res );
-	bool req_ok_after_upgrade( const PkgRelation& rel, const Package *oldpkg,
-							   const Package *newpkg );
+	bool req_ok_after_upgrade( const PkgRelation& rel, const Solvable *oldpkg,
+							   const Solvable *newpkg );
 	// alternatives.cc
 	void handle_alternative( const AltInfo& alt_info );
 	// consistency.cc
-	bool pkg_consistent( const Package *pkg, ErrorResult *err );
+	bool pkg_consistent( const Solvable *pkg, ErrorResult *err );
 	// remove.cc
-	void virtual_remove_package( const Package *pkg, NameList& to_remove,
-								 const Package *assume_instd = NULL ) const;
-	void remove_package( PkgSet *set, const Package *pkg,
+	void virtual_remove_package( const Solvable *pkg, NameList& to_remove,
+								 const Solvable *assume_instd = NULL ) const;
+	void remove_package( PkgSet *set, const Solvable *pkg,
 						 NameList& to_remove) const;
 	// utils.cc
 	bool also_provided_by_installed( const PkgRelation& rel );
 	unsigned count_providers_for( const PkgSet* set,
 								  const PkgRelation& req ) const;
-	const Package *upgrade_solves_conflict( const Package *pkg,
+	const Solvable *upgrade_solves_conflict( const Solvable *pkg,
 											const PkgRelation& confl );
-	const Package *try_upgrade_conflictor( const Package *pkg,
+	const Solvable *try_upgrade_conflictor( const Solvable *pkg,
 										   const PkgRelation& provides );
-	const Package *try_upgrade_conflicted( const Package *pkg,
+	const Solvable *try_upgrade_conflicted( const Solvable *pkg,
 										   const PkgRelation& confl );
-	const Package *try_upgrade_requirerer( const Package *pkg,
-										   const Package *oldpkg,
-										   const Package *newpkg );
-	const Package *available_upgrade( const Package *pkg );
-	void do_upgrade_for_conflict( const Package *upgrade );
-	bool has_conflict_with( const PkgRelation& confl, const Package *pkg );
-	void add_referer( const PkgName& name, const Package *referer,
+	const Solvable *try_upgrade_requirerer( const Solvable *pkg,
+										   const Solvable *oldpkg,
+										   const Solvable *newpkg );
+	const Solvable *available_upgrade( const Solvable *pkg );
+	void do_upgrade_for_conflict( const Solvable *upgrade );
+	bool has_conflict_with( const PkgRelation& confl, const Solvable *pkg );
+	void add_referer( const PkgName& name, const Solvable *referer,
 					  const PkgRelation& rel );
-	void add_referer( const Package *pkg, const Package *referer,
+	void add_referer( const Solvable *pkg, const Solvable *referer,
 					  const PkgRelation& rel ) {
 		add_referer( pkg->name(), referer, rel );
 	}
-	void add_not_available( const Package *referer, const PkgRelation& rel );
+	void add_not_available( const Solvable *referer, const PkgRelation& rel );
 	
 public:
 	PkgDep( PkgSet& instd, const PkgSet& avail,

@@ -9,75 +9,16 @@ using namespace std;
 
 ostream& operator<<( ostream& os, const Package& pkg )
 {
-	os << "Name: " << (const char *)pkg._name << endl;
-	os << "Version: " << pkg._edition.version() << endl;
-	if (pkg._edition.has_release())
-		os << "Release: " << pkg._edition.release() << endl;
-	if (pkg._edition.has_epoch())
-		os << "Epoch: " << pkg._edition.epoch() << endl;
+	pkg.print(os);
+	return os;
+}
 
-	if (pkg._requires.size())
-		cout << "Requires: " << pkg._requires << endl;
-	if (pkg._conflicts.size())
-		cout << "Conflicts: " << pkg._conflicts << endl;
-	if (pkg._provides.size())
-		cout << "Provides: " << pkg._provides << endl;
-	if (pkg._obsoletes.size())
-		cout << "Obsoletes: " << pkg._obsoletes << endl;
-	
-//	os << "Size: " << pkg._size << endl;
-
+void Package::print( ostream& os ) const
+{
 	os << "Files:\n";
-	for( Package::FileList_const_iterator vi = pkg._files.begin();
-		 vi != pkg._files.end(); ++vi )
+	for( Package::FileList_const_iterator vi = _files.begin();
+		 vi != _files.end(); ++vi )
 		cout << " " << *vi << endl;
-#if 0
-	for( unsigned i = 0; i < Package::N_STRS; ++i ) {
-		if (!pkg.strings[i] || pkg.strings[i]->empty())
-			continue;
-		// we need a named object for the tag name here, because egcs-2.91.66
-		// otherwise gets confused with the temporary string and a SIGSEGV is
-		// the result.
-		string tagn = Tag::tagname(Package::str_tags[i]);
-		os << tagn << ": " << modify_newlines(*pkg.strings[i]) << endl;
-	}
-	for( unsigned i = 0; i < Package::N_BINS; ++i ) {
-		if (!pkg.binfields[i] || !pkg.binfields[i]->contents)
-			continue;
-		// we need a named object for the tag name here, because egcs-2.91.66
-		// otherwise gets confused with the temporary string and a SIGSEGV is
-		// the result.
-		string tagn = Tag::tagname(Package::bin_tags[i]);
-		os << tagn << ": "<< hex << setfill('0');
-		for( unsigned j = 0; j < pkg.binfields[i]->size; ++j ) {
-			os << setw(2) << (unsigned)(pkg.binfields[i]->contents[j]);
-		}
-		os << dec << setfill(' ') << endl;
-	}
-#endif
-	return os;
-}
-
-/*
-ostream& operator<<( ostream& os, const DistTagList& dl )
-{
-	for( DistTagList_const_iterator q = dl.begin(); q != dl.end(); ++q ){
-		if (q != dl.begin())
-			cout << ", ";
-		cout << (const char *)*q;
-	}
-	return os;
-}
-*/
-ostream& operator<<( ostream& os, const Package::PkgRelList_type& rl )
-{
-	for( Package::PkgRelList_const_iterator q = rl.begin();
-		 q != rl.end(); ++q ){
-		if (q != rl.begin())
-			cout << ", ";
-		cout << *q;
-	}
-	return os;
 }
 
 bool Package::is_from_provider( PackageDataProvider* provider )
@@ -88,7 +29,6 @@ bool Package::is_from_provider( PackageDataProvider* provider )
 			return true;
 	return false;
 }
-
 
 #if 0
 // ---------------------------------------------------------------------------
@@ -122,30 +62,6 @@ bool Package::is_in_distrib( const DistTagList& distl )
 // End:
 #endif
 
-Package::Package()
-{
-}
-
-Package::Package(
-	PkgName& name,
-	PkgEdition& edition,
-	PkgRelList_type& requires,
-	PkgRelList_type& conflicts,
-	PkgRelList_type& provides,
-	PkgRelList_type& obsoletes
-	)
-{
-	_name=name;
-	_edition=edition;
-	_requires=requires;
-	_conflicts=conflicts;
-	_provides=provides;
-	_obsoletes=obsoletes;
-}
-
-Package::~Package()
-{
-}
 /*
 bool Package::is_in_distrib( const DistTag& dist )
 {
@@ -167,8 +83,4 @@ bool Package::is_in_distrib( const DistTagList& distl )
 	return false;
 }
 */
-const PkgRelation& Package::add_requires( PkgRelation& r)
-{
-	_requires.push_front(r);
-	return *(_requires.begin());
-}
+

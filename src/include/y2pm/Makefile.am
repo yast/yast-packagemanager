@@ -12,6 +12,7 @@ pkginclude_HEADERS =	\
 	PkgRelation.h	\
 	PkgRevRel.h	\
 	Package.h	\
+	Solvable.h	\
 	PackageSource.h	\
 	PkgSet.h
 

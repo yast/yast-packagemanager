@@ -3,7 +3,7 @@
 
 using namespace std;
 
-PkgDep::Result::Result( const PkgDep& pkgdep, const Package *pkg )
+PkgDep::Result::Result( const PkgDep& pkgdep, const Solvable *pkg )
 {
 	PkgName n = pkg->name();
 	name = n;
@@ -13,7 +13,7 @@ PkgDep::Result::Result( const PkgDep& pkgdep, const Package *pkg )
 	from_input_list = false;
 
 	if (pkgdep.installed.includes(n)) {
-		const Package *ipkg = pkgdep.installed[n];
+		const Solvable *ipkg = pkgdep.installed[n];
 		is_upgrade_from = (ipkg->edition() < pkg->edition())
 						  ? ipkg->edition()
 						  : PkgEdition(PkgEdition::UNSPEC);
@@ -39,8 +39,8 @@ PkgDep::Result::Result( const PkgDep& pkgdep, const PkgName& n )
 
 void PkgDep::ErrorResult::add_conflict( const PkgRevRelation& rrel,
 										const PkgDep& dep,
-										const Package *to_remove,
-										const Package *assume_instd,
+										const Solvable *to_remove,
+										const Solvable *assume_instd,
 										bool is_conflict )
 {
 	conflicts_with.push_back( RelInfo( rrel, is_conflict ));
@@ -51,8 +51,8 @@ void PkgDep::ErrorResult::add_conflict( const PkgRevRelation& rrel,
 
 void PkgDep::ErrorResult::add_conflict( PkgName n, const PkgRelation& rel,
 										const PkgDep& dep,
-										const Package *to_remove,
-										const Package *assume_instd,
+										const Solvable *to_remove,
+										const Solvable *assume_instd,
 										bool is_conflict )
 {
 	conflicts_with.push_back( RelInfo( n, rel, is_conflict ));

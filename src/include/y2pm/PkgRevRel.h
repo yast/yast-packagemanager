@@ -1,7 +1,7 @@
 #ifndef _PkgRevRel_h
 #define _PkgRevRel_h
 
-#include <y2pm/Package.h>
+#include <y2pm/Solvable.h>
 #include <y2pm/PkgRelation.h>
 
 class PkgRevRelation {
@@ -10,17 +10,17 @@ class PkgRevRelation {
 	// somebody asks for the PkgRelation, a faked one is returned.
 
 	const PkgRelation *_relation;
-	const Package *_pkg;
+	const Solvable *_pkg;
 
   public:
-	PkgRevRelation( const PkgRelation *r, const Package *p )
+	PkgRevRelation( const PkgRelation *r, const Solvable *p )
 		: _relation(r), _pkg(p) {}
 	// default copy constructor and assigment are ok
 
 	const PkgRelation relation() const {
 		return _relation ? *_relation : _pkg->self_provides();
 	}
-	const Package *pkg() const { return _pkg; }
+	const Solvable *pkg() const { return _pkg; }
 };
 
 #endif  /* _PkgRevRel_h */

@@ -12,7 +12,7 @@ INCLUDES = -I. -I/usr/include/YaST2 -I$(top_srcdir)/src/include
 libPkgDb_la_SOURCES = Package.cc PkgDb.cc PkgSet.cc PkgName.cc	\
 		      PkgEdition.cc PkgRelation.cc DbHeader.cc	\
 		      Exception.cc misc.cc pkgdbheader.c paths.cc \
-		      PackageSource.cc \
+		      PackageSource.cc Solvable.cc \
 		      Package.h PkgDb.h DbHeader.h Exception.h \
 		      DistTag.h misc.h pkgdbheader.h paths.h
 
