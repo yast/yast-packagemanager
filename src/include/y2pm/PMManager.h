@@ -179,10 +179,13 @@ class PMManager {
      *
      * @param good (output) list of PkgDep::Result that have been marked for installation/upgrade
      * @param bad (output) list of PkgDep::ErrorResult that have trouble
+     * @param filter_conflicts_with_installed filter packages which are
+     * selected for insallation by appl and conflict with an already installed
+     * one
      *
      * @return true if no conflicts where found (i.e no bad)
      * */
-    bool solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad);
+    bool solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad, bool filter_conflicts_with_installed = false);
     
     /**
      * resolve dependencies for all packages that are marked for installation

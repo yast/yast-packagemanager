@@ -83,7 +83,7 @@ void createbackups(vector<string>& argv);
 void rebuilddb(vector<string>& argv);
 void du(vector<string>& argv);
 void showselection(vector<string>& argv);
-void installselection(vector<string>& argv);
+void setappl(vector<string>& argv);
 void order(vector<string>& argv);
 void upgrade(vector<string>& argv);
 void commit(vector<string>& argv);
@@ -122,7 +122,7 @@ static struct Funcs func[] = {
     { "showpackage",	showpackage,	1,
 	"show state of package (all if none specified. Not installed will be suppressed if verbose=0)" },
 
-    { "installselection",	installselection,	1,	"mark selection for installation" },
+    { "setappl",	setappl,	1,	"set package to installed like a selection would do" },
     
     { "order",		order,		1,	"compute installation order" },
     { "upgrade",	upgrade,	1,	"compute upgrade" },
@@ -643,7 +643,7 @@ int printbadlist(PkgDep::ErrorResultList& bad)
     return numbad;
 }
 
-static void install_internal(PMManager& manager, vector<string>& argv)
+static void install_internal(PMManager& manager, vector<string>& argv, bool appl=false)
 {
     for (unsigned i=1; i < argv.size() ; i++) {
 	string pkg = stringutil::trim(argv[i]);
@@ -656,16 +656,17 @@ static void install_internal(PMManager& manager, vector<string>& argv)
 	    std::cout << "package " << pkg << " is not available.\n";
 	    continue;
 	}
-	PMSelectable::UI_Status s = PMSelectable::S_Install;
 
-	if(selp->has_installed())
+	bool ok;
+
+	if(appl)
+	    ok = selp->appl_set_install();
+	else
+	    ok = selp->user_set_install();
+
+	if(!ok)
 	{
-	    s = PMSelectable::S_Update;
-	}
-	if(!selp->set_status(s))
-	{
-	    cout << stringutil::form("coult not mark %s for %s", pkg.c_str(),
-		(s==PMSelectable::S_Install?"installation":"update")) << endl;
+	    cout << stringutil::form("coult not mark %s for installation/update", pkg.c_str());
 	}
     }
 }
@@ -675,20 +676,30 @@ void install(vector<string>& argv)
     install_internal(Y2PM::packageManager(), argv);
 }
 
-void installselection(vector<string>& argv)
+void setappl(vector<string>& argv)
 {
-    install_internal(Y2PM::selectionManager(), argv);
+    install_internal(Y2PM::packageManager(), argv, true);
 }
 
 void solve(vector<string>& argv)
 {
     int numinst=0,numbad=0;
     bool success = false;
+    bool filter = false;
+
+    for(vector<string>::iterator it= argv.begin(); it != argv.end();++it)
+    {
+	if(*it == "-u")
+	{
+	    filter = true;
+	    cout << "filtering" << endl;
+	}
+    }
 
     PkgDep::ResultList good;
     PkgDep::ErrorResultList bad;
 
-    success = Y2PM::packageManager().solveInstall(good, bad);
+    success = Y2PM::packageManager().solveInstall(good, bad, filter);
 
 
     numbad = printbadlist(bad);
