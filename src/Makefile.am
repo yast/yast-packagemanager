@@ -43,8 +43,12 @@ liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			libPkgDep/libPkgDep.la	\
 			-ly2util
 
-bin_PROGRAMS = online_update
+bin_PROGRAMS = online_update installation_sources
 
 online_update_SOURCES = online_update.cc
 online_update_LDADD = liby2pm.la
 online_update_LDFLAGS = -static
+
+installation_sources_SOURCES = installation_sources.cc
+installation_sources_LDADD = liby2pm.la
+installation_sources_LDFLAGS = -static
