@@ -268,7 +268,7 @@ EOF
     foreach my $rpm ( keys %rpms ) {
       print $out "#\n# Package: $rpms{ $rpm }{ 'Name' }\n#\n";
       print $out "Filename: $rpms{ $rpm }{ 'Name' }.rpm\n";
-      print $out "Version: $rpms{ $rpm }{ 'Version' }\n";
+      print $out "Version: $rpms{ $rpm }{ 'Version' }-$rpms{ $rpm }{ 'Release' }\n";
       print $out "Label: $rpms{ $rpm }{ 'Label' }\n";
       print $out "Size: $rpms{ $rpm }{ 'Size' } $rpms{ $rpm }{ 'ArchiveSize' }\n";
       print $out "Provides: $rpms{ $rpm }{ 'Provides' }\n";
