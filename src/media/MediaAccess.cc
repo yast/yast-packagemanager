@@ -186,7 +186,7 @@ PMError
 MediaAccess::release( bool eject )
 {
   if ( !_handler )
-    return Error::E_not_open;
+    return Error::E_ok;
 
   return _handler->release( eject );
 }

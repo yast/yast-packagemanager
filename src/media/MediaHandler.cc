@@ -183,7 +183,7 @@ PMError MediaHandler::disconnect()
 PMError MediaHandler::release( bool eject )
 {
   if ( !_isAttached )
-    return Error::E_not_attached;
+    return Error::E_ok;
 
   PMError err = releaseFrom( eject ); // pass to concrete handler
   if ( !err ) {
