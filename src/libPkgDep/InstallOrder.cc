@@ -22,7 +22,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/InstallOrder.h>
-#include <y2pm/PkgDep_int.h>
+#include "PkgDep_int.h"
 #include <y2pm/PMPackage.h>
 
 using namespace std;

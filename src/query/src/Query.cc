@@ -28,7 +28,7 @@
 #include <y2pm/PMSelectablePtr.h>
 
 #include <y2pm/Query.h>
-#include <y2pm/querycodes.h>
+#include "querycodes.h"
 
 using namespace std;
 

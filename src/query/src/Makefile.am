@@ -7,17 +7,7 @@ AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
 AM_LDFLAGS = -L$(libdir)
 
 # first look into source tree, then into $(includedir)
-INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
-		include			\
-		query/include		\
-		pkg/include		\
-		sel/include		\
-		you/include		\
-		inst/include		\
-		inst/rpm/include	\
-		media/include		\
-                libPkgDep/include       \
-	   ) -I$(includedir)
+INCLUDES = -I$(top_srcdir)/src -I$(includedir)
 
 noinst_LTLIBRARIES = liby2pmquery.la
 

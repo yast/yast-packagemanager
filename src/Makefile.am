@@ -2,23 +2,13 @@
 # Makefile.am for packagemanager/src
 #
 
-SUBDIRS = include inst pkg sel you media libPkgDep query
+SUBDIRS = inst pkg sel you media libPkgDep query y2pm
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -DLOCALEDIR=\"${localedir}\" -Wall
 AM_LDFLAGS = -L$(libdir)
 
 # first look into source tree, then into $(includedir)
-INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
-		include			\
-		query/include		\
-		pkg/include		\
-		sel/include		\
-		you/include		\
-		inst/include		\
-		inst/rpm/include	\
-		media/include		\
-		libPkgDep/include	\
-	   ) -I$(includedir)
+INCLUDES = -I$(top_srcdir)/src -I$(includedir)
 
 lib_LTLIBRARIES = liby2pm.la
 
@@ -49,6 +39,8 @@ liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			query/src/liby2pmquery.la\
 			libPkgDep/libPkgDep.la	\
 			-ly2util
+
+include_HEADERS = Y2PM.h
 
 bin_PROGRAMS = online_update installation_sources genIS_PLAINcache
 
