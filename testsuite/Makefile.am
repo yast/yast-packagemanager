@@ -21,11 +21,17 @@ noinst_PROGRAMS = \
 	test_tofromString.exe	\
 	testinstall	\
 	test_patchinfo	\
-	test_content
+	test_content	\
+	gs_test
 
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
 ma_test_exe_LDFLAGS = -static
+
+gs_test_SOURCES = gs_test.cc
+gs_test_LDADD =  $(top_builddir)/src/liby2pm.la		\
+		$(top_builddir)/src/inst/liby2pminstsrc.la
+gs_test_LDFLAGS = -static
 
 test_tofromString_exe_SOURCES = test_tofromString.cc
 test_tofromString_exe_LDADD = $(top_builddir)/src/liby2pm.la
