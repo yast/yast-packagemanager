@@ -10,7 +10,7 @@ pkginclude_HEADERS =	\
 	PMPackage.h \
 	PMPackageDataProvider.h \
 	PMPackageDataProviderPtr.h \
-	PMPackageManager.h \
+	PMPackageManager.h PMPackageManager_update.h \
 	PMPackagePtr.h
 
 #<INSTALL-HEADER-TARGET>
