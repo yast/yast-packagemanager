@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Feb 28 14:35:07 CET 2003 - kk@suse.de
+
+- eject all cd drives if none is active on 'eject' (#24005)
+
+-------------------------------------------------------------------
 Thu Feb 27 17:14:49 CET 2003 - lnussel@suse.de
 
 - check dependencies of packages that obsolete installed ones first (#24115)
