@@ -94,21 +94,17 @@ PMULSelectionDataProvider::getValue( constPMObjectPtr obj_r,
 	case PMSelection::ATTR_DELETE:
 	    pos_ptr = &attr_DELETE;
 	break;
-#warning ATTR_NAME should come from underlying PMObject
 	case PMSelection::ATTR_NAME:
-	    return attr_NAME;
+	    return PkgAttributeValue (obj_r->name());
 	break;
-#warning ATTR_VERSION should come from underlying PMObject
 	case PMSelection::ATTR_VERSION:
-	    return attr_VERSION;
+	    return PkgAttributeValue (obj_r->version());
 	break;
-#warning ATTR_RELEASE should come from underlying PMObject
 	case PMSelection::ATTR_RELEASE:
-	    return attr_RELEASE;
+	    return PkgAttributeValue (obj_r->release());
 	break;
-#warning ATTR_ARCH should come from underlying PMObject
 	case PMSelection::ATTR_ARCH:
-	    return attr_ARCH;
+	    return PkgAttributeValue (obj_r->arch());
 	break;
 
 	case PMSelection::ATTR_SUMMARY:
