@@ -424,27 +424,19 @@ class RpmDb: virtual public Rep
 
     /** remove rpm package
      *
-     * @param label label of the rpm package to remove. always specify the
-     * full label (name-version-release) as multiple packages with same
-     * name but different versions could be installed
+     * @param name_r Name of the rpm package to remove.
      * @param iflags which rpm options to use
      *
      * @return success
      * */
-    PMError removePackage(const std::string& label, unsigned flags = 0);
-    PMError removePackage(constPMPackagePtr package, unsigned flags = 0) { return removePackage (pkg2rpm (package), flags); }
+    PMError removePackage(const std::string & name_r, unsigned flags = 0);
+    PMError removePackage(constPMPackagePtr package, unsigned flags = 0);
 
     /**
      * get backup dir for rpm config files
      *
      * */
     Pathname getBackupPath (void) { return _backuppath; }
-
-    /**
-     * convert PMPackagePtr to package name for RPM
-     *
-    */
-    std::string pkg2rpm (constPMPackagePtr package);
 
     /**
      * create tar.gz of all changed files in a Package

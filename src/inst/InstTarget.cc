@@ -289,9 +289,9 @@ PMError InstTarget::installPackages (const std::list<Pathname>& filenames, unsig
     return err;
 }
 
-PMError InstTarget::removePackage (const std::string& label, unsigned flags)
+PMError InstTarget::removePackage (const std::string& name_r, unsigned flags)
 {
-    return _rpmdb->removePackage (label, flags?flags:_rpmremoveflags);
+    return _rpmdb->removePackage (name_r, flags?flags:_rpmremoveflags);
 }
 
 PMError InstTarget::removePackage (constPMPackagePtr package, unsigned flags)
@@ -299,10 +299,10 @@ PMError InstTarget::removePackage (constPMPackagePtr package, unsigned flags)
     return _rpmdb->removePackage (package, flags?flags:_rpmremoveflags);
 }
 
-PMError InstTarget::removePackages (const std::list<std::string>& labels, unsigned flags)
+PMError InstTarget::removePackages (const std::list<std::string>& names_r, unsigned flags)
 {
     PMError err;
-    for(list<string>::const_iterator it= labels.begin(); it != labels.end(); ++it)
+    for(list<string>::const_iterator it= names_r.begin(); it != names_r.end(); ++it)
     {
 	err = removePackage(*it,flags);
         if ( err ) break;

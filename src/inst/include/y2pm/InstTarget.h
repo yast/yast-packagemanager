@@ -266,12 +266,10 @@ class InstTarget: virtual public Rep, public InstData {
     /**
      * remove single package
      *
-     * @param label label of the rpm package to remove. always specify the
-     * full label (name-version-release) as multiple packages with same
-     * name but different versions could be installed
+     * @param name_r Name of the rpm package to remove.
      * @param flags which flags to use, default flags are used if 0
      **/
-    PMError removePackage(const std::string& label, unsigned flags = 0);
+    PMError removePackage(const std::string & name_r, unsigned flags = 0);
     PMError removePackage(constPMPackagePtr package, unsigned flags = 0);
 
     /**
@@ -279,7 +277,7 @@ class InstTarget: virtual public Rep, public InstData {
      *
      * @see removePackage
      **/
-    PMError removePackages(const std::list<std::string>& labels, unsigned flags = 0);
+    PMError removePackages(const std::list<std::string>& names_r, unsigned flags = 0);
     PMError removePackages(const std::list<PMPackagePtr>& packages, unsigned flags = 0);
 
   public:
