@@ -49,7 +49,8 @@ static LangCode getLangEnvironment()
     if (lang == 0)
 	return LangCode ("en");
     string langstr (lang);
-    MIL << "LANG=" << langstr << endl;
+// segfaults -- ln
+//    MIL << "LANG=" << langstr << endl;
     string::size_type sizepos = langstr.find ("@");	// cut off "@"
     if (sizepos != string::npos)
 	langstr = langstr.substr (0, sizepos);

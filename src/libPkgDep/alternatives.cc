@@ -192,6 +192,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		to_check.push_back( use_pkg );
 
 		if (cand) {
+// FIXME: what if alt_info.result was a ErrorResult? conflicts are just ignored here
 			add_referer( use_pkg, cand, alt_info.req );
 			D__ << "Candidate " << cand->name() << " ok\n";
 			good->push_back( alt_info.result );

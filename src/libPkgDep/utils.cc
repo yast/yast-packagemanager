@@ -111,6 +111,13 @@ PMSolvablePtr PkgDep::try_upgrade_requirerer(
 
 	D__ << "Trying to upgrade requirerer " << name << "-" << pkg->edition()
 		 << " to solve broken requirement\n";
+
+	if(pkg == oldpkg)
+	{
+		D__ << "Requirerer is the one to be replaced" << endl;
+		return newpkg;
+	}
+
 	// if no different version is available, we can't upgrade
 	PMSolvablePtr upgrade = available_upgrade(pkg);
 	if (!upgrade) {
@@ -118,15 +125,17 @@ PMSolvablePtr PkgDep::try_upgrade_requirerer(
 		return NULL;
 	}
 
+	D__ << "considering " << upgrade->nameEd() << endl;
+
 	// check if all requirements of upgrade that have oldpkg or newpkg as
 	// target are now satisfied
 	bool requirements_ok = true;
 	ci_for( PMSolvable::,PkgRelList_, req, upgrade->,requires_ ) {
-		// ln -- doesn't make sense, could be indirect requirement
-		//if ((req->name() == oldpkg->name() || req->name() == newpkg->name()) &&
-		
-		if(!req_ok_after_upgrade( *req, oldpkg, newpkg )) {
+		// ln -- does that make sense? why check at all?
+		if ((req->name() == oldpkg->name() || req->name() == newpkg->name()) &&
+			!req_ok_after_upgrade( *req, oldpkg, newpkg )) {
 			requirements_ok = false;
+			WAR << "  requirement " << *req << " of " << upgrade->name() << " still not satisfied" << endl;
 			break;
 		}
 	}
