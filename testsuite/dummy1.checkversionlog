@@ -1,0 +1,5 @@
+Checking: rpms/dummy-1-1.i386.rpm
+Package is not OK for the following reasons:
+ - Package contains different version than expected
+ - Package is not signed
+
