@@ -266,6 +266,94 @@ class PMSelectable : virtual public Rep {
      **/
     void setNothingSelected() { _state.user_unset( true ); }
 
+    ///////////////////////////////////////////////////////////////////
+    // public usable part of SelState
+    ///////////////////////////////////////////////////////////////////
+
+    /**
+     * True if either installed or candidate object is present
+     **/
+    bool has_object()    const { return _state.has_object(); }
+
+    /**
+     * True if installed object is present
+     **/
+    bool has_installed() const { return _state.has_installed(); }
+
+    /**
+     * True if candidate object is present
+     **/
+    bool has_candidate() const { return _state.has_candidate(); }
+
+    /**
+     * True if installed and candidate object is present
+     **/
+    bool has_both_objects() const { return _state.has_both_objects(); }
+
+    /**
+     * True if installed object is present but no candidate.
+     **/
+    bool has_installed_only() const { return _state.has_installed_only(); }
+
+    /**
+     * True if candidate object is present but no installed.
+     **/
+    bool has_candidate_only() const { return _state.has_candidate_only(); }
+
+    /**
+     * True if either to delete or to install
+     **/
+    bool to_modify()     const { return _state.to_modify(); }
+
+    /**
+     * True if to delete
+     **/
+    bool to_delete()     const { return _state.to_delete(); }
+
+    /**
+     * True if to install
+     **/
+    bool to_install()    const { return _state.to_install(); }
+
+    /**
+     * True if modification was requested by user
+     **/
+    bool by_user()       const { return _state.by_user(); }
+
+    /**
+     * True if forbidden to install a candidate object.
+     **/
+    bool is_taboo()      const { return _state.is_taboo(); }
+
+  public:
+
+    /**
+     * User request to clear state (neither delete nor install).
+     **/
+    bool user_unset() { return _state.user_unset( true ); }
+
+    /**
+     * User request to delete the installed object. Fails if no
+     * installed object is present.
+     **/
+    bool user_set_delete() { return _state.user_set_delete( true ); }
+
+    /**
+     * User request to install the candidate object. Fails if no
+     * candidate object is present, or taboo.
+     **/
+    bool user_set_install() { return _state.user_set_install( true ); }
+
+    /**
+     * Auto request to install the candidate object. Fails if no
+     * candidate object is present, or user requested delete, or taboo.
+     **/
+    bool auto_set_install() {
+      if ( !_state.has_candidate_only() )
+	return false; // Otherwise UI will be confused ;(
+      return _state.auto_set_install( true );
+    }
+
   public:
 
     /**
