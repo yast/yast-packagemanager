@@ -22,7 +22,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/Query.h>
- 
+#include <y2pm/PMManager.h> 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -32,6 +32,32 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////
 
 IMPL_BASE_POINTER( Query );
+
+
+//-----------------------------------------------------------------
+// private
+
+bool
+Query::checkSelectable (PMSelectablePtr selectable)
+{
+    return false;
+}
+
+bool
+Query::checkPackage (PMPackagePtr package)
+{
+    return false;
+}
+
+bool
+Query::checkSelection (PMSelectionPtr selection)
+{
+    return false;
+}
+
+//-----------------------------------------------------------------
+// public
+
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -77,19 +103,26 @@ Query::parseQuery (const std::string& query)
 
 
 const std::list<PMSelectablePtr>
-Query::querySelectables()
+Query::querySelectables (const PMManager& packageManager)
 {
-    return std::list<PMSelectablePtr>();
+    std::list<PMSelectablePtr> matches;
+    for (PMManager::PMSelectableVec::const_iterator it = packageManager.begin();
+	 it != packageManager.end(); ++it)
+    {
+	if (checkSelectable (*it))
+	    matches.push_back (*it);
+    }
+    return matches;
 }
 
 const std::list<PMPackagePtr>
-Query::queryPackages()
+Query::queryPackages (const PMManager& packageManager)
 {
     return std::list<PMPackagePtr>();
 }
 
 const std::list<PMSelectionPtr>
-Query::querySelections()
+Query::querySelections (const PMManager& selectionManager)
 {
     return std::list<PMSelectionPtr>();
 }

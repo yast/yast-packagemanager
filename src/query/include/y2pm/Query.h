@@ -32,6 +32,7 @@
 #include <y2pm/PMSelectablePtr.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSelectionPtr.h>
+#include <y2pm/PMManager.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -46,6 +47,9 @@ class Query : virtual public Rep {
 	struct qnode *_query;
 	int _errpos;
 
+	bool checkSelectable (PMSelectablePtr selectable);
+	bool checkPackage (PMPackagePtr package);
+	bool checkSelection (PMSelectionPtr selection);
     public:
 	Query();
 	~Query();
@@ -59,9 +63,9 @@ class Query : virtual public Rep {
 	 * -1 if no error
 	 */
 	int failedPos () { return _errpos; }
-	const std::list<PMSelectablePtr> querySelectables();
-	const std::list<PMPackagePtr> queryPackages();
-	const std::list<PMSelectionPtr> querySelections();
+	const std::list<PMSelectablePtr> querySelectables(const PMManager& packageManager);
+	const std::list<PMPackagePtr> queryPackages(const PMManager& packageManager);
+	const std::list<PMSelectionPtr> querySelections(const PMManager& selectionManager);
 };
 
 ///////////////////////////////////////////////////////////////////
