@@ -65,7 +65,7 @@ class YOUPatchTagSet : public CommonPkdParser::TagSet
 	    t->setType(CommonPkdParser::Tag::ACCEPTLOCALEONLY);
 	    t->setDefaultLocale("english");
 	    t->setPreferredLocale(locale);
-	    t->setEndTag("noitamrofnier",CommonPkdParser::Tag::ENDTAG_COMPLETELYREVERSED);
+	    t->setEndTag("noitamrofnierp",CommonPkdParser::Tag::ENDTAG_COMPLETELYREVERSED);
 	    t = createTag("Postinformation.",POSTINFORMATION);
 	    t->setType(CommonPkdParser::Tag::ACCEPTLOCALEONLY);
 	    t->setDefaultLocale("english");
