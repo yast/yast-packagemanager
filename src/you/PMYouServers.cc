@@ -80,6 +80,7 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
 	    y2milestone( "Service found: %s", srvurl );
 
 	    string myattr;
+	    string attr1 = "description";
 	    SLPHandle handleslp;
 	    SLPError err;
 
@@ -91,28 +92,25 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
 		err = SLPFindAttrs( handleslp,
 				    srvurl,
 				    "",			// use configured scopes
-				    "basepath,name",	// attributes
+				    attr1.c_str(),	// attributes (attr1,attr2,...)
 				    PMAttrCallback,
 				    (void *)&myattr );
 	    }
 
-	    string basepath = "/YOU";
-	    string name = "YOU Server";
+	    string descr = "Local YOU Server";
 	    
 	    if ( err == SLP_OK )
 	    {
-		// attributes e.g.:	(basepath=/YOU),(name=YOU Server Local)
+		// attributes e.g.:	(description=YOU Server Local),(attr2=value2)
 		vector<string> splitattr;
 		vector<string>::iterator it;
-		stringutil::split(  myattr, splitattr, ",", true );
+		stringutil::split( myattr, splitattr, ",", true );
 
 		for ( it = splitattr.begin(); it != splitattr.end(); *it++ )
 		{
-		    string attr = (*it).substr( 1, (*it).size()-2 );	// remove ( )
-		    if ( attr.find("name=") != string::npos )
-			name = attr.substr( 5 );
-		    else if  ( attr.find("basepath=") != string::npos )
-			basepath = attr.substr( 9 );
+		    string attr = (*it).substr( 1, (*it).size()-2 );	// remove '(' and ')'
+		    if ( attr.find( attr1 + "=") != string::npos )
+			descr = attr.substr( attr1.size()+1 );
 		}
 	    }
 	    else
@@ -127,8 +125,8 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
 	    stringutil::split( srvurl, splitted, ":", true );
 
 	    // add URL of SLP server to the list of servers
-	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(splitted[2] + ":" + splitted[3] + basepath,
-									name,		// name of server
+	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(splitted[2] + ":" + splitted[3],
+									descr,		// name of server
 									"",		// directory
 									"slp") );	// type
 	}
