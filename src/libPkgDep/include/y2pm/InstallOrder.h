@@ -24,6 +24,14 @@
 #include <y2pm/PMSolvablePtr.h>
 #include <y2pm/PkgSet.h>
 
+
+/**
+ * compute Installation order.<br>
+ *
+ * There are two Interfaces:<br>
+ * - getTopSorted: return flat list of packages in proper order<br>
+ * - computeNextSet: return only packages without requirements, see comment below<br>
+ * */
 class InstallOrder
 {
     public:
@@ -78,8 +86,8 @@ class InstallOrder
 
 	/**
 	 * Compute a list of Solvables which have no requirements and can be
-	 * installed in parallel without conflicts
-	 * */
+	 * installed in parallel without conflicts. Use setInstalled to make
+	 * computation of a different set possible */
 	SolvableList computeNextSet();
 
 	/**
@@ -93,7 +101,17 @@ class InstallOrder
 	 * */
 	void setInstalled( const SolvableList& list );
 
+
+	/**
+	 * recoursive depth first search, build internal trees
+	 * */
 	void startrdfs();
+
+	/**
+	 * Initialize data structures. Must be called before any other
+	 * function.
+	 * */
+	void init() { startrdfs(); }
 
 	/**
 	 * compute topological sorted list
