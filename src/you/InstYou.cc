@@ -69,9 +69,10 @@ class InstYou::DeltaToApply
     PMPackageDelta _delta;
     PMPackagePtr _pkg;
     PMPackagePtr _basepkg;
+    bool _from_filesystem;
 
-    DeltaToApply( PMYouPatchPtr patch, const PMPackageDelta& delta, PMPackagePtr pkg, PMPackagePtr basepkg)
-      : _patch(patch), _delta(delta), _pkg(pkg), _basepkg(basepkg)
+    DeltaToApply( PMYouPatchPtr patch, PMPackageDelta delta, PMPackagePtr pkg, PMPackagePtr basepkg, bool from_filesystem)
+      : _patch(patch), _delta(delta), _pkg(pkg), _basepkg(basepkg), _from_filesystem(from_filesystem)
       {
       }
 };
@@ -86,13 +87,14 @@ static void clearDeltasToApplyList(std::vector<InstYou::DeltaToApply*>& list)
   list.clear();
 }
 
+/** check if sequence info of delta matches the files of the installed packge */
+static bool delta_applies_to_filesystem(const PMPackageDelta& delta, bool quickcheck = false );
+
 static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackageDelta& delta );
 
 static PMError check_md5(const std::string& md5, const Pathname& path)
 {
   PMError err;
-
-  cerr << "check " << md5 << " " << path << endl;
 
   if(md5.empty())
     return err;
@@ -274,6 +276,7 @@ PMError InstYou::retrievePatchInfo()
       bool havedelta = false;
       if(_usedeltas)
       {
+#if 0
 	std::list<PMPackageDelta> d = (*itPkg)->deltas();
 	std::list<PMPackageDelta>::iterator it = d.begin();
 	std::list<PMPackageDelta>::iterator end = d.end();
@@ -288,6 +291,14 @@ PMError InstYou::retrievePatchInfo()
 	    havedelta = true;
 	    break;
 	  }
+	}
+#endif
+	DeltaToApply* delta = FetchSuitableDelta(*itPatch, *itPkg, true);
+	if(delta)
+	{
+	  havedelta = true;
+	  _info->packageDataProvider()->setArchiveSize( *itPkg, delta->_delta.size() );
+	  delete delta;
 	}
       }
 
@@ -483,7 +494,11 @@ struct DeltaSortBySourceCriterion
 {
   bool operator()(const InstYou::DeltaToApply* lhs, const InstYou::DeltaToApply* rhs)
   {
-    if(lhs->_basepkg->source() != rhs->_basepkg->source())
+    if(!lhs || !rhs || !lhs->_basepkg || !rhs->_basepkg)
+    {
+      return false;
+    }
+    else if(lhs->_basepkg->source() != rhs->_basepkg->source())
     {
       return lhs->_basepkg->source() < rhs->_basepkg->source();
     }
@@ -652,6 +667,8 @@ PMError InstYou::processPatches()
 
     patch = nextPatch();
   }
+  
+  disconnect();
 
   log("\n");
   if ( error == YouError::E_user_abort ) {
@@ -663,10 +680,10 @@ PMError InstYou::processPatches()
   }
   log( "\n" );
 
-  disconnect();
-
   if(_usedeltas)
   {
+    Pathname orig;
+
     sort(_deltastoapply.begin(), _deltastoapply.end(), DeltaSortBySourceCriterion());
 
     for (std::vector<DeltaToApply*>::iterator it = _deltastoapply.begin();
@@ -676,33 +693,36 @@ PMError InstYou::processPatches()
       Pathname rpmPath = delta->_patch->product()->rpmPath( delta->_pkg, false );
       Pathname dest = _media.localPath( rpmPath );
 
-      error = patchProgress( 0 );
-      if ( error ) return error;
-
-      log(stringutil::form(_("Fetching package %s from installation medium"), delta->_basepkg->name()->c_str()) + " ... ");
-
-      Pathname orig;
-      error = delta->_basepkg->providePkgToInstall(orig);
-      if (error)
+      if(!delta->_from_filesystem)
       {
-	ERR << "Unable to fetch " << delta->_basepkg->nameEd() << ": " << error << endl;
-	log(stringutil::form(_("Failed: %s\n"), error.asString().c_str() ));
-	return error;
-      }
-      else
-      {
-	ifstream file(orig.asString().c_str());
-	string digest = Digest::digest("MD5", file);
 
-	if(digest.empty() || digest != delta->_delta.srcmd5())
+	error = patchProgress( 0 );
+	if ( error ) return error;
+
+	log(stringutil::form(_("Fetching package %s from installation medium"), delta->_basepkg->name()->c_str()) + " ... ");
+
+	error = delta->_basepkg->providePkgToInstall(orig);
+	if (error)
 	{
-	  PMError err(YouError::E_md5sum_mismatch,stringutil::form(_("file '%s' has wrong MD5 checksum"),
-			  orig.asString().c_str()));
-	  log(err.errstr() + "\n");
-	  return err;
+	  ERR << "Unable to fetch " << delta->_basepkg->nameEd() << ": " << error << endl;
+	  log(stringutil::form(_("Failed: %s\n"), error.asString().c_str() ));
+	  return error;
 	}
+	else
+	{
+	  ifstream file(orig.asString().c_str());
+	  string digest = Digest::digest("MD5", file);
 
-	log(_("Ok\n"));
+	  if(digest.empty() || digest != delta->_delta.srcmd5())
+	  {
+	    PMError err(YouError::E_md5sum_mismatch,stringutil::form(_("file '%s' has wrong MD5 checksum"),
+			    orig.asString().c_str()));
+	    log(err.errstr() + "\n");
+	    return err;
+	  }
+
+	  log(_("Ok\n"));
+	}
       }
 
       Pathname deltaloc = _media.localPath(delta->_patch->product()->deltaPath( delta->_delta.filename()));
@@ -714,33 +734,43 @@ PMError InstYou::processPatches()
 	return err;
       }
 
-      const char* argv[] = {
-	"delta2rpm",
-	orig.asString().c_str(),
-	dest.asString().c_str(),
-	deltaloc.asString().c_str(),
-	NULL
-      };
+      const char* argv[8] = {0}; // must match max nr of args below
+
+      {
+	unsigned i = 0;
+	argv[i++] = "applydeltarpm";
+	argv[i++] = "-p";
+	argv[i++] = "-p";
+
+	if(!delta->_from_filesystem)
+	{
+	  argv[i++] = "-r";
+	  argv[i++] = orig.asString().c_str();
+	}
+	argv[i++] = deltaloc.asString().c_str();
+	argv[i++] = dest.asString().c_str();
+	argv[i] = NULL;
+      }
 
       log(string(_("Applying delta")) + " ... ");
 
       error = patchProgress( 0 );
       if ( error ) return error;
 
-      ExternalProgram prg(argv);
+      ExternalProgram prg(argv, ExternalProgram::Stderr_To_Stdout, true);
       string output;
       ProgressCounter counter;
-      counter.init(0,delta->_pkg->size(), 0);
+      counter.init(0, 100, 0);
       for ( string line( prg.receiveLine() ); line.length(); line = prg.receiveLine() )
       {
-	if(line.substr(0, sizeof("progress: ")-1) == "progress: ")
+	if(line.find(" percent finished.") != string::npos)
 	{
-	  FSize cursize(line.substr(sizeof("progress: ")-1), FSize::B);
+	  unsigned percent = atoi(line.c_str());
 
-	  if(cursize <= 0 ||  cursize > delta->_pkg->size())
+	  if(percent > 100)
 	    continue;
 
-	  counter.set(cursize);
+	  counter.set(percent);
 	  if(counter.updateIfNewPercent(3) && counter.percent())
 	  {
 	    error = patchProgress( counter.percent() );
@@ -1153,6 +1183,33 @@ bool InstYou::packageToBeInstalled( const PMYouPatchPtr &patch,
   return true;
 }
 
+static bool delta_applies_to_filesystem(const PMPackageDelta& delta, bool quickcheck )
+{
+  if(delta.seq().empty())
+    return false;
+
+  unsigned i = 0;
+  const char* argv[5] = {0}; // must match max nr of args below
+  argv[i++] = "applydeltarpm";
+  if(!quickcheck)
+    argv[i++] = "-c";
+  argv[i++] = "-s";
+  argv[i++] = delta.seq().c_str();
+  argv[i] = NULL;
+
+  ExternalProgram prg(argv, ExternalProgram::Discard_Stderr);
+  if(prg.close() == 0)
+  {
+    DBG << delta.seq() << " applies from filesystem" << endl;
+    return true;
+  }
+  else
+  {
+    DBG << delta.seq() << " does NOT apply from filesystem" << endl;
+    return false;
+  }
+}
+
 static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackageDelta& delta )
 {
     DBG << "delta " << delta.filename() << " needs candidate for " <<  pkg->name() << endl;
@@ -1170,7 +1227,7 @@ static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackage
     {
 	PMPackagePtr p = *it;
 	if(!p || p == pkg) continue;
-	DBG << "check " << pkg->nameEd() << endl;
+	DBG << "check " << pkg->nameEd() << ' ' << pkg->buildtime() << endl;
 	if(!p->source() || !p->source()->descr())
 	{
 	    INT << "package has no installation source?" << endl;
@@ -1178,7 +1235,7 @@ static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackage
 	}
 	else if(!p->source()->descr()->usefordeltas())
 	{
-	    DBG << "package installation source is not usable for deltas" << endl;
+	    DBG << "package installation source " << p->source()->descr()->content_label() << " is not usable for deltas" << endl;
 	    continue;
 	}
 
@@ -1193,6 +1250,58 @@ static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackage
     }
     DBG << "no matching candiate found" << endl;
     return NULL;
+}
+
+
+/** return the first usable delta for pkg, NULL otherwise.
+ * @param pkg the package to check
+ * @param quickcheck whether availability of the delta should only be
+ *        checked or also downloaded. quickcheck does not check if the
+ *        md5sum of every file in the filesystem matches since that takes
+ *        quite some time. when set to false a full check is done to make
+ *        really sure though.
+ * @return pointer to DeltaToApply. must be freed manually
+ * */
+InstYou::DeltaToApply* InstYou::FetchSuitableDelta(PMYouPatchPtr patch, PMPackagePtr pkg, bool quickcheck)
+{
+  std::list<PMPackageDelta> d = pkg->deltas();
+  std::list<PMPackageDelta>::iterator it = d.begin();
+  std::list<PMPackageDelta>::iterator end = d.end();
+  for(; it != end; ++it)
+  {
+    bool from_filesystem = false;
+    bool fetch_delta = false;
+    PMPackagePtr basepkg = NULL;
+
+    if(delta_applies_to_filesystem(*it, quickcheck))
+    {
+      from_filesystem = true;
+      fetch_delta = true;
+    }
+    else
+    {
+      basepkg = getPackageForDelta(pkg, *it);
+      if(basepkg)
+      {
+	DBG << "delta " << it->filename() << " fits " <<  basepkg->nameEd() << endl;
+	fetch_delta = true;
+      }
+      else
+      {
+	DBG << "no matching package found for delta " << it->filename() << endl;
+      }
+    }
+
+    if(fetch_delta)
+    {
+      if(quickcheck || (retrieveDelta(it->filename(), patch->product(), it->md5sum()) == PMError::E_ok))
+      {
+	return new DeltaToApply(patch, *it, pkg, basepkg, from_filesystem);
+      }
+    }
+  }
+
+  return NULL;
 }
 
 PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
@@ -1229,31 +1338,9 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
 
     if(_usedeltas)
     {
-      std::list<PMPackageDelta> d = (*itPkg)->deltas();
-      std::list<PMPackageDelta>::iterator it = d.begin();
-      std::list<PMPackageDelta>::iterator end = d.end();
-      bool havedelta = false;
-      for(; it != end; ++it)
-      {
-	PMPackagePtr basepkg = getPackageForDelta((*itPkg), *it);
-	if(basepkg)
-	{
-	  DBG << "delta " << it->filename() << " fits " <<  basepkg->nameEd() << endl;
-	  PMError err = retrieveDelta(it->filename(), patch->product(), it->md5sum() );
-	  if(!err)
-	  {
-	    havedelta = true;
-	    _deltastoapply.push_back(new DeltaToApply(patch, *it, (*itPkg), basepkg));
-	    break;
-	  }
-	}
-	else
-	{
-	  DBG << "no matching package found for delta " << it->filename() << endl;
-	}
-      }
-      if(havedelta)
-	continue;
+      DeltaToApply* delta = FetchSuitableDelta(patch, *itPkg);
+      if(delta)
+	_deltastoapply.push_back(delta);
     }
 
     error = retrievePackage( *itPkg, patch->product() );
