@@ -238,7 +238,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
           break;
       }
       
-      err.setErrDetails( _curlError );
+      err.setDetails( _curlError );
       return err;
     }
     

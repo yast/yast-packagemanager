@@ -134,6 +134,6 @@ std::string PMError::defaulterrstr( const std::string & cl, const std::string & 
 std::ostream & operator<<( std::ostream & str, const PMError & obj )
 {
   str << obj.errstr();
-  if ( !obj.errDetails().empty() ) str << ": " << obj.errDetails();
+  if ( !obj.details().empty() ) str << ": " << obj.details();
   return str;
 }
