@@ -34,8 +34,6 @@ using namespace std;
 //	METHOD NAME : PMSelectionManager::PMSelectionManager
 //	METHOD TYPE : Constructor
 //
-//	DESCRIPTION :
-//
 PMSelectionManager::PMSelectionManager()
 {
 }
@@ -46,8 +44,6 @@ PMSelectionManager::PMSelectionManager()
 //	METHOD NAME : PMSelectionManager::~PMSelectionManager
 //	METHOD TYPE : Destructor
 //
-//	DESCRIPTION :
-//
 PMSelectionManager::~PMSelectionManager()
 {
 }
@@ -57,8 +53,6 @@ PMSelectionManager::~PMSelectionManager()
 //
 //	METHOD NAME : PMSelectionManager::assertObjectType
 //	METHOD TYPE : PMObjectPtr
-//
-//	DESCRIPTION :
 //
 PMObjectPtr PMSelectionManager::assertObjectType( const PMObjectPtr & object_r ) const
 {
@@ -74,8 +68,6 @@ PMObjectPtr PMSelectionManager::assertObjectType( const PMObjectPtr & object_r )
 **
 **	FUNCTION NAME : operator<<
 **	FUNCTION TYPE : ostream &
-**
-**	DESCRIPTION :
 */
 ostream & operator<<( ostream & str, const PMSelectionManager & obj )
 {
@@ -83,14 +75,11 @@ ostream & operator<<( ostream & str, const PMSelectionManager & obj )
     return str;
 }
 
-#if 0
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMSelectionManager::setLast
 //	METHOD TYPE : void
-//
-//	DESCRIPTION :
 //
 inline void PMSelectionManager::setLast( const PMSelectablePtr & sel_r, PMSelectable::Fate val_r )
 {
@@ -103,22 +92,17 @@ inline void PMSelectionManager::setLast( const PMSelectablePtr & sel_r, PMSelect
 //	METHOD NAME : PMSelectionManager::lastState
 //	METHOD TYPE : PMSelectable::Fate
 //
-//	DESCRIPTION :
-//
 inline PMSelectable::Fate PMSelectionManager::lastState( const PMSelectablePtr & sel_r ) const
 {
   ActiveMap::const_iterator it( _last_active.find( sel_r ) );
   return( it == _last_active.end() ? PMSelectable::UNMODIFIED : it->second);
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMSelectionManager::getState
 //	METHOD TYPE : PMSelectable::Fate
-//
-//	DESCRIPTION :
 //
 inline PMSelectable::Fate PMSelectionManager::getState( const PMSelectablePtr & sel_r ) const
 {
@@ -131,8 +115,6 @@ inline PMSelectable::Fate PMSelectionManager::getState( const PMSelectablePtr & 
 //	METHOD NAME : PMSelectionManager::activate
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
-//
 PMError PMSelectionManager::activate()
 {
   return activate( Y2PM::packageManager() );
@@ -143,8 +125,6 @@ PMError PMSelectionManager::activate()
 **
 **	FUNCTION NAME : setAdd
 **	FUNCTION TYPE : inline void
-**
-**	DESCRIPTION :
 */
 inline void setAdd( PMManager::PMSelectableVec & lhs, const PMManager::PMSelectableVec & rhs )
 {
@@ -156,8 +136,6 @@ inline void setAdd( PMManager::PMSelectableVec & lhs, const PMManager::PMSelecta
 //
 //	METHOD NAME : PMSelectionManager::activate
 //	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
 //
 PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
 {
@@ -171,22 +149,50 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
   PMSelectableVec pkgOnSystem;   // soft: Keep it OnSystem.
   // selections to delete:
   PMSelectableVec pkgOffSystem;  // soft: if no one minds, bring it OffSystem
-  // EVERYTHING ELSE:               is set to unmodified
+  // EVERYTHING ELSE:
+  PMSelectableVec pkgUnmodified; // is set to unmodified
 
   for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
     const PMSelectablePtr & sptr( *it );
 
+    PMSelectable::Fate lstate = lastState( sptr );
     PMSelectable::Fate nstate = getState( sptr );
 
+    if ( lstate != nstate ) {
+      // tag previously selected packages to unmodify.
+      // !!! Here we must check, if installed/candidate objects needed do exist.
+      //     E.g even if lstate was TO_DELETE, it might be the installedObj isn't present anymore.
+      switch ( lstate ) {
+      case PMSelectable::TO_DELETE:
+      case PMSelectable::UNMODIFIED: // for savety
+	if ( sptr->installedObj() ) {
+	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
+	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
+	}
+	break;
+      case PMSelectable::TO_INSTALL:
+	if ( sptr->candidateObj() ) {
+	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->candidateObj() )->inspacks_ptrs() );
+	  setAdd( pkgUnmodified, PMSelectionPtr( sptr->candidateObj() )->delpacks_ptrs() );
+	}
+	break;
+	break;
+      }
+    }
+
     switch ( nstate ) {
+      // Here we know installed/candidate objects needed do exist.
+      // E.g. state can't be TO_DELETE, if there's no installedObj.
     case PMSelectable::TO_DELETE:
       // set to delete
       setAdd( pkgOffSystem, PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
+      setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
       break;
     case PMSelectable::UNMODIFIED:
       // keep an installed one
       if ( sptr->has_installed() ) {
 	setAdd( pkgOnSystem, PMSelectionPtr( sptr->installedObj() )->inspacks_ptrs() );
+	setAdd( pkgUnmodified, PMSelectionPtr( sptr->installedObj() )->delpacks_ptrs() );
       }
       break;
     case PMSelectable::TO_INSTALL:
@@ -196,20 +202,21 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
       break;
     }
 
-#if 0
     // remember new state
     setLast( sptr, nstate );
-#endif
   }
 
   ///////////////////////////////////////////////////////////////////
   // Adjust packagemanager states
   ///////////////////////////////////////////////////////////////////
-  for ( PMSelectableVec::const_iterator it = package_mgr.begin(); it != package_mgr.end(); ++it ) {
+  // First of all unset everyting collected in pkgUnmodified. Might be some of them
+  // are set again below, but we don't mind.
+  for ( PMSelectableVec::const_iterator it = pkgUnmodified.begin(); it != pkgUnmodified.end(); ++it ) {
     (*it)->appl_unset();
   }
   // now all modification requests are user requests
   PMSelectableVec pkgProcessed;
+
 
   // always delete delpacks
   for ( PMSelectableVec::const_iterator it = pkgToDelete.begin(); it != pkgToDelete.end(); ++it ) {
@@ -251,8 +258,6 @@ PMError PMSelectionManager::activate( PMPackageManager & package_mgr )
 //
 //	METHOD NAME : PMSelectionManager::installOnTarget
 //	METHOD TYPE : PMError
-//
-//	DESCRIPTION :
 //
 PMError PMSelectionManager::installOnTarget()
 {
@@ -311,9 +316,7 @@ PMError PMSelectionManager::installOnTarget()
   if ( must_reload ) {
     MIL << "Installed Selections have canged. Reloading from InstTarget" << endl;
     // reload from InstTarget and reset all active selections
-#if 0
     _last_active.clear();
-#endif
     poolSetInstalled( Y2PM::instTarget().getSelections() );
     for ( PMSelectableVec::const_iterator it = begin(); it != end(); ++it ) {
       (*it)->user_unset();
