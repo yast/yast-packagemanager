@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Mar  4 17:11:14 CET 2004 - cschum@suse.de
+
+- YOU: Process mediamap file. Doesn't request actual media changes
+       yet.
+- YOU: Add support for separate YOU high-level log.
+- YOU: Store patches in a vector, not a list.
+
+-------------------------------------------------------------------
 Wed Mar  3 14:39:35 CET 2004 - cschum@suse.de
 
 - InstYou: Merge functions retrievePatches() and installPatches()

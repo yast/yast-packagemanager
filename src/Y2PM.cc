@@ -405,11 +405,11 @@ PMYouPatchManager & Y2PM::youPatchManager()
 
     _youPatchManager->instYou().initProduct();
 
-    list<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
+    vector<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
 
     _youPatchManager->poolSetInstalled( patches );
 
-    list<PMYouPatchPtr>::const_iterator itPatch;
+    vector<PMYouPatchPtr>::const_iterator itPatch;
     for( itPatch = patches.begin(); itPatch != patches.end(); ++itPatch ) {
       Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
     }

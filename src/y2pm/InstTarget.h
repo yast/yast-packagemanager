@@ -156,7 +156,7 @@ class InstTarget: public CountedRep, public InstData {
      * generate PMYouPatch objects for each patch on the source
      * @return list of PMYouPatchPtr on this source
      **/
-    virtual const std::list<PMYouPatchPtr> & getPatches() const;
+    virtual const std::vector<PMYouPatchPtr> & getPatches() const;
 
     ///////////////////////////////////////////////////////////////////
     // Package related interface
@@ -355,7 +355,7 @@ class InstTarget: public CountedRep, public InstData {
     ///////////////////////////////////////////////////////////////////
   private:
 
-      mutable std::list<PMYouPatchPtr> _patches;
+      mutable std::vector<PMYouPatchPtr> _patches;
       mutable bool _patchesInitialized;
 
   public:

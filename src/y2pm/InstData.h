@@ -76,7 +76,7 @@ class InstData {
      * Default implementation provided returning empty list.
      * @return list of PMSolvablePtr on this source
      */
-    virtual const std::list<PMYouPatchPtr>& getPatches (void) const = 0;
+    virtual const std::vector<PMYouPatchPtr>& getPatches (void) const = 0;
 
     unsigned numPatches() const { return getPatches().size(); }
 

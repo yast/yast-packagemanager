@@ -118,6 +118,7 @@ void PMYouSettings::init( const string &product, const string &version,
   _dryRun = false;
   _getAll = false;
   _getOnly = false;
+  _isLogEnabled = true;
 
   PMYouProductPtr p = new PMYouProduct( product, version, baseArch,
                                         *this );
@@ -250,6 +251,11 @@ string PMYouSettings::directoryFileName()
   else return dir;
 }
 
+string PMYouSettings::mediaMapFileName()
+{
+  return "mediamap";
+}
+
 Pathname PMYouSettings::cookiesFile()
 {
   return localWriteDir() + "cookies";
@@ -263,6 +269,11 @@ Pathname PMYouSettings::configFile()
 Pathname PMYouSettings::passwordFile()
 {
   return localWriteDir() + "password";
+}
+
+Pathname PMYouSettings::logFile()
+{
+  return localWriteDir() + "youlog";
 }
 
 SysConfig *PMYouSettings::config()
@@ -389,4 +400,14 @@ void PMYouSettings::setGetOnly( bool dry )
 bool PMYouSettings::getOnly() const
 {
   return _getOnly;
+}
+
+void PMYouSettings::setLogEnabled( bool e )
+{
+  _isLogEnabled = e;
+}
+
+bool PMYouSettings::isLogEnabled() const
+{
+  return _isLogEnabled;
 }
