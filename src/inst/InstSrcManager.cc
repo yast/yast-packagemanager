@@ -774,6 +774,44 @@ void InstSrcManager::disableAllSources()
   }
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::releaseMedia
+//	METHOD TYPE : PMError
+//
+PMError InstSrcManager::releaseMedia( const ISrcId isrc_r, bool if_removable_r ) const
+{
+  InstSrcPtr srcptr( lookupId( isrc_r ) );
+  if ( ! srcptr ) {
+    WAR << "bad ISrcId " << isrc_r << endl;
+    return Error::E_bad_id;
+  }
+  return srcptr->releaseMedia( if_removable_r );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::releaseAllMedia
+//	METHOD TYPE : PMError
+//
+PMError InstSrcManager::releaseAllMedia( bool if_removable_r ) const
+{
+  PMError ret;
+
+  MIL << "Going to release all InstSrc'es media..." << endl;
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    PMError err = (*it)->releaseMedia( if_removable_r );
+    if ( err ) {
+      WAR << err << " returned by " << *it << endl;
+      ret = Error::E_error;
+    }
+  }
+
+  return ret;
+}
+
 
 /******************************************************************
 **
