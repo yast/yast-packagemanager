@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Thu Sep 18 22:20:44 CEST 2003 - ma@suse.de
+
+- Avoid creation of a second rpm3 database backup, after database was
+  converted.
+- Automaticaly close rpm database, if no handles outside librpmDb
+  exist. The necessity to explicitly call dbClose to avoid locking
+  the database longer than necessary is too error-prone.
+- Import of gpg-pubkeys fixed (#30350)
+- 2.8.24
+
+-------------------------------------------------------------------
 Wed Sep 17 15:22:55 CEST 2003 - lnussel@suse.de
 
 - First check obsoletes, then conflicts. Fixes #31001 and #31031.

@@ -112,13 +112,13 @@ class RpmDb: virtual public Rep
      * Remove the rpm4 database in dbdir_r and optionally any backup created
      * on conversion.
      **/
-    static void removeV4( const Pathname & dbdir_r, bool v3backup_r = false );
+    static void removeV4( const Pathname & dbdir_r, bool v3backup_r );
 
     /**
      * Remove the rpm3 database in dbdir_r. Create a backup copy named
      * packages.rpm3 if it does not already exist.
      **/
-    static void removeV3( const Pathname & dbdir_r );
+    static void removeV3( const Pathname & dbdir_r, bool v3backup_r );
 
     /**
      * Called before the database is modified by installPackage/removePackage.

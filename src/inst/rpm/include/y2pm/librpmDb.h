@@ -88,6 +88,19 @@ class librpmDb : virtual public Rep {
      **/
     static librpmDb * newLibrpmDb( Pathname root_r, Pathname dbPath_r, bool readonly_r, PMError & err_r );
 
+    /**
+     * Access the database at the current default location. If necessary
+     * (eg. after @ref dbRelease), the database is opened. This just creates
+     * the internal handle. Once the handle is passed to e.g. some
+     * @ref db_const_iterator, the database will be closed if the last
+     * outstanding reference goes out of scope. If no external reference is
+     * created, you'll have to explicitly call @ref dbRelease to close the
+     * database.
+     *
+     * @return @ref PMError
+     **/
+    static PMError dbAccess();
+
   public:
 
     /**
@@ -138,16 +151,7 @@ class librpmDb : virtual public Rep {
     static PMError dbAccess( const Pathname & root_r, const Pathname & dbPath_r );
 
     /**
-     * Access the database at the current default location. If necessary
-     * (eg. after @ref dbRelease), the database is opened. This usually
-     * happens on demand, eg.by creating a @ref db_const_iterator;
-     *
-     * @return @ref PMError
-     **/
-    static PMError dbAccess();
-
-    /**
-     * Same as &ref dbAccess(). Additionally returns the database handle if
+     * Same as &ref dbAccess(), but returns the database handle if
      * avaialble, otherwise NULL. This creates an external reference, thus
      * it should not be used longer than necessary. Be prepared that the
      * handle might become invalid (see @ref dbRelease) later.
@@ -234,6 +238,11 @@ class librpmDb : virtual public Rep {
      * static interface only.
      **/
     librpmDb( const Pathname & root_r, const Pathname & dbPath_r, bool readonly_r );
+
+    /**
+     * Trigger from @ref Rep, after rep_cnt was decreased.
+     **/
+    virtual void unref_to( unsigned rep_cnt_r ) const;
 
   public:
 
