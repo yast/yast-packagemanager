@@ -235,7 +235,7 @@ void InstYou::selectPatches( int kinds )
 
   for( it = _patches.begin(); it != _patches.end(); ++it ) {
     if ( ( (*it)->kind() == PMYouPatch::kind_yast )
-         && hasNewPackages( *it, true ) ) {
+         && hasOnlyNewPackages( *it ) ) {
       PMSelectablePtr selectable = (*it)->getSelectable();
       if ( !selectable ) {
         INT << "Patch has no selectable." << endl;
@@ -252,23 +252,30 @@ void InstYou::selectPatches( int kinds )
     for ( it = _patches.begin(); it != _patches.end(); ++it ) {
       D__ << "Check patch " << (*it)->fullName() << " ("
           << (*it)->kindLabel() << ")" << endl;
-      if ( ( (*it)->kind() & kinds ) && hasNewPackages( *it, true ) ) {
-        PMSelectablePtr selectable = (*it)->getSelectable();
-        if ( !selectable ) {
-          INT << "Patch has no selectable." << endl;
-          return;
-        }
+      if ( (*it)->kind() & kinds ) {
+        bool toInstall = false;
 
-        PMYouPatchPtr candidate = selectable->candidateObj();
-        D__ << "Patch " << (*it)->fullName();
-        if ( candidate ) {
-          D__ << " has candidate." << endl;
-          D__ << "Kind: " << candidate->kindLabel() << endl;
-          if ( candidate->kind() & kinds ) {
-            DBG << "Select patch: " << (*it)->fullName() << endl;
-            selectable->user_set_install();
+        if ( (*it)->updateOnlyNew() ) toInstall = hasNewPackages( *it );
+        else toInstall = hasOnlyNewPackages( *it );
+        
+        if ( toInstall ) {
+          PMSelectablePtr selectable = (*it)->getSelectable();
+          if ( !selectable ) {
+            INT << "Patch has no selectable." << endl;
+            return;
           }
-        } else D__ << " has no candidate." << endl;
+
+          PMYouPatchPtr candidate = selectable->candidateObj();
+          D__ << "Patch " << (*it)->fullName();
+          if ( candidate ) {
+            D__ << " has candidate." << endl;
+            D__ << "Kind: " << candidate->kindLabel() << endl;
+            if ( candidate->kind() & kinds ) {
+              DBG << "Select patch: " << (*it)->fullName() << endl;
+              selectable->user_set_install();
+            }
+          } else D__ << " has no candidate." << endl;
+        }
       }
     }
   }
@@ -571,6 +578,7 @@ bool InstYou::installPatches()
           installedPatches++;
           log( _("Ok\n") );
         } else {
+          ERR << "Install error " << patch->name() << ": " << error << endl;
           log( _("Error\n") );
 
           string msg;
@@ -657,10 +665,12 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
 
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-    if ( (*itPkg)->location().empty() ) {
-      if ( !patch->updateOnlyInstalled() || (*itPkg)->hasInstalledObj() ) {
-        return YouError::E_empty_location;
-      }
+    if ( (*itPkg)->location().empty() &&
+         packageToBeInstalled( patch, *itPkg ) ) {
+      error = YouError::E_empty_location;
+      error.setDetails( "Patch: " + patch->name().asString() +
+                        "\nPackage: " + (*itPkg)->name().asString() );
+      return error;
     }
   }
 
@@ -678,12 +688,9 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
     error = patchProgress( ( progressCurrent++ + 1 ) * 100 /
                            progressTotal );
     if ( error ) return error;
-    if ( patch->updateOnlyInstalled() ) {
-      if ( !(*itPkg)->forceInstall() && !(*itPkg)->hasInstalledObj() ) {
-        D__ << "Don't install '" << (*itPkg)->name()
-            << "', no installed obj and UpdateOnlyInstalled=true." << endl;
-        continue;
-      }
+    if ( !packageToBeInstalled( patch, *itPkg ) ) {
+      D__ << "Don't install" << endl;
+      continue;
     }
 
     Pathname fileName;
@@ -802,6 +809,24 @@ class CurlCallbacks : public MediaCurl::Callbacks
     InstYou *_instYou;
 };
 
+bool InstYou::packageToBeInstalled( const PMYouPatchPtr &patch,
+                                    const PMPackagePtr &pkg )
+{
+  if ( patch->updateOnlyInstalled() ) {
+    if ( !pkg->forceInstall() && !pkg->hasInstalledObj() ) {
+      D__ << "Package isn't to be installed: '" << pkg->name()
+          << "', no installed obj and UpdateOnlyInstalled=true." << endl;
+      return false;
+    }
+  }
+  if ( patch->updateOnlyNew() && !isNewerPackage( pkg ) ) {
+    D__ << "Package isn't to be installed: '" << pkg->name()
+        << "', package not newer and UpdateOnlyNew=true." << endl;
+    return false;
+  }
+  return true;
+}
+
 PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
 {
   D__ << "PATCH: " << patch->name() << endl;
@@ -827,12 +852,9 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     }
     progressCurrent += 100;
 
-    if ( patch->updateOnlyInstalled() && !_settings->getAll() ) {
-      if ( !(*itPkg)->forceInstall() && !(*itPkg)->hasInstalledObj() ) {
-        D__ << "Don't download '" << (*itPkg)->name()
-            << "', no installed obj and UpdateOnlyInstalled=true." << endl;
-        continue;
-      }
+    if ( !_settings->getAll() && !packageToBeInstalled( patch, *itPkg ) ) {
+      D__ << "Don't download" << endl;
+      continue;
     }
 
     error = retrievePackage( *itPkg, patch->product() );
@@ -1162,8 +1184,7 @@ void InstYou::showPatches( bool verbose )
   }
 }
 
-bool InstYou::hasNewPackages( const PMYouPatchPtr &patch,
-                              bool requireInstalled )
+bool InstYou::hasOnlyNewPackages( const PMYouPatchPtr &patch )
 {
   bool install = false;
 
@@ -1186,8 +1207,27 @@ bool InstYou::hasNewPackages( const PMYouPatchPtr &patch,
       } else if ( instEd < candEd ) {
         install = true;
       }
-    } else if ( !requireInstalled ) {
+    }
+  }
+
+  D__ << "hasOnlyNewPackages: " << patch->fullName() << " "
+      << ( install ? "yes" : "no" ) << endl;
+
+  return install;
+}
+
+bool InstYou::hasNewPackages( const PMYouPatchPtr &patch )
+{
+  bool install = false;
+
+  // Check, if patch contains at least one package which is newer than the
+  // correpsonding package on the system. If yes, trigger install.
+  list<PMPackagePtr> packages = patch->packages();
+  list<PMPackagePtr>::const_iterator itPkg;
+  for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+    if ( isNewerPackage( *itPkg ) ) {
       install = true;
+      break;
     }
   }
 
@@ -1195,6 +1235,22 @@ bool InstYou::hasNewPackages( const PMYouPatchPtr &patch,
       << ( install ? "yes" : "no" ) << endl;
 
   return install;
+}
+
+bool InstYou::isNewerPackage( const PMPackagePtr &pkg )
+{
+  if ( !pkg->hasInstalledObj() ) return false;
+
+  PkgEdition candEd = pkg->edition();
+  D__ << "  PKG-CAND: " << pkg->name() << "-" << candEd << endl;
+  PMPackagePtr installed = pkg->getInstalledObj();
+  if ( !installed ) {
+    INT << "No installed package" << endl;
+    return false;
+  }
+  PkgEdition instEd = installed->edition();
+  D__ << "  PKG-INST: " << installed->name() << "-" << instEd << endl;
+  return candEd > instEd;
 }
 
 bool InstYou::firesPackageTrigger( const PMYouPatchPtr &patch )

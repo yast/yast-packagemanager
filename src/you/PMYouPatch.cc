@@ -52,8 +52,9 @@ IMPL_DERIVED_POINTER( PMYouPatch, PMSolvable );
 PMYouPatch::PMYouPatch( const PkgName &    name_r,
 			const PkgEdition & edition_r,
                         const PkgArch & arch_r )
-    : PMObject( name_r, edition_r, arch_r )
-    , _kind( kind_invalid ), _updateOnlyInstalled( false ),
+  : PMObject( name_r, edition_r, arch_r ),
+    _kind( kind_invalid ), _updateOnlyInstalled( false ),
+    _updateOnlyNew( false ),
     _packagesInstalled( false ), _skipped( false )
 {
 }

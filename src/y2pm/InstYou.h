@@ -311,13 +311,34 @@ class InstYou {
     PMError executeScript( const std::string &, const PMYouProductPtr & );
 
     /**
-     * check, if patch has new packages.
-     *
-     * @param requireInstalled if true, it is required that at least one
-     *                         package from the patch is already installed
-     *                         in an older version.
-     */
-    bool hasNewPackages( const PMYouPatchPtr &patch, bool requireInstalled );
+      Check, if patch has only packages which are at least as new as the
+      installed version. If the patch contains a package which is older than the
+      installed version or the patch doesn't contain a package which is newer
+      than the installed version false is returned. 
+     
+      @param requireInstalled if true, it is required that at least one
+                              package from the patch is already installed
+                              in an older version.
+    */
+    bool hasOnlyNewPackages( const PMYouPatchPtr &patch );
+    /**
+      Check, if the patch has at least one package which is newer than the
+      instakked version.
+    */
+    bool hasNewPackages( const PMYouPatchPtr &patch );
+
+    /**
+      Check, if package is newer than the installed version. Return false if the
+      package isn't installed yet.
+    */
+    bool isNewerPackage( const PMPackagePtr &pkg );
+
+    /**
+      Return if the package is to be installed on the system.
+    */
+    bool packageToBeInstalled( const PMYouPatchPtr &patch,
+                               const PMPackagePtr &pkg );
+
     bool firesPackageTrigger( const PMYouPatchPtr &patch );
     bool firesScriptTrigger( const PMYouPatchPtr &patch );
 

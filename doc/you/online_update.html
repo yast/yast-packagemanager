@@ -268,6 +268,18 @@ Segakcap:
   default value for UpdateOnlyInstalled is "false".</td>
 </tr>
 <tr>
+  <td>UpdateOnlyNew</td>
+  <td>"true" or "false"</td>
+  <td>If set to "true", only packages are installed which are contained in the
+  patch in a newer version than on the installed system. Packages in the same
+  version aren't installed again. Packages which are contained in the patch in
+  an older version than on the installed system aren't installed and don't
+  prevent pre-selection of the patch. Packages which aren't already installed on
+  the system also aren't installed by the patch.
+  Default value for UpdateOnlyNew is "false".<br/>
+  <em>Since 9.1</em></td>
+</tr>
+<tr>
   <td>Prescript</td>
   <td>file name</td>
   <td>Name of script to be executed before installing the RPMs of the patch.</td>
@@ -389,6 +401,9 @@ by YOU:
   be selected.</li>
   <li>If one or more packages of the patch are older as the installed package, the patch will not
   be selected, even if other packages of the patch are newer than the installed one.</li>
+  <li>If the patch has the attribute "UpdateOnlyNew" set to "true"
+  (available since 9.1) the patch is selected if it contains at least one
+  package which is newer than on the installed system.</li>
 <!--  <li>One or more packages have a flag ( "Category" ) which is a installed package.</li>-->
 </ul>
 
@@ -398,6 +413,16 @@ updated which are already installed unless they have the flag "ForceInstall" set
 to "true". The "ForceInstall" flag is supported since 9.1.
 </p>
 
+<p>
+Since 9.1 there is the patch attribute "UpdateOnlyNew". If this is set to true
+only packages are installed which are newer
+than the package on the installed system. This means that packages which are in
+the same version in the patch as on the system aren't downloaded and installed
+again and that
+packages whose version in the patch is older than on the installed system aren't
+downgraded. It also means that the patch is automatically selected if it
+contains at least one package which is newer than on the installed system.
+</p>
 
 <h3>Multiple Architectures</h3>
 

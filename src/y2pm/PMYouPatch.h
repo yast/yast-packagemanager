@@ -135,6 +135,15 @@ class PMYouPatch : public PMObject
     bool updateOnlyInstalled() const { return _updateOnlyInstalled; }
 
     /**
+     * Set if only new packages should be installed.
+     */
+    void setUpdateOnlyNew( bool v ) { _updateOnlyNew = v; }
+    /**
+     * Return if only new packages should be New.
+     */
+    bool updateOnlyNew() const { return _updateOnlyNew; }
+
+    /**
      * Set name of script which is executed before installation of patch.
      */
     void setPreScript( const std::string &preScript ) { _preScript = preScript; }
@@ -273,6 +282,7 @@ class PMYouPatch : public PMObject
     std::string _preInformation, _postInformation;
     Kind _kind;
     bool _updateOnlyInstalled;
+    bool _updateOnlyNew;
     std::string _preScript, _postScript;
     FSize _patchSize;
 

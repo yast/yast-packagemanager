@@ -42,7 +42,8 @@ class YOUPatchTagSet : public TaggedFile::TagSet
       PACKAGES,
       PRESCRIPT,
       POSTSCRIPT,
-      FILES
+      FILES,
+      UPDATEONLYNEW
     };
  
     YOUPatchTagSet();
