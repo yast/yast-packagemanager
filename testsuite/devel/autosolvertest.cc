@@ -670,10 +670,13 @@ static Alternatives::AltDefaultList alternatives_callback( PkgName name )
     return Alternatives::AltDefaultList();
 }
 
-struct Test {
-	Test() : altmode(PkgDep::ASK_ALWAYS) {};
+class Test {
+    public:
 	PkgDep::alternatives_mode altmode;
+	bool just_solve : 1;
 	list<PkgName> cand_names;
+    public:
+	Test() : altmode(PkgDep::ASK_ALWAYS), just_solve(false) {};
 };
 
 typedef list<Test> TestList;
@@ -696,6 +699,14 @@ static void read_test_file( string filename, TestList& tests )
 		}
 		if (!is)
 			break;
+
+		if (word == "JUST_SOLVE" ) {
+			tst.just_solve = true;
+			while( is && (is.get(c), c != '\n') )
+				;
+			tests.push_back( tst );
+			continue;
+		}
 
 		// phi compat stuff
 		if (word == "CLEAR_DEFAULTS" ) {
@@ -735,8 +746,7 @@ static void read_test_file( string filename, TestList& tests )
 			is >> word;
 		} while( is );
 
-		if (!tst.cand_names.empty())
-			tests.push_back( tst );
+		tests.push_back( tst );
 	}
 }
 
@@ -744,6 +754,9 @@ static void read_test_file( string filename, TestList& tests )
 static void setPkgStates(struct Test& t)
 {
     Y2PM::packageManager().setNothingSelected();
+
+    if(t.just_solve)
+	return;
 
     for(list<PkgName>::iterator it= t.cand_names.begin();
 	it != t.cand_names.end(); ++it)

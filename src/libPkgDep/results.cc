@@ -11,6 +11,7 @@ PkgDep::Result::Result( const PkgDep& pkgdep, PMSolvablePtr pkg )
 	edition = pkg->edition();
 	upgrade_to_remove_conflict = false;
 	install_to_avoid_break = false;
+	was_inconsistent = false;
 	from_input_list = false;
 	solvable = pkg;
 
@@ -34,6 +35,8 @@ PkgDep::Result::Result( const PkgDep& pkgdep, const PkgName& n )
 	name = n;
 	edition = PkgEdition(PkgEdition::UNSPEC);
 	upgrade_to_remove_conflict = false;
+	install_to_avoid_break = false;
+	was_inconsistent = false;
 	from_input_list = false;
 	is_upgrade_from = PkgEdition(PkgEdition::UNSPEC);
 	is_downgrade_from = PkgEdition(PkgEdition::UNSPEC);
@@ -78,6 +81,7 @@ void PkgDep::Result::add_notes( const Notes& notes )
 	from_input_list = notes.from_input;
 	upgrade_to_remove_conflict = notes.upgrade_to_solve_conflict;
 	install_to_avoid_break = notes.install_to_avoid_break;
+	was_inconsistent = notes.was_inconsistent;
 	ci_for( IRelInfoList::,, n, notes.referers., ) {
 		referers.push_back( RelInfo(n->pkg, n->rel) );
 	}

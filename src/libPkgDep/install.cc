@@ -20,11 +20,37 @@ static PMSolvablePtr is_obsoleted_by_candidate(PkgSet& candidates, PMSolvablePtr
     return NULL;
 }
 
+/** Functor to remove packages from good list that were moved from installed to
+ * candidates because of broken dependencies
+ * */
+class InconsistentSameAsInstalled
+{
+    private:
+	PkgSet* _installed;
+    public:
+	InconsistentSameAsInstalled(PkgSet* installed) : _installed(installed) {};
+	bool operator()(PkgDep::Result& result)
+	{
+	    if(_installed && result.was_inconsistent && result.solvable != NULL)
+	    {
+		PMSolvablePtr p = _installed->lookup(result.name);
+		if(p == result.solvable)
+		{
+		    D__ << "don't reinstall inconsistent " << result.solvable->nameEd()
+			<< " as exact same is already installed" << endl;
+		    return true;
+		}
+	    }
+	    return false;
+	}
+};
+
 bool PkgDep::install( PkgSet& in_candidates,
 			  ResultList& out_good,
 			  ErrorResultList& out_bad,
 			  ErrorResultList& out_obsoleted,
-			  bool commit_to_installed )
+			  bool commit_to_installed,
+			  bool check_inconsistent)
 {
 	out_good = ResultList();
 	good = &out_good;
@@ -37,6 +63,9 @@ bool PkgDep::install( PkgSet& in_candidates,
 	out_obsoleted = ErrorResultList();
 	i_obsoleted = &out_obsoleted;
 	unsigned numtocheck = 0;
+
+	if(check_inconsistent)
+		inconsistent_to_candidates(*candidates);
 
 	// sort out candidates that are already installed, mark others as
 	// coming from input
@@ -77,11 +106,11 @@ bool PkgDep::install( PkgSet& in_candidates,
 			{
 			    to_check.push_back( cand );
 			}
-			notes[cand->name()].from_input = true;
+			if(!notes[cand->name()].was_inconsistent)
+			    notes[cand->name()].from_input = true;
 		}
 
 	}
-
 
 	DBG << numtocheck << " Packages to check" << endl;
 
@@ -109,6 +138,9 @@ bool PkgDep::install( PkgSet& in_candidates,
 		if (notes.exists(p->name))
 			p->add_notes( notes[p->name] );
 	}
+
+	if(check_inconsistent)
+	    good->remove_if(InconsistentSameAsInstalled(&installed));
 
 	if (bad->empty() && commit_to_installed) {
 		// if everything was ok, commit the candidates to the installed set
@@ -553,7 +585,7 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg, PMSolvablePtr newpkg, 
 {
 	bool error = false;
 
-	D__ << "check if replacing " << oldpkg->name() << " by " << newpkg->name() << " doesn't break anything" << endl;
+	D__ << "check if replacing " << oldpkg->nameEd() << " by " << newpkg->nameEd() << " doesn't break anything" << endl;
 
 	// for all provides of the old package
 	ci_for( PMSolvable::,Provides_, prov, oldpkg->,all_provides_) {
