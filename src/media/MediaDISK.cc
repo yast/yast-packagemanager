@@ -54,8 +54,8 @@ MediaDISK::MediaDISK( const Url &      url_r,
 		    false, // does_download
 		    type_r )
 {
-	_device = _url.getOption("device");
-	_filesystem = _url.getOption("filesystem");
+	_device = _url.option("device");
+	_filesystem = _url.option("filesystem");
 	if(_filesystem.empty())
 		_filesystem="auto";
 }
@@ -86,7 +86,7 @@ PMError MediaDISK::attachTo(bool next)
 
     Mount mount;
     const char *mountpoint = attachPoint().asString().c_str();
-    string options = _url.getOption("mountoptions");
+    string options = _url.option("mountoptions");
     if(options.empty())
     {
 	options="ro";

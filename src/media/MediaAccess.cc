@@ -69,7 +69,7 @@ const Pathname MediaAccess::_noPath; // empty path
 
 MediaAccess::MediaType MediaAccess::typeOf( const Url & url_r )
 {
-  ProtocolTypes::const_iterator t = protocolTypes.find( stringutil::toLower( url_r.getProtocol() ) );
+  ProtocolTypes::const_iterator t = protocolTypes.find( stringutil::toLower( url_r.protocol() ) );
   if ( t == protocolTypes.end() )
     return NONE;
   return t->second;
@@ -385,7 +385,7 @@ PMError MediaAccess::getFile( const Url &from, const Pathname &to )
 {
   D__ << "From: " << from << endl << "To: " << to << endl;
 
-  Pathname path = from.getPath();
+  Pathname path = from.path();
   Pathname dir = path.dirname();
   string base = path.basename();
 

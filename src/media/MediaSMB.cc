@@ -66,7 +66,7 @@ MediaSMB::MediaSMB( const Url &      url_r,
 //
 PMError MediaSMB::attachTo(bool next)
 {
-    if(_url.getHost().empty())
+    if(_url.host().empty())
 	    return Error::E_no_host_specified;
     if(next)
 	return Error::E_not_supported_by_media;
@@ -77,12 +77,12 @@ PMError MediaSMB::attachTo(bool next)
     PMError ret;
 
     string path = "//";
-    path += _url.getHost();
-    path += _url.getPath();
+    path += _url.host();
+    path += _url.path().asString();
 
-    string options = _url.getOption("mountoptions");
-    string username = _url.getUsername();
-    string password = _url.getPassword();
+    string options = _url.option("mountoptions");
+    string username = _url.username();
+    string password = _url.password();
     // need to add guest to prevent smbmount from asking for password
     if(options.empty())
     {
