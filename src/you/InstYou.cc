@@ -312,9 +312,12 @@ PMError InstYou::retrievePatchInfo()
       }
       FSize archiveSize = (*itPkg)->archivesize();
       D__ << "    ArchiveSize: " << archiveSize << endl;
-      patchSize += archiveSize;
 
-      if ( (*itPkg)->hasInstalledObj() ) packagesInstalled = true;
+      if ( (*itPkg)->hasInstalledObj() )
+      {
+	packagesInstalled = true;
+	patchSize += archiveSize;
+      }
     }
 
     list<PMYouFile> files = (*itPatch)->files();
