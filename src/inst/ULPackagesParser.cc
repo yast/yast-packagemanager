@@ -755,8 +755,8 @@ ULPackagesParser::fromMediaDir (std::list<PMPackagePtr>& packages,
 	 it != _pkgmap.end(); ++it)
     {
 	packages.push_back (it->second.first);
-	_pkgmap.erase (it);
     }
+    _pkgmap.clear ();
 
     return err;
 }
