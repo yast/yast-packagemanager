@@ -295,19 +295,12 @@ class InstSrc: virtual public Rep {
 	    - media type (0=CD, 1=DVD, ...)
 	    - expected media number
 	    - found media number (0 == none)
-	    return "": retry, "1": skip, "2" cancel, else new url
+	    return "": retry, "S": skip, "C" cancel, "I" ignore, "E" eject, else new url
 	 */
 	std::string (*_mediachangefunc)(const std::string& error, const std::string& url, const std::string& product, int expected, int current, void*);
 
-	/** media error callback
-	    - error code
-	*/
-
-	std::string (*_mediaerrorfunc)(PMError error, void*);
-
-	/** arbitrary data to pass back for progress callback */
+	/** arbitrary data to pass back for change callback */
 	void* _mediachangedata;
-	void* _mediaerrordata;
 
 	int _medianr;
 
