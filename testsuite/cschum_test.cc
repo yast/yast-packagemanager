@@ -22,6 +22,23 @@
 
 using namespace std;
 
+void printRel( PkgEdition left, PkgEdition right )
+{
+  D__ << left << " <-> " << right << endl;
+
+  cout << left << " ";
+  if ( left < right ) { D__ << "is <" << endl; cout << "<"; }
+  else if ( left > right ) { D__ << "is >" << endl; cout << ">"; }
+  else if ( left == right ) { D__ << "is ==" << endl; cout << "=="; }
+  else cout << "[undefined]";
+  cout << " " << right << endl;
+}
+
+void printEd( PkgEdition ed )
+{
+  cout << ed << ": version: " << ed.version() << " release: " << ed.release() << endl;
+}
+
 /******************************************************************
 **
 **
@@ -35,9 +52,18 @@ int main( int argc, char **argv )
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
 
-  cout << PMYouPatchInfo::translateLangCode( LangCode( "de" ) ) << endl;
-  cout << PMYouPatchInfo::translateLangCode( LangCode( "argl" ) ) << endl;
+  PkgEdition one( "1.0-0" );
+  printEd( one );
+  PkgEdition two( "1.0-1" );
+  printEd( two );
+  PkgEdition three( "1.1-0" );
+  printEd( three );
+  
+  printRel( one, two );
+  printRel( two, two );
+  printRel( three, two );
 
+#if 0
   cout << "num: " << Y2PM::youPatchManager().size() << endl;
 
   const PMYouPatchManager &mgr = Y2PM::youPatchManager();
@@ -50,7 +76,7 @@ int main( int argc, char **argv )
       cout << installed->name() << endl;
     }
   }
-
+#endif
 
 #if 0
   list<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
