@@ -43,6 +43,7 @@ void install(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
 void init(vector<string>& argv);
+void query(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -54,6 +55,7 @@ static struct Funcs func[] = {
     { "install", install, "install a package" },
     { "consistent", consistent, "check consistency" },
     { "init", init, "initialize packagemanager" },
+    { "query", query, "query package" },
     { "help", help, "this screen" },
     { NULL, NULL }
 };
@@ -77,6 +79,55 @@ void usage(char **argv) {
 	exit(1);
 }
 
+
+void query(vector<string>& argv)
+{
+    PMPackageManager& manager = Y2PM::packageManager();
+    vector<string>::iterator it=argv.begin();
+    ++it; // first one is function name itself
+    for(;it!=argv.end();++it)
+    {
+	PMSelectablePtr sel = manager.getItem(*it);
+	if(sel == NULL)
+	{
+	    cout << *it << " is not available" << endl;
+	}
+	else
+	{
+	    PMPackagePtr obj = static_cast<PMPackagePtr>(sel->installedObj());
+	    for(PMSolvable::PMSolvableAttribute attr = PMSolvable::PMSLV_ATTR_BEGIN;
+		attr < PMSolvable::PMSLV_NUM_ATTRIBUTES;
+		attr = PMSolvable::PMSolvableAttribute(attr+1))
+	    {
+		cout
+		    << obj->getAttributeName(attr)
+		    << ": "
+		    << obj->getAttributeValue(attr)
+		    << endl;
+	    }
+	    for(PMObject::PMObjectAttribute attr = PMObject::PMOBJ_ATTR_BEGIN;
+		attr < PMObject::PMOBJ_NUM_ATTRIBUTES;
+		attr = PMObject::PMObjectAttribute(attr+1))
+	    {
+		cout
+		    << obj->getAttributeName(attr)
+		    << ": "
+		    << obj->getAttributeValue(attr)
+		    << endl;
+	    }
+	    for(PMPackage::PMPackageAttribute attr = PMPackage::PKG_ATTR_BEGIN;
+		attr < PMPackage::PKG_NUM_ATTRIBUTES;
+		attr = PMPackage::PMPackageAttribute(attr+1))
+	    {
+		cout
+		    << obj->getAttributeName(attr)
+		    << ": "
+		    << obj->getAttributeValue(attr)
+		    << endl;
+	    }
+	}
+    }
+}
 
 void init(vector<string>& argv)
 {
@@ -287,7 +338,7 @@ void consistent(vector<string>& argv)
 
 int main( int argc, char *argv[] )
 {
-    char prompt[]="> ";
+    char prompt[]="y2pm > ";
 
     char* buf = NULL;
     string inputstr;

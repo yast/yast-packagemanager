@@ -47,44 +47,12 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
 {
 }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMRpmPackageDataProvider::getAttributeValue
-//	METHOD TYPE : PkgAttributeValue
-//
-//	DESCRIPTION :
-//
 PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
-							       PMObject::PMObjectAttribute attr_r )
+							       PMObject::PMObjectAttribute attr )
 {
-#warning getAttributeValue() must convert to new interface
-  PMPackagePtr p( PMPackagePtr::cast_away_const( obj_r ) );
-  return OLD_getAttributeValue( p, attr_r );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMRpmPackageDataProvider::getAttributeValue
-//	METHOD TYPE : PkgAttributeValue
-//
-//	DESCRIPTION :
-//
-PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
-							       PMPackage::PMPackageAttribute attr_r )
-{
-#warning getAttributeValue() must convert to new interface
-  PMPackagePtr p( PMPackagePtr::cast_away_const( pkg_r ) );
-  return OLD_getAttributeValue( p, attr_r );
-}
-
-string PMRpmPackageDataProvider::OLD_getAttributeValue(PMPackagePtr pkg,
-    PMObject::PMObjectAttribute attr)
-{
-//    D__ << pkg->name() << pkg->edition().as_string() << endl;
+    PMPackagePtr pkg( PMPackagePtr::cast_away_const( obj_r ) );
     const char* queryformat = NULL;
-    string ret;
+    PkgAttributeValue ret;
 
     switch(attr)
     {
@@ -99,7 +67,7 @@ string PMRpmPackageDataProvider::OLD_getAttributeValue(PMPackagePtr pkg,
 	    break;
 	case PMObject::PMOBJ_NUM_ATTRIBUTES:
 	    // invalid
-	    return "invalid query";
+	    return PkgAttributeValue("invalid query");
     }
 
     // check if cached
@@ -132,12 +100,11 @@ string PMRpmPackageDataProvider::OLD_getAttributeValue(PMPackagePtr pkg,
     return ret;
 }
 
-string PMRpmPackageDataProvider::OLD_getAttributeValue(PMPackagePtr pkg,
-    PMPackage::PMPackageAttribute attr)
+PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
+							       PMPackage::PMPackageAttribute attr )
 {
-//    D__ << pkg->name() << pkg->edition().as_string() << endl;
+    PMPackagePtr pkg( PMPackagePtr::cast_away_const( pkg_r ) );
     const char* queryformat = NULL;
-    string ret;
 
     switch(attr)
     {
@@ -198,15 +165,16 @@ string PMRpmPackageDataProvider::OLD_getAttributeValue(PMPackagePtr pkg,
 	    break;
 	case PMPackage::ATTR_AUTHOR:
 	    // not available as rpm tag
-	    return "";
+	    return PkgAttributeValue("");
 	case PMPackage::ATTR_FILENAMES:
 	    queryformat = "[%{FILENAMES}\\n]";
 	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid
-	    return "invalid query";
+	    return PkgAttributeValue("invalid query");
     }
 
+    PkgAttributeValue ret;
     // check if cached
     AttrVecPosition pos = pkgattr2pos(attr);
     if(pos != AV_POS_INVALID)
@@ -258,21 +226,21 @@ PMRpmPackageDataProvider::AttrVecPosition PMRpmPackageDataProvider::pkgattr2pos(
 
 /** inject attibute to cache */
 void PMRpmPackageDataProvider::setAttributeValue(
-    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr, const string& value)
+    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr, const PkgAttributeValue& value)
 {
     _setAttributeValue(pkg,attr,value);
 }
 
 /** inject attibute to cache */
 void PMRpmPackageDataProvider::setAttributeValue(
-    PMPackagePtr pkg, PMObject::PMObjectAttribute attr, const string& value)
+    PMPackagePtr pkg, PMObject::PMObjectAttribute attr, const PkgAttributeValue& value)
 {
     _setAttributeValue(pkg,attr,value);
 }
 
 /** inject attibute to cache */
 void PMRpmPackageDataProvider::_setAttributeValue(
-    PMPackagePtr pkg, unsigned attr, const string& value)
+    PMPackagePtr pkg, unsigned attr, const PkgAttributeValue& value)
 {
     AttrVecPosition pos = pkgattr2pos(attr);
     if(pos == AV_POS_INVALID)
@@ -285,7 +253,7 @@ void PMRpmPackageDataProvider::_setAttributeValue(
     // package not known yet
     if(it == _pkgmap.end())
     {
-	vec = AttrVec(AV_NUM_ITEMS,string());
+	vec = AttrVec(AV_NUM_ITEMS,PkgAttributeValue());
     }
     else
 	vec = it->second;

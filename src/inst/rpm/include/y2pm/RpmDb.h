@@ -36,6 +36,7 @@
 #include <y2util/ExternalProgram.h>
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PkgAttributeValue.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
 
 /**
@@ -186,7 +187,7 @@ class RpmDb: virtual public Rep
 	 * @param installed set to false to thread packagelabel as file, not as
 	 * installed package
 	 */
-	std::string queryPackage(const char *format, std::string packagelabel, bool installed = true);
+	PkgAttributeValue queryPackage(const char *format, std::string packagelabel, bool installed = true);
 
 	/** set parameters to use on installation/update
 	 *
