@@ -60,6 +60,10 @@ class QueryError {
 	E_bad_value,			// compare keyword used as value
 	E_syntax
     };
+
+    friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
+      return str << PMError( obj );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////

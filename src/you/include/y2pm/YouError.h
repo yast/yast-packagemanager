@@ -54,6 +54,10 @@ class YouError {
       E_read_suseservers_failed,
       E_auth_failed
     };
+
+    friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
+      return str << PMError( obj );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////

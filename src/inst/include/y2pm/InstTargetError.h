@@ -79,6 +79,10 @@ class InstTargetError {
       E_UpdateInf_not_found,
       E_UpdateInf_malformed
     };
+
+    friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
+      return str << PMError( obj );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////

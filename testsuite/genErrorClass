@@ -102,6 +102,10 @@ class ${CLASS} {
       E_error = PMError::C_${CLASS}	// some error
       // more specific errors start here:
     };
+    
+    friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
+      return str << PMError( obj );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////
