@@ -14,13 +14,15 @@ pkginclude_HEADERS =	\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
 	InstSrcData.h	InstSrcDataPtr.h	\
 	InstSrcDataUL.h	InstSrcDataULPtr.h	\
+	ULSelectionParser.h ULSelectionParserPtr.h \
+	ULPackagesParser.h ULPackagesParserPtr.h \
 	InstData.h				\
 	\
-	InstTargetError.h	\
-	InstTarget.h		\
+	InstTargetError.h			\
+	InstTarget.h				\
 	InstTargetSelDB.h InstTargetSelDBPtr.h	\
-	InstTargetProdDB.h InstTargetProdDBPtr.h \
-	InstSrcTags.h		\
+	InstTargetProdDB.h InstTargetProdDBPtr.h\
+	InstSrcTags.h				\
 	PMULPackageDataProvider.h PMULPackageDataProviderPtr.h	\
 	PMULSelectionDataProvider.h PMULSelectionDataProviderPtr.h
 

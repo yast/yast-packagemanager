@@ -68,6 +68,11 @@ class InstTarget: virtual public Rep, public InstData {
 	 **/
         typedef InstTargetError Error;
 
+
+      ///////////////////////////////////////////////////////////////////
+      // General interface
+      ///////////////////////////////////////////////////////////////////
+
     private:
 
         friend class Y2PM;
@@ -78,23 +83,14 @@ class InstTarget: virtual public Rep, public InstData {
 
 	PkgArch _base_arch;
 
-    public:
-
 	/**
-	 * Installation options like force, nodeps ...
-	 * Has to be moved from RpmDB to here
-	 *
-	 * @see RpmDB::RpmInstFlag
-	 * */
-	typedef enum RpmDb::RpmInstFlag InstFlag;
+	 * The name of the install root.
+	 */
+	Pathname _rootdir;
 
-	/**
-	 * Bits of possible package corruptions
-	 * Has to be moved from RpmDB to here
-	 *
-	 * @see RpmDb::checkPackageResult
-	 * */
-	typedef enum RpmDb::checkPackageResult checkPackageResult;
+
+	/** rpm database */
+	RpmDbPtr _rpmdb;
 
     public:
 
@@ -111,6 +107,11 @@ class InstTarget: virtual public Rep, public InstData {
 	 * It is safe to alwas use true here.
 	 * */
 	PMError init( const Pathname & rootpath, bool createnew = true );
+
+	/**
+	 * @return destination root directory of target system
+	 * */
+	const std::string& getRoot() const;
 
 	/**
 	 * determine target system architecture
@@ -154,6 +155,39 @@ class InstTarget: virtual public Rep, public InstData {
 	 */
 	virtual const std::list<PMYouPatchPtr>& getPatches (void) const;
 
+
+      ///////////////////////////////////////////////////////////////////
+      // Package related interface
+      ///////////////////////////////////////////////////////////////////
+
+    private:
+
+	/** parameters to use on installation/update
+	 * */
+	unsigned _rpminstflags;
+
+	/** parameters to use on removal
+	 * */
+	unsigned _rpmremoveflags;
+
+    public:
+
+	/**
+	 * Installation options like force, nodeps ...
+	 * Has to be moved from RpmDB to here
+	 *
+	 * @see RpmDB::RpmInstFlag
+	 * */
+	typedef enum RpmDb::RpmInstFlag InstFlag;
+
+	/**
+	 * Bits of possible package corruptions
+	 * Has to be moved from RpmDB to here
+	 *
+	 * @see RpmDb::checkPackageResult
+	 * */
+	typedef enum RpmDb::checkPackageResult checkPackageResult;
+
 	//-----------------------------
 	// package install / remove
 
@@ -192,7 +226,7 @@ class InstTarget: virtual public Rep, public InstData {
 	PMError installPackage (const std::string& filename, unsigned flags = 0);
 
 	/**
-	 * install packages to the target
+	 * install multiple packages to the target
 	 *
 	 * @param filename list of filenames of packages to install
 	 * @param flags which flags to use, default flags are used if 0
@@ -211,7 +245,7 @@ class InstTarget: virtual public Rep, public InstData {
 	PMError removePackage(const std::string& label, unsigned flags = 0);
 
 	/**
-	 * remove package
+	 * remove multiple packages
 	 *
 	 * @see removePackage
 	 * */
@@ -227,10 +261,31 @@ class InstTarget: virtual public Rep, public InstData {
 	void setPackageInstallProgressCallback(void (*func)(int,void*), void* data);
 
 	/**
-	 * @return destination root directory of target system
-	 * */
-	const std::string& getRoot() const;
+	 * query system for provided tag (rpm -q --whatprovides)
+	 */
+	bool isProvided (const std::string& tag) { return _rpmdb->isProvided (tag); }
 
+	/**
+	 * query system for installed package (rpm -q)
+	 */
+	bool isInstalled (const std::string& name) { return _rpmdb->isInstalled (name); }
+
+	/**
+	 * query system for package the given file belongs to
+	 * (rpm -qf)
+	 */
+	std::string belongsTo (const Pathname& name) { return _rpmdb->belongsTo (name); }
+
+
+      ///////////////////////////////////////////////////////////////////
+      // Patch related interface
+      ///////////////////////////////////////////////////////////////////
+
+    private:
+        mutable std::list<PMYouPatchPtr> _patches;
+        mutable bool _patchesInitialized;
+
+    public:
         /**
          * Install patch. This function does not install any packages. It just
          * registers the patch as installed.
@@ -246,33 +301,14 @@ class InstTarget: virtual public Rep, public InstData {
 
 	// TODO: more function, like df, du etc.
 
-    private:
-
-	/** parameters to use on installation/update
-	 * */
-	unsigned _rpminstflags;
-
-	/** parameters to use on removal
-	 * */
-	unsigned _rpmremoveflags;
-
-	/**
-	 * The name of the install root.
-	 */
-	Pathname _rootdir;
 
 
-	/** rpm database */
-	RpmDbPtr _rpmdb;
-
-        mutable std::list<PMYouPatchPtr> _patches;
-        mutable bool _patchesInitialized;
-
-    private:
       ///////////////////////////////////////////////////////////////////
       // Product related interface
       ///////////////////////////////////////////////////////////////////
 
+
+    private:
       /**
        * Selection database
        **/
@@ -305,11 +341,12 @@ class InstTarget: virtual public Rep, public InstData {
        **/
       PMError removeProduct( const constInstSrcDescrPtr & isd_r );
 
-    private:
+
       ///////////////////////////////////////////////////////////////////
       // Selection related interface
       ///////////////////////////////////////////////////////////////////
 
+    private:
       /**
        * Selection database
        **/

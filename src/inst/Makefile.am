@@ -29,6 +29,8 @@ liby2pminstsrc_la_SOURCES = \
 	InstSrcDescr.cc 		\
 	InstSrcData.cc			\
 	InstSrcDataUL.cc		\
+	ULSelectionParser.cc		\
+	ULPackagesParser.cc		\
 	PMULPackageDataProvider.cc	\
 	PMULSelectionDataProvider.cc	\
 	\
@@ -36,6 +38,5 @@ liby2pminstsrc_la_SOURCES = \
 	InstTargetError.cc		\
 	InstTargetSelDB.cc		\
 	InstTargetProdDB.cc
-
 
 liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la

@@ -70,58 +70,8 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	 * Return empty list as we do not hold Patches
 	 */
 	const std::list<PMYouPatchPtr>& getPatches (void) const { return InstData::getPatches(); }
+
     private:
-
-	//-----------------------------------------------------------
-	// static functions for tryGetDescr and tryGetData
-	//-----------------------------------------------------------
-
-	static std::list<PMSelectionPtr> lookupSelections (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections);
-	static std::list<PMPackagePtr> lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages);
-
-	/**
-	 * fill tagset from packages to PMPackage
-	 *
-	 */
-	static int Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist);
-
-	/**
-	 * fill tagset from packages to PMPackage
-	 *
-	 */
-	static PMPackagePtr PkgTag2Package( TagCacheRetrievalPtr pkgcache, TaggedFile::TagSet& tagset, const std::list<PMPackagePtr>& packags );
-
-	/**
-	 * fill tagset from packages.<lang> to PMPackage
-	 *
-	 */
-	static PMError LangTag2Package( TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, TaggedFile::TagSet& tagset );
-
-	/**
-	 * fill tagset from <name>.sel to PMSelection
-	 *
-	 */
-	static PMSelectionPtr Tag2Selection ( PMULSelectionDataProviderPtr dataprovider, TaggedFile::TagSet& tagset );
-
-	/*
-	 * parse the 'packages' file
-	 */
-	static PMError parsePackages (std::list<PMPackagePtr>& packages, MediaAccessPtr media_r, const Pathname & descr_dir_r );
-
-	/*
-	 * parse the 'packages.<lang>' file
-	 */
-	static PMError parsePackagesLang (std::list<PMPackagePtr>& packages, MediaAccessPtr media_r, const Pathname & descr_dir_r);
-
-	/*
-	 * parse the 'selections' and '*.sel* files
-	 */
-	static PMError parseSelections (std::list<PMSelectionPtr>& selections, MediaAccessPtr media_r, const Pathname & descr_dir_r );
-
-	/*
-	 * fill the PMSelectionPtr and PMPackagePtr lists
-	 */
-	static PMError fillSelections (std::list<PMSelectionPtr>& all_selections, std::list<PMPackagePtr>& all_packages);
 
 	/**
 	 * read media.X/media file
@@ -146,24 +96,6 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 
     InstSrcDataUL();
     ~InstSrcDataUL();
-
-  private:
-
-    Pathname _descr_dir; // provided by media or cache
-    Pathname _data_dir;
-
-    static const LangCode _fallback_langcode; // fix en
-    LangCode              _default_langcode;  // the one we're encouraged to use
-    LangCode              _langcode;          // the one we actually use
-
-    std::list<std::string> _selection_files;
-
-    Pathname packagesFile()     const { return _descr_dir + "packages"; }
-    Pathname packagesLangFile() const { return (_descr_dir + "packages.").extend(_langcode); }
-    Pathname packagesDuFile()   const { return _descr_dir + "packages.DU"; };
-
-    Pathname selectionsFile()   const { return _descr_dir + "selections"; }
-    Pathname selectionFile( const std::string & name_r ) const { return _descr_dir + name_r; }
 
   protected:
 
@@ -191,7 +123,7 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
      * or NULL and PMError set.
      **/
     static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
-				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
+				MediaAccessPtr media_r, const Pathname & product_dir_r );
 
     /**
      * Any concrete InstSrcData must realize this, as it knows the expected
@@ -203,7 +135,8 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
      * or NULL and PMError set.
      **/
     static PMError tryGetData( InstSrcDataPtr & ndata_r,
-			       MediaAccessPtr media_r, const Pathname & descr_dir_r );
+			MediaAccessPtr media_r, const Pathname & descr_dir_r,
+			const std::list<PkgArch>& allowed_archs, const LangCode& locale);
 
 };
 

@@ -247,14 +247,14 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   // content file archmap
   str << ArchBTag << ":" << endl;
   ArchMap::const_iterator arch_pos;
-  std::list<Pathname>::iterator pos;
+  std::list<PkgArch>::iterator pos;
 
   for ( arch_pos = _content_archmap.begin(); arch_pos != _content_archmap.end(); ++arch_pos )
   {
     str << (*arch_pos).first << " ";
-    std::list<Pathname> paths =  (*arch_pos).second;
+    std::list<PkgArch> archs =  (*arch_pos).second;
 
-    for ( pos = paths.begin(); pos != paths.end(); ++pos  )
+    for ( pos = archs.begin(); pos != archs.end(); ++pos  )
     {
       str  << (*pos) << " ";
     }
@@ -475,13 +475,13 @@ static bool fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet 
 	for ( multi_pos = multi.begin(); multi_pos != multi.end(); ++multi_pos )
 	{
 	    vector<std::string> line = TagParser::split2words (*multi_pos, " ");
-	    list<Pathname> paths;
+	    list<PkgArch> archs;
 	    unsigned int i;
 	    for ( i = 1; i < line.size(); i++ )
 	    {
-		paths.push_back( Pathname(line[i]) );
+		archs.push_back( PkgArch(line[i]) );
 	    }
-	    arch[line[0]] = paths;
+	    arch[line[0]] = archs;
 	}
 	ndescr->set_content_archmap( arch );
     }

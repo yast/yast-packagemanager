@@ -1118,17 +1118,27 @@ RpmDb::checkPackage( string packagePath, string version, string md5 )
 /*--------------------------------------------------------------*/
 
 bool
-RpmDb::queryPackage (const std::string& package, const char *qparam, const char *format, std::string& result_r)
+RpmDb::queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::string& result_r)
 {
     RpmArgVec opts(4);
 
     if(_old_present) return false;
     if(!_initialized) return false;
 
-    opts[0] = qparam;
-    opts[1] = "--queryformat";
-    opts[2] = format;
-    opts[3] = package.c_str();
+    int argc = 0;
+    opts[argc++] = qparam;
+    if (format != 0)
+    {
+	if (queryformat)
+	{
+	    opts[argc++] = "--queryformat";
+	}
+	opts[argc++] = format;
+    }
+    opts[argc++] = package.c_str();
+    if (argc < 4)
+	opts[argc] = 0;
+
     run_rpm (opts, ExternalProgram::Discard_Stderr);
 
     if ( process == NULL )
@@ -1141,17 +1151,27 @@ RpmDb::queryPackage (const std::string& package, const char *qparam, const char 
 }
 
 bool
-RpmDb::queryPackage (const std::string& package, const char *qparam, const char *format, std::list<std::string>& result_r)
+RpmDb::queryRPM (const std::string& package, const char *qparam, const char *format, bool queryformat, std::list<std::string>& result_r)
 {
     RpmArgVec opts(4);
 
     if(_old_present) return false;
     if(!_initialized) return false;
 
-    opts[0] = qparam;
-    opts[1] = "--queryformat";
-    opts[2] = format;
-    opts[3] = package.c_str();
+    int argc = 0;
+    opts[argc++] = qparam;
+    if (format != 0)
+    {
+	if (queryformat)
+	{
+	    opts[argc++] = "--queryformat";
+	}
+	opts[argc++] = format;
+    }
+    opts[argc++] = package.c_str();
+    if (argc < 4)
+	opts[argc] = 0;
+
     run_rpm (opts, ExternalProgram::Discard_Stderr);
 
     if ( process == NULL )
@@ -1170,25 +1190,25 @@ RpmDb::queryPackage (const std::string& package, const char *qparam, const char 
 bool
 RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::string& result_r)
 {
-    return queryPackage ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, result_r);
+    return queryRPM ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, true, result_r);
 }
 
 bool
 RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r)
 {
-    return queryPackage ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, result_r);
+    return queryRPM ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, true, result_r);
 }
 
 bool
 RpmDb::queryPackage (const Pathname& path, const char *format, std::string& result_r)
 {
-    return queryPackage (path.asString(), "-qp", format, result_r);
+    return queryRPM (path.asString(), "-qp", format, true, result_r);
 }
 
 bool
 RpmDb::queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r)
 {
-    return queryPackage (path.asString(), "-qp", format, result_r);
+    return queryRPM (path.asString(), "-qp", format, true, result_r);
 }
 
 /**
@@ -1308,6 +1328,52 @@ RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
     }
     return true;
 }
+
+
+/**
+ * query system for provided tag
+ */
+bool
+RpmDb::isProvided (const std::string& tag)
+{
+    std::string result;
+    if (queryRPM (tag, "-q", "--whatprovides", false, result))
+    {
+	if (result.size() < 3)
+	    return false;
+	return (result.substr(0,3) != "no ");
+    }
+    return false;
+}
+
+/**
+ * query system for installed package
+ */
+bool
+RpmDb::isInstalled (const std::string& name)
+{
+    std::string result;
+    if (queryRPM (name, "-q", 0, false, result))
+    {
+	if (result.size() > 8)
+	    return (result.substr(0,8) != "package ");
+	return false;
+    }
+    return false;
+}
+
+
+/**
+ * query system for package the given file belongs to
+ * (rpm -qf)
+ */
+std::string
+RpmDb::belongsTo (const Pathname& name)
+{
+    std::string result;
+    queryRPM (name.asString(), "-qf", 0, false, result);
+    return result;
+}
     
 #if 0
 /*--------------------------------------------------------------*/
@@ -1392,12 +1458,13 @@ RpmDb::run_rpm(const RpmArgVec& options,
 
     exit_code = -1;
 
-    RpmArgVec args(5);
-    args[0] = "rpm";
-    args[1] = "--root";
-    args[2] = _rootdir.asString().c_str();
-    args[3] = "--dbpath";
-    args[4] = dbPath.asString().c_str();
+    RpmArgVec args(6);
+    args[0] = "LANG=C";			// output english !
+    args[1] = "rpm";
+    args[2] = "--root";
+    args[3] = _rootdir.asString().c_str();
+    args[4] = "--dbpath";
+    args[5] = dbPath.asString().c_str();
 
     const char* argv[args.size()+options.size()+2];
     unsigned argc = 0;
