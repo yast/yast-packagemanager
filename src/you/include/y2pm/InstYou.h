@@ -150,6 +150,11 @@ class InstYou {
     void selectPatches( int kinds );
 
     /**
+      Update states of packages according to states of patches.
+    */
+    void updatePackageStates();
+
+    /**
      * Get object holding path information.
      */
     PMYouPatchPathsPtr paths() const { return _paths; }

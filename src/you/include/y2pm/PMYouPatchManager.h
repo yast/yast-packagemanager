@@ -25,7 +25,8 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
 #include <y2pm/PMYouPatch.h>
-#include <y2pm/InstYou.h>
+
+class InstYou;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -61,8 +62,13 @@ class PMYouPatchManager : public PMManager {
      **/
     InstYou &instYou();
 
+    /**
+      Update states of packages according to states of patches.
+    */
+    void updatePackageStates();  
+
   private:
-    InstYou _instYou;
+    InstYou *_instYou;
 };
 
 ///////////////////////////////////////////////////////////////////

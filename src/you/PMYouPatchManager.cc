@@ -21,6 +21,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2pm/PMYouPatchManager.h>
+#include <y2pm/InstYou.h>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ using namespace std;
 //
 PMYouPatchManager::PMYouPatchManager()
 {
-  
+  _instYou = new InstYou;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -47,6 +48,7 @@ PMYouPatchManager::PMYouPatchManager()
 //
 PMYouPatchManager::~PMYouPatchManager()
 {
+  delete _instYou;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -90,5 +92,10 @@ ostream & operator<<( ostream & str, const PMYouPatchManager & obj )
 */
 InstYou &PMYouPatchManager::instYou()
 {
-  return _instYou;
+  return *_instYou;
+}
+
+void PMYouPatchManager::updatePackageStates()
+{
+  instYou().updatePackageStates();
 }
