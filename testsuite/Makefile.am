@@ -68,6 +68,10 @@ test_query_SOURCES = test_query.cc show_pm.cc
 test_query_LDADD = $(top_builddir)/src/liby2pm.la
 test_query_LDFLAGS = -static
 
+#test_speed_SOURCES = test_speed.cc
+#test_speed_LDADD = $(top_builddir)/src/liby2pm.la
+#test_speed_LDFLAGS = -static
+
 order_SOURCES = order.cc
 order_LDADD = $(top_builddir)/src/liby2pm.la
 order_LDFLAGS = -static

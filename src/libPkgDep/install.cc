@@ -27,8 +27,8 @@ bool PkgDep::install( PkgSet& in_candidates,
 	// sort out candidates that are already installed, mark others as
 	// coming from input
 	ci_for( PkgSet::,, c, candidates->, ) {
-		PkgName candname = c->key;
-		PMSolvablePtr cand = c->value;
+		PkgName candname = c->first;
+		PMSolvablePtr cand = c->second;
 
 		PMSolvablePtr instd = installed[candname];
 		if (!_install_installed && instd && instd->edition() == cand->edition())
@@ -81,7 +81,7 @@ bool PkgDep::install( PkgSet& in_candidates,
 			installed.remove( n->name );
 		}
 		ci_for( PkgSet::,, c, candidates->, )
-			installed.add( c->value, true );
+			installed.add( c->second, true );
 	}
 
 	return bad->empty();
@@ -109,7 +109,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	D__ << "Checking candidate " << candname << endl;
 
 	// check if the candidate is the target of an obsoletes
-	RevRel_for( vinstalled.obsoleted()[candname], obs ) {
+	RevRel_for( PkgSet::getRevRelforPkg(vinstalled.obsoleted(),candname), obs ) {
 		if (obs->relation().matches( cand->self_provides() )) {
 			WAR << "candidate " << candname << " is obsoleted by "
 				 << obs->pkg()->name() << endl;
@@ -126,7 +126,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	// first check if something already installed conflicts with the new
 	// package
 	ci_for( PMSolvable::,Provides_, prov, cand->,all_provides_ ) {
-		RevRel_for( vinstalled.conflicted()[(*prov).name()], confl ) {
+		RevRel_for( PkgSet::getRevRelforPkg(vinstalled.conflicted(),(*prov).name()), confl ) {
 			if (confl->relation().matches( *prov )) {
 				D__ << "Conflict of candidate " << *prov
 					 << " provided by " << candname
@@ -222,7 +222,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	ci_for( PMSolvable::,PkgRelList_, confl, cand->,conflicts_ ) {
 		// confl is now a PkgRelation
 
-		RevRel_for( vinstalled.provided()[confl->name()], prov ) {
+		RevRel_for( PkgSet::getRevRelforPkg(vinstalled.provided(),confl->name()), prov ) {
 			if (confl->matches( prov->relation() )) {
 				D__ << "Conflict of installed/accepted " << prov->relation()
 					 << " provided by " << prov->pkg()->name()
@@ -245,7 +245,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		RevRelList alternatives;
 		bool self_conflict = false;
 		// for all packages that provide what we conflict with
-		RevRel_for( candidates->provided()[confl->name()], prov1 ) {
+		RevRel_for( PkgSet::getRevRelforPkg(candidates->provided(),confl->name()), prov1 ) {
 			if (confl->matches( prov1->relation() ) &&
 				has_conflict_with( prov1->relation(), prov1->pkg() ))
 			{
@@ -303,7 +303,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		// (Candidates must be checked first, because they can replace
 		// installed packages.)
 		// FIXME: what if multiple candidates provide it? add to alternatives?
-		RevRel_for( candidates->provided()[reqname], prov ) {
+		RevRel_for( PkgSet::getRevRelforPkg(candidates->provided(),reqname), prov ) {
 			if (req->matches( prov->relation() )) {
 				D__ << "Candidate " << prov->pkg()->name() << " provides "
 					 << prov->relation() << " which is needed by "
@@ -318,7 +318,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 
 		// also ok if a matching version is provided by an installed package
 		{
-			RevRel_for( vinstalled.provided()[reqname], prov ) {
+			RevRel_for( PkgSet::getRevRelforPkg(vinstalled.provided(),reqname), prov ) {
 				if(prov->pkg()->name()==candname)
 				{
 					W__ << "ignoring old version of " << candname << " for provides check" << endl;
@@ -387,7 +387,7 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 	RevRelList providers;
 	noval_hash<PMSolvablePtr > seen;
 
-	RevRel_for( available.provided()[req.name()], prov ) {
+	RevRel_for( PkgSet::getRevRelforPkg(available.provided(),req.name()), prov ) {
 		if (seen.exists(prov->pkg()))
 			continue;
 		seen.insert(prov->pkg());
@@ -498,7 +498,7 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg, PMSolvablePtr newpkg, 
 	ci_for( PMSolvable::,Provides_, prov, oldpkg->,all_provides_) {
 		D__ << "  checking provided name " << (*prov).name() << endl;
 		// for all packages that require this provide
-		RevRel_for( vinstalled.required()[(*prov).name()], req ) {
+		RevRel_for( PkgSet::getRevRelforPkg(vinstalled.required(),(*prov).name()), req ) {
 			bool obsdoesntmatter = false;
 			D__ << "    requirement: " << req->relation()
 				 << " by installed/accepted " << req->pkg()->name() << endl;
@@ -559,7 +559,7 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel, PMSolvablePtr oldpkg,
 	}
 
 	// check if a candidate satisfies it
-	RevRel_for( candidates->provided()[rel.name()], prov1 ) {
+	RevRel_for( PkgSet::getRevRelforPkg(candidates->provided(),rel.name()), prov1 ) {
 		if (prov1->relation().matches( rel )) {
 			D__ << "    satisfied by candidate " << prov1->pkg()->name()
 				 << " with Provides: " << prov1->relation() << endl;
@@ -569,7 +569,7 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel, PMSolvablePtr oldpkg,
 
 	// check if an installed Solvable satifies it
 	// FIXED: vinstalled instead of installed
-	RevRel_for( vinstalled.provided()[rel.name()], prov2 ) {
+	RevRel_for( PkgSet::getRevRelforPkg(vinstalled.provided(),rel.name()), prov2 ) {
 		// skip oldpkg (which is to be replaced) and packages that are
 		// candidates
 		if (prov2->pkg() == oldpkg ||

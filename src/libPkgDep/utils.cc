@@ -29,7 +29,7 @@ bool PkgDep::also_provided_by_installed( const PkgRelation& req )
 	bool also_provided_by_installed = false;
 	// originally installed was used here, this must have been a bug
 	// (lprng, cups-client, lsb incident, #21829)
-	RevRel_for( vinstalled.provided()[req.name()], prov ) {
+	RevRel_for( PkgSet::getRevRelforPkg(vinstalled.provided(),req.name()), prov ) {
 		if (req.matches( prov->relation() )) {
 			also_provided_by_installed = true;
 			break;
@@ -42,7 +42,7 @@ unsigned PkgDep::count_providers_for( const PkgSet* set, const PkgRelation& req)
 {
 	unsigned providers = 0;
 
-	RevRel_for( set->provided()[req.name()], prov ) {
+	RevRel_for( PkgSet::getRevRelforPkg(set->provided(),req.name()), prov ) {
 		if (prov->relation().matches( req )) {
 			D__ << req.name() << " satisfied by " << prov->pkg()->name()
 				 << " with Provides: " << prov->relation() << std::endl;

@@ -225,7 +225,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       // replaced or dropped (ayway there's no candidate for this!)
       // If unique provides exists check if obsoleted (replaced).
       // Remember new package for 2nd pass.
-      const PkgSet::RevRelList_type & provided = available.provided()[installed->name()];
+      const PkgSet::RevRelList_type & provided = PkgSet::getRevRelforPkg(available.provided(),installed->name());
       PackageSet mpkg;
 
       if ( provided.size() ) {

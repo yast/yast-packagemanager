@@ -14,9 +14,9 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	// list, so double entries can happen. We need those double entries so
 	// that we can add the 2nd and following packages as referers.
 	if (cand && alts_handled.exists(reqname)) {
-		if (vinstalled.provided()[reqname].size() != 0) {
+		if (PkgSet::getRevRelforPkg(vinstalled.provided(),reqname).size() != 0) {
 			PMSolvablePtr first_provider
-				= vinstalled.provided()[reqname].front().pkg();
+				= PkgSet::getRevRelforPkg(vinstalled.provided(),reqname).front().pkg();
 			D__ << "Alternative for " << reqname << " already handled -- "
 				 "adding reference from " << cand->name() << " on "
 				 << alt_info.req << " provided by "

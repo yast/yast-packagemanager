@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Feb 13 15:00:59 CET 2003 - lnussel@suse.de
+
+- keep package sets between solver runs
+- use stl map instead of hash for PkgSet
+- non-recursive remove function
+
+-------------------------------------------------------------------
 Thu Feb 13 15:00:18 CET 2003 - cschum@suse.de
 
 - Added -q option to online_update command line to for quick check of

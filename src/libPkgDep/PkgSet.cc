@@ -9,31 +9,9 @@ using namespace std;
 PkgSet::PkgSet() : _additionalprovides_callback(NULL)
 {
 }
-/*
-PkgSet::PkgSet( const DistTagList& tags )
+
+PkgSet::~PkgSet()
 {
-	for( PkgDb::const_iterator p = PkgPool.begin(); p != PkgPool.end(); ++p ) {
-		Package *pkg = p->value;
-		if (pkg->is_in_distrib( tags ))
-			add( pkg );
-	}
-	PkgPool.attach_set( this );
-}
-*/
-/*
-PkgSet::PkgSet( PackageDataProvider* provider )
-{
-	for( PkgDb::const_iterator p = PkgPool.begin(); p != PkgPool.end(); ++p ) {
-		Package *pkg = p->value;
-		if (pkg->is_from_provider( provider ))
-			add( pkg );
-	}
-	PkgPool.attach_set( this );
-}
-*/
-PkgSet::~PkgSet() {
-	// FIXME
-//	PkgPool.detach_set( this );
 }
 
 #define RelList_for(field,var)											\
@@ -135,6 +113,49 @@ void PkgSet::new_provides( PMSolvablePtr pkg, const PkgRelation& prov )
 		return;
 	
 	_provided[prov.name()].push_back( PkgRevRelation( &prov, pkg ));
+}
+
+bool PkgSet::empty() const
+{
+	return contents.empty();
+}
+
+unsigned PkgSet::size() const
+{
+    return contents.size();
+}
+
+void PkgSet::remove( PkgName name )
+{
+    PMSolvablePtr pkg = lookup(name);
+
+    if (pkg) remove( pkg );
+}
+
+PMSolvablePtr PkgSet::lookup( const PkgName& name ) const
+{
+    const_iterator it = contents.find(name);
+    
+    if(it==contents.end())
+	return NULL;
+
+    return it->second;
+}
+
+bool PkgSet::includes( const PkgName& name ) const
+{
+    return (contents.count(name)>0);
+}
+
+static PkgSet::RevRelList_type _tmprevrellist;
+
+const PkgSet::RevRelList_type& PkgSet::getRevRelforPkg(const PkgSet::InvRel_type& m, const PkgName& n)
+{
+    PkgSet::InvRel_const_iterator it = m.find(n);
+    if(it == m.end())
+	return _tmprevrellist;
+
+    return it->second;
 }
 
 // Local Variables:
