@@ -44,12 +44,15 @@ class PMYouPatch : virtual public Rep, public PMObject {
      * Attributes provided by PMYouPatch
      **/
     enum PMYouPatchAttribute {
-      ATTR_KIND,
+      PMYOU_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
+      ATTR_KIND = PMYOU_ATTR_BEGIN,
       ATTR_SHORTDESCRIPTION,
       ATTR_LONGDESCRIPTION,
       ATTR_SIZE,
       ATTR_BUILDTIME,
-      ATTR_MINYAST2VERSION
+      ATTR_MINYAST2VERSION,
+      // last entry
+      PMYOU_NUM_ATTRIBUTES
     };
 
     /**
