@@ -85,6 +85,8 @@ class PMYouPatchPaths : virtual public Rep {
     
     PkgArch baseArch();
 
+    std::list<PkgArch> archs();
+
     bool businessProduct();
 
     PMError requestServers( const std::string &url = "", bool addFile = false );
@@ -110,6 +112,8 @@ class PMYouPatchPaths : virtual public Rep {
     std::string _product;
     std::string _version;
     PkgArch _baseArch;
+
+    std::list<PkgArch> _archs;
     
     std::list<Url> _servers;
 

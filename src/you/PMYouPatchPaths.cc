@@ -136,6 +136,10 @@ PMError PMYouPatchPaths::initProduct()
     init( product, version, baseArch, youUrl, youPath, youType == "business" );
   }
 
+  InstSrcDescr::ArchMap archMap = descr->content_archmap();
+  string basearch = instTarget.baseArch();
+  _archs = archMap[ basearch ];
+
   return PMError();
 }
 
@@ -223,6 +227,11 @@ PkgArch PMYouPatchPaths::baseArch()
 bool PMYouPatchPaths::businessProduct()
 {
   return _businessProduct;
+}
+
+list<PkgArch> PMYouPatchPaths::archs()
+{
+  return _archs;
 }
 
 PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
