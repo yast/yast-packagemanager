@@ -211,10 +211,12 @@ PMError MediaHandler::releaseFile( const Pathname & filename ) const
   if ( ! _does_download || _attachPoint.empty() )
     return Error::E_ok;
 
-  Pathname target( _localRoot + filename.absolutename() );
+  PathInfo info( localPath( filename.absolutename() ) );
+  if ( info.isFile() ) {
+    PathInfo::unlink( info.path() );
+  }
 
-#warning TBD releaseFile
-    return Error::E_error;
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -230,10 +232,14 @@ PMError MediaHandler::releasePath( const Pathname & pathname ) const
   if ( ! _does_download || _attachPoint.empty() )
     return Error::E_ok;
 
-  Pathname target( _localRoot + pathname.absolutename() );
+  PathInfo info( localPath( pathname.absolutename() ) );
+  if ( info.isDir() ) {
+    if ( info.path() != _localRoot ) {
+      PathInfo::recursive_rmdir( info.path() );
+    }
+  }
 
-#warning TBD releasePath
-    return Error::E_error;
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -252,7 +258,7 @@ PMError MediaHandler::dirInfo( std::list<std::string> & retlist,
   if ( !_isAttached )
     return Error::E_not_attached;
 
-  return getDirInfo( retlist, dirname, dots );
+  return getDirInfo( retlist, dirname.absolutename(), dots );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -282,10 +288,11 @@ MediaHandler::dumpOn( ostream & str ) const
 //
 PMError MediaHandler::getFile( const Pathname & filename ) const
 {
-  PathInfo info( _localRoot + filename );
+  PathInfo info( localPath( filename ) );
   if( ! info.isFile() ) {
     return Error::E_file_not_found;
   }
+
   return Error::E_ok;
 }
 
@@ -302,12 +309,12 @@ PMError MediaHandler::getFile( const Pathname & filename ) const
 PMError MediaHandler::getDirInfo( std::list<std::string> & retlist,
 				  const Pathname & dirname, bool dots ) const
 {
-  PathInfo info( _localRoot + dirname );
+  PathInfo info( localPath( dirname ) );
   if( ! info.isDir() ) {
     return Error::E_not_a_directory;
   }
 
-  int res = PathInfo::readdir( retlist, dirname, dots );
+  int res = PathInfo::readdir( retlist, info.path(), dots );
   if ( res )
     return Error::E_system;
 
