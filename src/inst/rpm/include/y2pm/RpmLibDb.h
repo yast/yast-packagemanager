@@ -458,14 +458,15 @@ class PkgHeaderCache {
 
   public:
 
-    static int buildPkgHeaderCache( const Pathname & cache_r,
-				    const Pathname & pkgroot_r, const std::list<Pathname> & pkglist_r );
+    struct buildOpts {
+      bool recurse;
+      buildOpts()
+	: recurse( false )
+      {}
+    };
 
-    static int buildPkgHeaderCache( const Pathname & cache_r, const Pathname & pkgroot_r ) {
-      std::list<Pathname> pkglist;
-      pkglist.push_back( "/" );
-      return buildPkgHeaderCache( cache_r, pkgroot_r, pkglist );
-    }
+    static int buildPkgHeaderCache( const Pathname & cache_r, const Pathname & pkgroot_r,
+				    const buildOpts & options_r = buildOpts() );
 };
 
 ///////////////////////////////////////////////////////////////////

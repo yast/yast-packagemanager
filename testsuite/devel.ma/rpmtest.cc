@@ -33,8 +33,15 @@ ostream & operator <<( ostream & str, const list<string> & t ) {
   return str;
 }
 
+ostream & operator<<( ostream & str, const PkgSplitSet & obj ) {
+  for ( PkgSplitSet::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+    str << *it << endl;
+  }
+  return str;
+}
+
 void dataDump( ostream & str, constPMPackagePtr p ) {
-  str << p << endl;
+  str << p << " ++++++++++++++++++++++++++++" << endl;
   str << "SUMMARY:       " << p->summary() << endl;
   str << "DESCRIPTION:   " << p->description() << endl;
   str << "INSNOTIFY:     " << p->insnotify() << endl;
@@ -68,6 +75,15 @@ void dataDump( ostream & str, constPMPackagePtr p ) {
   str << "LOCATION:      " << p->location() << endl;
   str << "MEDIANR:       " << p->medianr() << endl;
   str << "KEYWORDS:      " << p->keywords() << endl;
+  str << "INSTSOURCE:    " << p->source() << endl;
+  str << "IS REMOTE:     " << p->isRemote() << endl;
+  str << "PROVIDES:      " << p->provides().size() << endl;
+  str << "REQUIRES:      " << p->requires().size() << endl;
+  str << "CONFLICTS:     " << p->conflicts().size() << endl;
+  str << "OBSOLETES:     " << p->obsoletes().size() << endl;
+  str << "PREREQUIRES:   " << p->prerequires().size() << endl;
+  str << "SPLITPROVIDES: " << p->splitprovides().size() << endl;
+  str << "---------------" << endl;
 }
 
 void dummyDU()
@@ -85,6 +101,15 @@ void dummyDU()
   mountpoints.insert( PkgDuMaster::MountPoint( "/var",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
   MIL << mountpoints;
   PMGR.setMountPoints( mountpoints );
+}
+
+InstSrcManager::ISrcId newSrc( const string & url_r ) {
+  Url url( url_r );
+  InstSrcManager::ISrcIdList idlist;
+  Timecount _t( url_r.c_str() );
+  PMError err = ISM.scanMedia( idlist, url_r );
+  ( err ? ERR : MIL ) << "newSrc: " << idlist.size() << " (" << err << ")" << endl;
+  return( idlist.size() ? *idlist.begin() : 0 );
 }
 
 ostream & dumpPkgWhatIf( ostream & str, bool all = false )
@@ -111,9 +136,6 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
-
-void SBS( string name );
-
 /******************************************************************
 **
 **
@@ -126,7 +148,7 @@ int main()
 {
   Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
-  //Y2PM::noAutoInstSrcManager();
+  Y2PM::noAutoInstSrcManager();
   Timecount _t( "Launch InstTarget" );
   Y2PM::instTarget(true,"/");
   _t.start( "Launch PMPackageManager" );
@@ -139,159 +161,10 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-
-  INT << TMGR.getMountPoints() << endl;
-
-  SEC << "STOP" << endl;
-  return 0;
-  if ( 0 ) {
-  SEC << "--------------------------------------------------------------------" << endl;
-  dumpSelWhatIf( DBG, true );
-  SBS( "default" );
-  dumpSelWhatIf( DBG );
-  dumpPkgWhatIf( DBG );
-  }
-  SEC << "--------------------------------------------------------------------" << endl;
-  SMGR["X11"]->user_set_delete();
-  SMGR.activate (PMGR);
-  dumpSelWhatIf( DBG );
-  dumpPkgWhatIf( DBG );
-  SEC << "--------------------------------------------------------------------" << endl;
-
-  if ( 0 ) {
-    SBS( "Minimal" );
-    dumpSelWhatIf( DBG );
-    dumpPkgWhatIf( DBG );
-  }
+  InstSrcManager::ISrcId nid = newSrc( "dir:////tmp/PLAIN" );
+  ISM.enableSource( nid );
 
   SEC << "STOP" << endl;
   return 0;
 }
 
-#undef Y2LOG
-#define Y2LOG "SBS"
-
-bool SetSelectionString (std::string name, bool recursive = false)
-{
-  PMSelectablePtr selectable = SMGR.getItem(name);
-    if (selectable)
-    {
-      INT << "SetSelectionString " << name << " " << recursive << " " << selectable << endl;
-	PMSelectionPtr selection = selectable->theObject();
-	if (selection)
-	{
-	    if (!recursive && selection->isBase())
-	    {
-		MIL << "Changing base selection, re-setting manager" << endl;
-		SMGR.setNothingSelected();
-		PMGR.setNothingSelected();
-	    }
-	    else if (selectable->status() == PMSelectable::S_Install)
-	    {
-		DBG << "Don't recurse already selected." << endl;
-		return true;
-	    }
-	}
-
-	if (!selectable->user_set_install())
-	{
-	    ERR << name << "->user_set_install" << endl;
-	    return false;
-	}
-	DBG << name << "->user_set_install" << endl;
-
-	// RECURSION
-	// select all recommended selections of a base selection
-
-	if ( selection->isBase() )
-	{
-	    const std::list<std::string> recommends = selection->recommends();
-	    MIL << "Base ! Selecting all required and recommends (" << recommends.size() << ")..." << endl;
-	    for (std::list<std::string>::const_iterator it = recommends.begin();
-		 it != recommends.end(); ++it)
-	    {
-		SetSelectionString (*it, true);
-	    }
-	    MIL << "DONE: Selecting all required and recommends." << endl;
-	}
-
-	MIL << "Solve Selections...." << endl;
-	PkgDep::ResultList good;
-	PkgDep::ErrorResultList bad;
-	if ( !SMGR.solveInstall(good, bad) )
-	{
-	    ERR << bad.size() << " selections failed." << endl;
-	    for (PkgDep::ErrorResultList::const_iterator p = bad.begin();
-		 p != bad.end(); ++p )
-	    {
-		DBG << *p << std::endl;
-	    }
-
-	    return false;
-	}
-	return true;
-    }
-    WAR << "Unknown selection '" << name << "'" << endl;
-    return false;
-}
-
-
-bool ActivateSelections ()
-{
-  MIL << "ActivateSelections..." << endl;
-  SMGR.activate (PMGR);
-  return true;
-}
-
-
-bool PkgSolve ()
-{
-  MIL << "Solve Packages..." << endl;
-    bool filter_conflicts_with_installed = false;
-
-    PkgDep::ResultList good;
-    PkgDep::ErrorResultList bad;
-
-    if (!PMGR.solveInstall(good, bad, filter_conflicts_with_installed))
-    {
-        unsigned _solve_errors = bad.size();
-	ERR << bad.size() << " packages failed." << endl;
-	for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
-	     p != bad.end(); ++p )
-	{
-	    DBG << *p << std::endl;
-	}
-
-	return false;
-    }
-    return true;
-}
-
-void SBS( string name )
-{
-  SEC << "SBS (" << name << ")..." << endl;
-  PMSelectablePtr selectable = SMGR.getItem( name );
-  if ( !selectable ) {
-    ERR << "No Selection '" << name << "'" << endl;
-    return;
-  }
-  PMSelectionPtr candidate = selectable->candidateObj();
-  if ( !candidate || !candidate->isBase() ) {
-    ERR << "No candidate or not base selection " << candidate << endl;
-    return;
-  }
-
-  MIL << "ClearSelection..." << endl;
-  SMGR.setNothingSelected();
-  PMGR.setNothingSelected();
-
-
-  MIL << "SetSelection '" << name << "'..." << endl;
-  SetSelectionString ( name );
-
-  ActivateSelections ();
-
-  //PkgSolve();
-
-  SEC << "DONE SBS (" << name << ")" << endl;
-}
