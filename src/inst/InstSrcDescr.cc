@@ -22,9 +22,13 @@
 
 /-*/
 
+#include <y2util/Y2SLog.h>
+
 #include <iostream>
+#include <fstream>
 
 #include <y2pm/InstSrcDescr.h>
+
 
 using namespace std;
 
@@ -106,7 +110,7 @@ InstSrcDescr::parseSuSEFile (const Pathname & mountpoint, const Pathname & susef
 
     FILE *info = fopen ((mountpoint + "suse/setup/descr/info").asString().c_str(), "r");
 
-fprintf (stderr, "parseSuSEFile(%s) = %p\n", filename.asString().c_str(), info);
+    fprintf (stderr, "parseSuSEFile(%s) = %p\n", filename.asString().c_str(), info);
     if (info == 0)
 	return;
 
@@ -202,6 +206,7 @@ InstSrcDescr::writeCache (void)
 ostream & InstSrcDescr::dumpOn( ostream & str ) const
 {
   Rep::dumpOn( str ) << "(";
+  str << " arch: " << _base_arch;
   str << " type:" << _type;
   str << " url:" << _url;
   str << " product:" << _content_product;
@@ -213,33 +218,118 @@ ostream & InstSrcDescr::dumpOn( ostream & str ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcDescr::vconstruct
+//	METHOD NAME : InstSrcDescr::readCache
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
 PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & cache_dir_r )
 {
-  ndescr_r = 0;
-  PMError err;
+    ndescr_r = 0;
+    PMError err = Error::E_error;
 
-  InstSrcDescrPtr ndescr( new InstSrcDescr );
+    InstSrcDescrPtr ndescr( new InstSrcDescr );
 
-  ///////////////////////////////////////////////////////////////////
-  // parse _cache_file and fill into ndescr
-  ///////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////
+    // parse _cache_file and fill into ndescr
+    ///////////////////////////////////////////////////////////////////
 
+    TagParser parser;
+    std::string tagstr;
+
+    std::ifstream mediaCacheStream( cache_dir_r.asString().c_str() );
+
+    if( !mediaCacheStream )
+    {
+	return Error::E_open_file;
+    }
+
+    CommonPkdParser::TagSet* tagset;
+    tagset = new InstSrcMediaTags();
+    
+    bool repeatassign = false;
+    bool parse = true;
+    
+    while( parse && parser.lookupTag( mediaCacheStream ) )
+    {
+	tagstr = parser.startTag();
+
+	do
+	{
+	    switch( tagset->assign( tagstr.c_str(), parser, mediaCacheStream ) )
+	    {
+		case CommonPkdParser::Tag::ACCEPTED:
+		    std::cerr << "*** filling ***" << std::endl;
+		    // fill InstSrcDescr 
+		    fillInstSrcDescr( ndescr, tagset );
+		    repeatassign = false;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOMATCH:
+		    repeatassign = false;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_FULL:
+		    // not needed here because there is only one set of tags
+		    // fillInstSrcDescr( ndescr, tagset );
+		    tagset->clear();
+		    repeatassign = true;
+		    err = Error::E_ok;
+		    break;
+		case CommonPkdParser::Tag::REJECTED_NOENDTAG:
+		    repeatassign = false;
+		    parse = false;
+		    break;
+	    }
+	} while( repeatassign );
+
+    }
+
+    tagset->clear();
+
+    if( parse )
+	std::cerr << "**  +* parsing completed ***" << std::endl;
+    else
+	std::cerr << "*** parsing was aborted ***" << std::endl;
+    
+    
 #warning TBD InstSrcDescr cache read
+  
+    ///////////////////////////////////////////////////////////////////
+    // done
+    ///////////////////////////////////////////////////////////////////
 
-  err = Error::E_error;
+    if ( err == Error::E_ok )
+    {
+	ndescr_r = ndescr;
+    }
 
-  ///////////////////////////////////////////////////////////////////
-  // done
-  ///////////////////////////////////////////////////////////////////
-  if ( !err ) {
-    ndescr_r = ndescr;
-  }
-  return err;
+    return err;
+}
+
+bool InstSrcDescr::fillInstSrcDescr( InstSrcDescrPtr & ndescr, CommonPkdParser::TagSet * tagset )
+{
+    PkgArch arch( (tagset->getTagByIndex(InstSrcMediaTags::ARCH))->Data() );
+    ndescr->set_base_arch( arch );
+
+    MIL << "*** Arch" << arch << std::endl;
+
+    if (  (tagset->getTagByIndex(InstSrcMediaTags::ACTIVATE))->Data() == "1" )
+    {
+	ndescr->set_default_activate( true );
+    }
+    else
+    {
+	ndescr->set_default_activate( false );	
+    }
+
+    string typeStr = (tagset->getTagByIndex(InstSrcMediaTags::TYPE))->Data();
+    InstSrc::Type type = InstSrc::fromString( typeStr );
+
+    ndescr->set_type( type );
+
+    MIL << "*** Type" << type << std::endl;
+    
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -254,6 +344,22 @@ PMError InstSrcDescr::writeCache( const Pathname & cache_dir_r ) const
 {
 #warning TBD InstSrcDescr cache write
 
-  return Error::E_error;
+    ofstream file( cache_dir_r.asString().c_str() );
+
+    if ( !file )
+    {
+	return Error::E_create_file;
+    }
+    
+    file << "=Arch: " << _base_arch << endl;
+    file << "=Type: " << InstSrc::toString(_type) << endl;
+    file << "+Media: " << endl;
+    file << _media_vendor << endl;
+    file << _media_id << endl;
+    file << _media_count << endl;
+    file << "-Media:" << endl;
+    file << "=Default_activate: " << (_default_activate?"1":"0") << endl;
+    
+    return Error::E_ok;
 }
 
