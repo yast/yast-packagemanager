@@ -292,7 +292,10 @@ const set<PMPackageManager::MountPoint> & PMPackageManager::currentDu()
   }
 
   for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
-    ;
+    if ( (*it)->has_installed() )
+      PMPackagePtr( (*it)->installedObj() )->du_sub( _du_master );
+    if ( (*it)->has_candidate() )
+      PMPackagePtr( (*it)->candidateObj() )->du_add( _du_master );
   }
 
   DBG << _du_master << endl;

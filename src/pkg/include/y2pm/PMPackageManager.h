@@ -22,11 +22,13 @@
 #include <iosfwd>
 #include <list>
 
+#include <y2util/YRpmGroupsTree.h>
+
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
 #include <y2pm/PMPackage.h>
-#include <y2util/YRpmGroupsTree.h>
 #include <y2pm/PMPackageManager_update.h>
+#include <y2pm/PkgDu.h>
 
 ///////////////////////////////////////////////////////////////////
 //
