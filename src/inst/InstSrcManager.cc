@@ -367,6 +367,19 @@ void InstSrcManager::getSources( ISrcIdList & idlist_r, const bool enabled_only 
   }
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::cacheCopyTo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::cacheCopyTo( const Pathname & newRoot_r )
+{
+  return Error::E_error;
+}
+
 /******************************************************************
 **
 **
