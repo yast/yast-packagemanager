@@ -142,7 +142,8 @@ InstYou::~InstYou()
 #warning MediaAccess destructors
   // XXX for some reason MediaAccess destructors are not called. if removed,
   // remove include file above as well
-  Y2PM::instSrcManager().releaseAllMedia();
+  if(_usedeltas)
+    Y2PM::instSrcManager().releaseAllMedia();
   releaseSource();
   clearDeltasToApplyList(_deltastoapply);
 }
@@ -153,22 +154,27 @@ void InstYou::init()
   _progressTotal = 0;
   _progressCurrent = 0;
   _installedPatches = 0;
+  _usedeltas = NO_DELTAS;
 
-  SysConfig syscfg( "onlineupdate" );
+  // check whether the necessary tool is installed
+  PathInfo pi("/usr/bin/applydeltarpm");
+  if(pi.isX())
+  {
+    SysConfig syscfg( "onlineupdate" );
+    string usedeltas = syscfg.readEntry("YOU_USE_DELTAS");
 
-  string usedeltas = syscfg.readEntry("YOU_USE_DELTAS");
-
-  if(usedeltas.empty() || usedeltas == "yes")
-  {
-    _usedeltas = ANY_DELTAS;
-  }
-  else if(usedeltas == "filesystem")
-  {
-    _usedeltas = ONLY_FS_DELTAS;
-  }
-  else
-  {
-    _usedeltas = NO_DELTAS;
+    if(usedeltas == "yes")
+    {
+      _usedeltas = ANY_DELTAS;
+    }
+    else if(usedeltas.empty() || usedeltas == "filesystem")
+    {
+      _usedeltas = ONLY_FS_DELTAS;
+    }
+    else
+    {
+      _usedeltas = NO_DELTAS;
+    }
   }
 
   if(_usedeltas)
@@ -689,6 +695,8 @@ PMError InstYou::processPatches()
       DeltaToApply* delta = *it;
       Pathname rpmPath = delta->_patch->product()->rpmPath( delta->_pkg, false );
       Pathname dest = _media.localPath( rpmPath );
+
+      DBG << "applying delta for " << delta->_pkg->nameEd() << (delta->_from_filesystem?" (filesystem)":"") << endl;
 
       if(!delta->_from_filesystem)
       {
@@ -1294,10 +1302,17 @@ InstYou::DeltaToApply* InstYou::FetchSuitableDelta(PMYouPatchPtr patch, PMPackag
 
     if(fetch_delta)
     {
-      if(quickcheck || (retrieveDelta(it->filename(), patch->product(), it->md5sum()) == PMError::E_ok))
+      if(!quickcheck)
       {
-	return new DeltaToApply(patch, *it, pkg, basepkg, from_filesystem);
+	PMError err = retrieveDelta(it->filename(), patch->product(), it->md5sum());
+	if(err)
+	{
+	  ERR << "retrieveDelta: " << err << endl;
+	  log(err.asString()+"\n");
+	  return NULL;
+	}
       }
+      return new DeltaToApply(patch, *it, pkg, basepkg, from_filesystem);
     }
   }
 
@@ -1340,7 +1355,10 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     {
       DeltaToApply* delta = FetchSuitableDelta(patch, *itPkg);
       if(delta)
+      {
 	_deltastoapply.push_back(delta);
+	continue;
+      }
     }
 
     error = retrievePackage( *itPkg, patch->product() );
@@ -1601,7 +1619,11 @@ PMError InstYou::retrieveDelta( const std::string& name, const PMYouProductPtr& 
   Pathname path = product->deltaPath( name );
 
   PMError err = _media.provideFile( path, !_settings->reloadPatches() );
-  if ( err ) return err;
+  if ( err )
+  {
+    ERR << err << endl;
+    return err;
+  }
 
   string fn = _media.localPath( path ).asString();
 
@@ -1610,12 +1632,14 @@ PMError InstYou::retrieveDelta( const std::string& name, const PMYouProductPtr& 
 
   if(digest.empty() || digest != md5sum)
   {
-    string msg = stringutil::form(_("file '%s' has wrong MD5 checksum"), path.asString().c_str());
+    // Translator: filename, md5sum, md5sum
+    string msg = stringutil::form(_("file '%s' has wrong MD5 checksum: '%s' != '%s'"),
+	path.asString().c_str(), digest.c_str(), md5sum.c_str());
     return PMError(YouError::E_md5sum_mismatch, msg);
   }
 
 
-  return PMError();
+  return err;
 }
 
 PMError InstYou::disconnect()

@@ -12,7 +12,8 @@ EXTRA_PROGRAMS = \
         test_patchinfo \
         products \
         test_media \
-        test_proddb
+        test_proddb \
+	checkpatch
 
 cschum_test_SOURCES = cschum_test.cc
 cschum_test_LDADD = $(top_builddir)/src/liby2pm.la
@@ -45,5 +46,8 @@ products_LDFLAGS = -static
 test_proddb_SOURCES = test_proddb.cc
 test_proddb_LDADD = $(top_builddir)/src/liby2pm.la
 test_proddb_LDFLAGS = -static
+
+checkpatch_SOURCES = checkpatch.cc
+checkpatch_LDADD = -lcurl $(top_builddir)/src/liby2pm.la
 
 ALL: $(EXTRA_PROGRAMS)

@@ -36,7 +36,7 @@ void usage()
 */
 int main( int argc, char **argv )
 {
-  bool verbose = false;
+  unsigned verbose = 0;
   bool show = false;
   bool detailed = false;
 
@@ -47,7 +47,7 @@ int main( int argc, char **argv )
 
     switch ( c ) {
       case 'v':
-        verbose = true;
+        ++verbose;
         break;
       case 's':
         show = true;
@@ -65,14 +65,22 @@ int main( int argc, char **argv )
 
   if ( optind == argc ) usage();
 
-  string patchFile = argv[ optind ];
+  Pathname patchFile = argv[ optind ];
+  Pathname dir = patchFile.dirname();
+  patchFile = patchFile.basename();
 
   if ( verbose ) set_log_filename( "-" );
+  if ( verbose > 1 )
+  {
+    Y2SLog::dbg_enabled_bm = true;
+    set_log_debug(true);
+  }
 
-  PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo );
-  std::list<PMYouPatchPtr> patches;
+  PMYouSettingsPtr settings = new PMYouSettings;
+  PMYouPatchInfoPtr patchInfo( new PMYouPatchInfo(settings) );
+  PMYouPatchPtr patch;
 
-  PMError error = patchInfo->readFile( "", patchFile, patches );
+  PMError error = patchInfo->readFile( dir, patchFile.asString(), patch );
 
   if ( error ) {
     cerr << "Check failed: " << error << endl;
@@ -81,43 +89,28 @@ int main( int argc, char **argv )
     cout << "Check succeeded." << endl;
   }
 
-  if ( show || detailed ) {
-    list<PMYouPatchPtr>::const_iterator it;
-    for( it = patches.begin(); it != patches.end(); ++it ) {
-      cout << "PATCH: " << (*it)->name() << " (" << (*it)->shortDescription()
-           << ")" << endl;
-//      (*it)->dumpOn( cout );
-      cout << "Summary: " << (*it)->summary() << endl;
-      cout << "Size: " << (*it)->size().asString() << endl;
-      cout << "Kind: " << (*it)->kindLabel( (*it)->kind() ) << endl;
-      cout << "<description>" << endl << (*it)->longDescription() << endl
-           << "</description>" << endl;
-      list<PMPackagePtr> packages = (*it)->packages();
-      list<PMPackagePtr>::const_iterator it2;
-      for( it2 = packages.begin(); it2 != packages.end(); ++it2 ) {
-        cout << "  Package:" << endl;
+  if ( show) {
+    patch->dumpOn(cout);
 
-        cout << "    Name: " << (*it2)->name() << endl;
-        cout << "    Version: " << (*it2)->version() << endl;
-        cout << "    Release: " << (*it2)->release() << endl;
+    if(detailed)
+    {
+      list<PMPackagePtr> packages = patch->packages();
+      list<PMPackagePtr>::const_iterator itPkg;
+      cout << "Packages: " << endl;
+      for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+        cout << "     RPM: " << (*itPkg)->nameEdArch() << " - " << (*itPkg)->summary() << endl;
 
-        cout << "    Size: " << (*it2)->size() << endl;
-        cout << "    ArchiveSize: " << (*it2)->archivesize() << endl;
-        cout << "    PatchRpmSize: " << (*it2)->patchRpmSize() << endl;
-
-        if ( detailed ) {
-          list<PkgEdition> editions = (*it2)->patchRpmBaseVersions();
-          list<PkgEdition>::const_iterator it3;
-          for( it3 = editions.begin(); it3 != editions.end(); ++it3 ) {
-            cout << "    PATCHRPM BASEVERSION: '" << it3->asString() << "'" << endl;
-          }
-          cout << "    REQUIRES:" << endl;
-          list<PkgRelation> relations = (*it2)->requires();
-          list<PkgRelation>::const_iterator it4;
-          for( it4 = relations.begin(); it4 != relations.end(); ++it4 ) {
-            cout << "      " << (*it4).asString() << endl;          
-          }
-        }
+	std::list<PMPackageDelta> d = (*itPkg)->deltas();
+	if(!d.empty())
+	{
+	  cout << "Deltas:" << endl;
+	  std::list<PMPackageDelta>::iterator it = d.begin();
+	  std::list<PMPackageDelta>::iterator end = d.end();
+	  for(; it != end; ++it)
+	  {
+	    cout << "  " << *it;
+	  }
+	}
       }
     }
   }

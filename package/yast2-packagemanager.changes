@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Aug 30 13:26:21 CEST 2004 - lnussel@suse.de
+
+- disable deltas directly at initialization if applydeltarpm is not installed
+- don't download full package if delta was downloaded
+- fix create_you_patch, add ability to sign patches
+- link create_you_patch to /usr/bin in yast2-packagemanager-devel
+- fix checkpatch test program
+- leave YOU_USE_DELTAS empty and have it default to "filesystem" in this case
+- 2.10.9
+
+-------------------------------------------------------------------
 Wed Aug 18 14:51:16 CEST 2004 - ma@suse.de
 
 - Do not include directories used as mountpoint in yast2-packagemanager.rpm.
