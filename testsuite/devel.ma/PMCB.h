@@ -214,6 +214,53 @@ struct DownloadProgressCallback : public MediaCallbacks::DownloadProgressCallbac
 
 DownloadProgressCallback downloadProgressCallback;
 
+///////////////////////////////////////////////////////////////////
+// Reporting progress of download
+///////////////////////////////////////////////////////////////////
+#undef Y2LOG
+#define Y2LOG "MediaChangeCallback"
+struct MediaChangeCallback  : public InstSrcManagerCallbacks::MediaChangeCallback  {
+  virtual void reportbegin() { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+
+  virtual bool isSet() {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << endl;
+    return true;
+  }
+
+  virtual std::string changeMedia( constInstSrcDescrPtr descr,
+				   const Url & currentUrl,
+				   int expectedMedianr,
+				   PMError error ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << endl
+      << "  " << YYY << descr << endl
+      << "  " << YYY << currentUrl << endl
+      << "  " << YYY << expectedMedianr << endl
+      << "  " << YYY << error << endl
+      << "  " << endl;
+    static string nret( "x" );
+    string ret( nret );
+    nret = "S";
+    return ret;
+  }
+
+  virtual std::string changeMedia( const std::string & error,
+				   const std::string & url,
+				   const std::string & product,
+				   int current,
+				   const std::string & currentLabel,
+				   int expected,
+				   const std::string & expectedLabel,
+				   bool doublesided ) {
+    return "S";
+  }
+  MediaChangeCallback() {
+    InstSrcManagerCallbacks::mediaChangeReport.redirectTo( this );
+  }
+};
+
+MediaChangeCallback mediaChangeCallback;
+
 #undef Y2LOG
 #define Y2LOG "DEFINE_Y2LOG"
 #endif // PMCB_h

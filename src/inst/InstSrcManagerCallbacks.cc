@@ -37,6 +37,15 @@ namespace InstSrcManagerCallbacks {
   bool MediaChangeCallback::isSet() {
     return false;
   }
+  string MediaChangeCallback::changeMedia( constInstSrcDescrPtr descr,
+					   const Url & currentUrl,
+					   int expectedMedianr,
+					   PMError error ) {
+    return "S";
+  }
+  /**
+   * DEPRECATED OLD STYLE CALLBACK (used by InstYou)
+   **/
   string MediaChangeCallback::changeMedia( const string & error,
 					   const string & url,
 					   const string & product,
@@ -45,9 +54,8 @@ namespace InstSrcManagerCallbacks {
 					   int expected,
 					   const std::string & expectedLabel,
                                            bool doublesided ) {
-    return "";
+    return "S";
   }
-
 #if 0
   ///////////////////////////////////////////////////////////////////
   // Reporting @

@@ -45,6 +45,7 @@
 #include <y2pm/InstSrcData.h>
 #include <y2pm/InstSrcDataUL.h>
 #include <y2pm/InstSrcDataPLAIN.h>
+#include <y2pm/F_Media.h>
 
 #include <y2pm/RpmHeader.h>
 
@@ -663,218 +664,151 @@ InstSrc::Type InstSrc::fromString( std::string s )
 **
 */
 #warning NEEDS REWRITE: provideMedia
-#warning Actually it's InstSrcData which has to somehow confirm it's the correct media.
-PMError
-InstSrc::provideMedia (int medianr) const
+PMError InstSrc::provideMedia ( int medianr ) const
 {
+  if ( _medianr == medianr ) {
+    return InstSrcError::E_ok; // everything ok
+  }
+
+  PMError err;
+  Url url = _descr->url();
+  bool triedReOpen = false;
+
   MediaChangeReport::Send report( mediaChangeReport );
 
-    PMError err;
-    string reply;
+  while ( true ) {
+    err = Error::E_ok;
+    MIL << "Looking for media " << medianr
+      << " ("  << _descr->media_vendor() << " | " << _descr->media_id() << ") " << endl;
 
-    // if the url ends with digits, try re-opening with
-    // digits replaced by medianr
-    bool triedReOpen = false;
-
-    Url url = _descr->url();
-    string product = _descr->label();
-    while (medianr != _medianr)
-    {
-	if (!_media->isAttached())
-	{
-	    _medianr = 0;
-
-	    err = _media->attach();
-
-	    if (err == MediaError::E_not_open)
-	    {
-		MIL << "Not open, doing initial open '" << url << "'" << endl;
-		err = _media->open (url, cache_media_dir());
-		if (err != MediaError::E_ok)
-		{
-		    ERR << "open (" << url << ") failed: " << err << endl;
-		}
-		else
-		{
-		    err = _media->attach();
-		}
-	    }
-
-	}
-
-	Pathname mediafile ( stringutil::form( "/media.%d/media", medianr ) );
-
-	err = _media->provideFile (mediafile);
-	if (err == MediaError::E_ok)
-	{
-	    // open media file
-	    std::ifstream mediaf (_media->localPath (mediafile).asString().c_str());
-	    if (mediaf)
-	    {
-		char vendor[200];
-		char id[200];
-		vendor[0] = 0;
-		id[0] = 0;
-		if ((mediaf.getline (vendor, 200, '\n'))
-		    && (string (vendor) == _descr->media_vendor()))	// check vendor
-		{
-		    if ((mediaf.getline (id, 200, '\n'))
-			&& (string (id) == _descr->media_id()))		// check id
-		    {
-			_medianr = medianr;			        // everything ok
-			mediaf.close();
-			break;
-		    }
-		}
-		mediaf.close();
-		MIL << "vendor '" << vendor << "' id '" << id << "'" << endl;
-		if ( report->isSet() )
-		{
-		    string error = string(vendor) + " != " + (const std::string &)(_descr->media_vendor());
-		    if (id[0] != 0)
-		    {
-			error = error + "<br>\n" + id + " != " + _descr->media_id();
-		    }
-
-		    //---------------------------------------------------------
-		    // wrong media ID number callback
-
-		    _media->release();
-
-		    string changereply;
-		    for (;;)
-		    {
-			changereply = report->changeMedia( error, url.asString(), product,
-							   -1, "",
-							   medianr, descr()->media_label( medianr )(),
-							   descr()->media_doublesided() );
-
-			if (changereply != "E")		// eject
-			    break;
-			_media->release(true);
-		    }					// re-prompt after eject
-
-		    if (changereply == "S")			// skip
-		    {
-			return InstSrcError::E_skip_media;
-		    }
-		    else if (changereply == "I")		// ignore
-		    {
-			_media->attach();
-			MIL << "ignore bad media id" << endl;
-			reply = "";
-			break;
-		    }
-		    else if (changereply == "C")		// cancel installation
-		    {
-			return InstSrcError::E_cancel_media;
-		    }
-		    else if (changereply.empty())
-		    {
-			continue;
-		    }
-		    else					// new url
-		    {
-			url = Url(changereply);
-			if (url.isValid())
-			{
-			    _media->close();				// close medium
-			    MIL << "Retry url '" << url << "'" << endl;
-			    continue;
-			}
-		    }
-		}
-
-	    } // media file ok
-	}
-	else
-	{
-            MIL << "Media can't provide '" << mediafile << "': " << err << endl;
-	}
-
-	_media->release();
-
-	if (_media->attach (true) == PMError::E_ok)	// retry next device of media
-	    continue;
-
-	std::string path = url.path();
-
-	if (!triedReOpen)
-	{
-	    while (path[path.size()-1] == '/')		// erase trailing '/'
-		path.erase (path.size()-1);
-	}
-
-	if (!triedReOpen
-	    && isdigit(path[path.size()-1]))
-	{
-	    triedReOpen = true;				// don't come here again
-	    MIL << "Closing path '" << path << "'" << endl;
-	    _media->close();				// close medium
-	    while (isdigit(path[path.size()-1])
-		   && !path.empty())
-	    {
-		path.erase (path.size()-1);		// remove trailing digits
-	    }
-	    path += stringutil::numstring( medianr );	// attach medianr
-	    url.setPath (path);
-	    MIL << "Re-open url '" << url << "'" << endl;
-	    continue;					// try re-open
-	}
-
-	if ( ! report->isSet() )
-	{
-	    ERR << "Can't find medium, can't ask user" << endl;
-	    medianr = 0;
-	    break;
-	}
-
-	// wrong media number callback
-	//---------------------------------------------------------
-
-	string changereply;
-	for (;;)
-	{
-	    changereply = report->changeMedia( err.asString(), url.asString(), product,
-					       _medianr, descr()->media_label( _medianr )(),
-					       medianr, descr()->media_label( medianr )(),
-					       descr()->media_doublesided() );
-
-	    if (changereply != "E")		// eject
-		break;
-	    _media->release(true);
-	}					// re-prompt after eject
-
-	if (changereply == "S")			// skip
-	{
-	    MIL << "skip media" << endl;
-	    return InstSrcError::E_skip_media;
-	}
-	else if (changereply == "C")		// cancel installation
-	{
-	    MIL << "cancel media" << endl;
-	    return InstSrcError::E_cancel_media;
-	}
-	else if (changereply.empty())
-	{
-	    _media->attach();
-	}
-	else					// new url
-	{
-	    _media->close();			// close medium
-	    url = Url(changereply);
-	}
+    // make shure media is open with correct Url
+    if ( ! _media->isOpen() ) {
+      _medianr = 0;
+      err = _media->open ( url, cache_media_dir() );
     }
 
-    if (reply != "")
-    {
-	_media->release();
-	return InstSrcError::E_no_media;
+    // make shure media is attached
+    if ( ! err && !_media->isAttached() ) {
+      _medianr = 0;
+      err = _media->attach();
     }
 
-    _medianr = medianr;			// everything ok
+    // confirm it's the correct media
+    if ( ! err ) {
+#warning Actually it's InstSrcData which has to somehow confirm it's the correct media.
 
-    return InstSrcError::E_ok;
+      Pathname mediafile( stringutil::form( "/media.%d/media", medianr ) );
+      err = _media->provideFile( mediafile );
+
+      if ( ! err ) {
+	// read mediafile
+	F_Media mediaf;
+	err = mediaf.quickread( _media->localPath( mediafile ) );
+
+	if ( ! err ) {
+	  // check vendor and id
+	  if (    mediaf.vendor() == _descr->media_vendor()
+	       && mediaf.ident()  == _descr->media_id() ) {
+
+	    _medianr = medianr; // everything ok
+	    return InstSrcError::E_ok; // -----------------------------> return ok
+	  }
+
+	  // NOTE: We've got the medianr, but with wrong mediaident. Former versions
+	  // asked via callback and offered to ignore the wrong mediaident. This might
+	  // be ok for a single source product, but not for multisource (e.g. SLES/CORE).
+	  //
+	  // At least the content file should be scanned, to check whether product id and
+	  // version match, before offering to use the media as substitute.
+
+	}
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Here: We've got no or a wrong media
+    ///////////////////////////////////////////////////////////////////
+    DBG << "Attempt result: " << err << endl;
+
+    // try next device if media supports it
+    if ( _media->isOpen() ) {
+      _media->release();
+      err = _media->attach( true ); // try next device of media
+      if ( ! err )
+	continue;               // ------------------------------------> continue
+    }
+
+    // No more devices to try, so have a look at the pathname.
+    // If it ends in digits, replace them with medianumber.
+    if ( ! triedReOpen ) {
+      triedReOpen = true; // don't come here again
+      string path = url.path();
+      string::size_type pos = path.find_last_not_of( '/' );
+      if ( pos != string::npos && ++pos != path.size() ) {
+	path.erase( pos );
+      }
+      pos = path.find_last_not_of( "1234567890" );
+      if ( pos != string::npos && ++pos != path.size() ) {
+	string mnum( stringutil::numstring( medianr ) );
+	if ( mnum != path.substr( pos ) ) {
+	  path.erase( pos );
+	  path += mnum;
+
+	  // give it a try
+	  _media->close();
+	  url.setPath( path );
+	  continue;             // ------------------------------------> continue
+	}
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Here: No device and no alternate path succeeded :(
+    ///////////////////////////////////////////////////////////////////
+
+    // Give up if there is no callback set
+    if ( ! report->isSet() ){
+      _media->close();
+      ERR << "Can't find medium, can't ask user" << endl;
+      return InstSrcError::E_skip_media; // ---------------------------> return
+    }
+
+    // ask what to do...
+    string changereply;
+    _media->release();
+
+    while ( true ) {
+      changereply = report->changeMedia( descr(), url, medianr, err );
+      if ( changereply == "E" ) {
+	_media->release( true );  // eject
+	continue;                 // re-prompt after eject
+      }
+      break; // leave
+    }
+
+    if ( changereply == "S" ) {		        // skip
+      _media->close();
+      MIL << "Skip media" << endl;
+      return InstSrcError::E_skip_media;        // ---> return
+    }
+    else if ( changereply == "C" ) {		// cancel installation
+      _media->close();
+      MIL << "Cancel media" << endl;
+      return InstSrcError::E_cancel_media;      // ---> return
+    }
+    else if ( ! changereply.empty() ) {
+      _media->close();
+      url = Url( changereply );
+      MIL << "Retry url '" << url << "'" << endl;
+    }
+    // else retry
+
+  } // while
+
+
+  // actually this should not be reached:
+  _media->close();
+  return InstSrcError::E_skip_media;
 }
 
 

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 21 13:43:46 CET 2005 - ma@suse.de
+
+- Fixed provideMedia and media change callbacks. Allow to provide
+  more information via callback.
+- 2.11.9
+
+-------------------------------------------------------------------
 Thu Jan 20 10:08:39 CET 2005 - ma@suse.de
 
 - Basic LanguageManager provided. Code adapted to libutils new

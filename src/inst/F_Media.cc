@@ -90,54 +90,58 @@ PMError F_Media::read( istream & stream_r, const bool quick_r )
     _ident = line;
   }
 
-  // count
-  line = stringutil::getline( stream_r, stringutil::TRIM );
-  if ( line.empty() ) {
-    ERR << "Parse error: missing 'count'" << endl;
-    return InstSrcError::E_no_instsrc_on_media;
-  } else {
-    _count = atoi( line.c_str() );
-    if ( !_count ) {
-      WAR << "Parse: media count must not be '0', using '1'" << endl;
-      _count = 1;
-    }
-  }
+  // thats all in quick mode!
+  if ( ! quick_r ) {
 
-  //
-  // bad :(
-  // optional flags / or 1st medianame
-  // fortunately there's currently just one flag
-  bool skipread = false; // in case we get the 1st medianame here
-  line = stringutil::getline( stream_r, stringutil::TRIM );
-  if ( line == "doublesided" ) {
-    _flags |= DOUBLESIDED;
-  } else if ( line.substr( 0, 5 ) == "MEDIA" ) {
-    skipread = true;
-  } else if ( line.size() ) {
-    WAR << "Parse: ignore unknown flags '" << line << "'" << endl;
-  }
-
-  // medianames
-  while ( stream_r || skipread ) {
-    if ( skipread ) {
-      skipread = false;
+    // count
+    line = stringutil::getline( stream_r, stringutil::TRIM );
+    if ( line.empty() ) {
+      ERR << "Parse error: missing 'count'" << endl;
+      return InstSrcError::E_no_instsrc_on_media;
     } else {
-      line = stringutil::getline( stream_r, stringutil::TRIM );
-    }
-    if ( !(stream_r.fail() || stream_r.bad()) ) {
-      string tag = stringutil::stripFirstWord( line );
-      if ( tag.substr( 0, 5 ) == "MEDIA" && tag.find_first_of( "123456789", 5 ) == 5 ) {
-	// MEDIA{N}[.LANG]
-	unsigned num = atoi( tag.c_str() + 5 );
-	LangCode lang;
-	string::size_type dot = tag.rfind( '.' );
-	if ( dot != string::npos ) {
-	  lang = LangCode( tag.substr( dot+1 ) );
-	}
-	_labels[num]._datamap[lang] = line;
+      _count = atoi( line.c_str() );
+      if ( !_count ) {
+	WAR << "Parse: media count must not be '0', using '1'" << endl;
+	_count = 1;
       }
     }
-  }
+
+    //
+    // bad :(
+    // optional flags / or 1st medianame
+    // fortunately there's currently just one flag
+    bool skipread = false; // in case we get the 1st medianame here
+    line = stringutil::getline( stream_r, stringutil::TRIM );
+    if ( line == "doublesided" ) {
+      _flags |= DOUBLESIDED;
+    } else if ( line.substr( 0, 5 ) == "MEDIA" ) {
+      skipread = true;
+    } else if ( line.size() ) {
+      WAR << "Parse: ignore unknown flags '" << line << "'" << endl;
+    }
+
+    // medianames
+    while ( stream_r || skipread ) {
+      if ( skipread ) {
+	skipread = false;
+      } else {
+	line = stringutil::getline( stream_r, stringutil::TRIM );
+      }
+      if ( !(stream_r.fail() || stream_r.bad()) ) {
+	string tag = stringutil::stripFirstWord( line );
+	if ( tag.substr( 0, 5 ) == "MEDIA" && tag.find_first_of( "123456789", 5 ) == 5 ) {
+	  // MEDIA{N}[.LANG]
+	  unsigned num = atoi( tag.c_str() + 5 );
+	  LangCode lang;
+	  string::size_type dot = tag.rfind( '.' );
+	  if ( dot != string::npos ) {
+	    lang = LangCode( tag.substr( dot+1 ) );
+	  }
+	  _labels[num]._datamap[lang] = line;
+	}
+      }
+    }
+  } // ! quick_r
 
   if ( stream_r.bad() ) {
     ERR << "Error parsing stream" << endl;

@@ -23,8 +23,11 @@
 
 #include <iosfwd>
 
+#include <y2util/Url.h>
+
 #include <y2pm/PMCallbacks.h>
 #include <y2pm/InstSrcPtr.h>
+#include <y2pm/InstSrcDescrPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 namespace InstSrcManagerCallbacks {
@@ -39,6 +42,21 @@ namespace InstSrcManagerCallbacks {
      **/
     virtual bool isSet() = 0;
     /** media change callback
+     * - descr: InstSrc description
+     * - currentUrl: URL used (may differ from descr->url())
+     * - expectedMedianr: expected media number
+     * - error: Error trying to access URL
+     * return "": retry, "S": skip, "C" cancel, "E" eject, else new url
+     **/
+    virtual std::string changeMedia( constInstSrcDescrPtr descr,
+				     const Url & currentUrl,
+				     int expectedMedianr,
+				     PMError error ) = 0;
+
+    /**
+     * DEPRECATED OLD STYLE CALLBACK (used by InstYou)
+     *
+     * media change callback
      * - product name (i.e "SuSE Linux Professional 8.1")
      * - product error
      * - media type (0=CD, 1=DVD, ...)
@@ -60,6 +78,16 @@ namespace InstSrcManagerCallbacks {
     virtual bool isSet() {
       return MediaChangeCallback::isSet();
     }
+    virtual std::string changeMedia( constInstSrcDescrPtr descr,
+				     const Url & currentUrl,
+				     int expectedMedianr,
+				     PMError error ) {
+      return MediaChangeCallback::changeMedia( descr, currentUrl,
+					       expectedMedianr, error );
+    }
+    /**
+     * DEPRECATED OLD STYLE CALLBACK (used by InstYou)
+     **/
     virtual std::string changeMedia( const std::string & error,
 				     const std::string & url,
 				     const std::string & product,
