@@ -20,7 +20,8 @@ using namespace std;
 void usage()
 {
   cout << "Usage:" << endl
-       << "  installation_sources -a url   Add source at given URL." << endl
+       << "  installation_sources [-e] -a url   Add source at given URL." << endl
+       << "    -e  Enable source." << endl
        << "  installation_sources -s       Show all available sources." << endl;
   exit( 1 );
 }
@@ -41,10 +42,11 @@ int main( int argc, char **argv )
 
   bool showSources = false;
   bool addSource = false;
+  bool enableSource = false;
 
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "sa:" );
+    c = getopt( argc, argv, "esa:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
@@ -54,6 +56,9 @@ int main( int argc, char **argv )
       case 'a':
         addSource = true;
         urlStr = optarg;
+        break;
+      case 'e':
+        enableSource = true;
         break;
       default:
         cerr << "Error parsing command line." << endl;
@@ -80,6 +85,14 @@ int main( int argc, char **argv )
     PMError error = instSrcMgr.scanMedia( sourceIds, url );
     if ( error ) {
       cerr << error << endl;
+    }
+    
+    InstSrcManager::ISrcIdList::const_iterator it;
+    for( it = sourceIds.begin(); it != sourceIds.end(); ++it ) {
+      error = instSrcMgr.enableSource( *it );
+      if ( error ) {
+        cerr << error << endl;
+      }
     }
   }
 
