@@ -10,7 +10,6 @@ pkginclude_HEADERS =	\
 	Alternatives.h	\
 	PkgSet.h	\
 	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgArch.h	\
-	PkgAttributeValue.h			\
 	\
 	PMError.h				\
 	\

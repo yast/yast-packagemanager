@@ -28,7 +28,6 @@
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgArch.h>
 #include <y2pm/PkgRelation.h>
-#include <y2pm/PkgAttributeValue.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -66,16 +65,6 @@ class PMSolvable : virtual public Rep {
 	// last entry:
 	PMSLV_NUM_ATTRIBUTES
     };
-
-    /**
-     * Get attribute name as string.
-     **/
-    std::string getAttributeName( PMSolvableAttribute attr ) const;
-
-    /**
-     * Get attribute value
-     **/
-    PkgAttributeValue getAttributeValue( PMSolvableAttribute attr ) const;
 
   public:
 
@@ -280,7 +269,6 @@ class PMSolvable : virtual public Rep {
     const PkgRelList_type& obsoletes() const { return _obsoletes; }
 
 
-    static PkgAttributeValue PkgRelList2AttributeValue( const PkgRelList_type & rellist_r );
     static std::list<std::string> PkgRelList2StringList ( const PkgRelList_type & rellist_r );
 
     // for convenience: directly return an iterator for relation lists

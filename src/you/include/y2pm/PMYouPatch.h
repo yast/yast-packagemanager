@@ -64,26 +64,6 @@ class PMYouPatch : virtual public Rep, public PMObject {
 	const FSize size() const;
 
     /**
-     * Get attribute name as string.
-     **/
-    std::string getAttributeName(PMYouPatchAttribute attr) const;
-
-    /**
-     * Access to base class getAttributeName
-     **/
-    PMObject::getAttributeName;
-
-    /**
-     * Get attribute value
-     **/
-    PkgAttributeValue getAttributeValue(PMYouPatchAttribute attr) const;
-
-    /**
-     * Access to base class getAttributeValue
-     **/
-    PMObject::getAttributeValue;
-
-    /**
      * Definitions for the kind of the patch.
      */
     enum Kind {

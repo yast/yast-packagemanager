@@ -117,58 +117,6 @@ PMSelection::~PMSelection()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMSelection::getAttributeName
-//	METHOD TYPE : string
-//
-//	DESCRIPTION :
-//
-string PMSelection::getAttributeName( PMSelectionAttribute attr ) const
-{
-    if (attr < PMSelection::PMSEL_ATTR_BEGIN)
-	return getAttributeName ((PMObject::PMObjectAttribute)attr);
-  switch ( attr ) {
-
-#define ENUM_OUT(V) case ATTR_##V: return #V; break
-    ENUM_OUT( CATEGORY );
-    ENUM_OUT( VISIBLE );
-    ENUM_OUT( SUGGESTS );
-    ENUM_OUT( INSPACKS );
-    ENUM_OUT( DELPACKS );
-    ENUM_OUT( ARCHIVESIZE );
-#undef ENUM_OUT
-
-  ///////////////////////////////////////////////////////////////////
-  // no default: let compiler warn '... not handled in switch'
-  ///////////////////////////////////////////////////////////////////
-  case PMSEL_NUM_ATTRIBUTES:
-    // illegal attr value
-    break;
-  }
-  // HERE: illegal attr value or forgott do adjust switch.
-  ERR << "Illegal SelectionAttribute(" << attr << ')' << endl;
-  return "";
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMSelection::getAttributeValue
-//	METHOD TYPE : PkgAttributeValue
-//
-//	DESCRIPTION :
-//
-PkgAttributeValue PMSelection::getAttributeValue( PMSelectionAttribute attr ) const
-{
-  if ( !_dataProvider ) {
-    ERR << "No DataProvider for " << *this << endl;
-    return PkgAttributeValue();
-  }
-  return _dataProvider->getAttributeValue( this, attr );
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : PMSelection::dumpOn
 //	METHOD TYPE : ostream &
 //

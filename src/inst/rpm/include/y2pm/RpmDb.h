@@ -37,7 +37,6 @@
 
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
-#include <y2pm/PkgAttributeValue.h>
 
 #include <y2pm/InstTargetError.h>
 

@@ -79,26 +79,6 @@ class PMSelection : virtual public Rep, public PMObject {
 	const FSize archivesize() const;
 	const std::string order() const;
 
-    /**
-     * Get attribute name as string.
-     **/
-    std::string getAttributeName(PMSelectionAttribute attr) const;
-
-    /**
-     * Access to base class getAttributeName
-     **/
-    PMObject::getAttributeName;
-
-    /**
-     * Get attribute value
-     **/
-    PkgAttributeValue getAttributeValue(PMSelectionAttribute attr) const;
-
-    /**
-     * Access to base class getAttributeValue
-     **/
-    PMObject::getAttributeValue;
-
   protected:
 
     PMSelectionDataProviderPtr _dataProvider;

@@ -66,12 +66,6 @@ class PMYouPatchDataProvider : virtual public Rep, public PMDataProvider  {
 	const std::list<std::string> delnotify() const;
 	const FSize size() const;
 
-    /**
-     * YouPatch attribute retrieval.
-     * @see PMYouPatch
-     **/
-    virtual PkgAttributeValue getAttributeValue( constPMYouPatchPtr sel_r,
-						 PMYouPatch::PMYouPatchAttribute attr_r ) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////

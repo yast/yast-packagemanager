@@ -128,7 +128,7 @@ class InstSrcData_ULPkgTags : public CommonPkdParser::TagSet
 {
 
 public:
-	// ** use same names as for PkgAttribute
+
     enum Tags {
 	VERSION,	// general file format version
 	PACKAGE,	// name version release arch
@@ -211,7 +211,7 @@ class InstSrcData_ULLangTags : public CommonPkdParser::TagSet
 {
 
 public:
-	// ** use same names as for PkgAttribute
+
     enum Tags {
 	VERSION,	// general file format version
 	PACKAGE,	// name version release arch
@@ -265,7 +265,7 @@ class InstSrcData_ULSelTags : public CommonPkdParser::TagSet
 {
 
 public:
-	// ** use same names as for PkgAttribute
+
     enum Tags {
 	VERSION,	// general file format version
 	SELECTION,	// name version release arch

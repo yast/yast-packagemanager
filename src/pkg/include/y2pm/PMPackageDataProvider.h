@@ -79,13 +79,6 @@ class PMPackageDataProvider : virtual public Rep, public PMDataProvider  {
 	virtual const std::string location () const = 0;
 	virtual const std::list<std::string> keywords () const = 0;
 
-    /**
-     * Package attribute retrieval.
-     * @see PMPackage
-     **/
-    virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
-						 PMPackage::PMPackageAttribute attr_r ) = 0;
-
 };
 
 ///////////////////////////////////////////////////////////////////

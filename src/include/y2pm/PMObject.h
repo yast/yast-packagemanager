@@ -88,26 +88,6 @@ class PMObject : virtual public Rep, public PMSolvable {
     virtual const std::list<std::string> delnotify() const = 0;
     virtual const FSize size() const = 0;
 
-    /**
-     * Get PMObject attribute name as string.
-     **/
-    std::string getAttributeName(PMObjectAttribute attr) const;
-
-    /**
-     * Access to base class getAttributeName
-     **/
-    PMSolvable::getAttributeName;
-
-    /**
-     * Get attribute value
-     **/
-    PkgAttributeValue getAttributeValue(PMObjectAttribute attr) const;
-
-    /**
-     * Access to base class getAttributeValue
-     **/
-    PMSolvable::getAttributeValue;
-
   public:
 
     PMObject( const PkgName &    name_r,

@@ -1,6 +1,6 @@
 @HEADER-COMMENT@
 
-# neededforbuild  autoconf automake gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel
+# neededforbuild  autoconf automake gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr
 
 @HEADER@
 Summary:	-
@@ -27,16 +27,13 @@ Requires: yast2-core
 
 %files
 %defattr(-,root,root)
-%{_libdir}/liby2.so.*
-@plugindir@/lib*.so.*
+%{_libdir}/liby2pm.so.*
 
 %files devel
 %defattr(-,root,root)
-%{_libdir}/liby2.so
-%{_libdir}/liby2.la
-@plugindir@/lib*.so
-@plugindir@/lib*.la
-@includedir@/Y2.h
-%dir @includedir@/y2
-@includedir@/y2/*.h
+%{_libdir}/liby2pm.so
+%{_libdir}/liby2pm.la
+@includedir@/Y2PM.h
+%dir @includedir@/y2pm
+@includedir@/y2pm/*.h
 %doc @docdir@

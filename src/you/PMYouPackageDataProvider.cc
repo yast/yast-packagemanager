@@ -86,36 +86,6 @@ PMYouPackageDataProvider::size() const
     return FSize(0);
 }
 
-PkgAttributeValue PMYouPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
-							       PMObject::PMObjectAttribute attr )
-{
-    PkgAttributeValue ret;
-    return ret;
-}
-
-PkgAttributeValue PMYouPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
-							       PMPackage::PMPackageAttribute attr )
-{
-    PkgAttributeValue ret;
-    return ret;
-}
-
-#if 0
-/** inject attibute to cache */
-void PMYouPackageDataProvider::setAttributeValue(
-    PMPackagePtr pkg, PMPackage::PMPackageAttribute attr, const PkgAttributeValue& value)
-{
-    _setAttributeValue(pkg,attr,value);
-}
-
-/** inject attibute to cache */
-void PMYouPackageDataProvider::setAttributeValue(
-    PMPackagePtr pkg, PMObject::PMObjectAttribute attr, const PkgAttributeValue& value)
-{
-    _setAttributeValue(pkg,attr,value);
-}
-#endif
-
 ///////////////////////////////////////////////////////////////////
 //
 //
