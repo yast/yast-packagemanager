@@ -53,6 +53,17 @@ PMSelection::PMSelection( const PkgName &    name_r,
 {
 }
 
+
+const std::string
+PMSelection::summary() const { return _dataProvider->summary(); }
+const std::list<std::string>
+PMSelection::description() const { return _dataProvider->description(); }
+const std::list<std::string>
+PMSelection::insnotify() const { return _dataProvider->insnotify(); }
+const std::list<std::string>
+PMSelection::delnotify() const { return _dataProvider->delnotify(); }
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //

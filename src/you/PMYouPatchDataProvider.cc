@@ -56,3 +56,15 @@ PMYouPatchDataProvider::PMYouPatchDataProvider()
 PMYouPatchDataProvider::~PMYouPatchDataProvider()
 {
 }
+
+
+const std::string
+PMYouPatchDataProvider::summary() const { return ""; }
+const std::list<std::string>
+PMYouPatchDataProvider::description() const { return std::list<std::string>(); }
+const std::list<std::string>
+PMYouPatchDataProvider::insnotify() const { return std::list<std::string>(); }
+const std::list<std::string>
+PMYouPatchDataProvider::delnotify() const { return std::list<std::string>(); }
+
+

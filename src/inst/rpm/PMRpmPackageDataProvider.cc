@@ -171,7 +171,7 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr
 	case PMPackage::ATTR_ARCHIVESIZE:
 	    queryformat = "%{ARCHIVESIZE}";
 	    break;
-	case PMPackage::ATTR_AUTHOR:
+	case PMPackage::ATTR_AUTHORS:
 	    // not available as rpm tag
 	    return PkgAttributeValue("");
 	case PMPackage::ATTR_FILENAMES:

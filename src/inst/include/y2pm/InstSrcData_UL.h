@@ -148,7 +148,7 @@ public:
 	SOURCERPM,	// source package
 	GROUP,		// rpm group
 	LICENSE,	// license
-	AUTHOR,		// list of authors
+	AUTHORS,	// list of authors
 	SHAREWITH,	// package to share data with
 	KEYWORDS,	// list of keywords
 	NUM_TAGS
@@ -181,7 +181,7 @@ public:
 	createTag( "=Src", SOURCERPM);		// source package
 	createTag( "=Grp", GROUP);		// rpm group
 	createTag( "=Lic", LICENSE);		// license
-	t = createTag( "+Aut", AUTHOR);		// list of authors
+	t = createTag( "+Aut", AUTHORS);	// list of authors
 	t->setEndTag("-Aut");
 	createTag( "=Shr", SHAREWITH);		// package to share data with
 	t = createTag( "+Key", KEYWORDS);	// list of keywords

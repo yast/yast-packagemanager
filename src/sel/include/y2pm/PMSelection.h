@@ -55,6 +55,12 @@ class PMSelection : virtual public Rep, public PMObject {
       PMSEL_NUM_ATTRIBUTES
     };
 
+	// overlay virtual PMObject functions
+	const std::string summary() const;
+	const std::list<std::string> description() const;
+	const std::list<std::string> insnotify() const;
+	const std::list<std::string> delnotify() const;
+
     /**
      * Get attribute name as string.
      **/

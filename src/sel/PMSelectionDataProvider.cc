@@ -56,3 +56,29 @@ PMSelectionDataProvider::PMSelectionDataProvider()
 PMSelectionDataProvider::~PMSelectionDataProvider()
 {
 }
+
+
+const std::string
+PMSelectionDataProvider::summary() const
+{
+    return "";
+}
+
+const std::list<std::string>
+PMSelectionDataProvider::description() const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMSelectionDataProvider::insnotify() const
+{
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMSelectionDataProvider::delnotify() const
+{
+    return std::list<std::string>();
+}
+

@@ -51,7 +51,71 @@ PMPackage::PMPackage( const PkgName &    name_r,
     : PMObject( name_r, edition_r, arch_r )
     , _dataProvider( dataProvider_r )
 {
+    if ( !_dataProvider ) {
+	ERR << "No DataProvider for PMPackage()" << endl;
+	abort ();
+    }
 }
+
+// cant define functions in header because PMPackageDataProvider
+// is incomplete there
+
+const std::string
+PMPackage::summary() const { return _dataProvider->summary(); }
+const std::list<std::string>
+PMPackage::description() const { return _dataProvider->description(); }
+const std::list<std::string>
+PMPackage::insnotify() const { return _dataProvider->insnotify(); }
+const std::list<std::string>
+PMPackage::delnotify() const { return _dataProvider->delnotify(); }
+
+const long
+PMPackage::buildtime() const { return _dataProvider->buildtime(); }
+const std::string
+PMPackage::buildhost() const { return _dataProvider->buildhost(); }
+const long
+PMPackage::installtime() const { return _dataProvider->installtime(); }
+const std::string
+PMPackage::distribution() const { return _dataProvider->distribution(); }
+const std::string
+PMPackage::vendor() const { return _dataProvider->vendor(); }
+const std::string
+PMPackage::license() const { return _dataProvider->license(); }
+const std::string
+PMPackage::packager() const { return _dataProvider->packager(); }
+const std::string
+PMPackage::group() const { return _dataProvider->group(); }
+const std::list<std::string>
+PMPackage::changelog() const { return _dataProvider->changelog(); }
+const std::string
+PMPackage::url() const { return _dataProvider->url(); }
+const std::string
+PMPackage::os() const { return _dataProvider->os(); }
+const std::list<std::string>
+PMPackage::prein() const { return _dataProvider->prein(); }
+const std::list<std::string>
+PMPackage::postin() const { return _dataProvider->postin(); }
+const std::list<std::string>
+PMPackage::preun() const { return _dataProvider->preun(); }
+const std::list<std::string>
+PMPackage::postun() const { return _dataProvider->postun(); }
+const std::string
+PMPackage::sourcerpm() const { return _dataProvider->sourcerpm(); }
+const long
+PMPackage::archivesize() const { return _dataProvider->archivesize(); }
+const std::list<std::string>
+PMPackage::authors() const { return _dataProvider->authors(); }
+const std::list<std::string>
+PMPackage::filenames() const { return _dataProvider->filenames(); }
+	// suse packages values
+const std::list<std::string>
+PMPackage::recommends() const { return _dataProvider->recommends(); }
+const std::list<std::string>
+PMPackage::suggests() const { return _dataProvider->suggests(); }
+const std::list<std::string>
+PMPackage::location() const { return _dataProvider->location(); }
+const std::list<std::string>
+PMPackage::keywords() const { return _dataProvider->keywords(); }
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -98,7 +162,7 @@ std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
     ENUM_OUT( POSTUN );
     ENUM_OUT( SOURCERPM );
     ENUM_OUT( ARCHIVESIZE );
-    ENUM_OUT( AUTHOR );
+    ENUM_OUT( AUTHORS );
     ENUM_OUT( FILENAMES );
     ENUM_OUT( RECOMMENDS );
     ENUM_OUT( SUGGESTS );
@@ -118,6 +182,7 @@ std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
   return "";
 }
 
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -128,10 +193,6 @@ std::string PMPackage::getAttributeName( PMPackageAttribute attr ) const
 //
 PkgAttributeValue PMPackage::getAttributeValue( PMPackageAttribute attr ) const
 {
-  if ( !_dataProvider ) {
-    ERR << "No DataProvider for " << *this << endl;
-    return PkgAttributeValue();
-  }
   return _dataProvider->getAttributeValue( this, attr );
 }
 

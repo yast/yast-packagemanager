@@ -50,7 +50,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 
 	TagCacheRetrieval::retrieval_t attr_RECOMMENDS;
 	TagCacheRetrieval::retrieval_t attr_SUGGESTS;
-	TagCacheRetrieval::retrieval_t attr_AUTHOR;
+	TagCacheRetrieval::retrieval_t attr_AUTHORS;
 	TagCacheRetrieval::retrieval_t attr_KEYWORDS;
 
 	TagCacheRetrieval::retrieval_t attr_DESCRIPTION;
