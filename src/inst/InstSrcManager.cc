@@ -130,7 +130,7 @@ PMError InstSrcManager::initSrcPool( const bool autoEnable_r )
   }
 
   if ( !count ) {
-    WAR << "Got no InstSrc'es from cahce!" << endl;
+    WAR << "Got no InstSrc'es from cache!" << endl;
   } else {
     MIL << "Read " << count << " InstSrc'es from cache." << endl;
   }
