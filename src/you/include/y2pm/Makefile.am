@@ -10,8 +10,6 @@ pkginclude_HEADERS =	\
 	InstYou.h			\
 	PMYouPatch.h			\
 	PMYouPatchPtr.h			\
-	PMYouPatchDataProvider.h	\
-	PMYouPatchDataProviderPtr.h	\
 	PMYouPackageDataProvider.h	\
 	PMYouPackageDataProviderPtr.h	\
 	PMYouPatchInfo.h		\

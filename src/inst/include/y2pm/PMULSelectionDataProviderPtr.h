@@ -27,7 +27,7 @@
 //	CLASS NAME : PMULSelectionDataProviderPtr
 //	CLASS NAME : constPMULSelectionDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMDataProvider);
+DEFINE_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMSelectionDataProvider);
 
 #endif // PMULSelectionDataProviderPtr_h
 

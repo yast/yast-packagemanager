@@ -41,102 +41,90 @@
 //	CLASS NAME : PMULSelectionDataProvider
 /**
  * @short Realizes SelectionDataProvider for UnitedLinux packages format
- * @see DataProvider
+ *
+ * InstSrcDataUL uses a per Selection DataProvider. Thus it's always the same
+ * Selection that calls the interface, and it's ok to store Selection related data
+ * here.
+ *
+ * @see PMSelectionDataProvider
  **/
-class PMULSelectionDataProvider : public PMSelectionDataProvider  {
+class PMULSelectionDataProvider : public PMSelectionDataProvider {
     REP_BODY(PMULSelectionDataProvider);
 
     friend class InstSrcDataUL;
 
     private:
+
 	std::string posmapSLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const;
 	std::list<std::string> posmapLLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const;
 
     protected:
 
-	// the data belongs to this selection
-	PMSelectionPtr _selection;
-
 	// PMObject
+	TaggedFile::Tag::posmaptype 			_attr_SUMMARY;
+	TaggedFile::Tag::posmaptype 			_attr_DESCRIPTION;
+	TaggedFile::Tag::posmaptype 			_attr_INSNOTIFY;
+	TaggedFile::Tag::posmaptype 			_attr_DELNOTIFY;
+	FSize 						_attr_SIZE;
 
-	TaggedFile::Tag::posmaptype _attr_SUMMARY;
-	TaggedFile::Tag::posmaptype _attr_DESCRIPTION;
-	TaggedFile::Tag::posmaptype _attr_INSNOTIFY;
-	TaggedFile::Tag::posmaptype _attr_DELNOTIFY;
-	FSize _attr_SIZE;
+	std::string 					_attr_CATEGORY;	// "base", ...
+	bool 						_attr_ISBASE;
 
-	std::string _attr_CATEGORY;	// "base", ...
-	bool _attr_ISBASE;
-
-	bool _attr_VISIBLE;
-	TagRetrievalPos _attr_RECOMMENDS;
-	std::list<PMSelectionPtr> _ptrs_attr_RECOMMENDS;
-	TagRetrievalPos _attr_SUGGESTS;
-	std::list<PMSelectionPtr> _ptrs_attr_SUGGESTS;
+	bool 						_attr_VISIBLE;
+	TagRetrievalPos 				_attr_RECOMMENDS;
+	std::list<PMSelectionPtr> 			_ptrs_attr_RECOMMENDS;
+	TagRetrievalPos 				_attr_SUGGESTS;
+	std::list<PMSelectionPtr> 			_ptrs_attr_SUGGESTS;
 
 	// map over locales
-	TaggedFile::Tag::posmaptype _attr_INSPACKS;
-	map <std::string,std::list<PMPackagePtr> > _ptrs_attr_INSPACKS;
-	TaggedFile::Tag::posmaptype _attr_DELPACKS;
-	map <std::string,std::list<PMPackagePtr> > _ptrs_attr_DELPACKS;
+	TaggedFile::Tag::posmaptype 			_attr_INSPACKS;
+	map <std::string,std::list<PMPackagePtr> > 	_ptrs_attr_INSPACKS;
+	TaggedFile::Tag::posmaptype 			_attr_DELPACKS;
+	map <std::string,std::list<PMPackagePtr> > 	_ptrs_attr_DELPACKS;
 
-	FSize _attr_ARCHIVESIZE;
-	std::string _attr_ORDER;
+	FSize 						_attr_ARCHIVESIZE;
+	std::string 					_attr_ORDER;
 
 	// retrieval pointer for *.sel data
 	TagCacheRetrievalPtr _selection_retrieval;
+
+        TagCacheRetrievalPtr getCacheRetrieval() { return _selection_retrieval; }
 
     public:
 
 	PMULSelectionDataProvider (const Pathname& selectionname);
 	virtual ~PMULSelectionDataProvider();
 
-	void startRetrieval() const;
-	void stopRetrieval() const;
-
-	void setSelection ( PMSelectionPtr selection) { _selection = selection; }
-	TagCacheRetrievalPtr getCacheRetrieval() { return _selection_retrieval; }
-
-	/**
-	 * access functions for PMObject/PMSelection attributes
-	 */
-
-	const std::string summary() const { return summary(""); }
-	const std::list<std::string> description() const { return description(""); }
-	const std::list<std::string> insnotify() const { return insnotify(""); }
-	const std::list<std::string> delnotify() const { return delnotify(""); }
-	const FSize size() const;
-
-	const std::string summary(const std::string& locale) const;
-	const std::list<std::string> description(const std::string& locale) const;
-	const std::list<std::string> insnotify(const std::string& locale) const;
-	const std::list<std::string> delnotify(const std::string& locale) const;
-
-	/**
-	 * access functions for PMSelection attributes
-	 */
-
-	const std::string category () const;
-	const bool visible () const;
-	const std::list<std::string> suggests() const;
-	const std::list<PMSelectionPtr> suggests_ptrs();
-	const std::list<std::string> recommends() const;
-	const std::list<PMSelectionPtr> recommends_ptrs();
-	const std::list<std::string> inspacks(const std::string& locale = "") const;
-	const std::list<PMPackagePtr> inspacks_ptrs (const std::string& locale = "");
-	const std::list<std::string> delpacks(const std::string& locale = "") const;
-	const std::list<PMPackagePtr> delpacks_ptrs (const std::string& locale = "");
-	const FSize archivesize() const;
-	const std::string order() const;
-
-	/**
-	 * helper functions
-	 */
-	const bool isBase () const;
-
     public:
 
-	virtual std::ostream & dumpOn( std::ostream & str ) const;
+	/**
+	 * Selection attributes InstSrcDataUL is able to provide.
+	 * @see PMSelectionDataProvider
+	 **/
+
+         // PMObject attributes
+         virtual std::string               summary        ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual std::list<std::string>    description    ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual std::list<std::string>    insnotify      ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual std::list<std::string>    delnotify      ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual FSize                     size           ( const PMSelection & sel_r ) const;
+
+	 // PMSelection attributes
+	 virtual std::string               category       ( const PMSelection & sel_r ) const;
+	 virtual bool                      visible        ( const PMSelection & sel_r ) const;
+	 virtual std::list<std::string>    suggests       ( const PMSelection & sel_r ) const;
+	 virtual std::list<PMSelectionPtr> suggests_ptrs  ( const PMSelection & sel_r ) const;
+	 virtual std::list<std::string>    recommends     ( const PMSelection & sel_r ) const;
+	 virtual std::list<PMSelectionPtr> recommends_ptrs( const PMSelection & sel_r ) const;
+	 virtual std::list<std::string>    inspacks       ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual std::list<PMPackagePtr>   inspacks_ptrs  ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual std::list<PMPackagePtr>   delpacks_ptrs  ( const PMSelection & sel_r, const std::string & lang = "" ) const;
+	 virtual FSize                     archivesize    ( const PMSelection & sel_r ) const;
+	 virtual std::string               order          ( const PMSelection & sel_r ) const;
+
+	 virtual bool                      isBase         ( const PMSelection & sel_r ) const;
+
 };
 
 ///////////////////////////////////////////////////////////////////

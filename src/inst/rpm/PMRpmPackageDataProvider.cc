@@ -34,14 +34,14 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMDataProvider );
+IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
 
 
 //-----------------------------------------------------------------
 // static class members
 
 PMPackagePtr PMRpmPackageDataProvider::_cachedPkg;
-struct rpmCache *PMRpmPackageDataProvider::_theCache = 0;
+rpmCache     PMRpmPackageDataProvider::_theCache;
 
 
 ///////////////////////////////////////////////////////////////////
@@ -56,8 +56,6 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
     : _rpmdb(rpmdb)
     , _attr_GROUP(0)
 {
-    if (_theCache == 0)
-	_theCache = new (struct rpmCache);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -70,215 +68,171 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
 //
 PMRpmPackageDataProvider::~PMRpmPackageDataProvider()
 {
-    if (_theCache != 0)
-	delete _theCache;
 }
-
-/**
- * hint before accessing multiple attributes
- */
-void
-PMRpmPackageDataProvider::startRetrieval() const
-{
-    return;
-}
-
-/**
- * hint after accessing multiple attributes
- */
-void
-PMRpmPackageDataProvider::stopRetrieval() const
-{
-    return;
-}
-
 
 //---------------------------------------------------------
 
 /**
  * fill _theCache with data from package
  */
-void
+inline void
 PMRpmPackageDataProvider::fillCache (PMPackagePtr package) const
 {
-    _rpmdb->queryCache (package, _theCache);
+  if ( package != _cachedPkg ) {
+    _rpmdb->queryCache (package, &_theCache);
     _cachedPkg = package;
-    return;
+  }
+  return;
 }
 
 //---------------------------------------------------------
-const std::string
-PMRpmPackageDataProvider::summary () const
+std::string
+PMRpmPackageDataProvider::summary ( const PMPackage & pkg_r ) const
 {
-    return _attr_SUMMARY;
+  return _attr_SUMMARY;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::description () const
+std::list<std::string>
+PMRpmPackageDataProvider::description ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_description;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._description;
 }
 
-const FSize
-PMRpmPackageDataProvider::size () const
+FSize
+PMRpmPackageDataProvider::size ( const PMPackage & pkg_r ) const
 {
     return _attr_SIZE;
 }
 
-const Date
-PMRpmPackageDataProvider::buildtime () const
+Date
+PMRpmPackageDataProvider::buildtime ( const PMPackage & pkg_r ) const
 {
     // take directly from PkgEdition, RpmDb sets it
-    return Date (_package->edition().buildtime());
+    return Date (pkg_r.edition().buildtime());
 }
 
-const std::string
-PMRpmPackageDataProvider::buildhost () const
+std::string
+PMRpmPackageDataProvider::buildhost ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_buildhost;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._buildhost;
 }
 
-const Date
-PMRpmPackageDataProvider::installtime () const
+Date
+PMRpmPackageDataProvider::installtime ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_installtime;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._installtime;
 }
 
-const std::string
-PMRpmPackageDataProvider::distribution () const
+std::string
+PMRpmPackageDataProvider::distribution ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_distribution;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._distribution;
 }
 
-const std::string
-PMRpmPackageDataProvider::vendor () const
+std::string
+PMRpmPackageDataProvider::vendor ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_vendor;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._vendor;
 }
 
-const std::string
-PMRpmPackageDataProvider::license () const
+std::string
+PMRpmPackageDataProvider::license ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_license;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._license;
 }
 
-const std::string
-PMRpmPackageDataProvider::packager () const
+std::string
+PMRpmPackageDataProvider::packager ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_packager;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._packager;
 }
 
-const std::string
-PMRpmPackageDataProvider::group () const
+std::string
+PMRpmPackageDataProvider::group ( const PMPackage & pkg_r ) const
 {
     if (_attr_GROUP == 0)
 	return "";
     return Y2PM::packageManager().rpmGroup (_attr_GROUP);
 }
 
-const YStringTreeItem *
-PMRpmPackageDataProvider::group_ptr () const
+YStringTreeItem *
+PMRpmPackageDataProvider::group_ptr ( const PMPackage & pkg_r ) const
 {
     return _attr_GROUP;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::changelog () const
+std::list<std::string>
+PMRpmPackageDataProvider::changelog ( const PMPackage & pkg_r ) const
 {
     std::list<std::string> value;
-    _rpmdb->queryPackage (_package, "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\\n\\n%{CHANGELOGTEXT}\\n\\n]", value);
+    _rpmdb->queryPackage (mkPtr(pkg_r), "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\\n\\n%{CHANGELOGTEXT}\\n\\n]", value);
     return value;
 }
 
-const std::string
-PMRpmPackageDataProvider::url () const
+std::string
+PMRpmPackageDataProvider::url ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_url;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._url;
 }
 
-const std::string
-PMRpmPackageDataProvider::os () const
+std::string
+PMRpmPackageDataProvider::os ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_os;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._os;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::prein () const
+std::list<std::string>
+PMRpmPackageDataProvider::prein ( const PMPackage & pkg_r ) const
 {
     std::list<std::string> value;
-    _rpmdb->queryPackage (_package, "%{PREIN}", value);
+    _rpmdb->queryPackage (mkPtr(pkg_r), "%{PREIN}", value);
     return value;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::postin () const
+std::list<std::string>
+PMRpmPackageDataProvider::postin ( const PMPackage & pkg_r ) const
 {
     std::list<std::string> value;
-    _rpmdb->queryPackage (_package, "%{POSTIN}", value);
+    _rpmdb->queryPackage (mkPtr(pkg_r), "%{POSTIN}", value);
     return value;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::preun () const
+std::list<std::string>
+PMRpmPackageDataProvider::preun ( const PMPackage & pkg_r ) const
 {
     std::list<std::string> value;
-    _rpmdb->queryPackage (_package, "%{PREUN}", value);
+    _rpmdb->queryPackage (mkPtr(pkg_r), "%{PREUN}", value);
     return value;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::postun () const
+std::list<std::string>
+PMRpmPackageDataProvider::postun ( const PMPackage & pkg_r ) const
 {
     std::list<std::string> value;
-    _rpmdb->queryPackage (_package, "%{POSTUN}", value);
+    _rpmdb->queryPackage (mkPtr(pkg_r), "%{POSTUN}", value);
     return value;
 }
 
-const std::string
-PMRpmPackageDataProvider::sourcerpm () const
+std::string
+PMRpmPackageDataProvider::sourcerpm ( const PMPackage & pkg_r ) const
 {
-    if (_package != _cachedPkg)
-	fillCache (_package);
-    return _theCache->_sourcerpm;
+    fillCache (mkPtr(pkg_r));
+    return _theCache._sourcerpm;
 }
 
-const std::list<std::string>
-PMRpmPackageDataProvider::filenames () const
+std::list<std::string>
+PMRpmPackageDataProvider::filenames ( const PMPackage & pkg_r ) const
 {
     std::list<std::string> value;
-    _rpmdb->queryPackage (_package, "[%{FILENAMES}\n]", value);
+    _rpmdb->queryPackage (mkPtr(pkg_r), "[%{FILENAMES}\n]", value);
     return value;
 }
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMRpmPackageDataProvider::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & PMRpmPackageDataProvider::dumpOn( ostream & str ) const
-{
-  Rep::dumpOn( str );
-  return str;
-}
-

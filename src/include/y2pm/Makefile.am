@@ -19,9 +19,7 @@ pkginclude_HEADERS =	\
 	PMManager.h	\
 	PMObjectContainerIter.h	\
 	\
-	PMSelectable.h PMSelectablePtr.h SelState.h	\
-	\
-	PMDataProvider.h PMDataProviderPtr.h
+	PMSelectable.h PMSelectablePtr.h SelState.h
 
 #<INSTALL-HEADER-TARGET>
 

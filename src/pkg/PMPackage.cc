@@ -38,6 +38,48 @@ IMPL_DERIVED_POINTER( PMPackage, PMObject, PMSolvable );
 
 ///////////////////////////////////////////////////////////////////
 //
+// PMPackage attribute retrieval via dataProvider, or default values.
+//
+///////////////////////////////////////////////////////////////////
+#define DP_GET(ATTR) if ( _dataProvider ) return _dataProvider->ATTR( *this ); return PMPackageDataProvider::ATTR()
+// PMObject attributes
+std::string            PMPackage::summary()      const { DP_GET( summary ); }
+std::list<std::string> PMPackage::description()  const { DP_GET( description ); }
+std::list<std::string> PMPackage::insnotify()    const { DP_GET( insnotify ); }
+std::list<std::string> PMPackage::delnotify()    const { DP_GET( delnotify ); }
+FSize                  PMPackage::size()         const { DP_GET( size ); }
+// PMPackage attributes
+Date                   PMPackage::buildtime()    const { DP_GET( buildtime ); }
+std::string            PMPackage::buildhost()    const { DP_GET( buildhost ); }
+Date                   PMPackage::installtime()  const { DP_GET( installtime ); }
+std::string            PMPackage::distribution() const { DP_GET( distribution ); }
+std::string            PMPackage::vendor()       const { DP_GET( vendor ); }
+std::string            PMPackage::license()      const { DP_GET( license ); }
+std::string            PMPackage::packager()     const { DP_GET( packager ); }
+std::string            PMPackage::group()        const { DP_GET( group ); }
+YStringTreeItem *      PMPackage::group_ptr()    const { DP_GET( group_ptr ); }
+std::list<std::string> PMPackage::changelog()    const { DP_GET( changelog ); }
+std::string            PMPackage::url()          const { DP_GET( url ); }
+std::string            PMPackage::os()           const { DP_GET( os ); }
+std::list<std::string> PMPackage::prein()        const { DP_GET( prein ); }
+std::list<std::string> PMPackage::postin()       const { DP_GET( postin ); }
+std::list<std::string> PMPackage::preun()        const { DP_GET( preun ); }
+std::list<std::string> PMPackage::postun()       const { DP_GET( postun ); }
+std::string            PMPackage::sourcerpm()    const { DP_GET( sourcerpm ); }
+FSize                  PMPackage::archivesize()  const { DP_GET( archivesize ); }
+std::list<std::string> PMPackage::authors()      const { DP_GET( authors ); }
+std::list<std::string> PMPackage::filenames()    const { DP_GET( filenames ); }
+// suse packages values
+std::list<std::string> PMPackage::recommends()   const { DP_GET( recommends ); }
+std::list<std::string> PMPackage::suggests()     const { DP_GET( suggests ); }
+std::string            PMPackage::location()     const { DP_GET( location ); }
+int                    PMPackage::medianr()      const { DP_GET( medianr ); }
+std::list<std::string> PMPackage::keywords()     const { DP_GET( keywords ); }
+#undef DP_GET
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
 //
 //	METHOD NAME : PMPackage::PMPackage
 //	METHOD TYPE : Constructor
@@ -51,123 +93,10 @@ PMPackage::PMPackage( const PkgName &    name_r,
     : PMObject( name_r, edition_r, arch_r )
     , _dataProvider( dataProvider_r )
 {
-    if ( !_dataProvider ) {
-	ERR << "No DataProvider for PMPackage()" << endl;
-	abort ();
-    }
+  if ( !_dataProvider ) {
+    WAR << "NULL DataProvider for " << *this << endl;
+  }
 }
-
-/**
- * hint before accessing multiple attributes
- */
-void
-PMPackage::startRetrieval() const
-{
-    _dataProvider->startRetrieval();
-}
-
-/**
- * hint after accessing multiple attributes
- */
-void
-PMPackage::stopRetrieval() const
-{
-    return _dataProvider->stopRetrieval();
-}
-
-// cant define functions in header because PMPackageDataProvider
-// is incomplete there
-
-const std::string
-PMPackage::summary() const { return _dataProvider->summary (); }
-
-const std::list<std::string>
-PMPackage::description() const { return _dataProvider->description (); }
-
-const std::list<std::string>
-PMPackage::insnotify() const { return _dataProvider->insnotify (); }
-
-const std::list<std::string>
-PMPackage::delnotify() const { return _dataProvider->delnotify (); }
-
-const FSize
-PMPackage::size () const { return _dataProvider->size (); }
-
-const Date
-PMPackage::buildtime() const { return _dataProvider->buildtime (); }
-
-const std::string
-PMPackage::buildhost() const { return _dataProvider->buildhost (); }
-
-const Date
-PMPackage::installtime() const { return _dataProvider->installtime (); }
-
-const std::string
-PMPackage::distribution() const { return _dataProvider->distribution (); }
-
-const std::string
-PMPackage::vendor() const { return _dataProvider->vendor (); }
-
-const std::string
-PMPackage::license() const { return _dataProvider->license (); }
-
-const std::string
-PMPackage::packager() const { return _dataProvider->packager (); }
-
-const std::string
-PMPackage::group() const { return _dataProvider->group (); }
-
-const YStringTreeItem *
-PMPackage::group_ptr() const { return _dataProvider->group_ptr (); }
-
-const std::list<std::string>
-PMPackage::changelog() const { return _dataProvider->changelog (); }
-
-const std::string
-PMPackage::url() const { return _dataProvider->url (); }
-
-const std::string
-PMPackage::os() const { return _dataProvider->os (); }
-
-const std::list<std::string>
-PMPackage::prein() const { return _dataProvider->prein (); }
-
-const std::list<std::string>
-PMPackage::postin() const { return _dataProvider->postin (); }
-
-const std::list<std::string>
-PMPackage::preun() const { return _dataProvider->preun (); }
-
-const std::list<std::string>
-PMPackage::postun() const { return _dataProvider->postun (); }
-
-const std::string
-PMPackage::sourcerpm() const { return _dataProvider->sourcerpm (); }
-
-const FSize
-PMPackage::archivesize() const { return _dataProvider->archivesize (); }
-
-const std::list<std::string>
-PMPackage::authors() const { return _dataProvider->authors (); }
-
-const std::list<std::string>
-PMPackage::filenames() const { return _dataProvider->filenames (); }
-
-	// suse packages values
-const std::list<std::string>
-PMPackage::recommends() const { return _dataProvider->recommends (); }
-
-const std::list<std::string>
-PMPackage::suggests() const { return _dataProvider->suggests (); }
-
-const std::string
-PMPackage::location() const { return _dataProvider->location (); }
-
-const int
-PMPackage::medianr() const { return _dataProvider->medianr (); }
-
-const std::list<std::string>
-PMPackage::keywords() const { return _dataProvider->keywords (); }
 
 ///////////////////////////////////////////////////////////////////
 //

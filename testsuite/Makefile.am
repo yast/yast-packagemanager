@@ -17,8 +17,8 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 	   ) -I$(includedir)
 
 noinst_HEADERS = show_pm.h
- 
-noinst_PROGRAMS = \
+
+EXTRA_PROGRAMS = \
 	test_rpmdb	\
 	test_tofromString.exe	\
 	testinstall	\
@@ -33,6 +33,20 @@ noinst_PROGRAMS = \
         test_you \
         cschum_test
 
+noinst_PROGRAMS = \
+	test_rpmdb	\
+	test_tofromString.exe	\
+	testinstall	\
+	test_patchinfo	\
+	test_content	\
+	test_packages	\
+	test_selections	\
+	test_query	\
+	order	\
+	ma_test.exe	\
+	gs_test \
+        test_you \
+        cschum_test
 
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la

@@ -19,7 +19,7 @@
 #ifndef PMPackageDataProviderPtr_h
 #define PMPackageDataProviderPtr_h
 
-#include <y2pm/PMDataProviderPtr.h>
+#include <y2util/RepDef.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -28,7 +28,7 @@
 /**
  *
  **/
-DEFINE_DERIVED_POINTER(PMPackageDataProvider, PMDataProvider, PMDataProvider );
+DEFINE_BASE_POINTER(PMPackageDataProvider);
 
 #endif // PMPackageDataProviderPtr_h
 

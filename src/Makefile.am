@@ -28,8 +28,7 @@ liby2pm_la_SOURCES = Y2PM.cc \
 	PMSolvable.cc	\
 	PMObject.cc	\
 	PMManager.cc PMManager_solver.cc	\
-	PMSelectable.cc	SelState.cc \
-	PMDataProvider.cc
+	PMSelectable.cc	SelState.cc
 
 liby2pm_la_LDFLAGS = -version-info 2:0
 

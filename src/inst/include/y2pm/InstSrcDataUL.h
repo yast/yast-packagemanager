@@ -146,6 +146,13 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	InstSrcDataUL();
 	~InstSrcDataUL();
 
+    protected:
+
+      /**
+       * @see InstSrcData#loadObjects
+       **/
+      virtual PMError loadObjects();
+
     public:
 
 	/**

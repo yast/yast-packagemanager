@@ -42,10 +42,10 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	// back pointer to RpmDb for on-demand rpm access
 	RpmDbPtr _rpmdb;
 
-	// package this provider belongs to
-	PMPackagePtr _package;
-
 	// cached values per package
+	// !!! RpmDb uses a per Package DataProvider, so it's always the
+	//     same PMPackage that calls the inteface. So it makes sense to
+	//     store data here.
 	std::string _attr_SUMMARY;
 	FSize _attr_SIZE;
 	YStringTreeItem *_attr_GROUP;
@@ -57,7 +57,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	 * for a package != _cachedPkg is issued
 	 */
 	static PMPackagePtr _cachedPkg;
-	static struct rpmCache *_theCache;
+	static rpmCache     _theCache;
 
 	void fillCache (PMPackagePtr package) const;
 
@@ -69,65 +69,39 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	PMRpmPackageDataProvider (RpmDbPtr rpmdb);
 	virtual ~PMRpmPackageDataProvider();
 
-	/**
-	 * backlink to package
-	 */
-	void setPackage (PMPackagePtr package) { _package = package; }
+  public:
 
-	/**
-	 * hint before accessing multiple attributes
-	 */
-	void startRetrieval() const;
+    /**
+     * Package attributes provided by RpmDb
+     **/
 
-	/**
-	 * hint after accessing multiple attributes
-	 */
-	void stopRetrieval() const;
+    // PMObject attributes
+    virtual std::string            summary     ( const PMPackage & pkg_r ) const;
+    virtual std::list<std::string> description ( const PMPackage & pkg_r ) const;
+    virtual FSize                  size        ( const PMPackage & pkg_r ) const;
 
-	/**
-	 * access functions for PMObject attributes
-	 */
+    // PMPackage attributes
+    virtual Date                   buildtime   ( const PMPackage & pkg_r ) const;
+    virtual std::string            buildhost   ( const PMPackage & pkg_r ) const;
+    virtual Date                   installtime ( const PMPackage & pkg_r ) const;
+    virtual std::string            distribution( const PMPackage & pkg_r ) const;
+    virtual std::string            vendor      ( const PMPackage & pkg_r ) const;
+    virtual std::string            license     ( const PMPackage & pkg_r ) const;
+    virtual std::string            packager    ( const PMPackage & pkg_r ) const;
+    virtual std::string            group       ( const PMPackage & pkg_r ) const;
+    virtual YStringTreeItem *      group_ptr   ( const PMPackage & pkg_r ) const;
+    virtual std::list<std::string> changelog   ( const PMPackage & pkg_r ) const;
+    virtual std::string            url         ( const PMPackage & pkg_r ) const;
+    virtual std::string            os          ( const PMPackage & pkg_r ) const;
+    virtual std::list<std::string> prein       ( const PMPackage & pkg_r ) const;
+    virtual std::list<std::string> postin      ( const PMPackage & pkg_r ) const;
+    virtual std::list<std::string> preun       ( const PMPackage & pkg_r ) const;
+    virtual std::list<std::string> postun      ( const PMPackage & pkg_r ) const;
+    virtual std::string            sourcerpm   ( const PMPackage & pkg_r ) const;
+    virtual std::list<std::string> filenames   ( const PMPackage & pkg_r ) const;
 
-	const std::string summary () const;
-	const std::list<std::string> description () const;
-	const std::list<std::string> insnotify () const { return PMPackageDataProvider::insnotify(); }
-	const std::list<std::string> delnotify () const { return PMPackageDataProvider::delnotify(); }
-	const FSize size () const;
-
-	/**
-	 * access functions for PMPackage attributes
-	 */
-
-	const Date buildtime () const;
-	const std::string buildhost () const;
-	const Date installtime () const;
-	const std::string distribution () const;
-	const std::string vendor () const;
-	const std::string license () const;
-	const std::string packager () const;
-	const std::string group () const;
-	const YStringTreeItem *group_ptr () const;
-	const std::list<std::string> changelog () const;
-	const std::string url () const;
-	const std::string os () const;
-	const std::list<std::string> prein () const;
-	const std::list<std::string> postin () const;
-	const std::list<std::string> preun () const;
-	const std::list<std::string> postun () const;
-	const std::string sourcerpm () const;
-	const FSize archivesize () const { return PMPackageDataProvider::archivesize(); }
-	const std::list<std::string> authors () const { return PMPackageDataProvider::authors(); }
-	const std::list<std::string> filenames () const;
-	// suse packages values
-	const std::list<std::string> recommends () const { return PMPackageDataProvider::recommends(); }
-	const std::list<std::string> suggests () const { return PMPackageDataProvider::suggests(); }
-	const std::string location () const { return PMPackageDataProvider::location(); }
-	const int medianr () const { return 0; }
-	const std::list<std::string> keywords () const { return PMPackageDataProvider::keywords(); }
-
-    public:
-
-	virtual std::ostream & dumpOn( std::ostream & str ) const;
+    // suse packages values
+    virtual int                    medianr     ( const PMPackage & pkg_r ) const { return 0; }
 };
 
 #endif // PMRpmPackageDataProvider_h

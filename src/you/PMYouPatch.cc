@@ -25,7 +25,6 @@
 #include <y2util/FSize.h>
 
 #include <y2pm/PMYouPatch.h>
-#include <y2pm/PMYouPatchDataProvider.h>
 
 using namespace std;
 
@@ -47,11 +46,9 @@ IMPL_DERIVED_POINTER( PMYouPatch, PMObject, PMSolvable );
 //
 PMYouPatch::PMYouPatch( const PkgName &    name_r,
 			const PkgEdition & edition_r,
-                        const PkgArch & arch_r,
-			PMYouPatchDataProviderPtr dataProvider_r )
+                        const PkgArch & arch_r )
     : PMObject( name_r, edition_r, arch_r )
     , _kind( kind_invalid ), _updateOnlyInstalled( false )
-    , _dataProvider( dataProvider_r )
 {
 }
 
@@ -66,29 +63,6 @@ PMYouPatch::PMYouPatch( const PkgName &    name_r,
 PMYouPatch::~PMYouPatch()
 {
 }
-
-void
-PMYouPatch::startRetrieval () const
-{
-    _dataProvider->startRetrieval ();
-}
-
-void
-PMYouPatch::stopRetrieval () const
-{
-    _dataProvider->stopRetrieval ();
-}
-
-const std::string
-PMYouPatch::summary() const { return _dataProvider->summary(); }
-const std::list<std::string>
-PMYouPatch::description() const { return _dataProvider->description(); }
-const std::list<std::string>
-PMYouPatch::insnotify() const { return _dataProvider->insnotify(); }
-const std::list<std::string>
-PMYouPatch::delnotify() const { return _dataProvider->delnotify(); }
-const FSize
-PMYouPatch::size() const { return _dataProvider->size(); }
 
 ///////////////////////////////////////////////////////////////////
 //

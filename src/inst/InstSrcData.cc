@@ -70,28 +70,30 @@ InstSrcData::~InstSrcData()
 //
 //
 //	METHOD NAME : InstSrcData::_instSrc_atach
-//	METHOD TYPE : void
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-void InstSrcData::_instSrc_attach( const InstSrcPtr & instSrc_r )
+PMError InstSrcData::_instSrc_attach( const InstSrcPtr & instSrc_r )
 {
   if ( _instSrc || _propagating ) {
     INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
   }
 
   _instSrc = instSrc_r;
+  return Error::E_ok;
+  return loadObjects();
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcData::_instSrc_detach
-//	METHOD TYPE : void
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-void InstSrcData::_instSrc_detach()
+PMError InstSrcData::_instSrc_detach()
 {
   if ( !_instSrc || _propagating ) {
     INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
@@ -100,35 +102,39 @@ void InstSrcData::_instSrc_detach()
   }
 
   _instSrc = 0;
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcData::_instSrc_propagate
-//	METHOD TYPE : void
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-void InstSrcData::_instSrc_propagate()
+PMError InstSrcData::_instSrc_propagate()
 {
   if ( !_instSrc || _propagating ) {
     INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
   }
 
-  propagateObjects();
-  _propagating = true;
+  PMError err = propagateObjects();
+  if ( ! err ) {
+    _propagating = true;
+  }
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcData::_instSrc_withdraw
-//	METHOD TYPE : void
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-void InstSrcData::_instSrc_withdraw()
+PMError InstSrcData::_instSrc_withdraw()
 {
   if ( !_instSrc || !_propagating ) {
     INT << "SUSPICIOUS: instSrc " << _instSrc << " _propagating " << _propagating << endl;
@@ -136,17 +142,48 @@ void InstSrcData::_instSrc_withdraw()
 
   withdrawObjects();
   _propagating = false;
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::getDataProvider
+//	METHOD TYPE : PMPackageDataProviderPtr
+//
+//	DESCRIPTION :
+//
+PMPackageDataProviderPtr InstSrcData::getDataProvider( const PMPackagePtr & obj_r )
+{
+  if ( !obj_r )
+    return 0;
+  return obj_r->_dataProvider;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcData::getDataProvider
+//	METHOD TYPE : PMSelectionDataProviderPtr
+//
+//	DESCRIPTION :
+//
+PMSelectionDataProviderPtr InstSrcData::getDataProvider( const PMSelectionPtr & obj_r )
+{
+  if ( !obj_r )
+    return 0;
+  return obj_r->_dataProvider;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcData::propagateObjects
-//	METHOD TYPE : void
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-void InstSrcData::propagateObjects()
+PMError InstSrcData::propagateObjects()
 {
   if ( getPackages().size() ) {
     Y2PM::packageManager().poolAddCandidates( getPackages() );
@@ -157,17 +194,18 @@ void InstSrcData::propagateObjects()
   if ( getPatches().size() ) {
     Y2PM::youPatchManager().poolAddCandidates( getPatches() );
   }
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : InstSrcData::withdrawObjects
-//	METHOD TYPE : void
+//	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-void InstSrcData::withdrawObjects()
+PMError InstSrcData::withdrawObjects()
 {
   if ( getPackages().size() ) {
     Y2PM::packageManager().poolRemoveCandidates( getPackages() );
@@ -178,6 +216,7 @@ void InstSrcData::withdrawObjects()
   if ( getPatches().size() ) {
     Y2PM::youPatchManager().poolRemoveCandidates( getPatches() );
   }
+  return Error::E_ok;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ typedef map <std::string,std::list<PMPackagePtr> >::const_iterator pkgsmapIT;
 //	CLASS NAME : PMULSelectionDataProviderPtr
 //	CLASS NAME : constPMULSelectionDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMDataProvider);
+IMPL_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMSelectionDataProvider);
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -62,39 +62,6 @@ PMULSelectionDataProvider::PMULSelectionDataProvider(const Pathname &selectionna
 PMULSelectionDataProvider::~PMULSelectionDataProvider()
 {
 }
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMULSelectionDataProvider::startRetrieval
-//	METHOD TYPE : bool
-//
-//	DESCRIPTION : hint to keep file stream open
-//
-void
-PMULSelectionDataProvider::startRetrieval() const
-{
-#if 0
-    _selection_retrieval->startRetrieval();
-#endif
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMULSelectionDataProvider::stopRetrieval
-//	METHOD TYPE : void
-//
-//	DESCRIPTION : hint to close stream
-//
-void
-PMULSelectionDataProvider::stopRetrieval() const
-{
-#if 0
-    _selection_retrieval->stopRetrieval();
-#endif
-}
-
 
 std::string
 PMULSelectionDataProvider::posmapSLookup (TaggedFile::Tag::posmaptype theMap, const std::string& locale) const
@@ -135,86 +102,86 @@ PMULSelectionDataProvider::posmapLLookup (TaggedFile::Tag::posmaptype theMap, co
 // public access functions
 //-------------------------------------------------------------------
 
-const std::string
-PMULSelectionDataProvider::summary(const std::string& locale) const
+std::string
+PMULSelectionDataProvider::summary(const PMSelection & sel_r, const std::string& locale) const
 {
     return posmapSLookup (_attr_SUMMARY, locale);
 }
 
-const std::list<std::string>
-PMULSelectionDataProvider::description(const std::string& locale) const
+std::list<std::string>
+PMULSelectionDataProvider::description(const PMSelection & sel_r, const std::string& locale) const
 {
     return posmapLLookup (_attr_DESCRIPTION, locale);
 }
 
-const std::list<std::string>
-PMULSelectionDataProvider::insnotify(const std::string& locale) const
+std::list<std::string>
+PMULSelectionDataProvider::insnotify(const PMSelection & sel_r, const std::string& locale) const
 {
     return posmapLLookup (_attr_INSNOTIFY, locale);
 }
 
-const std::list<std::string>
-PMULSelectionDataProvider::delnotify(const std::string& locale) const
+std::list<std::string>
+PMULSelectionDataProvider::delnotify(const PMSelection & sel_r, const std::string& locale) const
 {
     return posmapLLookup (_attr_DELNOTIFY, locale);
 }
 
-const FSize
-PMULSelectionDataProvider::size() const
+FSize
+PMULSelectionDataProvider::size( const PMSelection & sel_r ) const
 {
     return _attr_SIZE;
 }
 
 
-const std::string
-PMULSelectionDataProvider::category () const
+std::string
+PMULSelectionDataProvider::category ( const PMSelection & sel_r ) const
 {
     return _attr_CATEGORY;
 }
 
-const bool
-PMULSelectionDataProvider::visible () const
+bool
+PMULSelectionDataProvider::visible ( const PMSelection & sel_r ) const
 {
     return _attr_VISIBLE;
 }
 
-const std::list<std::string>
-PMULSelectionDataProvider::suggests() const
+std::list<std::string>
+PMULSelectionDataProvider::suggests( const PMSelection & sel_r ) const
 {
     std::list<std::string> value;
     _selection_retrieval->retrieveData (_attr_SUGGESTS, value);
     return value;
 }
 
-const std::list<PMSelectionPtr>
-PMULSelectionDataProvider::suggests_ptrs()
+std::list<PMSelectionPtr>
+PMULSelectionDataProvider::suggests_ptrs( const PMSelection & sel_r ) const
 {
     return _ptrs_attr_SUGGESTS;
 }
 
 
-const std::list<std::string>
-PMULSelectionDataProvider::recommends() const
+std::list<std::string>
+PMULSelectionDataProvider::recommends( const PMSelection & sel_r ) const
 {
     std::list<std::string> value;
     _selection_retrieval->retrieveData (_attr_RECOMMENDS, value);
     return value;
 }
 
-const std::list<PMSelectionPtr>
-PMULSelectionDataProvider::recommends_ptrs()
+std::list<PMSelectionPtr>
+PMULSelectionDataProvider::recommends_ptrs( const PMSelection & sel_r ) const
 {
     return _ptrs_attr_RECOMMENDS;
 }
 
-const std::list<std::string>
-PMULSelectionDataProvider::inspacks(const std::string& locale) const
+std::list<std::string>
+PMULSelectionDataProvider::inspacks(const PMSelection & sel_r, const std::string& locale) const
 {
     return posmapLLookup (_attr_INSPACKS, locale);
 }
 
-const std::list<PMPackagePtr>
-PMULSelectionDataProvider::inspacks_ptrs(const std::string& locale)
+std::list<PMPackagePtr>
+PMULSelectionDataProvider::inspacks_ptrs(const PMSelection & sel_r, const std::string& locale) const
 {
     // already set ?
     pkgsmapIT it = _ptrs_attr_INSPACKS.find(locale);
@@ -229,14 +196,14 @@ PMULSelectionDataProvider::inspacks_ptrs(const std::string& locale)
     return it->second;
 }
 
-const std::list<std::string>
-PMULSelectionDataProvider::delpacks(const std::string& locale) const
+std::list<std::string>
+PMULSelectionDataProvider::delpacks(const PMSelection & sel_r, const std::string& locale) const
 {
     return posmapLLookup (_attr_DELPACKS, locale);
 }
 
-const std::list<PMPackagePtr>
-PMULSelectionDataProvider::delpacks_ptrs(const std::string& locale)
+std::list<PMPackagePtr>
+PMULSelectionDataProvider::delpacks_ptrs(const PMSelection & sel_r, const std::string& locale) const
 {
     // already set ?
     pkgsmapIT it = _ptrs_attr_DELPACKS.find(locale);
@@ -252,35 +219,20 @@ PMULSelectionDataProvider::delpacks_ptrs(const std::string& locale)
     return it->second;
 }
 
-const FSize
-PMULSelectionDataProvider::archivesize () const
+FSize
+PMULSelectionDataProvider::archivesize ( const PMSelection & sel_r ) const
 {
     return _attr_ARCHIVESIZE;
 }
 
-const std::string
-PMULSelectionDataProvider::order () const
+std::string
+PMULSelectionDataProvider::order ( const PMSelection & sel_r ) const
 {
     return _attr_ORDER;
 }
 
-const bool
-PMULSelectionDataProvider::isBase () const
+bool
+PMULSelectionDataProvider::isBase ( const PMSelection & sel_r ) const
 {
     return _attr_ISBASE;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMULSelectionDataProvider::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream &
-PMULSelectionDataProvider::dumpOn( ostream & str ) const
-{
-    Rep::dumpOn( str );
-    return str;
 }

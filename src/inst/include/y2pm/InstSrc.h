@@ -80,7 +80,6 @@ class InstSrc: virtual public Rep {
       T_UNKNOWN,
       // :first entry
       T_UnitedLinux,
-      T_TEST_DIST,
       // last entry:
       T_AUTODETECT
     };
@@ -129,7 +128,6 @@ class InstSrc: virtual public Rep {
      **/
     static const Pathname _c_media_dir;
 
-
     /**
      * Helper function to combine _cache and subpaths.
      **/
@@ -143,12 +141,14 @@ class InstSrc: virtual public Rep {
     Pathname cache_dir() const { return _cache; }
 
     /**
-     * Full path of InstSrcDescr cache dir.
+     * Full path of InstSrcDescr cache dir. If it does not exist, no chache write
+     * is desired.
      **/
     Pathname cache_descr_dir() const { return cachePath( _c_descr_dir ); }
 
     /**
-     * Full path of InstSrcData cache dir.
+     * Full path of InstSrcData cache dir. If it does not exist, no chache write
+     * is desired.
      **/
     Pathname cache_data_dir() const { return cachePath( _c_data_dir ); }
 
@@ -158,6 +158,12 @@ class InstSrc: virtual public Rep {
     Pathname cache_media_dir() const { return cachePath( _c_media_dir ); }
 
   private:
+
+    /**
+     * If true, data and description cache directories should be created
+     * and used. (false during installation, when no system is present)
+     **/
+    bool mayUseCache() const;
 
     /**
      * Used by InstSrc::vconstruct to set up an InstSrc from

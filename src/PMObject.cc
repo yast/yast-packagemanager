@@ -23,7 +23,6 @@
 
 #include <y2pm/PMObject.h>
 #include <y2pm/PMSelectable.h>
-#include <y2pm/PMDataProvider.h>
 
 using namespace std;
 
@@ -34,6 +33,18 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////
 
 IMPL_DERIVED_POINTER( PMObject, PMSolvable, PMSolvable );
+
+///////////////////////////////////////////////////////////////////
+//
+// PMObject attribute default values
+//
+///////////////////////////////////////////////////////////////////
+std::string            PMObject::summary()     const { return std::string(); }
+std::list<std::string> PMObject::description() const { return std::list<std::string>(); }
+std::list<std::string> PMObject::insnotify()   const { return std::list<std::string>(); }
+std::list<std::string> PMObject::delnotify()   const { return std::list<std::string>(); }
+FSize                  PMObject::size()        const { return FSize(0); }
+///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
 //

@@ -99,6 +99,20 @@ InstSrc::~InstSrc()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrc::mayUseCache
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool InstSrc::mayUseCache() const
+{
+#warning by now cache enabled if runningFromSystem
+  return Y2PM::runningFromSystem();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrc::_mgr_attach
 //	METHOD TYPE : void
 //
@@ -138,36 +152,35 @@ PMError InstSrc::enableSource()
 
   ///////////////////////////////////////////////////////////////////
   // create InstSrcData according to Type stored in InstSrcDescr
+  // and let it load it's data.
   ///////////////////////////////////////////////////////////////////
   PMError err;
   InstSrcDataPtr ndata;
 
   switch ( _descr->type() ) {
 
-    case T_UnitedLinux:
-	err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
-	break;
-
-    case T_TEST_DIST:
-	err = InstSrcData::tryGetData( ndata, _media, _descr->descrdir() );
-	break;
+  case T_UnitedLinux:
+    ndata = new InstSrcDataUL;
+    err = InstSrcDataUL::tryGetData( ndata, _media, _descr->descrdir() );
+    break;
 
     ///////////////////////////////////////////////////////////////////
     // no default: let compiler warn '... not handled in switch'
     ///////////////////////////////////////////////////////////////////
-    case T_UNKNOWN:
-    case T_AUTODETECT:
-      break;
-  }
-
-  if ( err && ndata ) {
-    INT << "Note: reading InstSrcData returned data and error" << endl;
-    ndata = 0;
+  case T_UNKNOWN:
+  case T_AUTODETECT:
+    break;
   }
 
   if ( !ndata ) {
     ERR << "No InstSrcData type " << _descr->type() << " found on media " << _descr->url() << endl;
-    return Error::E_no_instsrcdata_on_media;
+    return Error::E_no_instsrc_on_media;
+  }
+
+  err = ndata->_instSrc_attach( this );
+  if ( err ) {
+    ERR << "Error retrieving InstSrcData: " << err << endl;
+    return err;
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -175,9 +188,7 @@ PMError InstSrc::enableSource()
   ///////////////////////////////////////////////////////////////////
   if ( !err ) {
     _data = ndata;
-    _data->_instSrc_attach( this ); // adjust backreferences to InstSrc.
     _data->_instSrc_propagate();    // propagate Objects to Manager classes.
-
     writeCache();
   }
 
@@ -212,7 +223,6 @@ PMError InstSrc::disableSource()
   PMError err;
 
   writeCache();
-
   _data->_instSrc_withdraw(); // withdraw Objects from Manager classes.
   _data->_instSrc_detach();   // clear backreferences to InstSrc.
   _data = 0;
@@ -231,8 +241,8 @@ PMError InstSrc::disableSource()
 PMError InstSrc::writeCache()
 {
 #warning errorchecks
-  if ( ! Y2PM::runningFromSystem() ) {
-    MIL << "Not running from system: writeCache disabled" << endl;
+  if ( ! mayUseCache() ) {
+    MIL << "WriteCache disabled" << endl;
     return Error::E_src_cache_disabled;
   }
 
@@ -273,30 +283,25 @@ PMError InstSrc::_init_openCache( const Pathname & cachedir_r )
 
   ///////////////////////////////////////////////////////////////////
   // check cache
-  // cache_descr_dir must exist, cache_data_dir/cache_media_dir
-  // are created if missing.
   ///////////////////////////////////////////////////////////////////
-  cpath( cache_descr_dir() );
 
+  // cache_descr_dir must exist.
+  cpath( cache_descr_dir() );
   if ( ! cpath.isDir() ) {
     ERR << "No cache description " << cpath << endl;
     return Error::E_bad_cache_descr;
   }
 
+  // cache_data_dir might exist. if, it must be a directory
   cpath( cache_data_dir() );
   if ( cpath.isExist() ) {
     if ( !cpath.isDir() ) {
       ERR << "data_dir is not a directory " << cpath << endl;
       return Error::E_cache_dir_create;
     }
-  } else {
-    int res = PathInfo::assert_dir( cpath.path(), 0700 );
-    if ( res ) {
-      ERR << "Unable to create data_dir " << cpath << " (errno " << res << ")" << endl;
-      return Error::E_cache_dir_create;
-    }
   }
 
+  // cache_media_dir is created if missing.
   cpath( cache_media_dir() );
   if ( cpath.isExist() ) {
     if ( !cpath.isDir() ) {
@@ -372,19 +377,23 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
   _cache_deleteOnExit = true; // preliminarily; will be unset if InstSrcManager accepts this.
 
   ///////////////////////////////////////////////////////////////////
-  // create descr/data/media_dir
+  // create media_dir. descr/data dir, if mayUseCache
   ///////////////////////////////////////////////////////////////////
 
-  res = PathInfo::assert_dir( cache_descr_dir(), 0700 );
-  if ( res ) {
-    ERR << "Unable to create descr_dir " << cache_descr_dir() << " (errno " << res << ")" << endl;
-    return Error::E_cache_dir_create;
-  }
+  if ( mayUseCache() ) {
+    res = PathInfo::assert_dir( cache_descr_dir(), 0700 );
+    if ( res ) {
+      ERR << "Unable to create descr_dir " << cache_descr_dir() << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
 
-  res = PathInfo::assert_dir( cache_data_dir(), 0700 );
-  if ( res ) {
-    ERR << "Unable to create data_dir " << cache_data_dir() << " (errno " << res << ")" << endl;
-    return Error::E_cache_dir_create;
+    res = PathInfo::assert_dir( cache_data_dir(), 0700 );
+    if ( res ) {
+      ERR << "Unable to create data_dir " << cache_data_dir() << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
+  } else {
+    MIL << "descr/data caches disabled" << endl;
   }
 
   res = PathInfo::assert_dir( cache_media_dir(), 0700 );
@@ -444,10 +453,6 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
 
     case T_UnitedLinux:
 	err = InstSrcDataUL::tryGetDescr( ndescr, _media, product_dir_r );
-	break;
-
-    case T_TEST_DIST:
-	err = InstSrcData::tryGetDescr( ndescr, _media, product_dir_r );
 	break;
 
     ///////////////////////////////////////////////////////////////////
@@ -521,7 +526,6 @@ string InstSrc::toString( const Type t )
 
 #define ENUM_OUT(V) case T_##V: return #V; break
     ENUM_OUT( UnitedLinux );
-    ENUM_OUT( TEST_DIST );
     ENUM_OUT( AUTODETECT );
 #undef ENUM_OUT
 
