@@ -171,7 +171,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 
     //---------------------------------------------------------------
     // drop packages not allowed for current architecture
-#warning src/nosrc are currently dropped
+
     if (!allowedArch (arch))
     {
 	if ((splitted[3] == "src")			// found a src/nosrc package
