@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <cctype> // get rid of readline defining isxdigit et al.
 
 #include <y2util/timeclass.h>
 #include <y2util/stringutil.h>
@@ -62,7 +63,7 @@ static bool _initialized = false;
 static vector<string> nullvector;
 
 static const char* statestr[] = { "--", " -", " >", " +", "a-", "a>", "a+", " i", "  " };
-    
+
 
 //void installold(vector<string>& argv);
 void install(vector<string>& argv);
@@ -126,14 +127,14 @@ static struct Funcs func[] = {
     { "createbackups",	createbackups,	0,	"createbackups" },
     { "rebuilddb",	rebuilddb,	1,	"rebuild rpm db" },
     { "du",		du,		1,	"display disk space forecast" },
-    
+
     { "selstate",	showselection,	1,
 	"show state of selection (all if none specified. -a to show also not installed" },
     { "pkgstate",	showpackage,	1,
 	"show state of package (all if none specified. -a to show also not installed" },
 
     { "setappl",	setappl,	1,	"set package to installed like a selection would do" },
-    
+
     { "order",		order,		1,	"compute installation order" },
     { "upgrade",	upgrade,	1,	"compute upgrade" },
     { "commit",		commit,		1,	"commit changes to and actually perform installation" },
@@ -152,7 +153,7 @@ void progresscallback(int p, void* nix)
     if(p>100) p = 100;
 
     if(p==0) lastprogress = 0;
-    
+
     int num = (long)60*p/100;
     for(int i=0; i < num-lastprogress; i++)
     {
@@ -396,7 +397,7 @@ void source(vector<string>& argv)
 	    {
 		if(count != num)
 		    continue;
-		    
+
 		cout << "enabling source ... " << endl;
 		PMError err = Y2PM::instSrcManager().enableSource(*it);
 		if( err != PMError::E_ok)
@@ -645,9 +646,9 @@ int printremovelist(PkgDep::SolvableList& to_remove)
 int printbadlist(PkgDep::ErrorResultList& bad)
 {
     int numbad = 0;
-    
+
     if(bad.empty()) return 0;
-    
+
     cout << "*** Conflicts ***" << endl;
     for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
 	 p != bad.end(); ++p ) {
@@ -663,7 +664,7 @@ static void install_internal(PMManager& manager, vector<string>& argv, bool appl
 	string pkg = stringutil::trim(argv[i]);
 
 	if(pkg.empty()) continue;
-	
+
 	PMSelectablePtr selp = manager.getItem(pkg);
 	if(!selp || !selp->has_candidate())
 	{
@@ -707,7 +708,7 @@ void delsel(vector<string>& argv)
 	string sel = stringutil::trim(argv[i]);
 
 	if(sel.empty()) continue;
-	
+
 	PMSelectablePtr selp = Y2PM::selectionManager().getItem(sel);
 	if(!selp)
 	{
@@ -851,7 +852,7 @@ void commit(vector<string>& argv)
     std::list<std::string> errors_r;
     std::list<std::string> remaining_r;
     std::list<std::string> srcremaining_r;
-    
+
     Y2PM::commitPackages (0,errors_r, remaining_r, srcremaining_r);
 
     if(!remaining_r.empty())
@@ -1069,7 +1070,7 @@ void deselect(vector<string>& argv)
 	string pkg = stringutil::trim(argv[i]);
 
 	if(pkg.empty()) continue;
-	
+
 	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
 	if(!selp)
 	{
@@ -1113,7 +1114,7 @@ void upgrade(vector<string>& argv)
 	string pkg = stringutil::trim(argv[i]);
 
 	if(pkg.empty()) continue;
-	
+
 	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
 	if(!selp || !selp->has_candidate())
 	{
@@ -1166,7 +1167,7 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 		nonone = false;
 		continue;
 	    }
-	    
+
 	    PMSelectablePtr selp = manager.getItem(pkg);
 	    if(!selp)
 	    {
@@ -1183,7 +1184,7 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 	begin = selectables.begin();
 	end = selectables.end();
     }
-    
+
     if(showall)
     {
 	begin = manager.begin();
@@ -1247,14 +1248,14 @@ void remove(vector<string>& argv)
 	string pkg = stringutil::trim(argv[i]);
 
 	if(pkg.empty()) continue;
-	
+
 	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
 	if(!selp)
 	{
 	    std::cout << "package " << pkg << " is not available.\n";
 	    continue;
 	}
-	
+
 	if(!selp->set_status(PMSelectable::S_Del))
 	{
 	    cout << stringutil::form("coult not mark %s for deletion", pkg.c_str()) << endl;
