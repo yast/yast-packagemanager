@@ -48,7 +48,6 @@ class PMSelectionManager : public PMManager {
     PMSelectionManager();
     virtual ~PMSelectionManager();
 
-#if 0
     typedef std::map<PMSelectablePtr,PMSelectable::Fate> ActiveMap;
 
     /**
@@ -65,7 +64,6 @@ class PMSelectionManager : public PMManager {
      * Return selections remembered state.
      **/
     PMSelectable::Fate lastState( const PMSelectablePtr & sel_r ) const;
-#endif
 
     /**
      * Return selections current state.

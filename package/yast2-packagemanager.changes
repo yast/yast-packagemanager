@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Mar  5 11:46:06 CET 2003 - ma@suse.de
+
+- Prevent selection manager from changing state of packages not included
+  in any selection. Formerly all settings on application level were cleared,
+  loosing hardware dependent and kernel packages selected on that level too.
+- 2.7.22
+
+-------------------------------------------------------------------
 Tue Mar  4 18:55:34 CET 2003 - ma@suse.de
 
 - Parse content files FLAGS value. Stored and provided via
