@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 10 16:08:59 CET 2003 - ma@suse.de
+
+- On update delete packages replaced by unique provides.
+
+-------------------------------------------------------------------
 Sat Mar  8 00:53:42 CET 2003 - ma@suse.de
 
 - Open RpmDb progress log (y2logRPM) on demand, and close it

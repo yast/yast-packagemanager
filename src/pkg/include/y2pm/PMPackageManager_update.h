@@ -97,6 +97,11 @@ class PMUpdateStats : public PMUpdateOpts {
     unsigned chk_already_todel;
 
     /**
+     * update checks: packages skipped due to taboo (foreign)
+     **/
+    unsigned chk_is_taboo;
+
+    /**
      * update checks: with candidate: packages already tagged to install
      **/
     unsigned chk_already_toins;
@@ -174,6 +179,7 @@ class PMUpdateStats : public PMUpdateOpts {
       // update checks
       chk_installed_total	= 0;
       chk_already_todel		= 0;
+      chk_is_taboo		= 0;
       // packages with candidate
       chk_already_toins		= 0;
       chk_to_update		= 0;
@@ -216,7 +222,7 @@ class PMUpdateStats : public PMUpdateOpts {
      **/
     unsigned totalToKeep() const
     {
-      unsigned ret = chk_to_keep_downgrade + chk_to_keep_installed + chk_keep_foreign;
+      unsigned ret = chk_is_taboo + chk_to_keep_downgrade + chk_to_keep_installed + chk_keep_foreign;
       if ( !delete_unmaintained )
 	ret += chk_dropped;
       return ret;
