@@ -44,6 +44,8 @@
 #include <y2pm/PMRpmPackageDataProvider.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
 
+#include <Y2PM.h>
+
 #ifndef _
 #define _(X) X
 #endif
@@ -643,7 +645,8 @@ RpmDb::getPackages (void)
 	RPM_OBSOLETES,
 	RPM_CONFLICTS,
 	RPM_BUILDTIME,		// passed to PkgEdition()
-	RPM_SIZE,
+	RPM_SIZE,		// cached in dataprovider
+	RPM_GROUP,		// cached in dataprovider
 	RPM_SUMMARY,      // summary MUST be last, could contain ';'
 	NUM_RPMTAGS
     };
@@ -666,7 +669,7 @@ RpmDb::getPackages (void)
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
     rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
     rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},];";
-    rpmquery += "%{BUILDTIME};%{SIZE};%{SUMMARY}";
+    rpmquery += "%{BUILDTIME};%{SIZE};%{GROUP};%{SUMMARY}";
     rpmquery += "\\n";
 
     RpmArgVec opts(4);
@@ -763,6 +766,7 @@ RpmDb::getPackages (void)
 
 	    dataprovider->_attr_SUMMARY = pkgattribs[RPM_SUMMARY];
 	    dataprovider->_attr_SIZE = FSize (atoll(pkgattribs[RPM_SIZE].c_str()));
+	    dataprovider->_attr_GROUP = Y2PM::packageManager().addRpmGroup(pkgattribs[RPM_GROUP]);
 
 	    _packages.push_back (p);
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;

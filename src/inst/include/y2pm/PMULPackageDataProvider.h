@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include <y2util/Pathname.h>
+#include <y2util/YRpmGroupsTree.h>
 #include <y2util/TagParser.h>
 #include <y2util/TagCacheRetrieval.h>
 #include <y2util/TagCacheRetrievalPtr.h>
@@ -66,7 +67,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// VENDOR
 	TagCacheRetrievalPos _attr_LICENSE;
 	// PACKAGER
-	TagCacheRetrievalPos _attr_GROUP;
+	YStringTreeItem *_attr_GROUP;
 	// CHANGELOG
 	// URL
 	// OS
@@ -131,6 +132,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	const std::string license () const;
 	const std::string packager () const { return PMPackageDataProvider::packager(); }
 	const std::string group () const;
+	const YStringTreeItem *group_ptr () const;
 	const std::list<std::string> changelog () const { return PMPackageDataProvider::changelog(); }
 	const std::string url () const { return PMPackageDataProvider::url(); }
 	const std::string os () const { return PMPackageDataProvider::os(); }

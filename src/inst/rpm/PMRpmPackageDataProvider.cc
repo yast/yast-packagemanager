@@ -24,6 +24,8 @@
 #include <y2pm/PkgName.h>
 #include <y2pm/RpmDb.h>
 
+#include <Y2PM.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -44,6 +46,7 @@ IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMDataProv
 //
 PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
     : _rpmdb(rpmdb)
+    , _attr_GROUP(0)
 {
 }
 
@@ -143,9 +146,15 @@ PMRpmPackageDataProvider::packager () const
 const std::string
 PMRpmPackageDataProvider::group () const
 {
-    std::string value;
-    _rpmdb->queryPackage (_package, "%{GROUP}", value);
-    return value;
+    if (_attr_GROUP == 0)
+	return "";
+    return Y2PM::packageManager().rpmGroup (_attr_GROUP);
+}
+
+const YStringTreeItem *
+PMRpmPackageDataProvider::group_ptr () const
+{
+    return _attr_GROUP;
 }
 
 const std::list<std::string>

@@ -24,6 +24,7 @@
 #include <map>
 #include <vector>
 
+#include <y2util/YRpmGroupsTree.h>
 #include <y2pm/RpmDbPtr.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
@@ -43,8 +44,10 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	// package this provider belongs to
 	PMPackagePtr _package;
 
+	// cached values per package
 	std::string _attr_SUMMARY;
 	FSize _attr_SIZE;
+	YStringTreeItem *_attr_GROUP;
 
     public:
 
@@ -91,6 +94,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	const std::string license () const;
 	const std::string packager () const;
 	const std::string group () const;
+	const YStringTreeItem *group_ptr () const;
 	const std::list<std::string> changelog () const;
 	const std::string url () const;
 	const std::string os () const;

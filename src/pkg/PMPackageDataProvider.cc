@@ -105,7 +105,7 @@ PMPackageDataProvider::group () const
     return "";
 }
 
-YStringTree *
+const YStringTreeItem *
 PMPackageDataProvider::group_ptr () const
 {
     return 0;

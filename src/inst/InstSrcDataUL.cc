@@ -240,7 +240,8 @@ InstSrcDataUL::PkgTag2Package( TagCacheRetrievalPtr pkgcache,
     }
     SET_VALUE (BUILDTIME, Date (GET_TAG(BUILDTIME)->Data()));
     SET_CACHE (SOURCERPM);
-    SET_CACHE (GROUP);
+
+    SET_VALUE (GROUP, Y2PM::packageManager().addRpmGroup (GET_TAG(GROUP)->Data()));
     SET_CACHE (LICENSE);
     SET_CACHE (AUTHORS);
     SET_CACHE (KEYWORDS);
