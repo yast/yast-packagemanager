@@ -206,12 +206,34 @@ InstSrcDescr::writeCache (void)
 ostream & InstSrcDescr::dumpOn( ostream & str ) const
 {
   Rep::dumpOn( str ) << "(";
-  str << " type:" << _type;
-  str << " url:" << _url;
+  str << " type: " << _type;
+  str << " url: " << _url;
   str << " product dir: " << _product_dir;
   str << " media vendor: " << _media_vendor;
-  str << " product:" << _content_product;
-  str << " vendor:" << _content_vendor;
+  str << " product: " << _content_product;
+  str << " vendor: " << _content_vendor;
+
+  map< string, list<Pathname> >::const_iterator it;
+  std::list<Pathname> paths;
+  str << " archmap: ";
+  for ( it = _content_archmap.begin(); it != _content_archmap.end(); ++it )
+  {
+      str << (*it).first << ": ";
+      paths = (*it).second;
+      str << paths.front() << " " << paths.back() << " "; 
+  }
+  str << "labelmap: ";
+  LabelMap::const_iterator labelIt;
+  for ( labelIt = _content_labelmap.begin(); labelIt != _content_labelmap.end(); ++labelIt )
+  {
+      str << (*labelIt).first << " " << (*labelIt).second << " ";
+  }
+  str << "linguas: ";
+  list<LangCode>::const_iterator lingIt;
+  for ( lingIt = _content_linguas.begin(); lingIt != _content_linguas.end(); ++lingIt )
+  {
+      str << (*lingIt) << " ";
+  }
   return str << ")";
 }
 
@@ -286,7 +308,7 @@ PMError InstSrcDescr::readCache( InstSrcDescrPtr & ndescr_r, const Pathname & ca
 	// fill the InstSrcDescr object
 	bool ok = fillInstSrcDescr( ndescr, tagset );
 
-	MIL << "Parsing data from " <<  cache_dir_r << " ,result: " << (ok?"true":"false") << std::endl;
+	MIL << "Parsing data from " <<  fileName << ", result: " << (ok?"true":"false") << std::endl;
 	
 	if ( !ok )
 	{
