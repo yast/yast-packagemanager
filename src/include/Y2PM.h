@@ -25,6 +25,7 @@
 #include <iosfwd>
 #include <string>
 
+#include <y2util/LangCode.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
@@ -48,6 +49,8 @@ class Y2PM {
 
     static Pathname _instTarget_rootdir;
 
+    static LangCode _preferred_locale;
+
   private:
 
     ///////////////////////////////////////////////////////////////////
@@ -65,6 +68,12 @@ class Y2PM {
     static PMYouPatchManager * _youPatchManager;
 
   public:
+
+    /**
+     * Access to the preferred locale
+     **/
+    static LangCode & getPreferredLocale () { return _preferred_locale; }
+    static void setPreferredLocale (LangCode & preferred_locale) { _preferred_locale = preferred_locale; }
 
     /**
      * Access to the installation target

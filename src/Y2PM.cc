@@ -102,7 +102,7 @@ InstSrcManager & Y2PM::instSrcManager()
 {
   if ( !_instSrcManager ) {
     MIL << "Launch InstSrcManager..." << endl;
-    _instSrcManager = new InstSrcManager;
+    _instSrcManager = new InstSrcManager ();
     MIL << "Created InstSrcManager @" << _instSrcManager << endl;
   }
   return *_instSrcManager;
