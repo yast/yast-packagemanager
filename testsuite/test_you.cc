@@ -167,8 +167,6 @@ int main( int argc, char **argv )
 
   you.selectPatches( kinds );
 
-  you.filterPatchSelection();
-
   error = you.retrievePatches();
   if ( error ) {
     cerr << "Error retrieving packages: " << error << endl;
