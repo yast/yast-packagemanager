@@ -52,6 +52,7 @@ FSize                     PMSelection::size()            const { DP_GET( size );
 bool                      PMSelection::providesSources() const { DP_GET( providesSources ); }
 std::string               PMSelection::instSrcLabel()    const { DP_GET( instSrcLabel ); }
 Vendor                    PMSelection::instSrcVendor()   const { DP_GET( instSrcVendor ); }
+unsigned                  PMSelection::instSrcRank()     const { DP_GET( instSrcRank ); }
 // PMSelection attributes
 std::string               PMSelection::category()        const { DP_GET( category ); }
 bool                      PMSelection::visible()         const { DP_GET( visible ); }

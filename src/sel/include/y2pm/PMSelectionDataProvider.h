@@ -62,6 +62,7 @@ class PMSelectionDataProvider : virtual public Rep {
     static bool                      providesSources() { return false; }
     static std::string               instSrcLabel()    { return std::string(); }
     static Vendor                    instSrcVendor()   { return Vendor(); }
+    static unsigned                  instSrcRank()     { return unsigned(-1); }
 
     // PMSelection attributes
     static std::string               category()        { return std::string(); }
@@ -105,6 +106,7 @@ class PMSelectionDataProvider : virtual public Rep {
     virtual bool                      providesSources( const PMSelection & sel_r ) const { return providesSources(); }
     virtual std::string               instSrcLabel   ( const PMSelection & sel_r ) const { return instSrcLabel(); }
     virtual Vendor                    instSrcVendor  ( const PMSelection & sel_r ) const { return instSrcVendor(); }
+    virtual unsigned                  instSrcRank    ( const PMSelection & sel_r ) const { return instSrcRank(); }
 
     // PMSelection attributes
     virtual std::string               category       ( const PMSelection & sel_r ) const { return category(); }

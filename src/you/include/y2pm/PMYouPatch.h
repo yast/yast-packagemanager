@@ -198,6 +198,7 @@ class PMYouPatch : virtual public Rep, public PMObject {
 
     virtual std::string            instSrcLabel()    const { return PMObject::instSrcLabel(); }
     virtual Vendor                 instSrcVendor()   const { return PMObject::instSrcVendor(); }
+    virtual unsigned               instSrcRank()     const { return PMObject::instSrcRank(); }
 
   private:
 

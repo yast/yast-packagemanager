@@ -146,6 +146,15 @@ PMULPackageDataProvider::instSrcVendor( const PMPackage & pkg_r ) const
   return PMPackageDataProvider::instSrcVendor();
 }
 
+unsigned
+PMULPackageDataProvider::instSrcRank( const PMPackage & pkg_r ) const
+{
+  if ( _source && _source->descr() ) {
+    return _source->descr()->default_rank();
+  }
+  return PMPackageDataProvider::instSrcRank();
+}
+
 PkgSplitSet
 PMULPackageDataProvider::splitprovides ( const PMPackage & pkg_r ) const
 {

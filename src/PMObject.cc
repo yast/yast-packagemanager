@@ -47,6 +47,7 @@ FSize                  PMObject::size()            const { return FSize(0); }
 bool                   PMObject::providesSources() const { return false; }
 std::string            PMObject::instSrcLabel()    const { return std::string(); }
 Vendor                 PMObject::instSrcVendor()   const { return Vendor(); }
+unsigned               PMObject::instSrcRank()     const { return unsigned(-1); }
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////

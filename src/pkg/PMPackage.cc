@@ -52,6 +52,7 @@ FSize                  PMPackage::size()         const { DP_GET( size ); }
 bool                   PMPackage::providesSources() const { DP_GET( providesSources ); }
 std::string            PMPackage::instSrcLabel() const { DP_GET( instSrcLabel ); }
 Vendor                 PMPackage::instSrcVendor()const { DP_GET( instSrcVendor ); }
+unsigned               PMPackage::instSrcRank()  const { DP_GET( instSrcRank ); }
 // PMPackage attributes
 PkgSplitSet            PMPackage::splitprovides()const { DP_GET( splitprovides ); }
 Date                   PMPackage::buildtime()    const { DP_GET( buildtime ); }

@@ -66,6 +66,7 @@ class PMObject : virtual public Rep, public PMSolvable {
 
     virtual std::string            instSrcLabel()    const = 0;
     virtual Vendor                 instSrcVendor()   const = 0;
+    virtual unsigned               instSrcRank()     const = 0; // rank == 0 is highest!
 
   public:
 

@@ -67,6 +67,7 @@ class PMPackageDataProvider : virtual public Rep {
     static bool                   providesSources() { return false; }
     static std::string            instSrcLabel()    { return std::string(); }
     static Vendor                 instSrcVendor()   { return Vendor(); }
+    static unsigned               instSrcRank()     { return unsigned(-1); }
 
     // PMPackage attributes
     static PkgSplitSet            splitprovides() { return PkgSplitSet(); }
@@ -131,6 +132,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual bool                   providesSources( const PMPackage & pkg_r ) const { return providesSources(); }
     virtual std::string            instSrcLabel   ( const PMPackage & pkg_r ) const { return instSrcLabel(); }
     virtual Vendor                 instSrcVendor  ( const PMPackage & pkg_r ) const { return instSrcVendor(); }
+    virtual unsigned               instSrcRank    ( const PMPackage & pkg_r ) const { return instSrcRank(); }
 
     // PMPackage attributes
     virtual PkgSplitSet            splitprovides( const PMPackage & pkg_r ) const { return splitprovides(); }
