@@ -74,20 +74,28 @@ class InstSrcData_UL : virtual public Rep, public InstSrcData {
 				MediaAccessPtr media_r, const Pathname & descr_dir_r );
 
     private:
-	static PMPackagePtr Tag2Package( TagCacheRetrieval *retrieval, CommonPkdParser::TagSet * tagset );
+	/**
+	 * fill tagset from packages to PMPackage
+	 */
+	static PMPackagePtr PkgTag2Package( TagCacheRetrieval *pkgcache, TagCacheRetrieval *langcache, CommonPkdParser::TagSet * tagset );
+
+	/**
+	 * fill tagset from packages.<lang> to PMPackage
+	 */
+	static void LangTag2Package( TagCacheRetrieval *langcache, const std::list<PMPackagePtr>* packagelist, CommonPkdParser::TagSet * tagset );
 };
 
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : InstSrcData_ULTags
+//	CLASS NAME : InstSrcData_ULPkgTags
 /**
  * @short provides the tag set for the packages file
- * (to feed the tag parser) 
+ * (to feed the tag parser)
  *
  **/
-class InstSrcData_ULTags : public CommonPkdParser::TagSet
+class InstSrcData_ULPkgTags : public CommonPkdParser::TagSet
 {
 
 public:
@@ -115,7 +123,7 @@ public:
     };
 
 public:
-    InstSrcData_ULTags( ) 
+    InstSrcData_ULPkgTags( ) 
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
@@ -146,6 +154,59 @@ public:
 	createTag( "=Shr", SHAREWITH);		// package to share data with
 	t = createTag( "+Key", KEYWORDS);	// list of keywords
 	t->setEndTag("-Key");
+    };
+
+private:
+
+    CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
+	
+	CommonPkdParser::Tag* t;
+	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
+	this->addTag(t);
+	addTagByIndex( tagEnum, t );
+
+	return t;
+    }
+    
+};
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : InstSrcData_ULLangTags
+/**
+ * @short provides the tag set for the packages.<lang> file
+ * (to feed the tag parser)
+ *
+ **/
+class InstSrcData_ULLangTags : public CommonPkdParser::TagSet
+{
+
+public:
+	// ** use same names as for PkgAttribute
+    enum Tags {
+	VERSION,	// general file format version
+	PACKAGE,	// name version release arch
+	SUMMARY,	// short summary (label)
+	DESCRIPTION,	// long description
+	INSNOTIFY,	// install notification
+	DELNOTIFY,	// delete notification
+	NUM_TAGS
+    };
+
+public:
+    InstSrcData_ULLangTags( ) 
+	: TagSet()	{
+
+	CommonPkdParser::Tag* t;
+	createTag( "=Ver", VERSION);		// general file format version
+	createTag( "=Pkg", PACKAGE);		// name version release arch
+	createTag( "=Sum", SUMMARY);
+	t = createTag( "+Des", DESCRIPTION);
+	t->setEndTag("-Des");
+	t = createTag( "+Ins", INSNOTIFY);
+	t->setEndTag("-Ins");
+	t = createTag( "+Del", DELNOTIFY);
+	t->setEndTag("-Del");
     };
 
 private:

@@ -43,18 +43,54 @@
 class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
     private:
-	// save file position and size data for each attribute
-	TagCacheRetrieval::retrieval_t attrpos[PMPackage::PKG_NUM_ATTRIBUTES];
 
-	// cache retrieved attribute values here
-	// these are set if attrpos[<attr>].size < 0
-	PkgAttributeValue attrval[PMPackage::PKG_NUM_ATTRIBUTES];
+	// save file position and size data for multi line attributes
+	TagCacheRetrieval::retrieval_t attr_REQUIRES;
+	TagCacheRetrieval::retrieval_t attr_PREREQUIRES;
+	TagCacheRetrieval::retrieval_t attr_PROVIDES;
+	TagCacheRetrieval::retrieval_t attr_CONFLICTS;
+	TagCacheRetrieval::retrieval_t attr_OBSOLETES;
 
-	TagCacheRetrieval *_retrieval;
+	TagCacheRetrieval::retrieval_t attr_RECOMMENDS;
+	TagCacheRetrieval::retrieval_t attr_SUGGESTS;
+	TagCacheRetrieval::retrieval_t attr_AUTHOR;
+	TagCacheRetrieval::retrieval_t attr_KEYWORDS;
+
+	TagCacheRetrieval::retrieval_t attr_DESCRIPTION;
+	TagCacheRetrieval::retrieval_t attr_INSNOTIFY;
+	TagCacheRetrieval::retrieval_t attr_DELNOTIFY;
+
+	// save PkgAttributeValue for single line attributes
+
+	PkgAttributeValue attr_NAME;
+	PkgAttributeValue attr_VERSION;
+	PkgAttributeValue attr_RELEASE;
+	PkgAttributeValue attr_ARCH;
+
+	PkgAttributeValue attr_SUMMARY;
+
+	PkgAttributeValue attr_LOCATION;
+	PkgAttributeValue attr_ARCHIVESIZE;
+	PkgAttributeValue attr_SIZE;
+	PkgAttributeValue attr_BUILDTIME;
+	PkgAttributeValue attr_SOURCERPM;
+	PkgAttributeValue attr_GROUP;
+	PkgAttributeValue attr_LICENSE;
+
+	// retrieval pointer for packages data
+	TagCacheRetrieval *_package_retrieval;
+
+	// retrieval pointer for packages.<lang> data
+	TagCacheRetrieval *_language_retrieval;
+
+    private:
+	// internal attribute value provider
+	PkgAttributeValue getValue( constPMObjectPtr obj_r,
+				    PMPackage::PMPackageAttribute attr_r );
 
     public:
 
-	PMULPackageDataProvider (TagCacheRetrieval *retrieval = 0);
+	PMULPackageDataProvider (TagCacheRetrieval *package_retrieval = 0, TagCacheRetrieval *language_retrieval = 0);
 	virtual ~PMULPackageDataProvider();
 
 	/**

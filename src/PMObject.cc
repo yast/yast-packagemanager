@@ -71,12 +71,16 @@ PMObject::~PMObject()
 //
 string PMObject::getAttributeName( PMObjectAttribute attr ) const
 {
+    if (attr < PMObject::PMOBJ_ATTR_BEGIN)
+	return getAttributeName ((PMSolvable::PMSolvableAttribute)attr);
   switch ( attr ) {
 
 #define ENUM_OUT(V) case ATTR_##V: return #V; break
     ENUM_OUT( SUMMARY );
     ENUM_OUT( DESCRIPTION );
     ENUM_OUT( SIZE );
+    ENUM_OUT( INSNOTIFY );
+    ENUM_OUT( DELNOTIFY );
 #undef ENUM_OUT
 
   ///////////////////////////////////////////////////////////////////

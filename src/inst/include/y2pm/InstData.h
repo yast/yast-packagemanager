@@ -126,6 +126,12 @@ class InstData {
     const std::list<PMSolvablePtr> *getPatches (void) const;
 
     virtual std::ostream & dumpOn( std::ostream & str ) const;
+
+    /**
+     * find list of packages
+     * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
+     */
+    static const std::list<PMPackagePtr> *findPackages (const std::list<PMPackagePtr> *packagelist, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "");
 };
 
 ///////////////////////////////////////////////////////////////////

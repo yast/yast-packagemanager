@@ -68,6 +68,13 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr 
 	case PMObject::PMOBJ_NUM_ATTRIBUTES:
 	    // invalid
 	    return PkgAttributeValue("invalid query");
+	    break;
+	// FIXME
+	case PMObject::ATTR_INSNOTIFY:
+	case PMObject::ATTR_DELNOTIFY:
+	    // invalid
+	    return PkgAttributeValue("-?-");
+	    break;
     }
 
     // check if cached
@@ -172,6 +179,12 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid
 	    return PkgAttributeValue("invalid query");
+	// FIXME
+	case PMPackage::ATTR_RECOMMENDS:
+	case PMPackage::ATTR_SUGGESTS:
+	case PMPackage::ATTR_LOCATION:
+	case PMPackage::ATTR_KEYWORDS:
+	    return PkgAttributeValue("-?-");
     }
 
     PkgAttributeValue ret;

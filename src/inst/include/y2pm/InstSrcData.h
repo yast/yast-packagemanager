@@ -124,6 +124,12 @@ class InstSrcData: virtual public Rep {
     const std::list<PMPackagePtr> *getPackages (void) const;
 
     /**
+     * find list of packages
+     * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
+     */
+    const std::list<PMPackagePtr> *findPackages (const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "") const;
+    
+    /**
      * generate PMSolvable objects for each selection on the source
      * @return list of PMSolvablePtr on this source
      */

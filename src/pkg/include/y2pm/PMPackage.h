@@ -46,6 +46,7 @@ class PMPackage : virtual public Rep, public PMObject {
      **/
     enum PMPackageAttribute {
       PKG_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
+      // RPM values
       ATTR_BUILDTIME = PKG_ATTR_BEGIN,
       ATTR_BUILDHOST,
       ATTR_INSTALLTIME,
@@ -66,6 +67,11 @@ class PMPackage : virtual public Rep, public PMObject {
       ATTR_ARCHIVESIZE,
       ATTR_AUTHOR,
       ATTR_FILENAMES,
+      // SuSE packages values
+      ATTR_RECOMMENDS,
+      ATTR_SUGGESTS,
+      ATTR_LOCATION,
+      ATTR_KEYWORDS,
       // last entry:
       PKG_NUM_ATTRIBUTES
     };
@@ -96,7 +102,7 @@ class PMPackage : virtual public Rep, public PMObject {
 
     PMPackageDataProviderPtr _dataProvider;
 
-  protected:
+  public:
 
     /**
      * Provide DataProvider access to the underlying Object
