@@ -79,7 +79,7 @@ class Query : virtual public Rep {
 	/**
 	 * determine type of value
 	 */
-	int typeOfValue (struct qvalue *value, int type_hint,
+	int checkValue (struct qvalue *value, int type_hint,
 		PMSelectablePtr selectable, BitMask& mask_r,
 		std::list<std::string>& vlist, std::string & vstring,
 		Date& vdate, PkgEdition& vversion, FSize& vsize);
@@ -90,18 +90,30 @@ class Query : virtual public Rep {
 	BitMask checkSelectable (PMSelectablePtr selectable, struct qnode *query);
 
 	/**
-	 * check query against package
+	 * return bit mask for current candidate
 	 */
-	bool checkPackage (PMPackagePtr package, struct qnode *query);
 
 	BitMask findCandidate (PMSelectablePtr selectable);
+
+	/**
+	 * return bit mask for given mask, set mask if none found
+	 */
+
 	PMPackagePtr findByMask (PMSelectablePtr selectable, BitMask& mask_r);
+
+	/**
+	 * compare functions for typed values
+	 */
 
 	bool compareVersion (const PkgEdition& left, enum operation op, const PkgEdition& right);
 	bool compareString (const std::string& left, enum operation op, const std::string& right);
 	bool compareStringList (const std::list<std::string>& left, enum operation op, const std::string& right);
 	bool compareDate (const Date& left, enum operation op, const Date& right);
 	bool compareSize (const FSize& left, enum operation op, const FSize& right);
+
+	/**
+	 * check selectable for query type
+	 */
 
 	BitMask checkSelectableFlag (PMSelectablePtr selectable, int flag);
 	BitMask checkSelectableOpCompare (PMSelectablePtr selectable, struct qnode *query);

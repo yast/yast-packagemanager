@@ -384,13 +384,13 @@ QueryParser::parse_expr (const char **query, PMError *error)
 fprintf (stderr, "parse_expr (%s)\n", *query);
 #endif
 
-	node = (struct qnode *)malloc (sizeof (struct qnode));
-	if (node == 0)
-	{
-	    *error = QueryError::E_memory;
-	    return 0;
-	}
-	memset (node, 0, sizeof (struct qnode));
+    node = (struct qnode *)malloc (sizeof (struct qnode));
+    if (node == 0)
+    {
+	*error = QueryError::E_memory;
+	return 0;
+    }
+    memset (node, 0, sizeof (struct qnode));
 #ifdef PARSER_DEBUG
 fprintf (stderr, "node at %p\n", node);
 #endif
@@ -541,6 +541,9 @@ fprintf (stderr, "final (%s)\n", *query);
 	}
 	break;
     }
+#ifdef PARSER_DEBUG
+fprintf (stderr, "parse_expr => (%d, %d, %d)\n", (int)node->left.type, (int)node->op, (int)node->right.type);
+#endif
     return node;
 }
 

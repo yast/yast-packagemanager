@@ -29,11 +29,11 @@ enum operation {
     OP_FLAG,				//2 unary operation -> flag
     OP_NOT,				//3 unary operation -> boolean not
     OP_UNARY,			// -- separator --
-    OP_AND, OP_OR,			//4,5 boolean
+    OP_AND, OP_OR,			//5,6 boolean
     OP_BOOLEAN,			// -- separator --
-    OP_EQ, OP_NEQ,			//6,7 equality
-    OP_GT, OP_GE, OP_LT, OP_LE,		//8..11 greater, lesser
-    OP_CONTAINS, OP_LIKE		//12,13 string list compare
+    OP_EQ, OP_NEQ,			//8,9 equality
+    OP_GT, OP_GE, OP_LT, OP_LE,		//10..13 greater, lesser
+    OP_CONTAINS, OP_LIKE		//14,15 string list compare
 };
 
 // flag to indicate paranthesized nodes
