@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov 27 15:28:49 CET 2003 - ma@suse.de
+
+- InstSrcManager: New interface method for InsrSrc editor to set new
+  proirity and default enabling in one call.
+- 2.9.8
+
+-------------------------------------------------------------------
 Mon Nov 24 13:07:41 CET 2003 - ma@suse.de
 
 - Removed install order argument from Y2PM::commitPackages, as we

@@ -151,6 +151,12 @@ class InstSrcManager {
     InstSrcPtr lookupId( const ISrcId & isrc_r ) const;
 
     /**
+     * Find InstSrcPtr in _knownSources by numeric srcID.
+     * Return NULL if not in _knownSources.
+     **/
+    InstSrcPtr lookupSourceByID( InstSrc::UniqueID srcID_r ) const;
+
+    /**
      * Find InstSrcPtr in _knownSources by comparing
      * InstSrcDescr. Return NULL if not in _knownSources.
      **/
@@ -269,6 +275,21 @@ class InstSrcManager {
      **/
     PMError rewriteUrl( const ISrcId isrc_r, const Url & newUrl_r );
 
+
+    typedef std::pair<InstSrc::UniqueID, bool> SrcState;
+    typedef std::vector<SrcState>              SrcStateVector;
+    typedef std::set<InstSrc::UniqueID>        SrcDelSet;
+
+    /**
+     * Rearange known InstSrces rank and default state according to keep_r
+     * (highest priority first). InstSrces to delete are given by del_r.
+     *
+     * In order to perform each currently known InstSrc must occur in either
+     * keep_r or del_r. The bool part of a SrcState tells whether the InstSrc
+     * should be enabled by default.
+     **/
+    PMError adjustSources( const SrcStateVector & keep_r, const SrcDelSet del_r );
+
   public:
 
     /**
@@ -305,7 +326,7 @@ class InstSrcManager {
      * Providing this srcID, the coresponding ISrcId is returned, or NULL, if the InstSrc not found in
      * the list of known InstSrces (e.g. meanwhile deleted).
      **/
-    ISrcId getSourceByID( InstSrc::UniqueID srcID_r ) const;
+    ISrcId getSourceByID( InstSrc::UniqueID srcID_r ) const { return lookupSourceByID( srcID_r ); }
 
     /**
      * Disable all InstSrc'es.

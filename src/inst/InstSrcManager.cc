@@ -281,6 +281,22 @@ InstSrcPtr InstSrcManager::lookupId( const ISrcId & isrc_r ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::lookupSourceByID
+//	METHOD TYPE : InstSrcPtr
+//
+InstSrcPtr InstSrcManager::lookupSourceByID( InstSrc::UniqueID srcID_r ) const
+{
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    if ( (*it)->srcID() == srcID_r ) {
+      return *it;
+    }
+  }
+  // not found
+  return 0;
+}
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::lookupInstSrc
 //	METHOD TYPE : InstSrcPtr
 //
@@ -671,6 +687,89 @@ PMError InstSrcManager::setNewRanks()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::adjustSources
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::adjustSources( const SrcStateVector & keep_r, const SrcDelSet del_r )
+{
+  PMError ret;
+
+  ///////////////////////////////////////////////////////////////////
+  // check args. all _knownSources must be listed once in either keep_r
+  // or del_r.
+  ///////////////////////////////////////////////////////////////////
+
+  ISrcPool       known;
+  list<ISrcId>   todel;
+  set<ISrcId>    seen;
+
+  // new known sources
+  for ( SrcStateVector::const_iterator it = keep_r.begin(); it != keep_r.end(); ++it ) {
+    InstSrcPtr item( lookupSourceByID( it->first ) );
+    if ( ! item ) {
+      ERR << "bad srcId " << it->first << endl;
+      return Error::E_bad_id;
+    }
+    if ( ! seen.insert( item ).second ) {
+      ERR << "srcId(" << it->first << ") listed twice" << endl;
+      return Error::E_isrc_cache_duplicate;
+    }
+    DBG << "To keep: srcID(" << it->first << ") " << item << endl;
+    known.push_back( item );
+  }
+
+  // sources to delete
+  for ( SrcDelSet::const_iterator it = del_r.begin(); it != del_r.end(); ++it ) {
+    InstSrcPtr item( lookupSourceByID( *it ) );
+    if ( ! item ) {
+      ERR << "bad srcId " << *it << endl;
+      return Error::E_bad_id;
+    }
+    if ( ! seen.insert( item ).second ) {
+      ERR << "srcId(" << *it << ") listed twice" << endl;
+      return Error::E_isrc_cache_duplicate;
+    }
+    DBG << "To delete: srcID(" << *it << ") " << item << endl;
+    todel.push_back( item );
+  }
+
+  // all sources we saw were valid
+  if ( seen.size() != _knownSources.size() ) {
+    ERR << "Expected " << _knownSources.size() << " sources, but saw just " << seen.size() << endl;
+    return Error::E_no_source;
+  }
+
+  seen.clear();
+
+  ///////////////////////////////////////////////////////////////////
+  // adjust sources
+  ///////////////////////////////////////////////////////////////////
+
+  // delete unwanted
+  for ( list<ISrcId>::iterator it = todel.begin(); it != todel.end(); ++it ) {
+    deleteSource( *it );
+  }
+  todel.clear();
+
+  // adjust _knownSources
+  _knownSources = known;
+
+  unsigned idx = 0;
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it, ++idx ) {
+    (*it)->descr()->set_default_activate( keep_r[idx].second );
+    (*it)->descr()->set_default_rank( idx );
+    (*it)->_mgr_attach();
+  }
+
+  MIL << *this;
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::deleteSource
 //	METHOD TYPE : PMError
 //
@@ -742,23 +841,6 @@ InstSrcManager::ISrcIdList InstSrcManager::getSources( const bool enabled_only )
     }
   }
   return ret;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : InstSrcManager::getSourceByID
-//	METHOD TYPE : InstSrcManager::ISrcId
-//
-InstSrcManager::ISrcId InstSrcManager::getSourceByID( InstSrc::UniqueID srcID_r ) const
-{
-  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
-    if ( (*it)->srcID() == srcID_r ) {
-      return *it;
-    }
-  }
-  // not found
-  return 0;
 }
 
 /******************************************************************
