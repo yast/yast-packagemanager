@@ -266,11 +266,7 @@ class InstTarget: virtual public Rep {
 	 * @param func callback function, must accept double as argument
 	 * @param data arbitrary data to pass when function is called
 	 * */
-	void setPackageInstallProgressCallback(void (*func)(double,void*), void* data)
-	{
-	    _progressfunc = func;
-	    _progressdata = data;
-	}
+	void setPackageInstallProgressCallback(void (*func)(double,void*), void* data);
 
 	std::ostream & dumpOn( std::ostream & str ) const;
 
@@ -283,12 +279,6 @@ class InstTarget: virtual public Rep {
 	// TODO: more function, like df, du etc.
 
     private:
-
-	/** progress callback */
-	void (*_progressfunc)(double,void*);
-
-	/** arbitrary data to pass back for progress callback */
-	void* _progressdata;
 
 	/** parameters to use on installation/update
 	 * */

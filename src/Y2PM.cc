@@ -25,7 +25,6 @@
 #include <y2util/Y2SLog.h>
 
 #include <Y2PM.h>
-#include <y2pm/InstTarget.h>
 
 using namespace std;
 
@@ -43,6 +42,22 @@ PMPackageManager *   Y2PM::_packageManager = 0;
 PMSelectionManager * Y2PM::_selectionManager = 0;
 
 PMYouPatchManager *  Y2PM::_youPatchManager = 0;
+
+InstTarget *  Y2PM::_instTarget = 0;
+
+string* Y2PM::_rootdir = 0;
+
+Y2PM::CallBacks Y2PM::_callbacks = Y2PM::CallBacks::CallBacks();
+
+Y2PM::CallBacks::CallBacks()
+{
+    _installation_package_start_func = NULL;
+    _installation_package_start_data = NULL;
+    _installation_package_progress_func = NULL;
+    _installation_package_progress_data = NULL;
+    _installation_package_done_func = NULL;
+    _installation_package_done_data = NULL;
+};
 
 ///////////////////////////////////////////////////////////////////
 
@@ -102,13 +117,12 @@ PMPackageManager & Y2PM::packageManager()
     MIL << "Created PackageManager" << endl;
 
     WAR << "Fake InstTarget and load installed Packages..." << endl;
-    InstTargetPtr target( new InstTarget("/") );
     list<PMPackagePtr> plist;
-    PMError dbstat = target->init();
+    PMError dbstat = Y2PM::instTarget().init();
     if( dbstat != InstTargetError::E_ok ) {
       ERR << "error initializing target: " << dbstat << endl;
     } else {
-      dbstat = target->getPackages(plist);
+      dbstat = Y2PM::instTarget().getPackages(plist);
       Y2PM::packageManager().poolSetInstalled( plist );
     }
   }
@@ -151,3 +165,51 @@ PMYouPatchManager & Y2PM::youPatchManager()
   return *_youPatchManager;
 }
 
+static void progresscallback(double p, void* nix)
+{
+    cout << p << endl;
+}
+
+/**
+ * Access to InstTarget
+ * */
+InstTarget & Y2PM::instTarget()
+{
+    if(!_rootdir)
+    {
+	_rootdir = new string("/");
+    }
+    if(!_instTarget)
+    {
+	MIL << "Create InstTarget" << endl;
+       _instTarget = new InstTarget(*_rootdir);
+       _instTarget->setPackageInstallProgressCallback(progresscallback,NULL);
+
+    }
+
+    return *_instTarget;
+}
+
+/**
+ * set path where root fs is mounted
+ * */
+bool Y2PM::setRoot(const std::string& r)
+{
+    if( _rootdir)
+    {
+	if( _instTarget )
+	{
+	    ERR << "root dir already set" << endl;
+	    return false;
+	}
+	else
+	{
+	    delete _rootdir;
+	    _rootdir = NULL;
+	}
+    }
+
+    _rootdir = new string(r);
+
+    return true;
+}

@@ -183,7 +183,7 @@ class RpmDb: virtual public Rep
 	 *
 	 * @return success
 	 * */
-	bool installPackage(const std::string& filename, unsigned flags = 0 );
+	PMError installPackage(const std::string& filename, unsigned flags = 0 );
 
 	/** remove rpm package
 	 *
@@ -194,7 +194,7 @@ class RpmDb: virtual public Rep
 	 *
 	 * @return success
 	 * */
-	bool removePackage(const std::string& label, unsigned flags = 0);
+	PMError removePackage(const std::string& label, unsigned flags = 0);
 
 	/** set callback function for reporting progress of package
 	 * installation
@@ -294,6 +294,9 @@ class RpmDb: virtual public Rep
 
 	/** whether an old database is present */
 	bool _old_present;
+
+	/** whether rpmdb is ready to use */
+	bool _initialized;
 
 	/* parse string of the form name/number/version into rellist. number is
 	 * the rpm number representing the operator <, <=, = etc. number&64

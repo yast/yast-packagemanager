@@ -48,6 +48,12 @@ using namespace std;
 
 IMPL_BASE_POINTER(RpmDb);
 
+#define FAILIFNOTINITIALIZED \
+	if(!_initialized) return Error::E_RpmDB_not_initialized;
+
+
+#define PROGRESSSSTREAM MIL
+
 /****************************************************************/
 /* public member-functions					*/
 /****************************************************************/
@@ -63,7 +69,8 @@ RpmDb::RpmDb(string name_of_root) :
     _varlib("/var/lib"),
     _rpmdbname("packages.rpm"),
     _creatednew(false),
-    _old_present(false)
+    _old_present(false),
+    _initialized(false)
 {
    process = 0;
    exit_code = -1;
@@ -119,6 +126,7 @@ PMError RpmDb::initDatabase( bool createNew )
     {
 	// DB found
 	dbPath = _varlibrpm;
+	_initialized = true;
 	DBG << "Setting dbPath to " << dbPath.asString() << endl;
     }
     else if ( createNew )
@@ -148,6 +156,7 @@ PMError RpmDb::initDatabase( bool createNew )
 	    else
 	    {
 		_creatednew = true;
+		_initialized = true;
 		dbStatus = Error::E_ok;
 	    }
 	}
@@ -218,6 +227,8 @@ PMError RpmDb::rebuildDatabase()
     RpmArgVec opts(1);
     PMError status = Error::E_ok;
 
+    FAILIFNOTINITIALIZED
+
     DBG << endl;
 
     opts[0] = "--rebuilddb";
@@ -246,6 +257,8 @@ PMError RpmDb::rebuildDatabase()
 /*--------------------------------------------------------------*/
 PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
 {
+    FAILIFNOTINITIALIZED
+
     return Error::E_ok;
 #warning "createTmpDatabase yet implemented"
 #if 0
@@ -357,6 +370,8 @@ PMError RpmDb::createTmpDatabase ( bool copyOldRpm )
 /*--------------------------------------------------------------*/
 PMError RpmDb::installTmpDatabase( void )
 {
+    FAILIFNOTINITIALIZED
+
     return Error::E_ok;
 #warning "installTmpDatabase not yet implemented"
 #if 0
@@ -579,6 +594,8 @@ void RpmDb::rpmdeps2rellist ( const string& depstr,
 PMError RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 {
     string rpmquery;
+
+    FAILIFNOTINITIALIZED
 
     // this enum tells the position in rpmquery string
     enum {
@@ -1035,6 +1052,9 @@ PkgAttributeValue RpmDb::queryPackage(const char *format, string packageName, bo
 {
     PkgAttributeValue value;
     RpmArgVec opts(4);
+
+    if(!_initialized) return value;
+    
     if(installed)
 	opts[0] = "-q";
     else
@@ -1245,9 +1265,11 @@ void RpmDb::systemKill()
 
 
 // inststall package filename with flags iflags
-bool RpmDb::installPackage(const string& filename, unsigned flags)
+PMError RpmDb::installPackage(const string& filename, unsigned flags)
 {
     RpmArgVec opts;
+
+    FAILIFNOTINITIALIZED
 
     opts.push_back("-U");
     opts.push_back("--percent");
@@ -1268,8 +1290,7 @@ bool RpmDb::installPackage(const string& filename, unsigned flags)
 
     opts.push_back(filename.c_str());
 
-    //XXX maybe some log for the user too?
-    DBG << "Installing " << filename << endl;
+    PROGRESSSSTREAM << "Installing " << Pathname::basename(filename) << endl;
 
     run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
 
@@ -1295,16 +1316,20 @@ bool RpmDb::installPackage(const string& filename, unsigned flags)
     int rpm_status = systemStatus();
     if (rpm_status != 0)
     {
+	PROGRESSSSTREAM << Pathname::basename(filename) << " failed" << endl;
 	ERR << "rpm failed, message was: " << rpmmsg << endl;
-	return false;
+	return Error::E_RpmDB_subprocess_failed;
     }
-    return true;
+    PROGRESSSSTREAM << Pathname::basename(filename) << " ok" << endl;
+    return Error::E_ok;
 }
 
 // remove package named label
-bool RpmDb::removePackage(const string& label, unsigned flags)
+PMError RpmDb::removePackage(const string& label, unsigned flags)
 {
     RpmArgVec opts;
+
+    FAILIFNOTINITIALIZED
 
     opts.push_back("-e");
 
@@ -1322,7 +1347,20 @@ bool RpmDb::removePackage(const string& label, unsigned flags)
 
     run_rpm(opts, ExternalProgram::Stderr_To_Stdout);
 
-    return true;
+    string rpmmsg;
+    string line;
+
+    while (systemReadLine(line))
+    {
+	rpmmsg += line+'\n';
+    }
+    int rpm_status = systemStatus();
+    if (rpm_status != 0)
+    {
+	ERR << "rpm failed, message was: " << rpmmsg << endl;
+	return Error::E_RpmDB_subprocess_failed;
+    }
+    return Error::E_ok;
 }
 
 string RpmDb::checkPackageResult2string(unsigned code)
