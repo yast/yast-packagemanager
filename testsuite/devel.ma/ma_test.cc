@@ -227,8 +227,7 @@ struct WFM {
     YCPValue ret = _pkgmod->SourceEditGet( args );
     OUT << " --> " << ret << endl;
   }
-  void SourceEditSet( const InstSrcManager::SrcStateVector & source_states,
-		      const InstSrcManager::SrcDelSet & source_todel ) {
+  void SourceEditSet( const InstSrcManager::SrcStateVector & source_states ) {
     YCPList args;
 
     YCPList a1;
@@ -239,14 +238,8 @@ struct WFM {
       el->add( YCPString("enabled"),	YCPBoolean( it->second ) );
       a1->add( el );
     }
-    YCPList a2;
-    for ( InstSrcManager::SrcDelSet::const_iterator it = source_todel.begin();
-	  it != source_todel.end(); ++it ) {
-      a2->add( YCPInteger( *it ) );
-    }
-
     args->add( a1 );
-    args->add( a2 );
+
     OUT << "SourceEditSet" << args;
     YCPValue ret = _pkgmod->SourceEditSet( args );
     OUT << " --> " << ret << endl;
@@ -255,13 +248,11 @@ struct WFM {
 
 static WFM wfm;
 
-void st() {
-  InstSrcManager::ISrcIdList sids;
-  ISM.getSources( sids );
-  unsigned n = 0;
-  for ( InstSrcManager::ISrcIdList::const_iterator it = sids.begin();
-	it != sids.end(); ++it, ++n ) {
-    SEC << "InstSrc[" << n << "] " << ((*it)->enabled()?"enabled":"disabled") << endl;
+void test() {
+  SEC << PMGR["aaa_base"] << endl;
+  for ( PMSelectable::PMObjectList::const_iterator it = PMGR["aaa_base"]->av_begin();
+	it != PMGR["aaa_base"]->av_end(); ++it ) {
+    SEC << "  " << PMPackagePtr(*it)->source()->srcID() << " - "  << *it << endl;
   }
 }
 
@@ -298,18 +289,28 @@ int main()
   wfm.init();
   INT << "START" << endl;
   wfm.SourceStartManager( false );
-  wfm.SourceGetCurrent( false );
-  wfm.SourceEditGet();
 
-  InstSrcManager::SrcStateVector keep;
-  InstSrcManager::SrcDelSet      del;
+  if ( 1 ) {
+    InstSrcManager::SrcStateVector keep;
+    keep.push_back( InstSrcManager::SrcState( 1, true ) );
+    keep.push_back( InstSrcManager::SrcState( 2, true ) );
+    keep.push_back( InstSrcManager::SrcState( 3, false ) );
+    wfm.SourceEditSet( keep );
+  }
 
-  keep.push_back( InstSrcManager::SrcState( 1, true ) );
-  keep.push_back( InstSrcManager::SrcState( 2, true ) );
-  keep.push_back( InstSrcManager::SrcState( 3, true ) );
+  wfm.SourceStartCache( true );
 
-  wfm.SourceEditSet( keep, del );
-  wfm.SourceEditGet();
+  test();
+
+  if ( 1 ) {
+    InstSrcManager::SrcStateVector keep;
+    keep.push_back( InstSrcManager::SrcState( 2, true ) );
+    keep.push_back( InstSrcManager::SrcState( 1, true ) );
+    keep.push_back( InstSrcManager::SrcState( 3, false ) );
+    wfm.SourceEditSet( keep );
+  }
+
+  test();
 
   SEC << "STOP" << endl;
   wfm.close();
