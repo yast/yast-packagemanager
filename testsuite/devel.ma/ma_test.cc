@@ -149,40 +149,36 @@ int main()
   Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
 
-  Y2PM::noAutoInstSrcManager();
+  //Y2PM::noAutoInstSrcManager();
   Timecount _t("",false);
-  //_t.start( "Launch InstTarget" );
-  //Y2PM::instTarget(true,"/");
-  //_t.start( "Launch PMPackageManager" );
-  //Y2PM::packageManager();
-  //_t.start( "Launch PMSelectionManager" );
-  //Y2PM::selectionManager();
+  _t.start( "Launch InstTarget" );
+  Y2PM::instTarget(true,"/");
+  _t.start( "Launch PMPackageManager" );
+  Y2PM::packageManager();
+  _t.start( "Launch PMSelectionManager" );
+  Y2PM::selectionManager();
   _t.start( "Launch InstSrcManager" );
   Y2PM::instSrcManager();
   _t.stop();
-  //INT << "Total Packages "   << PMGR.size() << endl;
-  //INT << "Total Selections " << SMGR.size() << endl;
+  INT << "Total Packages "   << PMGR.size() << endl;
+  INT << "Total Selections " << SMGR.size() << endl;
 
-  InstSrcManager::ISrcId nid = newSrc( "dir:////tmp/PLAIN" );
-  MIL << "New ID: " << nid << endl;
-  MIL << ISM.enableSource( nid ) << endl;
+  SMGR["X11"]->user_set_delete();
+  SMGR.activate();
+  Y2PM::packageSelectionSaveState();
 
-  PMPackagePtr fst;
-  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
-    if ( (*it)->has_candidate() ) {
-      dataDump( MIL, (*it)->candidateObj() );
-      if ( !fst )
-	fst = (*it)->candidateObj();
-    }
-  }
+  SMGR["X11"]->user_unset();
+  SMGR.activate();
+  dumpSelWhatIf( WAR );
+  dumpPkgWhatIf( WAR );
 
-  if ( fst ) {
-    Pathname loc;
-    SEC << "Bin : " << fst->providePkgToInstall( loc ) << endl;
-    MIL << "    : " << loc << endl;
-    SEC << "Src : " << fst->provideSrcPkgToInstall( loc ) << endl;
-    MIL << "    : " << loc << endl;
-  }
+  Y2PM::packageSelectionRestoreState();
+  dumpSelWhatIf( DBG );
+  dumpPkgWhatIf( DBG );
+  SMGR["X11"]->user_unset();
+  SMGR.activate();
+  dumpSelWhatIf( WAR );
+  dumpPkgWhatIf( WAR );
 
   SEC << "STOP" << endl;
   return 0;
