@@ -30,6 +30,8 @@ void usage()
        << "-g          Only download patches, don't install." << endl
        << "-i          Install downloaded patches, don't download." << endl
        << endl
+       << "-c          Show configuration. Don't do anything." << endl
+       << endl
        << "-p product  Name of product to get patches for." << endl
        << "-v version  Version of product to get patches for." << endl
        << "-a arch     Base architecture of product to get patches for." << endl
@@ -71,13 +73,16 @@ int main( int argc, char **argv )
   bool autoGet = false;
   bool autoInstall = false;
   bool reload = true;
-
+  bool showConfig = true;
+  
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "gihdnsVDu:p:v:a:l:" );
+    c = getopt( argc, argv, "cgihdnsVDu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
+      case 'c':
+        showConfig = true;
       case 'g':
         autoGet = true;
         break;
@@ -178,14 +183,19 @@ int main( int argc, char **argv )
     you.initProduct();
   }
 
-  cout << "Product:      " << you.paths()->product() << endl;
-  cout << "Version:      " << you.paths()->version() << endl;
-  cout << "Architecture: " << you.paths()->baseArch() << endl;
-  if ( verbose || debug ) {
-    cout << "Business Product: "
-         << ( you.paths()->businessProduct() ? "Yes" : "No" ) << endl;
+  if ( showConfig ) {
+    cout << "Product:      " << you.paths()->product() << endl;
+    cout << "Version:      " << you.paths()->version() << endl;
+    cout << "Architecture: " << you.paths()->baseArch() << endl;
+    if ( verbose || debug ) {
+      cout << "Business Product: "
+           << ( you.paths()->businessProduct() ? "Yes" : "No" ) << endl;
+    }
+    cout << "Language:     " << you.patchInfo()->langCode() << endl;
+    cout << "Directory:    " << you.paths()->directoryFileName() << endl;
+  
+    exit( 0 );
   }
-  cout << "Language:     " << you.patchInfo()->langCode() << endl;
 
   // Get URL of you source.
 
