@@ -217,7 +217,7 @@ int main( int argc, char **argv )
   Url url;
 
   if ( autoInstall ) {
-    url = Url( "dir://" + you.paths()->localDir().asString() );
+    url = Url( "dir://" + you.paths()->attachPoint().asString() );
   } else {
     if ( urlStr ) {
       url = Url( urlStr );
