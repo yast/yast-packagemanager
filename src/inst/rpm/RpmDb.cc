@@ -480,7 +480,7 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 {
     unsigned count = 0;
     string::size_type pos1=0, pos2=0;
-    while(pos1 != string::npos && (max>0?count<=max:true))
+    while(pos1 != string::npos && (max>0?count<max-1:true))
     {
 	count++;
 	pos2 = in.find(sep,pos1);
@@ -494,6 +494,11 @@ RpmDb::tokenize(const string& in, char sep, unsigned max, vector<string>& out)
 	    out.push_back(in.substr(pos1));
 	    pos1=pos2;
 	}
+    }
+    if(max && count >= max-1 && pos1 != string::npos)
+    {
+	count++;
+	out.push_back(in.substr(pos1));
     }
     return count;
 }
@@ -638,8 +643,8 @@ RpmDb::getPackages (void)
 	RPM_OBSOLETES,
 	RPM_CONFLICTS,
 	RPM_BUILDTIME,		// passed to PkgEdition()
-	RPM_SUMMARY,
 	RPM_SIZE,
+	RPM_SUMMARY,      // summary MUST be last, could contain ';'
 	NUM_RPMTAGS
     };
 
@@ -654,12 +659,14 @@ RpmDb::getPackages (void)
     // The query must end with "\\n" in order to separate
     // the package data
     //
+    // Values except summary must neither contain ',' nor ';'
+    // 
     rpmquery += "%{RPMTAG_NAME};%{RPMTAG_VERSION};%{RPMTAG_RELEASE};%{RPMTAG_ARCH};";
     rpmquery += "[%{REQUIRENAME},%{REQUIREFLAGS},%{REQUIREVERSION},];";
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
     rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
     rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},];";
-    rpmquery += "%{BUILDTIME};%{SUMMARY};%{SIZE}";
+    rpmquery += "%{BUILDTIME};%{SIZE};%{SUMMARY}";
     rpmquery += "\\n";
 
     RpmArgVec opts(4);
