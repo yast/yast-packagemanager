@@ -128,7 +128,7 @@ MediaHandler::~MediaHandler()
 
   if ( _tmp_attachPoint ) {
     int res = PathInfo::recursive_rmdir( _attachPoint );
-    if ( res ) {
+    if ( res == 0 ) {
       MIL << "Deleted default attach point " << _attachPoint << endl;
     } else {
       ERR << "Failed to Delete default attach point " << _attachPoint
