@@ -196,19 +196,23 @@ void InstYou::selectPatches( int kinds )
           INT << "Patch has no selectable." << endl;
           return;
         }
-      
+
         PMYouPatchPtr candidate = selectable->candidateObj();
         D__ << "Patch " << (*it)->fullName();
-        if ( candidate ) D__ << " has candidate." << endl;
-        else D__ << " has no candidate." << endl;
-        D__ << "Kind: " << candidate->kindLabel() << endl;
-        if ( candidate && ( candidate->kind() & kinds ) ) {
-          DBG << "Select patch: " << (*it)->fullName() << endl;
-          selectable->user_set_install();
-        }
+        if ( candidate ) {
+          D__ << " has candidate." << endl;
+          D__ << "Kind: " << candidate->kindLabel() << endl;
+          if ( candidate->kind() & kinds ) {
+            DBG << "Select patch: " << (*it)->fullName() << endl;
+            selectable->user_set_install();
+          }
+        } else D__ << " has no candidate." << endl;
       }
     }
   }
+  
+  // Read Taboo states
+  Y2PM::youPatchManager().readSettings();
   
   updatePackageStates();
 }
@@ -857,6 +861,9 @@ PMError InstYou::writeLastUpdate()
 
   _paths->config()->writeEntry( "LastUpdate", Date::toSECONDS( Date::now() ) );
   _paths->config()->save();
+
+#warning Settings should probably written elsewhere (PMManager destructor?)
+  Y2PM::youPatchManager().writeSettings();
 
   return PMError();
 }

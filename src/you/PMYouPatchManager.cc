@@ -127,3 +127,8 @@ bool PMYouPatchManager::securityUpdatesAvailable()
   
   return false;
 }
+
+Pathname PMYouPatchManager::settingsFile() const
+{
+  return "/var/lib/YaST2/you/settings";
+}
