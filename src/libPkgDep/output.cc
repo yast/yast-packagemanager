@@ -42,8 +42,16 @@ ostream& operator<<( ostream& os, const PkgDep::Result& res )
 		os << "Upgrade-To-Remove-Conflict: yes\n";
 	if (res.install_to_avoid_break)
 		os << "Install-To-Avoid-Break: yes\n";
-	if (res.was_inconsistent)
-		os << "Was-Inconsistent: yes\n";
+		/*
+	if (res.inconsistent_notavailable)
+		os << "Inconsistent-notavail: yes\n";
+		*/
+	if (!res.was_inconsistent.empty())
+	{
+		os << "Inconsistent: ";
+		os << res.was_inconsistent << endl;
+	}
+
 
 	return os;
 }

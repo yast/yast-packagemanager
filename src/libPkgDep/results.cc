@@ -11,7 +11,6 @@ PkgDep::Result::Result( const PkgDep& pkgdep, PMSolvablePtr pkg )
 	edition = pkg->edition();
 	upgrade_to_remove_conflict = false;
 	install_to_avoid_break = false;
-	was_inconsistent = false;
 	from_input_list = false;
 	solvable = pkg;
 
@@ -36,34 +35,58 @@ PkgDep::Result::Result( const PkgDep& pkgdep, const PkgName& n )
 	edition = PkgEdition(PkgEdition::UNSPEC);
 	upgrade_to_remove_conflict = false;
 	install_to_avoid_break = false;
-	was_inconsistent = false;
 	from_input_list = false;
 	is_upgrade_from = PkgEdition(PkgEdition::UNSPEC);
 	is_downgrade_from = PkgEdition(PkgEdition::UNSPEC);
 }
-
-void PkgDep::ErrorResult::add_conflict( const PkgRevRelation& rrel,
-										const PkgDep& dep,
-										PMSolvablePtr to_remove,
-										PMSolvablePtr assume_instd,
-										RelInfo::Kind kind )
+PkgDep::ErrorResult::ErrorResult(const PkgDep& pkgdep, PMSolvablePtr pkg)
+	: Result(pkgdep,pkg),
+	not_available(false),
+	state_change_not_possible(false),
+	_error(false)
 {
-	conflicts_with.push_back( RelInfo( rrel, kind ));
-	if (to_remove)
-		dep.virtual_remove_package( to_remove, remove_to_solve_conflict,
-									assume_instd );
 }
 
-void PkgDep::ErrorResult::add_conflict( PMSolvablePtr s, const PkgRelation& rel,
-										const PkgDep& dep,
-										PMSolvablePtr to_remove,
-										PMSolvablePtr assume_instd,
-										RelInfo::Kind kind )
+PkgDep::ErrorResult::ErrorResult(const PkgDep& pkgdep, const PkgName& name)
+	: Result(pkgdep,name),
+	not_available(false),
+	state_change_not_possible(false),
+	_error(false)
 {
-	conflicts_with.push_back( RelInfo( s, rel, kind ));
-	if (to_remove)
-		dep.virtual_remove_package( to_remove, remove_to_solve_conflict,
-									assume_instd );
+}
+PkgDep::ErrorResult::ErrorResult(const Result& res)
+	: Result(res),
+	not_available(false),
+	state_change_not_possible(false),
+	_error(false)
+{
+}
+
+
+void PkgDep::ErrorResult::add_conflict(
+	const PkgRevRelation& rrel,
+	const PkgDep& dep,
+	PMSolvablePtr to_remove,
+	PMSolvablePtr assume_instd,
+	RelInfo::Kind kind )
+{
+    conflicts_with.push_back( RelInfo( rrel, kind ));
+    if (to_remove)
+	dep.virtual_remove_package( to_remove, remove_to_solve_conflict, assume_instd );
+}
+
+/** this ErrorResult has a problem because <s> <kind> <rel> */
+void PkgDep::ErrorResult::add_conflict(
+    PMSolvablePtr s,
+    const PkgRelation& rel,
+    const PkgDep& dep,
+    PMSolvablePtr to_remove,
+    PMSolvablePtr assume_instd,
+    RelInfo::Kind kind )
+{
+    conflicts_with.push_back( RelInfo( s, rel, kind ));
+    if (to_remove)
+	dep.virtual_remove_package( to_remove, remove_to_solve_conflict, assume_instd );
 }
 
 void PkgDep::ErrorResult::add_unresolvable( PMSolvablePtr s, const PkgRelation& rel )
@@ -81,7 +104,10 @@ void PkgDep::Result::add_notes( const Notes& notes )
 	from_input_list = notes.from_input;
 	upgrade_to_remove_conflict = notes.upgrade_to_solve_conflict;
 	install_to_avoid_break = notes.install_to_avoid_break;
-	was_inconsistent = notes.was_inconsistent;
+	copy(
+		notes.was_inconsistent.begin(),
+		notes.was_inconsistent.end(),
+		back_inserter(was_inconsistent));
 	ci_for( IRelInfoList::,, n, notes.referers., ) {
 		referers.push_back( RelInfo(n->pkg, n->rel) );
 	}

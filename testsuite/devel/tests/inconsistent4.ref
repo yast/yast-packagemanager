@@ -1,5 +1,6 @@
 --- Test 1
 
+
 Name: libsomething.so.0(*)
 Edition: EDITION-UNSPEC
 Referers: shadow-1.0-1 requires libsomething.so.0
@@ -8,6 +9,6 @@ Remove-Referers: at, shadow
 
 Name: shadow
 Edition: 1.0-1
-Was-Inconsistent: yes
+Inconsistent: shadow-1.0-1 requires libsomething.so.0
 Unresolvable: shadow-1.0-1 requires libsomething.so.0
 

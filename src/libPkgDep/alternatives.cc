@@ -1,19 +1,27 @@
 #include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
+#include <y2pm/PkgDep_private.h>
 #include "PkgDep_int.h"
 
 using namespace std;
 
-void PkgDep::handle_alternative( const AltInfo& alt_info )
+void PkgDep::P::handle_alternative( const AltInfo& alt_info )
 {
-	PMSolvablePtr cand = alt_info.pkg;
+	PMSolvablePtr cand = alt_info.pkg; // may be NULL if self conflicting
 	PkgName reqname = alt_info.req.name();
+
+	PkgSet& vinstalled = _dep.vinstalled;
+	PkgSet& candidates  = *_dep.candidates;
+	const PkgSet& available  = _dep.available;
+	std::deque<PMSolvablePtr>& to_check = _dep.to_check;
+	ErrorResultList* bad = _dep.bad;
 
 	// Has this alternative already been handled? This can happen because
 	// add_package stores the alternatives that need later processing on a
 	// list, so double entries can happen. We need those double entries so
 	// that we can add the 2nd and following packages as referers.
-	if (cand && alts_handled.exists(reqname)) {
+	if (cand && (alts_handled.find(reqname) != alts_handled.end()))
+	{
 		if (PkgSet::getRevRelforPkg(vinstalled.provided(),reqname).size() != 0) {
 			PMSolvablePtr first_provider
 				= PkgSet::getRevRelforPkg(vinstalled.provided(),reqname).front().pkg();
@@ -22,7 +30,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 				 "adding reference from installed/accepted " << cand->name() << " on "
 				 << alt_info.req << " provided by "
 				 << first_provider->name() << endl;
-			add_referer( first_provider, cand, alt_info.req );
+			_dep.add_referer( first_provider, cand, alt_info.req );
 #endif
 			D__ << "Alternative for " << reqname << " needed by " << cand->name()
 				<< " already handled, put back to to_check" << endl;
@@ -38,15 +46,15 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		// arts alternative is handled first, XFree86-GLX is selected
 		// and added to candidates. Now at the time kdelibs3 is checked
 		// XFree86-GLX is still in candidates, not vinstalled! -- ln
-		else if (PkgSet::getRevRelforPkg(candidates->provided(),reqname).size() != 0) {
+		else if (PkgSet::getRevRelforPkg(candidates.provided(),reqname).size() != 0) {
 			PMSolvablePtr first_provider
-				= PkgSet::getRevRelforPkg(candidates->provided(),reqname).front().pkg();
+				= PkgSet::getRevRelforPkg(candidates.provided(),reqname).front().pkg();
 #ifdef phicode
 			D__ << "Alternative for " << reqname << " already handled -- "
 				 "adding reference from candiate " << cand->name() << " on "
 				 << alt_info.req << " provided by "
 				 << first_provider->name() << endl;
-			add_referer( first_provider, cand, alt_info.req );
+			_dep.add_referer( first_provider, cand, alt_info.req );
 #endif
 			D__ << "Alternative for " << reqname << " needed by " << cand->name()
 				<< " already handled, put back to to_check" << endl;
@@ -73,7 +81,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 				if( p->name == reqname )
 				{
 					found = true;
-					add_referer(p->name, cand, alt_info.req );
+					_dep.add_referer(p->name, cand, alt_info.req );
 				}
 			}
 			if(!found) INT << "already handled alternative " <<
@@ -82,10 +90,10 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 			/* we don't generate this result to not flood the list
 			 * with redundant information. the alternative error
 			 * should already suffice
+			*/
 			ErrorResult res = alt_info.result;
 			res.add_unresolvable( cand, alt_info.req );
 			bad->push_back( res );
-			*/
 
 		}
 		return;
@@ -105,11 +113,11 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 
 	// check status of alternatives: an alt could 1) conflict with something,
 	// 2) require more packages, or 3) nothing of the above
-	hash<PkgName,alternative_kind> altkind;
+	map<PkgName,alternative_kind> altkind;
 	ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 		PkgName altname = alt->pkg()->name();
 		D__ << "Checking consistency of alternative " << altname << ": ";
-		ErrorResult err( *this, alt->pkg() );
+		ErrorResult err( _dep, alt->pkg() );
 		pkg_consistent( alt->pkg(), &err );
 		if (err.conflicts_with.size()) {
 			D__ << "conflict\n";
@@ -137,7 +145,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	  case AUTO_IF_NO_DEFAULT:
 	  {
 		const Alternatives::AltDefaultList& defaults
-			= _alternatives_callback(reqname);
+			= _dep._alternatives_callback(reqname);
 		if (defaults.size() == 0) {
 			if (alt_mode == ASK_IF_NO_DEFAULT)
 				// no defaults -> let caller decide
@@ -253,11 +261,11 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	if (use_pkg) {
 		// ok, an alternative has been selected, add it as candidate
 		D__ << "Selected " << use_pkg->name() << " as alternative.\n";
-		candidates->add( use_pkg, true );
+		candidates.add( use_pkg, true );
 		to_check.push_back( use_pkg );
 
 		if (cand) {
-			add_referer( use_pkg, cand, alt_info.req );
+			_dep.add_referer( use_pkg, cand, alt_info.req );
 			D__ << "Candidate " << cand->name() << "seems ok, check again\n";
 			to_check.push_back(cand);
 			// putting this into good is definitively no good idea,
@@ -271,7 +279,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		// an ErrorResult
 		// the alternatives list is sorted by kind (SIMPLE, REQUIRES, CONFL)
 		D__ << "No alternative selected -- generating ErrorResult\n";
-		ErrorResult err(*this,reqname);
+		ErrorResult err(_dep,reqname);
 		ci_for( ,RevRelList_, alt, alt_info.providers., ) {
 			PkgName altname = alt->pkg()->name();
 			if (altkind[altname] == SIMPLE)
@@ -288,7 +296,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 				err.add_alternative( alt->pkg(), altkind[altname] );
 		}
 		if (cand)
-			add_referer( reqname, cand, alt_info.req );
+			_dep.add_referer( reqname, cand, alt_info.req );
 		bad->push_back( err );
 
 		if (cand) {
@@ -296,18 +304,18 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 			/* we don't generate this result to not flood the list
 			 * with redundant information. the alternative error
 			 * should already suffice
+			*/
 			ErrorResult res = alt_info.result;
 			res.add_unresolvable( cand, alt_info.req );
 			bad->push_back( res );
-			*/
 		}
 		else {
 			ci_for( ,RevRelList_, alt, alt_info.providers., ) {
-				ErrorResult e(*this, alt->pkg());
+				ErrorResult e(_dep, alt->pkg());
 				ci_for( ,RevRelList_, alt2, alt_info.providers., ) {
 					if (alt2->pkg() != alt->pkg())
 						e.add_conflict( alt2->pkg(), alt_info.req,
-										*this, NULL, NULL );
+										_dep, NULL, NULL );
 				}
 				bad->push_back( e );
 			}
@@ -317,9 +325,10 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	alts_handled.insert( reqname );
 }
 
+void PkgDep::set_alternatives_mode(alternatives_mode mode)
+{
+	_dp->alt_mode = mode;
+}
 
 
-// Local Variables:
-// c-basic-offset: 4
-// tab-width: 4
-// End:
+// vim: sw=4

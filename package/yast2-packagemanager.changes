@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Fri Jun 18 13:43:02 CEST 2004 - lnussel@suse.de
+
+- use uname() syscall instead of command
+- support rpmv4 obsoletetions
+- move some members of PkgDep into a private class
+- new list of inconsistencies for inconsistent, installed packages in
+  ErrorResult
+- move DbHeader parser into separate file
+- new class for ignored relations
+- new class for inserting into arbitrary container
+- more solver testcases
+- 2.10.1
+
+-------------------------------------------------------------------
 Thu Jun 17 15:34:07 CEST 2004 - lnussel@suse.de
 
 - merge 9.1 branch

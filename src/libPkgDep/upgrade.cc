@@ -1,6 +1,7 @@
 #include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
 #include "PkgDep_int.h"
+#include <y2pm/PkgDep_private.h>
 #include <y2util/hash.h>
 
 #include <set>
@@ -286,10 +287,15 @@ bool PkgDep::upgrade(
 }
 #endif
 
-void PkgDep::inconsistent_to_candidates(PkgSet& candidates)
+void PkgDep::P::inconsistent_to_candidates()
 {
 	unsigned numinconsistent = 0;
-	PkgSet brokeninstalled;
+	ErrorResultList brokeninstalled;
+
+	PkgSet& installed = _dep.installed;
+	PkgSet& candidates = *_dep.candidates;
+	const PkgSet& available = _dep.available;
+	Notes_type& notes = _dep.notes;
 
 	D__ << "check inconsistent" << endl;
 
@@ -305,57 +311,65 @@ void PkgDep::inconsistent_to_candidates(PkgSet& candidates)
 		    continue;
 
 		RevRel_for( PkgSet::getRevRelforPkg(candidates.obsoleted(),iname), obs ) {
-			if (obs->relation().matches( instd->self_provides() )) {
-				WAR << "installed " << iname << " is obsoleted by candidate "
-					 << obs->pkg()->name() << " -- not checking consistency"
-					 << endl;
-				if(iname == obs->pkg()->name())
-				{
-				    ERR << obs->pkg()->nameEd() << " obsoletes itself!" << endl;
-				}
-				obsolete = true;
+		    if (obs->relation().matches( instd->self_provides() )) {
+			WAR << "installed " << iname << " is obsoleted by candidate "
+			     << obs->pkg()->name() << " -- not checking consistency"
+			     << endl;
+			if(iname == obs->pkg()->name())
+			{
+			    ERR << obs->pkg()->nameEd() << " obsoletes itself!" << endl;
 			}
+			obsolete = true;
+		    }
 		}
 
 		// add installed as candiate if it's inconsistent
-		if(!obsolete && !pkg_consistent(instd, NULL))
+		ErrorResult res(_dep, instd);
+		if(!obsolete && !pkg_consistent(instd, &res))
 		{
 		    numinconsistent++;
-		    brokeninstalled.add(instd);
+		    brokeninstalled.push_back(res);
 		}
 	    }
 
-	    i_for( PkgSet::,, bit, brokeninstalled., )
+	    i_for( ErrorResultList::,, res, brokeninstalled., )
 	    {
-		if(installed.includes(bit->second->name()))
+		if(!res->solvable)
+		    { INT << res->name << " NULL!?" << endl; continue; }
+		if(!installed.includes(res->name))
+		    { INT << res->name << " not in installed!?" << endl; continue; }
+
+
+		if(candidates.includes( res->name))
 		{
-		    if(!candidates.includes( bit->second->name()))
+		    D__ << "inconsistent " << (res->name)
+			<< " already candidate" << endl;
+		}
+		else
+		{
+		    // doesn't matter, we force install anyway
+		    // installed.remove( res->second );
+		    if(available.includes( res->name ))
 		    {
-			// doesn't matter, we force install anyway
-			// installed.remove( bit->second );
-			if(available.includes( bit->second->name() ))
-			{
-			    D__ << "adding inconsistent " << (bit->second->name())
-				<< " from available to candidates" << endl;
-			    candidates.add( available[bit->second->name()] );
-			    notes[bit->second->name()].was_inconsistent = true;
-			}
-			else
-			{
-			    D__ << "adding inconsistent " << (bit->second->name())
-				<< " from installed to candidates" << endl;
-			    candidates.add( bit->second );
-			    notes[bit->second->name()].was_inconsistent = true;
-			}
+			D__ << "adding inconsistent " << (res->name)
+			    << " from available to candidates" << endl;
+			candidates.add( available[res->name] );
+			copy(
+			    res->unresolvable.begin(),
+			    res->unresolvable.end(),
+			    back_inserter(notes[res->name].was_inconsistent));
 		    }
 		    else
 		    {
-			D__ << "inconsistent " << (bit->second->name())
-			    << " already candidate" << endl;
+			D__ << "adding inconsistent " << (res->name)
+			    << " from installed to candidates" << endl;
+			candidates.add( res->solvable );
+			copy(
+			    res->unresolvable.begin(),
+			    res->unresolvable.end(),
+			    back_inserter(notes[res->name].was_inconsistent));
 		    }
 		}
-		else
-		    INT << bit->second->name() << " not in installed!?" << endl;
 	    }
 	}
 }
@@ -368,7 +382,7 @@ bool PkgDep::solvesystemnoauto(
 {
 	// try installation of the candidates
 	DBG << "-------------------- install run --------------------\n";
-	install( candidates, out_good, out_bad, out_obsoleted, true, true );
+	install( candidates, out_good, out_bad, out_obsoleted, false, true );
 	DBG << "-------------------- install end --------------------\n";
 
 	return out_bad.empty();

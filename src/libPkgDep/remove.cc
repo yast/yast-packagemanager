@@ -70,10 +70,11 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr startpkg, SolvableList& 
 	D__ << "removing package " << pkg->name() << " " << (const void*)pkg << endl;
 	set->remove( pkg->name() ); // must be name as pkg could be a reinstalled one, e.g. inconsistent
 
-	// the package itself must also be checked, not only the explicit provides!
-	D__ << " need to check " << pkg->provides().size()+1 << " provides" << endl;
+// size() is inefficient!
+//	D__ << " need to check " << pkg->provides().size()+1 << " provides" << endl;
 
 	unsigned numprov =0;
+	// the package itself (self-provides) must also be checked, not only the explicit provides
 	for(PMSolvable::Provides_iterator prov = pkg->all_provides_begin();
 	    prov != pkg->all_provides_end(); ++prov)
 	{

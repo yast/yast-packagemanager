@@ -160,7 +160,9 @@ class PMSolvable : public CountedRep {
     }
 
     /**
-     * set provides list
+     * \brief set provides list
+     *
+     * might break PkgSets if used on existing packages?
      */
     const PkgRelList_type& setProvides(const PkgRelList_type& provides)
     {
@@ -169,7 +171,9 @@ class PMSolvable : public CountedRep {
     }
 
     /**
-     * set requires list
+     * \brief set requires list
+     *
+     * might break PkgSets if used on existing packages?
      */
     const PkgRelList_type& setRequires(const PkgRelList_type& requires)
     {
@@ -190,6 +194,8 @@ class PMSolvable : public CountedRep {
 
     /**
      * set obsoletes list
+     *
+     * might break PkgSets if used on existing packages?
      */
     const PkgRelList_type& setObsoletes(const PkgRelList_type& obsoletes)
     {
@@ -199,6 +205,8 @@ class PMSolvable : public CountedRep {
 
     /**
      * set conflicts list
+     *
+     * might break PkgSets if used on existing packages?
      */
     const PkgRelList_type& setConflicts(const PkgRelList_type& conflicts)
     {

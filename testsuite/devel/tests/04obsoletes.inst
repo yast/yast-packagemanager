@@ -27,3 +27,19 @@ Edition: 1.2-1
 Name: somemore
 Edition: 1.0-1
 Requires: libbaz
+
+Name: libD
+Edition: 1.0-1
+Provides: D, E, F
+
+Name: libD2
+Edition: 1.0-1
+Provides: D2
+
+Name: libD2-devel
+Edition: 1.0-1
+Requires: D2
+
+Name: libD2-doc
+Edition: 1.0-1
+Requires: libD2

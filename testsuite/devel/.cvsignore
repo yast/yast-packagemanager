@@ -17,3 +17,5 @@ test_selections
 test_updateinf
 testinstall
 autosolvertest
+autosolvertest.out
+autosolvertest.y2log

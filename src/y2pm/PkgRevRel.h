@@ -4,30 +4,34 @@
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PMSolvable.h>
 
-class PkgRevRelation {
+/** \brief Associate package and relation */
+class PkgRevRelation
+{
+    private:
+	const PkgRelation* _relation;
+	PMSolvablePtr _p;
 
-	const PkgRelation *_relation;
-	const PMSolvablePtr _pkg;
+    public:
 
-  public:
-	/**
-	 * _relation can be a NULL pointer; that means that this is a
-	 * self-providing entry, i.e. the package provides its own name. If
-	 * somebody asks for the PkgRelation, a faked one is returned.
-	 * */
-	PkgRevRelation( const PkgRelation *r, const PMSolvablePtr p )
-		: _relation(r), _pkg(p) {}
-	// default copy constructor and assigment are ok
+	/** r MUST point into p or be NULL */
+	PkgRevRelation( const PkgRelation* r, PMSolvablePtr p )
+	    : _relation(r), _p(p)
+	{}
 
-	const PkgRelation relation() const {
-		return _relation ? *_relation : _pkg->self_provides();
+	/** r MUST point into p or be NULL */
+	PkgRevRelation(PMSolvablePtr p, const PkgRelation* r )
+	    : _relation(r), _p(p)
+	{}
+
+	const PkgRelation relation() const
+	{
+	    return _relation ?*_relation:_p->self_provides();
 	}
-	const PMSolvablePtr pkg() const { return _pkg; }
+
+	const PMSolvablePtr pkg() const
+	{
+	    return _p;
+	}
 };
 
 #endif  /* _PkgRevRel_h */
-
-
-// Local Variables:
-// tab-width: 4
-// End:
