@@ -56,6 +56,10 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr 
 
     switch(attr)
     {
+#warning FIXME PMSolvable::ATTR_ARCH
+	case PMObject::ATTR_ARCH:
+	    queryformat = "%{ARCH}\n";
+	    break;
 	case PMObject::ATTR_SUMMARY:
 	    queryformat = "%{SUMMARY}\n";
 	    break;
@@ -73,7 +77,7 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr 
 	case PMObject::ATTR_INSNOTIFY:
 	case PMObject::ATTR_DELNOTIFY:
 	    // invalid
-	    return PkgAttributeValue("-?-");
+	    return PkgAttributeValue();
 	    break;
     }
 
@@ -113,7 +117,7 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr
     PMPackagePtr pkg( PMPackagePtr::cast_away_const( pkg_r ) );
     const char* queryformat = NULL;
 
-    switch(attr)
+    switch (attr)
     {
 	case PMPackage::ATTR_BUILDTIME:
 	    queryformat = "%{BUILDTIME}";
@@ -149,9 +153,6 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr
 	case PMPackage::ATTR_OS:
 	    queryformat = "%{OS}";
 	    break;
-	case PMPackage::ATTR_ARCH:
-	    queryformat = "%{ARCH}";
-	    break;
 	case PMPackage::ATTR_PREIN:
 	    queryformat = "%{PREIN}";
 	    break;
@@ -184,7 +185,7 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr
 	case PMPackage::ATTR_SUGGESTS:
 	case PMPackage::ATTR_LOCATION:
 	case PMPackage::ATTR_KEYWORDS:
-	    return PkgAttributeValue("-?-");
+	    return PkgAttributeValue();
     }
 
     PkgAttributeValue ret;
