@@ -10,12 +10,13 @@
 #include <vector>
 #include <y2util/Pathname.h>
 #include <y2pm/PMError.h>
-#include <y2pm/PMPackage.h>
-#include <y2pm/PMPackagePtr.h>
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcPtr.h>
+#include <y2pm/InstSrcData.h>
 #include <iostream>
 #include <algorithm>
+
+#include "show_pm.h"
 
 #undef  Y2LOG
 #define Y2LOG "PM_test_packages"
@@ -34,52 +35,6 @@ class PMPkg_eq : public unary_function<PMPackagePtr,bool>
 void progresscallback(double p, void* nix)
 {
     cout << p << endl;
-}
-
-
-static void
-show_package (PMPackagePtr p)
-{
-    cout << "-- Solvable --" << endl;
-    for (PMPackage::PMSolvableAttribute attr
-	= PMPackage::PMSolvableAttribute(PMPackage::PMSLV_ATTR_BEGIN);
-	attr < PMPackage::PMSLV_NUM_ATTRIBUTES;
-	attr = PMPackage::PMSolvableAttribute(attr+1))
-    {
-	cout
-	<< p->getAttributeName(attr)
-	<< ": "
-	<< p->getAttributeValue((PMPackage::PMPackageAttribute)attr)
-	<< endl;
-    }
-
-    cout << "-- Object --" << endl;
-    for (PMPackage::PMObjectAttribute attr
-	= PMPackage::PMObjectAttribute(PMPackage::PMOBJ_ATTR_BEGIN);
-	attr < PMPackage::PMOBJ_NUM_ATTRIBUTES;
-	attr = PMPackage::PMObjectAttribute(attr+1))
-    {
-	cout
-	<< p->getAttributeName(attr)
-	<< ": "
-	<< p->getAttributeValue(attr)
-	<< endl;
-    }
-
-    cout << "-- Package --" << endl;
-	for (PMPackage::PMPackageAttribute attr
-	= PMPackage::PMPackageAttribute(PMPackage::PKG_ATTR_BEGIN);
-	    attr < PMPackage::PMPKG_NUM_ATTRIBUTES;
-	attr = PMPackage::PMPackageAttribute(attr+1))
-    {
-	cout
-	<< p->getAttributeName(attr)
-	<< ": "
-	<< p->getAttributeValue(attr)
-	<< endl;
-    }
-
-    return;
 }
 
 int main(int argc, char* argv[])
@@ -196,6 +151,7 @@ int main(int argc, char* argv[])
 	return 1;
     }
 
+    cout << "InstSrc::vconstruct() ok" << endl;
     err = nsrc->enableSource();
 
     if (err)
@@ -203,6 +159,13 @@ int main(int argc, char* argv[])
 	cerr << "Failed to enableSource: " << err << endl;
 	return 1;
     }
+    cout << "InstSrc::enableSource() ok" << endl;
+
+    constInstSrcDataPtr data = nsrc->data();
+#if 0
+    cout << "Got " << data->numPackages() << " from source" << endl;
+#endif
+    const std::list<PMPackagePtr> *packages = data->getPackages();
 
     if (command == "query")
     {
@@ -210,25 +173,25 @@ int main(int argc, char* argv[])
 	for(; argpos < argnum; argpos++)
 	{
 	    cout << "querying " << args[argpos] << endl;
-	    const std::list<PMPackagePtr> *pacs = nsrc->findPackages (args[argpos], package_version, package_release, package_arch);
-	    if (!pacs
-		|| pacs->empty())
+
+	    const std::list<PMPackagePtr> pacs = nsrc->findPackages (packages, args[argpos], package_version, package_release, package_arch);
+	    if (pacs.empty())
 	    {
 		cout << args[argpos] << " is not available" << endl;
 	    }
 	    else
 	    {
-		cout << pacs->size()
+		cout << pacs.size()
 		     << " matches for "
 		     << args[argpos]
 		     << (package_version.empty()?"":("-"+package_version))
 		     << (package_release.empty()?"":("-"+package_release))
 		     << (package_arch.empty()?"":("."+package_arch))
 		     << " found" << endl;
-		for (std::list<PMPackagePtr>::const_iterator p_it = pacs->begin();
-			p_it != pacs->end(); ++p_it)
+		for (std::list<PMPackagePtr>::const_iterator p_it = pacs.begin();
+			p_it != pacs.end(); ++p_it)
 		{
-		    show_package (*p_it);
+		    show_pmpackage (*p_it);
 		}
 	    }
 	}
