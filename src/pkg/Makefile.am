@@ -23,4 +23,4 @@ noinst_LTLIBRARIES = liby2pmpkg.la
 liby2pmpkg_la_SOURCES = \
 	PMPackage.cc \
 	PMPackageDataProvider.cc \
-	PMPackageManager.cc
+	PMPackageManager.cc PMPackageManager_update.cc
