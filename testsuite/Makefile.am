@@ -26,7 +26,8 @@ noinst_PROGRAMS = \
 	test_selections	\
 	order	\
 	gs_test \
-        test_you
+        test_you \
+        cschum_test
 
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
@@ -72,3 +73,7 @@ order_LDFLAGS = -static
 test_you_SOURCES = test_you.cc
 test_you_LDADD = $(top_builddir)/src/liby2pm.la
 test_you_LDFLAGS = -static
+
+cschum_test_SOURCES = cschum_test.cc
+cschum_test_LDADD = $(top_builddir)/src/liby2pm.la
+cschum_test_LDFLAGS = -static

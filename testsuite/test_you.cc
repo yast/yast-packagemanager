@@ -22,7 +22,7 @@ using namespace std;
 void usage()
 {
   cout << "Usage: online-update [-u url] [-p product] [-v version]"
-       << "[-a arch] [security] [recommended] [document]"
+       << "[-a arch] [-d] [security] [recommended] [document]"
        << " [optional]"
        << endl;
   exit( 1 );
@@ -47,12 +47,16 @@ int main( int argc, char **argv )
   const char *archStr = 0;
   const char *langStr = 0;
 
+  bool dryrun = false;
+
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "hu:p:v:a:l:" );
+    c = getopt( argc, argv, "hdu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
+      case 'd':
+        dryrun = true;
       case 'u':
         urlStr = optarg;
         break;
@@ -85,7 +89,10 @@ int main( int argc, char **argv )
       else if ( arg == "recommended" ) kinds |= PMYouPatch::kind_recommended;
       else if ( arg == "document" ) kinds |= PMYouPatch::kind_document;
       else if ( arg == "optional" ) kinds |= PMYouPatch::kind_optional;
-      else usage();
+      else if ( arg == "all" ) {
+        kinds = PMYouPatch::kind_all;
+        break;
+      } else usage();
     }
   }
 
@@ -160,13 +167,15 @@ int main( int argc, char **argv )
 
   you.selectPatches( kinds );
 
+  you.filterPatchSelection();
+
   error = you.retrievePackages();
   if ( error ) {
-    cerr << "Error retriwving packages: " << error << endl;
+    cerr << "Error retrieving packages: " << error << endl;
     exit( 1 );
   }
 
-  error = you.installPatches();
+  error = you.installPatches( dryrun );
   if ( error ) {
     cerr << "Error installing packages: " << error << endl;
     exit( 1 );
