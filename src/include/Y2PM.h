@@ -87,14 +87,14 @@ class Y2PM {
     /**
      * Access to the preferred locale
      **/
-    static LangCode & getPreferredLocale () { return _preferred_locale; }
-    static void setPreferredLocale (LangCode & preferred_locale) { _preferred_locale = preferred_locale; }
+    static const LangCode & getPreferredLocale () { return _preferred_locale; }
+    static void setPreferredLocale (const LangCode & preferred_locale) { _preferred_locale = preferred_locale; }
 
     /**
      * Access to the requested localed
      **/
-    static std::list<LangCode> & getRequestedLocales () { return _requested_locales; }
-    static void setRequestedLocales (std::list<LangCode> & requested_locales) { _requested_locales = requested_locales; }
+    static const std::list<LangCode> & getRequestedLocales () { return _requested_locales; }
+    static void setRequestedLocales (const std::list<LangCode> & requested_locales) { _requested_locales = requested_locales; }
 
     /**
      * Access to the (target) base architecture
@@ -104,7 +104,7 @@ class Y2PM {
     /**
      * Access to the list of allowed architectures
      **/
-    static std::list<PkgArch>& allowedArchs(void) { return _allowed_archs; }
+    static const std::list<PkgArch> & allowedArchs(void) { return _allowed_archs; }
     static void setAllowedArchs(const std::list<PkgArch>& allowed_archs) { _allowed_archs = allowed_archs; }
 
     /**
