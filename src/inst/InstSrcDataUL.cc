@@ -392,8 +392,8 @@ InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonP
     SET_VALUE (CATEGORY, category);
     SET_VALUE (ISBASE, (strncmp (category.c_str(), "base", 4) == 0));
     SET_VALUE (VISIBLE, GET_TAG(VISIBLE)->Data() == "true");
-    SET_CACHE (SUGGESTS);
     SET_CACHE (RECOMMENDS);
+    SET_CACHE (SUGGESTS);
 
     stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
     if (splitted.size() > 0)
