@@ -24,6 +24,7 @@
 #include <iosfwd>
 #include <string>
 #include <set>
+#include <functional>
 
 #include <y2util/Pathname.h>
 
@@ -106,15 +107,6 @@ class PkgSplit {
      * Stream output as 'ipkg:/file'
      **/
     friend std::ostream & operator<<( std::ostream & str, const PkgSplit & obj );
-
-    /**
-     * Order to be used by associative std::container (set/map). Lexicographic by
-     * ipkg, then file. <B>Do not change this ordering! We rely on it.</B>
-     *
-     * A matter of taste, as 'operator<' would do the same job. But I don't like it
-     * in classes where it's meaning isn't obvious.
-     **/
-    friend bool std::less<PkgSplit>::operator()(const PkgSplit & lhs, const PkgSplit & rhs ) const;
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -126,6 +118,7 @@ class PkgSplit {
  * A matter of taste, as 'operator<' would do the same job. But I don't like it
  * in classes where it's meaning isn't obvious.
  **/
+template<>
 inline bool std::less<PkgSplit>::operator()(const PkgSplit & lhs, const PkgSplit & rhs ) const {
   int d = lhs.ipkg().asString().compare( rhs.ipkg().asString() );
   if ( d )
