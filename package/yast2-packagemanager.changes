@@ -2,6 +2,9 @@
 Mon Sep  9 19:08:15 CEST 2002 - kkaempf@suse.de
 
 - Installation of src/nosrc rpms.
+- re-prompt after ejecting
+- release media before prompting
+- 2.6.12
 
 -------------------------------------------------------------------
 Mon Sep  9 15:52:29 CEST 2002 - lnussel@suse.de
