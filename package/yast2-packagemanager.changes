@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Nov  4 14:39:50 CET 2002 - ma@suse.de
+
+- Fixed PMULPackageDataProvider::providesSources returning the inverse.
+  (#21517)
+
+-------------------------------------------------------------------
 Thu Oct 24 12:56:59 CEST 2002 - ma@suse.de
 
 - Removed all the anythingBy...() methods from Selection/PackageManager.
