@@ -111,20 +111,20 @@ class Y2PM {
 	    /**
 	     * called right before package 'name' is installed
 	     * */
-	    void (*_installation_package_start_func)(const std::string& name);
+	    void (*_installation_package_start_func)(const std::string& name, void* data);
 	    void* _installation_package_start_data;
 
 	    /**
 	     * called multiple times during package installation, 'progress' is the
 	     * already installed percentage
 	     * */
-	    void (*_installation_package_progress_func)(const std::string& name, int progress);
+	    void (*_installation_package_progress_func)(const std::string& name, int progress, void* data);
 	    void* _installation_package_progress_data;
 
 	    /**
 	     * called after package 'name' got installed
 	     * */
-	    void (*_installation_package_done_func)(const std::string& name);
+	    void (*_installation_package_done_func)(const std::string& name, void* data);
 	    void* _installation_package_done_data;
 
 	};

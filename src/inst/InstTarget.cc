@@ -242,7 +242,7 @@ const std::string& InstTarget::getRoot() const
 }
 
 
-void InstTarget::setPackageInstallProgressCallback(void (*func)(double,void*), void* data)
+void InstTarget::setPackageInstallProgressCallback(void (*func)(int,void*), void* data)
 {
     _rpmdb->setProgressCallback(func,data);
 }

@@ -1398,7 +1398,7 @@ RpmDb::installPackage(const string& filename, unsigned flags)
 	    if (percent >= old_percent + 5.0)
 	    {
 		old_percent = int (percent / 5) * 5;
-		ReportProgress(percent);
+		ReportProgress(static_cast<int>(percent));
 	    }
 	}
 	else
