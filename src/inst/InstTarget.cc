@@ -40,7 +40,6 @@ extern "C" {
 #include <string.h>
 
 #include <y2util/Y2SLog.h>
-#include <y2util/DiskSpace.h>
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstTargetProdDB.h>
 #include <y2pm/InstTargetSelDB.h>
@@ -484,23 +483,6 @@ PMError InstTarget::installSelection( const Pathname & selfile_r )
 PMError InstTarget::removeSelection( const Pathname & selfile_r )
 {
   return _seldb->remove( selfile_r );
-}
-
-void InstTarget::SpaceTotal(FSize& total, FSize& used)
-{
-    DiskSpace::DfVec df;
-    df = DiskSpace::df(true,true);
-
-    for(DiskSpace::DfVec::iterator it = df.begin();
-        it != df.end(); ++it)
-    {
-	// only fs beginning with destination root
-	if(it->mountpoint.substr(0,_rootdir.asString().length()) == _rootdir )
-	{
-	    total+=it->total;
-	    used+=it->used;
-	}
-    }
 }
 
 ///////////////////////////////////////////////////////////////////

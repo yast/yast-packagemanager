@@ -267,10 +267,7 @@ void createbackups(vector<string>& argv)
 
 void du(vector<string>& argv)
 {
-    FSize total, used;
-    cout << Y2PM::packageManager().SpaceDifference() << endl;
-    Y2PM::instTarget().SpaceTotal(total,used);
-    cout << total << " " << used << endl;
+    cout << Y2PM::packageManager().updateDu() << endl;
 }
 
 void rebuilddb(vector<string>& argv)
