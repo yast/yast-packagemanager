@@ -138,8 +138,9 @@ class RpmLibHeader::intList {
 //
 //	DESCRIPTION :
 //
-RpmLibHeader::RpmLibHeader( Header h )
+RpmLibHeader::RpmLibHeader( Header h, bool isSrc )
     : _h( h )
+    , _isSrc( isSrc )
 {
   if ( !_h ) {
     INT << "OOPS: NULL HEADER created!" << endl;
@@ -443,7 +444,7 @@ PMSolvable::PkgRelList_type RpmLibHeader::PkgRelList_val( tag tag_r, FileDeps::F
 ostream & RpmLibHeader::dumpOn( ostream & str ) const
 {
   Rep::dumpOn( str );
-  return str << '{' << tag_name() << "-" << tag_edition() << '}';
+  return str << '{' << tag_name() << "-" << tag_edition() << ( _isSrc ? ".src}" : "}");
 }
 
 ///////////////////////////////////////////////////////////////////

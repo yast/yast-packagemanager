@@ -225,8 +225,7 @@ class RpmDb: virtual public Rep
 	 * Get an accessible packages data from disk. Data returned via
 	 * result are NULL on any error.
 	 **/
-	PMError getData( const Pathname & path,
-			 constRpmLibHeaderPtr & result_r ) const;
+	static PMError getData( const Pathname & path, constRpmLibHeaderPtr & result_r );
 
         ///////////////////////////////////////////////////////////////////
         //

@@ -414,6 +414,58 @@ class RpmLibDb {
      **/
     const_iterator end() const { return const_iterator(); }
 
+  public:
+
+    /**
+     * Get an accessible packages data from disk. Data returned via
+     * result are NULL on any error.
+     **/
+    static constRpmLibHeaderPtr getData( const Pathname & path );
+};
+
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PkgHeaderCache
+/**
+ * @short Simple class for handling rpm header cache.
+ **/
+class PkgHeaderCache {
+  PkgHeaderCache( const PkgHeaderCache & );
+  PkgHeaderCache & operator=( const PkgHeaderCache & );
+  private:
+
+    struct Cache;
+
+    Pathname _cpath;
+    Cache *  _c;
+
+  public:
+
+    PkgHeaderCache( const Pathname & cache_r );
+    ~PkgHeaderCache();
+
+    bool openCache();
+    void closeCache();
+    bool cacheOk() const;
+    time_t cacheCdate() const;
+
+    constRpmLibHeaderPtr getFirst( Pathname & citem_r, int & isSource_r, unsigned & at_r );
+    constRpmLibHeaderPtr getNext( Pathname & citem_r, int & isSource_r, unsigned & at_r );
+
+    constRpmLibHeaderPtr getAt( unsigned at_r );
+
+  public:
+
+    static int buildPkgHeaderCache( const Pathname & cache_r,
+				    const Pathname & pkgroot_r, const std::list<Pathname> & pkglist_r );
+
+    static int buildPkgHeaderCache( const Pathname & cache_r, const Pathname & pkgroot_r ) {
+      std::list<Pathname> pkglist;
+      pkglist.push_back( "/" );
+      return buildPkgHeaderCache( cache_r, pkgroot_r, pkglist );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////

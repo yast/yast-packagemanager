@@ -59,6 +59,7 @@ class RpmLibHeader : virtual public Rep {
   private:
 
     Header _h;
+    bool   _isSrc;
 
   private:
 
@@ -87,9 +88,11 @@ class RpmLibHeader : virtual public Rep {
     /**
      * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>Header</code>! </B>
      **/
-    RpmLibHeader( Header h );
+    RpmLibHeader( Header h, bool isSrc = false );
 
     virtual ~RpmLibHeader();
+
+    bool isSrc() const { return _isSrc; }
 
   public:
 

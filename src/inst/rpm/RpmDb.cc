@@ -713,8 +713,6 @@ const std::list<PMPackagePtr> & RpmDb::getPackages()
   // one installed to be the one we're interesed in.
   ///////////////////////////////////////////////////////////////////
 
-  map<PkgName,PMPackagePtr> pkgdata;
-
   for ( RpmLibDb::const_iterator iter = rpmdb.begin(); iter != rpmdb.end(); ++iter ) {
 
     if ( !*iter ) {
@@ -955,12 +953,10 @@ PMError RpmDb::getData( const PkgName & name_r, const PkgEdition & ed_r,
 //
 //	DESCRIPTION :
 //
-PMError RpmDb::getData( const Pathname & path,
-			constRpmLibHeaderPtr & result_r ) const
+PMError RpmDb::getData( const Pathname & path, constRpmLibHeaderPtr & result_r )
 {
-  result_r = 0;
-  INT << "NOT YET IMPLEMENTED: getData by Pathname" << endl;
-  return Error::E_error;
+  result_r = RpmLibDb::getData( path );
+  return( result_r ? Error::E_ok : Error::E_error );
 }
 
 /*--------------------------------------------------------------*/
