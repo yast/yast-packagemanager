@@ -1755,7 +1755,6 @@ RpmDb::installPackage(const Pathname& filename, unsigned flags)
 {
     RpmArgVec opts;
 MIL << "RpmDb::installPackage(" << filename << "," << flags << ")" << endl;
-    FAILIFNOTINITIALIZED
 
     if (_packagebackups)
     {
