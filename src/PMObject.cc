@@ -22,6 +22,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PMObject.h>
+#include <y2pm/PMSelectable.h>
 
 using namespace std;
 
@@ -102,4 +103,54 @@ ostream & PMObject::dumpOn( ostream & str ) const
     << '(' << _name << '-' << _edition.version() << '-' << _edition.release() << ')';
   return str;
 }
+
+///////////////////////////////////////////////////////////////////
+//
+// Shortcuts for UI
+//
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMObject::isInstalledObj
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMObject::isInstalledObj() const
+{
+  return( hasSelectable() && _selectable->installedObj() == this );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : PMObject::isCandidateObj
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMObject::isCandidateObj() const
+{
+  return( hasSelectable() && _selectable->candidateObj() == this );
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : PMObject::isAvailableOnly
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMObject::isAvailableOnly() const
+{
+  return( hasSelectable()
+	  && _selectable->installedObj() != this
+	  && _selectable->candidateObj() != this );
+}
+
+
+
+
+
 

@@ -56,5 +56,6 @@ int main()
   PMPackageManager::PM().poolRemoveCandidates( plist );
 
   MIL << "END" << endl;
+  PMPackageManager::PM().REINIT();
   return 0;
 }

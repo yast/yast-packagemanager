@@ -48,40 +48,100 @@ class PMManager {
 
   private:
 
-    typedef std::map<PkgName,PMSelectablePtr> PMSelectablePool;
+    typedef std::map<std::string,PMSelectablePtr> PMSelectablePool;
 
     PMSelectablePool _itemPool;
     PMSelectableVec _items;
 
-    BitField _installed;
+    BitField _bf_installed;
 
   private:
 
     virtual PMSelectablePtr newSelectable( const PkgName & name_r ) const;
 
-  private:
+    PMSelectablePtr poolLookup( unsigned idx_r ) const;
+    PMSelectablePtr poolLookup( const std::string & name_r ) const;
+    PMSelectablePtr poolProvide( const std::string & name_r );
 
-    PMSelectablePtr poolLookup( const PkgName & name_r ) const;
+    void clearAll();
+
+    void checkPool() const;
 
   public:
 
     PMManager();
     virtual ~PMManager();
 
+    void REINIT(); // dont use it
+
   public:
 
+    /**
+     * Called from TargetSystem providing all(!) installed objects
+     **/
     void poolSetInstalled( PMObjectContainerIter iter_r );
+
+    /**
+     * Called from InstSrc to add provided Objects
+     **/
     void poolAddCandidates( PMObjectContainerIter iter_r );
+
+    /**
+     * Called from InstSrc to remove the formerly added objects.
+     **/
     void poolRemoveCandidates( PMObjectContainerIter iter_r );
 
   public:
 
-    PMSelectablePtr get( const unsigned idx_t ) const;
-    PMSelectablePtr get( const std::string & name_t ) const;
+    /**
+     * The number of Selectables within this Manager.
+     **/
+    unsigned size() const { return _items.size(); }
 
-    PMSelectablePtr operator [] ( const unsigned idx_r ) const { return get( idx_r ); }
-    PMSelectablePtr operator [] ( const std::string & name_r ) const { return get( name_r ); }
+    /**
+     * True if Manager does not contain any Selectable
+     **/
+    bool empty() const { return _items.empty(); }
 
+    /**
+     * Iterator for Selectables within this Manager.
+     **/
+    PMSelectableVec::const_iterator begin() const { return _items.begin(); }
+
+    /**
+     * Iterator for Selectables within this Manager.
+     **/
+    PMSelectableVec::const_iterator end() const { return _items.end(); }
+
+    /**
+     * Iterator for Selectables within this Manager.
+     **/
+    PMSelectableVec::const_reverse_iterator rbegin() const { return _items.rbegin(); }
+
+    /**
+     * Iterator for Selectables within this Manager.
+     **/
+    PMSelectableVec::const_reverse_iterator rend() const { return _items.rend(); }
+
+    /**
+     * PMSelectablePtr to the Selectable with the given index, or NULL if index is invalid.
+     **/
+    PMSelectablePtr getItem( const unsigned idx_r ) const { return poolLookup( idx_r ); }
+
+    /**
+     * PMSelectablePtr to the Selectable with the given name, or NULL if there is none.
+     **/
+    PMSelectablePtr getItem( const std::string & name_t ) const { return poolLookup( name_t ); }
+
+    /**
+     * PMSelectablePtr to the Selectable with the given index, or NULL if index is invalid.
+     **/
+    PMSelectablePtr operator [] ( const unsigned idx_r ) const { return getItem( idx_r ); }
+
+    /**
+     * PMSelectablePtr to the Selectable with the given name, or NULL if there is none.
+     **/
+    PMSelectablePtr operator [] ( const std::string & name_r ) const { return getItem( name_r ); }
 };
 
 ///////////////////////////////////////////////////////////////////
