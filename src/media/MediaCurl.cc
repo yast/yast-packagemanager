@@ -113,6 +113,7 @@ PMError MediaCurl::attachTo (bool next)
   }
 
   SysConfig cfg( "proxy" );
+#warning must evaluate proxy via url options
 
   if ( cfg.readBoolEntry( "PROXY_ENABLED", false ) ) {
     if ( _url.protocol() == Url::ftp ) {
@@ -255,7 +256,7 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 
     DBG << "URL: " << url.asString().c_str() << endl;
 
-    string urlBuffer = url.saveAsString();
+    string urlBuffer = url.asString(true,false,true); // without options
 
     CURLcode ret = curl_easy_setopt( _curl, CURLOPT_URL,
                                      urlBuffer.c_str() );
