@@ -40,12 +40,7 @@ using namespace std;
 //
 //	DESCRIPTION : go through all installed (but not yet touched by user)
 //		packages and look for update candidates
-//		Handle splitprovides
-//		Mark packages appl_delete or appl_install accordingly
-//
-//		return number of packages affected
-//		return non-suse packages for which an update candidate exists in noinstall_r
-//		return non-suse packages for which an obsolete exists in nodelete_r
+//		handle splitprovides and replaced and dropped
 //
 void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 {
@@ -62,7 +57,6 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
   MIL << "doUpdate start... "
     << "(delete_unmaintained:" << (opt_stats_r.delete_unmaintained?"yes":"no") << ")"
     << endl;
-
 
   _update_items.clear();
 
@@ -105,7 +99,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     }
   }
   MIL << "doUpdate: " << opt_stats_r.pre_todel  << " packages tagged to delete" << endl;
-  MIL << "doUpdate: " << opt_stats_r.pre_nocand << " packages without candidate (foreign, renamed or droped)" << endl;
+  MIL << "doUpdate: " << opt_stats_r.pre_nocand << " packages without candidate (foreign, replaced or dropped)" << endl;
   MIL << "doUpdate: " << opt_stats_r.pre_avcand << " packages available for update" << endl;
 
   MIL << "doUpdate: going to check " << splitmap.size() << " probabely splitted packages" << endl;
@@ -173,6 +167,8 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     PMPackagePtr    installed( (*it)->installedObj() );
     PMPackagePtr    candidate( (*it)->candidateObj() );
 
+    bool probabely_dropped = false;
+
     DBG << "REPLACEMENT FOR " << installed << endl;
 
     // if installed not SuSE -> no action ???
@@ -221,8 +217,8 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	continue; // no check for splits
       }
 
-      // renamed or droped (ayway there's no candidate for this!)
-      // If unique provides exists check if obsoleted (rename).
+      // replaced or dropped (ayway there's no candidate for this!)
+      // If unique provides exists check if obsoleted (replaced).
       // Remember new package for 2nd pass.
       const PkgSet::RevRelList_type & provided = available.provided()[installed->name()];
       PackageSet mpkg;
@@ -240,28 +236,27 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	}
       }
 
-
       switch ( mpkg.size() ) {
       case 0:
-	if ( opt_stats_r.delete_unmaintained ) {
-	  state->appl_set_delete();
-	}
 	DBG << " ==> (dropped)" << endl;
-	++opt_stats_r.chk_dropped;
-	_update_items.insert( state );
+	// wait untill splits are processed. Might be a split obsoletes
+	// this one (i.e. package replaced but not provided by new one).
+	// otherwise it's finaly dropped.
+	probabely_dropped = true;
 	break;
       case 1:
         addProvided[installed] = mpkg;
-	state->appl_set_delete();
-	// must check obsoletes ?
-	DBG << " ==> RENAMED to: " << (*mpkg.begin()) << endl;
-	++opt_stats_r.chk_renamed;
+	if ( ! (*mpkg.begin())->doesObsolete( installed ) ) {
+	  state->appl_set_delete();
+	}
+	DBG << " ==> REPLACED by: " << (*mpkg.begin()) << endl;
+	// count stats later
 	break;
       default:
 	addMultiProvided[installed] = mpkg;
-	state->appl_set_delete();
 	DBG << " ==> pass 2 (" << mpkg.size() << " times provided)" << endl;
 	// count stats later
+	// check obsoletes later
 	break;
       }
     }
@@ -278,12 +273,29 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
       } else {
 	for ( PackageSet::iterator ait = toadd.begin(); ait != toadd.end(); ++ait ) {
 	  DBG << " ==> ADD (splited): " << (*ait) << endl;
+	  if ( probabely_dropped
+	       && (*ait)->getSelectable()->candidateObj()->doesObsolete( installed ) ) {
+	    probabely_dropped = false;
+	  }
 	}
 	addSplitted[installed] = toadd;
       }
       // count stats later
     }
-  }
+
+    ///////////////////////////////////////////////////////////////////
+    // now handle dropped package
+    ///////////////////////////////////////////////////////////////////
+
+    if ( probabely_dropped ) {
+      if ( opt_stats_r.delete_unmaintained ) {
+	state->appl_set_delete();
+      }
+      ++opt_stats_r.chk_dropped;
+      _update_items.insert( state );
+    }
+
+  } // pass 1 end
 
   ///////////////////////////////////////////////////////////////////
   // Now check the remembered packages and check non unique provided.
@@ -295,7 +307,10 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
   for ( TodoMap::iterator it = addProvided.begin(); it != addProvided.end(); ++it ) {
     PackageSet & tset( it->second );
     for ( PackageSet::iterator sit = tset.begin(); sit != tset.end(); ++sit ) {
-      (*sit)->getSelectable()->appl_set_install();
+      if ( ! (*sit)->getSelectable()->to_install() ) {
+	(*sit)->getSelectable()->appl_set_install();
+	++opt_stats_r.chk_replaced;
+      }
     }
   }
 
@@ -317,6 +332,9 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     for ( PackageSet::iterator git = gset.begin(); git != gset.end(); ++git ) {
       if ( (*git)->getSelectable()->to_install() ) {
 	DBG << " ==> (pass 2: meanwhile set to install): " << (*git) << endl;
+	if ( ! (*git)->getSelectable()->candidateObj()->doesObsolete( it->first ) ) {
+	  it->first->getSelectable()->appl_set_delete();
+	}
 	guess = 0;
 	break;
       } else {
@@ -334,8 +352,11 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 
     if ( guess ) {
       guess->getSelectable()->appl_set_install();
-      DBG << " ==> RENAMED to: (pass 2: guessed): " << guess << endl;
-      ++opt_stats_r.chk_renamed_guessed;
+      DBG << " ==> REPLACED by: (pass 2: guessed): " << guess << endl;
+      if ( ! guess->getSelectable()->candidateObj()->doesObsolete( it->first ) ) {
+	it->first->getSelectable()->appl_set_delete();
+      }
+      ++opt_stats_r.chk_replaced_guessed;
     }
   }
 
@@ -356,38 +377,45 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 std::ostream & operator<<( std::ostream & str, const PMUpdateStats & obj )
 {
   str << "===[options]========================================" << endl;
-  str << "delete_unmaintained " << obj.delete_unmaintained << endl;
+  str << "delete_unmaintained  " << obj.delete_unmaintained << endl;
   str << "===[initial]========================================" << endl;
-  str << "pre_todel           " << obj.pre_todel << endl;
-  str << "pre_nocand          " << obj.pre_nocand << endl;
-  str << "pre_avcand          " << obj.pre_avcand << endl;
+  str << "pre_todel            " << obj.pre_todel << endl;
+  str << "pre_nocand           " << obj.pre_nocand << endl;
+  str << "pre_avcand           " << obj.pre_avcand << endl;
   str << "===[checks]=========================================" << endl;
-  str << "chk_installed_total " << obj.chk_installed_total << endl;
+  str << "chk_installed_total  " << obj.chk_installed_total << endl;
   str << endl;
-  str << "chk_already_todel   " << obj.chk_already_todel << endl;
+  str << "chk_already_todel    " << obj.chk_already_todel << endl;
   str << endl;
-  str << "chk_already_toins   " << obj.chk_already_toins << endl;
-  str << "chk_to_update       " << obj.chk_to_update << endl;
-  str << "chk_to_downgrade    " << obj.chk_to_downgrade << endl;
-  str << "chk_to_keep_old     " << obj.chk_to_keep_old << endl;
-  str << "--------------------" << endl;
-  str << "              avcand"
+  str << "chk_already_toins    " << obj.chk_already_toins << endl;
+  str << "chk_to_update        " << obj.chk_to_update << endl;
+  str << "chk_to_downgrade     " << obj.chk_to_downgrade << endl;
+  str << "chk_to_keep_old      " << obj.chk_to_keep_old << endl;
+  str << "--------------------------" << endl;
+  str << "avcand               "
     <<  ( obj.chk_already_toins + obj.chk_to_update + obj.chk_to_downgrade + obj.chk_to_keep_old )
       << endl;
   str << endl;
-  str << "chk_keep_foreign    " << obj.chk_keep_foreign << endl;
-  str << "chk_dropped         " << obj.chk_dropped << endl;
-  str << "chk_renamed         " << obj.chk_renamed << endl;
-  str << "chk_renamed_guessed " << obj.chk_renamed_guessed << endl;
-  str << "chk_add_split       " << obj.chk_add_split << endl;
-  str << "--------------------" << endl;
-  str << "              nocand"
-    <<  ( obj.chk_keep_foreign + obj.chk_dropped + obj.chk_renamed + obj.chk_renamed_guessed + obj.chk_add_split )
+  str << "chk_keep_foreign     " << obj.chk_keep_foreign << endl;
+  str << "chk_dropped          " << obj.chk_dropped << endl;
+  str << "chk_replaced         " << obj.chk_replaced << endl;
+  str << "chk_replaced_guessed " << obj.chk_replaced_guessed << endl;
+  str << "chk_add_split        " << obj.chk_add_split << endl;
+  str << "--------------------------" << endl;
+  str << "nocand               "
+    <<  ( obj.chk_keep_foreign + obj.chk_dropped + obj.chk_replaced + obj.chk_replaced_guessed + obj.chk_add_split )
       << endl;
   str << "===[sum]============================================" << endl;
-  str << "Packages checked    " << obj.chk_installed_total << endl;
-  str << "totalToInstall      " << obj.totalToInstall() << endl;
-  str << "totalToDelete       " << obj.totalToDelete() << endl;
+  str << "Packages checked     " << obj.chk_installed_total << endl;
+  str << endl;
+  str << "totalToInstall       " << obj.totalToInstall() << endl;
+  str << "totalToDelete        " << obj.totalToDelete() << endl;
+  str << "totalToKeep          " << obj.totalToKeep() << endl;
+  str << "--------------------------" << endl;
+  str << "sum                  "
+    <<  ( obj.totalToInstall() + obj.totalToDelete() + obj.totalToKeep() )
+      << endl;
+  str << "====================================================" << endl;
   str << "====================================================" << endl;
 
   return str;

@@ -275,3 +275,27 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
     }
 
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMPackageManager::currentDu
+//	METHOD TYPE : const set<MountPoint> &
+//
+//	DESCRIPTION :
+//
+const set<PMPackageManager::MountPoint> & PMPackageManager::currentDu()
+{
+  if ( !_du_master.resetStats() ) {
+    DBG << "No MountPoints set" << endl;
+    return _du_master.mountpoints();
+  }
+
+  for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
+    ;
+  }
+
+  DBG << _du_master << endl;
+  return _du_master.mountpoints();
+}
+

@@ -25,22 +25,14 @@
 #include <set>
 
 #include <y2pm/PMSelectablePtr.h>
-#include <y2pm/PMManager.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : PMUpdateStats
+//	CLASS NAME : PMUpdateOpts
 /**
- * @short Struct for update options, statistics, and result lists.
- *
- *
+ * @short Struct for update options
  **/
-class PMUpdateStats {
-
-  friend std::ostream & operator<<( std::ostream & str, const PMUpdateStats & obj );
-
-  PMUpdateStats & operator=( const PMUpdateStats & );
-  PMUpdateStats            ( const PMUpdateStats & );
+class PMUpdateOpts {
 
   public:
 
@@ -55,6 +47,27 @@ class PMUpdateStats {
 
   public:
 
+    PMUpdateOpts() {
+      delete_unmaintained = true;
+    }
+
+    ~PMUpdateOpts() {}
+};
+
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : PMUpdateStats
+/**
+ * @short Struct for update options, statistics, and result lists.
+ **/
+class PMUpdateStats : public PMUpdateOpts {
+
+  friend std::ostream & operator<<( std::ostream & str, const PMUpdateStats & obj );
+
+  public:
+
     ///////////////////////////////////////////////////////////////////
     // STATISTICS
     ///////////////////////////////////////////////////////////////////
@@ -64,7 +77,7 @@ class PMUpdateStats {
      **/
     unsigned pre_todel;
     /**
-     * initial status: packages without candidate (foreign, renamed or droped)
+     * initial status: packages without candidate (foreign, replaced or dropped)
      **/
     unsigned pre_nocand;
     /**
@@ -116,11 +129,11 @@ class PMUpdateStats {
      **/
     unsigned chk_dropped;
     /**
-     * update checks: without candidate: packages renamed
+     * update checks: without candidate: packages replaced
      *
      * There's exactly one available candidate providing it.
      **/
-    unsigned chk_renamed;
+    unsigned chk_replaced;
     /**
      * update checks: without candidate: packages added by splitprovides
      *
@@ -128,19 +141,28 @@ class PMUpdateStats {
      **/
     unsigned chk_add_split;
     /**
-     * update checks: without candidate: package renamed (but not uniqe, thus guessed)
+     * update checks: without candidate: package replaced (but not uniqe, thus guessed)
      *
      * There are multiple available candidates providing it. If at the end
      * at least one out of these candidates was set to install by one of the
      * above checks, it's ok. Otherwise we have to guess one.
      **/
-    unsigned chk_renamed_guessed;
+    unsigned chk_replaced_guessed;
+
+  public:
+
+    ///////////////////////////////////////////////////////////////////
+    // RESULTLISTS
+    ///////////////////////////////////////////////////////////////////
+
+    /**
+     * chk_to_keep_old / chk_keep_foreign / chk_dropped
+     **/
+    //std::set<PMSelectablePtr> foreign_and_drop_set;
 
   public:
 
     PMUpdateStats() {
-      // initial options
-      delete_unmaintained       = true;
       // initial status
       pre_todel			= 0;
       pre_nocand		= 0;
@@ -156,8 +178,8 @@ class PMUpdateStats {
       // packages without candidate
       chk_keep_foreign		= 0;
       chk_dropped		= 0;
-      chk_renamed		= 0;
-      chk_renamed_guessed	= 0;
+      chk_replaced		= 0;
+      chk_replaced_guessed	= 0;
       chk_add_split		= 0;
     }
     ~PMUpdateStats() {}
@@ -169,17 +191,28 @@ class PMUpdateStats {
     {
       return chk_already_toins
 	+ chk_to_update + chk_to_downgrade
-	+ chk_renamed + chk_renamed_guessed + chk_add_split;
+	+ chk_replaced + chk_replaced_guessed + chk_add_split;
     }
 
     /**
      * total number of packages that will be finaly deleted
-     * (does not count the renamed packages)
+     * (does not count the replaced packages)
      **/
     unsigned totalToDelete() const
     {
       unsigned ret = chk_already_todel;
       if ( delete_unmaintained )
+	ret += chk_dropped;
+      return ret;
+    }
+
+    /**
+     * total number of packages that remain untouched
+     **/
+    unsigned totalToKeep() const
+    {
+      unsigned ret = chk_to_keep_old + chk_keep_foreign;
+      if ( !delete_unmaintained )
 	ret += chk_dropped;
       return ret;
     }
