@@ -223,10 +223,9 @@ class Y2PM {
 	 * if media_nr > 0, install only from this media nr
 	 * return list of failed package names in errors
 	 * return list of unavailable packages (due to InstSrc errors or wrong media nr) in remaining
-	 * return false if packages from wanted media could not be provided (remaining contains
-	 *	packages with medianr == media_nr)
+	 * return number of sucessfully installed packages
 	 * */
-	static bool commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining);
+	static int commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining);
 };
 
 ///////////////////////////////////////////////////////////////////
