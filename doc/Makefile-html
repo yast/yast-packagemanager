@@ -13,10 +13,20 @@ stylesheet_out := susebooks.css
 
 all:
 	@echo "+++"
-	@echo "+++ specify '$(patsubst %.xml,%.html,$(main))' or 'html' as target"
+	@echo "+++ Available targets:"
+ifneq "$(main)" ""
+	@echo "+++   '$(patsubst %.xml,%.html,$(main))'"
+	@echo "+++   '$(patsubst %.xml,%.txt,$(main))'"
+endif
+	@echo "+++   all-single"
+	@echo "+++   all-txt"
+	@echo "+++   html"
 	@echo "+++"
 
+
 all-single: $(DESTDIR)$(stylesheet_out) $(allhtml)
+
+all-txt: $(alltxt)
 
 html: $(DESTDIR)$(stylesheet_out) $(main)
 	if ! test -d $(DESTDIR)/html/$(basename $(admongfx)); then \
@@ -44,7 +54,10 @@ $(DESTDIR)%.html: %.xml $(DESTDIR)$(stylesheet_out)
 		--stringparam graphics.path ./ \
 	       	--output $@ $(xsl_html) $<
 
+%.txt: %.html
+	w3m -dump $< > $@
+
 clean:
-	rm -rf $(allhtml) $(DESTDIR)html $(DESTDIR)$(stylesheet_out)
+	rm -rf $(allhtml) $(DESTDIR)html $(DESTDIR)$(stylesheet_out) $(alltxt)
 
 .PHONY: clean html
