@@ -4,6 +4,9 @@ Fri Jan 31 17:05:15 CET 2003 - ma@suse.de
 - Fixes in testsuite to compile.
 - Fall back to InstTarget::getMountPoints, if 'df' info for
   packagemanagers disk usage calculation has not been initialized.
+- In PMPackageManager::getPackagesToInsDel filter out packages tagged
+  auto_delete. Solver sets auto_delete for packages being obsoleted.
+  Thus they should not be manualy deleted.
 - 2.7.7
 
 -------------------------------------------------------------------
