@@ -51,6 +51,19 @@ Since we have different kind of installation media (cd, dvd, nfs, ftp, ...)
 with different kind of contents (packages, patches, ...), an abstraction
 class is required which gives an uniform access to the contents.
 
+
+FIXME:
+
+An installation media might contain multiple products and architectures
+(i.e. ftp.suse.com or a patch CD)
+as does an installation target (which has UnitedLinux and EMail-Server
+installed, for example).
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Source side
+===========
+
 InstSrc
 -------
 
@@ -90,7 +103,6 @@ All the InstSrc gives to the outside is:
 	(-> getPatches())
 
 
-
 InstSrcDescr
 ------------
 
@@ -104,7 +116,7 @@ Initializing InstSrcDescr
 
 There are two ways to get media description data
 1. Reading directly from a new/unknown media
-2. Reading from a cache on the local fs
+2. Reading from a cache on the local fs (-> InstDescr)
 
 Both are handled by the InstSrcDescr constructor. The first by passing
 a MediaAccess object, the second by passing a Pathname of the local
@@ -137,4 +149,46 @@ with the exception of writing a cache file. In order to keep
 media description and content cache files consistent, the writeCache
 function for InstSrcData must be passed the Pathname from
 InstSrcDescr::writeCache.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Target side
+===========
+
+InstTarget provides access to the installation target
+and shares some API calls with InstSrc, esp.
+- selection information
+- package information
+- patch information
+but does not report about installable but installed
+selections, packages, or patches.
+
+Additionally, the InstTarget can also change package
+and patch lists, by installing or removing them.
+
+(see InstTarget.h for further docs)
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Common side
+===========
+
+InstDescr
+---------
+
+InstDescr handles installation description for both, sources and
+target.
+For the source, it is the information about installable products.
+For the target, it is the information about installed products.
+
+
+InstData
+--------
+
+InstData handles installation contents for both, sources and
+target.
+For the source, it is the installable items (selections, packages,
+patches).
+For the target, it is the installed items (selections, packages,
+patches).
 
