@@ -327,7 +327,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
     }
 
     Pathname fileName;
-    if ( _info->packageDataProvider()->externalUrl( *itPkg ).empty() ) {
+    if ( (*itPkg)->externalUrl().empty() ) {
       fileName = _media.localPath( (*itPkg)->location() );
     } else {
       fileName = (*itPkg)->location();
@@ -387,7 +387,7 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch, bool checkSig,
     if ( error ) return error;
     if ( checkSig ) {
       string localRpm;
-      string externalUrl = _info->packageDataProvider()->externalUrl( *itPkg );
+      string externalUrl = (*itPkg)->externalUrl();
       if ( externalUrl.empty() ) {
         localRpm = _media.localPath( (*itPkg)->location() ).asString();
       } else {
@@ -456,7 +456,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
 {
   D__ << "InstYou::retrievePackage: '" << pkg->name() << "'" << endl;
 
-  string externalUrl = _info->packageDataProvider()->externalUrl( pkg );
+  string externalUrl = pkg->externalUrl();
 
   if ( !externalUrl.empty() ) {
     Url url( externalUrl );
@@ -512,7 +512,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg, bool noExternal )
     if ( pkgHasInstalledObj ) {
       PkgEdition installedVersion = pkg->getInstalledObj()->edition();
       D__ << "Installed: " << installedVersion.asString() << endl;
-      list<PkgEdition> baseVersions = _info->packageDataProvider()->patchRpmBaseVersions( pkg );
+      list<PkgEdition> baseVersions = pkg->patchRpmBaseVersions();
       list<PkgEdition>::const_iterator it2;
       for( it2 = baseVersions.begin(); it2 != baseVersions.end(); ++it2 ) {
         if ( *it2 == installedVersion ) {
@@ -561,7 +561,7 @@ PMError InstYou::removePackages()
     list<PMPackagePtr> packages = patch->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-      string externalUrl = _info->packageDataProvider()->externalUrl( *itPkg );
+      string externalUrl = (*itPkg)->externalUrl();
       if ( externalUrl.empty() ) {
         PMError error = _media.releaseFile( (*itPkg)->location() );
         if ( error ) {

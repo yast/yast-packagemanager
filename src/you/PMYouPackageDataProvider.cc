@@ -99,9 +99,9 @@ void PMYouPackageDataProvider::setLocation( const PMPackagePtr &pkg, const strin
   _locations[ pkg ] = str;
 }
 
-const string PMYouPackageDataProvider::externalUrl( const PMPackagePtr &pkg ) const
+string PMYouPackageDataProvider::externalUrl( const PMPackage &pkg ) const
 {
-  map<PMPackagePtr,string>::const_iterator it = _externalUrls.find( pkg );
+  map<PMPackagePtr,string>::const_iterator it = _externalUrls.find( mkPtr( pkg ) );
   if ( it == _externalUrls.end() ) return "";
   else return it->second;
 }
@@ -111,9 +111,9 @@ void PMYouPackageDataProvider::setExternalUrl( const PMPackagePtr &pkg, const st
   _externalUrls[ pkg ] = str;
 }
 
-const list<PkgEdition> PMYouPackageDataProvider::patchRpmBaseVersions( const PMPackagePtr &pkg ) const
+list<PkgEdition> PMYouPackageDataProvider::patchRpmBaseVersions( const PMPackage &pkg ) const
 {
-  map<PMPackagePtr,list<PkgEdition> >::const_iterator it = _patchRpmBaseVersions.find( pkg );
+  map<PMPackagePtr,list<PkgEdition> >::const_iterator it = _patchRpmBaseVersions.find( mkPtr( pkg ) );
   if ( it == _patchRpmBaseVersions.end() ) return list<PkgEdition>();
   else return it->second;
 }
