@@ -292,7 +292,7 @@ InstSrcPtr InstSrcManager::lookupInstSrc( const InstSrcPtr & isrc_r ) const
     return 0;
 
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
-    if ( InstSrcDescr::sameContentProduct( (*it)->descr(), isrc_r->descr() ) ) {
+    if ( InstSrcDescr::sameInstSource( (*it)->descr(), isrc_r->descr() ) ) {
       return *it;
     }
   }
