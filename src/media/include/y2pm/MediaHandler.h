@@ -115,11 +115,19 @@ class MediaHandler {
 
 	/**
 	 * Call concrete handler to release the media.
-	 * If eject is true, physically eject the media * (i.e. CD-ROM).
+	 * If eject is true, physically eject the media (i.e. CD-ROM).
 	 *
 	 * Asserted that media is attached.
 	 **/
 	virtual PMError releaseFrom( bool eject ) = 0;
+
+	/**
+	 * Call concrete handler to physically eject the media (i.e. CD-ROM)
+	 * in case the media is not attached..
+	 *
+	 * Asserted that media is not attached.
+	 **/
+	virtual void forceEject() {}
 
 	/**
 	 * Call concrete handler to provide file below attach point.
@@ -213,11 +221,11 @@ class MediaHandler {
 
         /**
           Disconnect media.
-          
+
           This is useful for media which e.g. holds open a connection to a
           server like FTP. After calling disconnect() the media object still is
           valid and files are present.
-          
+
           After calling disconnect() it's not possible to call provideFile() or
           provideDir() anymore.
         */

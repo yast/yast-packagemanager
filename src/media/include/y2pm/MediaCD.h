@@ -50,6 +50,8 @@ class MediaCD : public MediaHandler {
 
     MEDIA_HANDLER_API;
 
+    virtual void forceEject();
+
   public:
 
     MediaCD( const Url &      url_r,
