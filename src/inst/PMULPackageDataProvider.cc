@@ -214,7 +214,7 @@ PMULPackageDataProvider::location ( const PMPackage & pkg_r ) const
     return value;
 }
 
-int
+unsigned int
 PMULPackageDataProvider::medianr ( const PMPackage & pkg_r ) const
 {
     return _attr_MEDIANR;

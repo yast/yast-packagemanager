@@ -60,7 +60,8 @@ IMPL_BASE_POINTER(ULSelectionParser);
 //
 //	DESCRIPTION : initialize parser and tag set for selections
 
-ULSelectionParser::ULSelectionParser()
+ULSelectionParser::ULSelectionParser(const InstSrcPtr source)
+    : _source (source)
 {
     // initialize tagset
 
@@ -123,7 +124,7 @@ ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
     PkgEdition edition;			// empty edition
     PkgArch arch ("noarch");		// selections are "noarch" objects for now
 
-    PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
+    PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider, _source));
     TagCacheRetrievalPtr selcache = dataprovider->getCacheRetrieval();
     if (!selcache)
     {
@@ -217,7 +218,7 @@ ULSelectionParser::toProvider (PMULSelectionDataProviderPtr dataprovider)
 //	DESCRIPTION : pass selection data from path to selection
 
 PMError
-ULSelectionParser::fromPath(const Pathname& path, PMSelectionPtr& selection)
+ULSelectionParser::fromPath (const Pathname& path, PMSelectionPtr& selection)
 {
     std::ifstream selstream (path.asString().c_str());
 

@@ -40,11 +40,15 @@
 
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
+#include <y2pm/InstSrcPtr.h>
 
 #include <y2pm/ULPackagesParserPtr.h>
 
 class ULPackagesParser : virtual public Rep {
     private:
+	// the source
+	const InstSrcPtr _source;
+		
 	// tag ids for the TaggedParser
 	enum Tags {
 	    PACKAGE,	// name version release arch
@@ -107,7 +111,7 @@ class ULPackagesParser : virtual public Rep {
 	PMError fromPathLocale (const Pathname& path);
 
     public:
-	ULPackagesParser ();
+	ULPackagesParser (const InstSrcPtr source);
 	~ULPackagesParser();
 
 	/**

@@ -198,3 +198,86 @@ PMYouPatchManager & Y2PM::youPatchManager()
 
 
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::commitPackages
+//	METHOD TYPE : int
+//
+//	DESCRIPTION : commit all changes in the package manager
+//		==> actually delete/install packages
+//		relies on callbacks for media change
+//		!! DOES NOT SOLVE !!
+//
+//	if media_nr is != 0, only packages from this media are
+//	installed. media_nr==0 means install all packages from all media.
+//
+//	returns failed packages in 'errors'
+//	returns uninstalled packages (because media not available) in 'remaining'
+//
+bool
+Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining)
+{
+    bool ret = true;
+
+    std::list<PMPackagePtr> dellist;
+    std::list<PMPackagePtr> inslist;
+
+    packageManager(true).getPackagesToInsDel (dellist, inslist);			// compute order
+
+    instTarget().removePackages (dellist);			// delete first
+
+
+    for (std::list<PMPackagePtr>::iterator it = inslist.begin();
+	 it != inslist.end(); ++it)
+    {
+	unsigned int pkgmedianr = (*it)->medianr();
+	if ((media_nr > 0)
+	    && (pkgmedianr != media_nr))
+	{
+#warning loosing version information
+	    remaining.push_back ((*it)->name());
+	    continue;
+	}
+	if ((*it)->source() == 0)
+	{
+	    ERR << "No source for " << *it << endl;
+	    remaining.push_back ((*it)->name());
+	    ret = false;
+	    continue;
+	}
+	// determine directory and rpm name
+	Pathname name = (*it)->location();
+	Pathname dir;
+	string::size_type dirpos = name.asString().find_first_of (" ");
+	if (dirpos == string::npos)
+	{
+	    // directory == architecture
+	    dir = Pathname ((const std::string &)((*it)->arch()));
+	}
+	else
+	{
+	    // directory in location
+	    dir = Pathname (name.asString().substr (dirpos+1));
+	    name = Pathname (name.asString().substr (0, dirpos));
+	}
+	Pathname path = (*it)->source()->providePackage (pkgmedianr, name, dir);
+	if (path.asString().empty())
+	{
+	    ERR << "Media can't provide " << pkgmedianr << ":" << dir << "/" << name << endl;
+	    remaining.push_back ((*it)->name());
+	    ret = false;
+	    continue;
+	}
+	PMError err = instTarget().installPackage (path);
+	if (err)
+	{
+	    errors.push_back ((*it)->name());
+	}
+
+    } // loop over inslist
+
+    return ret;
+}
+
+

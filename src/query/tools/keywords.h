@@ -13,48 +13,57 @@
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
 
+#include <y2pm/querycodes.h>
+
 static struct keyword {
     char *word;
     int code;
 } keywords[] = {
 
 // compare opts, id 1000...
-    { "like",		1000 },
-    { "contains",	1001 },
+    { "like",		QCODE_LIKE },
+    { "contains",	QCODE_CONTAINS },
 
 // flags, 1..99
-    { "isInstalled",	1 },
-    { "isAvailable",	2 },
-    { "isSelected",	3 },
-    { "isDeleted",	4 },
-    { "isUpdated",	5 },
-    { "isTaboo",	6 },
-    { "isAutomatic",	7 },
-    { "isIncomplete",	8 },
+    { "isInstalled",	QCODE_ISINSTALLED },
+    { "isAvailable",	QCODE_ISAVAILABLE },
+    { "toInstall",	QCODE_TOINSTALL },
+    { "toDelete",	QCODE_TODELETE },
+    { "toUpdate",	QCODE_TOUPDATE },
+    { "isTaboo",	QCODE_ISTABOO },
+    { "isAutomatic",	QCODE_ISAUTOMATIC },
+    { "isIncomplete",	QCODE_ISINCOMPLETE },
+    { "isCandidate",	QCODE_ISCANDIDATE },
 
 // values, 100..999
-    { "Version",	100 },
-    { "Vendor",		101 },
-    { "Group",		102 },
-    { "Name",		103 },
-    { "Requires",	104 },
-    { "Provides",	105 },
-    { "Conflicts",	106 },
-    { "InstallDate",	107 },
-    { "BuildDate",	108 },
-    { "Selection",	110 },
-    { "Patch",		111 },
-    { "Files",		112 },
-    { "MIME",		113 },
-    { "Keywords",	114 },
-    { "Supports",	115 },
-    { "Needs",		116 },
-    { "Summary",	117 },
-    { "Label",		117 },		// alias for "summary"
-    { "Description",	118 },
-    { "From",		119 },		// InstSrc
+    { "Version",	QCODE_VERSION },
+    { "Vendor",		QCODE_VENDOR },
+    { "Group",		QCODE_GROUP },
+    { "Name",		QCODE_NAME },
+    { "Requires",	QCODE_REQUIRES },
+    { "Provides",	QCODE_PROVIDES },
+    { "Conflicts",	QCODE_CONFLICTS },
+    { "InstallDate",	QCODE_INSTALLDATE },
+    { "InstallTime",	QCODE_INSTALLDATE },
+    { "BuildDate",	QCODE_BUILDDATE },
+    { "BuildTime",	QCODE_BUILDDATE },
+    { "Selection",	QCODE_SELECTION },
+    { "Patch",		QCODE_PATCH },
+    { "Files",		QCODE_FILES },
+    { "Filenames",	QCODE_FILES },
+    { "MIME",		QCODE_MIME },
+    { "Keywords",	QCODE_KEYWORDS },
+    { "Supports",	QCODE_SUPPORTS },
+    { "Needs",		QCODE_NEEDS },
+    { "Summary",	QCODE_SUMMARY },
+    { "Label",		QCODE_SUMMARY },	// alias for "summary"
+    { "Description",	QCODE_DESCRIPTION },
+    { "From",		QCODE_FROM },		// InstSrc
+    { "iVersion",	QCODE_IVERSION },	// installed version
+    { "aVersion",	QCODE_AVERSION },	// available version
+    { "cVersion",	QCODE_CVERSION },	// candidate version
+    { "Empty",		QCODE_EMPTY },
     { 0, 0 }
 };
 
 #endif	// KEYWORDS_H
-

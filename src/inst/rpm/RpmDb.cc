@@ -478,6 +478,19 @@ RpmDb::installTmpDatabase( void )
 #endif
 }
 
+
+// helper function
+// converting PMPackagePtr to "name-version-release" string
+//
+std::string
+RpmDb::pkg2rpm (constPMPackagePtr package)
+{
+    return ((const string &)package->name()) + "-" + package->edition().as_string();
+}
+
+
+
+
 // split in into pieces seperated by sep, return vector out
 // produce up to max tokens. if max is zero the number of tokens is unlimited
 //
@@ -986,20 +999,21 @@ RpmDb::queryDirectories ( FileList &fileList, string packageName )
 /* the version number.						*/
 /*--------------------------------------------------------------*/
 unsigned
-RpmDb::checkPackage( string packagePath, string version, string md5 )
+RpmDb::checkPackage (const Pathname& packagePath, string version, string md5 )
 {
     unsigned result = 0;
 
     if(!md5.empty())
     {
-	//TODO
+#warning TBD MD5 check
 	WAR << "md5sum check not yet implemented" << endl;
 	return CHK_INCORRECT_FILEMD5;
     }
 
+    std::string path = packagePath.asString();
     // checking --checksig
     const char *const argv[] = {
-	"rpm", "--checksig",  packagePath.c_str(), 0
+	"rpm", "--checksig", path.c_str(), 0
     };
 
     exit_code = -1;
@@ -1049,17 +1063,17 @@ RpmDb::checkPackage( string packagePath, string version, string md5 )
 	D__ << "stdout: " << value << endl;
 
 	string::size_type pos;
-	if((pos = value.find(packagePath)) != string::npos)
+	if((pos = value.find (path)) != string::npos)
 	{
-	    string rest = value.substr(pos+packagePath.length()+1);
-	    if(rest.find("NOT OK") == string::npos)
+	    string rest = value.substr (pos + path.length() + 1);
+	    if (rest.find("NOT OK") == string::npos)
 	    {
 		// see what checks are ok
-		if(rest.find("md5") == string::npos)
+		if (rest.find("md5") == string::npos)
 		{
 		    result |= CHK_MD5SUM_MISSING;
 		}
-		if(rest.find("gpg") == string::npos)
+		if (rest.find("gpg") == string::npos)
 		{
 		    result |= CHK_GPGSIG_MISSING;
 		}
@@ -1067,7 +1081,7 @@ RpmDb::checkPackage( string packagePath, string version, string md5 )
 	    else
 	    {
 		// see what checks are not ok
-		if(rest.find("MD5") != string::npos)
+		if (rest.find("MD5") != string::npos)
 		{
 		    result |= CHK_INCORRECT_PKGMD5;
 		}
@@ -1076,7 +1090,7 @@ RpmDb::checkPackage( string packagePath, string version, string md5 )
 		    result |= CHK_MD5SUM_MISSING;
 		}
 
-		if(rest.find("GPG") != string::npos)
+		if (rest.find("GPG") != string::npos)
 		{
 		    result |= CHK_INCORRECT_GPGSIG;
 		}
@@ -1100,7 +1114,7 @@ RpmDb::checkPackage( string packagePath, string version, string md5 )
     {
 
 	string value;
-	queryPackage (packagePath, "%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}", value);
+	queryPackage (path, "%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}", value);
 
 	D__ <<  "comparing version " << version << " <-> " << value << endl;
 	if ( version != value )
@@ -1190,13 +1204,13 @@ RpmDb::queryRPM (const std::string& package, const char *qparam, const char *for
 bool
 RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::string& result_r)
 {
-    return queryRPM ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, true, result_r);
+    return queryRPM (pkg2rpm (package), "-q", format, true, result_r);
 }
 
 bool
 RpmDb::queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r)
 {
-    return queryRPM ((const string &)package->name() + "-" + package->edition().as_string(), "-q", format, true, result_r);
+    return queryRPM (pkg2rpm (package), "-q", format, true, result_r);
 }
 
 bool
@@ -1220,7 +1234,7 @@ RpmDb::queryPackage (const Pathname& path, const char *format, std::list<std::st
 bool
 RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
 {
-    string pkgname = (const string &)package->name() + "-" + package->edition().as_string();
+    string pkgname = pkg2rpm (package);
 
     //------------------------------------------------
     //*** !!! ***
@@ -1626,7 +1640,7 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
 
 // inststall package filename with flags iflags
 PMError
-RpmDb::installPackage(const string& filename, unsigned flags)
+RpmDb::installPackage(const Pathname& filename, unsigned flags)
 {
     RpmArgVec opts;
 
@@ -1649,7 +1663,7 @@ RpmDb::installPackage(const string& filename, unsigned flags)
 	opts.push_back("--justdb");
 
 
-    opts.push_back(filename.c_str());
+    opts.push_back(filename.asString().c_str());
 
     // %s = filename of rpm package
 //    _progresslogstream << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
@@ -1717,11 +1731,11 @@ RpmDb::removePackage(const string& label, unsigned flags)
 
     opts.push_back("-e");
 
-    if(flags&RPMINST_NOSCRIPTS)
+    if (flags & RPMINST_NOSCRIPTS)
 	opts.push_back("--noscripts");
-    if(flags&RPMINST_NODEPS)
+    if (flags & RPMINST_NODEPS)
 	opts.push_back("--nodeps");
-    if(flags&RPMINST_JUSTDB)
+    if (flags & RPMINST_JUSTDB)
 	opts.push_back("--justdb");
 
     opts.push_back(label.c_str());
@@ -1729,7 +1743,7 @@ RpmDb::removePackage(const string& label, unsigned flags)
     //XXX maybe some log for the user too?
     DBG << "Removing " << label << endl;
 
-    run_rpm(opts, ExternalProgram::Stderr_To_Stdout);
+    run_rpm (opts, ExternalProgram::Stderr_To_Stdout);
 
     string rpmmsg;
     string line;
@@ -1808,7 +1822,7 @@ RpmDb::checkPackageResult2string(unsigned code)
     return msg;
 }
 
-bool RpmDb::setInstallationLogfile( const std::string& filename )
+bool RpmDb::setInstallationLogfile( const Pathname& filename )
 {
     if(_progresslogstream.is_open())
     {
@@ -1816,11 +1830,11 @@ bool RpmDb::setInstallationLogfile( const std::string& filename )
 	_progresslogstream.close();
     }
 
-    if(filename.empty())
+    if(filename.asString().empty())
 	return true;
 
     _progresslogstream.clear();
-    _progresslogstream.open(filename.c_str());
+    _progresslogstream.open(filename.asString().c_str());
     if(!_progresslogstream)
     {
 	ERR << "Could not open " << filename << endl;

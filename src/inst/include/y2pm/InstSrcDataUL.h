@@ -31,6 +31,7 @@
 #include <y2pm/PMULSelectionDataProviderPtr.h>
 #include <y2pm/InstSrcDataULPtr.h>
 #include <y2pm/InstSrcData.h>
+#include <y2pm/InstSrcPtr.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMSelection.h>
 
@@ -134,7 +135,7 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
      * Return the InstSrcData retrieved from the media via ndata_r,
      * or NULL and PMError set.
      **/
-    static PMError tryGetData( InstSrcDataPtr & ndata_r,
+    static PMError tryGetData( const InstSrcPtr source, InstSrcDataPtr & ndata_r,
 			MediaAccessPtr media_r, const Pathname & descr_dir_r,
 			const std::list<PkgArch>& allowed_archs, const LangCode& locale);
 

@@ -30,6 +30,7 @@
 #include <y2pm/QueryError.h>
 
 #include <y2pm/PMSelectablePtr.h>
+#include <y2pm/PkgEdition.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMPackageManager.h>
 
@@ -74,6 +75,15 @@ class Query : virtual public Rep {
 	BitMask _backlog;	// all bits
 	BitMask _logpos;	// mask of last returned package
 
+
+	/**
+	 * determine type of value
+	 */
+	int typeOfValue (struct qvalue *value, int type_hint,
+		PMSelectablePtr selectable,
+		std::list<std::string>& vlist, std::string & vstring,
+		Date& vdate, PkgEdition& vversion, FSize& vsize);
+
 	/**
 	 * check query against selectable
 	 */
@@ -85,6 +95,13 @@ class Query : virtual public Rep {
 	bool checkPackage (PMPackagePtr package, struct qnode *query);
 
 	BitMask findCandidate (PMSelectablePtr selectable);
+
+	bool compareVersion (const PkgEdition& left, enum operation op, const PkgEdition& right);
+	bool compareString (const std::string& left, enum operation op, const std::string& right);
+	bool compareStringList (const std::list<std::string>& left, enum operation op, const std::string& right);
+	bool compareDate (const Date& left, enum operation op, const Date& right);
+	bool compareSize (const FSize& left, enum operation op, const FSize& right);
+
 	BitMask checkSelectableFlag (PMSelectablePtr selectable, int flag);
 	BitMask checkSelectableOpCompare (PMSelectablePtr selectable, struct qnode *query);
 	BitMask checkSelectableOpBoolean (PMSelectablePtr selectable, struct qnode *query);

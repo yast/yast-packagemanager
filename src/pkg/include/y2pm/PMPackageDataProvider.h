@@ -86,7 +86,7 @@ class PMPackageDataProvider : virtual public Rep {
     static std::list<std::string> recommends()  { return std::list<std::string>(); }
     static std::list<std::string> suggests()    { return std::list<std::string>(); }
     static std::string            location()    { return std::string(); }
-    static int                    medianr()     { return 1; }
+    static unsigned int           medianr()     { return 0; }
     static std::list<std::string> keywords()    { return std::list<std::string>(); }
 
   protected:
@@ -138,7 +138,7 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::list<std::string> recommends  ( const PMPackage & pkg_r ) const { return recommends(); }
     virtual std::list<std::string> suggests    ( const PMPackage & pkg_r ) const { return suggests(); }
     virtual std::string            location    ( const PMPackage & pkg_r ) const { return location(); }
-    virtual int                    medianr     ( const PMPackage & pkg_r ) const { return medianr(); }
+    virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const { return medianr(); }
     virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const { return keywords(); }
 
 };

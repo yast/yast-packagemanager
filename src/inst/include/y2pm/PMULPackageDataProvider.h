@@ -83,7 +83,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	TagRetrievalPos		_attr_RECOMMENDS;
 	TagRetrievalPos		_attr_SUGGESTS;
 	TagRetrievalPos		_attr_LOCATION;
-	int			_attr_MEDIANR;
+	unsigned int		_attr_MEDIANR;
 	TagRetrievalPos		_attr_KEYWORDS;
 
 	// retrieval pointer for packages data
@@ -143,7 +143,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual std::list<std::string> recommends  ( const PMPackage & pkg_r ) const;
 	virtual std::list<std::string> suggests    ( const PMPackage & pkg_r ) const;
 	virtual std::string            location    ( const PMPackage & pkg_r ) const;
-	virtual int                    medianr     ( const PMPackage & pkg_r ) const;
+	virtual unsigned int           medianr     ( const PMPackage & pkg_r ) const;
 	virtual std::list<std::string> keywords    ( const PMPackage & pkg_r ) const;
 
 };
