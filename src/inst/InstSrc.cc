@@ -551,7 +551,6 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
     ndescr->set_type( ctype );
     ndescr->set_url( mediaurl_r );
     ndescr->set_product_dir( product_dir_r );
-    ndescr->set_default_activate( false );
 
     _descr = ndescr;
     MIL << "Found InstSrc " << _descr << endl;
