@@ -23,6 +23,8 @@
 
 #include <iosfwd>
 #include <string>
+#include <list>
+#include <set>
 
 #include <y2util/FSize.h>
 #include <y2util/Vendor.h>
@@ -76,16 +78,19 @@ class PMSelectionDataProvider : virtual public Rep {
     static std::list<std::string>    recommends()      { return std::list<std::string>(); }
     static std::list<PMSelectionPtr> recommends_ptrs() { return std::list<PMSelectionPtr>(); }
     static std::list<std::string>    inspacks     ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
-    static std::list<PMSelectablePtr>inspacks_ptrs( const LangCode& lang = LangCode("") ) { return std::list<PMSelectablePtr>(); }
     static std::list<std::string>    delpacks     ( const LangCode& lang = LangCode("") ) { return std::list<std::string>(); }
-    static std::list<PMSelectablePtr>delpacks_ptrs( const LangCode& lang = LangCode("") ) { return std::list<PMSelectablePtr>(); }
+
+    // the per locale entry ( no default lang argument! )
+    static std::set<PMSelectablePtr> inspacks_ptrs( const LangCode& lang ) { return std::set<PMSelectablePtr>(); }
+    static std::set<PMSelectablePtr> delpacks_ptrs( const LangCode& lang ) { return std::set<PMSelectablePtr>(); }
+
     static FSize                     archivesize()     { return FSize(0); }
     static std::string               order()           { return "000"; }
 
     static bool                      isBase()          { return false; }
 
     // physical access to the sel file.
-    static PMError provideSelToInstall( Pathname & path_r ) { path_r = Pathname(); return 1; }
+    static PMError provideSelToInstall( Pathname & path_r ) { path_r = Pathname(); return PMError::E_error; }
 
   protected:
 
@@ -123,9 +128,12 @@ class PMSelectionDataProvider : virtual public Rep {
     virtual std::list<std::string>    recommends     ( const PMSelection & sel_r ) const { return recommends(); }
     virtual std::list<PMSelectionPtr> recommends_ptrs( const PMSelection & sel_r ) const { return recommends_ptrs(); }
     virtual std::list<std::string>    inspacks       ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return inspacks(); }
-    virtual std::list<PMSelectablePtr>inspacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return inspacks_ptrs(); }
     virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delpacks(); }
-    virtual std::list<PMSelectablePtr>delpacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang = LangCode("") ) const { return delpacks_ptrs(); }
+
+    // the per locale entry ( no default lang argument! )
+    virtual std::set<PMSelectablePtr> inspacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang ) const { return inspacks_ptrs(lang); }
+    virtual std::set<PMSelectablePtr> delpacks_ptrs  ( const PMSelection & sel_r, const LangCode& lang ) const { return delpacks_ptrs(lang); }
+
     virtual FSize                     archivesize    ( const PMSelection & sel_r ) const { return archivesize(); }
     virtual std::string               order          ( const PMSelection & sel_r ) const { return order(); }
 

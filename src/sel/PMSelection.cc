@@ -23,6 +23,7 @@
 
 #include <y2util/Y2SLog.h>
 
+#include <Y2PM.h>
 #include <y2pm/PMSelection.h>
 #include <y2pm/PMSelectionDataProvider.h>
 
@@ -61,9 +62,9 @@ std::list<PMSelectionPtr> PMSelection::suggests_ptrs()         { DP_GET( suggest
 std::list<std::string>    PMSelection::recommends()      const { DP_GET( recommends ); }
 std::list<PMSelectionPtr> PMSelection::recommends_ptrs()       { DP_GET( recommends_ptrs ); }
 std::list<std::string>    PMSelection::inspacks     ( const LangCode& locale ) const { DP_ARG_GET( inspacks, locale ); }
-std::list<PMSelectablePtr>PMSelection::inspacks_ptrs( const LangCode& locale )       { DP_ARG_GET( inspacks_ptrs, locale ); }
 std::list<std::string>    PMSelection::delpacks     ( const LangCode& locale ) const { DP_ARG_GET( delpacks, locale ); }
-std::list<PMSelectablePtr>PMSelection::delpacks_ptrs( const LangCode& locale )       { DP_ARG_GET( delpacks_ptrs, locale ); }
+std::set<PMSelectablePtr> PMSelection::inspacks_ptrs( const LangCode& locale )       { DP_ARG_GET( inspacks_ptrs, locale ); }
+std::set<PMSelectablePtr> PMSelection::delpacks_ptrs( const LangCode& locale )       { DP_ARG_GET( delpacks_ptrs, locale ); }
 FSize                     PMSelection::archivesize()     const { DP_GET( archivesize ); }
 std::string               PMSelection::order()           const { DP_GET( order ); }
 
@@ -105,6 +106,58 @@ PMSelection::PMSelection( const PkgName &    name_r,
 //
 PMSelection::~PMSelection()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelection::inspacks_ptrs
+//	METHOD TYPE : set<PMSelectablePtr>
+//
+//	DESCRIPTION :
+//
+set<PMSelectablePtr> PMSelection::inspacks_ptrs()
+{
+  set<PMSelectablePtr> ret = inspacks_ptrs( LangCode( "" ) );
+
+  if ( ! Y2PM::getPreferredLocale()->empty() ) {
+    set<PMSelectablePtr> res = inspacks_ptrs( Y2PM::getPreferredLocale() );
+    ret.insert( res.begin(), res.end() );
+  }
+
+  for ( list<LangCode>::const_iterator it = Y2PM::getRequestedLocales().begin();
+	it != Y2PM::getRequestedLocales().end(); ++it ) {
+    set<PMSelectablePtr> res = inspacks_ptrs( *it );
+    ret.insert( res.begin(), res.end() );
+  }
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelection::delpacks_ptrs
+//	METHOD TYPE : set<PMSelectablePtr>
+//
+//	DESCRIPTION :
+//
+set<PMSelectablePtr> PMSelection::delpacks_ptrs()
+{
+  set<PMSelectablePtr> ret = delpacks_ptrs( LangCode( "" ) );
+
+  if ( ! Y2PM::getPreferredLocale()->empty() ) {
+    set<PMSelectablePtr> res = delpacks_ptrs( Y2PM::getPreferredLocale() );
+    ret.insert( res.begin(), res.end() );
+  }
+
+  for ( list<LangCode>::const_iterator it = Y2PM::getRequestedLocales().begin();
+	it != Y2PM::getRequestedLocales().end(); ++it ) {
+    set<PMSelectablePtr> res = delpacks_ptrs( *it );
+    ret.insert( res.begin(), res.end() );
+  }
+
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////

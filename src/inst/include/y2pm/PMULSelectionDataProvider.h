@@ -24,6 +24,8 @@
 #include <iosfwd>
 #include <string>
 #include <fstream>
+#include <list>
+#include <set>
 #include <map>
 
 #include <y2util/TaggedFile.h>
@@ -52,16 +54,16 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 
     private:
 
-	// the list of inspacks and delpacs are cached in two variants
-	// the first (and initial) is the map of <locale, retrieval position>
+	// inspacks and delpacs are cached in two variants. the first
+	// (and initial) is the map of <locale, retrieval position>
 	// (posmaptype)
 	// This map is used when the inspacks/delpacks are needed as a string list
 	//
-	// But when the inspacks/delpacks are needed as a PMSelectablePtr list,
-	// this list is created on demand and stored in the _ptrs* attribute.
+	// But when the inspacks/delpacks are needed as a PMSelectablePtr set,
+	// this set is created on demand and stored in the _ptrs* attribute.
 	//
-	// All further requests for string or pointer list are then fulfilled
-	// from the pointer list (which is converted back to a string list on demand,
+	// All further requests for string or pointer set are then fulfilled
+	// from the pointer set (which is converted back to a string set on demand,
 	// which is faster than a file retrieval anyway)
 	//
 
@@ -69,7 +71,7 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 	typedef TaggedFile::Tag::posmaptype::const_iterator posmapIT;
 
 	// map of <locale, selectable list>
-	typedef map <LangCode,std::list<PMSelectablePtr> > slcmaptype;
+	typedef map <LangCode,std::set<PMSelectablePtr> > slcmaptype;
 	typedef slcmaptype::const_iterator slcmapIT;
 
 	// find retrieval position by locale
@@ -87,16 +89,14 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 	// convert selection list to string list
 	std::list<std::string> sellist2strlist (const std::list<PMSelectionPtr>& sellist) const;
 
-	// convert selectable list to string list
-	std::list<std::string> slclist2strlist (const std::list<PMSelectablePtr>& slclist) const;
+	// convert selectable set to string list
+	std::list<std::string> slclist2strlist (const std::set<PMSelectablePtr>& slclist) const;
 
 	// lookup inspacks/delpacks for locale as string list
 	std::list<std::string> pkgsList (const LangCode& locale, bool is_delpacks) const;
 
-	// lookup inspacks/delpacks for locale as selectable list
-	//   this needs a non-const data provider in order to store the selectable list in this
-	//   provider if it didn't exits before.
-	std::list<PMSelectablePtr> pkgsPointers (PMULSelectionDataProviderPtr prv, const LangCode & locale, bool is_delpacks) const;
+	// lookup inspacks/delpacks for locale as selectable set
+	std::set<PMSelectablePtr> pkgsPointers (const LangCode & locale, bool is_delpacks) const;
 
     protected:
 
@@ -121,9 +121,9 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 
 	// map over locales
 	TaggedFile::Tag::posmaptype 		_attr_INSPACKS;
-	slcmaptype 				_ptrs_attr_INSPACKS;
 	TaggedFile::Tag::posmaptype 		_attr_DELPACKS;
-	slcmaptype				_ptrs_attr_DELPACKS;
+	mutable slcmaptype 			_ptrs_attr_INSPACKS; // on demand cache
+	mutable slcmaptype			_ptrs_attr_DELPACKS; // on demand cache
 
 	FSize 					_attr_ARCHIVESIZE;
 	std::string 				_attr_ORDER;
@@ -162,9 +162,12 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider {
 	virtual std::list<PMSelectionPtr> recommends_ptrs( const PMSelection & sel_r ) const;
 	// package dependencies
 	virtual std::list<std::string>    inspacks       ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
-	virtual std::list<PMSelectablePtr>inspacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
 	virtual std::list<std::string>    delpacks       ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
-	virtual std::list<PMSelectablePtr>delpacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale = LangCode("") ) const;
+
+        // the per locale entry ( no default lang argument! )
+	virtual std::set<PMSelectablePtr> inspacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale ) const;
+	virtual std::set<PMSelectablePtr> delpacks_ptrs  ( const PMSelection & sel_r, const LangCode & locale ) const;
+
 	virtual FSize                     archivesize    ( const PMSelection & sel_r ) const;
 	virtual std::string               order          ( const PMSelection & sel_r ) const;
 

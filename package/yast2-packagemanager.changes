@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Feb 12 14:59:13 CET 2003 - ma@suse.de
+
+- Selection/SelectionManager overworked. Now able to delete/install/replace
+  Selections. More stable parsing of alternate packages. Language dependent
+  packages are passed to the UI too. Ability to store the current state in
+  InstTargets selection DB.
+- 2.7.11
+
+-------------------------------------------------------------------
 Mon Feb 10 14:49:33 CET 2003 - cschum@suse.de
 
 - Destruct PatchManager at exit of YaST. This is needed to unmount

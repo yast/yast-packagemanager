@@ -86,10 +86,30 @@ void dummyDU()
   PMGR.setMountPoints( mountpoints );
 }
 
-ostream & dumpSel( ostream & str, const PMSelectablePtr & obj )
+ostream & dumpPkgWhatIf( ostream & str, bool all = false )
 {
+  str << "+++[dumpPkgWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
+    if ( all || (*it)->to_modify() || (*it)->is_taboo() ) {
+      (*it)->dumpStateOn( str ) << endl;
+    }
+  }
+  str << "---[dumpPkgWhatIf]---------------------------------------------------" << endl;
   return str;
 }
+
+ostream & dumpSelWhatIf( ostream & str, bool all = false  )
+{
+  str << "+++[dumpSelWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); it != SMGR.end(); ++it ) {
+    if ( all || (*it)->to_modify() ) {
+      (*it)->dumpStateOn( str ) << endl;
+    }
+  }
+  str << "---[dumpSelWhatIf]---------------------------------------------------" << endl;
+  return str;
+}
+
 
 
 /******************************************************************
@@ -103,6 +123,7 @@ ostream & dumpSel( ostream & str, const PMSelectablePtr & obj )
 int main()
 {
   Y2Logging::setLogfileName("-");
+  SMGR.installOnTarget();
   MIL << "START" << endl;
   //Y2PM::noAutoInstSrcManager();
   Timecount _t( "Launch InstTarget" );
@@ -117,20 +138,29 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); 0&&it != SMGR.end(); ++it ) {
-    (*it)->dumpStateOn( DBG ) << endl;
+  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); 0 && it != SMGR.end(); ++it ) {
+    PMSelectionPtr isel( (*it)->installedObj() );
+    PMSelectionPtr csel( (*it)->candidateObj() );
+
+    INT << (*it) << endl;
+    if ( isel )
+      MIL << " iSEL " << isel->inspacks_ptrs().size() << " (" << isel->delpacks_ptrs().size() << ")" << endl;
+    if ( csel )
+      MIL << " cSEL " << csel->inspacks_ptrs().size() << " (" << csel->delpacks_ptrs().size() << ")" << endl;
   }
 
-  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
-    if ( (*it)->has_both_objects() ) {
-      if ( (*it)->auto_set_install() ) {
-	if ( (*it)->installedObj()->edition() < (*it)->candidateObj()->edition() )
-	  INT << "SUSE " << (*it)->installedObj() << " -> " << (*it)->candidateObj() << endl;
-	else
-	  MIL << (*it)->installedObj() << " -> " << (*it)->candidateObj() << endl;
-      }
-    }
-  }
+  dumpPkgWhatIf( DBG );
+  dumpSelWhatIf( ERR, true );
+
+  SMGR["LOST"]->user_set_delete();
+  SMGR["LSB"]->user_set_install();
+  dumpSelWhatIf( ERR, true );
+
+  SMGR.activate( PMGR );
+  dumpPkgWhatIf( DBG );
+
+  SMGR.installOnTarget();
+  dumpSelWhatIf( ERR, true );
 
   SEC << "STOP" << endl;
   return 0;

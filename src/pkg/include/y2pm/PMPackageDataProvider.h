@@ -107,9 +107,9 @@ class PMPackageDataProvider : virtual public Rep {
 
     static bool isRemote()			{ return false; }
     // physical access to the rpm file.
-    static PMError providePkgToInstall(Pathname& path_r) { path_r = Pathname(); return 1; }
+    static PMError providePkgToInstall(Pathname& path_r) { path_r = Pathname(); return PMError::E_error; }
     // physical access to the src.rpm file.
-    static PMError provideSrcPkgToInstall(Pathname& path_r) { path_r = Pathname(); return 1; }
+    static PMError provideSrcPkgToInstall(Pathname& path_r) { path_r = Pathname(); return PMError::E_error; }
     // source for this package, needed for callbacks
     static constInstSrcPtr source()		{ return (constInstSrcPtr)0; }
 

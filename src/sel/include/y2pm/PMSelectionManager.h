@@ -21,6 +21,7 @@
 
 #include <iosfwd>
 #include <list>
+#include <map>
 
 #include <y2pm/PMError.h>
 #include <y2pm/PMManager.h>
@@ -46,16 +47,33 @@ class PMSelectionManager : public PMManager {
     PMSelectionManager();
     virtual ~PMSelectionManager();
 
+
+    typedef std::map<PMSelectablePtr,int> ActiveMap;
+
     /**
-     * list of currently active selections
-     * used to determine which (packages of) selections to
-     * de-select when activate() is called.
-     *
-     * see activate()
-     */
-    std::list<PMSelectablePtr> _currently_actives;
-    LangCode _currently_preferred_locale;
-    std::list<LangCode> _currently_requested_locales;
+     * Remembers selections state at last call to @ref activate.
+     * <ul>
+     * <li><code>-1</code> was to delete
+     * <li><code>0</code> was unmodified
+     * <li><code>1</code> was to install
+     * </ul>
+     **/
+    ActiveMap _last_active;
+
+    /**
+     * Remember selections state.
+     **/
+    void setLast( const PMSelectablePtr & sel_r, int val_r );
+
+    /**
+     * Return selections remembered state.
+     **/
+    int lastState( const PMSelectablePtr & sel_r ) const;
+
+    /**
+     * Return selections current state.
+     **/
+    int getState( const PMSelectablePtr & sel_r ) const;
 
   private:
 
@@ -65,37 +83,20 @@ class PMSelectionManager : public PMManager {
      **/
     virtual PMObjectPtr assertObjectType( const PMObjectPtr & object_r ) const;
 
-    /**
-     * get first matching alternative selection of given
-     * "pack (alt1, alt2, ...)" string
-     */
-    PMSelectablePtr getAlternativeSelectable (std::string pkgstr, PMPackageManager & package_mgr);
+  private:
 
     /**
-     * set all packages of the given list to "auto"
-     */
-    void setSelectionPackages (const std::list<std::string> packages, bool these_are_delpacks, PMPackageManager & package_mgr);
-
+     * Set all packages in this selection to unmodified.
+     **/
+    void resetSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr );
     /**
-     * set all packages of this selection to "don't install"
-     * if their status is "auto" (i.e. not explicitly requested
-     * by the user).
-     */
-    void resetSelectionPackages (const std::list<std::string> packages, bool these_are_inspacks, PMPackageManager & package_mgr);
-
+     * Install selection (install inspacks, delete delpacks).
+     **/
+    void setSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr );
     /**
-     * activate given selection
-     * set all packages of this selection to "auto"
-     */
-    void setSelection (PMSelectionPtr selection, PMPackageManager & package_mgr);
-
-    /**
-     * de-activate given selection
-     * set all packages of this selection to "don't install"
-     * if their status is "auto" (i.e. not explicitly requested
-     * by the user).
-     */
-    void resetSelection (PMSelectionPtr selection, PMPackageManager & package_mgr);
+     * Delete selection (delete inspacks, unmodify delpacks).
+     **/
+    void removeSelectionPackages( const PMSelectionPtr & sel_r, PMPackageManager & package_mgr );
 
   public:
 
@@ -107,9 +108,11 @@ class PMSelectionManager : public PMManager {
     PMError activate( PMPackageManager & package_mgr );
 
     /**
-     * Remember all activated selection in InstTargetSelDB
+     * Remember all activated selection in InstTargetSelDB. Reset all
+     * selections (not the packages!) and reflect the new InstTargetSelDB
+     * content.
      **/
-    PMError installOnTarget() const;
+    PMError installOnTarget();
 
 };
 

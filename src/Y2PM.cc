@@ -62,6 +62,7 @@ static LangCode getLangEnvironment()
 // global settings
 ///////////////////////////////////////////////////////////////////
 #warning MUST INIT GLOBAL SETTINGS
+#warning Provide a serial number for localesttings. DP could cache localedependent data.
 
 Pathname Y2PM::_instTarget_rootdir( "/" );
 Pathname Y2PM::_system_rootdir    ( "/" );
@@ -416,7 +417,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
     }
     else
     {
-	MIL << "ranked install !" << endl; 
+	MIL << "ranked install !" << endl;
 	packageManager().getPackagesToInsDel (dellist, inslist, srclist, installrank);	// compute order
     }
 
