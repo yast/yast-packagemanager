@@ -325,6 +325,11 @@ class InstSrc: public CountedRep {
      **/
     MediaAccessPtr media() { return _media; }
 
+    /**
+     * Triggered on change of preferredLocale
+     **/
+    void preferredLocaleChanged() const;
+
   public:
 
     /**

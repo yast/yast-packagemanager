@@ -18,6 +18,7 @@ liby2pm_la_SOURCES = Y2PM.cc Y2PM.locale.cc \
 	PkgName.cc	\
 	PkgEdition.cc	\
 	PkgRelation.cc	\
+	PkgIdent.cc	\
 	PkgSplit.cc	\
 	PkgArch.cc	\
 	PkgDu.cc	\

@@ -35,6 +35,9 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMSelection.h>
 
+#include <y2pm/ULParsePackagesLang.h>
+class ULParsePackagesLang;
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstSrcDataUL
@@ -71,6 +74,21 @@ class InstSrcDataUL : public InstSrcData {
 	 * Return empty list as we do not hold Patches
 	 */
 	const std::vector<PMYouPatchPtr>& getPatches (void) const { return InstData::getPatches(); }
+
+	/**
+	 * Triggered on change of preferredLocale
+	 **/
+	virtual void preferredLocaleChanged() const;
+
+	/**
+	 * On change of preferredLocale reparse new packages.lang
+	 **/
+	void reparsePackagesLang( ULParsePackagesLang & parser_r ) const;
+
+	/**
+	 * On reparse new packages.lang adjust dataprovider
+	 **/
+	void adjustDpLangData( PMPackagePtr pkg_r, const ULParsePackagesLang::Entry & entry_r ) const;
 
   public:
 

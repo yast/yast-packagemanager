@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  9 17:52:20 CET 2004 - ma@suse.de
+
+- Reparse packages.<lang> on locale change
+- 2.9.22
+
+-------------------------------------------------------------------
 Fri Mar  5 11:27:24 CET 2004 - lnussel@suse.de
 
 - allow uncached plain sources

@@ -36,6 +36,8 @@
 
 #include <y2pm/ULSelectionParser.h>
 #include <y2pm/ULPackagesParser.h>
+#include <y2pm/ULParsePackagesLang.h>
+#include <y2pm/PMULPackageDataProvider.h>
 
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/InstSrcError.h>
@@ -395,7 +397,7 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
     ULPackagesParser pkg_parser (source);
     PMError pkgerr = pkg_parser.fromMediaDir (ndata->_packages, media_r, descr_dir_r, allowed_archs, locale);
 
-    // parse <descr_dir_r>/selections and <descr_dir_r>/*.sel
+    // parse <descr_dir_r>/selections and <descr_dir_r>/ *.sel
 
     ULSelectionParser sel_parser (source);
     PMError selerr = sel_parser.fromMediaDir (ndata->_selections, media_r, descr_dir_r);
@@ -446,7 +448,6 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
 // PUBLIC
 ///////////////////////////////////////////////////////////////////
 
-
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -469,6 +470,104 @@ InstSrcDataUL::InstSrcDataUL()
 //
 InstSrcDataUL::~InstSrcDataUL()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::preferredLocaleChanged
+//	METHOD TYPE : void
+//
+void InstSrcDataUL::preferredLocaleChanged() const
+{
+  if ( _packages.empty() ) {
+    MIL << "Nothing to be done: No packages held" << endl;
+    return;
+  }
+
+  string ofile;
+  {
+    PMULPackageDataProviderPtr dpt( getDataProvider( *_packages.begin() ) );
+    ofile = dpt->_locale_retrieval->getName();
+  }
+  string stem( ofile );
+  string::size_type sep = stem.rfind( "." );
+  if ( sep != string::npos ) {
+    stem.erase( sep );
+  }
+
+  PM::LocaleOrder langs( Y2PM::getLocaleFallback() );
+  for ( PM::LocaleOrder::const_iterator lang = langs.begin(); lang != langs.end(); ++lang ) {
+
+    string nfile( stem + "." + lang->asString() );
+    if ( nfile == ofile ) {
+      MIL << "Nothing to be done:  New locale '" << *lang << "' is current locale." << endl;
+      return;
+    }
+
+    ULParsePackagesLang parser( nfile );
+    if ( parser.getRetrieval() ) {
+      // parse it...
+      reparsePackagesLang( parser );
+      MIL << "Reparsed new locale '" << *lang << "'" << endl;
+      return;
+    }
+  }
+
+  MIL << "NOP: Nothing appropriate for  '" << Y2PM::getPreferredLocale() << "'" << endl;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::reparsePackagesLang
+//	METHOD TYPE : void
+//
+void InstSrcDataUL::reparsePackagesLang( ULParsePackagesLang & parser_r ) const
+{
+  map<PkgIdent,PMPackagePtr> table;
+
+  // fill lookuptable with packages
+  for ( list<PMPackagePtr>::const_iterator it = _packages.begin(); it != _packages.end(); ++it ) {
+    table[PkgIdent(*it)] = *it;
+  }
+
+  // parse file and adjust packages data
+  for ( ULParsePackagesLang::Entry entry; parser_r.getEntry( entry ) == TaggedFile::ACCEPTED_FULL; /*empty*/ ) {
+    PMPackagePtr pkg = table[entry];
+    if ( pkg ) {
+      adjustDpLangData( pkg, entry );
+      table[entry] = 0; // processed
+    }
+  }
+
+  ULParsePackagesLang::Entry noEntry( parser_r.noEntry() );
+  // check for unprocessed packages
+  for ( map<PkgIdent,PMPackagePtr>::const_iterator it = table.begin(); it != table.end(); ++it ) {
+    if ( it->second ) {
+      // unprocessed
+      adjustDpLangData( it->second, noEntry );
+    }
+  }
+
+  return;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::adjustDpLangData
+//	METHOD TYPE : 	void
+//
+void InstSrcDataUL::adjustDpLangData( PMPackagePtr pkg_r,
+				      const ULParsePackagesLang::Entry & entry_r ) const
+{
+  PMULPackageDataProviderPtr dp( getDataProvider( pkg_r ) );
+  if ( ! dp ) {
+    INT << "NO DataProvider for package " << pkg_r << endl;
+    return;
+  }
+  dp->assignLocaleData( entry_r );
 }
 
 ///////////////////////////////////////////////////////////////////

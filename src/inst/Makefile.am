@@ -23,6 +23,7 @@ liby2pminstsrc_la_SOURCES = \
 	InstSrcDataUL.cc		\
 	ULSelectionParser.cc		\
 	ULPackagesParser.cc		\
+	ULParsePackagesLang.cc		\
 	PMULPackageDataProvider.cc	\
 	PMULSelectionDataProvider.cc	\
 	InstSrcDataPLAIN.cc		\

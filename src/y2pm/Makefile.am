@@ -8,11 +8,11 @@ pkgincludedir = $(includedir)/y2pm
 
 pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
 	Timecount.h	\
-	Alternatives.h	\
-	PkgSet.h	\
-	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h PkgDu.h PkgChangelog.h	\
+	PkgName.h PkgEdition.h PkgArch.h PkgIdent.h		\
+	PkgRelation.h PkgRevRel.h Alternatives.h PkgSet.h	\
+	PkgSplit.h PkgDu.h PkgChangelog.h			\
         \
-        PMLocale.h \
+        PMLocale.h	\
 	\
 	PMError.h			\
 	ModulePkgError.h		\
@@ -43,6 +43,7 @@ pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
 	InstSrcDataUL.h	InstSrcDataULPtr.h	\
 	ULSelectionParser.h ULSelectionParserPtr.h	\
 	ULPackagesParser.h ULPackagesParserPtr.h	\
+	ULParsePackagesLang.h				\
 	InstSrcDataPLAIN.h InstSrcDataPLAINPtr.h	\
 	PMPLAINPackageDataProvider.h PMPLAINPackageDataProviderPtr.h	\
 	UpdateInfParser.h			\

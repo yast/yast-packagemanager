@@ -92,6 +92,11 @@ void Y2PM::cleanupAtExit()
 PMError Y2PM::preferredLocaleChanged()
 {
   MIL << "New preferred locale: '" << getPreferredLocale() << "'" << endl;
+
+  if ( hasInstSrcManager() ) {
+    instSrcManager().preferredLocaleChanged();
+  }
+
   return PMError::E_ok;
 }
 
@@ -108,6 +113,9 @@ PMError Y2PM::requestedLocalesChanged( const LocaleSet & addLocales_r, const Loc
     MIL << " " << *it;
   }
   MIL << " }" << endl;
+
+  selectionManager().requestedLocalesChanged( addLocales_r, delLocales_r );
+#warning SAVE requestedLocales in some RCfile
   return PMError::E_ok;
 }
 
