@@ -11,6 +11,15 @@
 #
 YAST2_LOADFTPSERVER="yes"
 
+## Type: yesno
+## Default: no
+#
+# If SLP_ENABLED is set to "yes", YOU will check via SLP (Service Location Protocol)
+# whether SLP servers, which provide YOU patches, are available. These servers
+# are added to the server list.
+#
+SLP_ENABLED="no"
+
 ## Type: string
 ## Default:
 #
