@@ -1,7 +1,7 @@
 #
 # Makefile.am for packagemanager/testsuite
 #
-SUBDIRS = query devel.ma
+SUBDIRS = query devel.ma devel.cschum
 AUTOMAKE_OPTIONS = dejagnu
 PACKAGE = packagemanager
 INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
@@ -30,10 +30,8 @@ noinst_PROGRAMS = \
 	order		\
 	gs_test		\
         test_you	\
-        cschum_test	\
 	media_test	\
-	test_updateinf  \
-        test_libcurl
+	test_updateinf
 
 test_updateinf_SOURCES = test_updateinf.cc
 test_updateinf_LDADD = $(top_builddir)/src/liby2pm.la
@@ -83,15 +81,6 @@ test_you_SOURCES = test_you.cc
 test_you_LDADD = $(top_builddir)/src/liby2pm.la
 test_you_LDFLAGS = -static
 
-cschum_test_SOURCES = cschum_test.cc
-cschum_test_LDADD = $(top_builddir)/src/liby2pm.la
-cschum_test_LDFLAGS = -static
-
 media_test_SOURCES = media_test.cc
 media_test_LDADD = $(top_builddir)/src/liby2pm.la
 media_test_LDFLAGS = -static
-
-test_libcurl_SOURCES = test_libcurl.cc
-test_libcurl_LDADD = -lcurl $(top_builddir)/src/liby2pm.la
-test_libcurl_LDFLAGS = -static
-
