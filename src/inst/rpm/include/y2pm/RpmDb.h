@@ -24,6 +24,7 @@
 #ifndef RpmDb_h
 #define RpmDb_h
 
+#include <iosfwd>
 #include <set>
 #include <string>
 #include <list>
@@ -43,7 +44,7 @@
 
 class RpmDb: virtual public Rep
 {
-    REP_BODY(RpmDb)
+    REP_BODY(RpmDb);
 
     public:
 
@@ -69,7 +70,7 @@ class RpmDb: virtual public Rep
 //	const char* const _errorstrings[];
 
 	typedef std::set<std::string> FileList;
-	
+
 	/** Bits representing rpm installation options, useable as or
 	 * combination
 	 *
@@ -123,13 +124,13 @@ class RpmDb: virtual public Rep
 
 	/**
 	 * Initialize the rpm database
-	 * 
+	 *
 	 * @param createNew create a new database if none exists. This
 	 * parameter does no harm if a database already exists.
 	 */
 	DbStatus initDatabase( bool createNew = false);
 
-	/** 
+	/**
 	 * Rebuild the rpm database
 	 * */
 	DbStatus rebuildDatabase();
@@ -138,7 +139,7 @@ class RpmDb: virtual public Rep
 	 * Creating a temporary rpm-database.
 	 * If copyOldRpm == true than the rpm-database from
 	 * /var/lib/rpm will be copied.
-	 * 
+	 *
 	 * not yet implemented
 	 */
 	DbStatus createTmpDatabase(bool copyOldRpm = false );
@@ -159,7 +160,7 @@ class RpmDb: virtual public Rep
 
 	/**
 	 * Check rpm with rpm --checksig
-	 * 
+	 *
 	 * @param filename which file to check
 	 * @param version check if package really contains this version, leave emtpy to skip check
 	 * @param md5 md5sum for whole file, leave empty to skip check (not yet implemented)
@@ -192,7 +193,7 @@ class RpmDb: virtual public Rep
 	 * @param flags which parameters to use by default, eg. RPMINST_NODOCS|RPMINST_NOSCRIPTS
 	 * */
 	void setInstFlags(unsigned flags) { _rpminstflags = flags; }
-    
+
 	/** install rpm package
 	 *
 	 * @param filename file to install
@@ -202,7 +203,7 @@ class RpmDb: virtual public Rep
 	 * */
 	bool installPackage(const std::string& filename,
 	    unsigned flags = RPMINST_NODEPS|RPMINST_FORCE|RPMINST_IGNORESIZE );
-	
+
 	/** remove rpm package
 	 *
 	 * @param label label of the rpm package to remove. always specify the
@@ -242,7 +243,7 @@ class RpmDb: virtual public Rep
 	 * */
 	PMRpmPackageDataProviderPtr _dataprovider;
 
-	/** 
+	/**
 	 * The name of the install root.
 	 */
 	Pathname _rootdir;
@@ -251,7 +252,7 @@ class RpmDb: virtual public Rep
 	/**
 	 * current Path of the DB-path ( without "packages.rpm" )
 	 */
-	Pathname dbPath; 
+	Pathname dbPath;
 
 	/*
 	 * Flag that it is a temporary rpm-DB
@@ -299,10 +300,10 @@ class RpmDb: virtual public Rep
 
 	/** /var/lib/rpm */
 	Pathname _varlibrpm;
-	
+
 	/** /var/lib */
 	Pathname _varlib;
-	
+
 	/** packages.rpm */
 	Pathname _rpmdbname;
 
@@ -346,5 +347,11 @@ class RpmDb: virtual public Rep
 	 * */
 	static std::string checkPackageResult2string(unsigned code);
 };
+
+
+/**
+ * Write enum value as string
+ **/
+extern std::ostream & operator<<( std::ostream & str, const RpmDb::DbStatus & obj );
 
 #endif
