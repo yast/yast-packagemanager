@@ -146,7 +146,11 @@ PMError PMYouSettings::initProduct()
   for( it = products.begin(); it != products.end(); ++it ) {
     PMYouProductPtr p = new PMYouProduct( *it, *this );
     DBG << "Product: " << p->product() << " " << p->version() << endl;
-    _products.push_back( p );
+    if ( p->noYou() ) {
+      DBG << "YOU ignores this product." << endl;
+    } else {
+      _products.push_back( p );
+    }
   }
 
   return PMError();

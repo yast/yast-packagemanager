@@ -69,10 +69,21 @@ PMYouProduct::PMYouProduct( const constInstSrcDescrPtr &descr,
   DBG << "YouPath: " << youPath << endl;
   DBG << "DistProduct: " << _distProduct << endl;
 
+  _businessProduct = false;
+  _noYou = false;
+
+  vector<string> flags;
+  stringutil::split( youType, flags, "," );
+  vector<string>::const_iterator it;
+  for( it = flags.begin(); it != flags.end(); ++it ) {
+    if ( *it == "business" ) _businessProduct = true;
+    else if ( *it == "noyou" ) _noYou = true;
+  }
+
   if ( youPath.empty() ) {
     init( product, version, baseArch );
   } else {
-    init( product, version, baseArch, youUrl, youPath, youType == "business" );
+    init( product, version, baseArch, youUrl, youPath );
   }
 
   InstSrcDescr::ArchMap archMap = descr->content_archmap();
@@ -85,6 +96,9 @@ PMYouProduct::PMYouProduct( const string &product, const string &version,
                             PMYouSettings &settings )
   : _settings( settings )
 {
+  _businessProduct = false;
+  _noYou = false;
+
   init( product, version, baseArch );
 }
 
@@ -94,14 +108,13 @@ PMYouProduct::~PMYouProduct()
 
 void PMYouProduct::init( const string &product, const string &version,
                          const string &baseArch, const string &url,
-                         const string &path, bool business )
+                         const string &path )
 {
   _product = product;
   _version = version;
   _baseArch = PkgArch( baseArch );
 
   _youUrl = url;
-  _businessProduct = business;
 
   init( path );
 }
@@ -196,6 +209,11 @@ PkgArch PMYouProduct::baseArch()
 bool PMYouProduct::businessProduct()
 {
   return _businessProduct;
+}
+
+bool PMYouProduct::noYou()
+{
+  return _noYou;
 }
 
 void PMYouProduct::setArchs( const list<PkgArch> &a )

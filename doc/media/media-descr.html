@@ -227,7 +227,7 @@ In the above example, "SuSE Linux Personal" uses the toplevel directory, whereas
 other products have their own sub-directories.
 <p></p>
 
-<!------------------------------------------------------------------!>
+<!-----------------------------------------------------------------!>
 <H2>The <tt>content</tt> file</H2>
 This file resides inside the product directory as specified by the <tt>products</tt>
 file on the media. It contains all product-specfic data to describe
@@ -288,7 +288,8 @@ be determined.</td></tr>
 <tr><td>O</td><td><tt>RELNOTESURL</tt></td><td>url of release notes, see below</td></tr>
 <tr><td>O</td><td><tt>FLAGS</tt></td><td>product specific capabilities, see below</td></tr>
 <tr><td>O</td><td><tt>YOUURL</tt></td><td>URL of text file containing list of online update servers</td></tr>
-<tr><td>O</td><td><tt>YOUTYPE</tt></td><td><tt>business</tt> for SuSE business products</td></tr>
+<tr><td>O</td><td><tt>YOUTYPE</tt></td><td>comma-separated list of YOU flags. <tt>business</tt> for SuSE business products,
+<tt>noyou</tt> for products to be ignored by YOU</td></tr>
 <tr><td>O</td><td><tt>YOUPATH</tt></td><td>path to patches on the server<br>
 (triggers YOU to look at the maintenance web server for updates.</td></tr>
 </table>
