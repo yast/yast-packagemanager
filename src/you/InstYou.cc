@@ -61,6 +61,7 @@ InstYou::InstYou( const PMYouPatchInfoPtr &info,
 
 InstYou::~InstYou()
 {
+  _media.release();
 }
 
 void InstYou::init()

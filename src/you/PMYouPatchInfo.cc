@@ -441,6 +441,12 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
         }
     }
 
+    error = _media.release();
+    if ( error ) {
+        E__ << "Error releasing media." << endl;
+        return error;
+    }
+
     return PMError();
 }
 
