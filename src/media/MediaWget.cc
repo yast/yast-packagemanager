@@ -106,7 +106,7 @@ MediaResult MediaWget::provideFile (const Pathname & filename) const {
 	return E_bad_url;
 
     if(_url.getHost().empty())
-	return E_bad_url;
+	return E_no_host_specified;
 
     Wget wget;
     string tmp;

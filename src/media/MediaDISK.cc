@@ -174,9 +174,11 @@ MediaResult
 MediaDISK::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, disk is mounted at destination
-    //
     if(!_url.isValid())
 	return E_bad_url;
+
+    if(_attachPoint.asString().empty())
+	return E_not_attached;
 
     Pathname src = _attachPoint;
     src += _url.getPath();

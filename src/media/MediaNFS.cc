@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
 #include <y2pm/MediaNFS.h>
 
 #include <sys/types.h>
@@ -79,8 +80,7 @@ MediaNFS::~MediaNFS()
 ostream &
 MediaNFS::dumpOn( ostream & str ) const
 {
-    str << "MediaNFS (" << _server << "@" << _path << ")";
-    return str;
+    return MediaHandler::dumpOn(str);
 }
 
 
@@ -95,11 +95,33 @@ MediaNFS::dumpOn( ostream & str ) const
 MediaResult
 MediaNFS::attachTo (const Pathname & to)
 {
-    
+    if(!_url.isValid())
+	    return E_bad_url;
+
+    if(_url.getHost().empty())
+	    return E_no_host_specified;
+
+    const char* const filesystem = "nfs";
     const char *mountpoint = to.asString().c_str();
-    if (mount (_server.c_str(), mountpoint, "nfs", _mountflags, 0) != 0) {
+
+    string path = _url.getHost();
+    path += ':';
+    path += _url.getPath();
+
+    MIL << "try mount " << path
+	<< " to " << mountpoint
+	<< " filesystem " << filesystem << ": ";
+    if(!::mount (path.c_str(), mountpoint, filesystem, _mountflags, NULL))
+    {
+	MIL << "succeded" << endl;
+    }
+    else
+    {
+	D__ << strerror(errno) << endl;
+	MIL << "failed" << endl;
 	return E_system;
     }
+
     _attachPoint = to;
 
     return E_none;
@@ -117,9 +139,17 @@ MediaNFS::attachTo (const Pathname & to)
 MediaResult
 MediaNFS::release (bool eject)
 {
-    if (umount (_attachPoint.asString().c_str()) != 0) {
-	return E_system;
+    if(_attachPoint.asString().empty())
+    {
+	return E_not_attached;
     }
+    
+    MIL << "umount " << _attachPoint.asString() << endl;
+
+    if (umount (_attachPoint.asString().c_str()) != 0) {
+	    return E_system;
+    }
+
     _attachPoint = "";
     return E_none;
 }
@@ -139,6 +169,24 @@ MediaResult
 MediaNFS::provideFile (const Pathname & filename) const
 {
     // no retrieval needed, NFS path is mounted at destination
+    if(!_url.isValid())
+	return E_bad_url;
+
+    if(_attachPoint.asString().empty())
+	return E_not_attached;
+
+    Pathname src = _attachPoint;
+    src += _url.getPath();
+    src += filename;
+
+    PathInfo info(src);
+    
+    if(!info.isFile())
+    {
+	    D__ << src.asString() << " does not exist" << endl;
+	    return E_file_not_found;
+    }
+
     return E_none;
 }
 
