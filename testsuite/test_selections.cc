@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <y2util/Pathname.h>
+#include <y2util/LangCode.h>
 #include <Y2PM.h>
 #include <y2pm/PMError.h>
 #include <y2pm/PMSelection.h>
@@ -138,6 +139,13 @@ int main(int argc, char* argv[])
     }
 
     Y2PM y2pm;
+
+    char *lang = getenv("LANG");
+    if (lang)
+    {
+	LangCode locale (lang);
+	y2pm.setPreferredLocale (locale);
+    }
 
     y2pm.packageManager(false);		// start without target
 #if 0

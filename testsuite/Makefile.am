@@ -42,10 +42,10 @@ noinst_PROGRAMS = \
 	test_packages	\
 	test_selections	\
 	test_query	\
-	order	\
+	order		\
 	ma_test.exe	\
-	gs_test \
-        test_you \
+	gs_test		\
+        test_you	\
         cschum_test
 
 ma_test_exe_SOURCES = ma_test.cc
