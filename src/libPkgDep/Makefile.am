@@ -13,6 +13,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		sel/include	\
 		you/include	\
 		inst/include	\
+		inst/rpm/include\
 		media/include	\
 		libPkgDep/include \
 	   ) -I$(includedir) -I$(QTDIR)/include

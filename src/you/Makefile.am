@@ -15,7 +15,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		inst/include	\
 		inst/rpm/include\
 		media/include	\
-		libPkgDep/include	\
+		libPkgDep/include\
 	   ) -I$(includedir)
 
 noinst_LTLIBRARIES = liby2pmyou.la
