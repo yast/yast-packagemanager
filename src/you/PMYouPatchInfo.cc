@@ -398,9 +398,10 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 
     error = media.provideFile( directoryFile );
     if ( error ) {
-      WAR << "no directory file found." << endl;
+      WAR << "Unable to get file " << _paths->directoryFileName() << endl;
       if ( error == MediaError::E_login_failed ||
-           error == MediaError::E_proxyauth_failed ) {
+           error == MediaError::E_proxyauth_failed ||
+           error == MediaError::E_write_error ) {
           media.release();
           return error;
       }
@@ -539,7 +540,7 @@ PMError PMYouPatchInfo::processMediaDir( const Url &url )
         string errMsg = "Unable to get file '" + url.asString() + "/" +
                         path.asString() + "'";
         error.setDetails( errMsg );
-        WAR << error << endl;
+        DBG << error << endl;
     } else {
         string line;
         ifstream in( media.localPath( path ).asString().c_str() );
