@@ -502,7 +502,11 @@ PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
 
     Url url = _paths->patchUrl();
 
-    _paths->config()->writeEntry( "LastServer", url.saveAsString() );
+    Url saveUrl = url;
+    saveUrl.setUsername( "" );
+    saveUrl.setPassword( "" );
+
+    _paths->config()->writeEntry( "LastServer", saveUrl.saveAsString() );
     _paths->config()->save();
 
     PMError error = processMediaDir( url );
