@@ -45,6 +45,8 @@
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PkgArch.h>
 
+#include <Y2PM.h>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////
@@ -406,6 +408,9 @@ InstSrcDataUL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonP
     }
 
     SET_LCACHE (INSPACKS, "");
+#warning Fix language specific inspacks
+    tagptr = GET_TAG (INSLANGPACKS);
+    SET_LPOS (INSPACKS, tagptr->posDataStart(), tagptr->posDataEnd(), Y2PM::getPreferredLocale());
     SET_LCACHE (DELPACKS, "");
     SET_VALUE (ORDER, (GET_TAG(ORDER))->Data());
 
@@ -1184,5 +1189,45 @@ InstSrcDataUL::dumpOn( std::ostream & str ) const
 {
     Rep::dumpOn( str );
     return str;
+}
+
+
+
+
+InstSrcDataULSelTags::InstSrcDataULSelTags( )
+    : TagSet()
+{
+	const std::string& preferred_locale = (const std::string &)(Y2PM::getPreferredLocale());
+	CommonPkdParser::Tag* t;
+	createTag( "=Ver", InstSrcDataULSelTags::VERSION);		// general file format version
+	createTag( "=Sel", InstSrcDataULSelTags::SELECTION);		// name version release arch
+	t = createTag( "=Sum", InstSrcDataULSelTags::SUMMARY);
+	t->setType(CommonPkdParser::Tag::ACCEPTPREFERREDLOCALE);
+	t->setPreferredLocale(preferred_locale);
+	createTag( "=Cat", InstSrcDataULSelTags::CATEGORY);
+	createTag( "=Vis", InstSrcDataULSelTags::VISIBLE);
+	createTag( "=Ord", InstSrcDataULSelTags::ORDER);
+	t = createTag( "+Rec", InstSrcDataULSelTags::RECOMMENDS);	// list of recommends tags
+	t->setEndTag("-Rec");
+	t = createTag( "+Sug", InstSrcDataULSelTags::SUGGESTS);	// list of suggests tags
+	t->setEndTag("-Sug");
+	t = createTag( "+Req", InstSrcDataULSelTags::REQUIRES);	// list of requires tags
+	t->setEndTag("-Req");
+	t = createTag( "+Prv", InstSrcDataULSelTags::PROVIDES);	// list of provides tags
+	t->setEndTag("-Prv");
+	t = createTag( "+Con", InstSrcDataULSelTags::CONFLICTS);	// list of conflicts tags
+	t->setEndTag("-Con");
+	t = createTag( "+Obs", InstSrcDataULSelTags::OBSOLETES);	// list of obsoletes tags
+	t->setEndTag("-Obs");
+	createTag( "=Siz", InstSrcDataULSelTags::SIZE);		// packed and unpacked size
+	t = createTag( "+Ins", InstSrcDataULSelTags::INSPACKS);
+	t->setEndTag("-Ins");
+	if (!preferred_locale.empty())
+	{
+	    t = createTag (std::string ("+Ins" + preferred_locale).c_str(), INSLANGPACKS);
+	    t->setEndTag (std::string ("-Ins" + preferred_locale).c_str());
+	}
+	t = createTag( "+Del", InstSrcDataULSelTags::DELPACKS);
+	t->setEndTag("-Del");
 }
 

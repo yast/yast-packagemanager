@@ -358,39 +358,13 @@ public:
 	OBSOLETES,
 	SIZE,
 	INSPACKS,
+	INSLANGPACKS,
 	DELPACKS,
 	NUM_TAGS
     };
 
 public:
-    InstSrcDataULSelTags( )
-	: TagSet()	{
-
-	CommonPkdParser::Tag* t;
-	createTag( "=Ver", VERSION);		// general file format version
-	createTag( "=Sel", SELECTION);		// name version release arch
-	createTag( "=Sum", SUMMARY);
-	createTag( "=Cat", CATEGORY);
-	createTag( "=Vis", VISIBLE);
-	createTag( "=Ord", ORDER);
-	t = createTag( "+Rec", RECOMMENDS);	// list of recommends tags
-	t->setEndTag("-Rec");
-	t = createTag( "+Sug", SUGGESTS);	// list of suggests tags
-	t->setEndTag("-Sug");
-	t = createTag( "+Req", REQUIRES);	// list of requires tags
-	t->setEndTag("-Req");
-	t = createTag( "+Prv", PROVIDES);	// list of provides tags
-	t->setEndTag("-Prv");
-	t = createTag( "+Con", CONFLICTS);	// list of conflicts tags
-	t->setEndTag("-Con");
-	t = createTag( "+Obs", OBSOLETES);	// list of obsoletes tags
-	t->setEndTag("-Obs");
-	createTag( "=Siz", SIZE);		// packed and unpacked size
-	t = createTag( "+Ins", INSPACKS);
-	t->setEndTag("-Ins");
-	t = createTag( "+Del", DELPACKS);
-	t->setEndTag("-Del");
-    };
+    InstSrcDataULSelTags( );
 
 private:
 
