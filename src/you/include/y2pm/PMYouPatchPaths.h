@@ -166,23 +166,6 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname externalRpmDir();
 
     /**
-      Return path to local server list (suseservers). This file is obsolete, use
-      localYouServers() instead.
-    */
-    Pathname localSuseServers();
-
-    /**
-      Return path to local server list configuration file.
-    */
-    Pathname localYouServers();
-
-    /**
-      Return path to file where the server list is downloaded to from the
-      server.
-    */
-    Pathname cachedYouServers();
-
-    /**
       Return name of file holding the list of patches in the "patches"
       directory.
     */
@@ -220,37 +203,6 @@ class PMYouPatchPaths : virtual public Rep {
     bool businessProduct();
 
     /**
-      Get list of YOU servers from CGI script on the master server.
-    */
-    PMError requestServers( const std::string &url = std::string() );
-
-    /**
-      Return list of known servers.
-    */
-    std::list<Url> servers();
-    
-    /**
-      Return default server, when no server list can be read at all.
-    */
-    Url defaultServer();
-
-    /**
-      Return server which is currently used for getting updates.
-    */
-    Url currentServer();
-
-    /**
-      Return URL where list of YOU servers is read from.
-    */
-    std::string mirrorList();
-
-    /**
-      Return default URL where list of YOU servers is read from, if the
-      information can't be read from the product information.
-    */
-    std::string defaultMirrorList();
-
-    /**
       Return path to file used for storing cookies.
     */
     Pathname cookiesFile();
@@ -265,15 +217,13 @@ class PMYouPatchPaths : virtual public Rep {
     */
     SysConfig *config();
 
+    /**
+      Return base URL for YOU.
+    */
+    std::string youUrl();
+
   protected:
     void init( const std::string &path );
-
-    std::string encodeUrl( const std::string &url );
-
-    void addPackageVersion( const std::string &pkgName, std::string &url );
-
-    PMError readServers( const Pathname & );
-    void addServer( const Url & );
 
   private:
     Pathname _patchPath;
@@ -290,8 +240,6 @@ class PMYouPatchPaths : virtual public Rep {
 
     std::list<PkgArch> _archs;
     
-    std::list<Url> _servers;
-
     std::string _youUrl;
     bool _businessProduct;
 
