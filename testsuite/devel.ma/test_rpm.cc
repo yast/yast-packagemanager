@@ -14,7 +14,7 @@ extern int _hdr_debug;
 #include <y2util/stringutil.h>
 
 #include <y2pm/librpmDb.h>
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeader.h>
 
 using namespace std;
 

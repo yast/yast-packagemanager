@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       RpmLibHeader.h
+  File:       RpmHeader.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -18,13 +18,13 @@
   Purpose:
 
 /-*/
-#ifndef RpmLibHeader_h
-#define RpmLibHeader_h
+#ifndef RpmHeader_h
+#define RpmHeader_h
 
 #include <iosfwd>
 #include <list>
 
-#include <y2pm/RpmLibHeaderPtr.h>
+#include <y2pm/RpmHeaderPtr.h>
 #include <y2pm/binHeader.h>
 
 #include <y2pm/PMPackage.h>
@@ -35,25 +35,23 @@ class PkgDu;
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : RpmLibHeader
+//	CLASS NAME : RpmHeader
 /**
  * @short Wrapper class for rpm header struct.
  *
- * <code>RpmLibHeader</code> provides methods to query the content
+ * <code>RpmHeader</code> provides methods to query the content
  * of a rpm header struct retrieved from the RPM database or by reading
  * the rpm header of a package on disk.
  *
  * The rpm header contains all data associated with a package. So you
  * probabely do not want to permanently store too many of them.
  *
- * <B>NEVER create <code>RpmLibHeader</code> from a NULL <code>Header</code>! </B>
+ * <B>NEVER create <code>RpmHeader</code> from a NULL <code>Header</code>! </B>
  **/
-class RpmLibHeader : virtual public Rep, public binHeader {
-  REP_BODY(RpmLibHeader); // includes no cpoy, no assign
+class RpmHeader : virtual public Rep, public binHeader {
+  REP_BODY(RpmHeader); // includes no cpoy, no assign
 
   private:
-
-    bool         _isSrc;
 
     PMSolvable::PkgRelList_type PkgRelList_val( tag tag_r, FileDeps::FileNames * freq_r = 0 ) const;
 
@@ -62,17 +60,17 @@ class RpmLibHeader : virtual public Rep, public binHeader {
     /**
      *
      **/
-    RpmLibHeader( Header h_r = 0, bool isSrc = false );
+    RpmHeader( Header h_r = 0 );
 
     /**
      * <B>Dangerous!<\B> This one takes the header out of rhs
      * and leaves rhs empty.
      **/
-    RpmLibHeader( binHeaderPtr & rhs, bool isSrc = false );
+    RpmHeader( binHeaderPtr & rhs );
 
-    virtual ~RpmLibHeader();
+    virtual ~RpmHeader();
 
-    bool isSrc() const { return _isSrc; }
+    bool isSrc() const;
 
   public:
 
@@ -139,10 +137,10 @@ class RpmLibHeader : virtual public Rep, public binHeader {
      * Get an accessible packages data from disk.
      * Returns NULL on any error.
      **/
-    static constRpmLibHeaderPtr readPackage( const Pathname & path );
+    static constRpmHeaderPtr readPackage( const Pathname & path );
 };
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // RpmLibHeader_h
+#endif // RpmHeader_h
 

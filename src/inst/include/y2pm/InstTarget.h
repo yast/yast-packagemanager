@@ -36,6 +36,7 @@
 #include <set>
 #include <string>
 
+#include <y2util/ProgressCounter.h>
 #include <y2util/Pathname.h>
 #include <y2util/FSize.h>
 
@@ -64,19 +65,39 @@
 class InstTarget: virtual public Rep, public InstData {
     REP_BODY(InstTarget);
 
-    public:
+  public:
 
-        /**
-	 * default error class
-	 **/
-        typedef InstTargetError Error;
+    /**
+     * default error class
+     **/
+    typedef InstTargetError Error;
 
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Callbacks
+    //
+    ///////////////////////////////////////////////////////////////////
 
-      ///////////////////////////////////////////////////////////////////
-      // General interface
-      ///////////////////////////////////////////////////////////////////
+    /**
+     * @return Callback for reporting progress of rpm database conversion.
+     **/
+    static ProgressCounter::Callback & cb_rpmConvertDb() { return RpmDb::cb_convertDb(); }
 
-    private:
+    /**
+     * @return Callback for reporting progress of rpm database rebuild.
+     **/
+    static ProgressCounter::Callback & cb_rpmRrebuildDb() { return RpmDb::cb_rebuildDb(); }
+
+    /**
+     * @return Callback for reporting progress of rpm package installation.
+     **/
+    static ProgressCounter::Callback & cb_rpmInstallPkg() { return RpmDb::cb_installPkg(); }
+
+    ///////////////////////////////////////////////////////////////////
+    // General interface
+    ///////////////////////////////////////////////////////////////////
+
+  private:
 
         friend class Y2PM;
 	// no parameters here since Y2PM creates it on first access
@@ -110,6 +131,12 @@ class InstTarget: virtual public Rep, public InstData {
 	 * It is safe to alwas use true here.
 	 * */
 	PMError init( const Pathname & rootpath, bool createnew = true );
+
+
+	/**
+	 * Finish target system. Close all databases, logflies etc.
+	 **/
+	PMError finish();
 
 	/**
 	 * @return destination root directory of target system
@@ -162,7 +189,7 @@ class InstTarget: virtual public Rep, public InstData {
         {
           public:
             virtual ~Callbacks() {};
-          
+
             /**
               Signal script execution progress in percent. A value of -1
               indicates progress without known percentage value. If the
@@ -294,24 +321,6 @@ class InstTarget: virtual public Rep, public InstData {
 	 * */
 	PMError removePackages(const std::list<std::string>& labels, unsigned flags = 0);
 	PMError removePackages(const std::list<PMPackagePtr>& packages, unsigned flags = 0);
-
-	/**
-	 * set callback function for reporting progress of package
-	 * installation
-	 *
-	 * @param func callback function, must accept int as argument for percentage
-	 * @param data arbitrary data to pass when function is called
-	 * */
-	void setPackageInstallProgressCallback(void (*func)(int,void*), void* data);
-
-	/**
-	 * set callback function for reporting progress of rebuildding the
-	 * package database (rpm --rebuilddb)
-	 *
-	 * @param func callback function, must accept int as argument for percentage
-	 * @param data arbitrary data to pass when function is called
-	 * */
-	void setRebuildDBProgressCallback(void (*func)(int,void*), void* data);
 
     public:
       ///////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       RpmLibHeaderCache.h
+  File:       RpmHeaderCache.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -18,8 +18,8 @@
   Purpose:
 
 /-*/
-#ifndef RpmLibHeaderCache_h
-#define RpmLibHeaderCache_h
+#ifndef RpmHeaderCache_h
+#define RpmHeaderCache_h
 
 #include <iosfwd>
 
@@ -27,20 +27,20 @@
 
 #include <y2pm/PkgName.h>
 #include <y2pm/binHeaderCache.h>
-#include <y2pm/RpmLibHeaderPtr.h>
+#include <y2pm/RpmHeaderPtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : RpmLibHeaderCache
+//	CLASS NAME : RpmHeaderCache
 /**
  *
  **/
-class RpmLibHeaderCache : public binHeaderCache {
+class RpmHeaderCache : public binHeaderCache {
 
-  friend std::ostream & operator<<( std::ostream & str, const RpmLibHeaderCache & obj );
+  friend std::ostream & operator<<( std::ostream & str, const RpmHeaderCache & obj );
 
-  RpmLibHeaderCache & operator=( const RpmLibHeaderCache & );
-  RpmLibHeaderCache            ( const RpmLibHeaderCache & );
+  RpmHeaderCache & operator=( const RpmHeaderCache & );
+  RpmHeaderCache            ( const RpmHeaderCache & );
 
   private:
 
@@ -52,13 +52,13 @@ class RpmLibHeaderCache : public binHeaderCache {
 
   public:
 
-    RpmLibHeaderCache( const Pathname & cache_r );
-    virtual ~RpmLibHeaderCache();
+    RpmHeaderCache( const Pathname & cache_r );
+    virtual ~RpmHeaderCache();
 
-    constRpmLibHeaderPtr getFirst( Pathname & citem_r, int & isSource_r, pos & at_r );
-    constRpmLibHeaderPtr getNext( Pathname & citem_r, int & isSource_r, pos & at_r );
+    constRpmHeaderPtr getFirst( Pathname & citem_r, int & isSource_r, pos & at_r );
+    constRpmHeaderPtr getNext( Pathname & citem_r, int & isSource_r, pos & at_r );
 
-    constRpmLibHeaderPtr getAt( pos at_r );
+    constRpmHeaderPtr getAt( pos at_r );
 
   public:
 
@@ -75,4 +75,4 @@ class RpmLibHeaderCache : public binHeaderCache {
 
 ///////////////////////////////////////////////////////////////////
 
-#endif // RpmLibHeaderCache_h
+#endif // RpmHeaderCache_h

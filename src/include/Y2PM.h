@@ -25,8 +25,11 @@
 #include <iosfwd>
 #include <string>
 #include <list>
+
+#include <y2util/ProgressCounter.h>
 #include <y2util/LangCode.h>
 #include <y2util/FSize.h>
+
 #include <y2pm/PkgArch.h>
 #include <y2pm/InstSrcManager.h>
 
@@ -43,6 +46,13 @@ class PMSelectionManager;
  * Package Management creating them on demand.
  **/
 class Y2PM {
+
+  private:
+
+    // Translate InstTarget Callbacks to (still old) Y2PM interface
+    static void cbfConvertDb( const ProgressCounter & pc, void * );
+    static void cbfRebuildDb( const ProgressCounter & pc, void * );
+    static void cbfInstallPkg( const ProgressCounter & pc, void * );
 
   private:
 
@@ -152,6 +162,12 @@ class Y2PM {
      * and also !!START THE packageManager!!
      **/
     static InstTarget & instTarget(bool do_start = false, Pathname root = Pathname("/"));
+
+
+     /**
+      * Shutdown access to the installation target.
+      **/
+   static void instTargetFinish();
 
     /**
      * Special call to create the instSrcManager (if it does not

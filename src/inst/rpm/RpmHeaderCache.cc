@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       RpmLibHeaderCache.cc
+  File:       RpmHeaderCache.cc
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -24,17 +24,17 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PkgName.h>
-#include <y2pm/RpmLibHeaderCache.h>
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeaderCache.h>
+#include <y2pm/RpmHeader.h>
 
 using namespace std;
 
 #undef Y2LOG
-#define Y2LOG "RpmLibHeaderCache"
+#define Y2LOG "RpmHeaderCache"
 
 ///////////////////////////////////////////////////////////////////
 
-const PkgNameEd & RpmLibHeaderCache::def_magic()
+const PkgNameEd & RpmHeaderCache::def_magic()
 {
   static PkgNameEd _def_magic( PkgName("YaST-PHC"), PkgEdition("1.0-0") );
   return _def_magic;
@@ -45,10 +45,10 @@ const PkgNameEd & RpmLibHeaderCache::def_magic()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeaderCache::RpmLibHeaderCache
+//	METHOD NAME : RpmHeaderCache::RpmHeaderCache
 //	METHOD TYPE : Constructor
 //
-RpmLibHeaderCache::RpmLibHeaderCache( const Pathname & cache_r )
+RpmHeaderCache::RpmHeaderCache( const Pathname & cache_r )
     : binHeaderCache( cache_r )
 {
 }
@@ -56,20 +56,20 @@ RpmLibHeaderCache::RpmLibHeaderCache( const Pathname & cache_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeaderCache::~RpmLibHeaderCache
+//	METHOD NAME : RpmHeaderCache::~RpmHeaderCache
 //	METHOD TYPE : Destructor
 //
-RpmLibHeaderCache::~RpmLibHeaderCache()
+RpmHeaderCache::~RpmHeaderCache()
 {
 }
 
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeaderCache::magicOk
+//	METHOD NAME : RpmHeaderCache::magicOk
 //	METHOD TYPE : bool
 //
-bool RpmLibHeaderCache::magicOk()
+bool RpmHeaderCache::magicOk()
 {
   PkgNameEd magic( PkgNameEd::fromString( _cmagic ) );
   if ( magic != def_magic() ) {
@@ -87,16 +87,16 @@ bool RpmLibHeaderCache::magicOk()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeaderCache::getFirst
-//	METHOD TYPE : constRpmLibHeaderPtr
+//	METHOD NAME : RpmHeaderCache::getFirst
+//	METHOD TYPE : constRpmHeaderPtr
 //
-constRpmLibHeaderPtr RpmLibHeaderCache::getFirst( Pathname & citem_r, int & isSource_r, pos & at_r )
+constRpmHeaderPtr RpmHeaderCache::getFirst( Pathname & citem_r, int & isSource_r, pos & at_r )
 {
-  RETURN_IF_CLOSED( (RpmLibHeader*)0 );
+  RETURN_IF_CLOSED( (RpmHeader*)0 );
 
   if ( seek( _cheaderStart ) == npos ) {
     ERR << "Can't seek to first header at " << _cheaderStart << endl;
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
   return getNext( citem_r, isSource_r, at_r );
@@ -105,12 +105,12 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getFirst( Pathname & citem_r, int & isSo
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeaderCache::getNext
-//	METHOD TYPE : constRpmLibHeaderPtr
+//	METHOD NAME : RpmHeaderCache::getNext
+//	METHOD TYPE : constRpmHeaderPtr
 //
-constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSource_r, pos & at_r )
+constRpmHeaderPtr RpmHeaderCache::getNext( Pathname & citem_r, int & isSource_r, pos & at_r )
 {
-  RETURN_IF_CLOSED( constRpmLibHeaderPtr() );
+  RETURN_IF_CLOSED( constRpmHeaderPtr() );
 
   static const unsigned sigsize = 8;
 
@@ -122,12 +122,12 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSou
     if ( count ) {
       ERR << "Error reading entry." << endl;
     } // else EOF?
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
   if ( sig[0] != '@' || sig[sigsize-1] != '@' ) {
     ERR << "Invalid entry." << endl;
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
   sig[sigsize-1] = '\0';
@@ -138,7 +138,7 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSou
 
   if ( readData( citem, count ) != count ) {
     ERR << "Error reading entry data." << endl;
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
   isSource_r = ( citem[0] == 's' );
@@ -152,25 +152,25 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getNext( Pathname & citem_r, int & isSou
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeaderCache::getAt
-//	METHOD TYPE : constRpmLibHeaderPtr
+//	METHOD NAME : RpmHeaderCache::getAt
+//	METHOD TYPE : constRpmHeaderPtr
 //
-constRpmLibHeaderPtr RpmLibHeaderCache::getAt( pos at_r )
+constRpmHeaderPtr RpmHeaderCache::getAt( pos at_r )
 {
-  RETURN_IF_CLOSED( constRpmLibHeaderPtr() );
+  RETURN_IF_CLOSED( constRpmHeaderPtr() );
 
   if ( seek( at_r ) == npos ) {
     ERR << "Can't seek to header at " << at_r << endl;
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
   binHeaderPtr bp = readHeader();
   if ( !bp ) {
     ERR << "Can't read header at " << at_r << endl;
-    return (RpmLibHeader*)0;
+    return (RpmHeader*)0;
   }
 
-  return new RpmLibHeader( bp );
+  return new RpmHeader( bp );
 }
 
 /******************************************************************
@@ -179,9 +179,9 @@ constRpmLibHeaderPtr RpmLibHeaderCache::getAt( pos at_r )
 **	FUNCTION NAME : operator<<
 **	FUNCTION TYPE : ostream &
 */
-ostream & operator<<( ostream & str, const RpmLibHeaderCache & obj )
+ostream & operator<<( ostream & str, const RpmHeaderCache & obj )
 {
-  return str << "RpmLibHeaderCache@" << static_cast<const binHeaderCache &>(obj);
+  return str << "RpmHeaderCache@" << static_cast<const binHeaderCache &>(obj);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -192,6 +192,7 @@ ostream & operator<<( ostream & str, const RpmLibHeaderCache & obj )
 #include <y2util/PathInfo.h>
 extern "C" {
 #include <rpm/rpmlib.h>
+#include <rpm/rpmts.h>
 #include <netinet/in.h>
   // from rpm: lib/header.c
   struct entryInfo {
@@ -247,7 +248,7 @@ unsigned phcAddHeader( FD_t fd, Header h, const Pathname & citem_r, int isSource
 */
 unsigned phcAddFile( FD_t fd, const PathInfo & cpath_r, const Pathname & citem_r )
 {
-  FD_t pkg = ::Fopen( cpath_r.asString().c_str(), "r" );
+  FD_t pkg = ::Fopen( cpath_r.asString().c_str(), "r.ufdio" );
   if ( pkg == 0 || ::Ferror(pkg) ) {
     ERR << "Can't open file for reading: " << cpath_r << " (" << ::Fstrerror(pkg) << ")" << endl;
     if ( pkg )
@@ -255,25 +256,22 @@ unsigned phcAddFile( FD_t fd, const PathInfo & cpath_r, const Pathname & citem_r
     return 0;
   }
 
-  Header h     = 0;
-  int isSource = 0;
-  int major    = 0;
-  int minor    = 0;
-
-  //int res = ::rpmReadPackageHeader( pkg, &h, &isSource, &major, &minor );
-#warning MISSING ::rpmReadPackageHeader
-  int res = 1;
+  rpmts ts = rpmtsCreate();
+  Header h = 0;
+  int res = ::rpmReadPackageFile( ts, pkg, cpath_r.path().asString().c_str(), &h );
+  ts = rpmtsFree(ts);
   ::Fclose( pkg );
 
-  if ( res || !h ) {
-    WAR << "Error reading: " << cpath_r << (res==1?" (bad magic)":"") << endl;
+  if ( ! h ) {
+    WAR << "Error reading header from " << cpath_r << " error(" << res << ")" << endl;
     return 0;
   }
 
-  constRpmLibHeaderPtr dummy( new RpmLibHeader( h, isSource ) ); // to handle header free
-  MIL << major << "." << minor << "-" << (isSource?"src ":"bin ") << dummy << " for " << citem_r << endl;
+  constRpmHeaderPtr dummy( new RpmHeader( h ) ); // to handle header free
+  headerFree( h ); // clear reference set in ReadPackageFile
+  MIL << dummy << " for " << citem_r << endl;
 
-  return phcAddHeader( fd, h, citem_r, isSource );
+  return phcAddHeader( fd, h, citem_r, dummy->isSrc() );
 }
 
 /******************************************************************
@@ -283,7 +281,7 @@ unsigned phcAddFile( FD_t fd, const PathInfo & cpath_r, const Pathname & citem_r
 **	FUNCTION TYPE : unsigned
 */
 unsigned phcScanDir( FD_t fd, const PathInfo & cpath_r, const Pathname & prfx_r,
-		     const RpmLibHeaderCache::buildOpts & options_r )
+		     const RpmHeaderCache::buildOpts & options_r )
 {
   DBG << "SCAN " << cpath_r << " (" << prfx_r << ")" << endl;
 
@@ -317,10 +315,10 @@ unsigned phcScanDir( FD_t fd, const PathInfo & cpath_r, const Pathname & prfx_r,
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : RpmLibHeaderCache::buildHeaderCache
+//	METHOD NAME : RpmHeaderCache::buildHeaderCache
 //	METHOD TYPE : int
 //
-int RpmLibHeaderCache::buildHeaderCache( const Pathname & cache_r,
+int RpmHeaderCache::buildHeaderCache( const Pathname & cache_r,
 					 const Pathname & pkgroot_r,
 					 const buildOpts & options_r )
 {

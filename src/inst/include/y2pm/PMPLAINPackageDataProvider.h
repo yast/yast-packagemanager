@@ -30,7 +30,7 @@
 #include <y2util/Vendor.h>
 
 #include <y2pm/InstSrcDataPLAINPtr.h>
-#include <y2pm/RpmLibHeaderPtr.h>
+#include <y2pm/RpmHeaderPtr.h>
 
 #include <y2pm/PMPLAINPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
@@ -62,7 +62,7 @@ class PMPLAINPackageDataProvider : virtual public Rep, public PMPackageDataProvi
     /**
      * Called from RpmDb to setup cached values.
      **/
-    void loadStaticData( constRpmLibHeaderPtr h );
+    void loadStaticData( constRpmHeaderPtr h );
 
     /**
      * single package cache for _cachedPkg
@@ -71,9 +71,9 @@ class PMPLAINPackageDataProvider : virtual public Rep, public PMPackageDataProvi
      * for a package != _cachedPkg is issued
     */
     static PMPackagePtr         _cachedPkg;
-    static constRpmLibHeaderPtr _cachedData;
+    static constRpmHeaderPtr _cachedData;
 
-    constRpmLibHeaderPtr fillCache( PMPackagePtr package ) const;
+    constRpmHeaderPtr fillCache( PMPackagePtr package ) const;
 
   public:
 

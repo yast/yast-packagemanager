@@ -185,8 +185,44 @@ Y2PM::CallBacks::CallBacks()
     _rebuilddb_progress_data = NULL;
     _source_change_func = NULL;
     _source_change_data = NULL;
+#warning Switch to new callback interface
+    // Translate new InstTarget Callbacks:
+    InstTarget::cb_rpmConvertDb().setFunc( cbfConvertDb );
+    InstTarget::cb_rpmRrebuildDb().setFunc( cbfRebuildDb );
+    InstTarget::cb_rpmInstallPkg().setFunc( cbfInstallPkg );
 };
 
+void Y2PM::cbfConvertDb( const ProgressCounter & pc, void * ) {
+  // WFM does not yet support it, so drop a debug line every 100 packages processed.
+  if ( pc.state() == ProgressCounter::st_value && pc.val() % 100 )
+    return;
+  DBG << pc.state() << " (" << pc.cycle() << ")[" << pc.min() << "-" << pc.max() << "] "
+      << pc.val() << " " << pc.precent() << "%" << endl;
+
+}
+void Y2PM::cbfRebuildDb( const ProgressCounter & pc, void * ) {
+  if ( _callbacks._rebuilddb_progress_func ) {
+    _callbacks._rebuilddb_progress_func( (int)pc.precent(), _callbacks._rebuilddb_progress_data );
+  }
+}
+void Y2PM::cbfInstallPkg( const ProgressCounter & pc, void * ) {
+  static int lastP = 0;
+  switch ( pc.state() ) {
+  case ProgressCounter::st_start:
+  case ProgressCounter::st_stop:
+    lastP = 0; // reset
+    break;
+  case ProgressCounter::st_value:
+    if ( pc.precent() - lastP < 5 ) {
+      return; // WFM likes 5% steps
+    }
+    lastP = (int)pc.precent();
+  }
+  // report
+  if ( _callbacks._package_progress_func ) {
+    _callbacks._package_progress_func( (int)pc.precent(), _callbacks._package_progress_data );
+  }
+}
 
 /**
  * called right before package 'name' is provided
@@ -238,7 +274,7 @@ Y2PM::setPackageProgressCallback(void (*func)(int percent, void*), void* data)
 {
     _callbacks._package_progress_func = func;
     _callbacks._package_progress_data = data;
-    instTarget().setPackageInstallProgressCallback (func, data);
+   // from cbfInstallPkg: instTarget().setPackageInstallProgressCallback (func, data);
 }
 
 /**
@@ -261,7 +297,7 @@ Y2PM::setRebuildDBProgressCallback(void (*func)(int percent, void*), void* data)
 {
     _callbacks._rebuilddb_progress_func = func;
     _callbacks._rebuilddb_progress_data = data;
-    instTarget().setRebuildDBProgressCallback(func, data);
+    // from cbfRebuildDb: instTarget().setRebuildDBProgressCallback(func, data);
 }
 
 
@@ -327,6 +363,29 @@ InstTarget & Y2PM::instTarget(bool do_start, Pathname root)
     }
 
     return *_instTarget;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::instTargetFinish
+//	METHOD TYPE : void
+//
+void Y2PM::instTargetFinish()
+{
+  if ( _instTarget ) {
+    MIL << "Shutdown InstTarget..." << endl;
+    if ( _packageManager ) {
+      std::list<PMPackagePtr> empty;
+      _packageManager->poolSetInstalled( empty );
+    }
+    if ( _selectionManager ) {
+      std::list<PMSelectionPtr> empty;
+      _selectionManager->poolSetInstalled( empty );
+    }
+    instTarget().finish();
+    MIL << "InstTarget down" << endl;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////

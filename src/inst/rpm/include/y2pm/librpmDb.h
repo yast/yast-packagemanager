@@ -28,7 +28,7 @@
 
 #include <y2pm/InstTargetError.h>
 #include <y2pm/librpmDbPtr.h>
-#include <y2pm/RpmLibHeader.h>
+#include <y2pm/RpmHeader.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -455,7 +455,7 @@ class librpmDb::db_const_iterator {
     PMError dbError() const;
 
     /**
-     * Advance to next constRpmLibHeaderPtr.
+     * Advance to next constRpmHeaderPtr.
      **/
     void operator++();
 
@@ -466,15 +466,15 @@ class librpmDb::db_const_iterator {
     unsigned dbHdrNum() const;
 
     /**
-     * Returns the current constRpmLibHeaderPtr or
+     * Returns the current constRpmHeaderPtr or
      * NULL, if no more entries available.
      **/
-    const constRpmLibHeaderPtr & operator*() const;
+    const constRpmHeaderPtr & operator*() const;
 
     /**
-     * Forwards to the current constRpmLibHeaderPtr.
+     * Forwards to the current constRpmHeaderPtr.
      **/
-    const constRpmLibHeaderPtr & operator->() const {
+    const constRpmHeaderPtr & operator->() const {
       return operator*();
     }
 

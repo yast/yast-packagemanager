@@ -27,9 +27,9 @@
 #include <y2pm/InstSrcDataPLAINPtr.h>
 #include <y2pm/InstSrcData.h>
 #include <y2pm/PMPackage.h>
-#include <y2pm/RpmLibHeaderPtr.h>
+#include <y2pm/RpmHeaderPtr.h>
 
-class RpmLibHeaderCache;
+class RpmHeaderCache;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -49,7 +49,7 @@ class InstSrcDataPLAIN : virtual public Rep, public InstSrcData {
 
   private:
 
-    RpmLibHeaderCache & _cache;
+    RpmHeaderCache & _cache;
 
     /**
      * List of Packages on this source
@@ -69,7 +69,7 @@ class InstSrcDataPLAIN : virtual public Rep, public InstSrcData {
     /**
      * Called from PMPLAINPackageDataProvider to fill its header cache
      **/
-    constRpmLibHeaderPtr getHeaderAt( unsigned _cachepos ) const;
+    constRpmHeaderPtr getHeaderAt( unsigned _cachepos ) const;
 
     PMError providePkgToInstall( const Pathname & pkgfile_r, Pathname & path_r ) const;
 

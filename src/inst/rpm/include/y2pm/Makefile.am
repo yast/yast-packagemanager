@@ -9,8 +9,8 @@ pkgincludedir = $(includedir)/y2pm
 pkginclude_HEADERS =	\
 	binHeader.h binHeaderPtr.h \
 	binHeaderCache.h \
-	RpmLibHeader.h RpmLibHeaderPtr.h \
-	RpmLibHeaderCache.h \
+	RpmHeader.h RpmHeaderPtr.h \
+	RpmHeaderCache.h \
 	librpmDb.h librpmDbPtr.h \
 	RpmDb.h RpmDbPtr.h \
 	PMRpmPackageDataProvider.h PMRpmPackageDataProviderPtr.h
