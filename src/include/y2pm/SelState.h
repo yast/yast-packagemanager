@@ -46,17 +46,20 @@ class SelState {
     static const bits B_TO_DEL   = 0x04; // request to delete installed object
     static const bits B_TO_INS   = 0x08; // request to install candidate object
 
+    // next two are mutual exclusive
     static const bits B_BY_USER  = 0x10; // modification requested by user
-
-    static const bits B_F_TABOO  = 0x20; // In absence of installed object
-                                         // forbid to install candidate object
+    static const bits B_BY_APPL  = 0x20; // modification requested by application
 
     //static const bits B_UNUSED  = 0x40;
-    //static const bits B_UNUSED  = 0x80;
+
+    static const bits B_F_TABOO  = 0x80; // In absence of installed object
+                                         // forbid to install candidate object
 
     static const bits M_IS = B_IS_I | B_IS_C;
 
     static const bits M_TO = B_TO_DEL | B_TO_INS;
+
+    static const bits M_BY = B_BY_USER | B_BY_APPL;
 
   private:
 
@@ -114,6 +117,7 @@ class SelState {
      **/
     bool has_candidate_only() const { return( _bits & M_IS ) == B_IS_C; }
 
+  public:
 
     /**
      * True if either to delete or to install
@@ -130,10 +134,22 @@ class SelState {
      **/
     bool to_install()    const { return( _bits & B_TO_INS ); }
 
+  public:
+
     /**
      * True if modification was requested by user
      **/
     bool by_user()       const { return( _bits & B_BY_USER ); }
+
+    /**
+     * True if modification was requested by application
+     **/
+    bool by_appl()       const { return( _bits & B_BY_APPL ); }
+
+    /**
+     * True if modification was auto requested
+     **/
+    bool by_auto()       const { return!( _bits & M_BY ); }
 
     /**
      * True if forbidden to install a candidate object.
@@ -169,21 +185,43 @@ class SelState {
      **/
     bool user_clr_taboo( const bool doit );
 
+  public:
+
+    /**
+     * Application request to clear state (neither delete nor install).
+     * Fails if user requested modification.
+     **/
+    bool appl_unset( const bool doit );
+
+    /**
+     * Application request to delete the installed object. Fails if no
+     * installed object is present, or user requested install.
+     **/
+    bool appl_set_delete( const bool doit );
+
+    /**
+     * Application request to install the candidate object. Fails if no
+     * candidate object is present, or user requested delete, or taboo.
+     **/
+    bool appl_set_install( const bool doit );
+
+  public:
+
     /**
      * Auto request to clear state (neither delete nor install).
-     * Fails if user requested modification.
+     * Fails if user/appl requested modification.
      **/
     bool auto_unset( const bool doit );
 
     /**
      * Auto request to delete the installed object. Fails if no
-     * installed object is present, or user requested install.
+     * installed object is present, or user/appl requested install.
      **/
     bool auto_set_delete( const bool doit );
 
     /**
      * Auto request to install the candidate object. Fails if no
-     * candidate object is present, or user requested delete, or taboo.
+     * candidate object is present, or user/appl requested delete, or taboo.
      **/
     bool auto_set_install( const bool doit );
 

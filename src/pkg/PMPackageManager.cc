@@ -115,30 +115,21 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
       continue;
     }
 
-    switch( sel->status() ) {
+    if ( sel->to_install() ) {
 
-    case PMSelectable::S_Install:
-    case PMSelectable::S_Update:
-    case PMSelectable::S_Auto:
       if ( sel->candidateObj() ) {
 	iset.add( sel->candidateObj() );
 	instlist_r.push_back( sel->candidateObj() );
       } else
 	INT << "NULL candidate to install" << endl;
-      break;
 
-    case PMSelectable::S_Del:
+    } else if ( sel->to_delete() ) {
+
       if ( sel->installedObj() ) {
 	dellist_r.push_back( sel->installedObj() );
       } else
 	INT << "NULL installed to delete" << endl;
-      break;
 
-    case PMSelectable::S_NoInst:
-    case PMSelectable::S_KeepInstalled:
-    case PMSelectable::S_Taboo:
-      // nothing to do.
-      break;
     }
   }
   DBG << "num packages: delete " << dellist_r.size() << ", install " << instlist_r.size() << endl;

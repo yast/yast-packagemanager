@@ -211,14 +211,18 @@ class PMSelectable : virtual public Rep {
     // Dangerous / noteworthy states are sorted first.
     //
     // sh@suse.de
-    
+
     enum UI_Status {
       S_Taboo,               // hide candidateObj so it can't be installed. ( have no installedObj )
+      // requested by user:
       S_Del,                 // delete  installedObj
       S_Update,              // install candidateObj ( have installedObj )
       S_Install,             // install candidateObj ( have no installedObj ) ( clears taboo )
-      S_AutoDel,             // like S_Del, but not requested by user, does not clear taboo
-      S_Auto,                // like S_Install, but not requested by user, does not clear taboo
+      // not requested by user:
+      S_AutoDel,             // delete  installedObj
+      S_AutoUpdate,          // install candidateObj ( have installedObj )
+      S_AutoInstall,         // install candidateObj ( have no installedObj )
+      // no modification:
       S_KeepInstalled,       // no modification      ( have installedObj )
       S_NoInst,              // no modification      ( have no installedObj )
     };
@@ -231,6 +235,7 @@ class PMSelectable : virtual public Rep {
      * If doit is true, clears a TABOO flag, and
      * sets candidateObj to bestCandidate, if available.
      *
+
      * Anyway return whether there is (or would be) a
      * candidateObj available afterwards.
      **/
@@ -299,6 +304,8 @@ class PMSelectable : virtual public Rep {
      **/
     bool has_candidate_only() const { return _state.has_candidate_only(); }
 
+  public:
+
     /**
      * True if either to delete or to install
      **/
@@ -314,10 +321,24 @@ class PMSelectable : virtual public Rep {
      **/
     bool to_install()    const { return _state.to_install(); }
 
+  public:
+
     /**
      * True if modification was requested by user
      **/
     bool by_user()       const { return _state.by_user(); }
+
+    /**
+     * True if modification was requested by application
+     **/
+    bool by_appl()       const { return _state.by_appl(); }
+
+    /**
+     * True if modification was auto requested
+     **/
+    bool by_auto()       const { return _state.by_auto(); }
+
+  public:
 
     /**
      * True if forbidden to install a candidate object.
@@ -343,24 +364,45 @@ class PMSelectable : virtual public Rep {
      **/
     bool user_set_install() { return _state.user_set_install( true ); }
 
+  public:
+
     /**
-     * Auto request to install the candidate object. Fails if no
+     * Application request to clear state (neither delete nor install).
+     * Fails if user requested modification.
+     **/
+    bool appl_unset() { return _state.appl_unset( true ); }
+
+    /**
+     * Application request to delete the installed object. Fails if no
+     * installed object is present, or user requested install.
+     **/
+    bool appl_set_delete() { return _state.appl_set_delete( true ); }
+
+    /**
+     * Application request to install the candidate object. Fails if no
      * candidate object is present, or user requested delete, or taboo.
      **/
-    bool auto_set_install() {
-      if ( !_state.has_candidate_only() )
-	return false; // Otherwise UI will be confused ;(
-      return _state.auto_set_install( true );
-    }
+    bool appl_set_install() { return _state.appl_set_install( true ); }
+
+  public:
+
+    /**
+     * Auto request to clear state (neither delete nor install).
+     * Fails if user/appl requested modification.
+     **/
+    bool auto_unset() { return _state.auto_unset( true ); }
+
+    /**
+     * Auto request to install the candidate object. Fails if no
+     * candidate object is present, or user/appl requested delete, or taboo.
+     **/
+    bool auto_set_install() { return _state.auto_set_install( true ); }
 
     /**
      * Auto request to delete the installed object. Fails if no
-     * installed object is present, or user requested 'install'.
-     ** FIXME #warning auto_set_delete: Any UI checks needed here ?
+     * installed object is present, or user/appl requested 'install'.
      **/
-    bool auto_set_delete() {
-      return _state.auto_set_delete( true );
-    }
+    bool auto_set_delete() { return _state.auto_set_delete( true ); }
 
   public:
 

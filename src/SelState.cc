@@ -109,7 +109,7 @@ void SelState::set_has_candidate( bool b )
 bool SelState::user_unset( const bool doit )
 {
   if ( doit ) {
-    clr( M_TO | B_BY_USER );
+    clr( M_TO | M_BY );
   }
   return true;
 }
@@ -127,7 +127,7 @@ bool SelState::user_set_delete( const bool doit )
   if ( ! has_installed() )
     return false;
   if ( doit ) {
-    clr( M_TO );
+    clr( M_TO | M_BY );
     set( B_TO_DEL | B_BY_USER );
   }
   return true;
@@ -146,7 +146,7 @@ bool SelState::user_set_install( const bool doit )
   if ( ! has_candidate() )
     return false;
   if ( doit ) {
-    clr( M_TO );
+    clr( M_TO | M_BY );
     set( B_TO_INS | B_BY_USER );
   }
   return true;
@@ -194,6 +194,67 @@ bool SelState::user_clr_taboo( const bool doit )
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : SelState::appl_unset
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool SelState::appl_unset( const bool doit )
+{
+  if ( by_user() )
+    return false;
+  if ( doit ) {
+    clr( M_TO | M_BY );
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : SelState::appl_set_delete
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool SelState::appl_set_delete( const bool doit )
+{
+  if ( to_delete() )
+    return true;
+  if ( by_user() || !has_installed() )
+    return false;
+  if ( doit ) {
+    clr( M_TO | M_BY );
+    set( B_TO_DEL | B_BY_APPL );
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : SelState::appl_set_install
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool SelState::appl_set_install( const bool doit )
+{
+  if ( to_install() )
+    return true;
+  if ( by_user() || !has_candidate() )
+    return false;
+  if ( doit ) {
+    clr( M_TO | M_BY );
+    set( B_TO_INS | B_BY_APPL );
+  }
+  return true;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : SelState::auto_unset
 //	METHOD TYPE : bool
 //
@@ -201,7 +262,7 @@ bool SelState::user_clr_taboo( const bool doit )
 //
 bool SelState::auto_unset( const bool doit )
 {
-  if ( by_user() )
+  if ( !by_auto() )
     return false;
   if ( doit ) {
     clr( M_TO );
@@ -221,7 +282,7 @@ bool SelState::auto_set_delete( const bool doit )
 {
   if ( to_delete() )
     return true;
-  if ( by_user() || ! has_installed() )
+  if ( !by_auto() || !has_installed() )
     return false;
   if ( doit ) {
     clr( M_TO );
@@ -242,7 +303,7 @@ bool SelState::auto_set_install( const bool doit )
 {
   if ( to_install() )
     return true;
-  if ( by_user() || ! has_candidate() )
+  if ( !by_auto() || !has_candidate() )
     return false;
   if ( doit ) {
     clr( M_TO );
@@ -261,15 +322,16 @@ bool SelState::auto_set_install( const bool doit )
 */
 ostream & operator<<( ostream & str, const SelState & obj )
 {
-  str << '['
+  str << "[has "
     << ( obj.has_installed() ? 'i' : ' ' )
     << ( obj.has_candidate() ? 'c' : ' ' )
-      << '|'
+      << " modif "
     << ( obj.to_delete()  ? 'D' : ' ' )
     << ( obj.to_install() ? 'I' : ' ' )
-      << '|'
+      << " by "
     << ( obj.by_user() ? 'U' : ' ' )
-      << '|'
+    << ( obj.by_appl() ? 'S' : ' ' )
+      << " flags "
     << ( obj.is_taboo() ? 'T' : ' ' )
       << ']';
   return str;

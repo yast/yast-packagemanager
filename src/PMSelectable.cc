@@ -439,14 +439,6 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
     return _state.user_set_delete( doit );
     break;
 
-  case S_Update:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
-    if ( !_state.has_both_objects() )
-      return false;
-    return _state.user_set_install( doit );
-    break;
-
   case S_Install:
     if ( ! clearTaboo( doit ) )
       return false; // got no candidateObj
@@ -455,10 +447,32 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
     return _state.user_set_install( doit );
     break;
 
-  case S_Auto:
+  case S_Update:
+    // TABOO state has no installed and no candidate set!
+    // No need for extra test
+    if ( !_state.has_both_objects() )
+      return false;
+    return _state.user_set_install( doit );
+    break;
+
+  case S_AutoDel:
+    // TABOO state has no installed and no candidate set!
+    // No need for extra test
+    return _state.auto_set_delete( doit );
+    break;
+
+  case S_AutoInstall:
     // TABOO state has no installed and no candidate set!
     // No need for extra test
     if ( !_state.has_candidate_only() )
+      return false;
+    return _state.auto_set_install( doit );
+    break;
+
+  case S_AutoUpdate:
+    // TABOO state has no installed and no candidate set!
+    // No need for extra test
+    if ( !_state.has_both_objects() )
       return false;
     return _state.auto_set_install( doit );
     break;
@@ -504,12 +518,12 @@ PMSelectable::UI_Status PMSelectable::status() const
 
   if ( _state.to_install() ) {
     if ( _state.has_installed() )
-      return S_Update;
-    return( _state.by_user() ? S_Install : S_Auto );
+      return ( _state.by_user() ? S_Update : S_AutoUpdate );
+    return( _state.by_user() ? S_Install : S_AutoInstall );
   }
 
   // _state.to_delete
-  return S_Del;
+  return( _state.by_user() ? S_Del : S_AutoDel );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -545,13 +559,15 @@ std::ostream & operator<<( std::ostream & str, PMSelectable::UI_Status obj )
   switch ( obj ) {
 #define ENUM_OUT(V) case PMSelectable::V: return str << #V; break
 
+    ENUM_OUT( S_Taboo );
     ENUM_OUT( S_Del );
     ENUM_OUT( S_Install );
     ENUM_OUT( S_Update );
+    ENUM_OUT( S_AutoDel );
+    ENUM_OUT( S_AutoInstall );
+    ENUM_OUT( S_AutoUpdate );
     ENUM_OUT( S_NoInst );
     ENUM_OUT( S_KeepInstalled );
-    ENUM_OUT( S_Auto );
-    ENUM_OUT( S_Taboo );
 
 #undef ENUM_OUT
   }
