@@ -50,6 +50,21 @@ class RpmDb: virtual public Rep
     public:
 
 	typedef std::set<std::string> FileList;
+	
+	/** Bits representing rpm installation options, useable as or
+	 * combination
+	 *
+	 * @see installPackage(), removePackage()
+	 * */
+	enum RpmInstFlag
+	{
+	    RPMINST_NONE       = 0x00,
+	    RPMINST_NODOCS     = 0x01,
+	    RPMINST_NOSCRIPTS  = 0x02,
+	    RPMINST_FORCE      = 0x04,
+	    RPMINST_NODEPS     = 0x08,
+	    RPMINST_IGNORESIZE = 0x10
+	};
 
 	/**
 	 * Create an new instance.
@@ -68,7 +83,7 @@ class RpmDb: virtual public Rep
 	 * "filelist" is a list of missing files
 	 */
 
-	bool checkPackage ( std::string packageName, FileList &fileList );
+//	bool checkPackage ( std::string packageName, FileList &fileList );
 
 	/**
 	 * Initialize the rpm database
@@ -98,9 +113,12 @@ class RpmDb: virtual public Rep
 
 	/**
 	 * Check rpm with rpm --checksig
-	 * FIXME whats the version good for?
+	 * 
+	 * @param filename which file to check
+	 * @param version check if package really contains this version, leave emtpy to skip check
+	 * @param md5 md5sum for whole file, leave empty to skip check (not yet implemented)
 	 */
-	bool checkPackage( std::string packagePath, std::string version = "" );
+	bool checkPackage( std::string filename, std::string version = "", std::string md5 = "" );
 
 
 	/**
@@ -119,7 +137,49 @@ class RpmDb: virtual public Rep
 	 */
 	std::string queryPackage(const char *format, std::string packagelabel);
 
+	/** set parameters to use on installation/update
+	 *
+	 * @param flags which parameters to use by default, eg. RPMINST_NODOCS|RPMINST_NOSCRIPTS
+	 * */
+	void setInstFlags(unsigned flags) { _rpminstflags = flags; }
+    
+	/** install rpm package
+	 *
+	 * @param filename file to install
+	 * @param flags which rpm options to use, will be or'ed with flags set by setInstFlags()
+	 *
+	 * @return success
+	 * */
+	bool installPackage(const std::string& filename,
+	    unsigned flags = RPMINST_NODEPS|RPMINST_FORCE|RPMINST_IGNORESIZE );
+	
+	/** remove rpm package
+	 *
+	 * @param label label of the rpm package to remove. always specify the
+	 * full label (name-version-release) as multiple packages with same
+	 * name but different versions could be installed
+	 * @param iflags which rpm options to use
+	 *
+	 * @return success
+	 * */
+	bool removePackage(const std::string& label, unsigned iflags);
+
+	/** set callback function for reporting progress of package
+	 * installation
+	 *
+	 * @param func callback function, must accept double as argument
+	 * */
+	void setProgressCallback(void (*func)(double))
+	    { _progressfunc = func; }
+
     private:
+
+	/** progress callback */
+	void (*_progressfunc)(double);
+
+	/** parameters to use on installation/update
+	 * */
+	unsigned _rpminstflags;
 
 	/** dataprovider that is given to every created package
 	 * */
@@ -146,13 +206,15 @@ class RpmDb: virtual public Rep
 	 */
 	ExternalProgram *process;
 
+	typedef std::vector<const char*> RpmArgVec;
+
 	/**
 	 * Run rpm with the specified arguments and handle stderr.
 	 * @param n_opts The number of arguments
 	 * @param options Array of the arguments, @ref n_opts elements
 	 * @param stderr_disp How to handle stderr, merged with stdout by default
 	 */
-	void run_rpm(int n_opts, const char *const *options,
+	void run_rpm(const RpmArgVec& options,
 	ExternalProgram::Stderr_Disposition stderr_disp =
 	ExternalProgram::Stderr_To_Stdout);
 
@@ -195,7 +257,14 @@ class RpmDb: virtual public Rep
 			PMSolvable::PkgRelList_type& deps,
 			PMSolvable::PkgRelList_type& prereq,
 			bool ignore_prereqs = false);
-    public:
+
+	/** wrapper for _progressfunc, does nothing if it's unset
+	 * */
+	void ReportProgress(double p)
+	    { if(_progressfunc != NULL) (*_progressfunc)(p); }
+    
+    public: // static members
+
 	/** split string into tokens delimited by a one character
 	 * seperator, empty fields will not be removed
 	 *

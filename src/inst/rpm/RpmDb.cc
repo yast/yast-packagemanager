@@ -30,6 +30,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/TagParser.h>
+#include <y2util/Pathname.h>
 #include <y2util/ExternalDataSource.h>
 #include <y2pm/RpmDb.h>
 #include <y2pm/PkgEdition.h>
@@ -37,8 +38,11 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMRpmPackageDataProvider.h>
 
+//XXX make configurable
 #define ORIGINALRPMPATH "/var/lib/rpm/"
+//XXX make configurable
 #define RPMPATH "/var/lib/"
+//XXX make configurable
 #define RPMDBNAME "packages.rpm"
 
 using namespace std;
@@ -65,7 +69,9 @@ IMPL_HANDLES(RpmDb);
 /*-------------------------------------------------------------*/
 /* creates a RpmDb					       */
 /*-------------------------------------------------------------*/
-RpmDb::RpmDb(string name_of_root)
+RpmDb::RpmDb(string name_of_root) :
+    _progressfunc(NULL),
+    _rpminstflags(RPMINST_NONE)
 {
    rootfs = name_of_root;
    process = 0;
@@ -107,14 +113,14 @@ RpmDb::~RpmDb()
 /*--------------------------------------------------------------*/
 DbStatus RpmDb::initDatabase( bool createNew )
 {
-    string       dbFilename = rootfs;
+    Pathname     dbFilename = rootfs;
     struct stat  dummyStat;
     DbStatus	 dbStatus = DB_OK;
 
     DBG << "calling initDatabase" << endl;
 
-    dbFilename = dbFilename + ORIGINALRPMPATH + RPMDBNAME;
-    if (  stat( dbFilename.c_str(), &dummyStat ) != -1 )
+    dbFilename += dbFilename + ORIGINALRPMPATH + RPMDBNAME;
+    if (  stat( dbFilename.asString().c_str(), &dummyStat ) != -1 )
     {
        // DB found
        dbPath = ORIGINALRPMPATH;
@@ -122,7 +128,7 @@ DbStatus RpmDb::initDatabase( bool createNew )
     }
     else
     {
-       ERR << "dbFilename not found " << dbFilename.c_str() << endl;
+       ERR << "dbFilename not found " << dbFilename.asString() << endl;
 
        // DB not found
        dbStatus = DB_NOT_FOUND;
@@ -131,12 +137,19 @@ DbStatus RpmDb::initDatabase( bool createNew )
        {
 	  // New rpm-DB will be created
 	  create_directories(rootfs + ORIGINALRPMPATH);
-	  const char *const opts[] = { "--initdb" };
-	  run_rpm(sizeof(opts) / sizeof(*opts), opts);
+	  RpmArgVec opts(1);
+	  opts[0] = "--initdb";
+	  run_rpm(opts);
+	  string rpmerrormsg, str;
+	  while(systemReadLine(str))
+	  {
+	      rpmerrormsg+=str;
+	  }
 	  if ( systemStatus() != 0 )
 	  {
 	     // error
 	     dbStatus = DB_ERROR_CREATED;
+	     ERR << "Error creating rpm database, rpm error was: " << rpmerrormsg << endl;
 	  }
 	  else
 	  {
@@ -148,19 +161,27 @@ DbStatus RpmDb::initDatabase( bool createNew )
     if ( dbStatus == DB_OK )
     {
        // Check, if it is an old rpm-Db
-       const char *const opts[] = { "-q", "rpm" };
+       RpmArgVec opts(2);
+       opts[0] = "-q";
+       opts[1] = "rpm";
        string output;
 
-       run_rpm(sizeof(opts) / sizeof(*opts), opts);
-       if ( !systemReadLine ( output ) )
+       run_rpm(opts);
+       string rpmmsg, str;
+       while(systemReadLine(str))
+       {
+	   rpmmsg+=str;
+       }
+
+       if ( rpmmsg.empty() )
        {
 	  // error
 	  dbStatus = DB_ERROR_CHECK_OLD_VERSION;
-	  ERR << "Error occured while checking old version." << endl;
+	  ERR << "rpm silently failed while checking old rpm version" << endl;
        }
        else
        {
-	  if ( output.find ( "old format database is present" ) !=
+	  if ( rpmmsg.find ( "old format database is present" ) !=
 	       string::npos )
 	  {
 	     dbStatus = DB_OLD_VERSION;
@@ -172,7 +193,8 @@ DbStatus RpmDb::initDatabase( bool createNew )
 	     {
 		// error
 		dbStatus = DB_ERROR_CHECK_OLD_VERSION;
-		ERR << "Error occured while checking old version."  << endl;
+		ERR << "checking for old rpm version failed, rpm output was: "
+		    << rpmmsg << endl;
 	     }
 	  }
        }
@@ -230,8 +252,9 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
 
    if ( ok )
    {
-      const char *const opts[] = { "--initdb" };
-      run_rpm(sizeof(opts) / sizeof(*opts), opts);
+      RpmArgVec opts(1);
+      opts[0] = "--initdb";
+      run_rpm(opts);
       if ( systemStatus() != 0 )
       {
 	 // error
@@ -261,8 +284,9 @@ bool RpmDb::createTmpDatabase ( bool copyOldRpm )
 
       if ( ok )
       {
-	 const char *const opts[] = { "--rebuilddb" };
-	 run_rpm(sizeof(opts) / sizeof(*opts), opts);
+	  RpmArgVec opts(1);
+	  opts[0] = "--rebuilddb";
+	  run_rpm(opts);
 	 if ( systemStatus() != 0 )
 	 {
 	    // error
@@ -380,60 +404,6 @@ bool RpmDb::installTmpDatabase( void )
    return ( ok );
 }
 
-#if 0
-/*--------------------------------------------------------------*/
-/* Evaluate all installed packages				*/
-/* Returns false, if an error has been occured.			*/
-/*--------------------------------------------------------------*/
-bool RpmDb::getInstalledPackages ( PackList &packageList )
-{
-   bool ok = true;
-
-   const char *const opts[] = {
-      "-qa",  "--queryformat", "%{RPMTAG_NAME}\\n"
-     };
-
-   packageList.clear();
-
-   run_rpm(sizeof(opts) / sizeof(*opts), opts,
-	   ExternalProgram::Discard_Stderr);
-
-   if ( process == NULL )
-      return false;
-
-   string value;
-
-   string output = process->receiveLine();
-
-   while ( output.length() > 0 )
-   {
-      string::size_type ret;
-
-      // extract \n
-      ret = output.find_first_of ( "\n" );
-      if ( ret != string::npos )
-      {
-	 value.assign ( output, 0, ret );
-      }
-      else
-      {
-	 value = output;
-      }
-
-      packageList.insert ( value );
-      output = process->receiveLine();
-   }
-
-   if ( systemStatus() != 0 )
-   {
-      ok = false;
-   }
-
-   return ( ok );
-}
-
-#endif
-
 // split in into pieces seperated by sep, return vector out
 unsigned RpmDb::tokenize(const string& in, char sep, vector<string>& out)
 {
@@ -456,7 +426,6 @@ unsigned RpmDb::tokenize(const string& in, char sep, vector<string>& out)
     }
     return count;
 }
-
 
 
 // parse string of the form name/number/version into rellist. number is the rpm
@@ -596,16 +565,12 @@ bool RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
     rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},]";
     rpmquery += "\\n";
 
-    const char* const opts[] =
-    {
-	"-q",
-	"-a",
-	"--queryformat",
-	rpmquery.c_str()
-    };
-
-    run_rpm(sizeof(opts) / sizeof(*opts), opts,
-	ExternalProgram::Discard_Stderr);
+    RpmArgVec opts(4);
+    opts[0] = "-q";
+    opts[1] = "-a";
+    opts[2] = "--queryformat";
+    opts[3] = rpmquery.c_str();
+    run_rpm(opts, ExternalProgram::Discard_Stderr);
 
     if(!process)
 	return false;
@@ -1177,16 +1142,23 @@ bool RpmDb::queryDirectories ( FileList &fileList, string packageName )
 /* Checking the source rpm <rpmpath> with rpm --chcksig and     */
 /* the version number.						*/
 /*--------------------------------------------------------------*/
-bool RpmDb::checkPackage( string packagePath, string version )
+bool RpmDb::checkPackage( string packagePath, string version, string md5 )
 {
     bool ok = true;
 
     bool md5ok = false;
     bool gpgok = false;
 
+    if(!md5.empty())
+    {
+	//TODO
+	WAR << "md5sum check not yet implemented" << endl;
+    }
 
    if ( version != "" )
    {
+#warning "FIXME"
+#if 0
       // Checking Version
       const char *const opts[] = {
 	 "-qp", "--qf", "%{RPMTAG_VERSION}-%{RPMTAG_RELEASE} ",
@@ -1227,6 +1199,7 @@ bool RpmDb::checkPackage( string packagePath, string version )
       {
 	 ok = false;
       }
+#endif
    }
 
     if ( ok )
@@ -1324,11 +1297,12 @@ bool RpmDb::checkPackage( string packagePath, string version )
 /*--------------------------------------------------------------*/
 string RpmDb::queryPackage(const char *format, string packageName)
 {
-
-  const char *const opts[] = {
-    "-q", "--qf", format,  packageName.c_str()
-  };
-  run_rpm(sizeof(opts) / sizeof(*opts), opts, ExternalProgram::Discard_Stderr);
+    RpmArgVec opts(4);
+    opts[0] = "-q";
+    opts[1] = "--queryformat";
+    opts[2] = format;
+    opts[3] = packageName.c_str();
+    run_rpm(opts, ExternalProgram::Discard_Stderr);
 
   if ( process == NULL )
      return "";
@@ -1432,42 +1406,46 @@ bool RpmDb::queryChangedFiles ( FileList &fileList, string packageName )
 /* Run rpm with the specified arguments, handling stderr	*/
 /* as specified  by disp					*/
 /*--------------------------------------------------------------*/
-void RpmDb::run_rpm(int n_opts, const char *const *options,
+void RpmDb::run_rpm(const RpmArgVec& options,
 		       ExternalProgram::Stderr_Disposition disp)
 {
-  exit_code = -1;
-  int argc = n_opts + 5 /* rpm --root <root> --dbpath <path> */
-             + 1 /* NULL */;
 
-  // Create the argument array
-  const char *argv[argc];
-  int i = 0;
-  argv[i++] = "rpm";
-  argv[i++] = "--root";
-  argv[i++] = rootfs.c_str();
-  argv[i++] = "--dbpath";
-  argv[i++] = dbPath.c_str();
-  for (int j = 0; j < n_opts; j++)
-  {
-    argv[i++] = options[j];
-  }
+    exit_code = -1;
 
-  string output = "";
-  int k;
-  for ( k = 0; k < argc-1; k++ )
-  {
-     output = output + " " + argv[k];
-  }
-  argv[i] = 0;
-  D__ << "rpm command: " << output << endl;
+    RpmArgVec args(5);
+    args[0] = "rpm";
+    args[1] = "--root";
+    args[2] = rootfs.c_str();
+    args[3] = "--dbpath";
+    args[4] = dbPath.c_str();
 
-  if ( process != NULL )
-  {
-     delete process;
-     process = NULL;
-  }
-  // Launch the program
-  process = new ExternalProgram(argv, disp, false, -1, true);
+    const char* argv[args.size()+options.size()+2];
+    unsigned argc = 0;
+
+    D__ << "rpm command: "; 
+
+    for(RpmArgVec::iterator it=args.begin();it<args.end();++it)
+    {
+	argv[argc++]=*it;
+	D__ << *it << " ";
+    }
+    for(RpmArgVec::const_iterator it2=options.begin();it2<options.end();++it2)
+    {
+	argv[argc++]=*it2;
+	D__ << *it2 << " ";
+    }
+
+    argv[argc] = 0;
+
+    D__ << endl;
+
+    if ( process != NULL )
+    {
+	delete process;
+	process = NULL;
+    }
+    // Launch the program
+    process = new ExternalProgram(argv, disp, false, -1, true);
 }
 
 /*--------------------------------------------------------------*/
@@ -1475,15 +1453,20 @@ void RpmDb::run_rpm(int n_opts, const char *const *options,
 /*--------------------------------------------------------------*/
 bool RpmDb::systemReadLine(string &line)
 {
-   if ( process == NULL )
-      return false;
+    line.erase();
 
-  line = process->receiveLine();
-  if (line.length() == 0)
-    return false;
-  if (line[line.length() - 1] == '\n')
-    line.erase(line.length() - 1);
-  return true;
+    if ( process == NULL )
+	return false;
+
+    line = process->receiveLine();
+
+    if (line.length() == 0)
+	return false;
+
+    if (line[line.length() - 1] == '\n')
+	line.erase(line.length() - 1);
+
+    return true;
 }
 
 /*--------------------------------------------------------------*/
@@ -1512,3 +1495,85 @@ void RpmDb::systemKill()
 {
   if (process) process->kill();
 }
+
+
+// inststall package filename with flags iflags
+bool RpmDb::installPackage(const string& filename, unsigned iflags)
+{
+    unsigned flags = iflags|_rpminstflags;
+
+    RpmArgVec opts;
+
+    opts.push_back("-U");
+    opts.push_back("--percent");
+
+    if(flags&RPMINST_NODOCS)
+	opts.push_back("--nodocs");
+    if(flags&RPMINST_NOSCRIPTS)
+	opts.push_back("--noscripts");
+    if(flags&RPMINST_FORCE)
+	opts.push_back("--force");
+    if(flags&RPMINST_NODEPS)
+	opts.push_back("--nodeps");
+    if(flags&RPMINST_IGNORESIZE)
+	opts.push_back("--ignoresize");
+
+    opts.push_back(filename.c_str());
+
+    //XXX maybe some log for the user too?
+    DBG << "Installing " << filename << endl;
+
+    run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
+
+    string line;
+    string rpmmsg;
+    double old_percent = 0.0;
+
+    while (systemReadLine(line))
+    {
+	if (line.substr(0,2)=="%%")
+	{
+	    double percent;
+	    sscanf (line.c_str () + 2, "%lg", &percent);
+	    if (percent >= old_percent + 5.0)
+	    {
+		old_percent = int (percent / 5) * 5;
+		ReportProgress(percent);
+	    }
+	}
+	else
+	    rpmmsg += line+'\n';
+    }
+    int rpm_status = systemStatus();
+    if (rpm_status != 0)
+    {
+	ERR << "rpm failed, message was: " << rpmmsg << endl;
+	return false;
+    }
+    return true;
+}
+
+// remove package named label
+bool RpmDb::removePackage(const string& label, unsigned iflags)
+{
+    unsigned flags = iflags|_rpminstflags;
+
+    RpmArgVec opts(2);
+
+    opts[0]="-e";
+
+    if(flags&RPMINST_NOSCRIPTS)
+	opts.push_back("--noscripts");
+    if(flags&RPMINST_NODEPS)
+	opts.push_back("--nodeps");
+
+    opts.push_back(label.c_str());
+
+    //XXX maybe some log for the user too?
+    DBG << "Removing " << label << endl;
+
+    run_rpm(opts, ExternalProgram::Stderr_To_Stdout);
+
+    return true;
+}
+
