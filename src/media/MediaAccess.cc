@@ -34,6 +34,7 @@
 #include <y2pm/MediaDISK.h>
 #include <y2pm/MediaNFS.h>
 #include <y2pm/MediaSMB.h>
+#include <y2pm/MediaCIFS.h>
 #include <y2pm/MediaCurl.h>
 
 using namespace std;
@@ -89,6 +90,9 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
         break;
       case Url::smb:
         _handler = new MediaSMB (url,preferred_attach_point);
+        break;
+      case Url::cifs:
+        _handler = new MediaCIFS (url,preferred_attach_point);
         break;
       case Url::ftp:
       case Url::http:

@@ -20,6 +20,7 @@ liby2pmMedia_la_SOURCES = \
 	MediaNFS.cc		\
 	MediaDISK.cc		\
 	MediaSMB.cc		\
+	MediaCIFS.cc		\
 	MediaCurl.cc		\
 	Mount.cc
 
