@@ -50,7 +50,7 @@ PMYouPatch::PMYouPatch( const PkgName &    name_r,
                         const PkgArch & arch_r )
     : PMObject( name_r, edition_r, arch_r )
     , _kind( kind_invalid ), _updateOnlyInstalled( false ),
-    _packagesInstalled( false )
+    _packagesInstalled( false ), _skipped( false )
 {
 }
 

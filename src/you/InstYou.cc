@@ -39,6 +39,7 @@
 #include <y2pm/PMYouServers.h>
 #include <y2pm/MediaCurl.h>
 #include <y2pm/PMYouProduct.h>
+#include <y2pm/PMLocale.h>
 
 #include <y2pm/InstYou.h>
 
@@ -359,18 +360,91 @@ PMError InstYou::retrievePatches()
 {
   D__ << "Retrieve patches." << endl;
 
-  log( "RETRIEVE PATCHES" );
-
   PMError error = attachSource();
   if ( error ) {
     showError( error );
     return error;
   }
 
-  PMYouPatchPtr patch;
-  for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    error = retrievePatch( patch );
-    if ( error ) return error;
+  PMYouPatchPtr patch = firstPatch();
+  
+  if ( !patch ) {
+    log( _("No patches have been selected for installation.\n") );
+  }
+
+  bool skipAll = false;
+
+  while( patch ) {
+    string text = stringutil::form( _("Retrieving %s: \"%s\" "),
+                                    patch->name().asString().c_str(),
+                                    patch->summary().c_str() );
+    log( text );
+
+    if ( skipAll ) {
+      log( _("Skipped\n") );
+      patch->setSkipped( true );
+    } else {
+      patch->setSkipped( false );
+      error = retrievePatch( patch );
+      if ( !error ) {
+        log( _("Ok\n") );
+      } else {
+        DBG << "Patch retrieval error: " << error << endl;
+      
+        if ( error == YouError::E_user_abort ) {
+          log( _("Aborted\n") );
+          PMError callbackError = showError( "abort", "", "" );
+          if ( callbackError == YouError::E_user_abort ) break;
+          else continue;
+        }
+
+        string msg = stringutil::form(
+          _("Error downloading patch '%s'.\n"
+            "Try again to download the patch, skip this patch, or\n"
+            "abort the update?"), patch->name().asString().c_str() );
+
+        PMError callbackError = showError( "skip", msg, error.asString() );
+
+        DBG << "Error callback response: " << callbackError << endl;
+
+        if ( callbackError == YouError::E_user_abort ) {
+          log( _("Aborted\n") );
+          error = YouError::E_user_abort;
+          break;
+        } else if ( callbackError == YouError::E_user_skip ) {
+          log( _("Skipped\n") );
+          patch->setSkipped( true );
+          error = PMError::E_ok;
+        } else if ( callbackError == YouError::E_user_skip_all ) {
+          log( _("Skipped\n") );
+          skipAll = true;
+          error = PMError::E_ok;
+        } else if ( callbackError == YouError::E_user_retry ) {
+          log( _("Retry\n") );
+          continue;
+        } else {
+          if ( error.errClass() == PMError::C_MediaError ) {
+            log( _("Error: Cannot get files.\n") );
+          } else if ( error == YouError::E_bad_sig_file ||
+                      error == YouError::E_bad_sig_rpm ) {
+            log( _("Error: Signature check failed.\n") );
+          } else {
+            log( _("Error\n") );
+          }
+          return error;
+        }
+      }
+    }
+
+    patch = nextPatch();
+  }
+
+  if ( error == YouError::E_user_abort ) {
+    log( _("Download aborted.\n") );
+  } else if ( error ) {
+    log( _("Download failed.\n") );
+  } else {
+    log( _("Download finished.\n\n") );
   }
 
   return error;
@@ -457,13 +531,105 @@ PMError InstYou::retrieveCurrentPatch()
 
 PMError InstYou::installPatches()
 {
-  PMYouPatchPtr patch;
-  for( patch = firstPatch(); patch; patch = nextPatch() ) {
-    PMError error = installPatch( patch );
-    if ( error ) return error;
+  PMYouPatchPtr patch = firstPatch();
+  
+  if ( !patch ) {
+    log( _("No patches have been selected for installation.\n") );
   }
 
-  writeLastUpdate();
+  bool skipAll = false;
+
+  int installedPatches = 0;
+
+  PMError error;
+
+  while ( patch ) {
+    string text = stringutil::form( _("Installing %s: \"%s\" "),
+                                    patch->name().asString().c_str(),
+                                    patch->summary().c_str() );
+    log( text );
+
+    if ( skipAll || patch->skipped() ) {
+      log( _("Skipped\n") );
+    } else {
+      string preInfo = patch->preInformation();
+      if ( !preInfo.empty() ) {
+        list<PMYouPatchPtr> patches;
+        patches.push_back( patch );
+        PMError callbackError = showMessage( "preinfo", patches );
+        if ( callbackError == YouError::E_user_skip ) {
+          log( _("Skipped\n") );
+          patch->setSkipped( true );
+        }
+      }
+
+      if ( !patch->skipped() ) {
+        error = installPatch( patch );
+        if ( !error ) {
+          installedPatches++;
+          string postInfo = patch->postInformation();
+          if ( !postInfo.empty() ) {
+            list<PMYouPatchPtr> patches;
+            patches.push_back( patch );
+            PMError callbackError = showMessage( "postinfo", patches );
+          }
+          log( _("Ok\n") );
+        } else {
+          log( _("Error\n") );
+
+          string msg;
+          if ( error == YouError::E_user_abort ) {
+            msg = _("Installation of patch was aborted by user.\n\n"
+                    "Warning: This can cause an inconsistent system. Select \n"
+                    "'Try Again' to repeat installation of this patch.");
+          } else {
+            msg = stringutil::form ( _("Error installing patch '%s'.\n\n"
+                                       "Skip this patch or abort\n"
+                                       "the update?"),
+                                     patch->name().asString().c_str() );
+          }
+
+          string details = error.errstr() + "\n" + error.details();
+
+          PMError callbackError = showError( "skip", msg, details );
+          if ( callbackError == YouError::E_user_abort ) {
+            log( _("Installation aborted.") );
+            error = YouError::E_user_abort;
+            break;
+          } else if ( callbackError == YouError::E_user_skip ) {
+            patch->setSkipped( true );
+          } else if ( callbackError == YouError::E_user_skip_all ) {
+            patch->setSkipped( true );
+            skipAll = true;
+          } else if ( callbackError == YouError::E_user_retry ) {
+            continue;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    patch = nextPatch();
+  }
+
+  log( _("Installation finished.\n") );
+  log( "\n" );
+
+  if ( installedPatches == 0 ) {
+    log( _("No patches have been installed.") );
+  } else if ( installedPatches == 1 ) {
+    log( _("1 patch has been installed") );
+  } else {
+    log( stringutil::form( _("%d patches have been installed."),
+                           installedPatches ) );
+  }
+
+  if ( error ) {
+    showError( "message", _("Installation failed."), "" );
+  } else {
+    writeLastUpdate();
+  }
 
   return PMError();
 }
@@ -1096,6 +1262,15 @@ PMError InstYou::showError( const string &type, const string &text,
 PMError InstYou::showError( const PMError &error )
 {
   return showError( "error", error.errstr(), error.details() );
+}
+
+PMError InstYou::showMessage( const string &type, list<PMYouPatchPtr> &patches )
+{
+  if ( _callbacks ) {
+    return _callbacks->showMessage( type, patches );
+  } else {
+    return YouError::E_callback_missing;
+  }  
 }
 
 void InstYou::log( const string &text )

@@ -236,6 +236,15 @@ class PMYouPatch : public PMObject
     */
     PMYouProductPtr product() const;
 
+    /**
+      Set if the patch has been skipped by the user.
+    */
+    void setSkipped( bool s ) { _skipped = s; }
+    /**
+      Return if the patch has been skipped by the user.
+    */
+    bool skipped() const { return _skipped; }
+
   public:
 
     /**
@@ -271,6 +280,8 @@ class PMYouPatch : public PMObject
     std::list<PMYouFile> _files;
 
     PMYouProductPtr _product;
+
+    bool _skipped;
 
   public:
 

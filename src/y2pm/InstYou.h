@@ -219,6 +219,11 @@ class InstYou {
     PMError showError( const PMError &error );
 
     /**
+      Show patch message.
+    */
+    PMError showMessage( const std::string &type, std::list<PMYouPatchPtr> & );
+
+    /**
       Add line to log. Calls callbacks.
     */
     void log( const std::string &text );
@@ -276,6 +281,8 @@ class InstYou {
           virtual PMError showError( const std::string &type,
                                      const std::string &text,
                                      const std::string &details ) = 0;
+          virtual PMError showMessage( const std::string &type,
+                                       const std::list<PMYouPatchPtr> & ) = 0;
           virtual void log( const std::string &text ) = 0;
 
           virtual bool executeYcpScript( const std::string &script ) = 0;
