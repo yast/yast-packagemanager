@@ -171,17 +171,21 @@ Pathname PMYouProduct::patchPath()
 
 Pathname PMYouProduct::rpmPath( const PMPackagePtr &pkg, bool patchRpm )
 {
-  string rpmName = pkg->arch();
-  rpmName += "/";
-  rpmName += pkg->name();
-  rpmName += "-";
-  rpmName += pkg->version();
-  rpmName += "-";
-  rpmName += pkg->release();
-  rpmName += ".";
-  rpmName += pkg->arch();
-  if ( patchRpm ) rpmName += ".patch";
-  rpmName += ".rpm";
+  string rpmName;
+  if(pkg)
+  {
+    rpmName = pkg->arch();
+    rpmName += "/";
+    rpmName += pkg->name();
+    rpmName += "-";
+    rpmName += pkg->version();
+    rpmName += "-";
+    rpmName += pkg->release();
+    rpmName += ".";
+    rpmName += pkg->arch();
+    if ( patchRpm ) rpmName += ".patch";
+    rpmName += ".rpm";
+  }
   return _settings.pathPrefix() + _rpmPath + rpmName;
 }
 
