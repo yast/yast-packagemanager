@@ -1,4 +1,5 @@
 #include <y2pm/PkgDep.h>
+#include <y2pm/PkgDep_int.h>
 #include <iostream>
 
 using namespace std;
@@ -37,8 +38,18 @@ ostream& operator<<( ostream& os, const PkgDep::ErrorResult& res )
 	if (!res.conflicts_with.empty())
 		os << "Conflicts-With: " << res.conflicts_with << endl;
 	if (!res.remove_to_solve_conflict.empty())
-		os << "Remove-To-Solve-Conflict: " << res.remove_to_solve_conflict
-		   << endl;
+	{
+		os << "Remove-To-Solve-Conflict: ";
+		ci_for( PkgDep::SolvableList::, it, res.remove_to_solve_conflict.)
+		{
+		    os << (*it)->name();
+		    if(it != res.remove_to_solve_conflict.begin())
+		    {
+			cout << ", ";
+		    }
+		}
+		os << endl;
+	}
 
 	return os;
 }

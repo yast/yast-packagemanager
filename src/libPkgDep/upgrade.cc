@@ -27,13 +27,13 @@ static void deselect_referers(
 
 bool PkgDep::upgrade(
 	PkgSet &candidates, ResultList& out_good, ErrorResultList& out_bad,
-	NameList& to_remove, unsigned max_remove
+	SolvableList& to_remove, unsigned max_remove
 ) {
 	PkgSet installed_backup = installed;
 	noval_hash<PkgName> real_from_input_list;
 	noval_hash<PkgName> upgrades_solving_conflicts;
 	noval_hash<PkgName> avoid_break_installs;
-	to_remove = NameList();
+	to_remove = SolvableList();
 	
 	DBG << "Starting upgrade\n";
 	
@@ -123,14 +123,14 @@ bool PkgDep::upgrade(
 					all_ok = false;
 					goto out;
 				}
-				ci_for( NameList::, q, p->remove_to_solve_conflict. ) {
-					if (candidates.includes(*q)) {
-						DBG << "removing candidate " << *q
+				ci_for( SolvableList::, q, p->remove_to_solve_conflict. ) {
+					if (candidates.includes((*q)->name())) {
+						DBG << "removing candidate " << (*q)->name()
 							 << " due to conflict with " << p->name << endl;
-						candidates.remove( *q );
+						candidates.remove( (*q)->name() );
 					}
 					else {
-						DBG << "removing installed " << *q
+						DBG << "removing installed " << (*q)->name()
 							 << " due to conflict with " << p->name << endl;
 						to_remove.push_back( *q );
 					}
@@ -146,9 +146,9 @@ bool PkgDep::upgrade(
 		}
 
 		// ok, everything fixed, remove to_remove pkgs from installed
-		DBG << "Ok, removing " << to_remove << endl;
-		ci_for( NameList::, p, to_remove. )
-			installed.remove( *p );
+		//DBG << "Ok, removing " << to_remove << endl;
+		ci_for( SolvableList::, p, to_remove. )
+			installed.remove( (*p)->name() );
 	}
   out:
 	if (endless_protect <= 0)

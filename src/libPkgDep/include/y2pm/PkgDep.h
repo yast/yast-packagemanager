@@ -113,6 +113,8 @@ class PkgDep {
 	typedef RelInfoList::iterator RelInfoList_iterator;
 	typedef RelInfoList::const_iterator RelInfoList_const_iterator;
 
+	typedef std::list<PMSolvablePtr> SolvableList;
+
 	struct Notes;
 
 	/**
@@ -183,7 +185,7 @@ class PkgDep {
 		//
 		RelInfoList conflicts_with;
 		//
-		NameList remove_to_solve_conflict;
+		SolvableList remove_to_solve_conflict;
 
 		ErrorResult(const PkgDep& pkgdep, PMSolvablePtr pkg)
 			: Result(pkgdep,pkg), not_available(false) {}
@@ -326,10 +328,10 @@ class PkgDep {
 	// consistency.cc
 	bool pkg_consistent( PMSolvablePtr pkg, ErrorResult *err );
 	// remove.cc
-	void virtual_remove_package( PMSolvablePtr pkg, NameList& to_remove,
+	void virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
 								 PMSolvablePtr assume_instd = NULL ) const;
 	void remove_package( PkgSet *set, PMSolvablePtr pkg,
-						 NameList& to_remove) const;
+						 SolvableList& to_remove) const;
 	// utils.cc
 	bool also_provided_by_installed( const PkgRelation& rel );
 	unsigned count_providers_for( const PkgSet* set,
@@ -390,11 +392,11 @@ public:
 	/** remove a list of packages; the 'pkgs' list will be extended by all
 	 * packages that have to be removed, too, to make the installed set
 	 * consistent again */
-	void remove( NameList& pkgs );
+	void remove( SolvableList& pkgs );
 	/** check consistency of current installed set */
 	bool consistent( ErrorResultList& failures );
 	bool upgrade(	PkgSet&candidates, ResultList& out_good,
-			ErrorResultList& out_bad, NameList& to_remove,
+			ErrorResultList& out_bad, SolvableList& to_remove,
 			unsigned max_remove = default_max_remove );
 
 	/** return current installed set for inspection */

@@ -56,8 +56,8 @@ static vector<string> nullvector;
 #define DOINIT \
     if(!_initialized) init(nullvector);
 
+void installold(vector<string>& argv);
 void install(vector<string>& argv);
-void install2(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
 void init(vector<string>& argv);
@@ -69,6 +69,7 @@ void rpminstall(vector<string>& argv);
 void instlog(vector<string>& argv);
 void setroot(vector<string>& argv);
 void source(vector<string>& argv);
+void deselect(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -77,8 +78,8 @@ struct Funcs {
 };
 
 static struct Funcs func[] = {
-    { "install",    install,    "simulated install of a package, direct PkgDep" },
-    { "install2",    install2,    "simulated install of a package, through manager" },
+    { "installold",    installold,    "simulated install of a package, direct PkgDep" },
+    { "install",    install,    "simulated install of a package, through manager" },
     { "rpminstall", rpminstall, "install rpm files" },
     { "consistent", consistent, "check consistency" },
     { "init",       init,       "initialize packagemanager" },
@@ -90,6 +91,7 @@ static struct Funcs func[] = {
     { "instlog",    instlog,    "set installation log file" },
     { "setroot",    setroot,    "set root directory for operation" },
     { "source",     source,     "scan media for inst sources" },
+    { "deselect",   deselect,   "deselect packages marked for installation" },
     { NULL,         NULL,       NULL }
 };
 
@@ -198,7 +200,7 @@ void show(vector<string>& argv)
 	}
 	else
 	{
-	    PMPackagePtr obj = static_cast<PMPackagePtr>(sel->installedObj());
+	    PMPackagePtr obj = static_cast<PMPackagePtr>(sel->theObject());
 	    show_pmpackage (obj);
 	}
     }
@@ -221,7 +223,7 @@ void source(vector<string>& argv)
 	_isrclist.erase(_isrclist.begin(), _isrclist.end());
 	return;
     }
-    else if(param == "--enable")
+    else if(param == "--enable" || param == "-e")
     {
 	if (parampos >= argv.size())
 	{
@@ -244,10 +246,15 @@ void source(vector<string>& argv)
 		if(count != num)
 		    continue;
 		    
+		cout << "enabling source ... " << endl;
 		PMError err = Y2PM::instSrcManager().enableSource(*it);
 		if( err != PMError::E_ok)
 		{
-		    cout << err << endl;
+		    cout << "Error: " << err << endl;
+		}
+		else
+		{
+		    cout << "ok" << endl;
 		}
 	    }
 	}
@@ -417,7 +424,7 @@ PkgSet* getAvailable()
     return set;
 }
 
-void install2(vector<string>& argv)
+void install(vector<string>& argv)
 {
     DOINIT
 
@@ -434,12 +441,13 @@ void install2(vector<string>& argv)
 	if(pkg.empty()) continue;
 	
 	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
-	if(!selp)
+	if(!selp || !selp->has_candidate())
 	{
 	    std::cout << "package " << pkg << " is not available.\n";
 	    continue;
 	}
 	PMSelectable::UI_Status s = PMSelectable::S_Install;
+
 	if(selp->has_installed())
 	{
 	    s = PMSelectable::S_Update;
@@ -493,7 +501,7 @@ void install2(vector<string>& argv)
     cout << "Time consumed: " << t.getTimer() << endl;
 }
 
-void install(vector<string>& argv)
+void installold(vector<string>& argv)
 {
     DOINIT
 
@@ -605,14 +613,8 @@ void remove(vector<string>& argv)
     vector<string>::iterator it=argv.begin();
     ++it; // first one is function name itself
 
-    PkgDep::NameList list1;
-    PkgDep::NameList list2;
-
-    for(;it!=argv.end();++it)
-    {
-	list1.push_back(PkgName(*it));
-	list2.push_back(PkgName(*it));
-    }
+    PkgDep::SolvableList list1;
+    PkgDep::SolvableList list2;
 
     PkgSet *installed = NULL;
     PkgSet *available = NULL;
@@ -620,17 +622,28 @@ void remove(vector<string>& argv)
     installed = getInstalled();
     available = getAvailable();
 
+    for(;it!=argv.end();++it)
+    {
+	PMSolvablePtr p;
+	if((p = installed->lookup(PkgName(*it))) != NULL)
+	{
+	    list1.push_back(p);
+	    list2.push_back(p);
+	}
+    }
+
+
     PkgDep engine( *installed, *available, alternative_default );
     engine.set_unresolvable_callback(unresolvable_callback);
 
     engine.remove(list1);
 
     cout << "Additionally removing ";
-    for(PkgDep::NameList::iterator it = list1.begin(); it != list1.end(); ++it)
+    for(PkgDep::SolvableList::iterator it = list1.begin(); it != list1.end(); ++it)
     {
 	if(find(list2.begin(),list2.end(),*it) == list2.end())
 	{
-	    cout << *it << " ";
+	    cout << (*it)->name() << " ";
 	}
     }
     cout << endl;
@@ -667,6 +680,27 @@ void consistent(vector<string>& argv)
     else
     {
 	cout << "everything allright" << endl;
+    }
+}
+
+void deselect(vector<string>& argv)
+{
+    DOINIT
+
+    for (unsigned i=1; i < argv.size() ; i++)
+    {
+	string pkg = stringutil::trim(argv[i]);
+
+	if(pkg.empty()) continue;
+	
+	PMSelectablePtr selp = Y2PM::packageManager().getItem(pkg);
+	if(!selp)
+	{
+	    std::cout << "package " << pkg << " is not available.\n";
+	    continue;
+	}
+
+	selp->setNothingSelected();
     }
 }
 

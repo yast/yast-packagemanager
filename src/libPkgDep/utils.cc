@@ -3,6 +3,8 @@
 #include <y2pm/PkgDep.h>
 #include <y2pm/PkgDep_int.h>
 
+using namespace std;
+
 // initialization of static class vars
 //const PkgSet* PkgDep::default_avail = new PkgSet();
 PkgDep::alternatives_mode PkgDep::default_alternatives_mode =ASK_IF_NO_DEFAULT;
@@ -28,12 +30,12 @@ unsigned PkgDep::count_providers_for(
 	
 	RevRel_for( set->provided()[req.name()], prov ) {
 		if (prov->relation().matches( req )) {
-			DBG << "    satisfied by " << prov->pkg()->name()
+			D__ << req.name() << " satisfied by " << prov->pkg()->name()
 				 << " with Provides: " << prov->relation() << std::endl;
 			++providers;
 		}
 	}
-	DBG << "    total " << providers << " providers\n";
+	D__ << req.name() << ": total " << providers << " providers" << endl;
 	return providers;
 }
 
