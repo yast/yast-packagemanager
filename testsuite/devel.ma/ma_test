@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 
-PRG=ma_test.exe
+PRG=ma_test.bin
 if [ -n "$1" ]; then
        PRG=$1
        shift
@@ -20,11 +20,10 @@ if ! fuser $LPIPE >/dev/null; then
         ~ma/bin/sy2l.tcl $LPIPE &
 fi
 
-echo > $LPIPE
 make -C ../../src && make $PRG || exit 1
 
 export Y2SLOG_FILE=-
-export Y2SLOG_DEBUG=
+# export Y2SLOG_DEBUG=
 # export Y2DEBUG=1
 # exec gdb ./$PRG
 #./$PRG "$@" 2> log

@@ -31,6 +31,7 @@
 #include <y2util/PathInfo.h>
 
 #include <Y2PM.h>
+#include <y2pm/Timecount.h>
 
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcError.h>
@@ -190,6 +191,7 @@ PMError InstSrc::enableSource()
   // create InstSrcData according to Type stored in InstSrcDescr
   // and let it load it's data.
   ///////////////////////////////////////////////////////////////////
+  Timecount _t( "InstSrc::enableSource" );
 
   PMError err;
   InstSrcDataPtr ndata;

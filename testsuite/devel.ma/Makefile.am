@@ -15,18 +15,18 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 
 LDADD = $(top_builddir)/src/liby2pm.la
 
-LDFLAGS = -static
+LDFLAGS =
 
-CLEANFILES = *.exe
+CLEANFILES = *.bin
 
 EXTRA_PROGRAMS = \
-	ma_test.exe	\
-	rpmtest.exe
+	ma_test.bin	\
+	rpmtest.bin
 
-ma_test_exe_SOURCES = ma_test.cc
-ma_test_exe_LDADD = $(LDADD)
+ma_test_bin_SOURCES = ma_test.cc
+ma_test_bin_LDADD = $(LDADD)
 
-rpmtest_exe_SOURCES = rpmtest.cc
-rpmtest_exe_LDADD = $(LDADD)
+rpmtest_bin_SOURCES = rpmtest.cc
+rpmtest_bin_LDADD = $(LDADD)
 
 ALL: $(EXTRA_PROGRAMS)
