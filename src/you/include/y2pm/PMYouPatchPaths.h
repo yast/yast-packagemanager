@@ -111,6 +111,10 @@ class PMYouPatchPaths : virtual public Rep {
     
     Url defaultServer();
 
+    std::string mirrorList();
+
+    std::string defaultMirrorList();
+
     Pathname cookiesFile();
     
     Pathname configFile();

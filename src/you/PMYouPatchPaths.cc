@@ -88,6 +88,7 @@ void PMYouPatchPaths::init( const string &product, const string &version,
   _version = version;
   _baseArch = PkgArch( baseArch );
 
+  _youUrl = defaultMirrorList();
   _businessProduct = ( product != "SuSE-Linux" );
 
   string path = baseArch + "/update/";
@@ -291,7 +292,7 @@ PMError PMYouPatchPaths::requestServers( const string &u )
     string url = u;
 
     if ( url.empty() ) {
-      if ( _youUrl.empty() ) url = "http://www.suse.de/cgi-bin/suseservers.cgi";
+      if ( _youUrl.empty() ) url = defaultMirrorList();
       else url = _youUrl;
       url += "?product=" + product();
       url += "&version=" + version();
@@ -405,4 +406,14 @@ string PMYouPatchPaths::encodeUrl( const string &url )
   D__ << result << endl;
 
   return result;
+}
+
+string PMYouPatchPaths::mirrorList()
+{
+  return _youUrl;
+}
+
+string PMYouPatchPaths::defaultMirrorList()
+{
+  return "http://www.suse.de/cgi-bin/suseservers.cgi";
 }
