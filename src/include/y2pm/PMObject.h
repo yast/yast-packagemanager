@@ -49,6 +49,14 @@ class PMObject : virtual public Rep, public PMSolvable {
     // back pointer to selectable if this object is managed
     PMSelectablePtr _selectable;
 
+  private:
+
+    /**
+     * Internally used by PMSelectable. InstSrc may overwrite
+     * candidate selection rules under certain conditions.
+     **/
+    virtual bool prefererCandidate() const { return false; }
+
   public:
 
     /**

@@ -169,6 +169,9 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// source pointer
 	virtual constInstSrcPtr		source ( const PMPackage & pkg_r ) const { return _source; }
 
+	// Internally used by PMSelectable.
+	virtual bool prefererCandidate( const PMPackage & pkg_r ) const;
+
         // dudata is special
         virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const;
 };

@@ -401,3 +401,17 @@ PMError PMULPackageDataProvider::provideSrcPkgToInstall( const PMPackage & pkg_r
 
     return _source->providePackage (medianr, rpmname, dir, path_r);
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::prefererCandidate
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMULPackageDataProvider::prefererCandidate( const PMPackage & pkg_r ) const
+{
+  return( source( pkg_r ) && source( pkg_r )->specialCache() );
+}
+

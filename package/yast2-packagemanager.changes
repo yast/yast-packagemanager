@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Mon Feb 24 14:36:39 CET 2003 - ma@suse.de
+
+- Changed ranking of candidate packages, if package is available on
+  multiple instsources. Packages are now ranked by best version,
+  then architecture, then instsource priority. In presence of an
+  installed package, the best candidate with respect to the installed
+  packages architecture is choosen.
+- Allow krpmview widget in konqueror to introduce a special instsource.
+  Packages from this source are always prefered as candidate. (#23748)
+- 2.7.15
+
+-------------------------------------------------------------------
 Mon Feb 24 14:37:37 CET 2003 - cschum@suse.de
 
 - Create /var/lib/YaST2/you/ for update check, if it doesn't exist

@@ -80,6 +80,7 @@ class PMSelectable : virtual public Rep {
     Error setInstalledObj( PMObjectPtr obj_r );
     Error delInstalledObj();
 
+    static bool clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & rhs );
     Error clistAdd( PMObjectPtr obj_r );
     Error clistDel( PMObjectPtr obj_r );
     Error clistClearAll();
@@ -185,7 +186,7 @@ class PMSelectable : virtual public Rep {
     }
 
     /**
-     * Best among the availableObjs() Determined by ranking.
+     * Best among the availableObjs().
      * May be NULL, if no available is better than the installed.
      **/
     PMObjectPtr autoCandidate() const;
@@ -491,7 +492,6 @@ class PMSelectable : virtual public Rep {
 	return (sel_r.operator->()->*fnc_r)();
       return false;
     }
-
 };
 
 ///////////////////////////////////////////////////////////////////

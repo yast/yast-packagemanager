@@ -52,6 +52,14 @@ class PMPackage : virtual public Rep, public PMObject {
     bool du_add( PkgDuMaster & master_r ) const;
     bool du_sub( PkgDuMaster & master_r ) const;
 
+  private:
+
+    /**
+     * Internally used by PMSelectable. InstSrc may overwrite
+     * candidate selection rules under certain conditions.
+     **/
+    virtual bool prefererCandidate() const;
+
   public:
 
     /**
@@ -117,11 +125,11 @@ class PMPackage : virtual public Rep, public PMObject {
     bool isRemote (void) const;
 
     // physical access to the rpm file.
-    PMError providePkgToInstall(Pathname&) const;
+    PMError providePkgToInstall( Pathname & ) const;
     // physical access to the src.rpm file.
-    PMError provideSrcPkgToInstall(Pathname&) const;
+    PMError provideSrcPkgToInstall( Pathname & ) const;
     // who's providing this package ?
-    constInstSrcPtr source () const;
+    constInstSrcPtr source() const;
 
   protected:
 
