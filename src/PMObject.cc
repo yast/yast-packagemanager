@@ -78,6 +78,12 @@ string PMObject::getAttributeName(PMObjectAttribute attr)
 	    return "invalid query";
     }
 
+    if(!str)
+    {
+	ERR << "invalid enum value" << endl;
+	str = "invalid query";
+    }
+
     return str;
 }
 

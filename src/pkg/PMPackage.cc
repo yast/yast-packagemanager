@@ -175,6 +175,12 @@ std::string PMPackage::getAttributeName(PMPackageAttribute attr)
 	    return "invalid query";
     }
 
+    if(!str)
+    {
+	ERR << "invalid enum value" << endl;
+	str = "invalid query";
+    }
+
     return str;
 }
 
