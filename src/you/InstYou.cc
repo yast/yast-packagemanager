@@ -63,7 +63,7 @@ InstYou::~InstYou()
 
 void InstYou::init()
 {
-  _selectedPatchesIt = _selectedPatches.begin();
+  _selectedPatchesIt = _patches.begin();
 }
 
 PMError InstYou::servers( list<Url> &servers )
@@ -104,28 +104,28 @@ PMError InstYou::retrievePatchInfo( const Url &url )
 
 void InstYou::selectPatches( int kinds )
 {
-  _selectedPatches.clear();
-
   bool yastPatch = false;
 
-  list<PMYouPatchPtr>::const_iterator itPatch;
-  for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
-    if ( (*itPatch)->kind() == PMYouPatch::kind_yast ) {
-      _selectedPatches.push_back( *itPatch );
+  const PMYouPatchManager &mgr = Y2PM::youPatchManager();
+  PMManager::PMSelectableVec::const_iterator it;
+  for ( it = mgr.begin(); it != mgr.end(); ++it ) {
+    PMSelectablePtr selectable = *it;
+    PMYouPatchPtr candidate = selectable->candidateObj();
+    if ( candidate && ( candidate->kind() == PMYouPatch::kind_yast ) ) {
+      selectable->user_set_install();
       yastPatch = true;
     }
   }
 
   if ( !yastPatch ) {
-    for( itPatch = _patches.begin(); itPatch != _patches.end(); ++itPatch ) {
-      int kind = (*itPatch)->kind();
-      if ( kind & kinds ) {
-        _selectedPatches.push_back( *itPatch );
+    for ( it = mgr.begin(); it != mgr.end(); ++it ) {
+      PMSelectablePtr selectable = *it;
+      PMYouPatchPtr candidate = selectable->candidateObj();
+      if ( candidate && ( candidate->kind() & kinds ) ) {
+        selectable->user_set_install();
       }
     }
   }
-
-  _selectedPatchesIt = _selectedPatches.begin();
 }
 
 PMError InstYou::attachSource()
@@ -155,10 +155,9 @@ PMError InstYou::retrievePatches()
   PMError error = attachSource();
   if ( error ) return error;
 
-  list<PMYouPatchPtr>::const_iterator itPatch;
-  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
-       ++itPatch ) {
-    PMError error = retrievePatch( *itPatch );
+  PMYouPatchPtr patch;
+  for( patch = firstPatch(); patch; patch = nextPatch() ) {
+    PMError error = retrievePatch( patch );
     if ( error ) return error;
   }
 
@@ -167,31 +166,36 @@ PMError InstYou::retrievePatches()
 
 PMYouPatchPtr InstYou::firstPatch()
 {
-  _selectedPatchesIt = _selectedPatches.begin();
+  _selectedPatchesIt = _patches.begin();
 
-  if ( _selectedPatchesIt == _selectedPatches.end() ) {
-    return PMYouPatchPtr();
-  }
-
-  return *_selectedPatchesIt;
+  return nextSelectedPatch();
 }
 
 PMYouPatchPtr InstYou::nextPatch()
 {
   ++_selectedPatchesIt;
 
-  if ( _selectedPatchesIt == _selectedPatches.end() ) {
-    return PMYouPatchPtr();
+  return nextSelectedPatch();
+}
+
+PMYouPatchPtr InstYou::nextSelectedPatch()
+{
+  while ( _selectedPatchesIt != _patches.end() ) {
+    PMSelectablePtr selectable = (*_selectedPatchesIt)->getSelectable();
+    if ( selectable && selectable->to_install() ) {
+      return *_selectedPatchesIt;
+    }
+    ++_selectedPatchesIt;
   }
 
-  return *_selectedPatchesIt;
+  return PMYouPatchPtr();
 }
 
 PMError InstYou::installCurrentPatch()
 {
   D__ << "Install current Patch" << endl;
 
-  if ( _selectedPatchesIt == _selectedPatches.end() ) {
+  if ( _selectedPatchesIt == _patches.end() ) {
     E__ << "No more patches." << endl;
     return PMError( InstSrcError::E_error );
   }
@@ -201,7 +205,7 @@ PMError InstYou::installCurrentPatch()
 
 PMError InstYou::retrieveCurrentPatch()
 {
-  if ( _selectedPatchesIt == _selectedPatches.end() ) {
+  if ( _selectedPatchesIt == _patches.end() ) {
     E__ << "No more patches." << endl;
     return PMError( InstSrcError::E_error );
   }
@@ -211,10 +215,9 @@ PMError InstYou::retrieveCurrentPatch()
 
 PMError InstYou::installPatches( bool dryrun )
 {
-  list<PMYouPatchPtr>::const_iterator itPatch;
-  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
-       ++itPatch ) {
-    PMError error = installPatch( *itPatch, dryrun );
+  PMYouPatchPtr patch;
+  for( patch = firstPatch(); patch; patch = nextPatch() ) {
+    PMError error = installPatch( patch, dryrun );
     if ( error ) return error;
   }
 
@@ -277,14 +280,11 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
 
 void InstYou::filterPatchSelection()
 {
-  list<PMYouPatchPtr> filteredPatches;
+  PMYouPatchPtr patch;
+  for( patch = firstPatch(); patch; patch = nextPatch() ) {
+    D__ << "PATCH: " << patch->name() << endl;
 
-  list<PMYouPatchPtr>::const_iterator itPatch;
-  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
-       ++itPatch ) {
-    D__ << "PATCH: " << (*itPatch)->name() << endl;
-
-    list<PMPackagePtr> packages = (*itPatch)->packages();
+    list<PMPackagePtr> packages = patch->packages();
     list<PMPackagePtr>::const_iterator itPkg;
 
     bool install = false;
@@ -305,25 +305,21 @@ void InstYou::filterPatchSelection()
       }
     }
     
-    if ( install ) filteredPatches.push_back( *itPatch );
+    PMSelectablePtr selectable = patch->getSelectable();
+    if ( !selectable ) {
+      E__ << "Patch " << patch->name() << " has no Selectable." << endl;
+    } else {
+      if ( install ) selectable->user_set_install();
+      else selectable->user_unset();
+    }
   }
-
-  _selectedPatches = filteredPatches;
-
-  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
-       ++itPatch ) {
-    cerr << "Install: " << (*itPatch)->name() << endl;
-  }
-
-  _selectedPatchesIt = _selectedPatches.begin();
 }
 
 PMError InstYou::removePackages()
 {
-  list<PMYouPatchPtr>::const_iterator itPatch;
-  for( itPatch = _selectedPatches.begin(); itPatch != _selectedPatches.end();
-       ++itPatch ) {
-    list<PMPackagePtr> packages = (*itPatch)->packages();
+  PMYouPatchPtr patch;
+  for( patch = firstPatch(); patch; patch = nextPatch() ) {
+    list<PMPackagePtr> packages = patch->packages();
     list<PMPackagePtr>::const_iterator itPkg;
     for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
       PMError error = _media.releaseFile( _paths->rpmPath( *itPkg ) );

@@ -141,11 +141,13 @@ class InstYou {
     PMError retrievePatch( const PMYouPatchPtr & );
 
   private:
+    PMYouPatchPtr nextSelectedPatch();
+
+  private:
     PMYouPatchInfoPtr _info;
     PMYouPatchPathsPtr _paths;
     
     std::list<PMYouPatchPtr> _patches;
-    std::list<PMYouPatchPtr> _selectedPatches;
     
     std::list<PMYouPatchPtr>::const_iterator _selectedPatchesIt;
 
