@@ -43,14 +43,31 @@ int main()
     MIL << "URL: " << url << endl;
     MIL << "TYPE: " << descr->type() << endl;
     descr->set_product_dir ( dir );
-    
+
+    InstSrcDescr::ArchMap archmap;
+    list<Pathname> paths;
+    paths.push_back( Pathname("/aa/bb") );
+    paths.push_back( Pathname("/cc/dd") );
+    archmap["i586"] = paths;
+    descr->set_content_archmap( archmap );
+
+    InstSrcDescr::LabelMap labelmap;
+    labelmap[LangCode("en")] = "english";
+    labelmap[LangCode("de")] = "german";
+    descr->set_content_labelmap( labelmap );
+
+    InstSrcDescr::LinguasList linguas;
+    linguas.push_back( LangCode("en") );
+    linguas.push_back( LangCode("de") );
+    descr->set_content_linguas( linguas );
+     
     // write
-    PMError err = descr->writeCache( "/tmp/mediafile" );
+    PMError err = descr->writeCache( "/tmp/" );
 
     if ( err == PMError::E_ok )
     {
 	// read
-	descr->readCache( ndescr_r, "/tmp/mediafile" );
+	descr->readCache( ndescr_r, "/tmp/" );
 	ndescr_r->dumpOn ( cerr );
 	MIL << ndescr_r << endl;
     }
