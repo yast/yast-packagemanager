@@ -1190,6 +1190,7 @@ void InstYou::filterArchitectures( PMYouPatchPtr &patch )
       if ( *archIt == (*it1)->arch() ) break;
     }
     if ( archIt == archs.end() ) {
+      D__ << "    Discard package because of unknown arch." << endl;
       it1 = packages.erase( it1 );
       continue;
     }
