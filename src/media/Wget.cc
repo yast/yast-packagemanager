@@ -1,5 +1,5 @@
 /*************************************************************
- *    
+ *
  *     YaST2      SuSE Labs                        -o)
  *     --------------------                        /\\
  *                                                _\_v
@@ -15,9 +15,12 @@
  * $Header$
  *
  *************************************************************/
-   
+
 /*
  * $Log$
+ * Revision 1.4  2002/08/02 11:11:27  ma
+ * Malplaced 'N_()' macro removed.
+ *
  * Revision 1.3  2002/07/05 12:05:13  lnussel
  * catch more wget errors
  *
@@ -67,7 +70,7 @@
 using namespace std;
 
 /*-------------------------------------------------------------*/
-/* Create all parent directories of @param name, as necessary  */	
+/* Create all parent directories of @param name, as necessary  */
 /*-------------------------------------------------------------*/
 static void
 create_directories(string name)
@@ -81,7 +84,7 @@ create_directories(string name)
 
 
 /****************************************************************/
-/* public member-functions					*/	
+/* public member-functions					*/
 /****************************************************************/
 
 /*-------------------------------------------------------------*/
@@ -109,7 +112,7 @@ Wget::~Wget()
 
    process = NULL;
 
-   M__ << "~Wget() end" << endl;   
+   M__ << "~Wget() end" << endl;
 }
 
 /*--------------------------------------------------------------*/
@@ -118,13 +121,13 @@ Wget::~Wget()
 string Wget::error_string ( WgetStatus status )
 {
     string ret = "";
-    
+
     switch ( status )
     {
 	case WGET_OK:
 	    ret = N_("Ok");
 	    break;
-	case N_(WGET_ERROR_FILE):
+	case WGET_ERROR_FILE:
 	    ret = N_("file not found");
 	    break;
 	case WGET_ERROR_CONNECT:
@@ -143,7 +146,7 @@ string Wget::error_string ( WgetStatus status )
 	    ret = N_("unexpected error");
 	    break;
     }
-    
+
     return ret;
 }
 
@@ -187,11 +190,11 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
 
    if ( process == NULL )
        return WGET_ERROR_UNEXPECTED;
-   
+
    string value;
    string output = process->receiveLine();
    bool firstUnauthorized = false;
-   
+
    while ( output.length() > 0)
    {
       string::size_type 	ret;
@@ -212,7 +215,7 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
       if  ( value.find ( WRONGUSER ) != string::npos )
       {
 	  // wget returns always ohne unauthorize error message
-	  if ( !firstUnauthorized ) 
+	  if ( !firstUnauthorized )
 	  {
 	      firstUnauthorized = true;
 	  }
@@ -254,7 +257,7 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
 	  ok = WGET_ERROR_FILE;
       }
 
-      output = process->receiveLine();            
+      output = process->receiveLine();
    }
 
    if ( systemStatus() != 0
@@ -262,18 +265,18 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
    {
        ok = WGET_ERROR_UNEXPECTED;
    }
-   
+
    return ( ok );
 }
 
 
 
 /****************************************************************/
-/* private member-functions					*/	
+/* private member-functions					*/
 /****************************************************************/
 
 /*--------------------------------------------------------------*/
-/* Run wget with the specified arguments, handling stderr	*/	
+/* Run wget with the specified arguments, handling stderr	*/
 /* as specified  by disp					*/
 /*--------------------------------------------------------------*/
 void Wget::run_wget(int n_opts, const char *const *options,
@@ -291,7 +294,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
 //  string usr = "--http-user=" + user;
   string proxyUsr = "--proxy-user=" + proxyUser;
   string proxyPasswd = "--proxy-passwd=" + proxyPassword;
-  
+
   argv[i++] = "wget";
 
   argv[i++] = "--tries=3";
@@ -303,7 +306,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
   }
   else
   {
-      argv[i++] = "";      
+      argv[i++] = "";
   }
   if ( password != "" )
   {
@@ -311,7 +314,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
   }
   else
   {
-      argv[i++] = "";      
+      argv[i++] = "";
   }
 */
   if ( proxyUser != "" )
@@ -320,7 +323,7 @@ void Wget::run_wget(int n_opts, const char *const *options,
   }
   else
   {
-      argv[i++] = "";      
+      argv[i++] = "";
   }
   if ( proxyPassword != "" )
   {
@@ -328,10 +331,10 @@ void Wget::run_wget(int n_opts, const char *const *options,
   }
   else
   {
-      argv[i++] = "";      
+      argv[i++] = "";
   }
 
-  
+
   for (int j = 0; j < n_opts; j++)
   {
     argv[i++] = options[j];
@@ -362,7 +365,7 @@ bool Wget::systemReadLine(string &line)
 {
    if ( process == NULL )
       return false;
-   
+
   line = process->receiveLine();
   if (line.length() == 0)
     return false;
@@ -379,12 +382,12 @@ int Wget::systemStatus()
 {
    if ( process == NULL )
       return -1;
-   
+
    exit_code = process->close();
    process->kill();
    delete process;
    process = 0;
-   
+
    D__ << "exit code: " << exit_code << endl;
 
    return exit_code;
