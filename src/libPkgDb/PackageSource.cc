@@ -8,13 +8,13 @@
 #include <Pathname.h>
 #include <time.h>
 
-hash<string,MediaAccess*> media_access_handlers;
+hash<string,MediaAccess::Ref> media_access_handlers;
 
 #define startswith(Str,With) Str.substr(0,sizeof(With)-1)==With
 
 Url::Url(const string& url)
 {
-    MediaAccess* access;
+    MediaAccess::Ref access;
     string access_str;
     string::size_type pos = url.find("://");
     access_str = url.substr(0, pos);
@@ -22,7 +22,7 @@ Url::Url(const string& url)
 	access_str="file";
     access = media_access_handlers[access_str];
 
-    if(!access)
+    if(access.null())
 	throw PkgDbExcp("unkown url");
 
     _access = access;
@@ -35,7 +35,7 @@ const string& Url::getPath() const
     return _path;
 }
 
-MediaAccess* Url::getAccess()
+MediaAccess::Ref Url::getAccess()
 {
     return _access;
 }
@@ -216,7 +216,7 @@ void SuSEClassicDataProvider::ParseCommonPkd()
 MediaAccess::MediaAccess(string urlprefix)
 {
     _urlprefix = urlprefix;
-    media_access_handlers[_urlprefix]=this;
+    media_access_handlers[_urlprefix]=MediaAccess::Ref(this);
 }
 MediaAccess::~MediaAccess()
 {

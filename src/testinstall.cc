@@ -30,7 +30,7 @@ int main( int argc, char *argv[] )
 //    PkgPool.add_installed_packages();
 
     // TODO: this has to be done by some dlopen magic
-    MediaAccess_File fileaccess;
+    MediaAccess::Ref fileaccess(new MediaAccess_File());
     PackageDataProvider::Ref source;
     try
     {
