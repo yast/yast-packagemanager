@@ -51,9 +51,12 @@ YOU_REMOVE_SOURCE_PACKAGES="no"
 # If set to "yes" YOU will try to download delta packages if
 # possible. You may need your installation media for this to work.
 #
-# If set to 'filesystem' YOU will try to download delta packages
-# that apply to installed files. You don't need your installation
-# media in this case but might need to accept larger download sizes.
+# If empty or set to 'filesystem' YOU will try to download delta packages that
+# apply to installed files. You don't need your installation media in this case
+# but might need to accept larger download sizes.
 #
 # If set to 'no' YOU will only use patch rpms and normal rpms.
-YOU_USE_DELTAS="yes"
+#
+# Note: you need to have the deltarpm tools installed to actually
+# make this work
+YOU_USE_DELTAS=""
