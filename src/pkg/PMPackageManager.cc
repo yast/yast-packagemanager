@@ -324,10 +324,6 @@ const PkgDuMaster & PMPackageManager::updateDu()
 
       }
 
-      SEC << sel->name() << (sel->to_install()?" INSTALL ":" DELETE ")
-      << " i: " << (sel->has_installed()?sel->installedObj()->size():FSize())
-      << " c: " << (sel->has_candidate()?sel->candidateObj()->size():FSize()) << endl;
-      DBG << _du_master << endl;
     }
   }
 
