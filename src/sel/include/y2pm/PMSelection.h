@@ -45,8 +45,8 @@ class PMSelection : virtual public Rep, public PMObject {
      * Attributes provided by PMSelection
      **/
     enum PMSelectionAttribute {
-      SEL_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
-      ATTR_CATEGORY = SEL_ATTR_BEGIN,
+      PMSEL_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
+      ATTR_CATEGORY = PMSEL_ATTR_BEGIN,
       ATTR_VISIBLE,
       ATTR_INSTALL,
       ATTR_DELETE,

@@ -75,6 +75,8 @@ PMSelection::~PMSelection()
 //
 string PMSelection::getAttributeName( PMSelectionAttribute attr ) const
 {
+    if (attr < PMSelection::PMSEL_ATTR_BEGIN)
+	return getAttributeName ((PMObject::PMObjectAttribute)attr);
   switch ( attr ) {
 
 #define ENUM_OUT(V) case ATTR_##V: return #V; break
