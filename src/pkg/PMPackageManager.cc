@@ -279,12 +279,12 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMPackageManager::currentDu
-//	METHOD TYPE : const set<MountPoint> &
+//	METHOD NAME : PMPackageManager::updateDu
+//	METHOD TYPE : const PkgDuMaster &
 //
 //	DESCRIPTION :
 //
-const set<PMPackageManager::MountPoint> & PMPackageManager::currentDu()
+const PkgDuMaster & PMPackageManager::updateDu()
 {
   bool count_mp = _du_master.resetStats();
 
@@ -324,14 +324,14 @@ const set<PMPackageManager::MountPoint> & PMPackageManager::currentDu()
 
       }
 
-      //SEC << sel->name() << (sel->to_install()?" INSTALL ":" DELETE ")
-      //<< " i: " << (sel->has_installed()?sel->installedObj()->size():FSize())
-      //<< " c: " << (sel->has_candidate()?sel->candidateObj()->size():FSize()) << endl;
-      //DBG << _du_master << endl;
+      SEC << sel->name() << (sel->to_install()?" INSTALL ":" DELETE ")
+      << " i: " << (sel->has_installed()?sel->installedObj()->size():FSize())
+      << " c: " << (sel->has_candidate()?sel->candidateObj()->size():FSize()) << endl;
+      DBG << _du_master << endl;
     }
   }
 
   DBG << _du_master << endl;
-  return _du_master.mountpoints();
+  return _du_master;
 }
 

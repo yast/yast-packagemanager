@@ -169,21 +169,21 @@ class PMPackageManager : public PMManager {
     }
 
     /**
-     * Calculate disk usage based on previously provided 'df' info.
+     * Returns PkgDuMaster, that contains not just the mountpoints set,
+     * but overall disk usage info (not spillted to partitions).
      *
-     * Quite weak calculations, due to missing info about intalled
-     * packages.
+     * This does not update the statistics! It's the info of any previous
+     * updateDu().
      **/
-    const std::set<MountPoint> & currentDu();
+    const PkgDuMaster & getDu() const { return _du_master; }
 
     /**
      * Calculate disk usage based on previously provided 'df' info.
      *
-     * Same as currentDu() but returns PkgDuMaster, that contains not
-     * just the mountpoints set, but overall disk usage info (not spillted
-     * to partitions).
+     * Returns PkgDuMaster, that contains not just the mountpoints set,
+     * but overall disk usage info (not spillted to partitions).
      **/
-    const PkgDuMaster & updateDu() { currentDu(); return _du_master; }
+    const PkgDuMaster & updateDu();
 
 };
 
