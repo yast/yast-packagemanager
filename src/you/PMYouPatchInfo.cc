@@ -359,7 +359,14 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
                                  list<PMYouPatchPtr> &patches, bool checkSig )
 {
-    PMError error = _media.open( baseUrl );
+  int err = PathInfo::assert_dir( _paths->localDir() );
+  if ( err ) {
+    E__ << "Can't create " << _paths->localDir() << " (errno: " << err << ")"
+        << endl;
+    return PMError( InstSrcError::E_error );
+  }
+
+   PMError error = _media.open( baseUrl, _paths->localDir() );
     if ( error != PMError::E_ok ) {
       E__ << "MediaAccess::open() failed." << endl;
       return error;

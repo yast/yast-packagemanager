@@ -21,10 +21,24 @@ using namespace std;
 
 void usage()
 {
-  cout << "Usage: online-update [-u url] [-p product] [-v version]"
-       << "[-a arch] [-d] [-n] [security] [recommended] [document]"
+  cout << "Usage: online-update [-u url] [-p product] [-v version] "
+       << "[-a arch] [-d] [-s] [-n] [security] [recommended] [document]"
        << " [optional]"
-       << endl;
+       << endl << endl
+       << "-u url      Base URL of directory tree used to get patches from." << endl
+       << endl
+       << "-p product  Name of product to get patches for." << endl
+       << "-v version  Version of product to get patches for." << endl
+       << "-a arch     Base architecture of product to get patches for." << endl
+       << endl
+       << "-d          Dry run. Only get patches, don't install them." << endl
+       << "-n          No signature check of downloaded files." << endl
+       << endl
+       << "-s          Show list of patches." << endl
+       << "-V          Be verbose." << endl
+       << "-D          Debug output." << endl
+       << endl
+       << "security | recommended | document | optional   Types of patches to be installed." << endl;
   exit( 1 );
 }
 
@@ -48,10 +62,13 @@ int main( int argc, char **argv )
 
   bool dryrun = false;
   bool checkSig = true;
+  bool showPatches = true;
+  bool verbose = false;
+  bool debug = false;
 
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "hdnu:p:v:a:l:" );
+    c = getopt( argc, argv, "hdnsVDu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
@@ -60,6 +77,16 @@ int main( int argc, char **argv )
         break;
       case 'n':
         checkSig = false;
+        break;
+      case 's':
+        showPatches = true;
+        break;
+      case 'V':
+        verbose = true;
+        break;
+      case 'D':
+        debug = true;
+        break;
       case 'u':
         urlStr = optarg;
         break;
@@ -170,7 +197,10 @@ int main( int argc, char **argv )
 
   you.selectPatches( kinds );
 
-  you.filterPatchSelection();
+  if ( debug || showPatches ) {
+    cout << "--PATCHES:--" << endl;
+    you.showPatches( verbose );
+  }
 
   error = you.retrievePatches( checkSig );
   if ( error ) {
