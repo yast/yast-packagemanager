@@ -5,6 +5,11 @@ Mon Jun  9 01:05:03 CEST 2003 - ma@suse.de
   code needs review.
 
 -------------------------------------------------------------------
+Wed May 28 14:12:33 CEST 2003 - cschum@suse.de
+
+- Added option to execute YCP scripts as part of a YOU patch.
+
+-------------------------------------------------------------------
 Fri May 16 14:54:29 CEST 2003 - cschum@suse.de
 
 - Rewrote YOU authentification code.
