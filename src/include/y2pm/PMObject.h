@@ -127,6 +127,7 @@ class PMObject : virtual public Rep, public PMSolvable {
     /**
      * Return true if this is the Selectables InstalledObj (on InstTartget).
      * The one actually installed on the target system.
+     * Not to be confused with hasInstalledObj() !
      **/
     bool isInstalledObj() const;
 
@@ -134,6 +135,7 @@ class PMObject : virtual public Rep, public PMSolvable {
      * Return true if this is the Selectables CandidateObj (from an InstSrc).
      * Among all available Objects, this is considered to be the best choice
      * for an installation.
+     * Not to be confused with hasCandidateObj() !
      **/
     bool isCandidateObj() const;
 
@@ -143,6 +145,37 @@ class PMObject : virtual public Rep, public PMSolvable {
      * but not considered to be the best choice for an installation.
      **/
     bool isAvailableOnly() const;
+
+    /**
+     * Convenience method: Retrieve the installed instance of this
+     * selectable. This may be a brother of this object or this object itself
+     * or 0 (if there is no installed instance or if this object doesn't have a
+     * selectable - in which case something has gone wrong badly anyway).
+     **/
+    PMObjectPtr getInstalledObj() const;
+    
+    /**
+     * Convenience method: Retrieve the candidate instance of this
+     * selectable. This may be a brother of this object or this object itself
+     * or 0 (if there is no candidate instance or if this object doesn't have a
+     * selectable - in which case something has gone wrong badly anyway).
+     **/
+    PMObjectPtr getCandidateObj() const;
+
+    /**
+     * Convenience method: Check if there is any installed instance of this
+     * selectable - this instance or any of its brothers.
+     * Not to be confused with isInstalledObj() !
+     **/
+    bool hasInstalledObj() const;
+    
+    /**
+     * Convenience method: Check if there is any candidate instance of this
+     * selectable - this instance or any of its brothers.
+     * Not to be confused with isInstalledObj() !
+     **/
+    bool hasCandidateObj() const;
+    
 
   public:
 

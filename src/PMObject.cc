@@ -176,6 +176,79 @@ bool PMObject::isAvailableOnly() const
 
 
 
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : PMObject::getInstalledObj
+//	METHOD TYPE : PMObjectPtr
+//
+//	DESCRIPTION :
+//
+//  Convenience method: Retrieve the installed instance of this
+//  selectable. This may be a brother of this object or this object itself
+//  or 0 (if there is no installed instance or if this object doesn't have a
+//  selectable - in which case something has gone wrong badly anyway).
+
+PMObjectPtr PMObject::getInstalledObj() const
+{
+    if ( _selectable )
+	return _selectable->installedObj();
+    else
+	return PMObjectPtr();	// Null pointer
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : PMObject::getCandidateObj
+//	METHOD TYPE : PMObjectPtr
+//
+//	DESCRIPTION :
+//
+//  Convenience method: Retrieve the candidate instance of this
+//  selectable. This may be a brother of this object or this object itself
+//  or 0 (if there is no candidate instance or if this object doesn't have a
+//  selectable - in which case something has gone wrong badly anyway).
+
+PMObjectPtr PMObject::getCandidateObj() const
+{
+    if ( _selectable )
+	return _selectable->candidateObj();
+    else
+	return PMObjectPtr();	// Null pointer
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : PMObject::hasInstalledObj
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+// Convenience method: Check if there is any installed instance of this
+// selectable - this instance or any of its brothers.
+// Not to be confused with isInstalledObj() !
+
+bool PMObject::hasInstalledObj() const
+{
+    return _selectable && _selectable->installedObj();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : PMObject::hasInstalledObj
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+// Convenience method: Check if there is any candidate instance of this
+// selectable - this instance or any of its brothers.
+// Not to be confused with isInstalledObj() !
+
+bool PMObject::hasCandidateObj() const
+{
+    return _selectable && _selectable->candidateObj();
+}
 
 
 
