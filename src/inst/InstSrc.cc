@@ -419,17 +419,20 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
   // first prepare cache
   // cachedir must not exist, but parent dir must.
   ///////////////////////////////////////////////////////////////////
-  PathInfo cpath( cachedir_r );
+  if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() ) {
 
-  if ( cpath.isExist() ) {
-    ERR << "Cache dir already exists " << cpath << endl;
-    return Error::E_cache_dir_exists;
-  }
+    PathInfo cpath( cachedir_r );
 
-  int res = PathInfo::mkdir( cpath.path() );
-  if ( res ) {
-    ERR << "Unable to create cache dir " << cpath << " (errno " << res << ")" << endl;
-    return Error::E_cache_dir_create;
+    if ( cpath.isExist() ) {
+      ERR << "Cache dir already exists " << cpath << endl;
+      return Error::E_cache_dir_exists;
+    }
+
+    int res = PathInfo::mkdir( cpath.path() );
+    if ( res ) {
+      ERR << "Unable to create cache dir " << cpath << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
   }
 
   _cache = cachedir_r;
@@ -440,7 +443,7 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
   ///////////////////////////////////////////////////////////////////
 
   if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() ) {
-    res = PathInfo::assert_dir( cache_descr_dir() );
+    int res = PathInfo::assert_dir( cache_descr_dir() );
     if ( res ) {
       ERR << "Unable to create descr_dir " << cache_descr_dir() << " (errno " << res << ")" << endl;
       return Error::E_cache_dir_create;
@@ -451,15 +454,15 @@ PMError InstSrc::_init_newCache( const Pathname & cachedir_r )
       ERR << "Unable to create data_dir " << cache_data_dir() << " (errno " << res << ")" << endl;
       return Error::E_cache_dir_create;
     }
+
+    res = PathInfo::assert_dir( cache_media_dir() );
+    if ( res ) {
+      ERR << "Unable to create media_dir " << cache_media_dir() << " (errno " << res << ")" << endl;
+      return Error::E_cache_dir_create;
+    }
   } else {
     _may_use_cache = false;
     MIL << "descr/data caches disabled" << endl;
-  }
-
-  res = PathInfo::assert_dir( cache_media_dir() );
-  if ( res ) {
-    ERR << "Unable to create media_dir " << cache_media_dir() << " (errno " << res << ")" << endl;
-    return Error::E_cache_dir_create;
   }
 
   return Error::E_ok;
