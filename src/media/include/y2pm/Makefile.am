@@ -16,8 +16,6 @@ pkginclude_HEADERS =	\
 	MediaNFS.h \
 	MediaCD.h \
         MediaCurl.h \
-	MediaWget.h \
-	Wget.h \
 	Mount.h \
 	MediaError.h
 

@@ -34,7 +34,6 @@
 #include <y2pm/MediaDISK.h>
 #include <y2pm/MediaNFS.h>
 #include <y2pm/MediaSMB.h>
-#include <y2pm/MediaWget.h>
 #include <y2pm/MediaCurl.h>
 
 using namespace std;
