@@ -41,6 +41,8 @@
 
 using namespace std;
 
+InstYou::Callbacks *InstYou::_callbacks = 0;
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstYou
@@ -73,8 +75,6 @@ InstYou::~InstYou()
 
 void InstYou::init()
 {
-  _callbacks = 0;
-
   _selectedPatchesIt = _patches.begin();
   _progressTotal = 0;
   _progressCurrent = 0;
