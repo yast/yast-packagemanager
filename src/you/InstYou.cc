@@ -374,6 +374,11 @@ PMError InstYou::processPatches()
   _installedPatches = 0;
   vector<PMYouPatchPtr> patchesToInstall;
 
+  // Write taboo settings
+  // Settings can't be written in destructor, because writeSettings relies on
+  // virtual methods.
+  Y2PM::youPatchManager().writeSettings();
+
   bool hasPreInformation = false;
 
   PMYouPatchPtr patch = firstPatch();
@@ -767,6 +772,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
 
   error = patchProgress( 99 );
   if ( error ) return error;
+
+  // TOOD: Execute script before marking patch as installed
 
   if ( !_settings->dryRun() ) {
     error = Y2PM::instTarget().installPatch( patch->localFile() );
@@ -1443,11 +1450,6 @@ PMError InstYou::writeLastUpdate()
 
   _settings->config()->writeEntry( "LastUpdate", Date::toSECONDS( Date::now() ) );
   _settings->config()->save();
-
-#warning Settings should probably written elsewhere
-  // Settings can't be written in destructor, because writeSettings relies on
-  // virtual methods.
-  Y2PM::youPatchManager().writeSettings();
 
   return PMError();
 }
