@@ -53,11 +53,12 @@ show_pmobject (PMPackagePtr p)
 {
     show_pmsolvable (p);
     cout << "-- Object --" << endl;
-#if 0
+#if 1
     cout << "Summary: " << p->summary() << endl;
     cout << "Description: " << list2string (p->description(), "\n") << endl;
     cout << "InsNotify: " << list2string (p->insnotify(), "\n") << endl;
     cout << "DelNotify: " << list2string (p->delnotify(), "\n") << endl;
+    cout << "Size: " << p->size().asString() << endl;
 #endif
 }
 
