@@ -111,6 +111,7 @@ int main( int argc, char **argv )
       cout << "PATCH: " << (*it)->name() << " (" << (*it)->shortDescription()
            << ")" << endl;
 //      (*it)->dumpOn( cout );
+      cout << "Summary: " << (*it)->summary() << endl;
       list<PMPackagePtr> packages = (*it)->packages();
       list<PMPackagePtr>::const_iterator it2;
       for( it2 = packages.begin(); it2 != packages.end(); ++it2 ) {

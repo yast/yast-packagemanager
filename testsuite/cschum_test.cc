@@ -13,6 +13,7 @@
 #include <y2pm/PMError.h>
 #include <y2pm/PMYouPatch.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/PMPackageManager.h>
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/MediaAccess.h>
@@ -32,11 +33,14 @@ void printRel( PkgEdition left, PkgEdition right )
   else if ( left == right ) { D__ << "is ==" << endl; cout << "=="; }
   else cout << "[undefined]";
   cout << " " << right << endl;
+
+  D__ << "-----------------------------------------------" << endl;
 }
 
 void printEd( PkgEdition ed )
 {
-  cout << ed << ": version: " << ed.version() << " release: " << ed.release() << endl;
+  cout << ed << ": version: " << ed.version() << " release: " << ed.release()
+       << " buildtime: " << ed.buildtime() << endl;
 }
 
 /******************************************************************
@@ -52,16 +56,42 @@ int main( int argc, char **argv )
   Y2Logging::setLogfileName( "cschum_test.log" );
   MIL << "START" << endl;
 
+#if 0
+  PMPackageManager &mgr = Y2PM::packageManager();
+  
+  PMSelectablePtr sel = mgr.getItem( "mydummy" );
+  
+  if ( !sel ) {
+    cerr << "no selectable" << endl;
+  } else {
+    PMPackagePtr pkg = sel->installedObj();
+
+    if ( !pkg ) {
+      cerr << "no installed obj" << endl;
+    } else {
+      cout << pkg->name() << ": " << pkg->version() << " (" << pkg->arch() <<")" << endl;
+    }
+  }
+#endif
+
+#if 0
+  PkgEdition five( "0.9-0" );
+  printEd( five );
   PkgEdition one( "1.0-0" );
   printEd( one );
   PkgEdition two( "1.0-1" );
   printEd( two );
-  PkgEdition three( "1.1-0" );
+  PkgEdition three( "1.0-2" );
   printEd( three );
+  PkgEdition four( "1.1-0" );
+  printEd( four );
   
+  printRel( five, two );
   printRel( one, two );
   printRel( two, two );
   printRel( three, two );
+  printRel( four, two );
+#endif
 
 #if 0
   cout << "num: " << Y2PM::youPatchManager().size() << endl;
