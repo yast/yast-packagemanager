@@ -687,12 +687,31 @@ PMError InstSrcManager::setNewRanks()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcManager::adjustSources
+//	METHOD NAME : InstSrcManager::editGet
+//	METHOD TYPE : InstSrcManager::SrcStateVector
+//
+InstSrcManager::SrcStateVector InstSrcManager::editGet() const
+{
+  SrcStateVector ret;
+  ret.reserve( _knownSources.size() );
+
+  for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
+    ret.push_back( SrcState( (*it)->srcID(),
+			     (*it)->descr()->default_activate() ) );
+  }
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::editSet
 //	METHOD TYPE : PMError
 //
 //	DESCRIPTION :
 //
-PMError InstSrcManager::adjustSources( const SrcStateVector & keep_r, const SrcDelSet del_r )
+PMError InstSrcManager::editSet( const SrcStateVector & keep_r, const SrcDelSet del_r )
 {
   PMError ret;
 
