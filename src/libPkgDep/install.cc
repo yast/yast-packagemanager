@@ -38,8 +38,29 @@ bool PkgDep::install( PkgSet& in_candidates,
 				 << cand->edition() << " -- dropping it\n";
 		}
 		else {
+			bool pushfront=false;
 			numtocheck++;
-			to_check.push_back( cand );
+			// ensure that packages that obsolete something
+			// installed are checked first
+			for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
+			    obs != cand->obsoletes_end(); ++obs )
+			{
+				PMSolvablePtr p = vinstalled.lookup(obs->name());
+				if (p && obs->matches( p->self_provides() )) 
+				{
+				    pushfront=true;
+				    break;
+				}
+			}
+			if(pushfront)
+			{
+			    D__ << cand->name() << " obsoletes installed package, moving to front" << endl;
+			    to_check.push_front( cand );
+			}   
+			else
+			{
+			    to_check.push_back( cand );
+			}
 			notes[cand->name()].from_input = true;
 		}
 

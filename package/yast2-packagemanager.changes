@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 27 17:14:49 CET 2003 - lnussel@suse.de
+
+- check dependencies of packages that obsolete installed ones first (#24115)
+
+-------------------------------------------------------------------
 Thu Feb 27 13:19:27 CET 2003 - cschum@suse.de
 
 - Fixed dangling pointer to cookie jar (#24286).
