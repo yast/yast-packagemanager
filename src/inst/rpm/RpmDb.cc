@@ -79,7 +79,8 @@ RpmDb::RpmDb() :
     _rpmdbname("packages.rpm"),
     _creatednew(false),
     _old_present(false),
-    _initialized(false)
+    _initialized(false),
+    _warndirexists(false)
 {
    process = 0;
    exit_code = -1;
@@ -1486,31 +1487,40 @@ void RpmDb::processConfigFiles(const string& line, const string& name, const cha
     string file1;
     string file2;
 
-    pos1 = msg.find(typemsg);
-    for(;;)
+    pos1 = msg.find (typemsg);
+    for (;;)
     {
 	if( pos1 == string::npos )
 	    break;
 
-	pos2=pos1+strlen(typemsg);
+	pos2 = pos1 + strlen (typemsg);
 
-	if( pos2 >= msg.length() )
+	if (pos2 >= msg.length() )
 	    break;
 
-	file1 = msg.substr(0,pos1);
-	file2 = msg.substr(pos2);
+	if (!_rootdir.empty() && _rootdir != "/")
+	{
+	    file1 = _rootdir + msg.substr (0, pos1);
+	    file2 = _rootdir + msg.substr (pos2);
+	}
+	else
+	{
+	    file1 = msg.substr (0, pos1);
+	    file2 = msg.substr (pos2);
+	}
+
 	string out;
-	int ret = Diff::differ(file1,file2,out,25);
-	if(ret)
+	int ret = Diff::differ (file1, file2, out, 25);
+	if (ret)
 	{
 	    Pathname notifydir = Pathname(_rootdir) + WARNINGMAILPATH;
-	    if(PathInfo::assert_dir(notifydir) != 0)
+	    if (PathInfo::assert_dir(notifydir) != 0)
 	    {
 		ERR << "Could not create " << notifydir.asString() << endl;
 		break;
 	    }
 	    string file = name + '_' + file1;
-	    for(string::size_type pos = file.find('/'); pos != string::npos; pos = file.find('/'))
+	    for (string::size_type pos = file.find('/'); pos != string::npos; pos = file.find('/'))
 	    {
 		file[pos] = '_';
 	    }
