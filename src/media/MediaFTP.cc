@@ -143,8 +143,6 @@ MediaFTP::release (bool eject)
 MediaResult
 MediaFTP::provideFile (const Pathname & filename) const
 {
-    // TODO: retrieve file from server, save below _attacedTo
-
     D__ << filename.asString() << endl;
 
     Wget wget;
@@ -162,10 +160,18 @@ MediaFTP::provideFile (const Pathname & filename) const
     D__ << url << endl;
 
     // TODO: recreate fs structure
-    Pathname dest = _attachPoint+filename.basename();
+    Pathname dest = _attachPoint+path;
+    if(PathInfo::mkdir(dest.dirname()))
+    {
+	DBG << "mkdir " << dest.asString() << " failed" << endl;
+	return E_system;
+    }
     
     WgetStatus status = wget.getFile( url, dest.asString() );
-    return E_none;
+    if(status == WGET_OK)
+	return E_none;
+    else
+	return E_system;
 }
 
 ///////////////////////////////////////////////////////////////////

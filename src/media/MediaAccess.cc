@@ -208,6 +208,7 @@ MediaAccess::attachTo (const Pathname & to)
 
     if (!info.isDir())			// must be dir
     {
+	D__ << to.asString() << " is no directory" << endl;
 	return E_not_a_directory;
     }
 
