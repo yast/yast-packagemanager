@@ -108,7 +108,7 @@ class PMSelectionManager : public PMManager {
     PMError activate( PMPackageManager & package_mgr );
 
     /**
-     * Remember all activated selection in InstTargetSelDB. Reset all
+     * Remember all activated selections in InstTargetSelDB. Reset all
      * selections (not the packages!) and reflect the new InstTargetSelDB
      * content.
      **/

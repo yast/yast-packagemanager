@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 14 12:29:53 CET 2003 - ma@suse.de
+
+- Call PMSelectionManager::installOnTarget from Y2PM::commitPackages
+  to remember selection changes (#21616)
+
+-------------------------------------------------------------------
 Thu Feb 13 17:45:56 CET 2003 - cschum@suse.de
 
 - Added CMDLINE_OPTIONS variable to sysconfig/onlineupdate.

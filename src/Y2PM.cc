@@ -396,9 +396,11 @@ PMYouPatchManager & Y2PM::youPatchManager()
 //	returns uninstalled packages (because media not available) in 'remaining_r'
 //	returns uninstalled source packages in 'srcremaining_r'
 //
-int
-Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
-	std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r, InstSrcManager::ISrcIdList installrank)
+int Y2PM::commitPackages( unsigned int media_nr,
+			  std::list<std::string>& errors_r,
+			  std::list<std::string>& remaining_r,
+			  std::list<std::string>& srcremaining_r,
+			  InstSrcManager::ISrcIdList installrank )
 {
     int count = 0;
     bool go_on = true;
@@ -442,7 +444,20 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
     if (!go_on)
 	return 0;
 
+    ///////////////////////////////////////////////////////////////////
+    // One may argue whether selection data should be installed before
+    // or after any packages. Doing it before has the benefit, that the
+    // selection DB reflects what the user wanted. In case of trouble it
+    // should be easier to check and manualy repair.
+    ///////////////////////////////////////////////////////////////////
+    PMError err = selectionManager().installOnTarget();
+    if ( err ) {
+      ERR << "Error installing selection data." << err << endl;
+    }
+
+    ///////////////////////////////////////////////////////////////////
     // install loop
+    ///////////////////////////////////////////////////////////////////
 
     unsigned int current_src_media = 0;
     constInstSrcPtr current_src_ptr = 0;
