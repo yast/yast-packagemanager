@@ -47,11 +47,11 @@ class PMYouPatch : virtual public Rep, public PMObject {
      */
     enum Kind {
       kind_invalid = 0,
-      kind_security = 1,
-      kind_recommended = 2,
-      kind_optional = 4,
-      kind_document = 8,
-      kind_yast = 16,
+      kind_yast = 1,
+      kind_security = 2,
+      kind_recommended = 4,
+      kind_optional = 8,
+      kind_document = 16,
       kind_all = 31
     };
     /**
