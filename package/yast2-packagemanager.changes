@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 29 00:23:30 CEST 2004 - ma@suse.de
+
+- Fixed SEGV on loading rpm header data. (#45941)
+- 2.10.14
+
+-------------------------------------------------------------------
 Tue Sep 21 18:07:35 CEST 2004 - ma@suse.de
 
 - Adjust WFM access to rpm digest and signature verification.

@@ -424,25 +424,23 @@ PMError InstSrcDataPLAIN::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr
 
   if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() ) {
 
-  cpath( cdir );
-  if ( !cpath.isDir() ) {
-    WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
-    return Error::E_src_cache_disabled;
-  }
+    cpath( cdir );
+    if ( !cpath.isDir() ) {
+      WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
+      return Error::E_src_cache_disabled;
+    }
 
-  cpath( cdir + "IS_PLAINcache.gz" ); // cachefile in local cache
-  if ( !cpath.isFile() ) {
-    WAR << "No cachefile " << cpath << endl;
-
-    cpath( cdir + "IS_PLAINcache" ); // cachefile in local cache
+    cpath( cdir + "IS_PLAINcache.gz" ); // cachefile in local cache
     if ( !cpath.isFile() ) {
       WAR << "No cachefile " << cpath << endl;
-    }
-  }
 
-  }
-  else
-  {
+      cpath( cdir + "IS_PLAINcache" ); // cachefile in local cache
+      if ( !cpath.isFile() ) {
+	WAR << "No cachefile " << cpath << endl;
+      }
+    }
+
+  } else {
     cpath = source_r->media()->localPath("IS_PLAINcache");
   }
 

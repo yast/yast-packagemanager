@@ -141,6 +141,24 @@ void binHeaderCache::Cache::close()
 //	METHOD NAME : binHeaderCache::Cache::tell
 //	METHOD TYPE : pos
 //
+
+extern "C" {
+  typedef struct X_FDSTACK_s {
+    FDIO_t	io;
+    void *	fp;
+    int		fdno;
+  } XFDSTACK_t;
+
+  struct X_FD_s {
+    int		nrefs;
+    int		flags;
+    int		magic;
+#define	XFDMAGIC	0x04463138
+    int		nfps;
+    XFDSTACK_t	fps[8];
+  };
+}
+
 binHeaderCache::pos binHeaderCache::Cache::tell() const
 {
   pos rc = npos;
@@ -217,6 +235,19 @@ unsigned binHeaderCache::Cache::readData( void * buf_r, unsigned count_r )
 //	METHOD NAME : binHeaderCache::Cache::readHeader
 //	METHOD TYPE : Header
 //
+
+extern "C" {
+#include <netinet/in.h>
+  // from rpm: lib/header.c
+  struct XXentryInfo {
+    int_32 tag;
+    int_32 type;
+    int_32 offset;              /* Offset from beginning of data segment,
+				 only defined on disk */
+    int_32 count;
+  };
+}
+
 Header binHeaderCache::Cache::readHeader( bool magicp )
 {
   static const int_32 rpm_header_magic = 0x01e8ad8e;
@@ -245,7 +276,7 @@ Header binHeaderCache::Cache::readHeader( bool magicp )
   il = ntohl( block[count++] );
   dl = ntohl( block[count++] );
 
-  totalSize = (2*sizeof(int_32)) + (il * sizeof(struct entryInfo)) + dl;
+  totalSize = (2*sizeof(int_32)) + (il * sizeof(struct XXentryInfo)) + dl;
   if (totalSize > (32*1024*1024)) {
     ERR << "Error header ecxeeds 32Mb limit (" << totalSize << ")" << endl;
     return NULL;
@@ -262,7 +293,7 @@ Header binHeaderCache::Cache::readHeader( bool magicp )
   if ( readData( p, totalSize ) != totalSize ) {
     ERR << "Error reading header data (" << ::Fstrerror(fd) << ")" << endl;
   } else {
-    h = ::headerLoad( data );
+    h = ::headerCopyLoad( data );
     if ( !h ) {
       ERR << "Error loading header data" << endl;
     }
