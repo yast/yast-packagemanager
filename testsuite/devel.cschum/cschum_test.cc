@@ -73,7 +73,8 @@ int main( int argc, char **argv )
   DBG << path.dirname() << endl;
   DBG << path.basename() << endl;
 #endif
-  
+
+#if 0  
   Url u(
 "http://weber/cgi-bin/suseservers.cgi?product=SuSE%20Linux&version=8.1&basearch=i386&business=0&distproduct=--&yast2-online-update=2.6.12-10&yast2-packagemanager=2.6.26-0&liby2util=2.6.18-4"
 );
@@ -82,6 +83,7 @@ int main( int argc, char **argv )
   DBG << error << endl;
       
   return 0;
+#endif 
   
 #if 0
   if ( argc != 4 ) {
@@ -110,68 +112,6 @@ int main( int argc, char **argv )
   WgetStatus status = wget.getFile( Url( url ), dest );
   
   cout << "STATUS: " << wget.error_string( status ) << endl;
-#endif
-
-#if 1
-  InstTarget &TMGR( Y2PM::instTarget( true ) );
-
-#if 0
-  InstSrcManager &MGR( Y2PM::instSrcManager() );
-
-  InstSrcManager::ISrcIdList nids;
-  MGR.getSources( nids, true ); // nids = InstSrcIds aller enableten Quellen
-
-  if ( nids.begin() == nids.end() ) {
-    cerr << "No sources." << endl;
-    exit( 1 );
-  }
-
-  // such die passende Quelle raus und hol ihre InstSrcDescr
-  constInstSrcDescrPtr p = (*nids.begin())->descr();
-  
-  D__ << "DESCR: " << p->content_product().name << endl;
-  
-  PMError err = TMGR.installProduct(p); // Installiert das Produkt auf dem InstTarget
-
-  if ( err ) {
-    E__ << err << endl;
-    cerr << err << endl;
-  }
-#endif
-
-  const std::list<constInstSrcDescrPtr> &products = TMGR.getProducts();
-  
-  std::list<constInstSrcDescrPtr>::const_iterator it = products.begin();
-
-  if ( it == products.end() ) {
-    cerr << "No products installed." << endl;
-    exit ( 1 );
-  }
-
-  constInstSrcDescrPtr product = *it;
-
-  PkgNameEd prodEd = product->content_product();
-
-  cout << "PRODUCT NAME: " << prodEd.name << endl;
-  cout << "PRODUCT VERSION: " << prodEd.edition.version() << endl;
-  cout << "BASEARCH: " << TMGR.baseArch() << endl;
-
-  cout << "YOUURL: " << product->content_youurl() << endl;
-  cout << "YOUTYPE: " << product->content_youtype() << endl;
-  cout << "YOUPATH: " << product->content_youpath() << endl;
-
-  InstSrcDescr::ArchMap archMap = product->content_archmap();
-  string basearch = TMGR.baseArch();
-  
-  list<PkgArch> archs = archMap[ basearch ];
-  
-  cout << "ARCHS: ";
-  list<PkgArch>::const_iterator it2;
-  for( it2 = archs.begin(); it2 != archs.end(); ++it2 ) {
-    cout << " " << *it2;
-  }
-  cout << endl;
-
 #endif
 
 #if 0

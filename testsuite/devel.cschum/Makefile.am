@@ -19,7 +19,8 @@ EXTRA_PROGRAMS = \
 	test_libcurl \
         err_test \
         callback_test \
-        test_patchinfo
+        test_patchinfo \
+        products
 
 cschum_test_SOURCES = cschum_test.cc
 cschum_test_LDADD = $(top_builddir)/src/liby2pm.la
@@ -40,5 +41,9 @@ callback_test_LDFLAGS = -static
 test_patchinfo_SOURCES = test_patchinfo.cc
 test_patchinfo_LDADD = $(top_builddir)/src/liby2pm.la
 test_patchinfo_LDFLAGS = -static
+
+products_SOURCES = products.cc
+products_LDADD = $(top_builddir)/src/liby2pm.la
+products_LDFLAGS = -static
 
 ALL: $(EXTRA_PROGRAMS)
