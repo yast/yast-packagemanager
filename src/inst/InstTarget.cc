@@ -261,6 +261,14 @@ PMError InstTarget::installPatch( const Pathname &filename )
     Pathname dest = getRoot();
     dest += paths.localDir();
     dest += "installed/";
+
+    int err = PathInfo::assert_dir( dest );
+    if ( err ) {
+      E__ << "Can't create " << dest << " (errno: " << err
+          << ")" << endl;
+      return PMError( InstTargetError::E_error );
+    }
+    
     dest += filename.basename();
 
     D__ << "in: " << filename << " out: " << dest << endl;
