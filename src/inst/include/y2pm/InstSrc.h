@@ -297,7 +297,7 @@ class InstSrc: virtual public Rep {
 	    - found media number (0 == none)
 	    return "": retry, "1": skip, "2" cancel, else new url
 	 */
-	std::string (*_mediachangefunc)(const std::string& product, const std::string& error, int expected, int current, void*);
+	std::string (*_mediachangefunc)(const std::string& error, const std::string& url, const std::string& product, int expected, int current, void*);
 
 	/** media error callback
 	    - error code
@@ -317,7 +317,7 @@ class InstSrc: virtual public Rep {
 	 * @param func callback function
 	 * @param data arbitrary data to pass when function is called
 	 * */
-	void setMediaChangeCallback(std::string (*func)(const std::string&,const std::string&,int,int,void*), void* data)
+	void setMediaChangeCallback(std::string (*func)(const std::string&,const std::string&,const std::string&,int,int,void*), void* data)
 	{
 	    _mediachangefunc = func;
 	    _mediachangedata = data;

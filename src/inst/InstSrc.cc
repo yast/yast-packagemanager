@@ -664,6 +664,8 @@ InstSrc::provideMedia (int medianr) const
     bool triedReOpen = false;
 
     Url url = _descr->url();
+#warning TBD content_label(LangCode)
+    string product = _descr->content_label();
     while (medianr != _medianr)
     {
 	if (!_media->isAttached())
@@ -694,10 +696,65 @@ InstSrc::provideMedia (int medianr) const
 	err = _media->provideFile (mediafile);
 	if (err == MediaError::E_ok)
 	{
-#warning TBD check 'media' file contents
-	    InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
-	    ptr->_medianr = medianr;
-	    break;
+#if 1
+			InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
+			ptr->_medianr = medianr;			// everything ok
+#else
+	    // open media file
+	    std::ifstream media (_media->localPath (mediafile).asString().c_str());
+	    if (media)
+	    {
+		char vendor[200];
+		char id[200];
+		vendor[0] = 0;
+		id[0] = 0;
+		if ((media.getline (vendor, 200, '\n'))
+		    && (string (vendor) == _descr->media_vendor()))	// check vendor
+		{
+		    if ((media.getline (id, 200, '\n'))
+			&& (string (id) == _descr->media_id()))		// check id
+		    {
+			InstSrcPtr ptr = InstSrcPtr::cast_away_const (this);
+			ptr->_medianr = medianr;			// everything ok
+			break;
+		    }
+		}
+		if (_mediachangefunc != 0)
+		{
+		    string error = string(vendor) + " != " + _descr->media_vendor();
+		    if (id[0] != 0)
+		    {
+			error = error + "\n" + id + " != " + _descr->media_id();
+		    }
+		    string changereply = (*_mediachangefunc) (error, url.asString(), product, _medianr, medianr, _mediachangedata);
+		    if (changereply == "S")
+		    {
+			_media->release();
+			MIL << "skip media" << endl;
+		        return InstSrcError::E_skip_media;
+		    }
+		    else if (changereply == "E")
+		    {
+			_media->release(true);
+		    }
+		    else if (changereply == "C")
+		    {
+			_media->release();
+			MIL << "cancel media" << endl;
+		        return InstSrcError::E_skip_media;
+		    }
+		    else if (!changereply.empty())
+		    {
+			url = Url(changereply);
+			if (url.isValid())
+			{
+			    MIL << "Retry url '" << url << "'" << endl;
+			    continue;
+			}
+		    }
+		}
+	    } // media file ok
+#endif
 	}
 	else
 	{
@@ -706,7 +763,7 @@ InstSrc::provideMedia (int medianr) const
 #warning TBD eject CD on PPC/MAC
 	_media->release();
 
-	std::string path = _descr->url().getPath();
+	std::string path = url.getPath();
 	if (!triedReOpen
 	    && isdigit(path[path.size()-1]))
 	{
@@ -732,9 +789,7 @@ InstSrc::provideMedia (int medianr) const
 	    break;
 	}
 
-#warning TBD content_label(LangCode)
-	string product = _descr->content_label();
-	string changereply = (*_mediachangefunc) (product, err.errstr(), _medianr, medianr, _mediachangedata);
+	string changereply = (*_mediachangefunc) (err.errstr(), url.asString(), product, _medianr, medianr, _mediachangedata);
 #warning TBD check reply
 	reply = changereply;
 	if (reply != "")

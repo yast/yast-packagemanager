@@ -59,6 +59,8 @@ class InstSrcError {
       E_create_file,
       E_write_file,
       E_no_media,
+      E_cancel_media,		// media change: user wants to cancel installation
+      E_skip_media,		// media change: user wants to skip this media
       // InstSrc creation
       E_bad_url,
       E_no_instsrc_on_media,

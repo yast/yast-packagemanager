@@ -70,6 +70,8 @@ std::string InstSrcError::errtext( const unsigned e )
     ENUM_OUT( E_create_file );
     ENUM_OUT( E_write_file );
     ENUM_OUT( E_no_media );
+    ENUM_OUT( E_cancel_media );
+    ENUM_OUT( E_skip_media );
     //
     ENUM_OUT( E_bad_url );
     ENUM_OUT( E_no_instsrc_on_media );
@@ -86,7 +88,10 @@ std::string InstSrcError::errtext( const unsigned e )
       // InstSrcData
     ENUM_OUT( E_data_bad_packages );
     ENUM_OUT( E_data_bad_packages_lang );
+    ENUM_OUT( E_data_bad_packages_du );
     ENUM_OUT( E_data_bad_selection );
+      // DataProvider
+    ENUM_OUT( E_no_source );
 
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////

@@ -390,11 +390,36 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    && (_callbacks._provide_done_func != 0))
 	    (*_callbacks._provide_done_func)(err, "", _callbacks._provide_done_data);
 
-	if (err)
+	switch (err)
 	{
-	    ERR << "Media can't provide package to install for " << (*it) << ":" << err.errstr() << endl;
-	    remaining.push_back ((*it)->name());
-	    continue;
+	    case PMError::E_ok:
+	    break;
+	    case InstSrcError::E_cancel_media:		// cancel all
+	    {
+		while (it != inslist.end())
+		{
+		    remaining.push_back ((*it)->name());
+		    ++it;
+		}
+		return count;
+	    }
+	    break;
+	    case InstSrcError::E_skip_media:		// skip current
+	    {
+		while (it != inslist.end())
+		{
+		    if ((*it)->medianr() != pkgmedianr)	// break on next media
+			break;
+		    remaining.push_back ((*it)->name());
+		    ++it;
+		}
+	    }
+	    break;
+	    default:
+		ERR << "Media can't provide package to install for " << (*it) << ":" << err.errstr() << endl;
+		remaining.push_back ((*it)->name());
+		continue;
+	        break;
 	}
 
 	if (_callbacks._package_start_func)
