@@ -947,10 +947,21 @@ InstSrc::provideDir (int medianr, const Pathname& path, Pathname& dir_r) const
 bool
 InstSrc::isRemote () const
 {
-    return (_media->type() == MediaAccess::FTP)
-	   || (_media->type() == MediaAccess::HTTP)
-	   || (_media->type() == MediaAccess::HTTPS);
+  MediaAccess::MediaType mtype = _media->type();
 
+  if ( mtype == MediaAccess::NONE && _descr ) {
+    // not yet attached. check descr url
+    mtype = MediaAccess::typeOf( _descr->url() );
+  }
+
+  switch ( mtype ) {
+  case MediaAccess::FTP:
+  case MediaAccess::HTTP:
+  case MediaAccess::HTTPS:
+    return true;
+  }
+
+  return false;
 }
 
 

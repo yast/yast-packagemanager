@@ -64,8 +64,6 @@ class MediaAccess : virtual public Rep {
 
 	static const ProtocolTypes protocolTypes;
 
-	static MediaType typeOf( const Url & url_r );
-
 	static const Pathname _noPath;
 
 	/**
@@ -95,10 +93,15 @@ class MediaAccess : virtual public Rep {
 	 **/
 	bool isOpen() const { return( _handler != 0 ); }
 
-       /**
+	/**
 	 * Type of media if open, otherwise NONE.
 	 **/
         MediaType type() const;
+
+	/**
+	 * Type of media to expect if you'd open url.
+	 **/
+	static MediaType typeOf( const Url & url_r );
 
 	/**
 	 * close url

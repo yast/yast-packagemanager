@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar 10 22:51:42 CET 2003 - ma@suse.de
+
+- On query whether instsource is remote (ftp,http), check the url
+  in case the media is not yet open. (#24641)
+- 2.7.30
+
+-------------------------------------------------------------------
 Mon Mar 10 20:47:30 CET 2003 - ma@suse.de
 
 - Fixed: rpm install error wrongly interpreted as error providing
