@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-  File:       ParseDataUL.h
+  File:       InstSrcDataUL.h
 
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
@@ -18,8 +18,8 @@
   Purpose: Concrete InstSrcData able to handle UnitedLinux style layout.
 
 /-*/
-#ifndef ParseDataUL_h
-#define ParseDataUL_h
+#ifndef InstSrcDataUL_h
+#define InstSrcDataUL_h
 
 #include <iosfwd>
 #include <fstream>
@@ -28,108 +28,153 @@
 
 #include <y2pm/PMULPackageDataProviderPtr.h>
 #include <y2pm/PMULSelectionDataProviderPtr.h>
-#include <y2pm/ParseDataULPtr.h>
+#include <y2pm/InstSrcDataULPtr.h>
 #include <y2pm/InstSrcData.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMSelection.h>
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : ParseDataUL
+//	CLASS NAME : InstSrcDataUL
 /**
  * @short Concrete InstSrcData able to handle UnitedLinux style layout.
  **/
-class ParseDataUL : virtual public Rep {
-  REP_BODY(ParseDataUL);
+class InstSrcDataUL : virtual public Rep, public InstSrcData {
+    REP_BODY(InstSrcDataUL);
+
+    private:
+	/**
+	 * actual data for this InstSrc
+	 */
+	std::list<PMSelectionPtr> _selections;
+	std::list<PMPackagePtr> _packages;
+	std::list<PMYouPatchPtr> _patches;
+
+	//--------------------------------------------------------------------
+	// InstData interface  
+
+    protected:
+	//-----------------------------
+	// cache file handling
+	/**
+	 * write media content data to cache file
+	 * @param pathname of corresponding InstSrcDescr cache file
+	 * @return pathname of written cache
+	 * writes content cache data to an ascii file
+	 */
+	const Pathname writeCache (const Pathname &descrpathname);
+
+    public:
+
+	/**
+	 * generate PMSelection objects for each selection on the source
+	 * @return list of PMSelectionPtr on this source
+	 */
+	const std::list<PMSelectionPtr>& getSelections (void) const;
+
+	/**
+	 * generate PMPackage objects for each Item on the source/target
+	 * @return list of PMPackagePtr on this source
+	 * */
+	const std::list<PMPackagePtr>& getPackages (void) const;
+
+	/**
+	 * generate PMSolvable objects for each patch on the source
+	 * @return list of PMSolvablePtr on this source
+	 */
+	const std::list<PMYouPatchPtr>& getPatches (void) const;
+
+	std::ostream & dumpOn( std::ostream & str ) const;
 
     private:
 
-	std::list<PMSelectionPtr> lookupSelections (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections);
-	std::list<PMPackagePtr> lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages);
+	//-----------------------------------------------------------
+	// static functions for tryGetDescr and tryGetData
+	//-----------------------------------------------------------
+
+	static std::list<PMSelectionPtr> lookupSelections (const std::list<PMSelectionPtr> all_selections, const std::list<std::string>& selections);
+	static std::list<PMPackagePtr> lookupPackages (const std::list<PMPackagePtr> all_packages, const std::list<std::string>& packages);
 
 	/**
 	 * fill tagset from packages to PMPackage
 	 *
 	 */
-	int Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist);
+	static int Tag2PkgRelList (PMSolvable::PkgRelList_type& pkgrellist, const std::list<std::string>& relationlist);
 
 	/**
 	 * fill tagset from packages to PMPackage
 	 *
 	 */
-	PMPackagePtr PkgTag2Package( TagCacheRetrievalPtr pkgcache, CommonPkdParser::TagSet * tagset, const std::list<PMPackagePtr>& packags );
+	static PMPackagePtr PkgTag2Package( TagCacheRetrievalPtr pkgcache, CommonPkdParser::TagSet * tagset, const std::list<PMPackagePtr>& packags );
 
 	/**
 	 * fill tagset from packages.<lang> to PMPackage
 	 *
 	 */
-	void LangTag2Package( TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, CommonPkdParser::TagSet * tagset );
+	static void LangTag2Package( TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, CommonPkdParser::TagSet * tagset );
 
 	/**
 	 * fill tagset from <name>.sel to PMSelection
 	 *
 	 */
-	PMSelectionPtr Tag2Selection ( PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset );
-
+	static PMSelectionPtr Tag2Selection ( PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset );
 
 	/*
 	 * parse the 'packages' file
 	 */
-	PMError parsePackages (InstSrcDataPtr & ndata, MediaAccessPtr media_r, const Pathname & descr_dir_r );
+	static PMError parsePackages (std::list<PMPackagePtr>& packages, MediaAccessPtr media_r, const Pathname & descr_dir_r );
 
 	/*
 	 * parse the 'packages.<lang>' file
 	 */
-	PMError parsePackagesLang (InstSrcDataPtr & ndata, MediaAccessPtr media_r, const Pathname & descr_dir_r);
+	static PMError parsePackagesLang (std::list<PMPackagePtr>& packages, MediaAccessPtr media_r, const Pathname & descr_dir_r);
 
 	/*
 	 * parse the 'selections' and '*.sel* files
 	 */
-	PMError parseSelections (InstSrcDataPtr & ndata, MediaAccessPtr media_r, const Pathname & descr_dir_r );
+	static PMError parseSelections (std::list<PMSelectionPtr>& selections, MediaAccessPtr media_r, const Pathname & descr_dir_r );
 
 	/*
 	 * fill the PMSelectionPtr and PMPackagePtr lists
 	 */
-	PMError fillSelections (InstSrcDataPtr & ndata);
+	static PMError fillSelections (std::list<PMSelectionPtr>& all_selections, std::list<PMPackagePtr>& all_packages);
 
-  public:
+    public:
 
-    /**
-     * default error class
-     **/
-    typedef InstSrcError Error;
+	/**
+	 * default error class
+	 **/
+	typedef InstSrcError Error;
 
+    public:
 
-  public:
+	InstSrcDataUL();
+	~InstSrcDataUL();
 
-    ParseDataUL();
+    public:
 
-    virtual ~ParseDataUL();
-
-  public:
-
-    /**
-     * Any concrete InstSrcData must realize this, as it knows the expected
-     * layout on the media. Expect MediaAccessPtr to be open and attached.
-     *
-     * try to find product/content information on the media
-     *
-     * Return the InstSrcDescr retrieved from the media via ndescr_r,
-     * or NULL and PMError set.
-     **/
-    PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
+	/**
+	 * Any concrete InstSrcData must realize this, as it knows the expected
+	 * layout on the media. Expect MediaAccessPtr to be open and attached.
+	 *
+	 * try to find product/content information on the media
+	 *
+	 * Return the InstSrcDescr retrieved from the media via ndescr_r,
+	 * or NULL and PMError set.
+	 **/
+	static PMError tryGetDescr( InstSrcDescrPtr & ndescr_r,
 				MediaAccessPtr media_r, const Pathname & produduct_dir_r );
 
-    /**
-     * Any concrete InstSrcData must realize this, as it knows the expected
-     * layout on the media. Expect MediaAccessPtr to be open and attached.
-     *
-     * try to find selection/package/patch information on the media
-     *
-     * Return the InstSrcData retrieved from the media via ndata_r,
-     * or NULL and PMError set.
-     **/
-    PMError tryGetData( InstSrcDataPtr & ndata_r,
+	/**
+	 * Any concrete InstSrcData must realize this, as it knows the expected
+	 * layout on the media. Expect MediaAccessPtr to be open and attached.
+	 *
+	 * try to find selection/package/patch information on the media
+	 *
+	 * Return the InstSrcData retrieved from the media via ndata_r,
+	 * or NULL and PMError set.
+	 **/
+	static PMError tryGetData( InstSrcDataPtr & ndata_r,
 				MediaAccessPtr media_r, const Pathname & descr_dir_r );
 
 };
@@ -138,13 +183,13 @@ class ParseDataUL : virtual public Rep {
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : ParseDataULPkgTags
+//	CLASS NAME : InstSrcDataULPkgTags
 /**
  * @short provides the tag set for the packages file
  * (to feed the tag parser)
  *
  **/
-class ParseDataULPkgTags : public CommonPkdParser::TagSet
+class InstSrcDataULPkgTags : public CommonPkdParser::TagSet
 {
 
 public:
@@ -172,7 +217,7 @@ public:
     };
 
 public:
-    ParseDataULPkgTags( )
+    InstSrcDataULPkgTags( )
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
@@ -221,13 +266,13 @@ private:
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : ParseDataULLangTags
+//	CLASS NAME : InstSrcDataULLangTags
 /**
  * @short provides the tag set for the packages.<lang> file
  * (to feed the tag parser)
  *
  **/
-class ParseDataULLangTags : public CommonPkdParser::TagSet
+class InstSrcDataULLangTags : public CommonPkdParser::TagSet
 {
 
 public:
@@ -243,7 +288,7 @@ public:
     };
 
 public:
-    ParseDataULLangTags( )
+    InstSrcDataULLangTags( )
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
@@ -275,13 +320,13 @@ private:
 
 ///////////////////////////////////////////////////////////////////
 //
-//	CLASS NAME : ParseDataULSelTags
+//	CLASS NAME : InstSrcDataULSelTags
 /**
  * @short provides the tag set for a <name>.sel file
  * (to feed the tag parser)
  *
  **/
-class ParseDataULSelTags : public CommonPkdParser::TagSet
+class InstSrcDataULSelTags : public CommonPkdParser::TagSet
 {
 
 public:
@@ -306,7 +351,7 @@ public:
     };
 
 public:
-    ParseDataULSelTags( )
+    InstSrcDataULSelTags( )
 	: TagSet()	{
 
 	CommonPkdParser::Tag* t;
@@ -349,4 +394,4 @@ private:
 
 };
 
-#endif // ParseDataUL_h
+#endif // InstSrcDataUL_h

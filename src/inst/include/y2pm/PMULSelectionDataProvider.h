@@ -46,7 +46,7 @@
 class PMULSelectionDataProvider : public PMSelectionDataProvider  {
     REP_BODY(PMULSelectionDataProvider);
 
-    friend class ParseDataUL;
+    friend class InstSrcDataUL;
 
     protected:
 

@@ -225,7 +225,7 @@ PMError InstSrcData::tryGetData( InstSrcDataPtr & ndata_r,
   ndata_r = 0;
   PMError err;
 
-  InstSrcDataPtr ndata( new InstSrcData );
+  // InstSrcDataPtr ndata( new InstSrcData );
 
   ///////////////////////////////////////////////////////////////////
   // parse InstSrcData from media_r and fill ndescr
@@ -237,9 +237,9 @@ PMError InstSrcData::tryGetData( InstSrcDataPtr & ndata_r,
   ///////////////////////////////////////////////////////////////////
   // done
   ///////////////////////////////////////////////////////////////////
-  if ( !err ) {
-    ndata_r = ndata;
-  }
+  //  if ( !err ) {
+  //  ndata_r = ndata;
+  // }
   return err;
 }
 
@@ -249,6 +249,7 @@ InstSrcData::writeCache (const Pathname &descrpathname)
     return InstData::writeCache (descrpathname);
 }
 
+#if 0
 /**
  * generate PMSelection objects for each Item on the source
  * @return list of PMSelectionPtr on this source
@@ -256,8 +257,7 @@ InstSrcData::writeCache (const Pathname &descrpathname)
 const std::list<PMSelectionPtr>&
 InstSrcData::getSelections() const
 {
-    MIL << "InstSrcData::getSelections(" << _selections.size() << ")" << endl;
-    return _selections;
+    return std::list<PMSelectionPtr>();
 }
 
 /**
@@ -282,3 +282,4 @@ InstSrcData::getPatches (void) const
     return _patches;
 }
 
+#endif
