@@ -396,6 +396,13 @@ PMError RpmDb::initDatabase( Pathname root_r, Pathname dbPath_r )
     _dbPath = dbPath_r;
     _dbStateInfo = info;
 
+    if ( ! ( err || Y2PM::runningFromSystem() ) ) {
+      if (      dbsi_has( info, DbSI_HAVE_V4 )
+	   && ! dbsi_has( info, DbSI_MADE_V4 ) ) {
+	err = rebuildDatabase();
+      }
+    }
+
     // Close the database in case any write acces (create/convert)
     // happened during init. This should drop any lock acquired
     // by librpm. On demand it will be reopened readonly and should
