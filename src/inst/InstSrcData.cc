@@ -172,20 +172,6 @@ void InstSrcData::withdrawObjects()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : InstSrcData::dumpOn
-//	METHOD TYPE : ostream &
-//
-//	DESCRIPTION :
-//
-ostream & InstSrcData::dumpOn( ostream & str ) const
-{
-  Rep::dumpOn( str );
-  return str;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : InstSrcData::tryGetDescr
 //	METHOD TYPE : PMError
 //
@@ -246,44 +232,3 @@ PMError InstSrcData::tryGetData( InstSrcDataPtr & ndata_r,
   // }
   return err;
 }
-
-const Pathname
-InstSrcData::writeCache (const Pathname &descrpathname)
-{
-    return InstData::writeCache (descrpathname);
-}
-
-#if 0
-/**
- * generate PMSelection objects for each Item on the source
- * @return list of PMSelectionPtr on this source
- * */
-const std::list<PMSelectionPtr>&
-InstSrcData::getSelections() const
-{
-    return std::list<PMSelectionPtr>();
-}
-
-/**
- * generate PMPackage objects for each Item on the source
- * @return list of PMPackagePtr on this source
- * */
-const std::list<PMPackagePtr>&
-InstSrcData::getPackages() const
-{
-    MIL << "InstSrcData::getPackages(" << _packages.size() << ")" << endl;
-    return _packages;
-}
-
-/**
- * generate PMSolvable objects for each patch on the target
- * @return list of PMSolvablePtr on this target
- */
-const std::list<PMYouPatchPtr>&
-InstSrcData::getPatches (void) const
-{
-    MIL << "InstSrcData::getPatches()" << endl;
-    return _patches;
-}
-
-#endif
