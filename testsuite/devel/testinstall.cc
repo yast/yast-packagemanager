@@ -100,6 +100,7 @@ void varset(vector<string>& argv);
 void varunset(vector<string>& argv);
 
 void testset(vector<string>& argv);
+void testmediaorder(vector<string>& argv);
 
 void cdattach(vector<string>& argv);
 
@@ -432,6 +433,7 @@ static struct Funcs func[] = {
     { "cdattach",	cdattach,	2,	"cdattach" },
     { "mem",		mem,		0,	"memory statistics" },
     { "testset",	testset,	2,	"test memory consumption of PkgSet" },
+    { "testmediaorder",	testmediaorder,	3,	"test media order" },
     { "help",		help,		0,	"this screen" },
 
     { NULL,		NULL,		0,	NULL }
@@ -469,6 +471,10 @@ void providestartcallback(const std::string& name, const FSize& s, bool, void*)
 
 void donecallback(PMError error, const std::string& reason, void*)
 {
+    if(lastprogress != 100)
+	progresscallback(100,NULL);
+    lastprogress = 0;
+
     if(error)
 	cout << error << ": " << reason << endl;
     else
@@ -486,6 +492,11 @@ bool pkgstartcallback(const std::string& name, const std::string& summary, const
 	cout << stringutil::form("Installing %s (%s) - %s ",name.c_str(),size.asString().c_str(),summary.c_str()) << endl;
     }
     return true;
+}
+
+static void sourcechangecallback(InstSrcManager::ISrcId srcid, int medianr, void*)
+{
+    cout << "switching to source " << srcid << ", Media Nr. " << medianr << endl;
 }
 
 static const char* setdebug(const Variable& v)
@@ -774,12 +785,16 @@ void init(vector<string>& argv)
     Y2PM::noAutoInstSrcManager();
 
     Y2PM::setRebuildDBProgressCallback(progresscallback, NULL);
+
     Y2PM::setProvideStartCallback(providestartcallback, NULL);
     Y2PM::setProvideProgressCallback(progresscallback, NULL);
     Y2PM::setProvideDoneCallback(donecallback, NULL);
+
     Y2PM::setPackageStartCallback(pkgstartcallback, NULL);
     Y2PM::setPackageProgressCallback(progresscallback, NULL);
     Y2PM::setPackageDoneCallback(donecallback, NULL);
+    
+    Y2PM::setSourceChangeCallback(sourcechangecallback, NULL);
 
     if(variables["autosource"].getBool())
     {
@@ -883,28 +898,46 @@ int printbadlist(PkgDep::ErrorResultList& bad)
 
 static void install_internal(PMManager& manager, vector<string>& argv, bool appl=false)
 {
-    for (unsigned i=1; i < argv.size() ; i++) {
-	string pkg = stringutil::trim(argv[i]);
-
-	if(pkg.empty()) continue;
-
-	PMSelectablePtr selp = manager.getItem(pkg);
-	if(!selp || !selp->has_candidate())
+    PMManager::PMSelectableVec::iterator begin, end;
+    PMManager::PMSelectableVec vec;
+    if(argv.size()>1 && argv[1]=="-a")
+    {
+	begin = Y2PM::packageManager().begin();
+	end = Y2PM::packageManager().end();
+    }
+    else
+    {
+	for (vector<string>::iterator it = ++argv.begin();
+		it != argv.end(); ++it)
 	{
-	    std::cout << "package " << pkg << " is not available.\n";
-	    continue;
-	}
+	    string pkg = stringutil::trim(*it);
 
+	    if(pkg.empty()) continue;
+
+	    PMSelectablePtr selp = manager.getItem(pkg);
+	    if(!selp || !selp->has_candidate())
+	    {
+		std::cout << "package " << pkg << " is not available.\n";
+		continue;
+	    }
+	    vec.insert(selp);
+	}
+	begin=vec.begin();
+	end=vec.end();
+    }
+
+    for(PMManager::PMSelectableVec::iterator it=begin; it!=end;++it)
+    {
 	bool ok;
 
 	if(appl)
-	    ok = selp->appl_set_install();
+	    ok = (*it)->appl_set_install();
 	else
-	    ok = selp->user_set_install();
+	    ok = (*it)->user_set_install();
 
 	if(!ok)
 	{
-	    cout << stringutil::form("coult not mark %s for installation/update", pkg.c_str());
+	    cout << stringutil::form("coult not mark %s for installation/update", (*it)->theObject()->name()->c_str());
 	}
     }
 }
@@ -1119,6 +1152,43 @@ void commit(vector<string>& argv)
     }
 }
 
+void testmediaorder(vector<string>& argv)
+{
+    std::list<PMPackagePtr> dellist;
+    std::list<PMPackagePtr> inslist;
+    std::list<PMPackagePtr> srclist;
+
+    Y2PM::packageManager().getPackagesToInsDel (dellist, inslist, srclist);
+
+    unsigned int current_src_media = 0;
+    constInstSrcPtr current_src_ptr = 0;
+
+    for (std::list<PMPackagePtr>::iterator it = inslist.begin();
+	it != inslist.end(); ++it)
+    {
+	unsigned int pkgmedianr = 0;
+	pkgmedianr = (*it)->medianr();
+
+	if (((*it)->source() != current_src_ptr)	// source or media change
+	    || (pkgmedianr != current_src_media))
+	{
+	    constInstSrcDescrPtr descr = (*it)->source()->descr();
+	    if(current_src_ptr!=0)
+		cout << endl;
+	    cout << "Installing from " << descr->content_label()
+		<< " (" << descr->url() << ")"
+		<< " Media Nr. " << pkgmedianr << ":";
+
+	    current_src_ptr = (*it)->source();
+	    current_src_media = pkgmedianr;
+
+	}
+
+	cout << ' ' << (*it)->name();
+    }
+    cout << endl;
+}
+
 void consistent(vector<string>& argv)
 {
     int numbad=0;
@@ -1255,6 +1325,16 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 			    }
 			}
 			cout << ')';
+		}
+	    }
+	    {
+		PMSelectionPtr p=(*cit)->theObject();
+		if(p!=NULL)
+		{
+		    cout << '\t';
+		    if(p->visible())
+			cout << " +";
+		    cout << p->category();
 		}
 	    }
 	    cout << endl;
