@@ -123,6 +123,12 @@ class PMYouPatchPaths : virtual public Rep {
     PMYouServer patchServer();
 
     /**
+      Set username and password for current server.
+    */
+    void setUsernamePassword( const std::string &username,
+                              const std::string &password );
+
+    /**
       Return base URL to patches. This doesn't include the product dependent
       path.
     */

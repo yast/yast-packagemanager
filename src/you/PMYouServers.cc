@@ -51,6 +51,13 @@ PMYouServer::PMYouServer( const std::string &line )
   fromString( line );
 }
 
+void PMYouServer::setUsernamePassword( const string &username,
+                                       const string &password )
+{
+  _url.setUsername( username );
+  _url.setPassword( password );
+}
+
 bool PMYouServer::operator==( const PMYouServer &server ) const
 {
   return _url == server._url && _name == server._name &&

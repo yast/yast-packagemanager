@@ -51,6 +51,9 @@ class PMYouServer
     void setUrl( const Url &url ) { _url = url; }
     void setUrl( const std::string &url ) { _url = Url( url ); }
     Url url() const { return _url; }
+
+    void setUsernamePassword( const std::string &username,
+                              const std::string &password );
   
     void setName( const std::string &name ) { _name = name; }
     std::string name() const { return _name; }

@@ -232,6 +232,11 @@ PMYouServer PMYouPatchPaths::patchServer()
 {
   return _patchServer;
 }
+void PMYouPatchPaths::setUsernamePassword( const string &username,
+                                           const string &password )
+{
+  _patchServer.setUsernamePassword( username, password );
+}
 
 Url PMYouPatchPaths::patchUrl()
 {

@@ -108,12 +108,7 @@ PMError InstYou::readUserPassword()
   _username = cfg.readEntry( "USERNAME" );
   _password = cfg.readEntry( "PASSWORD" );
 
-  PMYouServer server = _paths->patchServer();
-  Url url = server.url();
-  url.setUsername( _username );
-  url.setPassword( _password );
-  server.setUrl( url );
-  _paths->setPatchServer( server );
+  _paths->setUsernamePassword( _username, _password );
 
   return PMError();
 }
@@ -144,12 +139,7 @@ PMError InstYou::setUserPassword( const string &username,
 PMError InstYou::retrievePatchDirectory()
 {
   if ( !_username.empty() && !_password.empty() ) {
-    PMYouServer server = _paths->patchServer();
-    Url u = server.url();
-    u.setUsername( _username );
-    u.setPassword( _password );
-    server.setUrl( u );
-    _paths->setPatchServer( server );
+    _paths->setUsernamePassword( _username, _password );
   }
 
   PMError error = _info->getDirectory( true );
@@ -164,12 +154,7 @@ PMError InstYou::retrievePatchInfo( bool reload, bool checkSig )
   _patches.clear();
 
   if ( !_username.empty() && !_password.empty() ) {
-    PMYouServer server = _paths->patchServer();
-    Url u = server.url();
-    u.setUsername( _username );
-    u.setPassword( _password );
-    server.setUrl( u );
-    _paths->setPatchServer( server );
+    _paths->setUsernamePassword( _username, _password );
   }
 
   PMError error = _info->getPatches( _patches, reload, checkSig );
