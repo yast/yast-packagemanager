@@ -62,7 +62,8 @@ class YouError {
       E_install_failed,
       E_empty_location,
       E_read_mediapatches_failed,
-      E_callback_missing
+      E_callback_missing,
+      E_missing_sig_file
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {

@@ -69,6 +69,7 @@ std::string YouError::errtext( const unsigned e )
   case E_empty_location: return N_("Package location is empty.");
   case E_read_mediapatches_failed: return N_("Error getting media.1/patches file.");
   case E_callback_missing: return N_("No callback function is set.");
+  case E_missing_sig_file: return N_("Missing signature.");
   };
 
   return stringutil::numstring( e );
