@@ -23,9 +23,9 @@
 #include <string>
 
 #include <y2pm/PMObjectPtr.h>
-
 #include <y2pm/PMSolvable.h>
-#include <y2pm/PkgArch.h>
+
+#include <y2pm/PMSelectablePtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -35,7 +35,15 @@
  **/
 class REP_CLASS(PMObject), public PMSolvable {
   REP_BODY(PMObject)
+
+  private:
+
+    friend class PMManager;
+
+    PMSelectablePtr _selectable;
+
   public:
+
     enum PMObjectAttribute {
       PMOBJ_SUMMARY = 0,
       PMOBJ_DESCRIPTION,
@@ -53,7 +61,24 @@ class REP_CLASS(PMObject), public PMSolvable {
 
   public:
 
-//    virtual std::string Summary() const { return "--not available--"; }
+    /**
+     * Return wheter the Object is managed.
+     **/
+    bool hasSelectable() const { return( _selectable != 0 ); }
+
+    /**
+     * Return the managing Selectable.
+     **/
+    PMSelectablePtr getSelectable() const { return _selectable; }
+
+#if 0
+    // TBD: first test whether comparison of PMObjectPtr <-> PMObject* works.
+    bool isInstalledObj() const {}
+    bool isCandidateObj() const {}
+    bool isInCandidateList() const {}
+#endif
+
+  public:
 
     /** get attributes like Summary, Description, Group etc.
      *

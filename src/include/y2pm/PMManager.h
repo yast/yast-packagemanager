@@ -21,10 +21,13 @@
 
 #include <iosfwd>
 #include <vector>
+#include <map>
 
 #include <y2util/BitField.h>
 
+#include <y2pm/PkgName.h>
 #include <y2pm/PMSelectablePtr.h>
+#include <y2pm/PMObjectContainerIter.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -41,18 +44,33 @@ class PMManager {
 
   public:
 
-    typedef std::vector<PMSelectablePtr>  ItemArray;
+    typedef std::vector<PMSelectablePtr>  PMSelectableVec;
 
-  protected:
+  private:
 
-    ItemArray _items;
+    typedef std::map<PkgName,PMSelectablePtr> PMSelectablePool;
 
-    BitField  _installed;
+    PMSelectablePool _itemPool;
+    PMSelectableVec _items;
+
+    BitField _installed;
+
+  private:
+
+    virtual PMSelectablePtr newSelectable( const PkgName & name_r ) const;
+
+    PMSelectablePtr poolLookup( const PkgName & name_r ) const;
 
   public:
 
     PMManager();
-    ~PMManager();
+    virtual ~PMManager();
+
+  public:
+
+    void poolSetInstalled( PMObjectContainerIter iter_r );
+    void poolAddCandidates( PMObjectContainerIter iter_r );
+    void poolRemoveCandidates( PMObjectContainerIter iter_r );
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <y2util/Y2SLog.h>
+
 #include <y2pm/PMSelectable.h>
 
 using namespace std;
@@ -40,6 +42,21 @@ IMPL_HANDLES(PMSelectable);
 //	DESCRIPTION :
 //
 PMSelectable::PMSelectable()
+    : _manager( 0 )
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::PMSelectable
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+PMSelectable::PMSelectable( const PkgName& name_r )
+    : _manager( 0 )
+    , _name( name_r )
 {
 }
 
@@ -65,7 +82,11 @@ PMSelectable::~PMSelectable()
 //
 ostream & PMSelectable::dumpOn( ostream & str ) const
 {
-  Rep::dumpOn( str );
+  str << _name << '[' << Rep::dumpOn( str )
+    << "(inst:" << _installedObj << ")"
+    << "(cand:" << _candidateObj << ")"
+    << "(avai:" << _candidateList.size() << ")"
+    << ']';
   return str;
 }
 
