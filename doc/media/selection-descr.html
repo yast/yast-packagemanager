@@ -53,6 +53,8 @@ provides is useful on updates if a selection was renamed.</LI>
 Selections obsoleted by this selection. Useful for update.</LI>
 <LI><b>Conflicts</b><br>
 Selections conflicting with this selection.</LI>
+<LI><b>Suggests</b><br>
+Selections suggested by this selection. (Weak dependency)</LI>
 <LI><b>Size</b><br>
 Sum of all package sizes, Sum of installed packages</LI>
 <LI><b>Package to install (generally)</b><br>
@@ -90,10 +92,11 @@ Lines starting with '<tt>#</tt>' are ignored.<BR>
 <tr><td valign=top>=Vis</i></td><td valign=top><i>visibility</i></td><td>visibility of selection (for user interface)<br>
 	Selection can be hidden from the user. This is useful e.g. for architecture dependant selections which
 	are handled internally by the system.</td></tr>
-<tr><td valign=top>+Req<br>-Req</td><td valign=top><i>tags</i></td><td>selections required for installation</td></tr>
-<tr><td valign=top>+Prv<br>-Prv</td><td valign=top><i>tags</i></td><td>selections provided</td></tr>
-<tr><td valign=top>+Con<br>-Con</td><td valign=top><i>tags</i></td><td>selections conflicting</td></tr>
-<tr><td valign=top>+Obs<br>-Obs</td><td valign=top><i>tags</i></td><td>selections obsoleted</td></tr>
+<tr><td valign=top>+Req<br>-Req</td><td valign=top><i>selections</i></td><td>selections required for installation</td></tr>
+<tr><td valign=top>+Prv<br>-Prv</td><td valign=top><i>selections</i></td><td>selections provided</td></tr>
+<tr><td valign=top>+Con<br>-Con</td><td valign=top><i>selections</i></td><td>selections conflicting</td></tr>
+<tr><td valign=top>+Obs<br>-Obs</td><td valign=top><i>selections</i></td><td>selections obsoleted</td></tr>
+<tr><td valign=top>+Sug<br>-Sug</td><td valign=top><i>selections</i></td><td>selections suggested</td></tr>
 <tr><td valign=top>=Siz</td><td valign=top><i>pkgsize</i> <i>instsize</i></td><td>size in bytes</td></tr>
 <tr><td valign=top>+Ins</i><br>-Ins</i></td><td valign=top><i>packages list</i></td><td>list of packages to install</td></tr>
 <tr><td valign=top>+Ins.<i>lang</i><br>-Ins.<i>lang</i></td><td valign=top><i>packages list</i></td><td>list of packages to install if given language is active</td></tr>
