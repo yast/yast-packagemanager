@@ -202,7 +202,6 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 	    {
 		INT << "NULL installed to delete" << endl;
 	    }
-	    break;
 	}
     }
 
