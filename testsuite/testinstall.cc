@@ -434,7 +434,7 @@ void rpminstall(vector<string>& argv)
 	pkgs.push_back(*it);
     }
 
-    if(Y2PM::instTarget().init() != InstTarget::Error::E_ok)
+    if(Y2PM::instTarget().init("/", false) != InstTarget::Error::E_ok)
     {
 	cout << "initialization failed" << endl;
     }
