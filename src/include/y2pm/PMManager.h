@@ -78,6 +78,13 @@ class PMManager {
      **/
     PMSelectablePtr poolProvide( const std::string & name_r );
 
+    /**
+     * Remove superfluous empty Selecatables. To be called after Objects
+     * were removed from Selectables.
+     **/
+    void poolAdjust();
+
+
     void clearAll();
 
     void checkPool() const;

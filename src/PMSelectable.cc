@@ -73,7 +73,7 @@ PMSelectable::PMSelectable( const PkgName& name_r )
 PMSelectable::~PMSelectable()
 {
   if ( _manager ) {
-    INT << "SUSPICIOUS: " << *this << ": " << _manager << endl;
+    INT << "SUSPICIOUS: still managed " << *this << ": " << _manager << endl;
   }
 }
 
