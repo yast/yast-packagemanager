@@ -50,7 +50,7 @@
  *
  * @see DataProvider
  **/
-class PMSelectionDataProvider : virtual public Rep {
+class PMSelectionDataProvider : public CountedRep {
   REP_BODY(PMSelectionDataProvider);
 
   public:

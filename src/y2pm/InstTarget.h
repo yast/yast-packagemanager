@@ -60,7 +60,7 @@
 /**
  *
  **/
-class InstTarget: virtual public Rep, public InstData {
+class InstTarget: public CountedRep, public InstData {
     REP_BODY(InstTarget);
 
   public:

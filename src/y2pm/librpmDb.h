@@ -36,7 +36,7 @@
 /**
  * @short Manage access to librpm database.
  **/
-class librpmDb : virtual public Rep {
+class librpmDb : public CountedRep {
   REP_BODY(librpmDb);
   /**
    * <B>INTENTIONALLY UNDEFINED<\B> because of bug in Ptr classes
@@ -240,9 +240,9 @@ class librpmDb : virtual public Rep {
     librpmDb( const Pathname & root_r, const Pathname & dbPath_r, bool readonly_r );
 
     /**
-     * Trigger from @ref Rep, after rep_cnt was decreased.
+     * Trigger from @ref Rep, after refCount was decreased.
      **/
-    virtual void unref_to( unsigned rep_cnt_r ) const;
+    virtual void unref_to( unsigned refCount_r ) const;
 
   public:
 

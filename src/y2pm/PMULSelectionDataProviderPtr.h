@@ -27,22 +27,7 @@
 //	CLASS NAME : PMULSelectionDataProviderPtr
 //	CLASS NAME : constPMULSelectionDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMSelectionDataProvider);
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMULSelectionDataProvider *></code>
- *
- * <b>See:</> @ref PMULSelectionDataProvider
- **/
-class PMULSelectionDataProviderPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMULSelectionDataProvider *></code>
- *
- * <b>See:</> @ref PMULSelectionDataProvider
- **/
-class constPMULSelectionDataProviderPtr {};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider);
 
 #endif // PMULSelectionDataProviderPtr_h
 

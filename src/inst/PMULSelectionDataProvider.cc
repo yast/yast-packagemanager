@@ -39,7 +39,7 @@ typedef map <std::string,std::list<PMPackagePtr> >::const_iterator pkgsmapIT;
 //	CLASS NAME : PMULSelectionDataProviderPtr
 //	CLASS NAME : constPMULSelectionDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider,PMSelectionDataProvider);
+IMPL_DERIVED_POINTER(PMULSelectionDataProvider,PMSelectionDataProvider);
 
 ///////////////////////////////////////////////////////////////////
 //

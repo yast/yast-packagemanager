@@ -30,19 +30,4 @@
  **/
 DEFINE_BASE_POINTER(PMYouServers);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMYouServers *></code>
- *
- * <b>See:</> @ref PMYouServers
- **/
-class PMYouServersPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMYouServers *></code>
- *
- * <b>See:</> @ref PMYouServers
- **/
-class constPMYouServersPtr {};
-#endif // just for kdoc
-
 #endif // PMYouServersPtr_h

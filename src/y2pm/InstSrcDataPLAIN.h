@@ -37,7 +37,7 @@ class RpmHeaderCache;
 /**
  *
  **/
-class InstSrcDataPLAIN : virtual public Rep, public InstSrcData {
+class InstSrcDataPLAIN : public InstSrcData {
   REP_BODY(InstSrcDataPLAIN);
 
   public:

@@ -30,20 +30,5 @@
  **/
 DEFINE_BASE_POINTER(MediaAccess);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref MediaAccess *></code>
- *
- * <b>See:</> @ref MediaAccess
- **/
-class MediaAccessPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref MediaAccess *></code>
- *
- * <b>See:</> @ref MediaAccess
- **/
-class constMediaAccessPtr {};
-#endif // just for kdoc
-
 #endif // MediaAccessPtr_h
 

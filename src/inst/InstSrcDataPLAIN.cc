@@ -82,7 +82,7 @@ set<PkgArch> archCompat( const PkgArch & arch )
 //	CLASS NAME : InstSrcDataPLAINPtr
 //	CLASS NAME : constInstSrcDataPLAINPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(InstSrcDataPLAIN,InstSrcData,InstSrcData);
+IMPL_DERIVED_POINTER(InstSrcDataPLAIN,InstSrcData);
 
 ///////////////////////////////////////////////////////////////////
 //

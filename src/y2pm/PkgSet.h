@@ -39,7 +39,7 @@ class PkgSet {
 	typedef InvRel_type::iterator InvRel_iterator;
 	typedef InvRel_type::const_iterator InvRel_const_iterator;
 
-	typedef PMSolvable::PkgRelList_type& (*getAdditionalProvides_callback)( constPMSolvablePtr& ptr );
+	typedef PMSolvable::PkgRelList_type& (*getAdditionalProvides_callback)( constPMSolvablePtr ptr );
 
 	typedef std::list<constPMSolvablePtr> SolvableList;
 
@@ -72,7 +72,7 @@ class PkgSet {
 	 * true as second parameter. Then pkg is always added, replacing a
 	 * previous member of the set with the same name.  */
 	void add( PMSolvablePtr pkg, bool force = false );
-	
+
 	/** remove a package
 	 *
 	 * Note: it does not matter if pkg is actually the pointer stored. The
@@ -93,7 +93,7 @@ class PkgSet {
 	 * @return NULL if package is not in set
 	 * */
 	PMSolvablePtr lookup( const PkgName& name ) const;
-	
+
 	PMSolvablePtr operator[] ( const PkgName& name ) const { return lookup(name); }
 	/**
 	 * package contained in this set?

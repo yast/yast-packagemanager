@@ -28,20 +28,5 @@
  **/
 DEFINE_BASE_POINTER(PMYouSettings);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMYouSettings *></code>
- *
- * <b>See:</> @ref PMYouSettings
- **/
-class PMYouSettingsPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMYouSettings *></code>
- *
- * <b>See:</> @ref PMYouSettings
- **/
-class constPMYouSettingsPtr {};
-#endif // just for kdoc
-
 #endif
 

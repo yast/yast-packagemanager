@@ -37,7 +37,7 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMObject.h>
 
-class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvider
+class PMRpmPackageDataProvider : public PMPackageDataProvider
 {
     REP_BODY(PMRpmPackageDataProvider);
 

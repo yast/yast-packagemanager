@@ -29,20 +29,5 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(PMPackageImEx);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMPackageImEx *></code>
- *
- * <b>See:</> @ref PMPackageImEx
- **/
-class PMPackageImExPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMPackageImEx *></code>
- *
- * <b>See:</> @ref PMPackageImEx
- **/
-class constPMPackageImExPtr {};
-#endif // just for kdoc
-
 #endif // PMPackageImExPtr_h
 

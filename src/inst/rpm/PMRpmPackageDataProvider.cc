@@ -35,7 +35,7 @@ using namespace std;
 //	CLASS NAME : PMRpmPackageDataProviderPtr
 //	CLASS NAME : constPMRpmPackageDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
+IMPL_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider );
 
 //-----------------------------------------------------------------
 // static class members

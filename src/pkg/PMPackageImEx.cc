@@ -182,7 +182,7 @@ PMPackageImEx::~PMPackageImEx()
 //
 ostream & PMPackageImEx::dumpOn( ostream & str ) const
 {
-  str << rep_name() << "{";
+  str << repName() << "{";
 #define OUTSTR(v,s) str << v "(" << s.size() << ")"
   OUTSTR( "Rlc",	_requestedLocales );
   OUTSTR( "Ons",	_onSystemSel );

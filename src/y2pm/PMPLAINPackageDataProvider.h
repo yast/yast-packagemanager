@@ -36,7 +36,7 @@
 #include <y2pm/PMPackageDataProvider.h>
 #include <y2pm/PMPackage.h>
 
-class PMPLAINPackageDataProvider : virtual public Rep, public PMPackageDataProvider
+class PMPLAINPackageDataProvider : public PMPackageDataProvider
 {
   REP_BODY(PMPLAINPackageDataProvider);
 

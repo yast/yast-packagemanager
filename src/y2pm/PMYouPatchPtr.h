@@ -28,21 +28,6 @@
 /**
  *
  **/
-DEFINE_DERIVED_POINTER( PMYouPatch, PMObject, PMSolvable );
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMYouPatch *></code>
- *
- * <b>See:</> @ref PMYouPatch
- **/
-class PMYouPatchPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMYouPatch *></code>
- *
- * <b>See:</> @ref PMYouPatch
- **/
-class constPMYouPatchPtr {};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER( PMYouPatch, PMSolvable );
 
 #endif // PMYouPatchPtr_h

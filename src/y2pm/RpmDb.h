@@ -47,7 +47,7 @@
 /**
  * @short Interface to the rpm program
  **/
-class RpmDb: virtual public Rep
+class RpmDb: public CountedRep
 {
   REP_BODY(RpmDb);
 

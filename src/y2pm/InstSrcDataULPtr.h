@@ -27,22 +27,7 @@
 //	CLASS NAME : InstSrcDataULPtr
 //	CLASS NAME : constInstSrcDataULPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(InstSrcDataUL,InstSrcData,InstSrcData);
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref InstSrcDataUL *></code>
- *
- * <b>See:</> @ref InstSrcDataUL
- **/
-class InstSrcDataULPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref InstSrcDataUL *></code>
- *
- * <b>See:</> @ref InstSrcDataUL
- **/
-class constInstSrcDataULPtr {};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER(InstSrcDataUL,InstSrcData);
 
 #endif // InstSrcDataULPtr_h
 

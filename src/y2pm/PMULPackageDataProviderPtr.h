@@ -27,22 +27,7 @@
 //	CLASS NAME : PMULPackageDataProviderPtr
 //	CLASS NAME : constPMULPackageDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMPackageDataProvider);
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMULPackageDataProvider *></code>
- *
- * <b>See:</> @ref PMULPackageDataProvider
- **/
-class PMULPackageDataProviderPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMULPackageDataProvider *></code>
- *
- * <b>See:</> @ref PMULPackageDataProvider
- **/
-class constPMULPackageDataProviderPtr {};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider);
 
 #endif // PMULPackageDataProviderPtr_h
 

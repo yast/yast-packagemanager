@@ -38,7 +38,7 @@
 /**
  * The software selection
  **/
-class PMSelection : virtual public Rep, public PMObject {
+class PMSelection : public PMObject {
   REP_BODY(PMSelection);
 
   public:

@@ -32,7 +32,7 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////
 
-IMPL_DERIVED_POINTER( PMObject, PMSolvable, PMSolvable );
+IMPL_DERIVED_POINTER( PMObject, PMSolvable );
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -90,7 +90,7 @@ ostream & PMObject::dumpOn( ostream & str ) const
   Rep::dumpOn( str );
   str << '{' << nameEdArch();
   if ( _selectable )
-    str << '[' << _selectable->rep_id() << ']';
+    str << '[' << _selectable->objectId() << ']';
   return str << '}';
 }
 

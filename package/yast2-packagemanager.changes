@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Feb 21 02:39:02 CET 2004 - ma@suse.de
+
+- Reimplemented counted pointer classes
+- 2.9.15
+
+-------------------------------------------------------------------
 Wed Feb 18 11:14:12 CET 2004 - cschum@suse.de
 
 - Include YOU docs and scripts in devel package.

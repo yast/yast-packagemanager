@@ -27,22 +27,7 @@
 //	CLASS NAME : InstSrcDataPLAINPtr
 //	CLASS NAME : constInstSrcDataPLAINPtr
 ///////////////////////////////////////////////////////////////////
-DEFINE_DERIVED_POINTER(InstSrcDataPLAIN,InstSrcData,InstSrcData);
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref InstSrcDataPLAIN *></code>
- *
- * <b>See:</> @ref InstSrcDataPLAIN
- **/
-class InstSrcDataPLAINPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref InstSrcDataPLAIN *></code>
- *
- * <b>See:</> @ref InstSrcDataPLAIN
- **/
-class constInstSrcDataPLAINPtr {};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER(InstSrcDataPLAIN,InstSrcData);
 
 #endif // InstSrcDataPLAINPtr_h
 

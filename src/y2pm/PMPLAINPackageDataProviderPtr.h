@@ -29,22 +29,7 @@
 /**
  *
  **/
-DEFINE_DERIVED_POINTER(PMPLAINPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
-
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref PMPLAINPackageDataProvider *></code>
- *
- * <b>See:</> @ref PMPLAINPackageDataProvider
- **/
-class PMPLAINPackageDataProviderPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref PMPLAINPackageDataProvider *></code>
- *
- * <b>See:</> @ref PMPLAINPackageDataProvider
- **/
-class constPMPLAINPackageDataProviderPtr {};
-#endif // just for kdoc
+DEFINE_DERIVED_POINTER(PMPLAINPackageDataProvider, PMPackageDataProvider );
 
 #endif // PMPLAINPackageDataProviderPtr_h
 

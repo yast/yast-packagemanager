@@ -52,7 +52,7 @@
  *
  * See also <A HREF="../media/media-descr.html">media-descr.html</A>
  **/
-class InstSrcDescr : virtual public Rep {
+class InstSrcDescr : public CountedRep {
   REP_BODY(InstSrcDescr);
 
   public:

@@ -248,9 +248,8 @@ PMError InstSrcManager::scanProductsFile( const Pathname & file_r, ProductSet & 
 InstSrcManager::ISrcPool::iterator InstSrcManager::poolHandle( const ISrcId & isrc_r )
 {
   if ( isrc_r ) {
-    InstSrcPtr item = InstSrcPtr::cast_away_const( isrc_r );
     for ( ISrcPool::iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
-      if ( *it == item )
+      if ( *it == isrc_r )
 	return it;
     }
   }
@@ -268,10 +267,9 @@ InstSrcManager::ISrcPool::iterator InstSrcManager::poolHandle( const ISrcId & is
 InstSrcPtr InstSrcManager::lookupId( const ISrcId & isrc_r ) const
 {
   if ( isrc_r ) {
-    InstSrcPtr item = InstSrcPtr::cast_away_const( isrc_r );
     for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
-      if ( *it == item )
-	return item;
+      if ( *it == isrc_r )
+	return *it;
     }
   }
   return 0;
@@ -823,9 +821,9 @@ PMError InstSrcManager::deleteSource( ISrcId & isrc_r )
   }
   delsrc->disableSource();
   delsrc->_cache_deleteOnExit = true;
-  MIL << "set to delete " << delsrc << " (RefCnt " << delsrc->rep_cnt()  << ")" << endl;
-  if ( delsrc->rep_cnt() > 1 ) {
-    WAR << (delsrc->rep_cnt()-1) << " more references exist for " << delsrc << endl;
+  MIL << "set to delete " << delsrc << " (RefCnt " << delsrc->refCount()  << ")" << endl;
+  if ( delsrc->refCount() > 1 ) {
+    WAR << (delsrc->refCount()-1) << " more references exist for " << delsrc << endl;
   }
   delsrc = 0;
 

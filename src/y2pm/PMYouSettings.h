@@ -40,7 +40,7 @@ class SysConfig;
 /**
   This class provides general settings for YOU.
 */
-class PMYouSettings : virtual public Rep
+class PMYouSettings : public CountedRep
 {
   REP_BODY(PMYouSettings);
 

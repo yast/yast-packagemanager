@@ -38,7 +38,7 @@
 /**
  * @short Interface class for stuff common to all objects (Packages, Selections,..)
  **/
-class PMObject : virtual public Rep, public PMSolvable {
+class PMObject : public PMSolvable {
   REP_BODY(PMObject);
 
   private:

@@ -36,7 +36,7 @@
  *
  * @short Contains everything needed for dependency solving.
  **/
-class PMSolvable : virtual public Rep {
+class PMSolvable : public CountedRep {
   REP_BODY(PMSolvable);
 
   public:

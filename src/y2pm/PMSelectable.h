@@ -35,7 +35,7 @@
 /**
  *
  **/
-class PMSelectable : virtual public Rep {
+class PMSelectable : public CountedRep {
   REP_BODY(PMSelectable);
 
   public:

@@ -75,7 +75,7 @@ class PMYouServer
 /**
   This class provides access to the list of YOU servers.
 */
-class PMYouServers : virtual public Rep {
+class PMYouServers : public CountedRep {
   REP_BODY(PMYouServers);
 
   public:

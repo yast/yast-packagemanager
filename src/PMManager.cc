@@ -368,7 +368,7 @@ void PMManager::poolAdjust()
       ++it;
 
       // delete tdel
-      if ( (*tdel)->rep_cnt() != 2 )
+      if ( (*tdel)->refCount() != 2 )
 	D__ << "(OUTSIDE REFERENCED) delete " << *tdel << endl;;
 
       // pool first

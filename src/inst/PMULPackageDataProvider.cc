@@ -34,7 +34,7 @@ using namespace std;
 //	CLASS NAME : PMULPackageDataProviderPtr
 //	CLASS NAME : constPMULPackageDataProviderPtr
 ///////////////////////////////////////////////////////////////////
-IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider,PMPackageDataProvider);
+IMPL_DERIVED_POINTER(PMULPackageDataProvider,PMPackageDataProvider);
 
 ///////////////////////////////////////////////////////////////////
 //

@@ -29,19 +29,4 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(binHeader);
 
-#if 0 // just for kdoc
-/**
- * @short Refcounting <code>&lt;@ref binHeader *></code>
- *
- * <b>See:</> @ref binHeader
- **/
-class binHeaderPtr {};
-/**
- * @short Refcounting <code>&lt;const @ref binHeader *></code>
- *
- * <b>See:</> @ref binHeader
- **/
-class constbinHeaderPtr {};
-#endif // just for kdoc
-
 #endif // binHeaderPtr_h
