@@ -265,7 +265,7 @@ class RpmDb: virtual public Rep
 	/*
 	 * Flag that it is a temporary rpm-DB
 	 */
-	bool temporary;;
+	bool temporary;
 
 	/**
 	 * The connection to the rpm process.
@@ -323,6 +323,9 @@ class RpmDb: virtual public Rep
 
 	/** whether rpmdb is ready to use */
 	bool _initialized;
+
+	/** whether <_rootdir>/<WARNINGMAILPATH> was already created */
+	bool _warndirexists;
 
 	/** progress of installation will be logged here */
 	std::ofstream _progresslogstream;
