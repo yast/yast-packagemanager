@@ -62,6 +62,7 @@ class PMSelection : virtual public Rep, public PMObject {
 
     virtual std::string            instSrcLabel()    const;
     virtual Vendor                 instSrcVendor()   const;
+    virtual unsigned               instSrcRank()     const;
 
     /**
      * PMSelection attributes passed off to PMSelectionDataProvider

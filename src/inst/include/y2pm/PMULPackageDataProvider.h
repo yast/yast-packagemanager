@@ -130,6 +130,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	virtual bool                   providesSources( const PMPackage & pkg_r ) const;
 	virtual std::string            instSrcLabel   ( const PMPackage & pkg_r ) const;
 	virtual Vendor                 instSrcVendor  ( const PMPackage & pkg_r ) const;
+	virtual unsigned               instSrcRank    ( const PMPackage & pkg_r ) const;
 
 	// PMPackage attributes
 	virtual PkgSplitSet            splitprovides ( const PMPackage & pkg_r ) const;

@@ -66,6 +66,7 @@ class PMPackage : virtual public Rep, public PMObject {
 
     virtual std::string            instSrcLabel()    const;
     virtual Vendor                 instSrcVendor()   const;
+    virtual unsigned               instSrcRank()     const;
 
     /**
      * PMPackage attributes passed off to PMPackageDataProvider
