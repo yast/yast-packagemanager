@@ -60,6 +60,7 @@ class YOUPackageTagSet : public TaggedFile::TagSet
       RPMNAME,
       INSTPATH,
       SIZE,
+      PATCHRPMSIZE,
       BUILDTIME,
       BUILTFROM,
       RPMGROUP,

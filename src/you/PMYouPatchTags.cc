@@ -49,6 +49,7 @@ YOUPackageTagSet::YOUPackageTagSet() : TagSet()
   addTag("RpmName",RPMNAME, TaggedFile::SINGLE );
   addTag("InstPath",INSTPATH, TaggedFile::SINGLE );
   addTag("Size",SIZE, TaggedFile::SINGLE );
+  addTag("PatchRpmSize",PATCHRPMSIZE, TaggedFile::SINGLE );
   addTag("Buildtime",BUILDTIME, TaggedFile::SINGLE );
   addTag("BuiltFrom",BUILTFROM, TaggedFile::SINGLE );
   addTag("RpmGroup",RPMGROUP, TaggedFile::SINGLE );

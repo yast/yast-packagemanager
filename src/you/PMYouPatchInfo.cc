@@ -28,6 +28,7 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/GPGCheck.h>
 #include <y2util/SysConfig.h>
+#include <y2util/stringutil.h>
 
 #include <Y2PM.h>
 
@@ -162,7 +163,24 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   _packageDataProvider->setSummary( pkg, value );
 
   value = tagValue( YOUPackageTagSet::SIZE );
-  _packageDataProvider->setSize( pkg, FSize( atoll( value.c_str() ) ) );
+  std::vector<std::string> values;
+  stringutil::split( value, values );
+  string size;
+  string rpmSize;
+  if ( values.size() >= 1 ) size = values[ 0 ];
+  if ( values.size() >= 2 ) rpmSize = values[ 1 ];
+
+  value = tagValue( YOUPackageTagSet::PATCHRPMSIZE );
+  stringutil::split( value, values );
+  string patchRpmSize;
+  if ( values.size() >= 2 ) patchRpmSize = values[ 1 ];
+
+  D__ << "Size: " << size << " RpmSize: " << rpmSize
+      << " PatchRpmSize: " << patchRpmSize << endl;
+
+  _packageDataProvider->setSize( pkg, FSize( atoll( size.c_str() ) ) );
+  _packageDataProvider->setArchiveSize( pkg, FSize( atoll( rpmSize.c_str() ) ) );
+  _packageDataProvider->setPatchRpmSize( pkg, FSize( atoll( patchRpmSize.c_str() ) ) );
 
   value = tagValue( YOUPackageTagSet::OBSOLETES );
   list<PkgRelation> relations = PkgRelation::parseRelations( value );

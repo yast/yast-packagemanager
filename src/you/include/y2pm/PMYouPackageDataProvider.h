@@ -116,6 +116,27 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         */
         std::list<PkgEdition> patchRpmBaseVersions( const PMPackage & ) const;
 
+        /**
+          Set file size of RPM archive.
+        */
+        void setArchiveSize( const PMPackagePtr &, const FSize & );
+        
+        /**
+          Get file size of RPM archive.
+        */
+        FSize archivesize( const PMPackage & ) const;
+    
+        /**
+          Set file size of patch RPM.
+        */
+        void setPatchRpmSize( const PMPackagePtr &, const FSize & );
+        
+        /**
+          Get file size of patch RPM.
+        */
+        FSize patchRpmSize( const PMPackage & ) const;
+    
+
     private:
         std::map<PMPackagePtr,std::string> _summaries;
         std::map<PMPackagePtr,std::string> _srcLabels;
@@ -124,6 +145,8 @@ class PMYouPackageDataProvider : virtual public Rep, public PMPackageDataProvide
         std::map<PMPackagePtr,std::string> _externalUrls;
         std::map<PMPackagePtr,std::list<PkgEdition> > _patchRpmBaseVersions;        
         std::map<PMPackagePtr,YStringTreeItem *> _rpmGroups;
+        std::map<PMPackagePtr,FSize> _archiveSizes;
+        std::map<PMPackagePtr,FSize> _patchRpmSizes;
 };
 
 #endif // PMYouPackageDataProvider_h
