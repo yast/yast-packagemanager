@@ -35,6 +35,7 @@
 #include <y2pm/MediaNFS.h>
 #include <y2pm/MediaSMB.h>
 #include <y2pm/MediaWget.h>
+#include <y2pm/MediaCurl.h>
 
 using namespace std;
 
@@ -85,7 +86,7 @@ MediaAccess::MediaAccess ()
 // destructor
 MediaAccess::~MediaAccess()
 {
-  close(); // !!! make shure handler gets properly deleted.
+  close(); // !!! make sure handler gets properly deleted.
 }
 
 // open URL
@@ -116,16 +117,16 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
        _handler = new MediaDISK (url,preferred_attach_point,utype);
      break;
     case FTP:
-      _handler = new MediaWget (url,preferred_attach_point,utype);
+      _handler = new MediaCurl (url,preferred_attach_point,utype);
       break;
     case SMB:
       _handler = new MediaSMB (url,preferred_attach_point,utype);
       break;
     case HTTP:
-      _handler = new MediaWget (url,preferred_attach_point,utype);
+      _handler = new MediaCurl (url,preferred_attach_point,utype);
       break;
     case HTTPS:
-      _handler = new MediaWget (url,preferred_attach_point,utype);
+      _handler = new MediaCurl (url,preferred_attach_point,utype);
       break;
 
     case NONE:

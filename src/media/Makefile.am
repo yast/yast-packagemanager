@@ -28,11 +28,12 @@ liby2pmMedia_la_SOURCES = \
 	MediaNFS.cc		\
 	MediaDISK.cc		\
 	MediaSMB.cc		\
+	MediaCurl.cc		\
 	MediaWget.cc		\
 	Wget.cc			\
 	Mount.cc
 
-liby2pmMedia_la_LIBADD = -ly2util
+liby2pmMedia_la_LIBADD = -lcurl -ly2util
 
 
 EXTRA_DIST = Make.defines
