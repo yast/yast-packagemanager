@@ -65,6 +65,7 @@ show_pmobject (PMObjectPtr p)
 void
 show_pmpackage (PMPackagePtr p)
 {
+    p->startRetrieval();
     show_pmobject ((PMObjectPtr)p);
 
     cout << "Buildtime: " << p->buildtime() << endl;
@@ -91,6 +92,7 @@ show_pmpackage (PMPackagePtr p)
     cout << "Location: " << p->location() << endl;
     cout << "Keywords: " << list2string(p->keywords()) << endl;
     cout << "========" << endl;
+    p->stopRetrieval();
     return;
 }
 
@@ -98,6 +100,7 @@ show_pmpackage (PMPackagePtr p)
 void
 show_pmselection (PMSelectionPtr s)
 {
+    s->startRetrieval();
     show_pmobject ((PMObjectPtr)s);
 
     cout << "Category: " << s->category () << endl;
@@ -108,6 +111,7 @@ show_pmselection (PMSelectionPtr s)
     cout << "DelPacks: " << list2string(s->delpacks("")) << endl;
     cout << "Archivesize: " << s->archivesize() << endl;
     cout << "========" << endl;
+    s->stopRetrieval();
     return;
 }
 
