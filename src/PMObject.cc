@@ -62,6 +62,7 @@ PMObject::PMObject( const PkgName &    name_r,
 		    const PkgEdition & edition_r,
 		    const PkgArch &    arch_r )
     : PMSolvable(name_r, edition_r, arch_r)
+    , _license_to_confirm( false )
 {
 }
 

@@ -451,6 +451,13 @@ ULPackagesParser::fromLocale ()
     SET_CACHE (DELNOTIFY);
     SET_CACHE (LICENSETOCONFIRM);
 
+    if ( ! dataprovider->_attr_LICENSETOCONFIRM.empty() ) {
+      MIL << "Package " << pkgpos->first << " has a license to confirm" << endl;
+      PMPackagePtr package = pkgpos->second.first;
+      package -> markLicenseUnconfirmed ();
+
+    }
+
 #undef GET_TAG
 #undef SET_CACHE
 
