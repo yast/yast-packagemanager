@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 16 23:17:05 CET 2004 - ma@suse.de
+
+- Added download progess cllback
+- Fixed packages.DU parser to handle whitespace in pathnames (#35707)
+- 2.9.26
+
+-------------------------------------------------------------------
 Mon Mar 15 15:34:39 CET 2004 - lnussel@suse.de
 
 - fix handling of inconsistent installed packages (#36033)

@@ -12,6 +12,7 @@ noinst_LTLIBRARIES = liby2pmMedia.la
 
 liby2pmMedia_la_SOURCES = \
 	MediaError.cc		\
+	MediaCallbacks.cc	\
 	MediaAccess.cc		\
 	MediaHandler.cc		\
 	MediaDIR.cc		\
