@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Sep 22 11:15:36 CEST 2003 - ma@suse.de
+
+- Fixed possible endless loop when skipping media during install.
+  (#31373)
+- 2.8.29
+
+-------------------------------------------------------------------
 Fri Sep 19 17:22:28 CEST 2003 - cschum@suse.de
 
 - InstYou: Reset MediaCurl callbacks in case of error or user
