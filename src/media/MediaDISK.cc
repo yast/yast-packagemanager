@@ -66,8 +66,10 @@ MediaDISK::MediaDISK( const Url &      url_r,
 //
 //	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError MediaDISK::attachTo()
+PMError MediaDISK::attachTo(bool next)
 {
+    if(next)
+	return Error::E_not_supported_by_media;
     // FIXME
     // do mount --bind <partition>/<dir> to <to>
     //   mount /dev/<partition> /tmp_mount

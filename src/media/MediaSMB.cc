@@ -64,10 +64,12 @@ MediaSMB::MediaSMB( const Url &      url_r,
 //
 //	DESCRIPTION : Asserted that not already attached, and attachPoint is a directory.
 //
-PMError MediaSMB::attachTo()
+PMError MediaSMB::attachTo(bool next)
 {
     if(_url.getHost().empty())
 	    return Error::E_no_host_specified;
+    if(next)
+	return Error::E_not_supported_by_media;
 
     const char* const filesystem = "smbfs";
     const char *mountpoint = attachPoint().asString().c_str();
