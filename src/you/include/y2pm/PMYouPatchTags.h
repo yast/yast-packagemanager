@@ -68,7 +68,8 @@ class YOUPackageTagSet : public TaggedFile::TagSet
       REQUIRES,
       PROVIDES,
       CONFLICTS,
-      PATCHRPMBASEVERSIONS
+      PATCHRPMBASEVERSIONS,
+      ARCH
     };
  
     YOUPackageTagSet();
