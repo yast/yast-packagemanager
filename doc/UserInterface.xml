@@ -3,22 +3,19 @@
 <chapter><title>User Interface</title>
 <para>Written by <ulink url="mailto:sh@suse.de">Stefan Hundhammer</ulink></para>
 
-<section><title>4.1 Views</title>
+<section><title>Views</title>
 <para>
 The user can dynamically switch between those views:
 <itemizedlist>
-<listitem><para>Add-on selections view (devlopment, multimedia, games, ...)
-  The user can add or remove any number of them.
-</para></listitem>
-<listitem><para>RPM group tags view
+  <listitem><para>Add-on selections view (devlopment, multimedia, games, ...)
+  The user can add or remove any number of them.</para></listitem>
+  <listitem><para>RPM group tags view
   The RPM group tags are displayed as a tree.
   The corresponding packages are displayed as a list when a leaf in that tree
-  is selected.
-</para></listitem>
-<listitem><para>Package search view
+  is selected.</para></listitem>
+  <listitem><para>Package search view
   Search form like in current YaST2:
-  Search for pkg name, in pkg descriptions
-</para></listitem>
+  Search for pkg name, in pkg descriptions</para></listitem>
 </itemizedlist>
 </para>
 <para>
@@ -30,7 +27,7 @@ etc.).
 
 
 </section>
-<section><title>4.2 Package list</title>
+<section><title>Package list</title>
 <para>
 In most views (at least for the RPM group tags view and for the pkg search
 view) a list of packages is displayed:
@@ -79,9 +76,9 @@ For each pkg, the following fields are displayed in the list:
 <para>
 Other pkg attributes like:</para>
 <itemizedlist>
-<listitem><para>pkg name</para></listitem>
-<listitem><para>pkg size</para></listitem>
-<listitem><para>pkg short description</para></listitem>
+  <listitem><para>pkg name</para></listitem>
+  <listitem><para>pkg size</para></listitem>
+  <listitem><para>pkg short description</para></listitem>
 </itemizedlist>
 <para>
 and maybe more.
@@ -89,7 +86,7 @@ and maybe more.
 
 
 </section>
-<section><title>4.3 Package details</title>
+<section><title>Package details</title>
 
 <para>
 If screen space permits, detailed information about the current pkg is
@@ -105,77 +102,57 @@ to switch from one version to another.
 
 Pkg details views:
 <itemizedlist>
-<listitem><para>Pkg long description. Both plain text and (simple - QSimpleRichText) HTML are
+  <listitem><para>Pkg long description. Both plain text and (simple - QSimpleRichText) HTML are
   supported. If the user interface supports displaying images, images are
-  supported, too (screen shots etc.).
-</para></listitem>
-<listitem><para>Technical data
+  supported, too (screen shots etc.).</para></listitem>
+  <listitem><para>Technical data
   The data "rpm -qi" provides (minus the pkg long description), e.g.
-  pkg name, version, license, home page, source RPM, buld date, ...
-</para></listitem>
+  pkg name, version, license, home page, source RPM, buld date, ...</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>4.4 Actions</title>
+<section><title>Actions</title>
 
 <para>
 <itemizedlist>
-<listitem><para>Cycle pkg selectionmultiple clicks may be required to
-  switch from the curent state to the one desired
-</para></listitem>
-<listitem><para>Show pkg details description (if not already present on screen)
-</para></listitem>
+  <listitem><para>Cycle pkg selectionmultiple clicks may be required to
+  switch from the curent state to the one desired</para></listitem>
+  <listitem><para>Show pkg details description (if not already present on screen)</para></listitem>
 
-<listitem><para>Start pkg search (if pkg search view is selected)
+  <listitem><para>Start pkg search (if pkg search view is selected)
   <itemizedlist>
-  <listitem><para>search for pkg name
-</para></listitem>
-  <listitem><para>full-text search in pkg description
-</para></listitem>
-  <listitem><para>toggle case sensitive search
-</para></listitem>
-  </itemizedlist>
-</para></listitem>
-<listitem><para>Save / load settings
-</para></listitem>
+  <listitem><para>search for pkg name</para></listitem>
+  <listitem><para>full-text search in pkg description</para></listitem>
+  <listitem><para>toggle case sensitive search</para></listitem>
+  </itemizedlist></para></listitem>
+  <listitem><para>Save / load settings</para></listitem>
 
-<listitem><para>Toggle immediate dependency check
-</para></listitem>
+  <listitem><para>Toggle immediate dependency check</para></listitem>
 
-<listitem><para>Check dependencies
-</para></listitem>
+  <listitem><para>Check dependencies</para></listitem>
 
 
-<listitem><para>Advanced (optional):
+  <listitem><para>Advanced (optional):
 <itemizedlist>
-<listitem><para>Select all
-</para></listitem>
-<listitem><para>Deselect all
-</para></listitem>
-<listitem><para>Delete all
-</para></listitem>
-<listitem><para>Delete nothing
-</para></listitem>
-<listitem><para>Replace all
-</para></listitem>
-<listitem><para>Replace nothing
-</para></listitem>
-<listitem><para>Don't replace anything, delete instead
-</para></listitem>
-<listitem><para>Replace, don't delete
-</para></listitem>
-</itemizedlist>
-</para></listitem>
+  <listitem><para>Select all</para></listitem>
+  <listitem><para>Deselect all</para></listitem>
+  <listitem><para>Delete all</para></listitem>
+  <listitem><para>Delete nothing</para></listitem>
+  <listitem><para>Replace all</para></listitem>
+  <listitem><para>Replace nothing</para></listitem>
+  <listitem><para>Don't replace anything, delete instead</para></listitem>
+  <listitem><para>Replace, don't delete</para></listitem>
+</itemizedlist></para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>4.5 Add-on Features 1 - Recommended</title>
+<section><title>Add-on Features 1 - Recommended</title>
 
 <para>
 <itemizedlist>
-<listitem><para>New selection status for each pkg: "taboo"
+  <listitem><para>New selection status for each pkg: "taboo"
 
   This excludes a pkg from automatic selection via dependencies - dependency
   conflict warnings will be issued instead. This way a user could make sure he
@@ -189,44 +166,38 @@ Pkg details views:
   the basic design.
 
   sh: For the frontend, it's trivial.
-  </emphasis>
-</para></listitem>
-<listitem><para>New pkg status "don't touch"for pkgs the user doesn't want to be updated
+  </emphasis></para></listitem>
+  <listitem><para>New pkg status "don't touch"for pkgs the user doesn't want to be updated
   or deleted in any case, such as pkgs he builds manually or gets from some
-  other source.
-</para></listitem>
-<listitem><para>New view for current pkg: Conflicts
+  other source.</para></listitem>
+  <listitem><para>New view for current pkg: Conflicts
 
-  Displays a list of pkgs this pkg conflicts with.
-</para></listitem>
-<listitem><para>New view for current pkg: Requires
+  Displays a list of pkgs this pkg conflicts with.</para></listitem>
+  <listitem><para>New view for current pkg: Requires
 
   Displays a flat list of pkgs required by the current pkg along with
   indications which of those are already automatically selected anyway and
   which ones would be added by adding this pkg - plus the accumulated size of
-  those new pkgs.
-</para></listitem>
-<listitem><para>New view for current pkg: Required by
+  those new pkgs.</para></listitem>
+  <listitem><para>New view for current pkg: Required by
 
-  Displays a flat list of pkgs that require this pkg.
-</para></listitem>
+  Displays a flat list of pkgs that require this pkg.</para></listitem>
 </itemizedlist>
 </para>
 
 
 </section>
-<section><title>4.6 Add-on Features 2 - Very useful</title>
+<section><title>Add-on Features 2 - Very useful</title>
 
 <para>
 <itemizedlist>
-<listitem><para>New view for current pkg: File list
+  <listitem><para>New view for current pkg: File list
 
   Displays a list of files this pkg contains (rpm -qpl).
-  This might require the installation medium the RPM is on to be inserted.
-</para></listitem>
+  This might require the installation medium the RPM is on to be inserted.</para></listitem>
 
 
-<listitem><para>Tools for direct status change without cycling through all possible values.
+  <listitem><para>Tools for direct status change without cycling through all possible values.
 
   The Qt UI should get tool buttons like in paint programs GIMP, CorelDraw
   etc. that directly set the pkg state to a defined value. The mouse cursor
@@ -237,32 +208,28 @@ Pkg details views:
   for "install", "d" for delete etc.
 
   Cycling through all possible values more often than not sets intermediate
-  states which cause unnecessary problems.
-</para></listitem>
+  states which cause unnecessary problems.</para></listitem>
 
-<listitem><para>Context menu for directly setting the pkg status
-</para></listitem>
+  <listitem><para>Context menu for directly setting the pkg status</para></listitem>
 
-<listitem><para>Qt UI: Tool tips (balloon help) for different versions of the same pkg
+  <listitem><para>Qt UI: Tool tips (balloon help) for different versions of the same pkg
   Display more info than just "V7.32" in column "CD" - e.g.
 <screen width="80">
 	V 7.32 from SuSE Firewall Update CD
 	283k
-</screen>
-</para></listitem>
+</screen></para></listitem>
 
-<listitem><para>What if... - shows list of pkgs that will be installed, deleted, updated
-</para></listitem>
+  <listitem><para>What if... - shows list of pkgs that will be installed, deleted, updated</para></listitem>
 </itemizedlist>
 </para>
 
 
 </section>
-<section><title>4.7 Add-on Features 3 - Useful</title>
+<section><title>Add-on Features 3 - Useful</title>
 
 <para>
 <itemizedlist>
-<listitem><para>New view for current pkg: Versions per installation source
+  <listitem><para>New view for current pkg: Versions per installation source
 
   Improved summary of all instances of the current pkg on all available
   installation sources, e.g.
@@ -270,104 +237,90 @@ Pkg details views:
 	       V 7.32 SuSE Firewall Update CD	- 283k
 	       V 7.30 SuSE Firewall CD		- 257k
 	       V 6.0  UBL 1.0 Base CD		- 180k
-</screen>
-</para></listitem>
+</screen></para></listitem>
 
-<listitem><para>New view for pkg list: Supported MIME types
+  <listitem><para>New view for pkg list: Supported MIME types
 
   Instead of the RPM group tags, display known MIME types and list pkgs that
   can handle the selected ones: Which pkgs support .png, which support MS Word
   .doc etc.
 
-  The information is there - SuSE-WM already uses it.
-</para></listitem>
+  The information is there - SuSE-WM already uses it.</para></listitem>
 
 
-<listitem><para>New view for pkg list: Supported hardware
+  <listitem><para>New view for pkg list: Supported hardware
 
-  Similar to above: Which pkgs support CD recorders, sound cards etc.
-</para></listitem>
-
-
-<listitem><para>Save status of SW selection window: Current view etc.
-</para></listitem>
+  Similar to above: Which pkgs support CD recorders, sound cards etc.</para></listitem>
 
 
-<listitem><para>Pkg view: Replaced / obsoleted pkgs
-  Show a list of pkgs that are replaced by other pkgs.
-</para></listitem>
+  <listitem><para>Save status of SW selection window: Current view etc.</para></listitem>
 
 
-<listitem><para>New view for pkg list: Licenses
+  <listitem><para>Pkg view: Replaced / obsoleted pkgs
+  Show a list of pkgs that are replaced by other pkgs.</para></listitem>
+
+
+  <listitem><para>New view for pkg list: Licenses
   (suggested by ke on [research] on 2002-05-22)
   View packages by license type: GPL, BSD, ...
   
   Maybe this should rather be a filter that works on top of other views.
-  Otherwise we'd get too many pkgs in each category: Most pkgs (70%? 80%?) are GPL.
-</para></listitem>
+  Otherwise we'd get too many pkgs in each category: Most pkgs (70%? 80%?) are GPL.</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>4.8 Add-on Features 4 - Nice to have</title>
+<section><title>Add-on Features 4 - Nice to have</title>
 
 <para>
 <itemizedlist>
-<listitem><para>New view for current pkg: Change log
+  <listitem><para>New view for current pkg: Change log
 
   Displays this pkg's change log.
-  This might require the installation medium the RPM is on to be inserted.
-</para></listitem>
+  This might require the installation medium the RPM is on to be inserted.</para></listitem>
 
-<listitem><para>Icons in the pkg list to indicate the type of pkg (system, X, KDE, ...)
+  <listitem><para>Icons in the pkg list to indicate the type of pkg (system, X, KDE, ...)
 
   The PDB team (Vladimir Nadvornik) say this info could automatically be
   generated from existing pkg dependencies (which pkgs are linked against KDE
-  libs etc).
-</para></listitem>
+  libs etc).</para></listitem>
 
 
-<listitem><para>Support for hyperlinks into the WWW from within the pkg description
-</para></listitem>
+  <listitem><para>Support for hyperlinks into the WWW from within the pkg description</para></listitem>
 
 
-<listitem><para>User Selections on Floppy: Users who usually add a few packages to one of the
+  <listitem><para>User Selections on Floppy: Users who usually add a few packages to one of the
   ready-made selections should be able to save those add-on selections to
   floppy so they don't forget them for future installations ("I always add 'xv'
-  and 'selfhtml' to the 'default + office' selection).
-</para></listitem>
+  and 'selfhtml' to the 'default + office' selection).</para></listitem>
 
 
-<listitem><para>Support for run time dependencies: Some YaST2 modules require installation of
+  <listitem><para>Support for run time dependencies: Some YaST2 modules require installation of
   additional packages only on invocation. This is typical for YaST2 config
   modules for special hardware (scanner, TV card etc.) - only when that
   hardware is being configured it makes sense to actually have the related
-  software. RPM supports only hard requirements, thus YaST2 needs to do that.
-</para></listitem>
+  software. RPM supports only hard requirements, thus YaST2 needs to do that.</para></listitem>
 
 
-<listitem><para>Reminder list: Let the user add pkgs he wants to explore at some later time
+  <listitem><para>Reminder list: Let the user add pkgs he wants to explore at some later time
   put on a list that he will se on his desktop after the installation. This is
   useful whenever a user sees a pkg he doesn't know yet during pkg selection -
   people often install pkgs they find interesting, yet forget to really check
   them out some day. We have so many useful pkgs on our distribution that don't
   get the attention they'd deserve - this would be an add-on value for the end
-  user for very little cost for us.
-</para></listitem>
+  user for very little cost for us.</para></listitem>
 
 
-<listitem><para>Installation history view: Display the last n pkgs installed or pkgs
+  <listitem><para>Installation history view: Display the last n pkgs installed or pkgs
   installed since a specific date.
-  (suggestion cfischer)
-</para></listitem>
+  (suggestion cfischer)</para></listitem>
 
-<listitem><para>Verify RPM (in installed system)
-</para></listitem>
+  <listitem><para>Verify RPM (in installed system)</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>4.9 Package Keywords</title>
+<section><title>Package Keywords</title>
 
 <para>
 Packages should get keywords to characterize them so advanced queries could be
@@ -375,29 +328,36 @@ possible.
 
 Examples:
 <itemizedlist>
-<listitem><para>KMail:
-- KDE app
-- X app
-- mail client
-- network
-</para></listitem>
-<listitem><para>
-Emacs:
-- X app
-- console app
-- editor
-</para></listitem>
-<listitem><para>
-File utilities (ls, cp, ...):
-- base system
-- system utilities
-- shell program
-</para></listitem>
+  <listitem><para>KMail:
+    <itemizedlist>
+      <listitem><para>KDE app</para></listitem>
+      <listitem><para>X app</para></listitem>
+      <listitem><para>mail client</para></listitem>
+      <listitem><para>network</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Emacs:
+    <itemizedlist>
+      <listitem><para>X app</para></listitem>
+      <listitem><para>console app</para></listitem>
+      <listitem><para>editor</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>
+    File utilities (ls, cp, ...):
+    <itemizedlist>
+      <listitem><para>base system</para></listitem>
+      <listitem><para>system utilities</para></listitem>
+      <listitem><para>shell program</para></listitem>
+    </itemizedlist>
+  </para></listitem>
 </itemizedlist>
 </para>
 <para>
 Sample queries:
-- Search ("KDE app" or "X app") and "mail client"
+<itemizedlist>
+    <listitem><para>Search ("KDE app" or "X app") and "mail client"</para></listitem>
+</itemizedlist>
 </para>
 <para>
 Problem: This requires constant work for either all pkg maintainers or some
@@ -406,17 +366,17 @@ responsible person who takes care of that.
 
 
 </section>
-<section><title>4.10 Ideas for the future</title>
+<section><title>Ideas for the future</title>
 
 <para>
-- Advanced multimedia support for the pkg description: Sound and video clips
-
-- msvec: Count of pkgs of each category / of pkgs total
-
-- msvec: Select / deselect entire categories
+<itemizedlist>
+  <listitem><para>Advanced multimedia support for the pkg description: Sound and video clips</para></listitem>
+  <listitem><para>msvec: Count of pkgs of each category / of pkgs total</para></listitem>
+  <listitem><para>msvec: Select / deselect entire categories</para></listitem>
+</itemizedlist>
 </para>
 
-<section><title>4.10.1 Package Ratings</title>
+<section><title>Package Ratings</title>
 
 <para>
 We have dozens of mail clients, dozens of editors etc. to choose from.
@@ -436,16 +396,16 @@ support something like that.
 Ratings could include:
 </para>
 <itemizedlist>
-<listitem><para>Feature set</para></listitem>
-<listitem><para>Stability</para></listitem>
-<listitem><para>Innovation</para></listitem>
-<listitem><para>Completeness</para></listitem>
-<listitem><para>Actively maintained</para></listitem>
-<listitem><para>Performance</para></listitem>
-<listitem><para>Resource consumption</para></listitem>
-<listitem><para>Suitability for console environment</para></listitem>
-<listitem><para>Suitability for X desktop environment</para></listitem>
-<listitem><para>Suitability for newbies vs. experts</para></listitem>
+  <listitem><para>Feature set</para></listitem>
+  <listitem><para>Stability</para></listitem>
+  <listitem><para>Innovation</para></listitem>
+  <listitem><para>Completeness</para></listitem>
+  <listitem><para>Actively maintained</para></listitem>
+  <listitem><para>Performance</para></listitem>
+  <listitem><para>Resource consumption</para></listitem>
+  <listitem><para>Suitability for console environment</para></listitem>
+  <listitem><para>Suitability for X desktop environment</para></listitem>
+  <listitem><para>Suitability for newbies vs. experts</para></listitem>
 </itemizedlist>
 
 <para>
@@ -454,7 +414,7 @@ obsolete unless updated.
 </para>
 </section>
 
-<section><title>4.10.2 Application View vs. Packages View</title>
+<section><title>Application View vs. Packages View</title>
 
 <para>
 Currently, there are the old SuSE package series and the RPM group tags, and
@@ -484,7 +444,7 @@ GUI).
 
 </section>
 
-<section><title>4.10.3 Application Categories</title>
+<section><title>Application Categories</title>
 
 <para>
 Display pkg list as tree, divided by user-visible categories, e.g.:
@@ -507,7 +467,7 @@ Editors
 
 </section>
 
-<section><title>4.10.4 User Package Preferences by Type</title>
+<section><title>User Package Preferences by Type</title>
 
 <para>
 The user should be able to adjust package selections to personal preferences,
@@ -524,49 +484,60 @@ there is none, a KDE based mailer. ..."
 </section>
 
 </section>
-<section><title>4.11 Package attributes</title>
+<section><title>Package attributes</title>
 
 <para>
 Attributes already available either from RPM or from the PDB:
 
-
-[Required]	pkg name
-[Required]	selection / installation status
-[Required]	version (including build no.)
-[Required]	installation source
-[Required]	architecture
-[Required]	requires
-[Required]	provides
-[Required]	conflicts
-[Required]	obsoletes
+<itemizedlist>
+  <listitem><para>[Required]	pkg name</para></listitem>
+  <listitem><para>[Required]	selection / installation status</para></listitem>
+  <listitem><para>[Required]	version (including build no.)</para></listitem>
+  <listitem><para>[Required]	installation source</para></listitem>
+  <listitem><para>[Required]	architecture</para></listitem>
+  <listitem><para>[Required]	requires</para></listitem>
+  <listitem><para>[Required]	provides</para></listitem>
+  <listitem><para>[Required]	conflicts</para></listitem>
+  <listitem><para>[Required]	obsoletes</para></listitem>
+</itemizedlist>
 </para>
 <para>
-[Required]	short description
-[Required]	installation size
-[Required]	RPM size
-[Required]	license
-[Required]	RPM group tags
+<itemizedlist>
+  <listitem><para>[Required]	short description</para></listitem>
+  <listitem><para>[Required]	installation size</para></listitem>
+  <listitem><para>[Required]	RPM size</para></listitem>
+  <listitem><para>[Required]	license</para></listitem>
+  <listitem><para>[Required]	RPM group tags</para></listitem>
+</itemizedlist>
 </para>
 <para>
-[Required]	long description
-[Required]	long description type (HTML / plain text)
+<itemizedlist>
+  <listitem><para>[Required]	long description</para></listitem>
+  <listitem><para>[Required]	long description type (HTML / plain text)</para></listitem>
+</itemizedlist>
 </para>
 <para>
-[Recommended]	file list
+<itemizedlist>
+  <listitem><para>[Recommended]	file list</para></listitem>
+</itemizedlist>
 </para>
 <para>
-[Recommended]	installation date (including time)
-[Recommended]	source RPM name
-[Recommended]	build host
-[Recommended]	build date (including time)
-[Recommended]	authors
-[Recommended]	distribution
-[Recommended]	relocations
+<itemizedlist>
+  <listitem><para>[Recommended]	installation date (including time)</para></listitem>
+  <listitem><para>[Recommended]	source RPM name</para></listitem>
+  <listitem><para>[Recommended]	build host</para></listitem>
+  <listitem><para>[Recommended]	build date (including time)</para></listitem>
+  <listitem><para>[Recommended]	authors</para></listitem>
+  <listitem><para>[Recommended]	distribution</para></listitem>
+  <listitem><para>[Recommended]	relocations</para></listitem>
+</itemizedlist>
 </para>
 <para>
-[Recommended]	MIME types supported		(from PDB - for SuSE-WM)
-[Recommended]	(special) hardware required	(from PDB)
-[Recommended]	(special) hardware supported	(from PDB)
+<itemizedlist>
+  <listitem><para>[Recommended]	MIME types supported		(from PDB - for SuSE-WM)</para></listitem>
+  <listitem><para>[Recommended]	(special) hardware required	(from PDB)</para></listitem>
+  <listitem><para>[Recommended]	(special) hardware supported	(from PDB)</para></listitem>
+</itemizedlist>
 </para>
 <para>
 [Useful]	change log
@@ -577,9 +548,11 @@ Attributes already available either from RPM or from the PDB:
 Attributes that are not available yet, but could be generated automatically:
 </para>
 <para>
-[Useful]	(basic) pkg keywords (X, KDE, ...) - generated from 'ldd'
-[Useful]	run time dependencies
-[Useful]	suggested pkgs
+<itemizedlist>
+  <listitem><para>[Useful]	(basic) pkg keywords (X, KDE, ...) - generated from 'ldd'</para></listitem>
+  <listitem><para>[Useful]	run time dependencies</para></listitem>
+  <listitem><para>[Useful]	suggested pkgs</para></listitem>
+</itemizedlist>
 </para>
 <para>
 
@@ -588,24 +561,31 @@ Attributes that are not available yet for which the information is
 expensive to collect:
 </para>
 <para>
-[Nice]		advanced keywords (system, network, ... + X, KDE, ...)
-[Nice]		ratings:
-		- feature set
-		- stability
-		- completeness
-		- actively maintained
-		- performance
-		- resource consumption
-		- suitability for console environment
-		- suitability for X desktop environment
-		- suitability for newbies
-		- suitability for experts
-		
-
+<itemizedlist>
+  <listitem><para>[Nice]		advanced keywords (system, network, ... + X, KDE, ...)</para></listitem>
+  <listitem><para>[Nice]		ratings:
+<itemizedlist>
+  <listitem><para>		- feature set</para></listitem>
+  <listitem><para>		- stability</para></listitem>
+  <listitem><para>		- completeness</para></listitem>
+  <listitem><para>		- actively maintained</para></listitem>
+  <listitem><para>		- performance</para></listitem>
+  <listitem><para>		- resource consumption</para></listitem>
+  <listitem><para>		- suitability for console environment</para></listitem>
+  <listitem><para>		- suitability for X desktop environment</para></listitem>
+  <listitem><para>		- suitability for newbies</para></listitem>
+  <listitem><para>		- suitability for experts</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</para>		
+<para>
 Other attributes not available yet that require (moderate) manual work:
 
-[Nice]		 video clip
-[Nice]		 sound
+<itemizedlist>
+  <listitem><para>[Nice]		 video clip</para></listitem>
+  <listitem><para>[Nice]		 sound</para></listitem>
+</itemizedlist>
 </para>
 </section>
 </chapter>

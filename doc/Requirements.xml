@@ -2,7 +2,7 @@
 <chapter>
 <title>Requirements</title>
 
-<section><title>2.1 General</title>
+<section><title>General</title>
 
 <para>
 Handling package dependency resolving across multiple package sources
@@ -30,14 +30,10 @@ are a logical consequence.
 <para>
 This all leads to the following:
 <itemizedlist>
-<listitem><para>A set of bytes make a file
-</para></listitem>
-<listitem><para>A set of files make a package
-</para></listitem>
-<listitem><para>A set of packages make a selection
-</para></listitem>
-<listitem><para>A set of selections make a distribution
-</para></listitem>
+  <listitem><para>A set of bytes make a file</para></listitem>
+  <listitem><para>A set of files make a package</para></listitem>
+  <listitem><para>A set of packages make a selection</para></listitem>
+  <listitem><para>A set of selections make a distribution</para></listitem>
 </itemizedlist>
 [This leads to having selections as .rpm files and let rpm do all
 the work in finding dependencies. However the selections are only
@@ -47,7 +43,7 @@ would be a good thing.]
 </para>
 </section>
 
-<section><title>2.2 User Interface</title>
+<section><title>User Interface</title>
 
 <para>
 The package management must be usable by command line, by a text (curses)
@@ -56,7 +52,7 @@ Detailed functional requirements (use-cases) are listed below.
 </para>
 
 </section>
-<section><title>2.3 Installation Media</title>
+<section><title>Installation Media</title>
 
 <para>
 The concept of separated base and product CDs can be extended to a
@@ -95,12 +91,11 @@ In addition to that, an installation source should contain:
 
 
 <itemizedlist>
-<listitem><para>
+  <listitem><para>
 Package descriptions - technical data as well as textual descriptions for
 all packages - as a cache for instant access to that information which
 otherwise may be accessible only at a remote location with considerable access
-times. 
-</para></listitem>
+times. </para></listitem>
 </itemizedlist>
 
 
@@ -108,25 +103,17 @@ times.
 Integrating separate 'package sources' into the installer and doing
 cross-media dependency resolving does have a lot of advantages:
 <itemizedlist>
-<listitem><para>Close interaction with SuSE installer
-</para></listitem>
-<listitem><para>Distributed installation (CD, DVD, NFS, ...)
-</para></listitem>
-<listitem><para>Abstracting from physical medium
-</para></listitem>
-<listitem><para>Overlaying package sources eases (online) updates or architecture
-  specific packages (i.e. i686 optimized)
-</para></listitem>
-<listitem><para>an installation source might not be available (i.e. network
-  server down)
-</para></listitem>
-<listitem><para>an installation source might be provided by a different
-  vendor (not SuSE)
-</para></listitem>
-<listitem><para>an installation source might be unreliable (bad MD5)
-</para></listitem>
-<listitem><para>cost of accessing an  installation source
-</para></listitem>
+  <listitem><para>Close interaction with SuSE installer</para></listitem>
+  <listitem><para>Distributed installation (CD, DVD, NFS, ...)</para></listitem>
+  <listitem><para>Abstracting from physical medium</para></listitem>
+  <listitem><para>Overlaying package sources eases (online) updates or architecture
+  specific packages (i.e. i686 optimized)</para></listitem>
+  <listitem><para>an installation source might not be available (i.e. network
+  server down)</para></listitem>
+  <listitem><para>an installation source might be provided by a different
+  vendor (not SuSE)</para></listitem>
+  <listitem><para>an installation source might be unreliable (bad MD5)</para></listitem>
+  <listitem><para>cost of accessing an  installation source</para></listitem>
 </itemizedlist>
 </para>
 
@@ -137,7 +124,7 @@ temporarely.
 </para>
 
 </section>
-<section><title>2.4 Installation Target</title>
+<section><title>Installation Target</title>
 
 <para>
 All package handling is always based on a single installation target,
@@ -148,19 +135,15 @@ embedded systems with limited resources for a full dependency handling.
 <para>
 Further requirements are:
 <itemizedlist>
-<listitem><para>Keep system consitent all the time.
-</para></listitem>
-<listitem><para>Install package from any source.
-</para></listitem>
-<listitem><para>Switch installation sources dynamically.
-</para></listitem>
-<listitem><para>Control RPM parameters (i.e. --oldpackage, --excludedocs)
-</para></listitem>
+  <listitem><para>Keep system consitent all the time.</para></listitem>
+  <listitem><para>Install package from any source.</para></listitem>
+  <listitem><para>Switch installation sources dynamically.</para></listitem>
+  <listitem><para>Control RPM parameters (i.e. --oldpackage, --excludedocs)</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>2.5 Dependency Solving</title>
+<section><title>Dependency Solving</title>
 
 <para>
 The current package handling is based on the package name only and does not
@@ -180,20 +163,16 @@ must be handled.
 Having more detailed package dependencies opens up a new set of
 packaging possibilities:
 <itemizedlist>
-<listitem><para>a package might be provided in several versions, user can choose
-  'best' package (matching his application)
-</para></listitem>
-<listitem><para>easier up/downgrade of packages
-</para></listitem>
-<listitem><para>easier handling of patches (incl. removal of patches)
-</para></listitem>
-<listitem><para>Control dependency solving (i.e. switch it off)
-</para></listitem>
+  <listitem><para>a package might be provided in several versions, user can choose
+  'best' package (matching his application)</para></listitem>
+  <listitem><para>easier up/downgrade of packages</para></listitem>
+  <listitem><para>easier handling of patches (incl. removal of patches)</para></listitem>
+  <listitem><para>Control dependency solving (i.e. switch it off)</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>2.6 Selections</title>
+<section><title>Selections</title>
 
 <para>
 Selections are a means to reduce dependency complexity and to
@@ -206,68 +185,51 @@ adding version information also update complexity can be reduced.
 </para>
 
 </section>
-<section><title>2.7 Packages</title>
+<section><title>Packages</title>
 
 <para>
 A package is the smallest entity handled by the package management.
 Packages consist of
 <itemizedlist>
-<listitem><para>A name
-</para></listitem>
-<listitem><para>A version
-</para></listitem> 
-<listitem><para>An architecture
-</para></listitem> 
-<listitem><para>Dependencies
-</para></listitem>
-<listitem><para>Files
-</para></listitem>
-<listitem><para>Attributes (Label, Size, Group Tag, ...)
-</para></listitem> 
+  <listitem><para>A name</para></listitem>
+  <listitem><para>A version</para></listitem> 
+  <listitem><para>An architecture</para></listitem> 
+  <listitem><para>Dependencies</para></listitem>
+  <listitem><para>Files</para></listitem>
+  <listitem><para>Attributes (Label, Size, Group Tag, ...)</para></listitem> 
 </itemizedlist>
 </para>
 
 <remark>see also ~sh/y2-proto/sw-single/sw-single-spec.txt </remark>
 
 </section>
-<section><title>2.8 Patches</title>
+<section><title>Patches</title>
 
 <para>
 Patches describe changes to be made to a system.
 A patch consists of
 <itemizedlist>
-<listitem><para>A name
-</para></listitem>
-<listitem><para>A version
-</para></listitem> 
-<listitem><para>An architecture
-</para></listitem> 
-<listitem><para>Dependencies
-</para></listitem>
-<listitem><para>Attributes
-</para></listitem> 
-<listitem><para>Text, Packages, Scripts
-</para></listitem>
+  <listitem><para>A name</para></listitem>
+  <listitem><para>A version</para></listitem> 
+  <listitem><para>An architecture</para></listitem> 
+  <listitem><para>Dependencies</para></listitem>
+  <listitem><para>Attributes</para></listitem> 
+  <listitem><para>Text, Packages, Scripts</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>2.9 Update</title>
+<section><title>Update</title>
 
 <para>
 Things to consider for an update are:
 <itemizedlist>
-<listitem><para>A functionality (Requires-Tag) might be provided by several
-packages. Decide which one to choose.
-</para></listitem>
-<listitem><para>Package renames
-</para></listitem>
-<listitem><para>Package splits
-</para></listitem>
-<listitem><para>Package drops
-</para></listitem>
-<listitem><para>Package unknown (foreign package) with dependencies
-</para></listitem>
+  <listitem><para>A functionality (Requires-Tag) might be provided by several
+packages. Decide which one to choose.</para></listitem>
+  <listitem><para>Package renames</para></listitem>
+  <listitem><para>Package splits</para></listitem>
+  <listitem><para>Package drops</para></listitem>
+  <listitem><para>Package unknown (foreign package) with dependencies</para></listitem>
 </itemizedlist>
 </para>
 

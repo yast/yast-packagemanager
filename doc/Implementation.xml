@@ -4,22 +4,22 @@
 
 <para>
 <itemizedlist>
-<listitem><para>installation sources provide selections (set of packages) and packages.</para></listitem>
-<listitem><para>installation source has unique ID and 'cache file' which is
+  <listitem><para>installation sources provide selections (set of packages) and packages.</para></listitem>
+  <listitem><para>installation source has unique ID and 'cache file' which is
 	stored at registration time to identify the source</para></listitem>
-<listitem><para>Pre-Require flags might be used to order packages during installation</para></listitem>
-<listitem><para>Package list on installation media determines installation order.
+  <listitem><para>Pre-Require flags might be used to order packages during installation</para></listitem>
+  <listitem><para>Package list on installation media determines installation order.
 	Still a number of packages (currently called ELF packs) must be pre-installed
 	by force. Possibly using a .tar.bz2 could be feasible (-> autobuild team)</para></listitem>
-<listitem><para>Autobuild needs a solver to determine how to spread packages across  multiple CDs</para></listitem>
-<listitem><para>Selections have dependencies and versions, so the same code can be
+  <listitem><para>Autobuild needs a solver to determine how to spread packages across  multiple CDs</para></listitem>
+  <listitem><para>Selections have dependencies and versions, so the same code can be
 	used for selections and packages</para></listitem>
-<listitem><para>Update server (YOU) can be implemented as an installation source (with
+  <listitem><para>Update server (YOU) can be implemented as an installation source (with
 	a high priority).</para></listitem>
 </itemizedlist>
 </para>
 
-<section><title>5.8 Installation Source</title>
+<section><title>Installation Source</title>
 <para>
 - how to identify an installation source (setup/descr/info, update.inf)
 </para>
@@ -30,10 +30,10 @@ a common frontend (interface) and a source (media) specific backend.
 <para>
 The following functionality should be provided
 <itemizedlist>
-<listitem><para>init package source (kind of source, ranking, status, ...)</para></listitem>
-<listitem><para>query package source (all attributes from III.3)</para></listitem>
-<listitem><para>query selection (provided by package source)</para></listitem>
-<listitem><para>query package (provided by package source)</para></listitem>
+  <listitem><para>init package source (kind of source, ranking, status, ...)</para></listitem>
+  <listitem><para>query package source (all attributes from III.3)</para></listitem>
+  <listitem><para>query selection (provided by package source)</para></listitem>
+  <listitem><para>query package (provided by package source)</para></listitem>
 </itemizedlist>
 </para>
 
@@ -50,15 +50,14 @@ accessible by the package drain (the target system).
 <para>
 A possible dataflow could be as possible
 <itemizedlist>
-<listitem><para>package source provides a set of selections/packages</para></listitem>
-<listitem><para>dependency solver computes a list of packages to be installed</para></listitem>
-<listitem><para>control unit loops through this list and calls the package
+  <listitem><para>package source provides a set of selections/packages</para></listitem>
+  <listitem><para>dependency solver computes a list of packages to be installed</para></listitem>
+  <listitem><para>control unit loops through this list and calls the package
 	source (manager) to provide a package for access, the result
 	of such an access command is a URL for package access.
-	(i.e. file:/var/adm/mount/suse/a1/aaa_base-8.1-42.i386.rpm)
-</para></listitem>
-<listitem><para>control unit calls package drain with the provided URL</para></listitem>
-<listitem><para>package drain tries to access and install the package</para></listitem>
+	(i.e. file:/var/adm/mount/suse/a1/aaa_base-8.1-42.i386.rpm)</para></listitem>
+  <listitem><para>control unit calls package drain with the provided URL</para></listitem>
+  <listitem><para>package drain tries to access and install the package</para></listitem>
 </itemizedlist>
 </para>
 
@@ -75,7 +74,7 @@ deliberately ignored dependency errors.
 </para>
 
 </section>
-<section><title>5.9 Package Provider</title>
+<section><title>Package Provider</title>
 
 <para>
 The package provider retrieves a package to a (local) directory
@@ -83,7 +82,7 @@ x
 </para>
 </section>
 
-<section><title>5.10 Installation Source Manager</title>
+<section><title>Installation Source Manager</title>
 <para>
 A package source manager eases the handling of multiple package
 sources. It basically provides the same interface as a normal
@@ -91,9 +90,9 @@ package source, as it also provides selections and packages.
 
 Additionally it provides functions to
 <itemizedlist>
-<listitem><para>add</para></listitem>
-<listitem><para>delete</para></listitem>
-<listitem><para>query</para></listitem>
+  <listitem><para>add</para></listitem>
+  <listitem><para>delete</para></listitem>
+  <listitem><para>query</para></listitem>
 </itemizedlist>
 package sources.
 </para>
@@ -106,7 +105,7 @@ architecture, vendor, package source)
 </para>
 </section>
 
-<section><title>5.11 Installation Target</title>
+<section><title>Installation Target</title>
 <para></para>
 </section>
 <section><title>Dependency Solver</title>

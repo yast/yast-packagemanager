@@ -13,6 +13,7 @@
 <!ENTITY OnlineUpdate SYSTEM "OnlineUpdate.xml">
 <!ENTITY FunctionalView SYSTEM "FunctionalView.xml">
 <!ENTITY Implementation SYSTEM "Implementation.xml">
+<!ENTITY MediaAccess SYSTEM "MediaAccess.xml">
 ]>
 
 <book>
@@ -40,7 +41,7 @@
 &UserInterface;
 &FunctionalView;
 &Implementation;
-
+&MediaAccess;
 
 <!--
 <glossary><title>Glossary</title>

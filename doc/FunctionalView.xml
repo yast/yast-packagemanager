@@ -2,7 +2,7 @@
 
 <chapter><title>Functional View</title>
 
-<section><title>5.1 Abstract functional blocks</title>
+<section><title>Abstract functional blocks</title>
 
 <para>
 By abstracting from a (physical) medium to a general 'installation source',
@@ -41,7 +41,7 @@ callbacks/return codes to handle resolving dependencies
 	  </mediaobject>
 </section>
 
-<section><title>5.2 Installation Source</title>
+<section><title>Installation Source</title>
 
 <para>
 An installation source has general information (data about the source)
@@ -58,33 +58,20 @@ a separate function block.
 
 An installation source contains
 <itemizedlist>
-<listitem><para>name
-</para></listitem>
-<listitem><para>version
-</para></listitem>
-<listitem><para>architecture
-</para></listitem>
-<listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)
-  e.g Product 'email server 3.1' needs 'basic system 8.1'.
-</para></listitem>
-<listitem><para>label (descriptive text, in various languages)
-</para></listitem>
-<listitem><para>language (if package is language specific)
-</para></listitem>
-<listitem><para>vendor
-</para></listitem>
-<listitem><para>flags (internal usage)
-</para></listitem>
-<listitem><para>medium (type of medium, like cd, ftp, etc.)
-</para></listitem>
-<listitem><para>ID-Code
-</para></listitem>
-<listitem><para>cache file
-</para></listitem>
-<listitem><para>MD5 sum (for the cache file) ?
-</para></listitem>
-<listitem><para>GPG signature
-</para></listitem>
+  <listitem><para>name</para></listitem>
+  <listitem><para>version</para></listitem>
+  <listitem><para>architecture</para></listitem>
+  <listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)
+  e.g Product 'email server 3.1' needs 'basic system 8.1'.</para></listitem>
+  <listitem><para>label (descriptive text, in various languages)</para></listitem>
+  <listitem><para>language (if package is language specific)</para></listitem>
+  <listitem><para>vendor</para></listitem>
+  <listitem><para>flags (internal usage)</para></listitem>
+  <listitem><para>medium (type of medium, like cd, ftp, etc.)</para></listitem>
+  <listitem><para>ID-Code</para></listitem>
+  <listitem><para>cache file</para></listitem>
+  <listitem><para>MD5 sum (for the cache file) ?</para></listitem>
+  <listitem><para>GPG signature</para></listitem>
 </itemizedlist>
 </para>
 
@@ -95,7 +82,7 @@ media.
 </para>
 
 </section>
-<section><title>5.3 Installation Target</title>
+<section><title>Installation Target</title>
 
 <para>
 The package management handles a single installation target. Besides the
@@ -110,18 +97,12 @@ or a patch. Both need different installer functionalities.
 <para>
 The installation target provides the following functions
 <itemizedlist>
-<listitem><para>install package
-</para></listitem>
-<listitem><para>set install flags (i.e. --excludedocs)
-</para></listitem>
-<listitem><para>delete package
-</para></listitem>
-<listitem><para>set delete flags
-</para></listitem>
-<listitem><para>rebuilddb
-</para></listitem>
-<listitem><para>verify
-</para></listitem>
+  <listitem><para>install package</para></listitem>
+  <listitem><para>set install flags (i.e. --excludedocs)</para></listitem>
+  <listitem><para>delete package</para></listitem>
+  <listitem><para>set delete flags</para></listitem>
+  <listitem><para>rebuilddb</para></listitem>
+  <listitem><para>verify</para></listitem>
 </itemizedlist>
 </para>
 
@@ -131,7 +112,7 @@ line level.
 </para>
 
 </section>
-<section><title>5.4 Dependency Solving</title>
+<section><title>Dependency Solving</title>
 
 <para>
 The solver gets a list of installed and a list of requested (selected)
@@ -145,82 +126,62 @@ Solver actions are triggered by the user interface.
 </para>
 
 </section>
-<section><title>5.5 Selections</title>
+<section><title>Selections</title>
 
 <para>
 A selection is a set of packages and described by the following attributes
 </para>
 <para>
 <itemizedlist>
-<listitem><para>name</para></listitem>
-<listitem><para>version</para></listitem>
-<listitem><para>architecture (if selection applies to specific architectures)</para></listitem>
-<listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)</para></listitem>
-<listitem><para>label (descriptive text, in various languages)</para></listitem>
-<listitem><para>language (if selection is language specific)</para></listitem>
-<listitem><para>vendor</para></listitem>
-<listitem><para>flags (internal usage)</para></listitem>
-<listitem><para>MD5 sum</para></listitem>
-<listitem><para>GPG signature</para></listitem>
+  <listitem><para>name</para></listitem>
+  <listitem><para>version</para></listitem>
+  <listitem><para>architecture (if selection applies to specific architectures)</para></listitem>
+  <listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)</para></listitem>
+  <listitem><para>label (descriptive text, in various languages)</para></listitem>
+  <listitem><para>language (if selection is language specific)</para></listitem>
+  <listitem><para>vendor</para></listitem>
+  <listitem><para>flags (internal usage)</para></listitem>
+  <listitem><para>MD5 sum</para></listitem>
+  <listitem><para>GPG signature</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>5.6 Packages</title>
+<section><title>Packages</title>
 
 <para>
 A package is a set of files and described by the following attributes
 <itemizedlist>
-<listitem><para>name
-</para></listitem>
-<listitem><para>version
-</para></listitem>
-<listitem><para>architecture
-</para></listitem>
-<listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)
-</para></listitem>
-<listitem><para>label (descriptive text, in various languages)
-</para></listitem>
-<listitem><para>language (if package is language specific)
-</para></listitem>
-<listitem><para>vendor
-</para></listitem>
-<listitem><para>flags (internal usage)
-</para></listitem>
-<listitem><para>MD5 sum (immediately before package installation, cant do this across
-  ftp).
-</para></listitem>
-<listitem><para>GPG signature
-</para></listitem>
+  <listitem><para>name</para></listitem>
+  <listitem><para>version</para></listitem>
+  <listitem><para>architecture</para></listitem>
+  <listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)</para></listitem>
+  <listitem><para>label (descriptive text, in various languages)</para></listitem>
+  <listitem><para>language (if package is language specific)</para></listitem>
+  <listitem><para>vendor</para></listitem>
+  <listitem><para>flags (internal usage)</para></listitem>
+  <listitem><para>MD5 sum (immediately before package installation, cant do this across
+  ftp).</para></listitem>
+  <listitem><para>GPG signature</para></listitem>
 </itemizedlist>
 </para>
 
 </section>
-<section><title>5.7 Patches</title>
+<section><title>Patches</title>
 
 <para>
 A patch is a set of system changes described by the following attributes
 <itemizedlist>
-<listitem><para>name
-</para></listitem>
-<listitem><para>version
-</para></listitem>
-<listitem><para>architecture
-</para></listitem>
-<listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)
-</para></listitem>
-<listitem><para>label (descriptive text, in various languages)
-</para></listitem>
-<listitem><para>vendor
-</para></listitem>
-<listitem><para>flags (internal usage)
-</para></listitem>
-<listitem><para>MD5 sum
-</para></listitem>
-<listitem><para>GPG signature
-</para></listitem>
-<listitem><para>Set of Text, Script, or packages in any combination.
-</para></listitem>
+  <listitem><para>name</para></listitem>
+  <listitem><para>version</para></listitem>
+  <listitem><para>architecture</para></listitem>
+  <listitem><para>dependencies (requires, provides, conflicts, recommends, suggests)</para></listitem>
+  <listitem><para>label (descriptive text, in various languages)</para></listitem>
+  <listitem><para>vendor</para></listitem>
+  <listitem><para>flags (internal usage)</para></listitem>
+  <listitem><para>MD5 sum</para></listitem>
+  <listitem><para>GPG signature</para></listitem>
+  <listitem><para>Set of Text, Script, or packages in any combination.</para></listitem>
 </itemizedlist>
 </para>
 </section>
