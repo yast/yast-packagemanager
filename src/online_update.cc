@@ -282,7 +282,6 @@ int main( int argc, char **argv )
   error = you.retrievePatchDirectory( url );
   if ( error ) {
     if ( error == MediaError::E_login_failed ) {
-      cerr << "Need authorization" << endl;
       you.readUserPassword();
       error = you.retrievePatchDirectory( url );
       if ( error ) {
@@ -327,7 +326,7 @@ int main( int argc, char **argv )
     exit( -1 );
   }
 
-  if ( autoGet && !autoInstall ) {
+  if ( verbose && autoGet && !autoInstall ) {
     cout << "Got patches." << endl;
     return 0;
   }
