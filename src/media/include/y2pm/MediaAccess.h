@@ -84,14 +84,14 @@ class MediaAccess : virtual public Rep {
 	PMError open (const Url& url);
 
 	/**
+	 * True if media is open
+	 **/
+	bool isOpen() const { return( _handler != 0 ); }
+
+	/**
 	 * close url
 	 **/
 	void close (void);
-
-	/**
-	 * get Handler
-	 **/
-	MediaHandler *handler (void) const;
 
 	/**
 	 * get destination for file retrieval
