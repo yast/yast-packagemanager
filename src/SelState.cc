@@ -358,17 +358,18 @@ bool SelState::auto_set_install( const bool doit )
 */
 ostream & operator<<( ostream & str, const SelState & obj )
 {
-  str << "[has "
-    << ( obj.has_installed() ? 'i' : ' ' )
-    << ( obj.has_candidate() ? 'c' : ' ' )
-      << " modif "
-    << ( obj.to_delete()  ? 'D' : ' ' )
-    << ( obj.to_install() ? 'I' : ' ' )
-      << " by "
-    << ( obj.by_user() ? 'U' : ' ' )
-    << ( obj.by_appl() ? 'S' : ' ' )
-      << " flags "
-    << ( obj.is_taboo() ? 'T' : ' ' )
+  str << "["
+    << ( obj.has_installed() ? 'i' : '-' )
+    << ( obj.has_candidate() ? 'c' : '-' )
+      << "|"
+    << ( obj.to_delete()  ? 'D' : '.' )
+    << ( obj.to_install() ? 'I' : '.' )
+    << ( obj.is_taboo()   ? 'T' : '.' )
+      << "|"
+    << ( obj.by_user() ? 'u' : '.' )
+    << ( obj.by_appl() ? 's' : '.' )
+      << "|"
+    << ( obj.is_srcins() ? 'X' : '.' )
       << ']';
   return str;
 }

@@ -9,7 +9,7 @@ pkgincludedir = $(includedir)/y2pm
 pkginclude_HEADERS =	\
 	Alternatives.h	\
 	PkgSet.h	\
-	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgArch.h	\
+	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgSplit.h PkgArch.h	\
 	\
 	PMError.h				\
 	\

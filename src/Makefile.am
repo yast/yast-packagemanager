@@ -25,6 +25,7 @@ liby2pm_la_SOURCES = Y2PM.cc \
 	PkgName.cc	\
 	PkgEdition.cc	\
 	PkgRelation.cc	\
+	PkgSplit.cc	\
 	PkgArch.cc	\
 	PMError.cc	\
 	PMSolvable.cc	\
