@@ -23,6 +23,7 @@
 #include <y2util/Pathname.h>
 
 #include <y2pm/PMPackageManager.h>
+#include <y2pm/PMPackageManagerCallbacks.h>
 
 #include <Y2PM.h>
 #include <y2pm/InstTarget.h>
@@ -30,6 +31,7 @@
 #include <y2pm/InstallOrder.h>
 
 using namespace std;
+using namespace PMPackageManagerCallbacks;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -149,8 +151,6 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
     instlist_r.clear();
     srclist_r.clear();
 
-    DBG << "getPackagesToInsDel..." << endl;
-
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
     {
 	const PMSelectablePtr & sel( *it );
@@ -203,7 +203,7 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 	}
     }
 
-    DBG << "num packages: delete " << dellist_r.size() << ", install " << instlist_r.size() << ", srcinstall " << srclist_r.size() << endl;
+    MIL << "PackagesToInsDel: delete " << dellist_r.size() << ", install " << instlist_r.size() << ", srcinstall " << srclist_r.size() << endl;
 
     ///////////////////////////////////////////////////////////////////
     // sort installed list...
@@ -214,10 +214,13 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
     ///////////////////////////////////////////////////////////////////
     // Get desired sequence InstSrc'es to install from.
     ///////////////////////////////////////////////////////////////////
+    MIL << "PackagesToInsDel: sort install list using " << (sourcerank_r.empty()?"default":"provided") << " ranking" << endl;
     if ( sourcerank_r.empty() ) {
       // if not provided use InstSrcManager's default
       Y2PM::instSrcManager().getSources( sourcerank_r, /*enabled_only*/true );
     }
+
+#warning RankPriority fails if provided sourcerank does not cover ALL sources occurring
     typedef map<unsigned,unsigned> RankPriority;
     RankPriority rankPriority;
     {

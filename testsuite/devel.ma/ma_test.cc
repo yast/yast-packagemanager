@@ -136,6 +136,40 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
+#include <y2pm/Y2PMCallbacks.h>
+
+#define dumpCB(n) MIL << pfx; if ( ptr && ptr != &n::defaults() ) { MIL << ptr << " <-- "; } else { ptr = &n::defaults(); MIL << ptr << " DEFAULT "; } MIL << #n << endl
+#define dumpF(n) DBG << pfx << (void*)ptr->n.func() << " - " #n << endl
+
+void dump( const RpmDbCallbacks * ptr, string pfx = "" ) {
+  dumpCB( RpmDbCallbacks );
+  pfx += "  ";
+  dumpF( _convertDb );
+  dumpF( _rebuildDb );
+  dumpF( _installPkg );
+}
+
+void dump( const InstTargetCallbacks * ptr, string pfx = "" ) {
+  dumpCB( InstTargetCallbacks );
+  pfx += "  ";
+  dump( &ptr->rpmDb, pfx );
+  dumpF( _scriptExec );
+}
+
+
+void dump( const Y2PMCallbacks * ptr, string pfx = "" ) {
+  dumpCB( Y2PMCallbacks );
+  pfx += "  ";
+  dump( &ptr->instTarget, pfx );
+}
+
+void dumpCallbacks() {
+  dump( (Y2PMCallbacks *)0 );
+  dump( Y2PMCallbacks::inUse() );
+  dump( InstTargetCallbacks::inUse() );
+  dump( RpmDbCallbacks::inUse() );
+}
+
 /******************************************************************
 **
 **
@@ -149,19 +183,26 @@ int main()
   Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
 
-  //Y2PM::noAutoInstSrcManager();
-  Timecount _t("",false);
-  _t.start( "Launch InstTarget" );
-  Y2PM::instTarget(true,"/");
-  _t.start( "Launch PMPackageManager" );
-  Y2PM::packageManager();
-  _t.start( "Launch PMSelectionManager" );
-  Y2PM::selectionManager();
-  _t.start( "Launch InstSrcManager" );
-  Y2PM::instSrcManager();
-  _t.stop();
-  INT << "Total Packages "   << PMGR.size() << endl;
-  INT << "Total Selections " << SMGR.size() << endl;
+  if ( 0 ) {
+    //Y2PM::noAutoInstSrcManager();
+    Timecount _t("",false);
+    _t.start( "Launch InstTarget" );
+    Y2PM::instTarget(true,"/");
+    _t.start( "Launch PMPackageManager" );
+    Y2PM::packageManager();
+    _t.start( "Launch PMSelectionManager" );
+    Y2PM::selectionManager();
+    _t.start( "Launch InstSrcManager" );
+    Y2PM::instSrcManager();
+    _t.stop();
+    INT << "Total Packages "   << PMGR.size() << endl;
+    INT << "Total Selections " << SMGR.size() << endl;
+  }
+
+  dumpCallbacks();
+  SEC << "====================================" << endl;
+  Y2PMCallbacks::use( 0 );
+  dumpCallbacks();
 
   SEC << "STOP" << endl;
   return 0;

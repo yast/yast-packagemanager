@@ -28,6 +28,9 @@ extern int _hdr_debug;
 #include <y2pm/Timecount.h>
 #include <y2pm/PMPackageImEx.h>
 
+#include <PkgModuleFunctions.h>
+
+#include "PMCB.h"
 
 using namespace std;
 
@@ -159,7 +162,7 @@ static void instPkgCb( int pc, void * )
   INT << "  at " << pc << "%" << endl;
 }
 
-void Pdb() {
+void Pdb( ) {
   {
     librpmDb::db_const_iterator it;
     unsigned cnt = 0;
@@ -193,13 +196,7 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  _hdr_debug = -1;
-  constRpmHeaderPtr h( RpmHeader::readPackage( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm" ) );
-  SEC << h << endl;
-  h = RpmHeader::readPackage( "/Local/packages/test/RPMS/test-3-1.src.rpm" );
-  SEC << h << endl;
-
-  //ret = mmain( argc, argv );
+  ret = mmain( argc, argv );
 
   TMGR.setInstallationLogfile( "" );
 
@@ -218,32 +215,21 @@ int main( int argc, const char * argv[] ) {
 int mmain( int argc, const char * argv[] )
 {
   _rpmdb_debug = 0;
-  _hdr_debug = -1;
+  _hdr_debug = 0;
 
   int Finst = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE;
-  int Fdel  = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE;
+  int Fdel  = RpmDb::RPMINST_NODEPS;
+
+  PkgModuleFunctions x( 0 );
 
   RpmDb db;
   SEC << db << endl;
   INT << db.initDatabase( root, dbPath ) << endl;
   SEC << db << endl;
-  Pdb();
-
+  return 0;
   INT << db.removePackage( "test", Fdel ) << endl;
 
-  Pdb();
-
-  //INT << db.installPackage( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm", Finst ) << endl;
-  //INT << db.installPackage( "/Local/packages/test/RPMS/test-2-1.intern.i386.rpm", Finst ) << endl;
-
-  Pdb();
-
-#if 0
-  INT << db.initDatabase( root, dbPath ) << endl;
-  SEC << db << endl;
-  INT << db.initDatabase( "/var/tmp", dbPath ) << endl;
-  SEC << db << endl;
-#endif
+  INT << db.installPackage( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm", Finst ) << endl;
 
   return 0;
 }

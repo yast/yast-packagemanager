@@ -1,0 +1,164 @@
+#! /bin/bash
+PROG=$(basename $0)
+
+function Warn() {
+	echo "$PROG: $@" >&2
+}
+function Err() {
+	Warn "$@"
+	echo "Usage: $PROG CLASSNAME" >&2
+	echo "" >&2
+	echo "Create Callback class for CLASSNAME." >&2
+	echo "" >&2
+	echo "Created files: {CLASSNAME}Callbacks.h {CLASSNAME}Callbacks.cc" >&2
+	echo "" >&2
+	exit 1
+}
+function ChkExists() {
+	DOEXIT=
+	for f in "$@" ; do
+		test -e $f && {
+			Warn "File already exists: $f"
+			DOEXIT=1
+		}
+	done
+
+	test -n "$DOEXIT" && Err "Aborting"
+}
+
+test $# != 1 && Err "Incorrect number of arguments $#:'$@'"
+
+CLASSNAME=$1
+CLASS=${CLASSNAME}Callbacks
+CH="${CLASS}.h"
+CC="${CLASS}.cc"
+
+ChkExists "$CH" "$CC"
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+function catLogo() {
+cat <<'EOF'
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                        (C) SuSE GmbH |
+\----------------------------------------------------------------------/
+EOF
+}
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CH"
+$(catLogo)
+
+  File:       ${CH}
+
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Callbacks triggered by ${CLASSNAME}
+
+/-*/
+#ifndef ${CLASS}_h
+#define ${CLASS}_h
+
+#include <iosfwd>
+
+#include <y2pm/PMCallbacks.h>
+
+///////////////////////////////////////////////////////////////////
+namespace ${CLASS} {
+///////////////////////////////////////////////////////////////////
+
+#if 0
+  ///////////////////////////////////////////////////////////////////
+  // Reporting @
+  ///////////////////////////////////////////////////////////////////
+  struct @Callback : public RedirectCallback<@Callback> {
+    virtual void start() = 0;
+    virtual void progress( const ProgressData & prg ) = 0;
+    virtual void stop( PMError error ) = 0;
+  };
+
+  class @Report : public Report<@Callback> {
+    virtual void start() {
+      @Callback::start();
+    }
+    virtual void progress( const ProgressData & prg ) {
+      @Callback::progress( prg );
+    }
+    virtual void stop( PMError error ) {
+      @Callback::stop( error );
+    }
+  };
+
+  extern @Report @Report;
+#endif
+
+///////////////////////////////////////////////////////////////////
+} // namespace ${CLASS}
+///////////////////////////////////////////////////////////////////
+
+#endif // ${CLASS}_h
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CC"
+$(catLogo)
+
+  File:       ${CC}
+
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Callbacks triggered by ${CLASSNAME}
+
+/-*/
+
+#include <iostream>
+
+#include <y2pm/${CLASS}.h>
+
+using namespace std;
+
+///////////////////////////////////////////////////////////////////
+namespace InstSrcManagerCallbacks {
+///////////////////////////////////////////////////////////////////
+
+#if 0
+  ///////////////////////////////////////////////////////////////////
+  // Reporting @
+  ///////////////////////////////////////////////////////////////////
+  @Report @Report;
+
+  void @Callback::start() {
+  }
+  void @Callback::progress( const ProgressData & prg ) {
+  }
+  void @Callback::stop( PMError error ) {
+  }
+#endif
+
+///////////////////////////////////////////////////////////////////
+} // namespace InstSrcManagerCallbacks
+///////////////////////////////////////////////////////////////////
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+

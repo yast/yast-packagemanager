@@ -21,7 +21,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 
 lib_LTLIBRARIES = liby2pm.la
 
-liby2pm_la_SOURCES = Y2PM.cc \
+liby2pm_la_SOURCES = Y2PM.cc Y2PMCallbacks.cc \
 	Timecount.cc	\
 	PkgName.cc	\
 	PkgEdition.cc	\
@@ -31,6 +31,7 @@ liby2pm_la_SOURCES = Y2PM.cc \
 	PkgDu.cc	\
 	PkgChangelog.cc	\
 	PMError.cc	\
+	PMCallbacks.cc	\
 	PMSolvable.cc	\
 	PMObject.cc	\
 	PMManager.cc PMManager_solver.cc	\

@@ -24,9 +24,12 @@
 
 #include <Y2PM.h>
 #include <y2pm/PMSelectionManager.h>
+#include <y2pm/PMSelectionManagerCallbacks.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstTargetError.h>
 
 using namespace std;
+using namespace PMSelectionManagerCallbacks;
 
 ///////////////////////////////////////////////////////////////////
 //

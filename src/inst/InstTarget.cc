@@ -41,6 +41,9 @@ extern "C" {
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstTargetError.h>
+#include <y2pm/InstTargetCallbacks.h>
+
 #include <y2pm/InstTargetProdDB.h>
 #include <y2pm/InstTargetSelDB.h>
 #include <y2pm/PMYouPatchPaths.h>
@@ -49,8 +52,7 @@ extern "C" {
 #include <Y2PM.h>
 
 using namespace std;
-
-InstTarget::Callbacks *InstTarget::_callbacks = 0;
+using namespace InstTargetCallbacks;
 
 /**
  * constructor
@@ -375,28 +377,43 @@ PMError InstTarget::installPatch( const Pathname &filename )
     return Error::E_ok;
 }
 
-PMError InstTarget::executeScript( const Pathname &scriptname )
+PMError InstTarget::executeScript( const Pathname & scriptname )
 {
-    if ( _callbacks ) _callbacks->scriptProgress( 0 );
-    ExternalProgram prg( ( "/bin/bash >/dev/null 2>/dev/null " +
-                           scriptname.asString() ).c_str() );
+  ScriptExecReport::Send report( scriptExecReport );
+  report->start( scriptname );
+
+  PMError err;
+  ProgressData pd( 0 ); // unpredicable limit
+
+  if ( ! report->progress( pd ) ) {
+    WAR << "Script " << scriptname << " aborted by user request" << endl;
+    err = Error::E_user_abort;
+  } else {
+
+    ExternalProgram prg( ( "/bin/bash >/dev/null 2>/dev/null " + scriptname.asString() ).c_str() );
+
     while( prg.running() ) {
       usleep( 500000 );
-      if ( _callbacks ) {
-        if ( !_callbacks->scriptProgress( -1 ) ) {
-          prg.kill();
-          return Error::E_user_abort;
-        }
+      if ( ! report->progress( pd.incr() ) ) {
+	prg.kill();
+	WAR << "Script " << scriptname << " aborted by user request" << endl;
+	err = Error::E_user_abort;
+	break;
       }
     }
-    int result = prg.close();
-    if ( _callbacks ) _callbacks->scriptProgress( 100 );
-    if ( result != 0 ) {
-        ERR << "Script failed. Exit code " << result << endl;
-        return Error::E_error;
+
+    if ( ! err ) {
+      int result = prg.close();
+      if ( result != 0 ) {
+	ERR << "Script " << scriptname << " failed. Exit code " << result << endl;
+	err = Error::E_error;
+      }
     }
 
-    return Error::E_ok;
+  }
+
+  report->stop( err );
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////

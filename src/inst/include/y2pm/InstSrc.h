@@ -312,19 +312,6 @@ class InstSrc: virtual public Rep {
 
   private:
 
-	/** media change callback
-	    - product name (i.e "SuSE Linux Professional 8.1")
-	    - product error
-	    - media type (0=CD, 1=DVD, ...)
-	    - expected media number
-	    - found media number (0 == none)
-	    return "": retry, "S": skip, "C" cancel, "I" ignore, "E" eject, else new url
-	 */
-	std::string (*_mediachangefunc)(const std::string& error, const std::string& url, const std::string& product, int expected, int current, void*);
-
-	/** arbitrary data to pass back for change callback */
-	void* _mediachangedata;
-
 	/**
 	 * Current media number. Mutable because media provide/release
 	 * are const methods.
@@ -337,16 +324,7 @@ class InstSrc: virtual public Rep {
 	PMError provideMedia (int medianr) const;
 
   public:
-	/** set callback function for media change
-	 *
-	 * @param func callback function
-	 * @param data arbitrary data to pass when function is called
-	 **/
-	void setMediaChangeCallback(std::string (*func)(const std::string&,const std::string&,const std::string&,int,int,void*), void* data)
-	{
-	    _mediachangefunc = func;
-	    _mediachangedata = data;
-	}
+
 	/**
 	 * provide package via medianr, name, and sub-dir
 	 *

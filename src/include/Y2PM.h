@@ -26,10 +26,10 @@
 #include <string>
 #include <list>
 
-#include <y2util/ProgressCounter.h>
 #include <y2util/LangCode.h>
 #include <y2util/FSize.h>
 
+#include <y2pm/PMError.h>
 #include <y2pm/PkgArch.h>
 #include <y2pm/InstSrcManager.h>
 
@@ -37,6 +37,8 @@ class InstTarget;
 class PMPackageManager;
 class PMYouPatchManager;
 class PMSelectionManager;
+
+class ProgressCounter;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -46,13 +48,6 @@ class PMSelectionManager;
  * Package Management creating them on demand.
  **/
 class Y2PM {
-
-  private:
-
-    // Translate InstTarget Callbacks to (still old) Y2PM interface
-    static void cbfConvertDb( const ProgressCounter & pc, const void * );
-    static void cbfRebuildDb( const ProgressCounter & pc, const void * );
-    static void cbfInstallPkg( const ProgressCounter & pc, const void * );
 
   private:
 
@@ -217,163 +212,33 @@ class Y2PM {
      **/
     static void packageSelectionClearSaveState();
 
-  private:
+  public:
 
-    static bool installSpmFromMedia (unsigned int current_src_media,
-				     constInstSrcPtr current_src_ptr,
-				     std::list<PMPackagePtr>& srclist);
+    /**
+     * package deletion/installation main loop
+     * deletes/installs all packages currently marked in packageManager()
+     * if media_nr == 0, install everything regardless of media nr
+     * if media_nr > 0, install only from this media nr
+     * return list of failed package names in errors_r
+     * return list of unavailable packages (due to InstSrc errors or wrong media nr) in remaining_r
+     * return list of unavailable source packages (due to InstSrc errors or wrong media nr) in srcremaining_r
+     * return number of sucessfully installed packages
+     **/
+    static int commitPackages( unsigned int media_nr,
+			       std::list<std::string>& errors_r,
+			       std::list<std::string>& remaining_r,
+			       std::list<std::string>& srcremaining_r,
+			       InstSrcManager::ISrcIdList installrank = InstSrcManager::ISrcIdList() );
 
-    ///////////////////////////////////////////////////////////////////
-    // CallBacks
-    ///////////////////////////////////////////////////////////////////
+    /**
+     * Install a single rpm file.
+     **/
+    static PMError installFile( const Pathname & path_r );
 
-	/**
-	 * callbacks and their data
-	 * */
-	struct CallBacks
-	{
-	    CallBacks();
-
-	    /**
-	     * called right before package 'name' is provided, if source is remote
-	     * */
-	    void (*_provide_start_func)(const std::string& server,
-					const FSize& size, bool remote, void* data);
-	    void* _provide_start_data;
-
-	    /**
-	     * called multiple times during package providal if source is remote
-	     * 'progress' is the already provided percentage
-	     * */
-	    void (*_provide_progress_func)(int progress, void* data);
-	    void* _provide_progress_data;
-
-	    /**
-	     * called after package 'name' was provided if source is remote or err != 0
-	     * might return
-	     *   ""	ok
-	     *   "I"	ignore error
-	     *   "C"	cancel installation completely
-	     *   "S"	skip rest of current media
-	     * */
-	    std::string (*_provide_done_func)(PMError err, const std::string& errdata, const std::string& name, void* data);
-	    void* _provide_done_data;
-
-	    /**
-	     * called right before package 'name' is installed or deleted
-	     * should return 'true' to continue, 'false' to abort
-	     * */
-	    bool (*_package_start_func)(const std::string& name,
-						     const std::string& summary,
-						     const FSize& size, bool is_delete, void* data);
-	    void* _package_start_data;
-
-	    /**
-	     * called multiple times during package installation, 'progress' is the
-	     * already installed percentage
-	     * */
-	    void (*_package_progress_func)(int progress, void* data);
-	    void* _package_progress_data;
-
-	    /**
-	     * called after package got installed or deleted
-	     * might return
-	     *   ""	ok
-	     *   "I"	ignore error
-	     *   "C"	cancel installation completely
-	     *   "S"	skip rest of current media
-	     * */
-	    std::string (*_package_done_func)(PMError err, const std::string& errdata, void* data);
-	    void* _package_done_data;
-
-	    /**
-	     * called multiple times during rpm rebuilddb, 'progress' is the progress 0..100
-	     * */
-	    void (*_rebuilddb_progress_func)(int progress, void* data);
-	    void* _rebuilddb_progress_data;
-
-	    /**
-	     * called when switching the source or media number during package commit (install loop)
-	     * informal callback for user interface, no user interaction necessary
-	     * */
-	    void (*_source_change_func)(InstSrcManager::ISrcId srcid, int medianr, void* data);
-	    void* _source_change_data;
-
-	};
-
-	static CallBacks _callbacks;
-
-    public:
-
-	/**
-	 * called right before package 'name' is provided
-	 * */
-	static void setProvideStartCallback(void (*func)(const std::string& name, const FSize&, bool, void*), void* data);
-
-	/**
-	 * called while package providal is in progress
-	 * */
-	static void setProvideProgressCallback(void (*func)(int percent, void*), void* data);
-
-	/**
-	 * called right after package 'name' was provided
-	 * function is supposed to return "" for Ok, "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
-	 * */
-	static void setProvideDoneCallback(std::string (*func)(PMError error, const std::string& reason, const std::string& name, void*), void* data);
-
-	/**
-	 * called right before package 'name' is installed or deleted
-	 * */
-	static void setPackageStartCallback(bool (*func)(const std::string& name, const std::string& summary, const FSize& size, bool is_delete, void*), void* data);
-
-	/**
-	 * called multiple times during package installation, 'progress' is the
-	 * already installed percentage
-	 * */
-	static void setPackageProgressCallback(void (*func)(int percent, void*), void* data);
-
-	/**
-	 * called after package 'name' got installed or deleted
-	 * */
-	static void setPackageDoneCallback(std::string (*func)(PMError err, const std::string& reason, void*), void* data);
-
-	/**
-	 * called multiple times during rpm rebuilddb, 'progress' is the
-	 * rebuild progress
-	 * */
-	static void setRebuildDBProgressCallback(void (*func)(int percent, void*), void* data);
-
-	/**
-	 * called when switching sources during package commit (install loop)
-	 * informal callback for user interface, no user interaction necessary
-	 * */
-	static void setSourceChangeCallback(void (*func)(InstSrcManager::ISrcId srcid, int medianr, void*), void* data);
-
-	/**
-	 * package deletion/installation main loop
-	 * deletes/installs all packages currently marked in packageManager()
-	 * if media_nr == 0, install everything regardless of media nr
-	 * if media_nr > 0, install only from this media nr
-	 * return list of failed package names in errors_r
-	 * return list of unavailable packages (due to InstSrc errors or wrong media nr) in remaining_r
-	 * return list of unavailable source packages (due to InstSrc errors or wrong media nr) in srcremaining_r
-	 * return number of sucessfully installed packages
-	 * */
-	static int commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
-		std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r,
-		InstSrcManager::ISrcIdList installrank = InstSrcManager::ISrcIdList());
-
-	/**
-	 * install a single rpm file
-	 * uses callbacks !
-	 */
-	static PMError installFile (const Pathname& path);
-
-	/**
-	 * remove a single package by name
-	 * uses callbacks !
-	 */
-	static PMError removePackage (const std::string& pkgname);
+    /**
+     * Remove a single package by name.
+     **/
+    static PMError removePackage( const std::string & pkgname_r );
 };
 
 ///////////////////////////////////////////////////////////////////
