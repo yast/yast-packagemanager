@@ -236,6 +236,13 @@ PMError PMYouServers::requestServers( bool check )
 
   error = readServers( cachedYouServers() );
 
+  SysConfig syscfg( "onlineupdate" );
+  if ( syscfg.readBoolEntry( "SLP_ENABLED", true ) )
+  {
+      y2milestone ("Cecking for SLP servers" );
+      addSLPServers( );
+  }
+  
   return error;
 }
 
@@ -265,13 +272,6 @@ PMError PMYouServers::readServers( const Pathname &file )
     }
   }
 
-  SysConfig cfg( "onlineupdate" );
-  if ( cfg.readBoolEntry( "SLP_ENABLED", true ) )
-  {
-      y2milestone ("Cecking for SLP severs" );
-      addSLPServers( );
-  }
-  
   return PMError();
 }
 
