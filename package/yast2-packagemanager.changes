@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  2 15:19:44 CEST 2004 - cschum@suse.de
+
+- Transmit time zone to suseservers.cgi (#38117).
+
+-------------------------------------------------------------------
 Fri Apr  2 12:34:22 CEST 2004 - ma@suse.de
 
 - Allow medianame mapping via media.1/media (#35924)
