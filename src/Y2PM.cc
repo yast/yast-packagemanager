@@ -41,7 +41,7 @@ using namespace std;
 Pathname Y2PM::_instTarget_rootdir( "/" );
 Pathname Y2PM::_system_rootdir    ( "/" );
 LangCode Y2PM::_preferred_locale ("en");
-std::list<LangCode> _requested_locales;
+std::list<LangCode> Y2PM::_requested_locales;
 
 ///////////////////////////////////////////////////////////////////
 // components provided
