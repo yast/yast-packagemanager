@@ -1,6 +1,6 @@
 @HEADER-COMMENT@
 
-# neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr curl curl-devel openssl openssl-devel rpm rpm-devel popt popt-devel
+# neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools kdoc readline readline-devel acl attr curl curl-devel openssl openssl-devel rpm rpm-devel popt popt-devel db-devel
 
 Provides:	libpkg
 Obsoletes:	libpkg
@@ -21,6 +21,8 @@ Obsoletes:	yast2-agent-http
 
 Provides:	yast2-db-groups
 Obsoletes:	yast2-db-groups
+
+PreReq:    	%fillup_prereq
 
 @HEADER@
 Summary:	-
@@ -66,6 +68,7 @@ install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
 /usr/bin/online_update
 /usr/bin/installation_sources
 %config(noreplace) /etc/youservers
+/var/adm/fillup-templates/sysconfig.onlineupdate
 
 %files devel
 %defattr(-,root,root)
@@ -75,3 +78,6 @@ install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
 %dir @includedir@/y2pm
 @includedir@/y2pm/*.h
 %doc @docdir@
+
+%post
+%{fillup_only -n onlineupdate}
