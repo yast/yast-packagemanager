@@ -192,7 +192,7 @@ PMULPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
     if (_fallback_provider != 0
 	&& value.empty())
     {
-MIL << "Fallback from " << this << " to " << _fallback_provider << endl;
+//MIL << "Fallback from " << this << " to " << _fallback_provider << endl;
 	return _fallback_provider->getAttributeValue (obj_r, attr);
     }
     return value;
@@ -214,7 +214,7 @@ PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
     if (_fallback_provider != 0
 	&& value.empty())
     {
-MIL << "Fallback from " << this << " to " << _fallback_provider << endl;
+//MIL << "Fallback from " << this << " to " << _fallback_provider << endl;
 	return _fallback_provider->getAttributeValue (pkg_r, attr);
     }
     return value;
