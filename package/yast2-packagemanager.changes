@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Apr  4 14:58:14 CEST 2004 - kkaempf@suse.de
+
+- add "cifs" support to media access (#37871)
+- 2.9.32
+
+-------------------------------------------------------------------
 Fri Apr 02 15:59:59 CEST 2004 - arvin@suse.de
 
 - finally changed license to GPL for good
