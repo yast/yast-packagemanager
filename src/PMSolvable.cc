@@ -31,12 +31,30 @@ using namespace std;
 **	FUNCTION NAME : PkgRelList2AttributeValue
 **	FUNCTION TYPE : PkgAttributeValue
 **
-**	DESCRIPTION :
+**	DESCRIPTION : AttributeValue
 */
 PkgAttributeValue
 PMSolvable::PkgRelList2AttributeValue( const PkgRelList_type & rellist_r ) const
 {
   PkgAttributeValue ret;
+  for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
+    ret.push_back( it->asString() );
+  }
+  return ret;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : PkgRelList2StringList
+**	FUNCTION TYPE : std::list<std::string>
+**
+**	DESCRIPTION : converts PkgRelList to list<string>
+*/
+std::list<std::string>
+PMSolvable::PkgRelList2StringList ( const PkgRelList_type & rellist_r ) const
+{
+  std::list<std::string> ret;
   for( PMSolvable::PkgRelList_const_iterator it = rellist_r.begin(); it != rellist_r.end(); ++it ) {
     ret.push_back( it->asString() );
   }
