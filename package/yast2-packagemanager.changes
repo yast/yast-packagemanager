@@ -1,12 +1,22 @@
 -------------------------------------------------------------------
+Thu Sep 11 13:02:15 CEST 2003 - ma@suse.de
+
+- Fixed failed sync between SelectionManager and InstTarget.
+- Log error and refuse to commit packages, if InstTarget is not
+  initialized.
+- 2.8.15
+
+-------------------------------------------------------------------
 Wed Sep 10 10:38:02 CEST 2003 - arvin@suse.de
 
 - fixed return value (bug #30354)
+- 2.8.14
 
 -------------------------------------------------------------------
 Tue Sep 09 11:21:20 CEST 2003 - arvin@suse.de
 
 - fixed compilation
+- 2.8.13
 
 -------------------------------------------------------------------
 Tue Sep  9 10:34:54 CEST 2003 - ma@suse.de
