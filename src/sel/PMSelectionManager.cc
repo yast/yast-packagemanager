@@ -96,12 +96,12 @@ PMSelectionManager::getAlternativeSelectable (std::string pkgstr,
 					 PMPackageManager & package_mgr)
 {
     PMSelectablePtr selectable;
-MIL << "getAlternativeSelectable(" << pkgstr << ")" << endl;
     string::size_type startpos = pkgstr.find_first_of ("(");
     string::size_type endpos = pkgstr.find_first_of (")");
     if ((startpos == string::npos)
 	|| (endpos == string::npos))
 	return selectable;
+MIL << "getAlternativeSelectable(" << pkgstr << ")" << endl;
     startpos++;
     while (startpos < endpos)
     {
@@ -138,7 +138,6 @@ PMSelectionManager::setSelectionPackages (const std::list<std::string> packages,
 					 bool these_are_delpacks,
 					 PMPackageManager & package_mgr)
 {
-MIL << "setSelectionPackages (" << packages.size() << ", " << these_are_delpacks << ")" << endl;
     for (std::list<std::string>::const_iterator it = packages.begin();
 	 it != packages.end(); ++it)
     {
@@ -193,7 +192,6 @@ PMSelectionManager::resetSelectionPackages (const std::list<std::string> package
 					bool these_are_inspacks,
 					PMPackageManager & package_mgr)
 {
-MIL << "resetSelectionPackages (" << packages.size() << ", " << these_are_inspacks << ")" << endl;
     for (std::list<std::string>::const_iterator it = packages.begin();
 	 it != packages.end(); ++it)
     {
@@ -242,7 +240,7 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
 {
     if (!selection)
 	return;
-MIL << "setSelection (" << selection->name() << ")" << endl;
+
     // get list of requested locales
     Y2PM y2pm;
     std::list<LangCode> requested_locales = y2pm.getRequestedLocales();
