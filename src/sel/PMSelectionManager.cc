@@ -241,7 +241,9 @@ PMSelectionManager::setSelection (PMSelectionPtr selection, PMPackageManager & p
     // first, the delpacks
     setSelectionPackages (selection->delpacks(), true, package_mgr);
     if (!((const std::string &)locale).empty())
+    {
 	setSelectionPackages (selection->delpacks(locale), true, package_mgr);
+    }
     for (std::list<LangCode>::iterator it = requested_locales.begin();
 	 it != requested_locales.end(); ++it)
     {
