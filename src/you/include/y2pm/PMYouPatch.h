@@ -154,14 +154,21 @@ class PMYouPatch : virtual public Rep, public PMObject {
     std::string postScript() const { return _postScript; }
 
     /**
-     * Add a package to this patch.
-     *
-     */
-    void addPackage( const PMPackagePtr &pkg );
+      Set list of packages belonging to this patch.
+    */
+    void setPackages( const std::list<PMPackagePtr> &p );
     /**
      * Return list of all packages belonging to this patch.
      */
     std::list<PMPackagePtr> packages() const { return _packages; }
+    /**
+      Add a package to this patch.
+    */
+    void addPackage( const PMPackagePtr &pkg );
+    /**
+      Clear package list.
+    */
+    void clearPackages();
 
     /**
      * Set name of file where patch info is stored on local system.

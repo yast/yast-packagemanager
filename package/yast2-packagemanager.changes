@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 21 10:30:50 CET 2004 - cschum@suse.de
+
+- YOU: Support patch files containing the same package in multiple
+       architectures.
+
+-------------------------------------------------------------------
 Fri Dec 12 20:46:22 CET 2003 - msvec@suse.cz
 
 - adapted for the logging changes in liby2util

@@ -6,8 +6,8 @@
 <body bgcolor="white">
 <h1>YaST Online Update</h1>
 
-<em>Where not otherwise mentioned this document applies to the online update of
-SuSE Linux 8.1/SLES 8.</em>
+<em>This document applies to the online update since SuSE Linux 8.1/SLES 8.
+Changes in later versions are explicitely marked.</em>
 
 <h2>Overview</h2>
 <p>The online update has a patch structure. Each patch has a patch description
@@ -189,6 +189,7 @@ like:
 ## -----&gt; bash &lt;-----
 ##
 Filename:      bash.rpm
+Series:        i586
 Label:         The GNU Bourne-Again Shell
 Size:          2116014 838521
 PatchRpmSize:  2116014 423212
@@ -295,6 +296,12 @@ Segakcap:
   <td>Version</td>
   <td>string of the form <tt>&lt;version&gt;-&lt;release&gt;</tt></td>
   <td>Version of the RPM</td>
+</tr>
+<tr>
+  <td>Series</td>
+  <td>string</td>
+  <td>Architecture of the RPM</td>
+</tr>
 <tr>
   <td>Requires</td>
   <td>string</td>
@@ -357,6 +364,7 @@ is empty or missing the version will be set to "0".</p>
 <p>If there is more than one patch with the same name, only the patch with the highest
 version will be offered for installation.</p>
 
+
 <h3><a name="preselection">Which patch will be preselected for installation?</a></h3>
 
 <p>There are some criterions for preselecting patches which will be installed
@@ -378,7 +386,24 @@ patch will be installed.
 If this flag is "true", only packages will be updated which are already installed.
 </p>
 
+
+<h3>Multiple Architectures</h3>
+
+<p>Since 9.1 a patch file can contain multiple variants of the same package in
+different architectures. The variant will be chosen which fits best to the
+installed system.</p>
+
+<p>The algorithm to select the best variant works as follows: All package
+instances of the same name are treated as variants of the same package. Version
+and release number are ignored and may be different. If the package is already
+installed the variant having the same architecture as the installed package will
+be chosen. If no such variant exists, no variant of the package will be chosen
+at all. If the package isn't installed, the variant with the best architecture
+according to the list of compatible architectures specified by the product and
+the actual architecture of the system will be chosen.</p>
+
 <h3>Executing scripts within a patch</h3>
+
 <p>There is the possibility to run scripts while installing packages. The script from the
 <tt>Prescript:</tt> tag is executed before the packages are installed. The script from the
 <tt>Postscript:</tt> tag is executed after the packages have been installed. The scripts are

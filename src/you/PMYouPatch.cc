@@ -129,6 +129,16 @@ void PMYouPatch::addPackage( const PMPackagePtr &pkg )
   _packages.push_back( pkg );
 }
 
+void PMYouPatch::clearPackages()
+{
+  _packages.clear();
+}
+
+void PMYouPatch::setPackages( const std::list<PMPackagePtr> &p )
+{
+  _packages = p;
+}
+
 void PMYouPatch::setPatchSize( const FSize &size )
 {
   _patchSize = size;

@@ -241,6 +241,10 @@ class PMYouPatchPaths : virtual public Rep {
     PkgArch baseArch();
 
     /**
+      Set list of compatible architectures.
+    */
+    void setArchs( const std::list<PkgArch> & );
+    /**
       Return list of compatible architectures.
     */
     std::list<PkgArch> archs();

@@ -52,4 +52,3 @@ int PkgArch::compare( const PkgArch & lhs, const PkgArch & rhs )
   }
   return 0; // both not allowed
 }
-
