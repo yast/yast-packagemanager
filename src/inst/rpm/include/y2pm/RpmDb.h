@@ -38,7 +38,6 @@
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PkgAttributeValue.h>
-#include <y2pm/PMRpmPackageDataProviderPtr.h>
 
 #include <y2pm/InstTargetError.h>
 
@@ -164,17 +163,26 @@ class RpmDb: virtual public Rep
 	std::string queryCurrentDBPath ( void ) { return dbPath.asString(); };
 
 	/**
-	 * general query of a package
+	 * general query of an installed package
 	 *
+	 * @param package constPMPackagePtr to package
 	 * @param format query format as rpm understands it
-	 * @param packagelabel full label (name-version-relase)
-	 * of the package to query. If you don't use the full label
-	 * but only the name, the return value could be the result
-	 * of multiple packages with different versions installed.
-	 * @param installed set to false to thread packagelabel as file, not as
-	 * installed package
+	 * @param result_r std::string& for single-line values
+	 *	  or std::list<std::string>& for multi-line values
 	 */
-	PkgAttributeValue queryPackage(const char *format, std::string packagelabel, bool installed = true);
+	bool queryPackage (constPMPackagePtr package, const char *format, std::string& result_r);
+	bool queryPackage (constPMPackagePtr package, const char *format, std::list<std::string>& result_r);
+
+	/**
+	 * general query of an available package file
+	 *
+	 * @param path full path to an rpm file
+	 * @param format query format as rpm understands it
+	 * @param result_r std::string& for single-line values
+	 *	  or std::list<std::string>& for multi-line values
+	 */
+	bool queryPackage (const Pathname& path, const char *format, std::string& result_r);
+	bool queryPackage (const Pathname& path, const char *format, std::list<std::string>& result_r);
 
 	/** install rpm package
 	 *
@@ -221,15 +229,10 @@ class RpmDb: virtual public Rep
 	/** arbitrary data to pass back for progress callback */
 	void* _progressdata;
 
-	/** dataprovider that is given to every created package
-	 * */
-	PMRpmPackageDataProviderPtr _dataprovider;
-
 	/**
 	 * The name of the install root.
 	 */
 	Pathname _rootdir;
-
 
 	/**
 	 * current Path of the DB-path ( without "packages.rpm" )
@@ -312,6 +315,11 @@ class RpmDb: virtual public Rep
 	 * */
 	void ReportProgress(double p)
 	    { if(_progressfunc != NULL) (*_progressfunc)(p,_progressdata); }
+
+	/** helper for queryPackage
+	 * */
+	bool queryPackage (const std::string& package, const char *qparam, const char *format, std::string& result_r);
+	bool queryPackage (const std::string& package, const char *qparam, const char *format, std::list<std::string>& result_r);
 
     public: // static members
 

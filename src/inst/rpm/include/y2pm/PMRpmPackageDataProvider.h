@@ -30,47 +30,70 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMObject.h>
 
-class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvider {
-	REP_BODY(PMRpmPackageDataProvider);
+class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvider
+{
+    REP_BODY(PMRpmPackageDataProvider);
 
+    friend class RpmDb;
+
+    private:
+	// back pointer to RpmDb for on-demand rpm access
 	RpmDbPtr _rpmdb;
 
-	/** vector to hold cached data */
-	typedef std::vector<PkgAttributeValue> AttrVec;
-
-	/** meaning of vector positions
-	 * pkgattr2pos must be adapted if changed
-	 * */
-	enum AttrVecPosition
-	{
-	    AV_POS_INVALID = -1,
-	    AV_SIZE = 0,
-	    AV_SUMMARY,
-	    AV_GROUP,
-
-	    AV_NUM_ITEMS
-	};
-
-	/** map associates packages with cached attributes */
-	typedef std::map<PMPackagePtr,AttrVec> PkgMap;
-
-	PkgMap _pkgmap;
-
-	/** compute vector position from attribute
-	 *
-	 * @return position or AV_POS_INVALID if this item is not to be cached
-	 * */
-	AttrVecPosition pkgattr2pos(unsigned attr);
-
-	/** inject attibute to cache */
-	void _setAttributeValue(
-	    PMPackagePtr pkg, unsigned attr, const PkgAttributeValue& value);
+	// package this provider belongs to
+	PMPackagePtr _package;
 
     public:
 
-	PMRpmPackageDataProvider(RpmDbPtr rpmdb);
-
+	/**
+	 * constructor, destructor
+	 */
+	PMRpmPackageDataProvider (RpmDbPtr rpmdb);
 	virtual ~PMRpmPackageDataProvider();
+
+	/**
+	 * backlink to package
+	 */
+	void setPackage (PMPackagePtr package) { _package = package; }
+
+	/**
+	 * access functions for PMObject attributes
+	 */
+
+	const std::string summary () const;
+	const std::list<std::string> description () const;
+	const std::list<std::string> insnotify () const;
+	const std::list<std::string> delnotify () const;
+	const FSize size () const;
+
+	/**
+	 * access functions for PMPackage attributes
+	 */
+
+	const Date buildtime () const;
+	const std::string buildhost () const;
+	const Date installtime () const;
+	const std::string distribution () const;
+	const std::string vendor () const;
+	const std::string license () const;
+	const std::string packager () const;
+	const std::string group () const;
+	const std::list<std::string> changelog () const;
+	const std::string url () const;
+	const std::string os () const;
+	const std::list<std::string> prein () const;
+	const std::list<std::string> postin () const;
+	const std::list<std::string> preun () const;
+	const std::list<std::string> postun () const;
+	const std::string sourcerpm () const;
+	const FSize archivesize () const;
+	const std::list<std::string> authors () const;
+	const std::list<std::string> filenames () const;
+	// suse packages values
+	const std::list<std::string> recommends () const;
+	const std::list<std::string> suggests () const;
+	const std::string location () const;
+	const std::list<std::string> keywords () const;
 
 	/**
 	 * Object attribute retrieval. (DataProvider interface)
@@ -87,12 +110,6 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	virtual PkgAttributeValue getAttributeValue( constPMPackagePtr pkg_r,
 						     PMPackage::PMPackageAttribute attr_r );
 
-/*
-	std::string PMRpmPackageDataProvider::OLD_getAttributeValue( PMPackagePtr pkg,
-								     PMObject::PMObjectAttribute attr );
-	std::string PMRpmPackageDataProvider::OLD_getAttributeValue( PMPackagePtr pkg,
-								     PMPackage::PMPackageAttribute attr );
-*/
         /** inject attibute to cache */
 	virtual void setAttributeValue(
 	    PMPackagePtr pkg, PMObject::PMObjectAttribute attr,

@@ -47,230 +47,247 @@ PMRpmPackageDataProvider::PMRpmPackageDataProvider(RpmDbPtr rpmdb)
 {
 }
 
+const std::string
+PMRpmPackageDataProvider::summary () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{SUMMARY}", value);
+    return value;
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::description () const
+{
+    std::list<std::string> value;
+    _rpmdb->queryPackage (_package, "%{DESCRIPTION}", value);
+    return value;
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::insnotify () const
+{
+    // N/A
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::delnotify () const
+{
+    // N/A
+    return std::list<std::string>();
+}
+
+const FSize
+PMRpmPackageDataProvider::size () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{SIZE}", value);
+    return FSize (atoll(value.c_str()));
+}
+
+const Date
+PMRpmPackageDataProvider::buildtime () const
+{
+    // take directly from PkgEdition, RpmDb sets it
+    return Date (_package->edition().buildtime());
+}
+
+const std::string
+PMRpmPackageDataProvider::buildhost () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{SUMMARY}", value);
+    return value;
+}
+
+const Date
+PMRpmPackageDataProvider::installtime () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{INSTALLTIME}", value);
+    return Date (value);
+}
+
+const std::string
+PMRpmPackageDataProvider::distribution () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{DISTRIBUTION}", value);
+    return value;
+}
+
+const std::string
+PMRpmPackageDataProvider::vendor () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{VENDOR}", value);
+    return value;
+}
+
+const std::string
+PMRpmPackageDataProvider::license () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{LICENSE}", value);
+    return value;
+}
+
+const std::string
+PMRpmPackageDataProvider::packager () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{PACKAGER}", value);
+    return value;
+}
+
+const std::string
+PMRpmPackageDataProvider::group () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{GROUP}", value);
+    return value;
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::changelog () const
+{
+    std::list<std::string> value;
+    _rpmdb->queryPackage (_package, "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\\n\\n%{CHANGELOGTEXT}\\n\\n]", value);
+    return value;
+}
+
+const std::string
+PMRpmPackageDataProvider::url () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{URL}", value);
+    return value;
+}
+
+const std::string
+PMRpmPackageDataProvider::os () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{OS}", value);
+    return value;
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::prein () const
+{
+    std::list<std::string> value;
+    _rpmdb->queryPackage (_package, "%{PREIN}", value);
+    return value;
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::postin () const
+{
+    std::list<std::string> value;
+    _rpmdb->queryPackage (_package, "%{POSTIN}", value);
+    return value;
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::preun () const
+{
+    std::list<std::string> value;
+    _rpmdb->queryPackage (_package, "%{PREUN}", value);
+    return value;
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::postun () const
+{
+    std::list<std::string> value;
+    _rpmdb->queryPackage (_package, "%{POSTUN}", value);
+    return value;
+}
+
+const std::string
+PMRpmPackageDataProvider::sourcerpm () const
+{
+    std::string value;
+    _rpmdb->queryPackage (_package, "%{SOURCERPM}", value);
+    return value;
+}
+
+const FSize
+PMRpmPackageDataProvider::archivesize () const
+{
+    // N/A
+    return FSize (0);
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::authors () const
+{
+    // N/A
+    return std::list<std::string> ();
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::filenames () const
+{
+    std::list<std::string> value;
+    _rpmdb->queryPackage (_package, "[%{FILENAMES}\n]", value);
+    return value;
+}
+
+// suse packages values
+const std::list<std::string>
+PMRpmPackageDataProvider::recommends () const
+{
+    // N/A
+    return std::list<std::string>();
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::suggests () const
+{
+    // N/A
+    return std::list<std::string>();
+}
+
+const std::string
+PMRpmPackageDataProvider::location () const
+{
+    // N/A
+    return std::string();
+}
+
+const std::list<std::string>
+PMRpmPackageDataProvider::keywords () const
+{
+    // N/A
+    return std::list<std::string>();
+}
+
+
 PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
 							       PMObject::PMObjectAttribute attr )
 {
-    PMPackagePtr pkg( PMPackagePtr::cast_away_const( obj_r ) );
-    const char* queryformat = NULL;
-    PkgAttributeValue ret;
-
-    switch(attr)
-    {
-	case PMObject::ATTR_SUMMARY:
-	    queryformat = "%{SUMMARY}\n";
-	    break;
-	case PMObject::ATTR_DESCRIPTION:
-	    queryformat = "%{DESCRIPTION}\n";
-	    break;
-	case PMObject::ATTR_SIZE:
-	    queryformat = "%{SIZE}\n";
-	    break;
-	case PMObject::PMOBJ_NUM_ATTRIBUTES:
-	    // invalid
-	    return PkgAttributeValue("invalid query");
-	    break;
-	// FIXME
-	case PMObject::ATTR_INSNOTIFY:
-	case PMObject::ATTR_DELNOTIFY:
-	    // invalid
-	    return PkgAttributeValue();
-	    break;
-    }
-
-    // check if cached
-    AttrVecPosition pos = pkgattr2pos(attr);
-    if(pos != AV_POS_INVALID)
-    {
-	PkgMap::iterator it = _pkgmap.find(pkg);
-
-	// is package in cache?
-	if(it != _pkgmap.end())
-	{
-//	    D__ << "found " << pkg->name() << " in cache" << endl;
-
-	    AttrVec& vec = it->second;
-	    ret = vec[pos];
-	    if(!ret.empty())
-		return ret;
-	}
-    }
-
-    ret = _rpmdb->queryPackage(queryformat,string(pkg->name())+"-"+pkg->edition().as_string());
-
-    // if attribute is to be cached but not stored yet, do it now
-    if(pos != AV_POS_INVALID)
-    {
-//	D__ << "insert attribute " << pkg->getAttributeName(attr) << " to cache" << endl;
-	setAttributeValue(pkg,attr,ret);
-    }
-
-    return ret;
+    return PkgAttributeValue();
 }
 
 PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
 							       PMPackage::PMPackageAttribute attr )
 {
-    PMPackagePtr pkg( PMPackagePtr::cast_away_const( pkg_r ) );
-    const char* queryformat = NULL;
-
-    switch (attr)
-    {
-	case PMPackage::ATTR_BUILDTIME:
-	    queryformat = "%{BUILDTIME}";
-	    break;
-	case PMPackage::ATTR_BUILDHOST:
-	    queryformat = "%{BUILDHOST}";
-	    break;
-	case PMPackage::ATTR_INSTALLTIME:
-	    queryformat = "%{INSTALLTIME}";
-	    break;
-	case PMPackage::ATTR_DISTRIBUTION:
-	    queryformat = "%{DISTRIBUTION}";
-	    break;
-	case PMPackage::ATTR_VENDOR:
-	    queryformat = "%{VENDOR}";
-	    break;
-	case PMPackage::ATTR_LICENSE:
-	    queryformat = "%{LICENSE}";
-	    break;
-	case PMPackage::ATTR_PACKAGER:
-	    queryformat = "%{PACKAGER}";
-	    break;
-	case PMPackage::ATTR_GROUP:
-	    queryformat = "%{GROUP}";
-	    break;
-	case PMPackage::ATTR_CHANGELOG:
-	    queryformat =
-    "[* %{CHANGELOGTIME:day} %{CHANGELOGNAME}\\n\\n%{CHANGELOGTEXT}\\n\\n]";
-	    break;
-	case PMPackage::ATTR_URL:
-	    queryformat = "%{URL}";
-	    break;
-	case PMPackage::ATTR_OS:
-	    queryformat = "%{OS}";
-	    break;
-	case PMPackage::ATTR_PREIN:
-	    queryformat = "%{PREIN}";
-	    break;
-	case PMPackage::ATTR_POSTIN:
-	    queryformat = "%{POSTIN}";
-	    break;
-	case PMPackage::ATTR_PREUN:
-	    queryformat = "%{PREUN}";
-	    break;
-	case PMPackage::ATTR_POSTUN:
-	    queryformat = "%{POSTUN}";
-	    break;
-	case PMPackage::ATTR_SOURCERPM:
-	    queryformat = "%{SOURCERPM}";
-	    break;
-	case PMPackage::ATTR_ARCHIVESIZE:
-	    queryformat = "%{ARCHIVESIZE}";
-	    break;
-	case PMPackage::ATTR_AUTHORS:
-	    // not available as rpm tag
-	    return PkgAttributeValue("");
-	case PMPackage::ATTR_FILENAMES:
-	    queryformat = "[%{FILENAMES}\\n]";
-	    break;
-	case PMPackage::PMPKG_NUM_ATTRIBUTES:
-	    // invalid
-	    return PkgAttributeValue("invalid query");
-	// FIXME
-	case PMPackage::ATTR_RECOMMENDS:
-	case PMPackage::ATTR_SUGGESTS:
-	case PMPackage::ATTR_LOCATION:
-	case PMPackage::ATTR_KEYWORDS:
-	    return PkgAttributeValue();
-    }
-
-    PkgAttributeValue ret;
-    // check if cached
-    AttrVecPosition pos = pkgattr2pos(attr);
-    if(pos != AV_POS_INVALID)
-    {
-	PkgMap::iterator it = _pkgmap.find(pkg);
-
-	// is package in cache?
-	if(it != _pkgmap.end())
-	{
-//	    D__ << "found " << pkg->name() << " in cache" << endl;
-
-	    AttrVec& vec = it->second;
-	    ret = vec[pos];
-	    if(!ret.empty())
-		return ret;
-	}
-    }
-
-    ret = _rpmdb->queryPackage(queryformat,string(pkg->name())+"-"+pkg->edition().as_string());
-
-    // if attribute is to be cached but not stored yet, do it now
-    if(pos != AV_POS_INVALID)
-    {
-//	D__ << "insert attribute " << pkg->getAttributeName(attr) << " to cache" << endl;
-	setAttributeValue(pkg,attr,ret);
-    }
-
-    return ret;
-}
-
-/** compute vector position from attribute
- *
- * @return position or AV_POS_INVALID if this item is not to be cached
- * */
-PMRpmPackageDataProvider::AttrVecPosition PMRpmPackageDataProvider::pkgattr2pos(unsigned attr)
-{
-    switch(attr)
-    {
-	case PMObject::ATTR_SIZE:
-	    return AV_SIZE;
-	case PMObject::ATTR_SUMMARY:
-	    return AV_SUMMARY;
-	case PMPackage::ATTR_GROUP:
-	    return AV_GROUP;
-	default:
-	    return AV_POS_INVALID;
-    };
+    return PkgAttributeValue();
 }
 
 /** inject attibute to cache */
 void PMRpmPackageDataProvider::setAttributeValue(
     PMPackagePtr pkg, PMPackage::PMPackageAttribute attr, const PkgAttributeValue& value)
 {
-    _setAttributeValue(pkg,attr,value);
+    return;
 }
 
 /** inject attibute to cache */
 void PMRpmPackageDataProvider::setAttributeValue(
     PMPackagePtr pkg, PMObject::PMObjectAttribute attr, const PkgAttributeValue& value)
 {
-    _setAttributeValue(pkg,attr,value);
-}
-
-/** inject attibute to cache */
-void PMRpmPackageDataProvider::_setAttributeValue(
-    PMPackagePtr pkg, unsigned attr, const PkgAttributeValue& value)
-{
-    AttrVecPosition pos = pkgattr2pos(attr);
-    if(pos == AV_POS_INVALID)
-	return;
-
-    PkgMap::iterator it = _pkgmap.find(pkg);
-
-    AttrVec vec;
-
-    // package not known yet
-    if(it == _pkgmap.end())
-    {
-	vec = AttrVec(AV_NUM_ITEMS,PkgAttributeValue());
-    }
-    else
-	vec = it->second;
-
-    vec[pos]=value;
-
-    _pkgmap[pkg]=vec;
+    return;
 }
 
 ///////////////////////////////////////////////////////////////////
