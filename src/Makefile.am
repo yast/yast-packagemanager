@@ -12,7 +12,9 @@ INCLUDES = -I$(top_srcdir)/src -I$(includedir)
 
 lib_LTLIBRARIES = liby2pm.la
 
-liby2pm_la_SOURCES = Y2PM.cc Y2PM.locale.cc \
+liby2pm_la_SOURCES = \
+	TextParse.h PMTextParse.h PMRcValues.h \
+	Y2PM.cc Y2PM.rcvalue.cc Y2PM.locale.cc \
 	Y2PMCallbacks.cc \
 	Timecount.cc	\
 	PkgName.cc	\

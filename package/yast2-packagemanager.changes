@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 31 12:59:07 CEST 2004 - ma@suse.de
+
+- Rcfile to store permanent settings like locales to support when
+  handling selections.
+
+-------------------------------------------------------------------
 Sat Mar 27 14:16:30 CET 2004 - lnussel@suse.de
 
 - add patch for uncached plain sources again. This time really only plain
@@ -27,7 +33,7 @@ Mon Mar 22 16:13:48 CET 2004 - cschum@suse.de
 -------------------------------------------------------------------
 Mon Mar 22 10:24:26 CET 2004 - visnov@suse.cz
 
-- 2.9.27 
+- 2.9.27
 
 -------------------------------------------------------------------
 Wed Mar 17 15:38:47 CET 2004 - lnussel@suse.de

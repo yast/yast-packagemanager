@@ -26,6 +26,7 @@
 #include <y2util/LangCode.h>
 
 #include <Y2PM.h>
+#include "PMRcValues.h"
 
 using namespace std;
 
@@ -147,6 +148,13 @@ class Y2PM::LocaleSettings {
       }
       return false;
     }
+    /**
+     * Set requested_locales. Return true if value actually changed.
+     **/
+    bool setRequestedLocales( const LocaleSet & newLocales_r ) {
+      LocaleSet failedSet_r, addSet_r, delSet_r;
+      return setRequestedLocales( newLocales_r, failedSet_r, addSet_r, delSet_r );
+    }
 
     /**
      * Add addLocales_r to requested_locales. Return true if value actually changed.
@@ -167,6 +175,13 @@ class Y2PM::LocaleSettings {
 	return true;
       }
       return false;
+    }
+    /**
+     * Add addLocales_r to requested_locales. Return true if value actually changed.
+     **/
+    bool addRequestedLocales( const LocaleSet & addLocales_r ) {
+      LocaleSet failedSet_r, addSet_r;
+      return addRequestedLocales( addLocales_r, failedSet_r, addSet_r );
     }
 
     /**
@@ -190,6 +205,13 @@ class Y2PM::LocaleSettings {
       }
       return false;
     }
+    /**
+     * Delete delLocales_r from requested_locales. Return true if value actually changed.
+     **/
+    bool delRequestedLocales( const LocaleSet & delLocales_r ) {
+      LocaleSet failedSet_r, delSet_r;
+      return delRequestedLocales( delLocales_r, failedSet_r, delSet_r );
+    }
 };
 
 LangCode Y2PM::LocaleSettings::_locale_fallback( "en" );
@@ -200,6 +222,7 @@ inline Y2PM::LocaleSettings & Y2PM::localeSettings() {
   static LocaleSettings * _localeSettings = 0;
   if ( ! _localeSettings ) {
     _localeSettings = new LocaleSettings;
+    _localeSettings->setRequestedLocales( PM::rcValues().requestedLocales );
   }
   return *_localeSettings;
 }

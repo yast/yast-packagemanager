@@ -180,8 +180,8 @@ int main()
   //Y2PM::setNotRunningFromSystem();
   //Y2PM::setCacheToRamdisk( false );
 
-  if ( 1 ) {
-    //Y2PM::noAutoInstSrcManager();
+  if ( 0 ) {
+    Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
     Y2PM::instTargetInit("/");
@@ -196,13 +196,9 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  //PMGR["3d_chess"]->user_set_install();
-  //PMGR.updateDu();
-
-  //InstSrcManager::ISrcId nid = newSrc( "ftp://schnell/CD-ARCHIVE/9.0/SuSE-9.0-DVD-i386-RC5/CD1" );
-  //ISM.enableSource( nid );
-  //ISM.deleteSource( nid );
-
+  MIL << "=========================" << endl;
+  MIL << Y2PM::getRequestedLocales() << endl;
+  MIL << "=========================" << endl;
 #if 0
   MIL << Y2PM::getRequestedLocales() << endl;
   Y2PM::setRequestedLocales( LangCode("de_AT") );
