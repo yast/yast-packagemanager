@@ -253,8 +253,18 @@ PMYouPatchManager & Y2PM::youPatchManager()
 {
   if ( !_youPatchManager ) {
     MIL << "Launch YouPatchManager..." << endl;
+
     _youPatchManager = new PMYouPatchManager;
-    _youPatchManager->poolSetInstalled( Y2PM::instTarget().getPatches () );
+    
+    list<PMYouPatchPtr> patches = Y2PM::instTarget().getPatches();
+    
+    _youPatchManager->poolSetInstalled( patches );
+    
+    list<PMYouPatchPtr>::const_iterator itPatch;
+    for( itPatch = patches.begin(); itPatch != patches.end(); ++itPatch ) {
+      Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
+    }
+
     MIL << "Created YouPatchManager @" << _youPatchManager << endl;
   }
   return *_youPatchManager;
