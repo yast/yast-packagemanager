@@ -7,8 +7,10 @@
 using namespace std;
 
 bool PkgDep::install( PkgSet& in_candidates,
-					  ResultList& out_good, ErrorResultList& out_bad,
-					  bool commit_to_installed )
+			  ResultList& out_good,
+			  ErrorResultList& out_bad,
+			  ErrorResultList& out_obsoleted,
+			  bool commit_to_installed )
 {
 	out_good = ResultList();
 	good = &out_good;
@@ -18,13 +20,13 @@ bool PkgDep::install( PkgSet& in_candidates,
 	vinstalled = installed;
 	to_check = deque<PMSolvablePtr >();
 	notes = Notes_type();
-	i_obsoleted = NameList();
+	out_obsoleted = ErrorResultList();
+	i_obsoleted = &out_obsoleted;
 	unsigned numtocheck = 0;
 
 	// sort out candidates that are already installed, mark others as
 	// coming from input
 	ci_for( PkgSet::,, c, candidates->, ) {
-		bool error = false;
 		PkgName candname = c->key;
 		PMSolvablePtr cand = c->value;
 
@@ -36,57 +38,6 @@ bool PkgDep::install( PkgSet& in_candidates,
 				 << cand->edition() << " -- dropping it\n";
 		}
 		else {
-			// check if the candidate is the target of an obsoletes; if yes, drop it
-			RevRel_for( vinstalled.obsoleted()[candname], obs ) {
-				if (obs->relation().matches( cand->self_provides() )) {
-					WAR << "candidate " << candname << " is obsoleted by "
-						 << obs->pkg()->name() << " -- dropping it\n";
-					if(candname == obs->pkg()->name())
-					{
-					    ERR << obs->pkg()->nameEd() << " obsoletes itself!" << endl;
-					}
-					error = true;
-				}
-			}
-			if (error)
-				continue;
-
-			/* we don't do that, we just remove them from vinstalled
-			 *
-			// check if the candidates obsoletes something already installed
-			// if yes, check if requirements would be broken by the replacement
-			// (conflict-by-obsoletion); otherwise, remove the obsoleted package from
-			// vinstalled
-			ci_for( PMSolvable::,PkgRelList_, obs, cand->,obsoletes_ ) {
-				PkgName oname = obs->name();
-				if (vinstalled.includes(oname)) {
-					W__ << "installed/accepted " << oname << " obsoleted by "
-						 << candname << " -- checking for conflict-by-obsoletion\n";
-					if (!check_for_broken_reqs( vinstalled[oname], cand, res ))
-						error = true;
-					else {
-						vinstalled.remove( oname );
-						i_obsoleted.push_back( oname );
-						if (candidates->includes(oname)) {
-							good->remove_if( ResultEqName(oname) );
-							candidates->remove(oname);
-						}
-					}
-				}
-			}
-			*/
-
-			for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
-			    obs != cand->obsoletes_end(); ++obs )
-			{
-				PkgName oname = obs->name();
-				PMSolvablePtr p = vinstalled.lookup(oname);
-				if (p && obs->matches( p->self_provides() )) {
-					WAR << "installed " << oname << " obsoleted by " << candname << endl;
-					vinstalled.remove( oname );
-				}
-			}
-
 			numtocheck++;
 			to_check.push_back( cand );
 			notes[cand->name()].from_input = true;
@@ -124,10 +75,10 @@ bool PkgDep::install( PkgSet& in_candidates,
 
 	if (bad->empty() && commit_to_installed) {
 		// if everything was ok, commit the candidates to the installed set
-		ci_for( NameList::,, n, i_obsoleted., )
+		ci_for( ErrorResultList::,, n, out_obsoleted., )
 		{
-			WAR << "obsolete package " << *n << endl;
-			installed.remove( *n );
+			WAR << "obsolete package " << n->name << endl;
+			installed.remove( n->name );
 		}
 		ci_for( PkgSet::,, c, candidates->, )
 			installed.add( c->value, true );
@@ -155,6 +106,20 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	ErrorResult res(*this,cand);
 	D__ << "Checking candidate " << candname << endl;
 
+	// check if the candidate is the target of an obsoletes
+	RevRel_for( vinstalled.obsoleted()[candname], obs ) {
+		if (obs->relation().matches( cand->self_provides() )) {
+			WAR << "candidate " << candname << " is obsoleted by "
+				 << obs->pkg()->name() << endl;
+			if(candname == obs->pkg()->name())
+			{
+			    ERR << obs->pkg()->nameEd() << " obsoletes itself!" << endl;
+			}
+			error = true;
+
+			res.add_conflict(obs->pkg(),obs->relation(),*this,obs->pkg(),NULL,RelInfo::OBSOLETION);
+		}
+	}
 
 	// first check if something already installed conflicts with the new
 	// package
@@ -177,8 +142,84 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		}
 	}
 
+	if (error)
+	{
+	    // ln -- added more error outputs, should avoid e.g. prompting the
+	    // user to choose alternatives while it would not be necessary when
+	    // he decides to not install the problematic package at all
+	    goto add_package_error_out;
+	}
+
+	/* we don't do that, we just remove them from vinstalled
+	 *
+	// check if the candidates obsoletes something already installed
+	// if yes, check if requirements would be broken by the replacement
+	// (conflict-by-obsoletion); otherwise, remove the obsoleted package from
+	// vinstalled
+	ci_for( PMSolvable::,PkgRelList_, obs, cand->,obsoletes_ ) {
+		PkgName oname = obs->name();
+		if (vinstalled.includes(oname)) {
+			W__ << "installed/accepted " << oname << " obsoleted by "
+				 << candname << " -- checking for conflict-by-obsoletion\n";
+			if (!check_for_broken_reqs( vinstalled[oname], cand, res ))
+				error = true;
+			else {
+				vinstalled.remove( oname );
+				i_obsoleted->push_back( oname );
+				if (candidates->includes(oname)) {
+					good->remove_if( ResultEqName(oname) );
+					candidates->remove(oname);
+				}
+			}
+		}
+	}
+	*/
+
+	for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
+	    obs != cand->obsoletes_end(); ++obs )
+	{
+		PkgName oname = obs->name();
+		PMSolvablePtr p = vinstalled.lookup(oname);
+		if (p && obs->matches( p->self_provides() )) {
+			WAR << "installed/accepted " << oname << " obsoleted by " << candname << endl;
+			/*
+			vinstalled.remove( oname );
+
+			ErrorResult res(*this,p);
+			res.add_conflict(cand,*obs,*this,cand,NULL,RelInfo::OBSOLETION);
+			i_obsoleted->push_back(res);
+			*/
+
+			if (!check_for_broken_reqs( p, cand, res ))
+				error = true;
+			else {
+				DBG << "no broken reqs, removing " << oname << " from installed" << endl;
+				vinstalled.remove( oname );
+
+				ErrorResult res(*this,p);
+				res.add_conflict(cand,*obs,*this,cand,NULL,RelInfo::OBSOLETION);
+				i_obsoleted->push_back(res);
+
+				/* shouldn't matter, if there a target of
+				 * obsoletion in candidates, it would choke
+				 * later as this one is already installed
+				if (candidates->includes(oname)) {
+					good->remove_if( ResultEqName(oname) );
+					candidates->remove(oname);
+				}
+				*/
+			}
+		}
+	}
+	if (error)
+	{
+	    goto add_package_error_out;
+	}
+
 	// check if the new package conflicts with something installed
 	ci_for( PMSolvable::,PkgRelList_, confl, cand->,conflicts_ ) {
+		// confl is now a PkgRelation
+
 		RevRel_for( vinstalled.provided()[confl->name()], prov ) {
 			if (confl->matches( prov->relation() )) {
 				D__ << "Conflict of installed/accepted " << prov->relation()
@@ -201,9 +242,12 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		// treated like alternatives
 		RevRelList alternatives;
 		bool self_conflict = false;
+		// for all packages that provide what we conflict with
 		RevRel_for( candidates->provided()[confl->name()], prov1 ) {
 			if (confl->matches( prov1->relation() ) &&
-				has_conflict_with( prov1->relation(), prov1->pkg() )) {
+				has_conflict_with( prov1->relation(), prov1->pkg() ))
+			{
+				D__ << "fellow conflict/provider found: " << prov1->pkg()->name() << endl;
 				alternatives.push_back( *prov1 );
 				if (prov1->pkg() == cand)
 					self_conflict = true;
@@ -219,6 +263,10 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			return;
 		}
 	}
+	if (error)
+	{
+	    goto add_package_error_out;
+	}
 
 	// check if the requirements of an installed or an already accepted
 	// candidate package would be broken by installing the candidate
@@ -228,6 +276,10 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			 "checking for conflict-by-upgrade\n";
 		if (!check_for_broken_reqs( vinstalled[candname], cand, res ))
 			error = true;
+	}
+	if (error)
+	{
+	    goto add_package_error_out;
 	}
 
 	// then check if requirements are present; if not, try to find them in the
@@ -264,7 +316,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 
 		// also ok if a matching version is provided by an installed package
 		{
-			RevRel_for( installed.provided()[reqname], prov ) {
+			RevRel_for( vinstalled.provided()[reqname], prov ) {
 				if(prov->pkg()->name()==candname)
 				{
 					W__ << "ignoring old version of " << candname << " for provides check" << endl;
@@ -301,6 +353,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		D__ << "Candidate " << candname << " delayed\n";
 	}
 	else if (error) {
+add_package_error_out:
 		D__ << "Candidate " << candname << " failed\n";
 		bad->push_back( res );
 	}
@@ -422,6 +475,8 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg,
 {
 	bool error = false;
 
+	D__ << "check if replacing " << oldpkg->name() << " by " << newpkg->name() << " doesn't break anything" << endl;
+
 	// for all provides of the old package
 	ci_for( PMSolvable::,Provides_, prov, oldpkg->,all_provides_) {
 		D__ << "  checking provided name " << (*prov).name() << endl;
@@ -462,7 +517,7 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg,
 						 << oldpkg->edition() << " by " << newpkg->name()
 						 << "-" << newpkg->edition()
 						 << " (old provided " << *prov << ")\n";
-					res.add_conflict( *req, *this, req->pkg(), newpkg, false );
+					res.add_conflict( *req, *this, req->pkg(), newpkg, RelInfo::REQUIREMENT );
 					error = true;
 				}
 			}
@@ -494,7 +549,8 @@ bool PkgDep::req_ok_after_upgrade( const PkgRelation& rel,
 	}
 
 	// check if an installed Solvable satifies it
-	RevRel_for( installed.provided()[rel.name()], prov2 ) {
+	// FIXED: vinstalled instead of installed
+	RevRel_for( vinstalled.provided()[rel.name()], prov2 ) {
 		// skip oldpkg (which is to be replaced) and packages that are
 		// candidates
 		if (prov2->pkg() == oldpkg ||

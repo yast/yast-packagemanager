@@ -43,9 +43,9 @@ void PkgDep::ErrorResult::add_conflict( const PkgRevRelation& rrel,
 										const PkgDep& dep,
 										PMSolvablePtr to_remove,
 										PMSolvablePtr assume_instd,
-										bool is_conflict )
+										RelInfo::Kind kind )
 {
-	conflicts_with.push_back( RelInfo( rrel, is_conflict ));
+	conflicts_with.push_back( RelInfo( rrel, kind ));
 	if (to_remove)
 		dep.virtual_remove_package( to_remove, remove_to_solve_conflict,
 									assume_instd );
@@ -55,9 +55,9 @@ void PkgDep::ErrorResult::add_conflict( PMSolvablePtr s, const PkgRelation& rel,
 										const PkgDep& dep,
 										PMSolvablePtr to_remove,
 										PMSolvablePtr assume_instd,
-										bool is_conflict )
+										RelInfo::Kind kind )
 {
-	conflicts_with.push_back( RelInfo( s, rel, is_conflict ));
+	conflicts_with.push_back( RelInfo( s, rel, kind ));
 	if (to_remove)
 		dep.virtual_remove_package( to_remove, remove_to_solve_conflict,
 									assume_instd );
@@ -65,7 +65,7 @@ void PkgDep::ErrorResult::add_conflict( PMSolvablePtr s, const PkgRelation& rel,
 
 void PkgDep::ErrorResult::add_unresolvable( PMSolvablePtr s, const PkgRelation& rel )
 {
-	unresolvable.push_back( RelInfo( s, rel, false ));
+	unresolvable.push_back( RelInfo( s, rel, RelInfo::REQUIREMENT ));
 }
 
 void PkgDep::ErrorResult::add_alternative( PMSolvablePtr p, alternative_kind k )

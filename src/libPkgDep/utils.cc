@@ -14,6 +14,8 @@ unsigned PkgDep::default_max_remove = 10;
 bool PkgDep::also_provided_by_installed( const PkgRelation& req )
 {
 	bool also_provided_by_installed = false;
+	// originally installed was used here, this must have been a bug
+	// (lprng, cups-client, lsb incident, #21829)
 	RevRel_for( vinstalled.provided()[req.name()], prov ) {
 		if (req.matches( prov->relation() )) {
 			also_provided_by_installed = true;
@@ -50,14 +52,13 @@ PMSolvablePtr PkgDep::try_upgrade_conflictor( PMSolvablePtr pkg,
 	if (!upgrade)
 		return NULL;
 
-	bool still_conflicts = false;
 	ci_for( PMSolvable::,PkgRelList_, confl, upgrade->,conflicts_ ) {
 		if (confl->matches( provides )) {
-			still_conflicts = true;
+			upgrade = NULL;
 			break;
 		}
 	}
-	return still_conflicts ? (PMSolvablePtr)0 : upgrade;
+	return upgrade;
 }
 
 PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
@@ -75,14 +76,13 @@ PMSolvablePtr PkgDep::try_upgrade_conflicted( PMSolvablePtr pkg,
 	// There are two cases: confl.name() isn't provided anymore, or the new
 	// provided version doesn't match the conflict anymore. Check all names
 	// the upgrade provides if they still match the conflict.
-	bool still_conflicts = false;
 	ci_for( PMSolvable::,Provides_, prov, upgrade->,all_provides_ ) {
 		if (confl.matches( *prov )) {
-			still_conflicts = true;
+			upgrade = NULL;
 			break;
 		}
 	}
-	return still_conflicts ? (PMSolvablePtr)0 : upgrade;
+	return upgrade;
 }
 
 PMSolvablePtr PkgDep::try_upgrade_requirerer(

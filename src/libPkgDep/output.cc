@@ -97,8 +97,19 @@ ostream& operator<<( ostream& os, const PkgDep::RelInfoList& rl )
 		    }
 		    os << p->name;
 		}
-		os << (p->is_conflict ? " conflicts " : " requires ")
-		   << p->rel;
+		switch(p->kind)
+		{
+			case PkgDep::RelInfo::REQUIREMENT:
+				os << " requires ";
+				break;
+			case PkgDep::RelInfo::CONFLICT:
+				os << " conflicts with ";
+				break;
+			case PkgDep::RelInfo::OBSOLETION:
+				os << " obsoletes ";
+				break;
+		}
+		os << p->rel;
 	}
 	return os;
 }
