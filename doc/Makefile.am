@@ -8,7 +8,10 @@ htmldir = $(docdir)
 
 html_DATA =
 
-EXTRA_DIST = $(html_DATA) README
+updatemessage_DATA = yast2-packagemanager.rpmdb.configfiles
+updatemessagedir = /usr/share/update-messages/en
+
+EXTRA_DIST = $(html_DATA) README $(updatemessage_DATA)
 
 %.ps: %.xml
 	db2ps $<
