@@ -39,7 +39,7 @@
 #include "show_pm.h"
 
 #undef Y2SLOG
-#define Y2SLOG "testinstall" 
+#define Y2SLOG "testinstall"
 
 using namespace std;
 
@@ -106,15 +106,15 @@ void verbose(vector<string>& argv)
 
 void debug(vector<string>& argv)
 {
-    if(Y2SLog::dbg_enabled_bm.isEnabled())
+    if(Y2SLog::dbg_enabled_bm)
     {
 	cout << "debug disabled" << endl;
-	Y2SLog::dbg_enabled_bm.setEnabled(false);
+	Y2SLog::dbg_enabled_bm = false;
     }
     else
     {
 	cout << "debug enabled" << endl;
-	Y2SLog::dbg_enabled_bm.setEnabled(true);
+	Y2SLog::dbg_enabled_bm = true;
     }
 }
 
@@ -146,9 +146,9 @@ void init(vector<string>& argv)
     t.startTimer();
     Y2PM::packageManager();
     t.stopTimer();
-    
+
     cout << "done in " << t.getTimer() << " seconds" << endl;
-    
+
 }
 
 void help(vector<string>& argv)
@@ -231,7 +231,7 @@ PkgSet* getInstalled()
 {
     PkgSet* set = new PkgSet();
     set->setAdditionalProvidesCallback(addprovidescallback);
-    
+
     MIL << "initialize manager" << endl;
     PMPackageManager& manager = Y2PM::packageManager();
     MIL << "got " << manager.size() << endl;
@@ -260,7 +260,7 @@ void install(vector<string>& argv)
     PkgSet empty;
     PkgSet candidates;
     candidates.setAdditionalProvidesCallback(addprovidescallback);
-    
+
     PkgSet *installed = NULL;
     PkgSet *available = NULL;
 
@@ -282,7 +282,7 @@ void install(vector<string>& argv)
 		char *s;
 		s = strchr(fupp,'\n'); if (s) *s = '\0';
 		s = strchr(fupp,'\r'); if (s) *s = '\0';
-		if (available->lookup(fupp)) 
+		if (available->lookup(fupp))
 		    candidates.add(available->lookup(fupp));
 	    }
     }
@@ -304,7 +304,7 @@ void install(vector<string>& argv)
     t.startTimer();
 
     success = engine.install( candidates, good, bad);
-    
+
     t.stopTimer();
 
     if (!success) {
@@ -336,7 +336,7 @@ void install(vector<string>& argv)
 	default: cout << "remove " << *q << endl;break;
 	}
 	numrem++;
-    } 
+    }
     cout << "***" << endl;
     cout << numbad << " bad, " << numinst << " to install, " << numrem << " to remove" << endl;
     cout << "Time consumed: " << t.getTimer() << endl;
@@ -361,7 +361,7 @@ void remove(vector<string>& argv)
 //    PMPackageManager& manager = Y2PM::packageManager();
     vector<string>::iterator it=argv.begin();
     ++it; // first one is function name itself
-    
+
     PkgDep::NameList list1;
     PkgDep::NameList list2;
 
@@ -402,7 +402,7 @@ void consistent(vector<string>& argv)
 
     PkgDep engine( *installed, *available, alternative_default );
     engine.set_unresolvable_callback(unresolvable_callback);
-    
+
     PkgDep::ErrorResultList bad;
 
     bool success = engine.consistent(bad);
@@ -428,7 +428,7 @@ void rpminstall(vector<string>& argv)
     vector<string>::iterator it=argv.begin();
     list<string> pkgs;
     ++it; // first one is function name itself
-    
+
     for(;it!=argv.end();++it)
     {
 	pkgs.push_back(*it);

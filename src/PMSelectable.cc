@@ -74,7 +74,7 @@ PMSelectable::PMSelectable( const PkgName& name_r )
 PMSelectable::~PMSelectable()
 {
   if ( _manager ) {
-    INT << "SUSPICIOUS: " << _manager << '|' << _mgr_idx << endl;
+    INT << "SUSPICIOUS: " << *this << ": " << _manager << '|' << _mgr_idx << endl;
   }
 }
 
@@ -89,7 +89,7 @@ PMSelectable::~PMSelectable()
 void PMSelectable::_mgr_attach( PMManager * mgr_r, const unsigned idx_r )
 {
   if ( _manager || !mgr_r || idx_r == no_mgr ) {
-    INT << "SUSPICIOUS: " << _manager << '|' << _mgr_idx << " -> " << mgr_r << '|' << idx_r << endl;
+    INT << "SUSPICIOUS: " << *this << ": " << _manager << '|' << _mgr_idx << " -> " << mgr_r << '|' << idx_r << endl;
   }
   _manager = mgr_r;
   _mgr_idx = idx_r;
@@ -106,7 +106,7 @@ void PMSelectable::_mgr_attach( PMManager * mgr_r, const unsigned idx_r )
 void PMSelectable::_mgr_detach()
 {
   if ( !_manager ) {
-    INT << "SUSPICIOUS: not attached!" << endl;
+    INT << "SUSPICIOUS: not attached! " << *this << endl;
   }
   _manager = 0;
   _mgr_idx = no_mgr;
@@ -205,48 +205,6 @@ PMSelectable::Error PMSelectable::delInstalledObj()
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMSelectable::setCandidateObj
-//	METHOD TYPE : PMSelectable::Error
-//
-//	DESCRIPTION :
-//
-PMSelectable::Error PMSelectable::setCandidateObj( PMObjectPtr obj_r )
-{
-  if ( _candidateObj == obj_r )
-    return E_Ok;
-
-  delCandidateObj();
-
-  if ( obj_r ) {
-    _candidateObj = obj_r;
-    _attach_obj( obj_r );
-    _state.set_has_candidate( true );
-  }
-
-  return E_Ok;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMSelectable::delCandidateObj
-//	METHOD TYPE : PMSelectable::Error
-//
-//	DESCRIPTION :
-//
-PMSelectable::Error PMSelectable::delCandidateObj()
-{
-   if ( _candidateObj ) {
-    _detach_obj( _candidateObj );
-    _candidateObj = 0;
-    _state.set_has_candidate( false );
-  }
-  return E_Ok;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : PMSelectable::clistAdd
 //	METHOD TYPE : PMSelectable::Error
 //
@@ -267,9 +225,9 @@ PMSelectable::Error PMSelectable::clistAdd( PMObjectPtr obj_r )
   _attach_obj( obj_r );
 
 #warning must rerank on add
-  if ( !_candidateObj ) {
-    setCandidateObj( obj_r );
-  }
+
+  chooseCandidateObj();
+
   return E_Ok;
 }
 
@@ -288,7 +246,7 @@ PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
     return E_Error;
   }
   if ( !obj_r->_selectable ) {
-    ERR << this << " now owner for " << obj_r << endl;
+    ERR << this << " no owner for " << obj_r << endl;
     return E_Error;
   }
   if ( obj_r->_selectable != this ) {
@@ -305,14 +263,15 @@ PMSelectable::Error PMSelectable::clistDel( PMObjectPtr obj_r )
   _detach_obj( obj_r );
   _candidateList.erase( it );
 
-  // check wheter it's been the current candidate
-  if ( _candidateObj == obj_r ) {
-    delCandidateObj();
-    if ( _candidateList.size() ) {
-      setCandidateObj( *_candidateList.begin() );
-    }
 #warning must rerank on del
+
+  if ( _userCandidateObj == obj_r ) {
+    _userCandidateObj = 0;
   }
+  if ( _candidateObj == obj_r ) {
+    _candidateObj = 0;
+  }
+  chooseCandidateObj();
 
   return E_Ok;
 }
@@ -331,7 +290,8 @@ PMSelectable::Error PMSelectable::clistClearAll()
     _detach_obj( *it );
   }
   _candidateList.clear();
-  delCandidateObj();
+  _userCandidateObj = 0;
+  clearCandidateObj();
 
   return E_Ok;
 }
@@ -399,6 +359,75 @@ void PMSelectable::check() const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMSelectable::chooseCandidateObj
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectable::chooseCandidateObj()
+{
+  if ( _state.is_taboo() ) {
+    return;
+  }
+
+  PMObjectPtr newcand = bestCandidate();
+  if ( _candidateObj != newcand ) {
+    DBG << "chooseCandidate: old " << _candidateObj << " -> new " << newcand << endl;
+    _candidateObj = newcand;
+    _state.set_has_candidate( _candidateObj );
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::clearCandidateObj
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMSelectable::clearCandidateObj()
+{
+   if ( _candidateObj ) {
+     DBG << "clearCandidate " << _candidateObj << endl;
+     _candidateObj = 0;
+     _state.set_has_candidate( false );
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::setUserCandidate
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::setUserCandidate( const PMObjectPtr & obj_r )
+{
+  if ( obj_r == userCandidate() )
+    return true;
+
+  if ( obj_r ) {
+    if ( ! obj_r->_selectable ) {
+      ERR << this << " no owner for " << obj_r << endl;
+      return false;
+    }
+    if ( obj_r->_selectable != this ) {
+      ERR << this << " not owner of " << obj_r << endl;
+      return false;
+    }
+  }
+
+  _userCandidateObj = obj_r;
+  chooseCandidateObj();
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMSelectable::dumpOn
 //	METHOD TYPE : ostream &
 //
@@ -410,7 +439,149 @@ ostream & PMSelectable::dumpOn( ostream & str ) const
     << "(inst:" << _installedObj << ")"
     << "(cand:" << _candidateObj << ")"
     << "(avai:" << _candidateList.size() << ")"
+    << "(state:" << _state << ")"
     << ']';
   return str;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::clearTaboo
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::clearTaboo( const bool doit )
+{
+  if ( _state.is_taboo() ) {
+    if ( doit ) {
+      _state.user_clr_taboo( doit );
+      chooseCandidateObj();
+    } else {
+      return bestCandidate(); // wheter we'd get one if...
+    }
+  }
+  return _candidateObj;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::set_status
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::set_status( const UI_Status state_r, const bool doit )
+{
+  switch ( state_r ) {
+
+  case F_Taboo:
+    if ( doit ) {
+      // enter TABOO
+      clearCandidateObj();
+    }
+    return _state.user_set_taboo( doit );
+    break;
+
+  case S_Del:
+    return _state.user_set_delete( doit );
+    break;
+
+  case S_Update:
+    if ( ! clearTaboo( doit ) )
+      return false; // got no candidateObj
+    if ( !_state.has_both_objects() )
+      return false;
+    return _state.user_set_install( doit );
+    break;
+
+  case S_Install:
+    if ( ! clearTaboo( doit ) )
+      return false; // got no candidateObj
+    if ( !_state.has_candidate_only() )
+      return false;
+    return _state.user_set_install( doit );
+    break;
+
+  case S_Auto:
+    // TABOO state has no candidate set!
+    // No need for extra test
+    if ( !_state.has_candidate_only() )
+      return false;
+    return _state.auto_set_install( doit );
+    break;
+
+  case S_KeepInstalled:
+    if ( ! _state.has_installed() )
+      return false;
+    return _state.user_unset( doit );
+    break;
+
+  case S_NoInst:
+    if ( _state.has_installed() )
+      return false;
+    return _state.user_unset( doit );
+    break;
+
+  }
+
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::status
+//	METHOD TYPE : PMSelectable::UI_Status
+//
+//	DESCRIPTION :
+//
+PMSelectable::UI_Status PMSelectable::status() const
+{
+  if ( !_state.to_modify() ) {
+    return( _state.has_installed() ? S_KeepInstalled : S_NoInst );
+  }
+
+  if ( _state.to_install() ) {
+    if ( _state.has_installed() )
+      return S_Update;
+    return( _state.by_user() ? S_Install : S_Auto );
+  }
+
+  // _state.to_delete
+  return S_Del;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::has_status
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSelectable::has_status( const UI_Status state_r ) const
+{
+  switch ( state_r ) {
+
+  case S_Del:
+  case S_Install:
+  case S_Update:
+  case S_NoInst:
+  case S_KeepInstalled:
+  case S_Auto:
+    return( status() == state_r );
+    break;
+
+  case F_Taboo:
+    return _state.is_taboo();
+    break;
+
+  }
+  // illegal state_r
+  return false;
 }
 

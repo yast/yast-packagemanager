@@ -9,6 +9,8 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include			\
 		query/include		\
 		pkg/include		\
+		sel/include		\
+		you/include		\
 		inst/include		\
 		inst/rpm/include	\
 		media/include		\

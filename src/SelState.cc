@@ -85,6 +85,9 @@ void SelState::set_has_candidate( bool b )
     return;
   if ( b ) {
     set( B_IS_C );
+    if (  is_taboo() ) {
+      clr( B_F_TABOO );
+    }
   } else {
     clr( B_IS_C );
     if ( to_install() )
@@ -100,9 +103,11 @@ void SelState::set_has_candidate( bool b )
 //
 //	DESCRIPTION :
 //
-bool SelState::user_unset()
+bool SelState::user_unset( const bool doit )
 {
-  clr( M_TO | B_BY_USER );
+  if ( doit ) {
+    clr( M_TO | B_BY_USER );
+  }
   return true;
 }
 
@@ -114,12 +119,14 @@ bool SelState::user_unset()
 //
 //	DESCRIPTION :
 //
-bool SelState::user_set_delete()
+bool SelState::user_set_delete( const bool doit )
 {
   if ( ! has_installed() )
     return false;
-  clr( M_TO );
-  set( B_TO_DEL | B_BY_USER );
+  if ( doit ) {
+    clr( M_TO );
+    set( B_TO_DEL | B_BY_USER );
+  }
   return true;
 }
 
@@ -131,12 +138,53 @@ bool SelState::user_set_delete()
 //
 //	DESCRIPTION :
 //
-bool SelState::user_set_install()
+bool SelState::user_set_install( const bool doit )
 {
   if ( ! has_candidate() )
     return false;
-  clr( M_TO );
-  set( B_TO_INS | B_BY_USER );
+  if ( doit ) {
+    clr( M_TO );
+    set( B_TO_INS | B_BY_USER );
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : SelState::user_set_taboo
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool SelState::user_set_taboo( const bool doit )
+{
+  if ( ! is_taboo() ) {
+    if ( doit ) {
+      set_has_candidate( false );
+      set( B_F_TABOO );
+    }
+  }
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : SelState::user_clr_taboo
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool SelState::user_clr_taboo( const bool doit )
+{
+  if ( is_taboo() ) {
+    if ( doit ) {
+      clr( B_F_TABOO );
+    }
+  }
+
   return true;
 }
 
@@ -148,11 +196,13 @@ bool SelState::user_set_install()
 //
 //	DESCRIPTION :
 //
-bool SelState::auto_unset()
+bool SelState::auto_unset( const bool doit )
 {
   if ( by_user() )
     return false;
-  clr( M_TO );
+  if ( doit ) {
+    clr( M_TO );
+  }
   return true;
 }
 
@@ -164,14 +214,16 @@ bool SelState::auto_unset()
 //
 //	DESCRIPTION :
 //
-bool SelState::auto_set_delete()
+bool SelState::auto_set_delete( const bool doit )
 {
   if ( to_delete() )
     return true;
   if ( by_user() || ! has_installed() )
     return false;
-  clr( M_TO );
-  set( B_TO_DEL );
+  if ( doit ) {
+    clr( M_TO );
+    set( B_TO_DEL );
+  }
   return true;
 }
 
@@ -183,17 +235,20 @@ bool SelState::auto_set_delete()
 //
 //	DESCRIPTION :
 //
-bool SelState::auto_set_install()
+bool SelState::auto_set_install( const bool doit )
 {
+  if ( is_taboo() )
+    return false;
   if ( to_install() )
     return true;
   if ( by_user() || ! has_candidate() )
     return false;
-  clr( M_TO );
-  set( B_TO_INS );
+  if ( doit ) {
+    clr( M_TO );
+    set( B_TO_INS );
+  }
   return true;
 }
-
 
 /******************************************************************
 **

@@ -14,8 +14,6 @@
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
 
-#include "show_pm.h"
-
 using namespace std;
 #undef  Y2LOG
 #define Y2LOG "PM_ma_test"
@@ -37,12 +35,12 @@ inline string dec( unsigned i ) {
 int main()
 {
   Y2Logging::setLogfileName("-");
+  M__ << "Y2SLOG_DEBUG IS ON" << endl;
   MIL << "START" << endl;
 
-  Y2PM y2pm;
-  InstSrcManager& MGR = y2pm.instSrcManager();
+  InstSrcManager & MGR( Y2PM::instSrcManager() );
 
-  Url url( "dir:///8.0" );
+  Url url( "dir:////Local/tmp/UL_test" );
 
   InstSrcManager::ISrcIdList nids;
   PMError err = MGR.scanMedia( nids, url );
@@ -54,27 +52,6 @@ int main()
     SEC << "enable: " <<  err << endl;
   }
 
-  // hack to get InstSrcPtr:
-  //
-  // InstSrcPtr enabled_souce( const_cast<InstSrc*>((*nids.begin()).operator->()) );
-
-
-  MIL << "END" << endl;
-  return 0;
-
-
-  SEC << "=================================" << endl;
-
-  INT << Y2PM::packageManager().size() << endl;
-  PMSelectablePtr p = Y2PM::packageManager()["aaa_base"];
-  INT << p << endl;
-  show_pmpackage (p->installedObj());
-
-  SEC << "=================================" << endl;
-  //Y2PM::packageManager().poolRemoveCandidates( plist );
-
-  MIL << "END" << endl;
-  Y2PM::packageManager().REINIT();
-  //rpmdb = 0;
+  MIL << "END " << endl;
   return 0;
 }
