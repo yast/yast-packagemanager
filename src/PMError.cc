@@ -150,3 +150,9 @@ std::ostream & operator<<( std::ostream & str, const PMError & obj )
 {
   return str << obj.asString();
 }
+
+void PMError::addDetails( const std::string &txt )
+{
+  if ( !_errdetails.empty() ) _errdetails += "\n";
+  _errdetails += txt;
+}

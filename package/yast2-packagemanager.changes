@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb 24 14:23:52 CET 2004 - cschum@suse.de
+
+- Added function PMError::addDetails().
+
+-------------------------------------------------------------------
 Tue Feb 24 11:08:27 CET 2004 - cschum@suse.de
 
 - YOU: Only try to retrieve packages with the architecture

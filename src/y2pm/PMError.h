@@ -215,6 +215,11 @@ class PMError {
     ErrClass errClass() const { return errClass( _errval ); }
 
     /**
+     * Add a string to the details string.
+     **/
+    void addDetails( const std::string & );
+
+    /**
      * Assign a details string
      **/
     void setDetails( const std::string & details ) { _errdetails = details; }
