@@ -30,5 +30,20 @@
  **/
 DEFINE_BASE_POINTER(PMPackageDataProvider);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref PMPackageDataProvider *></code>
+ *
+ * <b>See:</> @ref PMPackageDataProvider
+ **/
+class PMPackageDataProviderPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref PMPackageDataProvider *></code>
+ *
+ * <b>See:</> @ref PMPackageDataProvider
+ **/
+class constPMPackageDataProviderPtr {};
+#endif // just for kdoc
+
 #endif // PMPackageDataProviderPtr_h
 

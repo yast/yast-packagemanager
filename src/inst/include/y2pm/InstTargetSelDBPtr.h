@@ -29,5 +29,20 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(InstTargetSelDB);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref InstTargetSelDB *></code>
+ *
+ * <b>See:</> @ref InstTargetSelDB
+ **/
+class InstTargetSelDBPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref InstTargetSelDB *></code>
+ *
+ * <b>See:</> @ref InstTargetSelDB
+ **/
+class constInstTargetSelDBPtr {};
+#endif // just for kdoc
+
 #endif // InstTargetSelDBPtr_h
 

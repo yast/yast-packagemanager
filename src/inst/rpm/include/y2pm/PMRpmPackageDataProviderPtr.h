@@ -31,5 +31,20 @@
  **/
 DEFINE_DERIVED_POINTER(PMRpmPackageDataProvider, PMPackageDataProvider, PMPackageDataProvider );
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref PMRpmPackageDataProvider *></code>
+ *
+ * <b>See:</> @ref PMRpmPackageDataProvider
+ **/
+class PMRpmPackageDataProviderPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref PMRpmPackageDataProvider *></code>
+ *
+ * <b>See:</> @ref PMRpmPackageDataProvider
+ **/
+class constPMRpmPackageDataProviderPtr {};
+#endif // just for kdoc
+
 #endif // PMRpmPackageDataProviderPtr_h
 

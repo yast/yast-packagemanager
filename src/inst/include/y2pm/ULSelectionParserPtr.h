@@ -29,5 +29,20 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(ULSelectionParser);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref ULSelectionParser *></code>
+ *
+ * <b>See:</> @ref ULSelectionParser
+ **/
+class ULSelectionParserPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref ULSelectionParser *></code>
+ *
+ * <b>See:</> @ref ULSelectionParser
+ **/
+class constULSelectionParserPtr {};
+#endif // just for kdoc
+
 #endif // ULSelectionParserPtr_h
 

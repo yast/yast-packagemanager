@@ -30,4 +30,19 @@
  **/
 DEFINE_BASE_POINTER(PMSolvable);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref PMSolvable *></code>
+ *
+ * <b>See:</> @ref PMSolvable
+ **/
+class PMSolvablePtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref PMSolvable *></code>
+ *
+ * <b>See:</> @ref PMSolvable
+ **/
+class constPMSolvablePtr {};
+#endif // just for kdoc
+
 #endif // PMSolvablePtr_h

@@ -29,5 +29,22 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(RpmLibHeader);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref RpmLibHeader *></code>
+ *
+ * <b>See:</> @ref RpmLibHeader
+ **/
+class RpmLibHeaderPtr {
+};
+/**
+ * @short Refcounting <code>&lt;const @ref RpmLibHeader *></code>
+ *
+ * <b>See:</> @ref RpmLibHeader
+ **/
+class constRpmLibHeaderPtr {
+};
+#endif // just for kdoc
+
 #endif // RpmLibHeaderPtr_h
 

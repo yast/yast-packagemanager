@@ -29,4 +29,19 @@
 ///////////////////////////////////////////////////////////////////
 DEFINE_BASE_POINTER(InstSrc);
 
+#if 0 // just for kdoc
+/**
+ * @short Refcounting <code>&lt;@ref InstSrc *></code>
+ *
+ * <b>See:</> @ref InstSrc
+ **/
+class InstSrcPtr {};
+/**
+ * @short Refcounting <code>&lt;const @ref InstSrc *></code>
+ *
+ * <b>See:</> @ref InstSrc
+ **/
+class constInstSrcPtr {};
+#endif // just for kdoc
+
 #endif // InstSrcPtr_h

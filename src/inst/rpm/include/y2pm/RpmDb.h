@@ -158,19 +158,26 @@ class RpmDb: virtual public Rep
 	const std::list<PMPackagePtr>& getPackages ();
 
 	/**
-	 * Get an installed packages data from rpmdb
+	 * Get an installed packages data from rpmdb. Package is
+	 * identified by name. Data returned via result are NULL,
+	 * if packge is not installed (PMError is not set), or RPM database
+	 * could not be read (PMError is set).
 	 **/
 	PMError getData( const PkgName & name_r,
 			 constRpmLibHeaderPtr & result_r ) const;
 
 	/**
-	 * Get an installed packages data from rpmdb
+	 * Get an installed packages data from rpmdb. Package is
+	 * identified by name and edition. Data returned via result are NULL,
+	 * if packge is not installed (PMError is not set), or RPM database
+	 * could not be read (PMError is set).
 	 **/
 	PMError getData( const PkgName & name_r, const PkgEdition & ed_r,
 			 constRpmLibHeaderPtr & result_r ) const;
 
 	/**
-	 * Get an accessible packages data from disk
+	 * Get an accessible packages data from disk. Data returned via
+	 * result are NULL on any error.
 	 **/
 	PMError getData( const Pathname & path,
 			 constRpmLibHeaderPtr & result_r ) const;

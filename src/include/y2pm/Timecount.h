@@ -15,7 +15,7 @@
   Author:     Michael Andres <ma@suse.de>
   Maintainer: Michael Andres <ma@suse.de>
 
-  Purpose:
+  Purpose: Count and log elapsed time for debug purpose
 
 /-*/
 #ifndef Timecount_h
@@ -30,7 +30,7 @@
 //
 //	CLASS NAME : Timecount
 /**
- *
+ * @short Count and log elapsed time for debug purpose
  **/
 class Timecount {
 
@@ -44,10 +44,24 @@ class Timecount {
 
   public:
 
+    /**
+     * Optional set message to use in loglines Call start() per default
+     **/
     Timecount( const char * msg_r = 0, const bool autostart_r = true );
+
+    /**
+     * Calls stop()
+     **/
     ~Timecount();
 
+    /**
+     * Start timer and optional reset message
+     **/
     void start( const char * msg_r = 0 );
+
+    /**
+     * Stop timer and write logline showing message and elapsed time
+     **/
     void stop();
 };
 
