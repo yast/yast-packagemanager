@@ -368,7 +368,7 @@ PMError InstTarget::executeScript( const Pathname &scriptname )
                            scriptname.asString() ).c_str() );
     int result = prg.close();
     if ( result != 0 ) {
-        E__ << "Script failed. Exit code " << result << endl;
+        ERR << "Script failed. Exit code " << result << endl;
         return Error::E_error;
     }
 
