@@ -60,7 +60,7 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 		}
 		if (!match_found) {
 			if (err)
-				err->add_unresolvable( pkg->name(), *req );
+				err->add_unresolvable( pkg, *req );
 			error = true;
 		}
 	} // /requirements
@@ -70,8 +70,7 @@ bool PkgDep::pkg_consistent( PMSolvablePtr pkg, ErrorResult *err )
 		RevRel_for( installed.provided()[confl->name()], prov ) {
 			if (confl->matches( prov->relation() ) && prov->pkg() != pkg) {
 				if (err)
-					err->add_conflict( pkg->name(), *confl,
-									   *this,  prov->pkg(), NULL );
+					err->add_conflict( pkg, *confl, *this,  prov->pkg(), NULL );
 				error = true;
 			}
 		}

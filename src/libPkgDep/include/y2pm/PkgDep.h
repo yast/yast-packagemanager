@@ -50,19 +50,37 @@ class PkgDep {
 
 	/** RelInfo, Alternative, and NeededEditionRange are for returning results */
 	struct RelInfo {
-		// name of package causing the relation
+		/**
+		 * name of package causing the relation
+		 * */
 		PkgName name;
-		// copy of the relation
-		// (if rel.name() is different from name, then name provides
-		// rel.name)
+		/**
+		 * copy of the relation (if rel.name() is different
+		 * from name, then name provides rel.name)
+		 * */
 		PkgRelation rel;
-		// true if the relation is a conflict, false if it's a requires
+		/**
+		 * true if the relation is a conflict, false if
+		 * it's a requires
+		 * */
 		bool is_conflict;
 
-		RelInfo( PkgName n, PkgRelation r, bool is_c = false )
-			: name(n), rel(r), is_conflict(is_c) {}
+		/**
+		 * PMSolvablePtr if applicable.
+		 * */
+		PMSolvablePtr solvable;
+
+		RelInfo( PMSolvablePtr s, PkgRelation r, bool is_c = false)
+			: name(s->name()), rel(r),
+			is_conflict(is_c), solvable(s)
+			{}
+		RelInfo( PkgName n, PkgRelation r, bool is_c = false, PMSolvablePtr s = NULL )
+			: name(n), rel(r), is_conflict(is_c), solvable(s)
+			{}
 		RelInfo( PkgRevRelation r, bool is_c = false )
-			: name(r.pkg()->name()), rel(r.relation()), is_conflict(is_c) {}
+			: name(r.pkg()->name()), rel(r.relation()),
+			is_conflict(is_c), solvable(r.pkg())
+			{}
 	};
 
 	struct Alternative {
@@ -223,7 +241,6 @@ class PkgDep {
 		std::list<Alternative> alternatives;
 
 		/**
-		 * @tag conflicts_with alsjfl
 		 * This field lists all kinds of conflicts of the
 		 * package with installed packages or other packages
 		 * to be installed. The RelInfos can be requirements
@@ -263,13 +280,13 @@ class PkgDep {
 		ErrorResult(const Result& res)
 			: Result(res), not_available(false), state_change_not_possible(false) {}
 
-		void add_unresolvable( PkgName n, const PkgRelation& rel );
+		void add_unresolvable( PMSolvablePtr s, const PkgRelation& rel );
 		void add_conflict( const PkgRevRelation& rrel,
 						   const PkgDep& dep,
 						   PMSolvablePtr to_remove,
 						   PMSolvablePtr assume_instd,
 						   bool is_conflict = true );
-		void add_conflict( PkgName n, const PkgRelation& rel,
+		void add_conflict( PMSolvablePtr s, const PkgRelation& rel,
 						   const PkgDep& dep,
 						   PMSolvablePtr to_remove,
 						   PMSolvablePtr assume_instd,

@@ -167,7 +167,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 					do_upgrade_for_conflict( upgrade );
 				}
 				else {
-					res.add_conflict( candname, *confl,
+					res.add_conflict( cand, *confl,
 									  *this, prov->pkg(), cand );
 					error = true;
 				}
@@ -349,7 +349,7 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 			 << " (Requires: " << req << ")\n";
 		if (res) {
 			D__ << "add_unres( " << referer->name() << ", " << req << ")\n";
-			res->add_unresolvable( referer->name(), req );
+			res->add_unresolvable( referer, req );
 			add_not_available( referer, req );
 		}
 		return NONE;

@@ -17,7 +17,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		if (vinstalled.provided()[reqname].size() != 0) {
 			PMSolvablePtr first_provider
 				= vinstalled.provided()[reqname].front().pkg();
-			DBG << "Alternative for " << reqname << " already handled -- "
+			D__ << "Alternative for " << reqname << " already handled -- "
 				 "adding reference from " << cand->name() << " on "
 				 << alt_info.req << " provided by "
 				 << first_provider->name() << endl;
@@ -26,15 +26,15 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		return;
 	}
 
-	DBG << "Handling alternative for " << reqname << " ";
+	D__ << "Handling alternative for " << reqname << " ";
 	if (cand)
-		DBG << "needed by " << cand->name() << " as \"Requires: "
+		D__ << "needed by " << cand->name() << " as \"Requires: "
 			 << alt_info.req << "\"\nProviders are:\n";
 	else
-		DBG << " (all providers are self-conflicting candidates\n";
+		D__ << " (all providers are self-conflicting candidates\n";
 	
 	ci_for( RevRelList_, alt, alt_info.providers. ) {
-		DBG << "  " << alt->pkg()->name() << "-" << alt->pkg()->edition()
+		D__ << "  " << alt->pkg()->name() << "-" << alt->pkg()->edition()
 			 << " provides: " << alt->relation() << endl;
 	}
 
@@ -43,19 +43,19 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 	hash<PkgName,alternative_kind> altkind;
 	ci_for( RevRelList_, alt, alt_info.providers. ) {
 		PkgName altname = alt->pkg()->name();
-		DBG << "Checking consistency of alternative " << altname << ": ";
+		D__ << "Checking consistency of alternative " << altname << ": ";
 		ErrorResult err( *this, alt->pkg() );
 		pkg_consistent( alt->pkg(), &err );
 		if (err.conflicts_with.size()) {
-			DBG << "conflict\n";
+			D__ << "conflict\n";
 			altkind[altname] = CONFLICT;
 		}
 		else if (err.unresolvable.size()) {
-			DBG << "requires-more\n";
+			D__ << "requires-more\n";
 			altkind[altname] = REQUIRES_MORE;
 		}
 		else {
-			DBG << "simple\n";
+			D__ << "simple\n";
 			altkind[altname] = SIMPLE;
 		}
 	}
@@ -85,11 +85,11 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		if (cand) {
 			// filter out defaults that do not exist or not provide what we
 			// need
-			DBG << "Filtering defaults:\n";
+			D__ << "Filtering defaults:\n";
 			ci_for( Alternatives::AltDefaultList::, def, defaults. ) {
-				DBG << "  " << *def << ": ";
+				D__ << "  " << *def << ": ";
 				if (!available.includes(*def)) {
-					DBG << "not available -- skipping\n";
+					D__ << "not available -- skipping\n";
 					continue;
 				}
 				PMSolvablePtr pkg = available[*def];
@@ -101,11 +101,11 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 					}
 				}
 				if (found_match) {
-					DBG << "ok\n";
+					D__ << "ok\n";
 					useable_defaults.push_back( *def );
 				}
 				else
-					DBG << "does not provide what we need -- skipping\n";
+					D__ << "does not provide what we need -- skipping\n";
 			}
 			if (useable_defaults.size() == 0) {
 				// If no defaults are left, i.e. none provides what we need,
@@ -124,9 +124,9 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		}
 		else {
 			// filter out defaults that aren't on the providers list
-			DBG << "Filtering defaults:\n";
+			D__ << "Filtering defaults:\n";
 			ci_for( Alternatives::AltDefaultList::, def, defaults. ) {
-				DBG << "  " << *def << ": ";
+				D__ << "  " << *def << ": ";
 				bool found = false;
 				ci_for( RevRelList_, alt, alt_info.providers. ) {
 					if (alt->pkg()->name() == *def) {
@@ -135,11 +135,11 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 					}
 				}
 				if (found) {
-					DBG << "ok, is an alternative\n";
+					D__ << "ok, is an alternative\n";
 					useable_defaults.push_back( *def );
 				}
 				else {
-					DBG << "not ok, isn't one of the alternatives\n";
+					D__ << "not ok, isn't one of the alternatives\n";
 				}
 			}
 		}
@@ -187,13 +187,13 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 
 	if (use_pkg) {
 		// ok, an alternative has been selected, add it as candidate
-		DBG << "Selected " << use_pkg->name() << " as alternative.\n";
+		D__ << "Selected " << use_pkg->name() << " as alternative.\n";
 		candidates->add( use_pkg, true );
 		to_check.push_back( use_pkg );
 		
 		if (cand) {
 			add_referer( use_pkg, cand, alt_info.req );
-			DBG << "Candidate " << cand->name() << " ok\n";
+			D__ << "Candidate " << cand->name() << " ok\n";
 			good->push_back( alt_info.result );
 			vinstalled.add( cand, true );
 		}
@@ -202,7 +202,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		// no alternative auto-selected, let the caller decide, i.e. generate
 		// an ErrorResult
 		// the alternatives list is sorted by kind (SIMPLE, REQUIRES, CONFL)
-		DBG << "No alternative selected -- generating ErrorResult\n";
+		D__ << "No alternative selected -- generating ErrorResult\n";
 		ErrorResult err(*this,reqname);
 		ci_for( RevRelList_, alt, alt_info.providers. ) {
 			PkgName altname = alt->pkg()->name();
@@ -224,9 +224,9 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 		bad->push_back( err );
 
 		if (cand) {
-			DBG << "Candidate " << cand->name() << " failed\n";
+			D__ << "Candidate " << cand->name() << " failed\n";
 			ErrorResult res = alt_info.result;
-			res.add_unresolvable( cand->name(), alt_info.req );
+			res.add_unresolvable( cand, alt_info.req );
 			bad->push_back( res );
 		}
 		else {
@@ -234,7 +234,7 @@ void PkgDep::handle_alternative( const AltInfo& alt_info )
 				ErrorResult e(*this, alt->pkg());
 				ci_for( RevRelList_, alt2, alt_info.providers. ) {
 					if (alt2->pkg() != alt->pkg())
-						e.add_conflict( alt2->pkg()->name(), alt_info.req,
+						e.add_conflict( alt2->pkg(), alt_info.req,
 										*this, NULL, NULL );
 				}
 				bad->push_back( e );

@@ -1,3 +1,4 @@
+#include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PkgDep_int.h>
 
@@ -50,21 +51,21 @@ void PkgDep::ErrorResult::add_conflict( const PkgRevRelation& rrel,
 									assume_instd );
 }
 
-void PkgDep::ErrorResult::add_conflict( PkgName n, const PkgRelation& rel,
+void PkgDep::ErrorResult::add_conflict( PMSolvablePtr s, const PkgRelation& rel,
 										const PkgDep& dep,
 										PMSolvablePtr to_remove,
 										PMSolvablePtr assume_instd,
 										bool is_conflict )
 {
-	conflicts_with.push_back( RelInfo( n, rel, is_conflict ));
+	conflicts_with.push_back( RelInfo( s, rel, is_conflict ));
 	if (to_remove)
 		dep.virtual_remove_package( to_remove, remove_to_solve_conflict,
 									assume_instd );
 }
 
-void PkgDep::ErrorResult::add_unresolvable( PkgName n, const PkgRelation& rel )
+void PkgDep::ErrorResult::add_unresolvable( PMSolvablePtr s, const PkgRelation& rel )
 {
-	unresolvable.push_back( RelInfo( n, rel, false ));
+	unresolvable.push_back( RelInfo( s, rel, false ));
 }
 
 void PkgDep::ErrorResult::add_alternative( PMSolvablePtr p, alternative_kind k )
@@ -78,7 +79,7 @@ void PkgDep::Result::add_notes( const Notes& notes )
 	upgrade_to_remove_conflict = notes.upgrade_to_solve_conflict;
 	install_to_avoid_break = notes.install_to_avoid_break;
 	ci_for( IRelInfoList::, n, notes.referers. ) {
-		referers.push_back( RelInfo(n->pkg->name(), n->rel) );
+		referers.push_back( RelInfo(n->pkg, n->rel) );
 	}
 }
 
