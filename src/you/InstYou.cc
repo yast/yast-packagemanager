@@ -178,7 +178,7 @@ void InstYou::selectPatches( int kinds )
   list<PMYouPatchPtr>::const_iterator it;
   for( it = _patches.begin(); it != _patches.end(); ++it ) {
     if ( ( (*it)->kind() == PMYouPatch::kind_yast )
-         && hasNewPackages( *it, false ) ) {
+         && hasNewPackages( *it, true ) ) {
       PMSelectablePtr selectable = (*it)->getSelectable();
       if ( !selectable ) {
         INT << "Patch has no selectable." << endl;
@@ -393,7 +393,11 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
 
   list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
-    if ( (*itPkg)->location().empty() ) return YouError::E_empty_location;
+    if ( (*itPkg)->location().empty() ) {
+      if ( !patch->updateOnlyInstalled() || (*itPkg)->hasInstalledObj() ) {
+        return YouError::E_empty_location;
+      }
+    }
   }
 
   Pathname scriptPath;
