@@ -67,6 +67,18 @@ class PMPackageManager : public PMManager {
     bool anythingByUser(void);
 
     /**
+     * are there currently any selectables for deletion ?
+     *
+     */
+    bool anythingToDelete (void);
+
+    /**
+     * are there currently any selectables for installation ?
+     *
+     */
+    bool anythingToInstall (void);
+
+    /**
      * Fill in the packages set to be deleted and to be installed.
      * instlist_r is sorted according to PreReqs.
      **/
