@@ -159,7 +159,7 @@ show_pmselection (PMSelectionPtr s)
     s->startRetrieval();
     show_pmobject ((PMObjectPtr)s);
 
-    char *locales[] = { "de", "en", "cs", "es", "fr", "gl", "hu", "it", "ja", "nl", "pt", "sv", "tr", "ru", "cz", 0 };
+    char *locales[] = { "", "de", "en", "cs", "es", "fr", "gl", "hu", "it", "ja", "nl", "pt", "sv", "tr", "ru", "cz", 0 };
     int pos = 0;
     cout << "Category: " << s->category () << endl;
     cout << "IsBase: " << s->isBase () << endl;
