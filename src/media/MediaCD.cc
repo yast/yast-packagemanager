@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/ExternalProgram.h>
 #include <y2pm/Mount.h>
 #include <y2pm/MediaCD.h>
 
@@ -87,11 +88,11 @@ MediaCD::MediaCD( const Url &      url_r,
     }
     else
     {
-	    //default is /dev/cdrom
-	    //TODO: make configurable
-	    const char* const device = "/dev/cdrom";
-	    D__ << "use default device " << device << endl;
-	    _devices.push_back(device);
+	//default is /dev/cdrom
+	//TODO: make configurable
+	const char* const device = "/dev/cdrom";
+	D__ << "use default device " << device << endl;
+	_devices.push_back(device);
     }
 }
 
@@ -105,16 +106,13 @@ MediaCD::MediaCD( const Url &      url_r,
 //
 PMError MediaCD::attachTo()
 {
-    // FIXME, issue "eject -t" to close the tray
-    // really? mine does close automatically -- lnussel
-
     Mount mount;
     const char *mountpoint = attachPoint().asString().c_str();
     bool mountsucceeded = false;
     PMError ret = Error::E_ok;
 
     string options = _url.getOption("mountoptions");
-    if(options.empty())
+    if (options.empty())
     {
 	options="ro";
     }
@@ -123,25 +121,32 @@ PMError MediaCD::attachTo()
     list<string> filesystems;
 
     // if DVD, try UDF filesystem before iso9660
-    if(_url.getProtocol() == "dvd")
+    if (_url.getProtocol() == "dvd")
 	filesystems.push_back("udf");
 
     filesystems.push_back("iso9660");
 
     // try all devices in sequence
-    for(DeviceList::iterator it = _devices.begin()
+    for (DeviceList::iterator it = _devices.begin()
 	; !mountsucceeded && it != _devices.end()
 	; ++it )
     {
+	// close tray
+	const char *const argv[] = { "/bin/eject", "-t", (*it).c_str, NULL };
+	ExternalProgram *process = new ExternalProgram (argv, ExternalProgram::Discard_Stderr);
+	delete process;
+
 	// try all filesystems in sequence
 	for(list<string>::iterator fsit = filesystems.begin()
 	    ; !mountsucceeded && fsit != filesystems.end()
 	    ; ++fsit)
 	{
+#if 0 // mount.mount does the logging
 	    MIL << "try mount " << *it
 		<< " to " << mountpoint
 		<< " filesystem " << *fsit << ": ";
-	    ret = mount.mount(*it,mountpoint,*fsit,options);
+#endif
+	    ret = mount.mount (*it, mountpoint, *fsit, options);
 	    if( ret == Error::E_ok )
 	    {
 		mountsucceeded = true;
