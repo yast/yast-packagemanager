@@ -39,7 +39,39 @@
 
 #include <y2pm/PMYouServers.h>
 
+#include <slp.h>
+
 using namespace std;
+
+//////////////////////////////////////////////////////////////////
+//
+// Callback for SLPFindSrvs
+//
+SLPBoolean MySLPSrvURLCallback( SLPHandle hslp, 
+				const char* srvurl, 
+				unsigned short lifetime, 
+				SLPError errcode, 
+				void* mydata ) 
+{
+    if ( errcode == SLP_OK || errcode == SLP_LAST_CALL ) 
+    {
+	// service url e.g.:	 service:you.suse:http://sturm.suse.de
+	if ( srvurl )
+	{
+	    string srv = srvurl;
+	    vector<string> splitted;
+	    stringutil::split( srvurl, splitted, ":", true );
+	    srv = splitted[2] + ":" + splitted[3] + "/YOU" + ";" + "YOU Server";
+
+	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(srv) );
+	}
+    } 
+
+    /* return SLP_TRUE because we want to be called again */ 
+    /* if more services were found                        */ 
+
+    return SLP_TRUE; 
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -113,7 +145,7 @@ PMYouServers::~PMYouServers()
 }
 
 Pathname PMYouServers::localSuseServers()
-{
+{	
   return "/etc/suseservers";
 }
 
@@ -215,7 +247,7 @@ PMError PMYouServers::readServers( const Pathname &file )
     DBG << "File doesn't exist." << endl;
     return PMError();
   }
-
+  
   string line;
   ifstream in( file.asString().c_str() );
   if ( in.fail() ) {
@@ -229,7 +261,35 @@ PMError PMYouServers::readServers( const Pathname &file )
     }
   }
 
+  addSLPServers( );
+  
   return PMError();
+}
+
+void PMYouServers::addSLPServers( )
+{
+    SLPError err; 
+    SLPHandle hslp; 
+    
+    err = SLPOpen( NULL, SLP_FALSE, &hslp); 
+    if(err != SLP_OK) 
+    { 
+        y2error( "Error opening slp handle %i\n", err ); 
+    } 
+  
+    err = SLPFindSrvs( hslp, 
+                       "you.suse", 
+                       0,                    /* use configured scopes */ 
+                       0,                    /* no attr filter        */ 
+                       MySLPSrvURLCallback, 
+		       this ); 
+
+    if( err != SLP_OK ) 
+    { 
+        y2error( "Error registering service with slp" ); 
+    } 
+
+    SLPClose(hslp); 
 }
 
 void PMYouServers::addServer( const PMYouServer &server )

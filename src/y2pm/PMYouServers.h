@@ -128,13 +128,22 @@ class PMYouServers : public CountedRep {
     */
     PMYouServer currentServer();
 
-  protected:
+    /**
+     * Add the SLP servers to the list of known servers
+     */ 
+    void addSLPServers( );
+
+    /**
+     * Add a PMYouServer to the list of known servers
+     */ 
+    void addServer( const PMYouServer & );
+
+protected:
     std::string encodeUrl( const std::string &url );
 
     void addPackageVersion( const std::string &pkgName, std::string &url );
 
     PMError readServers( const Pathname & );
-    void addServer( const PMYouServer & );
 
   private:
     PMYouSettingsPtr _patchPaths;
