@@ -213,7 +213,7 @@ Y2PM::setProvideProgressCallback(void (*func)(int percent, void*), void* data)
  * called right after a package was provided
  * */
 void
-Y2PM::setProvideDoneCallback(void (*func)(PMError err, const std::string&, void*), void* data)
+Y2PM::setProvideDoneCallback(std::string (*func)(PMError err, const std::string&, const std::string&, void*), void* data)
 {
     _callbacks._provide_done_func = func;
     _callbacks._provide_done_data = data;
@@ -245,7 +245,7 @@ Y2PM::setPackageProgressCallback(void (*func)(int percent, void*), void* data)
  * called after a package got installed or deleted
  * */
 void
-Y2PM::setPackageDoneCallback(void (*func)(PMError, const std::string&, void*), void* data)
+Y2PM::setPackageDoneCallback(std::string (*func)(PMError, const std::string&, void*), void* data)
 {
     _callbacks._package_done_func = func;
     _callbacks._package_done_data = data;
@@ -494,26 +494,57 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	packageManager().getPackagesToInsDel (dellist, inslist, srclist, installrank);	// compute order
     }
 
+    bool retry;		// flag for inner 'retry' loops
+
+    //-----------------------------------------------------
+    // first, remove all packages marked for deletion
+
     for (std::list<PMPackagePtr>::iterator it = dellist.begin();
 	 it != dellist.end(); ++it)
     {
 	string fullname = (*it)->nameEd();
 
-	if (_callbacks._package_start_func)
+	do		// retry loop for package deletion
 	{
-	    go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), true, _callbacks._package_start_data);
-	    if (!go_on)
-		break;
+	    retry = false;	// default: don't retry
+
+	    if (_callbacks._package_start_func)
+	    {
+		go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), true, _callbacks._package_start_data);
+		if (!go_on)
+		{
+		    return 0;		// user cancelled it all
+		}
+	    }
+	    PMError err = instTarget().removePackage (*it);
+
+	    if (_callbacks._package_done_func)
+	    {
+		// show deletion result to user, if err is set, pops up a window with buttons
+		std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
+
+		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+		if (done_result == "C")
+		{
+		    return 0;				// cancel all
+		}
+		else if (done_result == "S")
+		{
+		    go_on = false;			// skip remaining
+		}
+		else if (done_result == "R")
+		{
+		    retry = true;			// retry !
+		}
+		// default: ok/ignore
+	    }
 	}
-	PMError err = instTarget().removePackage (*it);
+	while (retry);
 
-	if (_callbacks._package_done_func)
-	    (*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
-
+	if (!go_on)
+	    break;
     }
 
-    if (!go_on)
-	return 0;
 
     ///////////////////////////////////////////////////////////////////
     // One may argue whether selection data should be installed before
@@ -549,6 +580,9 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	bool is_remote = (*it)->isRemote();
 	string fullname = (*it)->nameEd();
 
+	//-----------------------------------------------------------
+	// check if we need a new media
+
 	if (((*it)->source() != current_src_ptr)	// source or media change
 	    || (pkgmedianr != current_src_media))
 	{
@@ -566,16 +600,45 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	    }
 	}
 
-	if (is_remote
-	    && (_callbacks._provide_start_func != 0))
-	    (*_callbacks._provide_start_func)(fullname, (*it)->archivesize(), true, _callbacks._provide_start_data);
+	//-----------------------------------------------------------
+	// fetch (provide) the binary package to install
 
 	Pathname path;
-	PMError err = (*it)->providePkgToInstall(path);
 
-	if (is_remote
-	    && (_callbacks._provide_done_func != 0))
-	    (*_callbacks._provide_done_func)(err, "", _callbacks._provide_done_data);
+	do		// retry loop for package providing (fetching rpm from possibly remote source)
+	{
+	    retry = false;
+
+	    // showing a progress bar only makes sense for really remote sources
+	    if (is_remote
+		&& (_callbacks._provide_start_func != 0))
+	    {
+		(*_callbacks._provide_start_func)(fullname, (*it)->archivesize(), true, _callbacks._provide_start_data);
+	    }
+
+	    PMError err = (*it)->providePkgToInstall(path);	// fetch package from source for later installation
+
+	    if ((err || is_remote)
+		&& (_callbacks._provide_done_func != 0))
+	    {
+		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), (*it)->name(), _callbacks._provide_done_data);
+
+		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+		if (done_result == "C")
+		{
+		    err = InstSrcError::E_cancel_media;		// cancel it all
+		}
+		else if (done_result == "S")
+		{
+		    err = InstSrcError::E_skip_media;		// skip current media
+		}
+		else if (done_result == "R")
+		{
+		    retry = true;				// retry !
+		}
+	    }
+	}
+	while (retry);
 
 	switch (err)
 	{
@@ -618,17 +681,48 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	if (it == inslist.end())
 	    break;
 
-	if (_callbacks._package_start_func)
+	//-----------------------------------------------------------
+	// install the binary package to install
+
+	do		// retry loop for package deletion
 	{
-	    go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), false, _callbacks._package_start_data);
-	    if (!go_on)
-		break;
+	    retry = false;	// default: don't retry
+
+	    if (_callbacks._package_start_func)
+	    {
+		go_on = (*_callbacks._package_start_func) (fullname, (*it)->summary(), (*it)->size(), false, _callbacks._package_start_data);
+		if (!go_on)
+		{
+		    break;		// user cancelled it all
+		}
+	    }
+
+	    err = instTarget().installPackage (path);
+
+	    if (_callbacks._package_done_func)
+	    {
+		std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
+
+		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+		if (done_result == "C")
+		{
+		    err = InstSrcError::E_cancel_media;		// cancel it all
+		}
+		else if (done_result == "S")
+		{
+		    err = InstSrcError::E_skip_media;		// skip current media
+		}
+		else if (done_result == "R")
+		{
+		    retry = true;				// retry !
+		}
+	    }
 	}
-
-	err = instTarget().installPackage (path);
-
-	if (_callbacks._package_done_func)
-	    (*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+	while (retry);
+	if (!go_on)
+	{
+	    break;
+	}
 
 	if (err)
 	{
@@ -639,9 +733,16 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	    count++;
 	}
 
+	//-----------------------------------------------------------
+	// if we're about to switch to a new media, install all source
+	// packages which are still due from the current media
+
 	if (current_src_media != pkgmedianr)			// new media number ?
 	{							// Y: install all sources from this media
 	    current_src_media = pkgmedianr;
+
+	    //-------------------------------------------------------
+	    // loop over all source rpms (.srpm) selected for installation
 
 	    for (std::list<PMPackagePtr>::iterator it = srclist.begin();
 		 it != srclist.end();)				// NO ++it here, see erase() at bottom !
@@ -662,16 +763,46 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		    continue;
 		}
 
-		if (is_remote
-		    && (_callbacks._provide_start_func != 0))
-		    (*_callbacks._provide_start_func)(srcloc, (*it)->sourcesize(), true, _callbacks._provide_start_data);
+		//---------------------------------------------------
+		// fetch (provide) source package for installation
 
-		Pathname path;
-		PMError err = (*it)->provideSrcPkgToInstall(path);
+		do		// retry loop for package providing (fetching rpm from possibly remote source)
+		{
+		    retry = false;	// default: don't retry
 
-		if (is_remote
-		    && (_callbacks._provide_done_func != 0))
-		    (*_callbacks._provide_done_func)(err, "", _callbacks._provide_done_data);
+		    // if source is remote, show progress bar while fetching package
+
+		    if (is_remote
+			&& (_callbacks._provide_start_func != 0))
+		    {
+			(*_callbacks._provide_start_func)(srcloc, (*it)->sourcesize(), true, _callbacks._provide_start_data);
+		    }
+
+		    Pathname path;
+		    PMError err = (*it)->provideSrcPkgToInstall(path);
+
+		    if ((err || is_remote)
+			&& (_callbacks._provide_done_func != 0))
+		    {
+			std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), (*it)->name(), _callbacks._provide_done_data);
+
+			// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+			if (done_result == "C")
+			{
+			    err = InstSrcError::E_cancel_media;		// cancel it all
+			}
+			else if (done_result == "S")
+			{
+			    err = InstSrcError::E_skip_media;		// skip current media
+			}
+			else if (done_result == "R")
+			{
+			    retry = true;				// retry !
+			}
+		    }
+
+		}
+		while (retry);
 
 		if (err != PMError::E_ok)				// pack source provide
 		{
@@ -679,17 +810,51 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		    continue;
 		}
 
-		if (_callbacks._package_start_func)
+		//---------------------------------------------------
+		// install provided source package
+
+
+		do
 		{
-		    go_on = (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
-		    if (!go_on)
-			break;
+		    retry = false;	// default: don't retry
+
+		    if (_callbacks._package_start_func)
+		    {
+			go_on = (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
+			if (!go_on)
+			{
+			    break;
+			}
+		    }
+
+		    err = instTarget().installPackage (path);
+
+		    if (_callbacks._package_done_func)
+		    {
+			std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
+
+			// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+			if (done_result == "C")
+			{
+			    err = InstSrcError::E_cancel_media;		// cancel it all
+			    go_on = false;
+			}
+			else if (done_result == "S")
+			{
+			    err = InstSrcError::E_skip_media;		// skip current media
+			}
+			else if (done_result == "R")
+			{
+			    retry = true;				// retry !
+			}
+		    }
 		}
+		while (retry);
 
-		err = instTarget().installPackage (path);
-
-		if (_callbacks._package_done_func)
-		    (*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+		if (!go_on)
+		{
+		    break;
+		}
 
 		if (err == PMError::E_ok)
 		{
@@ -699,8 +864,10 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		{
 		    ++it;					// bad, keep in list
 		}
-	    }
-	}
+
+	    } // loop over source packages
+
+	} // media change due
 
     } // loop over inslist
 
@@ -738,7 +905,7 @@ Y2PM::installFile (const Pathname& path)
     PMError err = instTarget().installPackage (path, RpmDb::RPMINST_NONE);
 
     if (_callbacks._package_done_func)
-	(*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+	(*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
 
     return err;
 }
@@ -759,7 +926,7 @@ Y2PM::removePackage (const std::string& pkgname)
     PMError err = instTarget().removePackage (pkgname);
 
     if (_callbacks._package_done_func)
-	(*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+	(*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
 
     return err;
 }
