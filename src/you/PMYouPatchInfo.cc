@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/GPGCheck.h>
 
 #include <Y2PM.h>
 
@@ -239,12 +240,14 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 {
     D__ << "path: " << path << " fileName: " << fileName << endl;
 
+    string filePath = ( path + fileName ).asString();
+    
     TagParser parser;
     string tagstr;
 
     _patchtagset->clear();
 
-    std::ifstream commonpkdstream( ( path + fileName ).asString().c_str() );
+    std::ifstream commonpkdstream( filePath.c_str() );
     if(!commonpkdstream)
     {
 	E__ << "file not found" << endl;
@@ -353,7 +356,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
 //	DESCRIPTION :
 //
 PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
-                                 list<PMYouPatchPtr> &patches )
+                                 list<PMYouPatchPtr> &patches, bool checkSig )
 {
     PMError error = _media.open( baseUrl );
     if ( error != PMError::E_ok ) {
@@ -392,6 +395,8 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
       }
     }
 
+    GPGCheck gpg;
+
     list<string>::const_iterator it;
     for( it = patchFiles.begin(); it != patchFiles.end(); ++it ) {
         if ( *it == "." || *it == ".." || *it == "directory" ) continue;
@@ -401,6 +406,16 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
             cerr << "ERR: " << *it << endl;
         } else {
             Pathname path = _media.localRoot() + patchPath;
+
+            if ( checkSig ) {
+                string filePath = ( path + *it ).asString();
+                if ( !gpg.check_file( filePath ) ) {
+                    E__ << "Signature check for '" << filePath << "' failed."
+                        << endl;
+                    return PMError( InstSrcError::E_error );
+                }
+            }
+
             D__ << "read patch: file: " << *it << endl;
             error = readFile( path, *it, patches );
             if ( error != PMError::E_ok ) {
@@ -421,10 +436,11 @@ PMError PMYouPatchInfo::readDir( const Url &baseUrl, const Pathname &patchPath,
 //	DESCRIPTION :
 //
 PMError PMYouPatchInfo::getPatches( PMYouPatchPathsPtr paths,
-                                    list<PMYouPatchPtr> &patches )
+                                    list<PMYouPatchPtr> &patches,
+                                    bool checkSig )
 {
     _paths = paths;
-    return readDir( paths->patchUrl(), paths->patchPath(), patches );
+    return readDir( paths->patchUrl(), paths->patchPath(), patches, checkSig );
 }
 
 string PMYouPatchInfo::tagValue( YOUPatchTagSet::Tags tagIndex )

@@ -47,15 +47,19 @@ int main( int argc, char **argv )
   const char *langStr = 0;
 
   bool dryrun = false;
+  bool checkSig = true;
 
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "hdu:p:v:a:l:" );
+    c = getopt( argc, argv, "hdnu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
       case 'd':
         dryrun = true;
+        break;
+      case 'n':
+        checkSig = false;
       case 'u':
         urlStr = optarg;
         break;
@@ -158,7 +162,7 @@ int main( int argc, char **argv )
 
   InstYou you( patchInfo, patchPaths );
 
-  error = you.retrievePatchInfo( url );
+  error = you.retrievePatchInfo( url, checkSig );
   if ( error ) {
     cerr << "Error retrieving patches: " << error << endl;
     exit( 1 );

@@ -64,11 +64,13 @@ class PMYouPatchInfo : virtual public Rep {
     /**
      * Get patches from specified location.
      *
-     * @param paths   Object holding the path location information.
-     * @param patches List of patch objects where the results are stored.
+     * @param paths     Object holding the path location information.
+     * @param patches   List of patch objects where the results are stored.
+     * @param checkSig  If true, check GPG signature of patch info files.
      **/
     PMError getPatches( PMYouPatchPathsPtr paths,
-                        std::list<PMYouPatchPtr> &patches );
+                        std::list<PMYouPatchPtr> &patches,
+                        bool checkSig = true );
     
     /**
      * Read patch info files from directory.
@@ -76,9 +78,10 @@ class PMYouPatchInfo : virtual public Rep {
      * @param baseUrl    Base of URL where patches are located.
      * @param patchPath  Path of patch directory relative to baseUrl.
      * @param patches    List of patch objects where the results are stored.
+     * @param checkSig   If true, check GPG signature of patch info files.
      **/
     PMError readDir( const Url &baseUrl, const Pathname &patchPath,
-                     std::list<PMYouPatchPtr> &patches );
+                     std::list<PMYouPatchPtr> &patches, bool checkSig = true );
 
     /**
      * Read patch info from file.
