@@ -217,13 +217,15 @@ PMYouPatchManager & Y2PM::youPatchManager()
 //	if media_nr is != 0, only packages from this media are
 //	installed. media_nr==0 means install all packages from all media.
 //
+//	returns number of sucessfully installed packages
+//
 //	returns failed packages in 'errors'
 //	returns uninstalled packages (because media not available) in 'remaining'
 //
-bool
+int
 Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining)
 {
-    bool ret = true;
+    int count = 0;
 
     std::list<PMPackagePtr> dellist;
     std::list<PMPackagePtr> inslist;
@@ -248,7 +250,6 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	{
 	    ERR << "Media can't provide package to install for " << (*it) << endl;
 	    remaining.push_back ((*it)->name());
-	    ret = false;
 	    continue;
 	}
 	PMError err = instTarget().installPackage (path);
@@ -256,10 +257,13 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	{
 	    errors.push_back ((*it)->name());
 	}
-
+	else
+	{
+	    count++;
+	}
     } // loop over inslist
 
-    return ret;
+    return count;
 }
 
 
