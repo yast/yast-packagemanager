@@ -1090,7 +1090,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 //	DESCRIPTION :
 //
 PMError InstSrcDataUL::tryGetData( InstSrcDataPtr& ndata_r,
-				    MediaAccessPtr media_r, const Pathname & descr_dir_r )
+				   MediaAccessPtr media_r, const Pathname & descr_dir_r )
 {
     MIL << "InstSrcDataUL::tryGetData(" << descr_dir_r << ")" << endl;
 
@@ -1176,7 +1176,7 @@ const std::list<PMYouPatchPtr>&
 InstSrcDataUL::getPatches (void) const
 {
   // Return empty list as we do not hold Patches
-  return InstSrcData::getPatches();
+  return InstData::getPatches();
 }
 
 
