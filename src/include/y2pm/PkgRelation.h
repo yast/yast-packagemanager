@@ -1,6 +1,8 @@
 #ifndef _PkgRelation_h
 #define _PkgRelation_h
 
+#include <list>
+
 #include <y2pm/PkgName.h>
 #include <y2pm/PkgEdition.h>
 #include <y2pm/PMSolvablePtr.h>
@@ -66,6 +68,15 @@ class PkgRelation {
 	 * <b>Keep it compatible with toString.</b>
 	 **/
 	static PkgRelation fromString( std::string s );
+
+        /**
+         * Parse relations strings like "pkg1 pkg2 >= 1.2.3".
+         **/
+        static std::list<PkgRelation> parseRelations( const std::string & data_tr );
+
+      private:
+      
+        static rel_op string2DepCompare( const std::string & str_tr );
 };
 
 #endif  /* _PkgRelation_h */
