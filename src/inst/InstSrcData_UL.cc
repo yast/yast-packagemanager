@@ -247,7 +247,7 @@ InstSrcData_UL::LangTag2Package (TagCacheRetrieval *langcache, const std::list<P
 //	DESCRIPTION : pass selection data from tagset to PMSelection
 
 PMSelectionPtr
-InstSrcData_UL::Tag2Selection (const std::string& sortby, TagCacheRetrieval *selcache, CommonPkdParser::TagSet * tagset)
+InstSrcData_UL::Tag2Selection (PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset)
 {
     // SELECTION
     string single ((tagset->getTagByIndex(InstSrcData_ULSelTags::SELECTION))->Data());
@@ -266,7 +266,6 @@ InstSrcData_UL::Tag2Selection (const std::string& sortby, TagCacheRetrieval *sel
     PkgEdition edition (splitted[1].c_str(), splitted[2].c_str());
     PkgArch arch (splitted[3]);
 
-    PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selcache));
     PMSelectionPtr selection( new PMSelection (name, edition, arch, dataprovider));
     dataprovider->setSelection (selection);
 
@@ -294,8 +293,9 @@ InstSrcData_UL::Tag2Selection (const std::string& sortby, TagCacheRetrieval *sel
     SET_VALUE (SIZE, FSize (atoll(splitted[1].c_str())));
 
     SET_CACHE (SUMMARY);
-    SET_VALUE (CATEGORY, GET_TAG(CATEGORY)->Data() == "base");
+    SET_VALUE (CATEGORY, GET_TAG(CATEGORY)->Data());
     SET_VALUE (VISIBLE, GET_TAG(VISIBLE)->Data() == "true");
+    SET_CACHE (SUGGESTS);
 
     stringutil::split ((GET_TAG(SIZE))->Data(), splitted, " ", false);
     if (splitted.size() > 0)
@@ -305,7 +305,7 @@ InstSrcData_UL::Tag2Selection (const std::string& sortby, TagCacheRetrieval *sel
 
     SET_CACHE (INSPACKS);
     SET_CACHE (DELPACKS);
-    SET_VALUE (SORTBY, sortby);
+    SET_VALUE (ORDER, (GET_TAG(ORDER))->Data());
 
 #undef SET_VALUE
 #undef SET_POS
@@ -791,8 +791,8 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
 MIL << "Reading " << selectionname << endl;
 
-	TagCacheRetrieval *selcache = new TagCacheRetrieval (selectionname);
-	parser = selcache->getParser();
+	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (*selfile));
+	parser = dataprovider->getParser();
 
 	MIL << "start " << *selfile << " parsing" << endl;
 
@@ -814,7 +814,7 @@ MIL << "Reading " << selectionname << endl;
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    selectionlist->push_back (Tag2Selection (*selfile, selcache, tagset));
+		    selectionlist->push_back (Tag2Selection (dataprovider, tagset));
 		    count++;
 		    tagset->clear();
 		    repeatassign = false;	// only single match
@@ -830,11 +830,11 @@ MIL << "Reading " << selectionname << endl;
 
 	if (parse)
 	{
-	    selectionlist->push_back (Tag2Selection (*selfile, selcache, tagset));
+	    selectionlist->push_back (Tag2Selection (dataprovider, tagset));
 	    count++;
 	}
 	tagset->clear();
-	delete selcache;
+
 	selection_stream.clear();
 	selection_stream.close();
 	MIL << "done " << *selfile << " parsing" << endl;

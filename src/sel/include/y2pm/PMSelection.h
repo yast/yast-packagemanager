@@ -77,7 +77,7 @@ class PMSelection : virtual public Rep, public PMObject {
 	const std::list<std::string> inspacks(const std::string& lang = "") const;
 	const std::list<std::string> delpacks(const std::string& lang = "") const;
 	const FSize archivesize() const;
-	const std::string sortby() const;
+	const std::string order() const;
 
     /**
      * Get attribute name as string.

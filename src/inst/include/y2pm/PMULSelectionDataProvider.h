@@ -58,13 +58,13 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	TagCacheRetrievalPos _attr_DELNOTIFY;
 	FSize _attr_SIZE;
 
-	bool _attr_CATEGORY;	// true == "base", false == "addon"
+	std::string _attr_CATEGORY;	// "base", ...
 	bool _attr_VISIBLE;
 	TagCacheRetrievalPos _attr_SUGGESTS;
 	TagCacheRetrievalPos _attr_INSPACKS;
 	TagCacheRetrievalPos _attr_DELPACKS;
 	FSize _attr_ARCHIVESIZE;
-	std::string _attr_SORTBY;
+	std::string _attr_ORDER;
 
 	// retrieval pointer for *.sel data
 	TagCacheRetrieval *_selection_retrieval;
@@ -76,9 +76,10 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 
     public:
 
-	PMULSelectionDataProvider (TagCacheRetrieval *selection_retrieval = 0);
+	PMULSelectionDataProvider (const std::string& selectionname);
 	virtual ~PMULSelectionDataProvider();
 
+	TagParser& getParser() { return _selection_retrieval->getParser(); }
 	void setSelection ( PMSelectionPtr selection) { _selection = selection; }
 
 	/**
@@ -101,7 +102,7 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	const std::list<std::string> inspacks(const std::string& lang = "") const;
 	const std::list<std::string> delpacks(const std::string& lang = "") const;
 	const FSize archivesize() const;
-	const std::string sortby() const;
+	const std::string order() const;
 
 	/**
 	 * Object attribute retrieval. (DataProvider interface)

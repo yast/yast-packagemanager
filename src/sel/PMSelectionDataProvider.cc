@@ -125,9 +125,9 @@ PMSelectionDataProvider::archivesize() const
 }
 
 const std::string
-PMSelectionDataProvider::sortby() const
+PMSelectionDataProvider::order() const
 {
-    return "";
+    return "000";
 }
 
 

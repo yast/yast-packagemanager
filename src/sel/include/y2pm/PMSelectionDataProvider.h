@@ -68,7 +68,7 @@ class PMSelectionDataProvider : virtual public Rep, public PMDataProvider  {
 	virtual const std::list<std::string> inspacks(const std::string& lang = "") const;
 	virtual const std::list<std::string> delpacks(const std::string& lang = "") const;
 	virtual const FSize archivesize() const;
-	virtual const std::string sortby() const;
+	virtual const std::string order() const;
 
     /**
      * Selection attribute retrieval.
