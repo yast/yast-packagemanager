@@ -74,7 +74,8 @@ class PkgSet {
 	 * previous member of the set with the same name.  */
 	void add( PMSolvablePtr pkg, bool force = false );
 	/** remove a package */
-	void remove( PMSolvablePtr pkg ); void remove( PkgName name ) {
+	void remove( PMSolvablePtr pkg );
+	void remove( PkgName name ) {
 		PMSolvablePtr pkg = lookup(name); if (pkg) remove( pkg ); }
 
 	/* notification from PkgPool that a pkg has a new provides
