@@ -230,7 +230,7 @@ class PMError {
     std::string details() const { return _errdetails; }
 
     /**
-     * @return The full error string icl. deatils: <B>ERROR(InstSrc:short_description)[details if set]</B>
+     * @return The full error string icl. details: <B>ERROR(InstSrc:short_description)[details if set]</B>
      **/
     std::string asString() const;
 

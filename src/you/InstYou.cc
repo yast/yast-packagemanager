@@ -359,8 +359,13 @@ PMError InstYou::retrievePatches()
 {
   D__ << "Retrieve patches." << endl;
 
+  log( "RETRIEVE PATCHES" );
+
   PMError error = attachSource();
-  if ( error ) return error;
+  if ( error ) {
+    showError( error );
+    return error;
+  }
 
   PMYouPatchPtr patch;
   for( patch = firstPatch(); patch; patch = nextPatch() ) {
@@ -1076,6 +1081,32 @@ PMError InstYou::patchProgress( int i, const string &pkg )
 
   if ( ret ) return PMError();
   else return YouError::E_user_abort;
+}
+
+PMError InstYou::showError( const string &type, const string &text,
+                            const string &details )
+{
+  if ( _callbacks ) {
+    return _callbacks->showError( type, text, details );
+  } else {
+    return YouError::E_callback_missing;
+  }
+}
+
+PMError InstYou::showError( const PMError &error )
+{
+  return showError( "error", error.errstr(), error.details() );
+}
+
+void InstYou::log( const string &text )
+{
+  MIL << text << endl;
+
+  if ( _callbacks ) {
+    _callbacks->log( text );
+  } else {
+    D__ << "No callback set" << endl;
+  }
 }
 
 int InstYou::lastUpdate()

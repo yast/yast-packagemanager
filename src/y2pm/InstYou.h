@@ -208,6 +208,22 @@ class InstYou {
     PMError patchProgress( int, const std::string &pkg = std::string() );
 
     /**
+      Show error. Calls callbacks.
+    */
+    PMError showError( const std::string &type, const std::string &text,
+                       const std::string &details );
+
+    /**
+      Show error. Calls callbacks.
+    */
+    PMError showError( const PMError &error );
+
+    /**
+      Add line to log. Calls callbacks.
+    */
+    void log( const std::string &text );
+
+    /**
       Returns how many days ago the last update was performed. Returns -1
       when no update has occured yet.
     */
@@ -256,6 +272,11 @@ class InstYou {
     
           virtual bool progress( int percent ) = 0;
           virtual bool patchProgress( int percent, const std::string &str ) = 0;
+
+          virtual PMError showError( const std::string &type,
+                                     const std::string &text,
+                                     const std::string &details ) = 0;
+          virtual void log( const std::string &text ) = 0;
 
           virtual bool executeYcpScript( const std::string &script ) = 0;
     };
