@@ -172,7 +172,36 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     // drop packages not allowed for current architecture
 #warning src/nosrc are currently dropped
     if (!allowedArch (arch))
+    {
+	if ((splitted[3] == "src")			// found a src/nosrc package
+	    || (splitted[3] == "nosrc"))
+	{
+	    string sharewith ((_tagset.getTagByIndex (SHAREWITH))->Data());
+	    pkgmaptype::iterator it = _pkgmap.find (sharewith);		// get binary for this source
+	    if (it != _pkgmap.end())
+	    {
+		PMULPackageDataProviderPtr dataprovider = it->second.second;	// get dataprovider
+
+		dataprovider->_attr_SOURCELOC = _tagset.getTagByIndex (LOCATION)->Pos();
+
+	        std::vector<std::string> sizesplit;
+		stringutil::split (_tagset.getTagByIndex(SIZE)->Data(), sizesplit, " ", false);
+		if (sizesplit.size() <= 0)
+		{
+		    ERR << "No sizes for '" << single << "'" << endl;
+		}
+		else
+		{
+		    dataprovider->_attr_SOURCESIZE = FSize (atoll(sizesplit[0].c_str()));
+		}
+
+	    } // binary package to current source found
+
+	} // this is a src/nosrc package
+
 	return InstSrcError::E_ok;
+
+    } // not allowed arch
 
     //---------------------------------------------------------------
     // Pkg -> PMPackage
@@ -298,7 +327,6 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 	}
     }
     SET_VALUE (BUILDTIME, Date (GET_TAG(BUILDTIME)->Data()));
-    SET_CACHE (SOURCERPM);
 
     SET_VALUE (GROUP, Y2PM::packageManager().addRpmGroup (GET_TAG(GROUP)->Data()));
     SET_CACHE (LICENSE);

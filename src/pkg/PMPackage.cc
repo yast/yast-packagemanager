@@ -68,7 +68,8 @@ std::list<std::string> PMPackage::prein()        const { DP_GET( prein ); }
 std::list<std::string> PMPackage::postin()       const { DP_GET( postin ); }
 std::list<std::string> PMPackage::preun()        const { DP_GET( preun ); }
 std::list<std::string> PMPackage::postun()       const { DP_GET( postun ); }
-std::string            PMPackage::sourcerpm()    const { DP_GET( sourcerpm ); }
+std::string            PMPackage::sourceloc()    const { DP_GET( sourceloc ); }
+FSize                  PMPackage::sourcesize()   const { DP_GET( sourcesize ); }
 FSize                  PMPackage::archivesize()  const { DP_GET( archivesize ); }
 std::list<std::string> PMPackage::authors()      const { DP_GET( authors ); }
 std::list<std::string> PMPackage::filenames()    const { DP_GET( filenames ); }

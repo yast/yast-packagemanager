@@ -89,9 +89,11 @@ class PMPackageManager : public PMManager {
     /**
      * Fill in the packages set to be deleted and to be installed.
      * instlist_r is sorted according to PreReqs.
+     * srclist_r is the unordered (!) list of all source packages to install
      **/
     void getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
-			      std::list<PMPackagePtr> & instlist_r );
+			      std::list<PMPackagePtr> & instlist_r,
+			      std::list<PMPackagePtr> & srclist_r );
 
     /**
      * go through all installed packages and update them.

@@ -84,7 +84,8 @@ class PMPackageDataProvider : virtual public Rep {
     static std::list<std::string> postin()      { return std::list<std::string>(); }
     static std::list<std::string> preun()       { return std::list<std::string>(); }
     static std::list<std::string> postun()      { return std::list<std::string>(); }
-    static std::string            sourcerpm()   { return std::string(); }
+    static std::string            sourceloc()   { return std::string(); }
+    static FSize	          sourcesize()  { return FSize(0); }
     static FSize                  archivesize() { return FSize(0); }
     static std::list<std::string> authors()     { return std::list<std::string>(); }
     static std::list<std::string> filenames()   { return std::list<std::string>(); }
@@ -145,7 +146,8 @@ class PMPackageDataProvider : virtual public Rep {
     virtual std::list<std::string> postin      ( const PMPackage & pkg_r ) const { return postin(); }
     virtual std::list<std::string> preun       ( const PMPackage & pkg_r ) const { return preun(); }
     virtual std::list<std::string> postun      ( const PMPackage & pkg_r ) const { return postun(); }
-    virtual std::string            sourcerpm   ( const PMPackage & pkg_r ) const { return sourcerpm(); }
+    virtual std::string            sourceloc   ( const PMPackage & pkg_r ) const { return sourceloc(); }
+    virtual FSize                  sourcesize  ( const PMPackage & pkg_r ) const { return sourcesize(); }
     virtual FSize                  archivesize ( const PMPackage & pkg_r ) const { return archivesize(); }
     virtual std::list<std::string> authors     ( const PMPackage & pkg_r ) const { return authors(); }
     virtual std::list<std::string> filenames   ( const PMPackage & pkg_r ) const { return filenames(); }

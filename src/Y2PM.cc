@@ -334,18 +334,21 @@ PMYouPatchManager & Y2PM::youPatchManager()
 //
 //	returns number of sucessfully installed packages
 //
-//	returns failed packages in 'errors'
-//	returns uninstalled packages (because media not available) in 'remaining'
+//	returns failed packages in 'errors_r'
+//	returns uninstalled packages (because media not available) in 'remaining_r'
+//	returns uninstalled source packages in 'srcremaining_r'
 //
 int
-Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std::list<std::string>& remaining)
+Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
+	std::list<std::string>& remaining_r, std::list<std::string>& srcremaining_r)
 {
     int count = 0;
 
     std::list<PMPackagePtr> dellist;
     std::list<PMPackagePtr> inslist;
+    std::list<PMPackagePtr> srclist;
 
-    packageManager().getPackagesToInsDel (dellist, inslist);	// compute order
+    packageManager().getPackagesToInsDel (dellist, inslist, srclist);	// compute order
 
     for (std::list<PMPackagePtr>::iterator it = dellist.begin();
 	 it != dellist.end(); ++it)
@@ -364,6 +367,8 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 
     // install loop
 
+    unsigned int current_src_media = 0;
+
     for (std::list<PMPackagePtr>::iterator it = inslist.begin();
 	 it != inslist.end(); ++it)
     {
@@ -372,7 +377,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    && (pkgmedianr != media_nr))
 	{
 #warning loosing version information
-	    remaining.push_back ((*it)->name());
+	    remaining_r.push_back ((*it)->name());
 	    continue;
 	}
 
@@ -398,7 +403,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 	    {
 		while (it != inslist.end())
 		{
-		    remaining.push_back ((*it)->name());
+		    remaining_r.push_back ((*it)->name());
 		    ++it;
 		}
 		return count;
@@ -410,14 +415,14 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 		{
 		    if ((*it)->medianr() != pkgmedianr)	// break on next media
 			break;
-		    remaining.push_back ((*it)->name());
+		    remaining_r.push_back ((*it)->name());
 		    ++it;
 		}
 	    }
 	    break;
 	    default:
 		ERR << "Media can't provide package to install for " << (*it) << ":" << err.errstr() << endl;
-		remaining.push_back ((*it)->name());
+		remaining_r.push_back ((*it)->name());
 		continue;
 	        break;
 	}
@@ -432,13 +437,81 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors, std
 
 	if (err)
 	{
-	    errors.push_back ((*it)->name());
+	    errors_r.push_back ((*it)->name());
 	}
 	else
 	{
 	    count++;
 	}
+
+	if (current_src_media != pkgmedianr)			// new media number ?
+	{							// Y: install all sources from this media
+	    current_src_media = pkgmedianr;
+
+	    for (std::list<PMPackagePtr>::iterator it = srclist.begin();
+		 it != srclist.end();)				// NO ++it here, see erase() at bottom !
+	    {
+		string srcloc = (*it)->sourceloc();
+		if (srcloc.empty())
+		{
+		    ERR << "No source location for " << (*it)->name() << endl;
+		    ++it;
+		    continue;
+		}
+
+		unsigned int srcmedia = atoi (srcloc.c_str());
+
+		if (srcmedia != current_src_media)			// wrong media
+		{
+		    ++it;
+		    continue;
+		}
+
+		if (is_remote
+		    && (_callbacks._provide_start_func != 0))
+		    (*_callbacks._provide_start_func)(srcloc, (*it)->sourcesize(), true, _callbacks._provide_start_data);
+
+		Pathname path;
+		PMError err = (*it)->provideSrcPkgToInstall(path);
+
+		if (is_remote
+		    && (_callbacks._provide_done_func != 0))
+		    (*_callbacks._provide_done_func)(err, "", _callbacks._provide_done_data);
+
+		if (err != PMError::E_ok)				// pack source provide
+		{
+		    ++it;
+		    continue;
+		}
+
+		if (_callbacks._package_start_func)
+		    (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
+
+		err = instTarget().installPackage (path);
+
+		if (_callbacks._package_done_func)
+		    (*_callbacks._package_done_func) (err, "", _callbacks._package_done_data);
+
+		if (err == PMError::E_ok)
+		{
+		    it = srclist.erase(it);			// ok, take out of list
+		}
+		else
+		{
+		    ++it;					// bad, keep in list
+		}
+	    }
+	}
+
     } // loop over inslist
+
+    // copy remaining sources to srcremaining_r
+
+    for (std::list<PMPackagePtr>::iterator it = srclist.begin();
+	 it != srclist.end(); ++it)
+    {
+	srcremaining_r.push_back ((*it)->name());
+    }
 
     return count;
 }

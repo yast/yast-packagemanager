@@ -185,12 +185,20 @@ PMULPackageDataProvider::group_ptr ( const PMPackage & pkg_r ) const
 
 
 std::string
-PMULPackageDataProvider::sourcerpm ( const PMPackage & pkg_r ) const
+PMULPackageDataProvider::sourceloc ( const PMPackage & pkg_r ) const
 {
-    FALLBACK(_attr_SOURCERPM,sourcerpm);
+    FALLBACK(_attr_SOURCELOC,sourceloc);
     std::string value;
-    _package_retrieval->retrieveData (_attr_SOURCERPM, value);
+    _package_retrieval->retrieveData (_attr_SOURCELOC, value);
     return value;
+}
+
+FSize
+PMULPackageDataProvider::sourcesize ( const PMPackage & pkg_r ) const
+{
+    if ((_attr_SOURCESIZE == 0LL)
+	&& (_fallback_provider != 0)) return _fallback_provider->sourcesize(pkg_r);
+    return _attr_SOURCESIZE;
 }
 
 FSize
@@ -323,7 +331,30 @@ PMError PMULPackageDataProvider::providePkgToInstall( const PMPackage & pkg_r, P
 //
 PMError PMULPackageDataProvider::provideSrcPkgToInstall( const PMPackage & pkg_r, Pathname& path_r ) const
 {
-    MIL << "provideSrcPkgToInstall " << pkg_r.sourcerpm() << endl;
-#warning TBD provideSrcPkgToInstall
-    return PMError::E_ok;
+    MIL << "provideSrcPkgToInstall " << pkg_r.sourceloc() << endl;
+
+    std::vector<std::string> locsplit;
+    stringutil::split (pkg_r.sourceloc(), locsplit, " ", false);
+
+    if (locsplit.size () < 2)
+    {
+	ERR << "bad location '" << pkg_r.sourceloc() << "'" << endl;
+	return InstSrcError::E_no_source;
+    }
+
+    // determine media, directory and rpm name
+    int medianr = atoi (locsplit[0].c_str());
+    Pathname rpmname (locsplit[1]);
+    Pathname dir;
+    if (locsplit.size() > 3)
+	dir = Pathname (locsplit[2]);
+
+    if (!_source)
+    {
+	ERR << "No source for '" << dir << "/" << rpmname << "'" << endl;
+	path_r = Pathname();
+	return InstSrcError::E_no_source;
+    }
+
+    return _source->providePackage (medianr, rpmname, dir, path_r);
 }
