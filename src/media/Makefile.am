@@ -4,6 +4,9 @@
 
 SUBDIRS = include
 
+# override commandline define for Y2LOG
+AM_CXXFLAGS = -imacros Make.defines
+
 # first look into source tree, then into $(includedir)
 INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		include	\
