@@ -271,16 +271,9 @@ PMSolvable::PkgRelList_type RpmHeader::PkgRelList_val( tag tag_r, FileDeps::File
   stringList versions;
   string_list( kindVersion, versions );
 
-  PkgName self( string_val( RPMTAG_NAME ) );
-
   for ( unsigned i = 0; i < count; ++i ) {
 
     PkgName n( names[i] );
-
-    if ( n == self ) {
-#warning Filtering self provides. Check code and solver
-      continue;
-    }
 
     rel_op op = NONE;
     int_32 f  = flags[i];

@@ -247,13 +247,13 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 
     if (pkgcache->retrieveData (GET_TAG(REQUIRES)->Pos(), pkglist))
     {
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"REQUIRES");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	package->setRequires (rellist);
     }
     pkglist.clear();
     if (pkgcache->retrieveData (GET_TAG(PREREQUIRES)->Pos(), pkglist))
     {
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"PREREQUIRES");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	package->addPreRequires (rellist); // rellist is modified after that
     }
     pkglist.clear();
@@ -277,19 +277,19 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 	{
 	    ERR << "*** LOST PROVIDES ***" << endl;
 	}
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"PROVIDES");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	package->setProvides (rellist);
     }
     pkglist.clear();
     if (pkgcache->retrieveData (GET_TAG(CONFLICTS)->Pos(), pkglist))
     {
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"CONFLICTS");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	package->setConflicts (rellist);
     }
     pkglist.clear();
     if (pkgcache->retrieveData (GET_TAG(OBSOLETES)->Pos(), pkglist))
     {
-	rellist = PMSolvable::StringList2PkgRelList (pkglist,name,"OBSOLETES");
+	rellist = PMSolvable::StringList2PkgRelList (pkglist);
 	package->setObsoletes (rellist);
     }
 

@@ -58,25 +58,16 @@ PMSolvable::PkgRelList2StringList ( const PkgRelList_type & rellist_r )
 //		      to PkgRelList_type
 //
 PMSolvable::PkgRelList_type
-PMSolvable::StringList2PkgRelList ( const list<string>& relationlist,
-				    const PkgName &     forPkg,
-				    const std::string & kind )
+PMSolvable::StringList2PkgRelList ( const list<string>& relationlist )
 {
     PkgRelList_type pkgrellist;
 
     if (!relationlist.empty())
     {
-	for (list<string>::const_iterator it = relationlist.begin(); it != relationlist.end(); ++it)
+	for (list<string>::const_iterator it = relationlist.begin(); it != relationlist.end(); ++it )
 	{
 	  PkgRelation newrel = PkgRelation::fromString (*it);
-	  // ignore provides/conflicts/obsoletes/requires on own name
-	  if ( forPkg->size() && newrel.name() == forPkg ) {
-#warning Filtering self provides. Check code and solver
-	  }
-	  else
-	  {
-	      pkgrellist.push_back (newrel);
-	  }
+	  pkgrellist.push_back (newrel);
 	}
     }
     return pkgrellist;
