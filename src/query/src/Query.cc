@@ -57,15 +57,105 @@ IMPL_BASE_POINTER( Query );
 // private
 
 /**
+ * findCandidate()
+ *
+ * find bitmask for candidate
+ */
+Query::BitMask
+Query::findCandidate (PMSelectablePtr selectable)
+{
+    Query::BitMask ret = MASK_NONE;
+MIL << "findCandidate()" << endl;
+    if (!selectable->has_candidate())
+	return ret;
+
+    Query::BitMask current = FIRST_AVAILABLE;
+    PMPackagePtr candidate = selectable->candidateObj();
+    for (PMSelectable::PMObjectList::const_iterator it = selectable->av_begin();
+	 it != selectable->av_end(); ++it)
+    {
+	if (candidate == *it)
+	{
+	    ret = current;
+	    break;
+	}
+	current <<= 1;
+    }
+    return ret;
+}
+
+
+
+/**
+ * findByMask ()
+ *
+ * I: selectable
+ * IO: mask, I: start of search, O: result of search (0 if no package found)
+ *
+ * find package by bitmask from selectable
+ * return package and mask matching the package
+ */
+PMPackagePtr
+Query::findByMask (PMSelectablePtr selectable, Query::BitMask& mask_r)
+ {
+    if (mask_r == 0)
+	return PMPackagePtr();
+
+    if (mask_r == MASK_INSTALLED)
+    {
+	if (!selectable->installedObj())
+	    mask_r = 0;
+	return selectable->installedObj();
+    }
+
+    Query::BitMask current = FIRST_AVAILABLE;
+    for (PMSelectable::PMObjectList::const_iterator it = selectable->av_begin();
+	 it != selectable->av_end(); ++it)
+    {
+	if (mask_r == current)
+	    return (*it);
+	current <<= 1;
+    }
+    mask_r = 0;
+    return PMPackagePtr();
+}
+
+
+
+/**
  * determine type of value
  */
 int
 Query::typeOfValue (struct qvalue *value, int type_hint,
-		PMSelectablePtr selectable,
+		PMSelectablePtr selectable, Query::BitMask& mask_r,
 		std::list<std::string>& vlist, std::string & vstring,
 		Date& vdate, PkgEdition& vversion, FSize& vsize)
 {
+    static void *last_ptr = 0;
+    static Query::BitMask last_mask = 0;
+
+    const void *now_ptr = selectable;
+
+    PMPackagePtr package;
+
+    if (now_ptr != last_ptr)
+    {
+	last_ptr = (void *)now_ptr;
+	last_mask = MASK_INSTALLED;
+    }
+    else
+    {
+	last_mask <<= 1;
+    }
+
+    package = findByMask (selectable, last_mask);
+    mask_r = last_mask;
+
     int type = QTYPE_NONE;
+
+    if (!package)
+	return type;
+
     if (value->type == QTYPE_ATTR)
     {
 //MIL << "typeOfValue QTYPE_ATTR" << endl;
@@ -74,59 +164,63 @@ Query::typeOfValue (struct qvalue *value, int type_hint,
 	    case QCODE_VERSION:
 	    {
 		type = QTYPE_VERSION;
-		vversion = PkgEdition::toString (selectable->theObject()->edition());
+		vversion = PkgEdition::toString (package->edition());
 	    }
 	    break;
 	    case QCODE_VENDOR:
 	    {
 		type = QTYPE_STRING;
-		PMPackagePtr package = selectable->theObject();
+		PMPackagePtr package = package;
 		vstring = package->vendor();
 	    }
 	    break;
 	    case QCODE_GROUP:
 	    {
 		type = QTYPE_STRING;
-		PMPackagePtr package = selectable->theObject();
+		PMPackagePtr package = package;
 		vstring = package->group();
 	    }
 	    break;
 	    case QCODE_NAME:
 	    {
 		type = QTYPE_STRING;
-		vstring = selectable->theObject()->name();
+		vstring = package->name();
 	    }
 	    break;
 	    case QCODE_REQUIRES:
 	    {
 		type = QTYPE_LIST;
-		vlist = PMSolvable::PkgRelList2StringList (selectable->theObject()->requires());
+		vlist = PMSolvable::PkgRelList2StringList (package->requires());
 	    }
 	    break;
 	    case QCODE_PROVIDES:
 	    {
 		type = QTYPE_LIST;
-		vlist = PMSolvable::PkgRelList2StringList (selectable->theObject()->provides());
+		vlist = PMSolvable::PkgRelList2StringList (package->provides());
 	    }
 	    break;
 	    case QCODE_CONFLICTS:
 	    {
 		type = QTYPE_LIST;
-		vlist = PMSolvable::PkgRelList2StringList (selectable->theObject()->conflicts());
+		vlist = PMSolvable::PkgRelList2StringList (package->conflicts());
 	    }
 	    break;
 	    case QCODE_INSTALLDATE:
 	    {
-		PMPackagePtr package = selectable->installedObj();
-		if (!package) break;
-		type = QTYPE_DATE;
-		vdate = package->installtime();
+		if (mask_r == MASK_INSTALLED)
+		{
+		    vdate = package->installtime();
+		    type = QTYPE_DATE;
+		}
+		else
+		{
+		    package = PMPackagePtr();
+		    mask_r = 0;
+		}
 	    }
 	    break;
 	    case QCODE_BUILDDATE:
 	    {
-		PMPackagePtr package = selectable->theObject();
-		if (!package) break;
 		type = QTYPE_DATE;
 		vdate = package->buildtime();
 	    }
@@ -174,16 +268,12 @@ Query::typeOfValue (struct qvalue *value, int type_hint,
 	    break;
 	    case QCODE_SUMMARY:
 	    {
-		PMPackagePtr package = selectable->theObject();
-		if (!package) break;
 		type = QTYPE_STRING;
 		vstring = package->summary();
 	    }
 	    break;
 	    case QCODE_DESCRIPTION:
 	    {
-		PMPackagePtr package = selectable->theObject();
-		if (!package) break;
 		type = QTYPE_LIST;
 		vlist = package->description();
 	    }
@@ -196,26 +286,40 @@ Query::typeOfValue (struct qvalue *value, int type_hint,
 	    break;
 	    case QCODE_IVERSION:
 	    {
-		PMPackagePtr package = selectable->installedObj();
-		if (!package) break;
-		type = QTYPE_VERSION;
-		vversion = package->edition();
+		if (mask_r == MASK_INSTALLED)
+		{
+		    vversion = package->edition();
+		    type = QTYPE_VERSION;
+		}
+		else
+		{
+		    package = PMPackagePtr();
+		    mask_r = 0;
+		}
 	    }
 	    break;
 	    case QCODE_AVERSION:
 	    {
-		PMPackagePtr package = selectable->theObject();
-		if (!package) break;
-		type = QTYPE_VERSION;
-		vversion = package->edition();
+		if ((mask_r != MASK_INSTALLED)
+		    && (mask_r != 0))
+		{
+		    vversion = package->edition();
+		    type = QTYPE_VERSION;
+		}
+		else
+		{
+		    package = PMPackagePtr();
+		    mask_r = 0;
+		}
 	    }
 	    break;
 	    case QCODE_CVERSION:
 	    {
-		PMPackagePtr package = selectable->candidateObj();
-		if (!package) break;
+		PMPackagePtr candidate = selectable->candidateObj();
+		if (!candidate) break;
 		type = QTYPE_VERSION;
-		vversion = package->edition();
+		vversion = candidate->edition();
+		last_mask = mask_r = findCandidate (selectable);
 	    }
 	    break;
 	    case QCODE_EMPTY:
@@ -282,34 +386,6 @@ Query::checkPackage (PMPackagePtr package, struct qnode *query)
 
 
 /**
- * findCandidate()
- *
- * find bitmask for candidate
- */
-Query::BitMask
-Query::findCandidate (PMSelectablePtr selectable)
-{
-    Query::BitMask ret = MASK_NONE;
-MIL << "findCandidate()" << endl;
-    if (!selectable->has_candidate())
-	return ret;
-
-    Query::BitMask current = FIRST_AVAILABLE;
-    PMPackagePtr candidate = selectable->candidateObj();
-    for (PMSelectable::PMObjectList::const_iterator it = selectable->av_begin();
-	 it != selectable->av_end(); ++it)
-    {
-	if (candidate == *it)
-	{
-	    ret = current;
-	    break;
-	}
-	current <<= 1;
-    }
-    return ret;
-}
-
-/**
  * checkSelectableFlag
  *
  * check if 'flag' is valid for packages of selectable
@@ -321,8 +397,6 @@ Query::checkSelectableFlag (PMSelectablePtr selectable, int flag)
     MIL << "Query::checkSelectableFlag (" << flag << endl;
 
     Query::BitMask ret = MASK_NONE;
-#warning Query::checkSelectableFlag function body disabled
-#if 0
     switch (flag)
     {
 	case QCODE_ISINSTALLED:
@@ -395,7 +469,6 @@ Query::checkSelectableFlag (PMSelectablePtr selectable, int flag)
 	default:
 	break;
     }
-#endif
 //    MIL << "ret " << ret << endl;
     return ret;
 }
@@ -615,20 +688,37 @@ Query::compareSize (const FSize& left, enum operation op, const FSize& right)
 Query::BitMask
 Query::checkSelectableOpCompare (PMSelectablePtr selectable, struct qnode *query)
 {
+    Query::BitMask result = 0;
+
+    for (;;)
+    {
+
+    Query::BitMask lmask;
     std::list<std::string> llist;
     std::string lstring;
     Date ldate;
     PkgEdition lversion;
     FSize lsize;
     // find type
-    int ltype = typeOfValue (&(query->left), QTYPE_NONE, selectable, llist, lstring, ldate, lversion, lsize);
+    int ltype = typeOfValue (&(query->left), QTYPE_NONE, selectable, lmask, llist, lstring, ldate, lversion, lsize);
+    if ((ltype == QTYPE_NONE)
+	&& (lmask == 0))
+    {
+	break;
+    }
 
+    Query::BitMask rmask;
     std::list<std::string> rlist;
     std::string rstring;
     Date rdate;
     PkgEdition rversion;
     FSize rsize;
-    int rtype = typeOfValue (&(query->right), ltype, selectable, rlist, rstring, rdate, rversion, rsize);
+    int rtype = typeOfValue (&(query->right), ltype, selectable, rmask, rlist, rstring, rdate, rversion, rsize);
+    if ((rtype == QTYPE_NONE)
+	&& (rmask == 0))
+    {
+	break;
+    }
 
     Query::BitMask ret = MASK_NONE;
 
@@ -667,7 +757,12 @@ Query::checkSelectableOpCompare (PMSelectablePtr selectable, struct qnode *query
 	default:
 	break;
     }
-    return ret;
+
+    result |= ret;
+    } // for()
+if (result)
+MIL << "checkSelectableOpCompare " << (void *)result << endl;
+    return result;
 }
 
 /**
@@ -867,7 +962,8 @@ Query::nextPackage (const PMPackageManager& packageManager)
 
 	    if (_backlog != MASK_NONE)			// Hit !
 	    {
-		_logpos = MASK_INSTALLED;
+		MIL << "hit !:" << (void *)_backlog << endl;
+		_logpos = MASK_INSTALLED;		// initial mask
 		break;
 	    }
 	    ++_current;
@@ -878,7 +974,8 @@ Query::nextPackage (const PMPackageManager& packageManager)
 
     if (_backlog != MASK_NONE)
     {
-	MIL << "backlog!" << endl;
+	MIL << "backlog! " << (void *)_backlog << endl;
+
 	// find next bit
 
 	while ((_logpos != MASK_NONE)
@@ -887,20 +984,24 @@ Query::nextPackage (const PMPackageManager& packageManager)
 	    _logpos <<= 1;
 	}
 
+	MIL << "_logpos: " << (void *)_logpos << endl;
+
 	// no more found but _backlog still set ?!
 
 	if (_logpos == MASK_NONE)
 	{
-	    ERR << "_backlog " << _backlog << " not found" << endl;
+	    ERR << "_backlog " << (void *)_backlog << " not found" << endl;
 	}
 	else if (_logpos == MASK_INSTALLED)
 	{
 	    // return installed
 	    package = (*_current)->installedObj();
+	    MIL << "installed !" << *_current << ":" << package << endl;
 	    _backlog &= ~_logpos;
 	}
 	else
 	{
+	    MIL << "available !" << endl;
 	    // an available
 	    Query::BitMask av_mask = FIRST_AVAILABLE;
 	    for (PMSelectable::PMObjectList::const_iterator it = (*_current)->av_begin();
@@ -913,9 +1014,11 @@ Query::nextPackage (const PMPackageManager& packageManager)
 		    package = *it;
 		    break;
 		}
+		av_mask <<= 1;
 	   }
 	}
     }
+    MIL << "return " << package << endl;
     return package;
 }
 
