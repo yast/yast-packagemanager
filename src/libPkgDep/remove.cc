@@ -1,3 +1,4 @@
+#include <y2util/Y2SLog.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PkgDep_int.h>
 
@@ -32,7 +33,7 @@ void PkgDep::virtual_remove_package( PMSolvablePtr pkg, NameList& to_remove,
 void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg,
 				 NameList& to_remove ) const
 {
-	DBG( "removing package " << pkg->name() << endl );
+	DBG << "removing package " << pkg->name() << endl;
 	set->remove( pkg );
 
 	bool already_present = false;
@@ -46,13 +47,13 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr pkg,
 		to_remove.push_back( pkg->name() );
 	
 	ci_for( PMSolvable::Provides_, prov, pkg->all_provides_) {
-		DBG( "  checking provided name " << (*prov).name() << endl );
+		DBG << "  checking provided name " << (*prov).name() << endl;
 		RevRel_for( set->required()[(*prov).name()], req1 ) {
-			DBG( "    requirement: " << req1->relation()
-				 << " by " << req1->pkg()->name() << endl );
+			DBG << "    requirement: " << req1->relation()
+				 << " by " << req1->pkg()->name() << endl;
 			if (count_providers_for( set, req1->relation() ) < 1) {
-				DBG( "    no providers anymore, removing "
-					 << req1->pkg()->name() << endl );
+				DBG << "    no providers anymore, removing "
+					 << req1->pkg()->name() << endl;
 				remove_package( set, req1->pkg(), to_remove );
 			}
 		}

@@ -42,6 +42,7 @@ using namespace std;
 void install(vector<string>& argv);
 void consistent(vector<string>& argv);
 void help(vector<string>& argv);
+void init(vector<string>& argv);
 
 struct Funcs {
     const char* name;
@@ -52,6 +53,7 @@ struct Funcs {
 static struct Funcs func[] = {
     { "install", install, "install a package" },
     { "consistent", consistent, "check consistency" },
+    { "init", init, "initialize packagemanager" },
     { "help", help, "this screen" },
     { NULL, NULL }
 };
@@ -75,6 +77,19 @@ void usage(char **argv) {
 	exit(1);
 }
 
+
+void init(vector<string>& argv)
+{
+    TimeClass t;
+    cout << "initializing packagemanager ... " << endl;
+
+    t.startTimer();
+    Y2PM::packageManager();
+    t.stopTimer();
+    
+    cout << "done in " << t.getTimer() << " seconds" << endl;
+    
+}
 
 void help(vector<string>& argv)
 {
@@ -101,7 +116,7 @@ static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
 
     if(rel.name()->find("rpmlib(") != std::string::npos)
 	return PkgDep::UNRES_IGNORE;
-    
+ /*   
     if(rel.name() == "/bin/bash" || rel.name() == "/bin/sh")
     {
 	const PkgSet inst = solver->current_installed();
@@ -114,7 +129,12 @@ static PkgDep::WhatToDoWithUnresolvable unresolvable_callback(
 	p = inst.lookup(PkgName("perl"));
 	return PkgDep::UNRES_TAKETHIS;
     }
-
+*/ 
+    if(rel.name()->operator[](0)=='/')
+    {
+	DBG << "ignoring file requirement " << rel.name() << endl;
+	return PkgDep::UNRES_IGNORE;
+    }
 
     return PkgDep::UNRES_FAIL;
 }
@@ -179,6 +199,7 @@ void install(vector<string>& argv)
     // construct PkgDep object
 //    PkgDep::set_default_alternatives_mode(PkgDep::AUTO_IF_NO_DEFAULT);
     PkgDep engine( *installed, *available, alternative_default );
+    engine.set_unresolvable_callback(unresolvable_callback);
 
     // call upgrade
     PkgDep::ResultList good;
