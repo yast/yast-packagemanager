@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep 19 13:24:52 CEST 2003 - ma@suse.de
+
+- No longer report enabling an enabled, or disabling a disabled
+  InstSrc as an error.
+- 2.8.27
+
+-------------------------------------------------------------------
 Fri Sep 19 11:18:51 CEST 2003 - ma@suse.de
 
 - Within instsys, if the InstSrc is setup to use the media and no
