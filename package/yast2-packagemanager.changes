@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Dec 10 15:37:04 CET 2004 - ma@suse.de
+
+- Passing username and password via environment smbmount/mount.cifs
+  does not work if they are invoked via 'mount -t smbfs/cifs'. Thus
+  they are passed as mount option. (#49053)
+- 2.11.4
+
+-------------------------------------------------------------------
 Thu Dec  2 11:57:23 CET 2004 - ma@suse.de
 
 - As some proxies forbid to pass username and password through the
