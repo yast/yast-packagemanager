@@ -28,6 +28,7 @@
 #include <y2util/Pathname.h>
 
 #include <y2pm/PMError.h>
+#include <y2pm/PMLangCode.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -45,13 +46,17 @@ class F_Media {
       DOUBLESIDED = 0x01
     };
 
+    typedef std::map<unsigned,PM::LocaleString> LabelMap;
+
+    static const PM::LocaleString _noLabel;
+
   private:
 
     Vendor       _vendor;
     std::string  _ident;
     unsigned     _count;
-
     unsigned     _flags;
+    LabelMap     _labels;
 
   public:
 
@@ -64,10 +69,22 @@ class F_Media {
 
     bool doublesided() const { return( _flags & DOUBLESIDED ); }
 
+    const LabelMap & labels() const { return _labels; }
+
+    const PM::LocaleString & label( unsigned number_r ) const {
+      LabelMap::const_iterator found( _labels.find( number_r ) );
+      return( found == _labels.end() ? _noLabel : found->second );
+    }
+
   public:
 
-   PMError read( std::istream & stream_r );
-   PMError read( const Pathname & file_r );
+   void reset() { *this = F_Media(); }
+
+   PMError read( std::istream & stream_r, const bool quick_r = false );
+   PMError read( const Pathname & file_r, const bool quick_r = false  );
+
+   PMError quickRead( std::istream & stream_r ) { return read( stream_r, /*quick*/true ); }
+   PMError quickread( const Pathname & file_r ) { return read( file_r, /*quick*/true ); }
 };
 
 ///////////////////////////////////////////////////////////////////

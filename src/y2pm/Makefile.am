@@ -6,7 +6,7 @@ pkgincludedir = $(includedir)/y2pm
 
 # these go to $(pkgincludedir)
 
-pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
+pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	Timecount.h	\
 	PkgName.h PkgEdition.h PkgArch.h PkgIdent.h		\
 	PkgRelation.h PkgRevRel.h Alternatives.h PkgSet.h	\
@@ -36,8 +36,6 @@ pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
         \
         InstSrcManager.h InstSrcManagerCallbacks.h	\
 	\
-	F_Media.h F_Medianames.h	\
-	\
 	InstSrcError.h				\
 	InstSrc.h	InstSrcPtr.h		\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\
@@ -46,6 +44,7 @@ pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
 	ULSelectionParser.h ULSelectionParserPtr.h	\
 	ULPackagesParser.h ULPackagesParserPtr.h	\
 	ULParsePackagesLang.h				\
+	F_Media.h \
 	InstSrcDataPLAIN.h InstSrcDataPLAINPtr.h	\
 	PMPLAINPackageDataProvider.h PMPLAINPackageDataProviderPtr.h	\
 	UpdateInfParser.h			\

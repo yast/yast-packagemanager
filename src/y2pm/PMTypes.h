@@ -26,10 +26,10 @@
 #include <list>
 #include <vector>
 
-#include <y2util/LangCode.h>
-
 #include <y2pm/PMError.h>
 #include <y2pm/PkgArch.h>
+#include <y2pm/PMLangCode.h>
+
 
 #include <y2pm/InstSrcPtr.h>
 
@@ -45,9 +45,6 @@ namespace PM {
   ///////////////////////////////////////////////////////////////////
   // Y2PM
   ///////////////////////////////////////////////////////////////////
-
-  typedef std::set<LangCode>  LocaleSet;
-  typedef std::list<LangCode> LocaleOrder;
 
   typedef std::list<PkgArch>  ArchSet;
 

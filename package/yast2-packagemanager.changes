@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr  2 12:34:22 CEST 2004 - ma@suse.de
+
+- Allow medianame mapping via media.1/media (#35924)
+- 2.9.30
+
+-------------------------------------------------------------------
 Thu Apr  1 17:17:12 CEST 2004 - lnussel@suse.de
 
 - don't use --nodigest at rpm installation by default so faulty packages don't

@@ -35,6 +35,7 @@
 #include <y2util/LangCode.h>
 
 #include <y2pm/InstSrcDescrPtr.h>
+#include <y2pm/F_Media.h>
 
 #include <y2pm/InstSrc.h>
 #include <y2pm/PkgRelation.h>
@@ -132,6 +133,7 @@ class InstSrcDescr : public CountedRep {
     std::string _media_id;		// ID code for media match
     unsigned    _media_count;		// total number if is split up on multiple media
     bool        _media_doublesided;     // true if doublesided media
+    F_Media::LabelMap _media_labels;    // media names to use in UI
 
     ///////////////////////////////////////////////////////////////////
     // content file ( _url / _product_dir / content )
@@ -141,7 +143,6 @@ class InstSrcDescr : public CountedRep {
     PkgNameEd   _content_distproduct;
     PkgNameEd   _content_baseproduct;
     Vendor      _content_vendor;
-
 
     std::string _content_defaultbase;
     ArchMap     _content_archmap;
@@ -190,7 +191,10 @@ class InstSrcDescr : public CountedRep {
     const std::string &  media_id()            const { return _media_id; }
     const unsigned &     media_count()         const { return _media_count; }
     bool                 media_doublesided()   const { return _media_doublesided; }
-
+    const PM::LocaleString & media_label( unsigned number_r ) const {
+      F_Media::LabelMap::const_iterator found( _media_labels.find( number_r ) );
+      return( found == _media_labels.end() ? F_Media::_noLabel : found->second );
+    }
     const PkgNameEd &    content_product()     const { return _content_product; }
     const PkgNameEd &    content_distproduct() const { return _content_distproduct; }
     const PkgNameEd &    content_baseproduct() const { return _content_baseproduct; }
@@ -247,6 +251,7 @@ class InstSrcDescr : public CountedRep {
     void set_media_id( const std::string & val_r )            { _media_id = val_r; }
     void set_media_count( unsigned val_r )                    { _media_count = val_r; }
     void set_media_doublesided( bool val_r )                  { _media_doublesided = val_r; }
+    void set_media_labels( const F_Media::LabelMap & val_r )  { _media_labels = val_r; }
 
     void set_content_product( const PkgNameEd & val_r )       { _content_product = val_r; }
     void set_content_distproduct( const PkgNameEd & val_r )   { _content_distproduct = val_r; }
