@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 30 11:41:43 CET 2003 - ma@suse.de
+
+- Added PMError hook for PkgModule.
+- 2.9.3
+
+-------------------------------------------------------------------
 Thu Oct  2 12:06:06 CEST 2003 - ma@suse.de
 
 - Revised MediaHandler error reporting ang logging. Implemented
