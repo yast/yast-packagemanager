@@ -929,6 +929,23 @@ static int internal_commitPackages( unsigned mediaNr_r,
 {
   CommitReport::Send report( commitReport );
 
+  ///////////////////////////////////////////////////////////////////
+  // One may argue whether selection data should be installed before
+  // or after any packages. Doing it before has the benefit, that the
+  // selection DB reflects what the user wanted. In case of trouble it
+  // should be easier to check and manualy repair.
+  //
+  // But we could thing about moving it to instTargetUpdate().
+  //
+  ///////////////////////////////////////////////////////////////////
+  {
+    PMError res = Y2PM::selectionManager().installOnTarget();
+    if ( res ) {
+      ERR << "Error installing selection data: " << res << endl;
+    }
+  }
+  ///////////////////////////////////////////////////////////////////
+
 #warning loosing version information when using remaining_r etc.
   errors_r.clear();
   remaining_r.clear();
@@ -972,22 +989,6 @@ static int internal_commitPackages( unsigned mediaNr_r,
   default:
     error = PMError::E_ok;
     break;
-  }
-
-  ///////////////////////////////////////////////////////////////////
-  // One may argue whether selection data should be installed before
-  // or after any packages. Doing it before has the benefit, that the
-  // selection DB reflects what the user wanted. In case of trouble it
-  // should be easier to check and manualy repair.
-  //
-  // But we could thing about moving it to instTargetUpdate().
-  //
-  ///////////////////////////////////////////////////////////////////
-  {
-    PMError res = Y2PM::selectionManager().installOnTarget();
-    if ( res ) {
-      ERR << "Error installing selection data: " << res << endl;
-    }
   }
 
   ///////////////////////////////////////////////////////////////////
