@@ -21,6 +21,7 @@
 /-*/
 
 #include <iostream>
+#include <stdlib.h>
 
 #include <y2util/Y2SLog.h>
 
@@ -83,6 +84,14 @@ PMPackageManager *   Y2PM::_packageManager = 0;
 PMSelectionManager * Y2PM::_selectionManager = 0;
 
 PMYouPatchManager *  Y2PM::_youPatchManager = 0;
+
+void Y2PM::cleanupAtExit()
+{
+  if ( _youPatchManager ) {
+    delete _youPatchManager;
+    _youPatchManager = 0;
+  }
+}
 
 ///////////////////////////////////////////////////////////////////
 // CallBacks
@@ -355,6 +364,8 @@ PMYouPatchManager & Y2PM::youPatchManager()
     for( itPatch = patches.begin(); itPatch != patches.end(); ++itPatch ) {
       Y2PM::packageManager().poolAddCandidates( (*itPatch)->packages() );
     }
+
+    atexit( &cleanupAtExit );
 
     MIL << "Created YouPatchManager @" << _youPatchManager << endl;
   }

@@ -66,7 +66,9 @@ InstYou::InstYou( const PMYouPatchInfoPtr &info,
 
 InstYou::~InstYou()
 {
-  _media.release();
+  if ( _media.isOpen() && _media.isAttached() ) {
+    _media.release();
+  }
 }
 
 void InstYou::init()

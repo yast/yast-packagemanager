@@ -86,6 +86,8 @@ class Y2PM {
 
     static PMYouPatchManager * _youPatchManager;
 
+    static void cleanupAtExit();
+
   public:
 
     /**
