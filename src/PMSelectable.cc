@@ -620,7 +620,6 @@ bool PMSelectable::downgrade_condition() const
   if ( inst->edition() < cand->edition() )
     return false; // candidate is newer
 
-#warning SPEEDUP vendor().isSuSE() tests
   // SuSE specific exeption: version downgrade due to newer buildtime
   if ( inst->buildtime() < cand->buildtime()
        && inst->vendor().isSuSE()
