@@ -22,6 +22,9 @@
 #define PMPackageManager_update_h
 
 #include <iosfwd>
+#include <set>
+
+#include <y2pm/PMSelectablePtr.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -44,6 +47,9 @@ class PMUpdateStats {
     // OPTIONS
     ///////////////////////////////////////////////////////////////////
 
+    /**
+     * If true, dropped SuSE Packages will be preselected to delete
+     **/
     bool delete_unmaintained;
 
   public:
@@ -135,6 +141,11 @@ class PMUpdateStats {
     // RESULTLISTS
     ///////////////////////////////////////////////////////////////////
 
+    /**
+     * chk_to_keep_old / chk_keep_foreign / chk_dropped
+     **/
+    std::set<PMSelectablePtr> foreign_and_drop_set;
+
   public:
 
     PMUpdateStats() {
@@ -163,12 +174,25 @@ class PMUpdateStats {
 
     /**
      * total number of packages that will be installed
-     */
-    unsigned totalToInstall (void) const
+     **/
+    unsigned totalToInstall() const
     {
-	return chk_already_toins + chk_to_update + chk_to_downgrade + chk_renamed + chk_renamed_guessed + chk_add_split;
+      return chk_already_toins
+	+ chk_to_update + chk_to_downgrade
+	+ chk_renamed + chk_renamed_guessed + chk_add_split;
     }
 
+    /**
+     * total number of packages that will be finaly deleted
+     * (does not count the renamed packages)
+     **/
+    unsigned totalToDelete() const
+    {
+      unsigned ret = chk_already_todel;
+      if ( delete_unmaintained )
+	ret += chk_dropped;
+      return ret;
+    }
 };
 
 ///////////////////////////////////////////////////////////////////
