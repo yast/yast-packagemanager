@@ -50,6 +50,11 @@ class PkgAttributeValue : public std::list<std::string> {
     /**
      * Construct als list containing one entry val_r only
      **/
+    PkgAttributeValue( const long int val );
+
+    /**
+     * Construct als list containing one entry val_r only
+     **/
     PkgAttributeValue( const std::string & val_r );
 
     /**
@@ -60,6 +65,11 @@ class PkgAttributeValue : public std::list<std::string> {
     ~PkgAttributeValue();
 
   public:
+
+    /**
+     * Get as numeric value
+     **/
+    long int asLong ( long int default_li = 0 ) const;
 
     /**
      * Usefull for single string values if you don't mind whether there's

@@ -68,11 +68,32 @@ PMULPackageDataProvider::~PMULPackageDataProvider()
 //	DESCRIPTION :Package attribute retrieval.
 //
 PkgAttributeValue
-PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
-					 PMPackage::PMPackageAttribute attr_r )
+PMULPackageDataProvider::getAttributeValue( constPMObjectPtr obj_r,
+					PMPackage::PMObjectAttribute attr )
 {
-    if (attrpos[attr_r].size < 0)
-	return attrval[attr_r];
+    if (attr >= PMObject::PMOBJ_NUM_ATTRIBUTES)
+	return PkgAttributeValue("invalid query");
+
+    if (attrpos[attr].size < 0)
+	return attrval[attr];
+    /*
+	FIXME
+
+	re-read value from cache file
+    */
+
+    return PkgAttributeValue("**undef**");
+}
+
+PkgAttributeValue
+PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
+					PMPackage::PMPackageAttribute attr )
+{
+    if (attr >= PMPackage::PKG_NUM_ATTRIBUTES)
+	return PkgAttributeValue("invalid query");
+
+    if (attrpos[attr].size < 0)
+	return attrval[attr];
     /*
 	FIXME
 
@@ -93,10 +114,64 @@ PMULPackageDataProvider::getAttributeValue( constPMPackagePtr pkg_r,
 void
 PMULPackageDataProvider::setAttributeValue(
 	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
-	const PkgAttributeValue value)
+	const PkgAttributeValue& value)
 {
     attrpos[attr].size = -1;
     attrval[attr] = PkgAttributeValue (value);
+    return;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
+//	METHOD TYPE : attribute set
+//
+//	DESCRIPTION : inject some SINGLE object attribute by value
+//
+void
+PMULPackageDataProvider::setAttributeValue(
+	PMPackagePtr pkg, PMPackage::PMPackageAttribute attr,
+	const PkgAttributeValue& value)
+{
+    attrpos[attr].size = -1;
+    attrval[attr] = PkgAttributeValue (value);
+    return;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
+//	METHOD TYPE : attribute set
+//
+//	DESCRIPTION : inject some SINGLE object attribute by value
+//
+void
+PMULPackageDataProvider::setAttributeValue(
+	PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
+	const PkgAttributeValue& value)
+{
+    attrpos[attr].size = -1;
+    attrval[attr] = PkgAttributeValue (value);
+    return;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
+//	METHOD TYPE : attribute set
+//
+//	DESCRIPTION :inject some package attribute by file offset
+//
+void
+PMULPackageDataProvider::setAttributeValue(
+	PMPackagePtr pkg, PMObject::PMObjectAttribute attr,
+	std::streampos pos, int size)
+{
+    attrpos[attr].pos = pos;
+    attrpos[attr].size = size;
     return;
 }
 
@@ -117,4 +192,38 @@ PMULPackageDataProvider::setAttributeValue(
     attrpos[attr].size = size;
     return;
 }
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::setAttributeValue
+//	METHOD TYPE : attribute set
+//
+//	DESCRIPTION :inject some package attribute by file offset
+//
+void
+PMULPackageDataProvider::setAttributeValue(
+	PMPackagePtr pkg, PMSolvable::PMSolvableAttribute attr,
+	std::streampos pos, int size)
+{
+    attrpos[attr].pos = pos;
+    attrpos[attr].size = size;
+    return;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMULPackageDataProvider::dumpOn
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+ostream &
+PMULPackageDataProvider::dumpOn( ostream & str ) const
+{
+  Rep::dumpOn( str );
+  return str;
+}
+
 
