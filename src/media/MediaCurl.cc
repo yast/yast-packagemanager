@@ -83,6 +83,12 @@ PMError MediaCurl::attachTo (bool next)
     return Error::E_error;
   }
 
+  ret = curl_easy_setopt( _curl, CURLOPT_FAILONERROR, true );
+  if ( ret != 0 ) {
+    ERR << "curl setopt failed" << endl;
+    return Error::E_error;
+  }
+
   return Error::E_ok;
 }
 
@@ -165,8 +171,31 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 
     if ( ret != 0 ) {
       E__ << "curl perform failed" << endl;
-      ERR << "curl error: " << _curlError << endl;
-      return Error::E_error;
+      ERR << "curl error: " << ret << ": " << _curlError << endl;
+      switch ( ret ) {
+        case CURLE_UNSUPPORTED_PROTOCOL:
+        case CURLE_URL_MALFORMAT:
+        case CURLE_URL_MALFORMAT_USER:
+          return Error::E_bad_url;
+        case CURLE_HTTP_NOT_FOUND:
+        case CURLE_FTP_COULDNT_RETR_FILE:
+          return Error::E_file_not_found;
+        case CURLE_BAD_PASSWORD_ENTERED:
+        case CURLE_FTP_ACCESS_DENIED:
+        case CURLE_FTP_USER_PASSWORD_INCORRECT:
+          return Error::E_login_failed;
+        case CURLE_COULDNT_RESOLVE_PROXY:
+        case CURLE_COULDNT_RESOLVE_HOST:
+        case CURLE_COULDNT_CONNECT:
+        case CURLE_FTP_CANT_GET_HOST:
+          return Error::E_connection_failed;
+        CURLE_WRITE_ERROR:
+          ERR << "Couldn't write file." << endl;
+          return Error::E_error;
+        case CURLE_SSL_PEER_CERTIFICATE:
+        default:
+          return Error::E_error;
+      }
     }
     
     return Error::E_ok;
