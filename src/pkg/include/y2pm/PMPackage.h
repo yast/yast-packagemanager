@@ -41,7 +41,8 @@ class PMPackage : virtual public Rep, public PMObject {
 
   enum PMPackageAttribute
   {
-      ATTR_BUILDTIME = PMOBJ_NUM_ATTRIBUTES,
+      PKG_ATTR_BEGIN = PMOBJ_NUM_ATTRIBUTES,
+      ATTR_BUILDTIME = PKG_ATTR_BEGIN,
       ATTR_BUILDHOST,
       ATTR_INSTALLTIME,
       ATTR_DISTRIBUTION,
@@ -60,6 +61,7 @@ class PMPackage : virtual public Rep, public PMObject {
       ATTR_SOURCERPM,
       ATTR_ARCHIVESIZE,
       ATTR_AUTHOR,
+      ATTR_FILENAMES,
 
       PKG_NUM_ATTRIBUTES
   };
@@ -93,7 +95,9 @@ class PMPackage : virtual public Rep, public PMObject {
      * */
     std::string getAttributeValue(PMPackageAttribute attr);
 
-    std::string getAttributeValue(PMObjectAttribute attr);;
+    std::string getAttributeValue(PMObjectAttribute attr);
+    
+    std::string getAttributeValue(PMSolvableAttribute attr);
 
     /** get the name of an attribute
      *
@@ -103,6 +107,8 @@ class PMPackage : virtual public Rep, public PMObject {
     std::string getAttributeName(PMPackageAttribute attr);
 
     std::string getAttributeName(PMObjectAttribute attr);
+    
+    std::string getAttributeName(PMSolvableAttribute attr);
 
     /** assign a data provider
      * @param dataprovider the dataprovider

@@ -17,6 +17,8 @@
 
 /-*/
 
+#include <sstream> // for querying provides, requires etc.
+
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PMPackage.h>
@@ -82,6 +84,63 @@ string PMPackage::Summary() const
 }
 */
 
+std::string PMPackage::getAttributeValue(PMSolvableAttribute attr)
+{
+    string str;
+    switch(attr)
+    {
+	case ATTR_NAME:
+	    str = this->name();
+	    break;
+	case ATTR_VERSION:
+	    str = this->edition().version();
+	    break;
+	case ATTR_RELEASE:
+	    str = this->edition().release();
+	    break;
+	case ATTR_REQUIRES:
+	    {
+		ostringstream ost;
+		ost << (this->requires()) << endl;
+		str = ost.str();
+	    }
+	    break;
+	case ATTR_PREREQUIRES:
+	    {
+		ostringstream ost;
+		ost << (this->prerequires()) << endl;
+		str = ost.str();
+	    }
+	    break;
+	case ATTR_PROVIDES:
+	    {
+		ostringstream ost;
+		ost << (this->provides()) << endl;
+		str = ost.str();
+	    }
+	    break;
+	case ATTR_CONFLICTS:
+	    {
+		ostringstream ost;
+		ost << (this->conflicts()) << endl;
+		str = ost.str();
+	    }
+	    break;
+	case ATTR_OBSOLETES:
+	    {
+		ostringstream ost;
+		ost << (this->obsoletes()) << endl;
+		str = ost.str();
+	    }
+	    break;
+	case PMSLV_NUM_ATTRIBUTES:
+	    // invalid
+	    return "invalid query";
+    }
+
+    return str;
+}
+
 // get data from data provider
 std::string PMPackage::getAttributeValue(PMObjectAttribute attr)
 {
@@ -101,6 +160,11 @@ std::string PMPackage::getAttributeValue(PMPackageAttribute attr)
 	return "";
     }
     return _dataProvider->getAttributeValue(this,attr);
+}
+
+std::string PMPackage::getAttributeName(PMSolvableAttribute attr)
+{
+    return PMObject::getAttributeName(attr);
 }
 
 std::string PMPackage::getAttributeName(PMObjectAttribute attr)
@@ -169,6 +233,9 @@ std::string PMPackage::getAttributeName(PMPackageAttribute attr)
 	    break;
 	case ATTR_AUTHOR:
 	    str = "AUTHOR";
+	    break;
+	case ATTR_FILENAMES:
+	    str = "FILENAMES";
 	    break;
 	case PMPackage::PKG_NUM_ATTRIBUTES:
 	    // invalid

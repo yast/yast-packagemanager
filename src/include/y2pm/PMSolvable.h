@@ -44,6 +44,22 @@ class PMSolvable : virtual public Rep {
     typedef PkgRelList_type::iterator       PkgRelList_iterator;
     typedef PkgRelList_type::const_iterator PkgRelList_const_iterator;
 
+    enum PMSolvableAttribute
+    {
+	PMSLV_ATTR_BEGIN = 0,
+	ATTR_NAME = PMSLV_ATTR_BEGIN,
+	ATTR_VERSION,
+	ATTR_RELEASE,
+	ATTR_REQUIRES,
+	ATTR_PREREQUIRES,
+	ATTR_PROVIDES,
+	ATTR_OBSOLETES,
+	ATTR_CONFLICTS,
+
+	PMSLV_NUM_ATTRIBUTES
+    };
+
+
   public:
 
     ///////////////////////////////////////////////////////////////////
