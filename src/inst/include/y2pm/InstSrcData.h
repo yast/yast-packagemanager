@@ -130,10 +130,16 @@ class InstSrcData: virtual public Rep {
     const std::list<PMPackagePtr> *findPackages (const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "") const;
     
     /**
-     * generate PMSolvable objects for each selection on the source
-     * @return list of PMSolvablePtr on this source
+     * generate PMSelection objects for each Item on the source
+     * @return list of PMSelection Ptr on this source
+     * */
+    void setSelections (std::list<PMSelectionPtr> *sels) { _data->setSelections(sels); }
+
+    /**
+     * generate PMSelection objects for each selection on the source
+     * @return list of PMSelectionPtr on this source
      */
-    const std::list<PMSolvablePtr> *getSelections (void) const;
+    const std::list<PMSelectionPtr> *getSelections (void) const;
 
     /**
      * generate PMSolvable objects for each patch on the source

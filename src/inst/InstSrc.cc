@@ -274,17 +274,6 @@ InstSrc::numPatches() const
 
 
 /**
- * generate PMSolvable objects for each selection on the source
- * @return list of PMSolvablePtr on this source
- */
-const std::list<PMSolvablePtr> *
-InstSrc::getSelections() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    return _data->getSelections();
-}
-
-/**
  * generate PMSolvable objects for each patch on the source
  * @return list of PMSolvablePtr on this source
  */
@@ -295,6 +284,17 @@ InstSrc::getPatches() const
     return _data->getPatches();
 }
 #endif
+
+/**
+ * generate PMSelection objects for each selection on the source
+ * @return list of PMSelectionPtr on this source
+ */
+const std::list<PMSelectionPtr> *
+InstSrc::getSelections() const
+{
+    D__ << __FUNCTION__ << std::endl;
+    return _data->getSelections();
+}
 
 /**
  * generate PMPackage objects for each Item on the source

@@ -27,6 +27,7 @@
 
 #include <y2util/Pathname.h>
 
+#include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMPackagePtr.h>
 #include <y2pm/PMSolvablePtr.h>
 
@@ -39,7 +40,7 @@ class InstData {
   REP_BODY(InstData);
 
   private:
-    const std::list<PMSolvablePtr> *_selections;
+    const std::list<PMSelectionPtr> *_selections;
     const std::list<PMPackagePtr>  *_packages;
     const std::list<PMSolvablePtr> *_patches;
 
@@ -93,13 +94,13 @@ class InstData {
      * set list of selections
      * @return void
      */
-    void setSelections (std::list<PMSolvablePtr> *sels) { _selections = sels; }
+    void setSelections (std::list<PMSelectionPtr> *sels) { _selections = sels; }
     
     /**
-     * generate PMSolvable objects for each selection on the source
-     * @return list of PMSolvablePtr on this source
+     * generate PMSelection objects for each selection on the source
+     * @return list of PMSelectionPtr on this source
      */
-    const std::list<PMSolvablePtr> *getSelections (void) const;
+    const std::list<PMSelectionPtr> *getSelections (void) const;
     
     /**
      * set list of packages
