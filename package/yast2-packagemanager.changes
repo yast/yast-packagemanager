@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 26 15:36:04 CET 2004 - cschum@suse.de
+
+- Media: Handle relative paths as arguments to
+  MediaAccess::provideFile().
+
+-------------------------------------------------------------------
 Wed Feb 25 17:16:44 CET 2004 - gs@suse.de
 
 - SLP support added to PMYouServers 

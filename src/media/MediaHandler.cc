@@ -234,8 +234,6 @@ PMError MediaHandler::provideFile( Pathname filename ) const
     return Error::E_not_attached;
   }
 
-  filename = filename.absolutename();
-
   PMError err = getFile( filename ); // pass to concrete handler
   if ( err ) {
     WAR << "provideFile(" << filename << "): " << err << endl;
@@ -260,8 +258,6 @@ PMError MediaHandler::provideDir( Pathname dirname ) const
     INT << Error::E_not_attached << " on provideDir(" << dirname << ")" << endl;
     return Error::E_not_attached;
   }
-
-  dirname = dirname.absolutename();
 
   list<string> filelist;
   PMError err = getDirInfo( filelist, dirname, false );
@@ -311,7 +307,6 @@ PMError MediaHandler::releasePath( Pathname pathname ) const
   if ( ! _does_download || _attachPoint.empty() )
     return Error::E_ok;
 
-  pathname = pathname.absolutename();
   PathInfo info( localPath( pathname ) );
 
   if ( info.isFile() ) {
@@ -342,8 +337,6 @@ PMError MediaHandler::dirInfo( list<string> & retlist, Pathname dirname, bool do
     INT << Error::E_not_attached << " on dirInfo(" << dirname << ")" << endl;
     return Error::E_not_attached;
   }
-
-  dirname = dirname.absolutename();
 
   // look for directory.yast
   Pathname dirFile = dirname + "directory.yast";
