@@ -10,3 +10,4 @@ tmp.log*
 *.sum
 test_rpmdb
 testinstall
+test_patchinfo

@@ -15,7 +15,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		libPkgDep/include \
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-noinst_PROGRAMS = test_rpmdb ma_test.exe testinstall
+noinst_PROGRAMS = test_rpmdb ma_test.exe testinstall test_patchinfo
 
 ma_test_exe_SOURCES = ma_test.cc
 ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
@@ -28,3 +28,8 @@ test_rpmdb_LDFLAGS = -static
 testinstall_SOURCES = testinstall.cc
 testinstall_LDADD = $(top_builddir)/src/liby2pm.la -lreadline -lncurses
 testinstall_LDFLAGS = -static
+
+test_patchinfo_SOURCES = test_patchinfo.cc
+test_patchinfo_LDADD = $(top_srcdir)/src/liby2pm.la
+test_patchinfo_LDFLAGS = -static
+
