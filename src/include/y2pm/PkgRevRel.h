@@ -1,14 +1,14 @@
 #ifndef _PkgRevRel_h
 #define _PkgRevRel_h
 
-#include <Package.h>
-#include <PkgRelation.h>
+#include <y2pm/Package.h>
+#include <y2pm/PkgRelation.h>
 
 class PkgRevRelation {
 	// _relation can be a NULL pointer; that means that this is a
 	// self-providing entry, i.e. the package provides its own name. If
 	// somebody asks for the PkgRelation, a faked one is returned.
-	
+
 	const PkgRelation *_relation;
 	const Package *_pkg;
 

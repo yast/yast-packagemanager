@@ -1,21 +1,21 @@
 #ifndef _PkgName_h
 #define _PkgName_h
 
-#include <PkgEdition.h>
-#include <UniqStr.h>
+#include <y2util/UniqStr.h>
+#include <y2pm/PkgEdition.h>
 
 class PkgName {
 	static UniqStr PkgNameHash;
 	const char *name;
   public:
 	PkgName( const char *n = "" ) { name = PkgNameHash.add(n); }
-	PkgName( const string& s ) { name = PkgNameHash.add(s.c_str()); }
+	PkgName( const std::string& s ) { name = PkgNameHash.add(s.c_str()); }
 	// default copy constructor and assigment are ok
 
 	bool operator==( const PkgName& n2 ) const { return name == n2.name; }
 	bool operator!=( const PkgName& n2 ) const { return name != n2.name; }
 	operator const char* () const { return name; }
-	friend ostream& operator<<( ostream&, const PkgName& );
+	friend std::ostream& operator<<( std::ostream&, const PkgName& );
 };
 
 inline size_t hashfun( const PkgName& n ) {
@@ -39,7 +39,7 @@ struct PkgNameEd {
 		return name != ne2.name || edition != ne2.edition;
 	}
 
-	friend ostream& operator<<( ostream&, const PkgNameEd& );
+	friend std::ostream& operator<<( std::ostream&, const PkgNameEd& );
 };
 
 

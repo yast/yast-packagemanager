@@ -1,8 +1,8 @@
 #ifndef _PkgRelation_h
 #define _PkgRelation_h
 
-#include <PkgName.h>
-#include <PkgEdition.h>
+#include <y2pm/PkgName.h>
+#include <y2pm/PkgEdition.h>
 
 class Package;
 
@@ -32,8 +32,8 @@ class PkgRelation {
 				(_op == NONE || _edition == r2._edition) );
 	}
 	bool operator!=( const PkgRelation& r2 ) { return !operator==(r2); }
-	
-	friend ostream& operator<<( ostream&, const PkgRelation& );
+
+	friend std::ostream& operator<<( std::ostream&, const PkgRelation& );
 };
 
 #endif  /* _PkgRelation_h */

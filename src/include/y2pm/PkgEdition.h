@@ -4,8 +4,6 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
-
 enum rel_op { NONE, EQ, NE, LT, LE, GT, GE };
 
 // PkgEdition represents version, release, and epoch of a package.
@@ -29,7 +27,7 @@ class PkgEdition {
 
 	// helper for copy constructor and operator=
 	void xconstruct( type_enum xtype, int buildtime, int metahash,
-		int epoch, const char *v, const char *r 
+		int epoch, const char *v, const char *r
 	) {
 		type = xtype;
 		_epoch = epoch;
@@ -88,7 +86,7 @@ class PkgEdition {
 		yconstruct( e );
 		return *this;
 	}
-	
+
 	const char *version() const {
 		switch( type ) {
 		  case NORMAL:
@@ -114,7 +112,7 @@ class PkgEdition {
 
 	bool is_unspecified() const { return type == UNSPEC; }
 	bool is_maximum() const { return type == MAXIMUM; }
-	
+
 	bool compare( rel_op op, const PkgEdition& e2 ) const;
 	bool operator==( const PkgEdition& e2 ) const { return compare( EQ, e2 ); }
 	bool operator!=( const PkgEdition& e2 ) const { return compare( NE, e2 ); }
@@ -123,10 +121,10 @@ class PkgEdition {
 	bool operator> ( const PkgEdition& e2 ) const { return compare( GT, e2 ); }
 	bool operator>=( const PkgEdition& e2 ) const { return compare( GE, e2 ); }
 
-	string as_string() const;
-	operator string() const { return as_string(); }
+	std::string as_string() const;
+	operator std::string() const { return as_string(); }
 
-	friend ostream& operator<<( ostream&, const PkgEdition& );
+	friend std::ostream& operator<<( std::ostream&, const PkgEdition& );
 };
 
 #endif  /* _PkgEdition_h */

@@ -10,9 +10,10 @@ INCLUDES = -I. -I$(top_srcdir)/src/libPkgDb -I/usr/include/YaST2
 #
 
 libPkgDep_la_SOURCES = install.cc remove.cc consistency.cc alternatives.cc \
-					   upgrade.cc results.cc output.cc utils.cc
+		       upgrade.cc results.cc output.cc utils.cc \
+		       PkgDep.h PkgDep_int.h
+
 libPkgDep_la_LIBADD =  $(top_srcdir)/src/libPkgDb/libPkgDb.la
-pkginclude_HEADERS = PkgDep.h PkgDep_int.h
 
 # Local Variables:
 # tab-width: 4

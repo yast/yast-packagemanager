@@ -1,14 +1,17 @@
 #
-# Makefile.am for liby2/src/include
+# Makefile.am for liby2util/src/include/y2pm
 #
 
-SUBDIRS = y2pm
-
-pkgincludedir = $(includedir)
+pkgincludedir = $(includedir)/y2pm
 
 # these go to $(pkgincludedir)
 
-pkginclude_HEADERS = Y2PM.h
+pkginclude_HEADERS =	\
+	PkgName.h	\
+	PkgEdition.h	\
+	PkgRelation.h	\
+	PkgRevRel.h	\
+	PkgSet.h
 
 #<INSTALL-HEADER-TARGET>
 

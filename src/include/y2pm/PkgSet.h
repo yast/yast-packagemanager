@@ -2,9 +2,9 @@
 #define _PkgSet_h
 
 #include <list>
-#include <hash.h>
-#include <Package.h>
-#include <PkgRevRel.h>
+#include <y2util/hash.h>
+#include <y2pm/Package.h>
+#include <y2pm/PkgRevRel.h>
 
 
 class PkgSet {
@@ -13,7 +13,7 @@ class PkgSet {
 	typedef PkgList_type::iterator iterator;
 	typedef PkgList_type::const_iterator const_iterator;
 
-	typedef list<PkgRevRelation> RevRelList_type;
+	typedef std::list<PkgRevRelation> RevRelList_type;
 	typedef RevRelList_type::iterator RevRelList_iterator;
 	typedef RevRelList_type::const_iterator RevRelList_const_iterator;
 
@@ -51,7 +51,7 @@ class PkgSet {
 		if (pkg)
 			remove( pkg );
 	}
-	
+
 	// notification from PkgPool that a pkg has a new provides
 	void new_provides( const Package *pkg, const PkgRelation& prov );
 
@@ -65,13 +65,13 @@ class PkgSet {
 	bool includes( const PkgName& name ) const {
 		return contents.exists(name);
 	}
-	
+
 	// iterator (steps through all contained packages)
 	iterator begin() { return contents.begin(); }
 	iterator end() { return contents.end(); }
 	const_iterator begin() const { return contents.begin(); }
 	const_iterator end() const { return contents.end(); }
-	
+
 	// member access methods
 	const InvRel_type& required() const { return _required; }
 	const InvRel_type& conflicted() const { return _conflicted; }
