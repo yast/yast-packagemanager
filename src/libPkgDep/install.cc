@@ -140,29 +140,118 @@ void PkgDep::add_package( PMSolvablePtr cand )
 
 	bool error = false;
 	bool delay = false;
-	bool short_errors = false; // activate eary error exit
+	bool short_errors = false; // activate early error exit
 
 	ErrorResult res(*this,cand);
 	D__ << "Checking candidate " << candname << endl;
-#if 0
-	// check if the candidate is the target of an obsoletes
+
+#if 0 // original phi code for reference
+	// check if the candidates obsoletes something already installed
+	// if yes, check if requirements would be broken by the replacement
+	// (conflict-by-obsoletion); otherwise, remove the obsoleted package from
+	// vinstalled
+	ci_for( PMSolvable::,PkgRelList_, obs, cand->,obsoletes_ ) {
+		PkgName oname = obs->name();
+		if (vinstalled.includes(oname)) {
+			W__ << "installed/accepted " << oname << " obsoleted by "
+				 << candname << " -- checking for conflict-by-obsoletion\n";
+			if (!check_for_broken_reqs( vinstalled[oname], cand, res ))
+				error = true;
+			else {
+				vinstalled.remove( oname );
+				i_obsoleted->push_back( oname );
+				if (candidates->includes(oname)) {
+					good->remove_if( ResultEqName(oname) );
+					candidates->remove(oname);
+				}
+			}
+		}
+	}
+#endif
+
+	// check if the candidates obsoletes something already installed
+	// if yes, check if requirements would be broken by the replacement
+	// (conflict-by-obsoletion); otherwise, remove the obsoleted package from
+	// vinstalled
+	for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
+	    obs != cand->obsoletes_end(); ++obs )
+	{
+		PkgName oname = obs->name();
+		// find a package that is target of the obsoletes
+		// wrong with rpmv4? need to check provides too?
+		PMSolvablePtr p = vinstalled.lookup(oname);
+		if (p && obs->matches( p->self_provides() )) {
+			DBG << "installed/accepted " << oname << " obsoleted by " << candname << endl;
+			/*
+			vinstalled.remove( oname );
+
+			ErrorResult res(*this,p);
+			res.add_conflict(cand,*obs,*this,cand,NULL,RelInfo::OBSOLETION);
+			i_obsoleted->push_back(res);
+			*/
+
+			if (!check_for_broken_reqs( p, cand, res ))
+				error = true;
+			else {
+				D__ << "no broken reqs, removing " << oname << " from vinstalled" << endl;
+				vinstalled.remove( oname );
+
+				ErrorResult res(*this,p);
+				res.add_conflict(cand,*obs,*this,cand,NULL,RelInfo::OBSOLETION);
+				i_obsoleted->push_back(res);
+
+				/* shouldn't matter, if there a target of
+				 * obsoletion in candidates, it would choke
+				 * later as this one is already installed
+				if (candidates->includes(oname)) {
+					good->remove_if( ResultEqName(oname) );
+					candidates->remove(oname);
+				}
+				*/
+			}
+		}
+	}
+
+	// check if the candidate is obsoleted by an installed package. rpm
+	// does not check this, but we better do it (#31001). This code must be
+	// after the check if the candidate obsoletes installed packages to not
+	// raise useless conflicts.
+	// if this is triggered during update, the reason is  a packaging bug.
+	// Well, at least in theory. Practically, it depends on the order in
+	// which packages are beeing checked. e.g. kdemultimedia3-sound is
+	// installed and obsoletes kdemultimedia3. Now updating
+	// kdemultimedia3-sound to a version that doesn't have the obsoletes
+	// and installing a new kdemultimedia3 raises a conflict by obsoletion
+	// if kdemultimedia3 is checked first.
 	RevRel_for( PkgSet::getRevRelforPkg(vinstalled.obsoleted(),candname), obs ) {
 		if (obs->relation().matches( cand->self_provides() )) {
-			WAR << "candidate " << candname << " is obsoleted by "
+			WAR << "candidate " << candname << " is obsoleted by installed "
 				 << obs->pkg()->name() << endl;
+			WAR << "check #31001, better rename the package" << endl;
 			if(candname == obs->pkg()->name())
 			{
 			    ERR << obs->pkg()->nameEd() << " obsoletes itself!" << endl;
 			}
+#if 0
 			error = true;
 
 			// confirm assume_installed == cand instead of NULL?
 			res.add_conflict(obs->pkg(),obs->relation(),*this,obs->pkg(),NULL,RelInfo::OBSOLETION);
+#endif
 		}
 	}
-#endif
-	// first check if something already installed conflicts with the new
-	// package
+
+
+	if (error && short_errors)
+	{
+	    goto add_package_error_out;
+	}
+
+	// 17.09.2003 ln -- moved conflicts checks after obsoletes check to not
+	// complain about packages that are conflicted and obsoleted.
+	// (bind9-utils vs bind-utils case #31031)
+	//
+	// check if something already installed conflicts with the new package
 	ci_for( PMSolvable::,Provides_, prov, cand->,all_provides_ ) {
 		RevRel_for( PkgSet::getRevRelforPkg(vinstalled.conflicted(),(*prov).name()), confl ) {
 			if (confl->relation().matches( *prov )) {
@@ -187,71 +276,6 @@ void PkgDep::add_package( PMSolvablePtr cand )
 	    // ln -- added more error outputs, should avoid e.g. prompting the
 	    // user to choose alternatives while it would not be necessary when
 	    // he decides to not install the problematic package at all
-	    goto add_package_error_out;
-	}
-
-#if 0
-	// check if the candidates obsoletes something already installed
-	// if yes, check if requirements would be broken by the replacement
-	// (conflict-by-obsoletion); otherwise, remove the obsoleted package from
-	// vinstalled
-	ci_for( PMSolvable::,PkgRelList_, obs, cand->,obsoletes_ ) {
-		PkgName oname = obs->name();
-		if (vinstalled.includes(oname)) {
-			W__ << "installed/accepted " << oname << " obsoleted by "
-				 << candname << " -- checking for conflict-by-obsoletion\n";
-			if (!check_for_broken_reqs( vinstalled[oname], cand, res ))
-				error = true;
-			else {
-				vinstalled.remove( oname );
-				i_obsoleted->push_back( oname );
-				if (candidates->includes(oname)) {
-					good->remove_if( ResultEqName(oname) );
-					candidates->remove(oname);
-				}
-			}
-		}
-	}
-#endif
-
-	for( PMSolvable::PkgRelList_const_iterator obs = cand->obsoletes_begin();
-	    obs != cand->obsoletes_end(); ++obs )
-	{
-		PkgName oname = obs->name();
-		PMSolvablePtr p = vinstalled.lookup(oname);
-		if (p && obs->matches( p->self_provides() )) {
-			DBG << "installed/accepted " << oname << " obsoleted by " << candname << endl;
-			/*
-			vinstalled.remove( oname );
-
-			ErrorResult res(*this,p);
-			res.add_conflict(cand,*obs,*this,cand,NULL,RelInfo::OBSOLETION);
-			i_obsoleted->push_back(res);
-			*/
-
-			if (!check_for_broken_reqs( p, cand, res ))
-				error = true;
-			else {
-				D__ << "no broken reqs, removing " << oname << " from installed" << endl;
-				vinstalled.remove( oname );
-
-				ErrorResult res(*this,p);
-				res.add_conflict(cand,*obs,*this,cand,NULL,RelInfo::OBSOLETION);
-				i_obsoleted->push_back(res);
-
-				/* shouldn't matter, if there a target of
-				 * obsoletion in candidates, it would choke
-				 * later as this one is already installed
-				if (candidates->includes(oname)) {
-					good->remove_if( ResultEqName(oname) );
-					candidates->remove(oname);
-				}
-				*/
-			}
-		}
-	}
-	if (error && short_errors)
-	{
 	    goto add_package_error_out;
 	}
 

@@ -95,7 +95,7 @@ ostream& operator<<( ostream& os, const PkgDep::RelInfoList& rl )
 		    {
 			INT << "names dont match" << endl;
 		    }
-		    os << p->name;
+		    os << p->solvable->nameEd();
 		}
 		switch(p->kind)
 		{

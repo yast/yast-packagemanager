@@ -20,6 +20,7 @@
 /-*/
 
 #include <cstdlib> //atoi
+#include <fstream>
 
 //getpw*
 #include <pwd.h>
@@ -42,9 +43,11 @@
 #include <y2pm/PkgDep.h>
 #include <y2pm/PMPackage.h>
 #include <y2pm/InstTarget.h>
+#include <y2pm/InstTargetError.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/RpmDbCallbacks.h>
 
 #include <asm/msr.h>
 #include <stdint.h>
@@ -445,9 +448,9 @@ static ostream& operator<<( ostream& os, const struct mallinfo& i )
     return os;
 }
 
-static int lastprogress = 0;
-void progresscallback(int p, void* nix)
+void progresscallback(const ProgressData & prg, int& lastprogress)
 {
+    int p = (int)((prg.max()-prg.min())/1.0*prg.val());
     if(p<0) p = 0;
     if(p>100) p = 100;
 
@@ -456,14 +459,110 @@ void progresscallback(int p, void* nix)
     int num = (long)60*p/100;
     for(int i=0; i < num-lastprogress; i++)
     {
-	cout << "%";
+	cout << ".";
     }
     cout.flush();
     lastprogress = num;
-
-    if(p == 100) cout << endl;
+//    if(p == 100) cout << endl;
 }
 
+class ConvertDbCallback : public RpmDbCallbacks::ConvertDbCallback
+{
+    int lastprogress;
+    int _failed;
+    int _ignored;
+    int _alreadyInV4;
+    virtual void start( const Pathname & v3db )
+    {
+	lastprogress = 0;
+	_failed = _ignored = _alreadyInV4 = 0;
+	cout << "converting database " << v3db << " ";
+    }
+    virtual void progress( const ProgressData & prg,
+			   unsigned failed, unsigned ignored, unsigned alreadyInV4 )
+    {
+	progresscallback(prg, lastprogress);
+	_failed = failed;
+	_ignored = ignored;
+	_alreadyInV4 = alreadyInV4;
+    }
+    virtual void dbInV4( const std::string & pkg )
+    {
+	cout << endl << "package "<< pkg << " already in V4 Database" << endl;
+    }
+    /**
+     * PROCEED: Continue to see if more errors occur, but discard new db.
+     * SKIP:    Ignore error and continue.
+     * CANCEL:  Stop conversion and discard new db.
+     **/
+    virtual CBSuggest dbReadError( int offset )
+    {
+	return CBSuggest::PROCEED;
+    }
+    virtual void dbWriteError( const std::string & pkg )
+    {
+	cout << endl << "write error at package " << pkg << endl;
+    }
+    virtual void stop( PMError error )
+    {
+	if(error != PMError::E_ok)
+	    cout << error << endl;
+	else
+	    cout << " ok" << endl;
+
+	cout << _failed << " failed" << endl;
+	cout << _ignored << " ignored" << endl;
+	cout << _alreadyInV4 << " already in V4 format" << endl;
+    };
+};
+
+class InstallPkgCallback : public RpmDbCallbacks::InstallPkgCallback
+{
+    int lastprogress;
+    virtual void start( const Pathname & filename )
+    {
+	lastprogress = 0;
+	cout << "installing " << filename.basename() << " ";
+    };
+    virtual void progress( const ProgressData & prg )
+    {
+	progresscallback(prg, lastprogress);
+    };
+    virtual void stop( PMError error )
+    {
+	if(error != PMError::E_ok)
+	    cout << error << endl;
+	else
+	    cout << " ok" << endl;
+    };
+};
+
+class RebuildDbCallback : public RpmDbCallbacks::RebuildDbCallback
+{
+    int lastprogress;
+    virtual void start()
+    {
+	lastprogress = 0;
+	cout << "rebuilding rpm database ";
+    };
+    virtual void progress( const ProgressData & prg )
+    {
+	progresscallback(prg, lastprogress);
+    };
+    virtual void stop( PMError error )
+    {
+	if(error != PMError::E_ok)
+	    cout << error << endl;
+	else
+	    cout << " ok" << endl;
+    };
+};
+
+static InstallPkgCallback installpkgcallback;
+static RebuildDbCallback rebuilddbcallback;
+static ConvertDbCallback convertdbcallback;
+
+#if 0
 void providestartcallback(const std::string& name, const FSize& s, bool, void*)
 {
     cout << stringutil::form("Downloading %s (%s)",name.c_str(), s.asString().c_str()) << endl;
@@ -509,6 +608,7 @@ static void sourcechangecallback(InstSrcManager::ISrcId srcid, int medianr, void
 {
     cout << "switching to source " << srcid << ", Media Nr. " << medianr << endl;
 }
+#endif
 
 static const char* setdebug(const Variable& v)
 {
@@ -780,7 +880,8 @@ void init(vector<string>& argv)
 
     Y2PM::packageManager();
     Y2PM::selectionManager();
-    PMError dbstat = Y2PM::instTarget().init(_rootdir, true);
+//    PMError dbstat = Y2PM::instTarget().init(_rootdir);
+    PMError dbstat = Y2PM::instTargetInit(_rootdir);
     if( dbstat != InstTargetError::E_ok )
     {
 	cout << "error initializing target: " << dbstat << endl;
@@ -790,11 +891,15 @@ void init(vector<string>& argv)
 
 
     Y2PM::instTarget().createPackageBackups(_createbackups);
+    
+#if 0
     Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages() );
     Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections() );
+#endif
 
     Y2PM::noAutoInstSrcManager();
 
+#if 0
     Y2PM::setRebuildDBProgressCallback(progresscallback, NULL);
 
     Y2PM::setProvideStartCallback(providestartcallback, NULL);
@@ -806,6 +911,11 @@ void init(vector<string>& argv)
     Y2PM::setPackageDoneCallback(packagedonecallback, NULL);
     
     Y2PM::setSourceChangeCallback(sourcechangecallback, NULL);
+#endif
+
+    RpmDbCallbacks::installPkgReport.redirectTo(installpkgcallback);
+    RpmDbCallbacks::rebuildDbReport.redirectTo(rebuilddbcallback);
+    RpmDbCallbacks::convertDbReport.redirectTo(convertdbcallback);
 
     if(variables["autosource"].getBool())
     {
@@ -1245,7 +1355,8 @@ void rpminstall(vector<string>& argv)
 	pkgs.push_back (Pathname (*it));
     }
 
-    if(Y2PM::instTarget().init(_rootdir, false) != InstTarget::Error::E_ok)
+//    if(Y2PM::instTarget().init(_rootdir) != InstTarget::Error::E_ok)
+    if(Y2PM::instTargetInit(_rootdir) != InstTargetError::E_ok)
     {
 	cout << "initialization failed" << endl;
     }
@@ -1336,6 +1447,10 @@ static void showstate_internal(PMManager& manager, vector<string>& argv)
 			    }
 			}
 			cout << ')';
+		}
+		else if((*cit)->has_candidate())
+		{
+			cout << " (" << (*cit)->candidateObj()->edition() << ")";
 		}
 	    }
 	    {
