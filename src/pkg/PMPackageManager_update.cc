@@ -89,7 +89,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     // if installed not SuSE -> not available ???
     available.add( candidate );
 
-    // remember any splitprovides to packages actually installed
+    // remember any splitprovides to packages actually installed.
     PkgSplitSet splits( candidate->splitprovides() );
     for ( PkgSplitSet::iterator sit = splits.begin(); sit != splits.end(); ++sit ) {
       PMSelectablePtr item = getItem( sit->ipkg() );
@@ -109,7 +109,8 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     // filelist as an new ipkg occurres, and use it for consecutive entries.
     //
     // On the fly buld SplitPkgMap from splits that do apply (i.e. file is
-    // in ipkg's filelist).
+    // in ipkg's filelist). The way splitmap was created, candidates added
+    // are not initially tagged to delete!
     ///////////////////////////////////////////////////////////////////
     PMPackagePtr cpkg;
     list<string> cflist;
@@ -228,8 +229,12 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 
 	for( PkgSet::RevRelList_const_iterator pit = provided.begin(); pit != provided.end(); ++pit ) {
 	  if ( pit->relation().matches( installed ) ) {
-	    DBG << "  relation match: " << pit->relation() << " ==> " << pit->pkg() << endl;
-	    mpkg.insert( pit->pkg() );
+	    if ( PMPackagePtr( pit->pkg() )->getSelectable()->to_delete() ) {
+	      DBG << "  IGNORE relation match (package is tagged to delete): " << pit->relation() << " ==> " << pit->pkg() << endl;
+	    } else {
+	      DBG << "  relation match: " << pit->relation() << " ==> " << pit->pkg() << endl;
+	      mpkg.insert( pit->pkg() );
+	    }
 	  } else {
 	    DBG << "  NO relation match: " << pit->relation() << " ==> " << pit->pkg() << endl;
 	  }
@@ -246,11 +251,9 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 	break;
       case 1:
         addProvided[installed] = mpkg;
-	if ( ! (*mpkg.begin())->doesObsolete( installed ) ) {
-	  state->appl_set_delete();
-	}
 	DBG << " ==> REPLACED by: " << (*mpkg.begin()) << endl;
 	// count stats later
+	// check obsoletes later
 	break;
       default:
 	addMultiProvided[installed] = mpkg;
@@ -299,7 +302,7 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
 
   ///////////////////////////////////////////////////////////////////
   // Now check the remembered packages and check non unique provided.
-  // Maybe one of themwas somehow selected. Otherwise we have to guess
+  // Maybe one of them was somehow selected. Otherwise we have to guess
   // one.
   ///////////////////////////////////////////////////////////////////
   MIL << "doUpdate pass 2..." << endl;
@@ -309,6 +312,9 @@ void PMPackageManager::doUpdate( PMUpdateStats & opt_stats_r )
     for ( PackageSet::iterator sit = tset.begin(); sit != tset.end(); ++sit ) {
       if ( ! (*sit)->getSelectable()->to_install() ) {
 	(*sit)->getSelectable()->appl_set_install();
+	if ( ! (*sit)->getSelectable()->candidateObj()->doesObsolete( it->first ) ) {
+	  it->first->getSelectable()->appl_set_delete();
+	}
 	++opt_stats_r.chk_replaced;
       }
     }
