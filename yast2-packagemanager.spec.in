@@ -6,6 +6,8 @@ Provides:	libpkg libpkg-devel
 Obsoletes:	libpkg libpkg-devel
 Provides:	yast2-agent-package yast2-agent-package-devel
 Obsoletes:	yast2-agent-package yast2-agent-package-devel
+Provides:	yast2-agent-you yast2-agent-you-devel
+Obsoletes:	yast2-agent-you yast2-agent-you-devel
 Provides:	yast2-agent-targetpkg yast2-agent-targetpkg-devel
 Obsoletes:	yast2-agent-targetpkg yast2-agent-targetpkg-devel
 Provides:	yast2-core-clients yast2-core-clients-devel
