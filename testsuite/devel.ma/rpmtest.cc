@@ -22,6 +22,11 @@
 
 using namespace std;
 
+#define TMGR Y2PM::instTarget()
+#define PMGR Y2PM::packageManager()
+#define SMGR Y2PM::selectionManager()
+#define ISM  Y2PM::instSrcManager()
+
 ostream & operator <<( ostream & str, const list<string> & t ) {
   stringutil::dumpOn( str, t, true );
   return str;
@@ -64,6 +69,29 @@ void dataDump( ostream & str, constPMPackagePtr p ) {
   str << "KEYWORDS:      " << p->keywords() << endl;
 }
 
+void dummyDU()
+{
+  std::set<PkgDuMaster::MountPoint> mountpoints;
+  mountpoints.insert( PkgDuMaster::MountPoint( "/",          FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/boot",      FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/bin",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/etc",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/lib",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/opt",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/sbin",      FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/usr",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/usr/local", FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  mountpoints.insert( PkgDuMaster::MountPoint( "/var",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
+  MIL << mountpoints;
+  PMGR.setMountPoints( mountpoints );
+}
+
+ostream & dumpSel( ostream & str, const PMSelectablePtr & obj )
+{
+  return str;
+}
+
+
 /******************************************************************
 **
 **
@@ -78,42 +106,20 @@ int main()
   MIL << "START" << endl;
   //Y2PM::noAutoInstSrcManager();
   Timecount _t( "Launch InstTarget" );
-  InstTarget &         TMGR( Y2PM::instTarget(true,"/") );
+  Y2PM::instTarget(true,"/");
   _t.start( "Launch PMPackageManager" );
-  PMPackageManager &   PMGR( Y2PM::packageManager() );
+  Y2PM::packageManager();
   _t.start( "Launch PMSelectionManager" );
-  PMSelectionManager & SMGR( Y2PM::selectionManager() );
+  Y2PM::selectionManager();
   _t.start( "Launch InstSrcManager" );
-  InstSrcManager &     MGR( Y2PM::instSrcManager() );
+  Y2PM::instSrcManager();
   _t.stop();
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
-  _t.start( "INIT DU mountpoints" );
-  {
-    std::set<PkgDuMaster::MountPoint> mountpoints;
-    mountpoints.insert( PkgDuMaster::MountPoint( "/",          FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/boot",      FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/bin",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/etc",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/lib",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/opt",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/sbin",      FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/usr",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/usr/local", FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    mountpoints.insert( PkgDuMaster::MountPoint( "/var",       FSize(4,FSize::K), FSize(1,FSize::G) ) );
-    //PMGR.setMountPoints( mountpoints );
+  for ( PMManager::PMSelectableVec::const_iterator it = SMGR.begin(); it != SMGR.end(); ++it ) {
+    (*it)->dumpStateOn( DBG ) << endl;
   }
-  PkgDuMaster dum( PMGR.getDu() );
-  _t.start( "1st DU calculation" );
-  SEC << PMGR.countDuInstalled( dum );
-  _t.start( "2nd DU calculation" );
-  SEC << PMGR.countDuCandidates( dum );
-  _t.start( "3rd DU calculation" );
-  SEC << PMGR.countDuSelected( dum );
-  _t.start( "PM DU calculation" );
-  SEC << PMGR.updateDu();
-  _t.stop();
 
 
   SEC << "STOP" << endl;

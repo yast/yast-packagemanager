@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Feb  6 14:02:21 CET 2003 - ma@suse.de
+
+- New UI_Status 'S_Keep' (similar to S_Taboo, but an installed object
+  is present). Setting S_Keep/S_Taboo no longer clears any candidateObj.
+- 2.7.9
+
+-------------------------------------------------------------------
 Mon Feb  3 14:01:48 CET 2003 - ma@suse.de
 
 - InstSrcManager: Allow multiple entries for same product via

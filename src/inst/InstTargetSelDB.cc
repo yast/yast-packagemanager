@@ -51,6 +51,7 @@ const Pathname InstTargetSelDB::_db_path( "/var/adm/YaST/SelDB" );
 //	DESCRIPTION :
 //
 InstTargetSelDB::InstTargetSelDB()
+    : _sellistDirty( true )
 {
 }
 
@@ -115,7 +116,7 @@ PMError InstTargetSelDB::open( const Pathname & system_root_r, const bool create
 //
 //	DESCRIPTION :
 //
-PMError InstTargetSelDB::rescan()
+PMError InstTargetSelDB::rescan() const
 {
   PMError err = assert_open();
   if ( err ) {
@@ -148,6 +149,7 @@ PMError InstTargetSelDB::rescan()
     }
   }
 
+  _sellistDirty = false;
   return Error::E_ok;
 }
 
@@ -254,6 +256,7 @@ PMError InstTargetSelDB::install( const Pathname & selfile_r )
   }
 
   MIL << *this << " installed " << selfile_r << endl;
+  _sellistDirty = true;
   return Error::E_ok;
 }
 
@@ -280,6 +283,7 @@ PMError InstTargetSelDB::remove( const Pathname & selfile_r )
 
   PathInfo::unlink( dbfile.path() );
   MIL << *this << " removed " << dbfile.path().basename() << endl;
+  _sellistDirty = true;
   return Error::E_ok;
 }
 

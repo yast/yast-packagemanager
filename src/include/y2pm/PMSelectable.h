@@ -76,6 +76,7 @@ class PMSelectable : virtual public Rep {
       E_Error
     };
 
+    void  _clearInstalledObj();
     Error setInstalledObj( PMObjectPtr obj_r );
     Error delInstalledObj();
 
@@ -131,7 +132,7 @@ class PMSelectable : virtual public Rep {
      * The one among all available Objects with this name (from any enabled InstSrc),
      * That could be actually installed.
      *
-     * Might be NULL, if no available Object is appropriate or TABOO flag is set.
+     * Might be NULL, if no available Object is appropriate.
      **/
     PMObjectPtr candidateObj() const { return _candidateObj; }
 
@@ -224,33 +225,24 @@ class PMSelectable : virtual public Rep {
     // sh@suse.de
 
     enum UI_Status {
-      S_Taboo,               // hide candidateObj so it can't be installed. ( have no installedObj )
+      S_Keep,                // Keep this unmodified ( have installedObj && S_Keep )
+      S_Taboo,               // Keep this unmodified ( have no installedObj && S_Taboo)
       // requested by user:
-      S_Del,                 // delete  installedObj
-      S_Update,              // install candidateObj ( have installedObj )
-      S_Install,             // install candidateObj ( have no installedObj )
+      S_Del,                 // delete  installedObj ( clears S_Keep if set )
+      S_Update,              // install candidateObj ( have installedObj, clears S_Keep if set )
+      S_Install,             // install candidateObj ( have no installedObj, clears S_Taboo if set )
       // not requested by user:
       S_AutoDel,             // delete  installedObj
       S_AutoUpdate,          // install candidateObj ( have installedObj )
       S_AutoInstall,         // install candidateObj ( have no installedObj )
       // no modification:
-      S_KeepInstalled,       // no modification      ( have installedObj )
-      S_NoInst,              // no modification      ( have no installedObj ) ( clears taboo )
+      S_KeepInstalled,       // no modification      ( have installedObj && !S_Keep, clears S_Keep if set )
+      S_NoInst,              // no modification      ( have no installedObj && !S_Taboo, clears S_Taboo if set )
     };
 
     friend std::ostream & operator<<( std::ostream & str, UI_Status obj );
 
   private:
-
-    /**
-     * If doit is true, clears a TABOO flag, and
-     * sets candidateObj to bestCandidate, if available.
-     *
-
-     * Anyway return whether there is (or would be) a
-     * candidateObj available afterwards.
-     **/
-    bool clearTaboo( const bool doit );
 
     /**
      * Test or trigger status change according to doit.
@@ -369,7 +361,7 @@ class PMSelectable : virtual public Rep {
   public:
 
     /**
-     * True if forbidden to install a candidate object.
+     * True if no modification allowed by user.
      **/
     bool is_taboo()      const { return _state.is_taboo(); }
 
@@ -377,18 +369,19 @@ class PMSelectable : virtual public Rep {
 
     /**
      * User request to clear state (neither delete nor install).
+     * (keeps taboo)
      **/
     bool user_unset() { return _state.user_unset( true ); }
 
     /**
      * User request to delete the installed object. Fails if no
-     * installed object is present.
+     * installed object is present (clears taboo).
      **/
     bool user_set_delete() { return _state.user_set_delete( true ); }
 
     /**
      * User request to install the candidate object. Fails if no
-     * candidate object is present, or taboo.
+     * candidate object is present (clears taboo).
      **/
     bool user_set_install() { return _state.user_set_install( true ); }
 
@@ -402,13 +395,13 @@ class PMSelectable : virtual public Rep {
 
     /**
      * Application request to delete the installed object. Fails if no
-     * installed object is present, or user requested install.
+     * installed object is present, or user requested install or taboo.
      **/
     bool appl_set_delete() { return _state.appl_set_delete( true ); }
 
     /**
      * Application request to install the candidate object. Fails if no
-     * candidate object is present, or user requested delete, or taboo.
+     * candidate object is present, or user requested delete or taboo.
      **/
     bool appl_set_install() { return _state.appl_set_install( true ); }
 
@@ -422,13 +415,13 @@ class PMSelectable : virtual public Rep {
 
     /**
      * Auto request to install the candidate object. Fails if no
-     * candidate object is present, or user/appl requested delete, or taboo.
+     * candidate object is present, or user/appl requested delete or taboo.
      **/
     bool auto_set_install() { return _state.auto_set_install( true ); }
 
     /**
      * Auto request to delete the installed object. Fails if no
-     * installed object is present, or user/appl requested 'install'.
+     * installed object is present, or user/appl requested install or taboo.
      **/
     bool auto_set_delete() { return _state.auto_set_delete( true ); }
 
@@ -439,6 +432,10 @@ class PMSelectable : virtual public Rep {
      **/
     virtual std::ostream & dumpOn( std::ostream & str ) const;
 
+    /**
+     * print some debug lines
+     **/
+    std::ostream & dumpStateOn( std::ostream & str ) const;
 
   public:
 

@@ -54,7 +54,9 @@ class InstTargetSelDB : virtual public Rep {
 
     const Pathname _db;
 
-    std::list<PMSelectionPtr> _sellist;
+    mutable std::list<PMSelectionPtr> _sellist;
+
+    mutable bool _sellistDirty;
 
   private:
 
@@ -64,7 +66,7 @@ class InstTargetSelDB : virtual public Rep {
 
     Pathname db_file( const Pathname & selfile_r ) const;
 
-    PMError rescan();
+    PMError rescan() const;
 
   public:
 
@@ -80,7 +82,11 @@ class InstTargetSelDB : virtual public Rep {
 
     const Pathname & dbPath() const { return _db; }
 
-    const std::list<PMSelectionPtr> & getSelections() const { return _sellist; }
+    const std::list<PMSelectionPtr> & getSelections() const {
+      if ( _sellistDirty )
+	rescan();
+      return _sellist;
+    }
 
   public:
 

@@ -104,7 +104,12 @@ class PMSelectionManager : public PMManager {
      * (go through package list of selection and select/deselect
      * all packages -> needs PMPackageManager)
      */
-    PMError activate (PMPackageManager & package_mgr);
+    PMError activate( PMPackageManager & package_mgr );
+
+    /**
+     * Remember all activated selection in InstTargetSelDB
+     **/
+    PMError installOnTarget() const;
 
 };
 

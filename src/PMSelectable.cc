@@ -187,6 +187,22 @@ PMObjectPtr PMSelectable::autoCandidate() const
   return *_candidateList.begin();
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::_clearInstalledObj
+//	METHOD TYPE : void
+//
+//	DESCRIPTION : Helper for set/delInstalledObj
+//
+inline void PMSelectable::_clearInstalledObj()
+{
+  if ( _installedObj ) {
+    _detach_obj( _installedObj );
+    _installedObj = 0;
+    _state.set_has_installed( false );
+  }
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -201,7 +217,7 @@ PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
   if ( _installedObj == obj_r )
     return E_Ok;
 
-  delInstalledObj();
+  _clearInstalledObj();
 
   if ( obj_r ) {
     _installedObj = obj_r;
@@ -223,12 +239,7 @@ PMSelectable::Error PMSelectable::setInstalledObj( PMObjectPtr obj_r )
 //
 PMSelectable::Error PMSelectable::delInstalledObj()
 {
-  if ( _installedObj ) {
-    _detach_obj( _installedObj );
-    _installedObj = 0;
-    _state.set_has_installed( false );
-  }
-
+  _clearInstalledObj();
   chooseCandidateObj(); // installed arch influences it
   return E_Ok;
 }
@@ -389,10 +400,6 @@ bool PMSelectable::isEmpty() const
 //
 void PMSelectable::chooseCandidateObj()
 {
-  if ( _state.is_taboo() ) {
-    return;
-  }
-
   PMObjectPtr newcand = bestCandidate();
   if ( _candidateObj != newcand ) {
     _candidateObj = newcand;
@@ -449,27 +456,6 @@ bool PMSelectable::setUserCandidate( const PMObjectPtr & obj_r )
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : PMSelectable::clearTaboo
-//	METHOD TYPE : bool
-//
-//	DESCRIPTION :
-//
-bool PMSelectable::clearTaboo( const bool doit )
-{
-  if ( _state.is_taboo() ) {
-    if ( doit ) {
-      _state.user_clr_taboo( doit );
-      chooseCandidateObj();
-    } else {
-      return bestCandidate(); // wheter we'd get one if...
-    }
-  }
-  return _candidateObj;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
 //	METHOD NAME : PMSelectable::intern_set_status
 //	METHOD TYPE : bool
 //
@@ -479,73 +465,68 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
 {
   switch ( state_r ) {
 
+  case S_Keep:
+    if ( !_state.has_installed() )
+      return false;
+    return _state.user_set_taboo( doit );
+    break;
+
   case S_Taboo:
-    if ( _state.user_set_taboo( doit ) ) {
-      if ( doit )
-	clearCandidateObj();
-      return true;
-    }
-    return false;
+    if ( _state.has_installed() )
+      return false;
+    return _state.user_set_taboo( doit );
     break;
 
   case S_Del:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
     return _state.user_set_delete( doit );
     break;
 
   case S_Install:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
     if ( !_state.has_candidate_only() )
       return false;
     return _state.user_set_install( doit );
     break;
 
   case S_Update:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
     if ( !_state.has_both_objects() )
       return false;
     return _state.user_set_install( doit );
     break;
 
   case S_AutoDel:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
     return _state.auto_set_delete( doit );
     break;
 
   case S_AutoInstall:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
     if ( !_state.has_candidate_only() )
       return false;
     return _state.auto_set_install( doit );
     break;
 
   case S_AutoUpdate:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
     if ( !_state.has_both_objects() )
       return false;
     return _state.auto_set_install( doit );
     break;
 
   case S_KeepInstalled:
-    // TABOO state has no installed and no candidate set!
-    // No need for extra test
     if ( ! _state.has_installed() )
       return false;
-    return _state.user_unset( doit );
+    if ( doit ) {
+      _state.user_clr_taboo( doit ); // not done by user_unset
+      _state.user_unset( doit );
+    }
+    return true;
     break;
 
   case S_NoInst:
-    if ( ! clearTaboo( doit ) )
-      return false; // got no candidateObj
     if ( _state.has_installed() )
       return false;
-    return _state.user_unset( doit );
+    if ( doit ) {
+      _state.user_clr_taboo( doit ); // not done by user_unset
+      _state.user_unset( doit );
+    }
+    return true;
     break;
 
   }
@@ -565,7 +546,7 @@ PMSelectable::UI_Status PMSelectable::status() const
 {
   if ( !_state.to_modify() ) {
     if ( _state.has_installed() )
-      return S_KeepInstalled;
+      return ( _state.is_taboo() ? S_Keep :S_KeepInstalled );
     return( _state.is_taboo() ? S_Taboo : S_NoInst );
   }
 
@@ -645,6 +626,7 @@ std::ostream & operator<<( std::ostream & str, PMSelectable::UI_Status obj )
   switch ( obj ) {
 #define ENUM_OUT(V) case PMSelectable::V: return str << #V; break
 
+    ENUM_OUT( S_Keep );
     ENUM_OUT( S_Taboo );
     ENUM_OUT( S_Del );
     ENUM_OUT( S_Install );
@@ -680,6 +662,18 @@ ostream & PMSelectable::dumpOn( ostream & str ) const
   return str << '}';
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::dumpStateOn
+//	METHOD TYPE : std::ostream &
+//
+//	DESCRIPTION :
+//
+std::ostream & PMSelectable::dumpStateOn( std::ostream & str ) const
+{
+  return str << _state << " " << _name;
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -730,6 +724,10 @@ void PMSelectable::check() const
   bool hc = _candidateObj;
   if ( hi != _state.has_installed() || hc != _state.has_candidate() ) {
     CHKLOG( "state <-> object missmatch" );
+  }
+
+  if ( _state.is_taboo() && _state.to_modify() ) {
+    CHKLOG( "taboo and modification set" );
   }
 }
 
