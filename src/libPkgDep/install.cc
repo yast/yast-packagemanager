@@ -184,7 +184,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 		PkgName oname = obs->name();
 		PMSolvablePtr p = vinstalled.lookup(oname);
 		if (p && obs->matches( p->self_provides() )) {
-			WAR << "installed/accepted " << oname << " obsoleted by " << candname << endl;
+			DBG << "installed/accepted " << oname << " obsoleted by " << candname << endl;
 			/*
 			vinstalled.remove( oname );
 
@@ -196,7 +196,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 			if (!check_for_broken_reqs( p, cand, res ))
 				error = true;
 			else {
-				DBG << "no broken reqs, removing " << oname << " from installed" << endl;
+				D__ << "no broken reqs, removing " << oname << " from installed" << endl;
 				vinstalled.remove( oname );
 
 				ErrorResult res(*this,p);

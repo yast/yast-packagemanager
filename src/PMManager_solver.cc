@@ -208,7 +208,7 @@ bad, PkgDep::ErrorResultList& obsolete)
 
 	if(!selp->auto_set_install())
 	    {
-		ERR << "could not set " << it->name <<
+		WAR << "could not set " << it->name <<
 		    " to status auto install, current state is " << selp->status() << endl;
 		PkgDep::ErrorResult err(*it);
 		err.state_change_not_possible = true;
@@ -245,9 +245,9 @@ bad, PkgDep::ErrorResultList& obsolete)
     	if(!it->referers.empty())
 	{
 	    PkgSet fakei;
-	    DBG << "before assign" << endl;
+	    D__ << "before assign" << endl;
 	    fakei = installed;
-	    DBG << "after assign" << endl;
+	    D__ << "after assign" << endl;
 	    for(PkgDep::RelInfoList::iterator rit = it->referers.begin()
 		; rit != it->referers.end(); ++rit)
 	    {
@@ -258,7 +258,7 @@ bad, PkgDep::ErrorResultList& obsolete)
 		if(p == it->solvable) continue; // do not remove the package that has the conflict
 
 		if(!fakei.includes(p->name())) continue;
-		DBG << "remove " <<  p->name() << endl;
+		D__ << "remove " <<  p->name() << endl;
 		PkgDep::remove_package(&fakei, p, it->remove_to_solve_conflict);
 	    }
 	}
