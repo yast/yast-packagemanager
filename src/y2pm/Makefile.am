@@ -6,7 +6,7 @@ pkgincludedir = $(includedir)/y2pm
 
 # these go to $(pkgincludedir)
 
-pkginclude_HEADERS = Y2PMCallbacks.h \
+pkginclude_HEADERS = PMTypes.h Y2PMCallbacks.h \
 	Timecount.h	\
 	Alternatives.h	\
 	PkgSet.h	\

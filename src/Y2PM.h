@@ -24,21 +24,10 @@
 
 #include <iosfwd>
 #include <string>
-#include <list>
 
-#include <y2util/LangCode.h>
-#include <y2util/FSize.h>
+#include <y2util/Pathname.h>
 
-#include <y2pm/PMError.h>
-#include <y2pm/PkgArch.h>
-#include <y2pm/InstSrcManager.h>
-
-class InstTarget;
-class PMPackageManager;
-class PMYouPatchManager;
-class PMSelectionManager;
-
-class ProgressCounter;
+#include <y2pm/PMTypes.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -62,7 +51,7 @@ class Y2PM {
     // the current base architecture of the target
     static PkgArch _base_arch;
     // the current list of allowed architectures
-    static std::list<PkgArch> _allowed_archs;
+    static PM::ArchSet _allowed_archs;
 
   private:
 
@@ -89,14 +78,14 @@ class Y2PM {
     ///////////////////////////////////////////////////////////////////
   public:
 
-    typedef std::set<LangCode> LocaleSet;
-    typedef std::list<LangCode> LocaleFallback;
+    typedef PM::LocaleSet   LocaleSet;
+    typedef PM::LocaleOrder LocaleOrder;
 
     /**
      * Return an ordered list of locales to try. For 'de_DE' you may for
      * example get a list like: { de_DE, de, en }
      **/
-    static LocaleFallback getLocaleFallback( const LangCode & locale_r );
+    static LocaleOrder getLocaleFallback( const LangCode & locale_r );
 
     /**
      * Return the preferred locale. The preferred language for labels,
@@ -170,8 +159,8 @@ class Y2PM {
     /**
      * Access to the list of allowed architectures
      **/
-    static const std::list<PkgArch> & allowedArchs(void) { return _allowed_archs; }
-    static void setAllowedArchs(const std::list<PkgArch>& allowed_archs) { _allowed_archs = allowed_archs; }
+    static const PM::ArchSet & allowedArchs(void) { return _allowed_archs; }
+    static void setAllowedArchs(const PM::ArchSet & allowed_archs) { _allowed_archs = allowed_archs; }
 
     /**
      * If false, root is ramdisk, and system to install is (or will be) mounted
@@ -315,7 +304,7 @@ class Y2PM {
 			       std::list<std::string>& errors_r,
 			       std::list<std::string>& remaining_r,
 			       std::list<std::string>& srcremaining_r,
-			       InstSrcManager::ISrcIdList installrank );
+			       PM::ISrcIdList installrank );
 
     /**
      * Install a single rpm file.

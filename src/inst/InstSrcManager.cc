@@ -281,7 +281,7 @@ InstSrcPtr InstSrcManager::lookupId( const ISrcId & isrc_r ) const
 //	METHOD NAME : InstSrcManager::lookupSourceByID
 //	METHOD TYPE : InstSrcPtr
 //
-InstSrcPtr InstSrcManager::lookupSourceByID( InstSrc::UniqueID srcID_r ) const
+InstSrcPtr InstSrcManager::lookupSourceByID( PM::NumericISrcID srcID_r ) const
 {
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
     if ( (*it)->srcID() == srcID_r ) {

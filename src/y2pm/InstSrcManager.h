@@ -20,11 +20,13 @@
 #define InstSrcManager_h
 
 #include <iosfwd>
-#include <set>
-#include <map>
-#include <list>
 
-#include <y2pm/InstSrc.h>
+#include <y2util/Url.h>
+
+#include <y2pm/PMTypes.h>
+
+#include <y2pm/InstSrcPtr.h>
+#include <y2pm/InstSrcError.h>
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -113,9 +115,8 @@ class InstSrcManager {
      **/
     typedef InstSrcError Error;
 
-    typedef constInstSrcPtr   ISrcId;
-
-    typedef std::list<ISrcId> ISrcIdList;
+    typedef PM::ISrcId     ISrcId;
+    typedef PM::ISrcIdList ISrcIdList;
 
   private:
 
@@ -161,7 +162,7 @@ class InstSrcManager {
      * Find InstSrcPtr in _knownSources by numeric srcID.
      * Return NULL if not in _knownSources.
      **/
-    InstSrcPtr lookupSourceByID( InstSrc::UniqueID srcID_r ) const;
+    InstSrcPtr lookupSourceByID( PM::NumericISrcID srcID_r ) const;
 
     /**
      * Add nsrc_r to _knownSources if same product is not yet present.
@@ -276,8 +277,8 @@ class InstSrcManager {
      **/
     PMError rewriteUrl( const ISrcId isrc_r, const Url & newUrl_r );
 
-    typedef std::pair<InstSrc::UniqueID, bool> SrcState;
-    typedef std::vector<SrcState>              SrcStateVector;
+    typedef PM::SrcState       SrcState;
+    typedef PM::SrcStateVector SrcStateVector;
 
     /**
      * Return list of all known sources numeric srcID and default state
@@ -328,7 +329,7 @@ class InstSrcManager {
      * Providing this srcID, the coresponding ISrcId is returned, or NULL, if the InstSrc not found in
      * the list of known InstSrces (e.g. meanwhile deleted).
      **/
-    ISrcId getSourceByID( InstSrc::UniqueID srcID_r ) const { return lookupSourceByID( srcID_r ); }
+    ISrcId getSourceByID( PM::NumericISrcID srcID_r ) const { return lookupSourceByID( srcID_r ); }
 
     /**
      * Disable all InstSrc'es.
@@ -371,7 +372,7 @@ class InstSrcManager {
 
   public:
 
-    typedef std::vector<InstSrc::UniqueID> InstOrder;
+    typedef PM::InstOrder InstOrder;
 
   private:
 

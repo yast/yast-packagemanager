@@ -30,6 +30,7 @@
 
 #include <y2pm/InstTarget.h>
 #include <y2pm/InstTargetError.h>
+#include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
@@ -533,7 +534,7 @@ static void commitCkeckMediaGpg( PMPackagePtr pkg_r )
   if ( Y2PM::instTarget().rootdir() == "/" )
     return;
 
-  static set<InstSrc::UniqueID> known_Srces;
+  static set<PM::NumericISrcID> known_Srces;
   static set<string> known_pubkeys;
   static string prefix( "gpg-pubkey-" );
   static string ext( ".asc" );

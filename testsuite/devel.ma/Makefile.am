@@ -11,8 +11,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		media/include		\
 		query/include		\
 		libPkgDep/include	\
-	   ) -I$(includedir)
-# -I/Local/ma/yast2/current/source/core/wfm/src
+	   ) -I$(includedir) -I/Local/ma/yast2/current/source/core/wfm/src
 
 LDADD = $(top_builddir)/src/liby2pm.la
 

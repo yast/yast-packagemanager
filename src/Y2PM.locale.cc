@@ -210,10 +210,10 @@ inline Y2PM::LocaleSettings & Y2PM::localeSettings() {
 //
 //
 //	METHOD NAME : Y2PM::getLocaleFallback
-//	METHOD TYPE : Y2PM::LocaleFallback
+//	METHOD TYPE : Y2PM::LocaleOrder
 //
-Y2PM::LocaleFallback Y2PM::getLocaleFallback( const LangCode & locale_r ) {
-  LocaleFallback ret;
+Y2PM::LocaleOrder Y2PM::getLocaleFallback( const LangCode & locale_r ) {
+  LocaleOrder ret;
 
   if ( locale_r->empty() ) {
     // _locale_fallback only

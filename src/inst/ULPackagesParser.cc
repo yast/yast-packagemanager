@@ -68,37 +68,50 @@ ULPackagesParser::ULPackagesParser(const InstSrcPtr source)
     _tagset.setAllowMultipleSets (true);	// multiple tagsets per file
     _tagset.setAllowUnknownTags (true);		// skip unknown tags
 
-    // for the 'packages' file
+    // Using loop and switch to get a compiler warning, if tags are
+    // defined but uninitialized, or vice versa.
+    for ( Tags tag = Tags(0); tag < NUM_TAGS; tag = Tags(tag+1) ) {
+      switch ( tag ) {
+#define DEFTAG(T,ARGS) case T: _tagset.addTag ARGS; break
 
-    _tagset.addTag ("Pkg", PACKAGE,	TaggedFile::SINGLE, TaggedFile::START);
-    _tagset.addTag ("Req", REQUIRES,	TaggedFile::MULTI);
-    _tagset.addTag ("Prq", PREREQUIRES, TaggedFile::MULTI);
-    _tagset.addTag ("Prv", PROVIDES,	TaggedFile::MULTI);
-    _tagset.addTag ("Con", CONFLICTS,	TaggedFile::MULTI);
-    _tagset.addTag ("Obs", OBSOLETES,	TaggedFile::MULTI);
-    _tagset.addTag ("Rec", RECOMMENDS,	TaggedFile::MULTI);
-    _tagset.addTag ("Sug", SUGGESTS,	TaggedFile::MULTI);
+	// for the 'packages' file
 
-    _tagset.addTag ("Loc", LOCATION,	TaggedFile::SINGLE);
-    _tagset.addTag ("Siz", SIZE,	TaggedFile::SINGLE);
-    _tagset.addTag ("Tim", BUILDTIME,	TaggedFile::SINGLE);
-    _tagset.addTag ("Src", SOURCERPM,	TaggedFile::SINGLEPOS);
-    _tagset.addTag ("Grp", GROUP,	TaggedFile::SINGLE);
-    _tagset.addTag ("Lic", LICENSE,	TaggedFile::SINGLEPOS);
-    _tagset.addTag ("Aut", AUTHORS,	TaggedFile::MULTI);
-    _tagset.addTag ("Shr", SHAREWITH,	TaggedFile::SINGLE);
-    _tagset.addTag ("Key", KEYWORDS,	TaggedFile::MULTI);
+	DEFTAG( PACKAGE,	( "Pkg", tag,	TaggedFile::SINGLE, TaggedFile::START) );
+	DEFTAG( REQUIRES,	( "Req", tag,	TaggedFile::MULTI) );
+	DEFTAG( PREREQUIRES,	( "Prq", tag,	TaggedFile::MULTI) );
+	DEFTAG( PROVIDES,	( "Prv", tag,	TaggedFile::MULTI) );
+	DEFTAG( CONFLICTS,	( "Con", tag,	TaggedFile::MULTI) );
+	DEFTAG( OBSOLETES,	( "Obs", tag,	TaggedFile::MULTI) );
+	DEFTAG( RECOMMENDS,	( "Rec", tag,	TaggedFile::MULTI) );
+	DEFTAG( SUGGESTS,	( "Sug", tag,	TaggedFile::MULTI) );
 
-    // for the 'packages.<locale>' file
+	DEFTAG( LOCATION,	( "Loc", tag,	TaggedFile::SINGLE) );
+	DEFTAG( SIZE,		( "Siz", tag,	TaggedFile::SINGLE) );
+	DEFTAG( BUILDTIME,	( "Tim", tag,	TaggedFile::SINGLE) );
+	DEFTAG( SOURCERPM,	( "Src", tag,	TaggedFile::SINGLEPOS) );
+	DEFTAG( GROUP,		( "Grp", tag,	TaggedFile::SINGLE) );
+	DEFTAG( LICENSE,	( "Lic", tag,	TaggedFile::SINGLEPOS) );
+	DEFTAG( AUTHORS,	( "Aut", tag,	TaggedFile::MULTI) );
+	DEFTAG( SHAREWITH,	( "Shr", tag,	TaggedFile::SINGLE) );
+	DEFTAG( KEYWORDS,	( "Key", tag,	TaggedFile::MULTI) );
 
-    _tagset.addTag ("Sum", SUMMARY,	TaggedFile::SINGLE);
-    _tagset.addTag ("Des", DESCRIPTION, TaggedFile::MULTI);
-    _tagset.addTag ("Ins", INSNOTIFY,   TaggedFile::MULTI);
-    _tagset.addTag ("Del", DELNOTIFY,   TaggedFile::MULTI);
+	// for the 'packages.<locale>' file
 
-    // for the 'packages.DU' file
+	DEFTAG( SUMMARY,	( "Sum", tag,	TaggedFile::SINGLE) );
+	DEFTAG( DESCRIPTION,	( "Des", tag,	TaggedFile::MULTI) );
+	DEFTAG( INSNOTIFY,	( "Ins", tag,   TaggedFile::MULTI) );
+	DEFTAG( DELNOTIFY,	( "Del", tag,   TaggedFile::MULTI) );
+	DEFTAG( LICENSETOCONFIRM,( "Eul", tag,   TaggedFile::MULTI) );
+	// for the 'packages.DU' file
 
-    _tagset.addTag ("Dir", DU,		TaggedFile::MULTI);
+	DEFTAG( DU,		( "Dir", DU,	TaggedFile::MULTI) );
+
+	// No default: let compiler warn missing enumeration values
+	case NUM_TAGS: break;
+
+#undef DEFTAG
+      }
+    }
 }
 
 
@@ -437,6 +450,7 @@ ULPackagesParser::fromLocale ()
     SET_CACHE (DESCRIPTION);
     SET_CACHE (INSNOTIFY);
     SET_CACHE (DELNOTIFY);
+    SET_CACHE (LICENSETOCONFIRM);
 
 #undef GET_TAG
 #undef SET_CACHE
