@@ -19,55 +19,12 @@
 #include <iostream>
 #include <algorithm>
 
+#include "show_pm.h"
+
 #undef  Y2LOG
 #define Y2LOG "PM_test_selections"
 
 using namespace std;
-
-static void
-show_selection (PMSelectionPtr p)
-{
-    cout << "-- Solvable --" << endl;
-    for (PMSelection::PMSolvableAttribute attr
-	= PMSelection::PMSolvableAttribute(PMSelection::PMSLV_ATTR_BEGIN);
-	attr < PMSelection::PMSLV_NUM_ATTRIBUTES;
-	attr = PMSelection::PMSolvableAttribute(attr+1))
-    {
-	cout
-	<< p->getAttributeName(attr)
-	<< ": "
-	<< p->getAttributeValue((PMSelection::PMSelectionAttribute)attr)
-	<< endl;
-    }
-
-    cout << "-- Object --" << endl;
-    for (PMSelection::PMObjectAttribute attr
-	= PMSelection::PMObjectAttribute(PMSelection::PMOBJ_ATTR_BEGIN);
-	attr < PMSelection::PMOBJ_NUM_ATTRIBUTES;
-	attr = PMSelection::PMObjectAttribute(attr+1))
-    {
-	cout
-	<< p->getAttributeName(attr)
-	<< ": "
-	<< p->getAttributeValue(attr)
-	<< endl;
-    }
-
-    cout << "-- Selection --" << endl;
-	for (PMSelection::PMSelectionAttribute attr
-	= PMSelection::PMSelectionAttribute(PMSelection::PMSEL_ATTR_BEGIN);
-	    attr < PMSelection::PMSEL_NUM_ATTRIBUTES;
-	attr = PMSelection::PMSelectionAttribute(attr+1))
-    {
-	cout
-	<< p->getAttributeName(attr)
-	<< ": "
-	<< p->getAttributeValue(attr)
-	<< endl;
-    }
-
-    return;
-}
 
 int main(int argc, char* argv[])
 {
@@ -215,7 +172,7 @@ int main(int argc, char* argv[])
 		for (std::list<PMSelectionPtr>::const_iterator p_it = sels->begin();
 			p_it != sels->end(); ++p_it)
 		{
-		    show_selection (*p_it);
+		    show_pmselection (*p_it);
 		}
 	    }
 	}
