@@ -1,8 +1,19 @@
 -------------------------------------------------------------------
+Fri Mar 14 01:22:16 CET 2003 - ma@suse.de
+
+- Enabled using plain RPM sources as InstSource. With media other
+  than FTP/HTTP it works out of the box, if all RPM packages are
+  located in one directory. For remote media and RPM packages located
+  inside a directory tree, a chachefile must be provided at the InstSrc
+  root directory. Zipped cachefile is supported. Standalone binary to
+  create a chachefile will be provided ASASP.(#23928)
+- 2.7.31
+
+-------------------------------------------------------------------
 Thu Mar 13 14:02:09 CET 2003 - ma@suse.de
 
 - Fixed: Request to install source rpm got lost, if binary package
-  is to be installed/deleted.
+  is to be installed/deleted (#24067,25318)
 
 -------------------------------------------------------------------
 Mon Mar 10 22:51:42 CET 2003 - ma@suse.de
