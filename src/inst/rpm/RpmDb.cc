@@ -1618,8 +1618,10 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 
     // run rpm
     RpmArgVec opts;
-    opts.push_back ("-U");
-    opts.push_back ("--percent");
+    opts.push_back("-U");
+    opts.push_back("--percent");
+    opts.push_back("--nodigest");
+    opts.push_back("--nosignature");
 
     if (flags & RPMINST_NODOCS)
 	opts.push_back ("--excludedocs");
