@@ -259,10 +259,13 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
                                                   &httpReturnCode );
             if ( infoRet == CURLE_OK ) {
               string msg = "HTTP return code: " +
-                           stringutil::numstring( httpReturnCode );
+                           stringutil::numstring( httpReturnCode ) +
+                           " (URL: " + url.asString() + ")";
               DBG << msg << endl;
               err.setDetails( msg );
-              if ( httpReturnCode == 401 ) return Error::E_login_failed;
+              if ( httpReturnCode == 401 )
+                return PMError( Error::E_login_failed,
+                                "URL: " + url.asString() );
               else return PMError( Error::E_file_not_found, msg );
             }
           }
@@ -324,7 +327,7 @@ int MediaCurl::progressCallback( void *clientp, double dltotal, double dlnow,
                                  double ultotal, double ulnow )
 {
   if ( _callbacks ) {
-    if ( _callbacks->progress( dlnow * 100 / dltotal ) ) return 0;
+    if ( _callbacks->progress( int( dlnow * 100 / dltotal ) ) ) return 0;
     else return 1;
   }
 
