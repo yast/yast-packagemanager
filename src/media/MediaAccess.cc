@@ -144,7 +144,6 @@ Url MediaAccess::url() const
 PMError
 MediaAccess::close ()
 {
-  DBG << "handler " << _handler << endl;
   ///////////////////////////////////////////////////////////////////
   // !!! make shure handler gets properly deleted.
   // I.e. release attached media before deleting the handler.

@@ -222,17 +222,33 @@ int main( int argc, char * argv[] )
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  if ( 1 ) {
-    LMGR;
-    for ( PMManager::PMSelectableVec::const_iterator it = LMGR.begin(); it != LMGR.end(); ++it ) {
+  PMError  err;
+  Pathname localp;
+  int      medianr = -1;
+  InstSrcManager::ISrcId sid( ISM.getSources(true).front() );
 
-      (*it)->dumpStateOn( WAR ) << " " << *it << endl
-	<< (*it)->name() << " " << (*it)->theObject()->summary() << endl;
+  err = sid->provideFile( medianr, "/autorun.inf", localp );
+  SEC << medianr << ": " << localp << " - " << err << endl;
 
-      PMLanguageManager::PkgSelectables packages( LMGR.getLangPackagesFor( *it ) );
-      MIL << packages << endl;
-    }
-  }
+  medianr = 1;
+  err = sid->provideFile( medianr, "/autorun.inf", localp );
+  SEC << medianr << ": " << localp << " - " << err << endl;
+
+  medianr = 2;
+  err = sid->provideFile( medianr, "/autorun.inf", localp );
+  SEC << medianr << ": " << localp << " - " << err << endl;
+
+  medianr = 3;
+  err = sid->provideFile( medianr, "/autorun.inf", localp );
+  SEC << medianr << ": " << localp << " - " << err << endl;
+
+  medianr = 4;
+  err = sid->provideFile( medianr, "/autorun.inf", localp );
+  SEC << medianr << ": " << localp << " - " << err << endl;
+
+  medianr = 8;
+  err = sid->provideFile( medianr, "/autorun.inf", localp );
+  SEC << medianr << ": " << localp << " - " << err << endl;
 
   SEC << "STOP" << endl;
   return 0;
