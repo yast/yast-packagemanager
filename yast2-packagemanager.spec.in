@@ -1,6 +1,6 @@
 @HEADER-COMMENT@
 
-# neededforbuild  autoconf automake gpp libgpp yast2-core yast2-core-devel yast2-devtools
+# neededforbuild  autoconf automake gpp libgpp liby2util liby2util-devel yast2-devtools kdoc
 
 @HEADER@
 Summary:	-
