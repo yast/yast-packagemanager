@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 10 19:01:20 CEST 2002 - lnussel@suse.de
+
+- do not complain about broken requirements of installed but obsolete packages
+
+-------------------------------------------------------------------
 Tue Sep 10 17:10:34 CEST 2002 - lnussel@suse.de
 
 - upgrade mode option. Packages marked for installation by a selection which
