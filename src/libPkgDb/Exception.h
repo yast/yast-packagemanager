@@ -5,33 +5,31 @@
 #include <string>
 #include <cerrno>
 
-using namespace std;
-
 struct PkgDbExcp {
   protected:
-	string name;
+	std::string name;
   public:
-	PkgDbExcp( string str ) : name(str) {
+	PkgDbExcp( std::string str ) : name(str) {
 #ifndef NDEBUG
-		cerr << "PkgDbExcp(" << str << ")\n";
+		std::cerr << "PkgDbExcp(" << str << ")\n";
 #endif
 	}
 	PkgDbExcp() : name("") {}
 	virtual ~PkgDbExcp() {}
 	const char *opname() { return name.c_str(); }
-	virtual void print( ostream& os ) const;
+	virtual void print( std::ostream& os ) const;
 	
-	friend ostream& operator<<( ostream& os, const PkgDbExcp& e );
+	friend std::ostream& operator<<( std::ostream& os, const PkgDbExcp& e );
 };
 
 struct PkgDbFileExcp : public PkgDbExcp {
   protected:
 	int err;
   public:
-	PkgDbFileExcp(string str, int e = -1) : PkgDbExcp(str) {
+	PkgDbFileExcp(std::string str, int e = -1) : PkgDbExcp(str) {
 		err = (e == -1) ? errno : e;
 	}
-	void print( ostream& os ) const;
+	void print( std::ostream& os ) const;
 };
 /*
 struct PkgDbNoTagExcp : public PkgDbExcp {
@@ -47,8 +45,8 @@ struct PkgDbReadTagExcp : public PkgDbExcp {
   protected:
 	int line;
   public:
-	PkgDbReadTagExcp(string str, int l = 0) : PkgDbExcp(str), line(l) {}
-	void print( ostream& os ) const;
+	PkgDbReadTagExcp(std::string str, int l = 0) : PkgDbExcp(str), line(l) {}
+	void print( std::ostream& os ) const;
 };
 
 #endif  /* _PkgDb_Exception_h */

@@ -3,12 +3,14 @@
 
 #include <list>
 #include <vector>
-#include <PackageSource.h>
-#include <PkgName.h>
-#include <PkgEdition.h>
-#include <PkgRelation.h>
+#include <string>
+#include <iostream>
+#include <y2pm/PackageSource.h>
+#include <y2pm/PkgName.h>
+#include <y2pm/PkgEdition.h>
+#include <y2pm/PkgRelation.h>
 //#include <DistTag.h>
-#include <RefObject.h>
+#include <y2util/RefObject.h>
 
 class PkgRelation;
 class PackageDataProvider;
@@ -16,11 +18,11 @@ class PackageDataProvider;
 // Package is the class that is stored in the package pool.
 class Package {
   public:
-	typedef list<PkgRelation> PkgRelList_type;
+	typedef std::list<PkgRelation> PkgRelList_type;
 	typedef PkgRelList_type::iterator PkgRelList_iterator;
 	typedef PkgRelList_type::const_iterator PkgRelList_const_iterator;
 
-	typedef vector<string> FileList_type;
+	typedef std::vector<std::string> FileList_type;
 	typedef FileList_type::iterator FileList_iterator;
 	typedef FileList_type::const_iterator FileList_const_iterator;
 	
@@ -75,7 +77,7 @@ class Package {
 //	DistTagList _in_distribs;
 	// file and offset from where the data came for reloading
 //	PackageSource *_source;
-	list<PackageDataProvider*> _dataproviders;
+	std::list<PackageDataProvider*> _dataproviders;
 	// relations of the package
 	//TODO
 	PkgRelList_type _requires, _conflicts, _provides, _obsoletes;
@@ -97,7 +99,7 @@ class Package {
 	~Package();
 
 	// print package data in ASCII summary format
-	friend ostream& operator<<( ostream&, const Package& );
+	friend std::ostream& operator<<( std::ostream&, const Package& );
 
 /*
 	// add a DistTag to in_distribs
@@ -167,7 +169,7 @@ class Package {
 };
 
 // some aux output operators
-ostream& operator<<( ostream&, const Package::PkgRelList_type& );
+std::ostream& operator<<( std::ostream&, const Package::PkgRelList_type& );
 //ostream& operator<<( ostream&, const DistTagList& );
 
     	

@@ -2,7 +2,7 @@
 
 noinst_LTLIBRARIES = libPkgDb.la
 
-INCLUDES = -I. -I/usr/include/YaST2
+INCLUDES = -I. -I/usr/include/YaST2 -I$(top_srcdir)/src/include
 
 #LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 #libPkgDb_la_LIBADD = @Z_LIBS@
@@ -14,8 +14,7 @@ libPkgDb_la_SOURCES = Package.cc PkgDb.cc PkgSet.cc PkgName.cc	\
 		      Exception.cc misc.cc pkgdbheader.c paths.cc \
 		      PackageSource.cc \
 		      Package.h PkgDb.h DbHeader.h Exception.h \
-		      DistTag.h misc.h pkgdbheader.h paths.h \
-		      PackageSource.h debug.h
+		      DistTag.h misc.h pkgdbheader.h paths.h
 
 # Local Variables:
 # tab-width: 4

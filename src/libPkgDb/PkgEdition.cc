@@ -2,8 +2,9 @@
 #include <cstring>
 #include <alloca.h>
 #include <cctype>
-#include <PkgEdition.h>
+#include <y2pm/PkgEdition.h>
 
+using namespace std;
 
 //
 // compare two editions

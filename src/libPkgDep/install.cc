@@ -2,6 +2,7 @@
 #include <PkgDep_int.h>
 #include <functional>
 
+using namespace std;
 
 bool PkgDep::install( PkgSet& in_candidates,
 					  ResultList& out_good, ErrorResultList& out_bad,

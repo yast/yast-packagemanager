@@ -2,6 +2,7 @@
 #include <PkgDep_int.h>
 #include <PkgDb.h>
 
+using namespace std;
 
 void PkgDep::handle_alternative( const AltInfo& alt_info )
 {

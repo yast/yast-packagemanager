@@ -2,7 +2,7 @@
 //#include <fstream>
 #include <string>
 #include <PkgDb.h>
-#include <PkgSet.h>
+#include <y2pm/PkgSet.h>
 #include <Exception.h>
 #include <unistd.h>
 /*
@@ -13,6 +13,8 @@
 #include "paths.h"
 #include "misc.h"
 */
+
+using namespace std;
 
 PkgDb PkgPool;
 
@@ -250,7 +252,7 @@ void PkgDb::check_new_ReqFiles( Package *pkg, const ReqFiles_type& RF )
 void PkgDb::notify_sets_of_new_provides( const Package *pkg,
 										 const PkgRelation& new_p )
 {
-	for( list<PkgSet*>::iterator p = attached_sets.begin();
+	for( list<PkgSet::Ref>::iterator p = attached_sets.begin();
 		 p != attached_sets.end(); ++p )
 		(*p)->new_provides( pkg, new_p );
 }

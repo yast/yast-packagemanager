@@ -1,10 +1,12 @@
 #include <unistd.h>
 #include <PkgDep.h>
-#include <Package.h>
-#include <PackageSource.h>
+#include <y2pm/Package.h>
+#include <y2pm/PackageSource.h>
 #include <PkgDb.h>
 #include <Exception.h>
-#include <timeclass.h>
+#include <y2util/timeclass.h>
+
+using namespace std;
 
 void usage(char **argv) {
 	cerr <<

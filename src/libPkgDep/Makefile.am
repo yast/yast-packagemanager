@@ -2,7 +2,7 @@
 
 noinst_LTLIBRARIES = libPkgDep.la
 
-INCLUDES = -I. -I$(top_srcdir)/src/libPkgDb -I/usr/include/YaST2
+INCLUDES = -I. -I$(top_srcdir)/src/libPkgDb -I/usr/include/YaST2 -I$(top_srcdir)/src/include
 #LDADD = $(top_srcdir)/src/libPkgDb/libPkgDb.la
 
 #LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@

@@ -2,8 +2,10 @@
 #include <cstring>
 #include <iostream>
 #include <iomanip>
-#include "hash.h"
-#include <Package.h>
+#include <y2util/hash.h>
+#include <y2pm/Package.h>
+
+using namespace std;
 
 ostream& operator<<( ostream& os, const Package& pkg )
 {

@@ -2,8 +2,9 @@
 #define _PackageSource_h
 
 //#include <DistTag.h>
+#include <string>
 #include <y2util/hash.h>
-#include <y2pm/RefObject.h>
+#include <y2util/RefObject.h>
 #include <y2pm/PkgName.h>
 
 // todo
@@ -32,13 +33,13 @@ class MediaAccess
     private:
 	MediaAccess(const MediaAccess&);
     protected:
-	string _urlprefix;
+	std::string _urlprefix;
     public:
 	typedef RefObject<MediaAccess> Ref;
 
-	MediaAccess(string urlprefix = "file");
+	MediaAccess(std::string urlprefix = "file");
 	virtual ~MediaAccess();
-	virtual string getFile(const string& file, bool purge = false)=0;
+	virtual std::string getFile(const std::string& file, bool purge = false)=0;
 };
 
 class MediaAccess_File : public MediaAccess
@@ -48,10 +49,10 @@ class MediaAccess_File : public MediaAccess
 	~MediaAccess_File();
 	// purge means remember the file and delete it on destruction of the
 	// object, e.g for temporary ftp downloads
-	string getFile(const string& file, bool purge=false);
+	std::string getFile(const std::string& file, bool purge=false);
 };
 
-extern hash<string,RefObject<MediaAccess> > media_access_handlers;
+extern hash<std::string,RefObject<MediaAccess> > media_access_handlers;
 
 // *********************************
 
@@ -61,11 +62,11 @@ class Url
     private:
 //	Url(const Url&);
 	MediaAccess::Ref _access;
-	string _path;
+	std::string _path;
     public:
-	Url(const string& url);
+	Url(const std::string& url);
 	MediaAccess::Ref getAccess();
-	const string& getPath() const;
+	const std::string& getPath() const;
 };
 
 // Base class for all data providers
@@ -88,7 +89,7 @@ class PackageDataProvider
 	// access functions
 //	virtual Size getSize(const PkgIdent& id) = 0;
 
-	virtual string getStringAttribute( stringAttributes attr ) = 0;
+	virtual std::string getStringAttribute( stringAttributes attr ) = 0;
 };
 
 class SuSEClassicDataProvider : public PackageDataProvider
@@ -112,7 +113,7 @@ class SuSEClassicDataProvider : public PackageDataProvider
 	    ParseCommonPkd();
 	};
 	
-	string getStringAttribute( stringAttributes attr )
+	std::string getStringAttribute( stringAttributes attr )
 	{
 	    return "nix";
 	}

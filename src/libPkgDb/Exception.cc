@@ -3,6 +3,8 @@
 #include <Exception.h>
 #include <DbHeader.h>
 
+using namespace std;
+
 ostream& operator<<( ostream& os, const PkgDbExcp& e )
 {
 	e.print( os );

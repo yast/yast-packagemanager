@@ -11,6 +11,8 @@ pkginclude_HEADERS =	\
 	PkgEdition.h	\
 	PkgRelation.h	\
 	PkgRevRel.h	\
+	Package.h	\
+	PackageSource.h	\
 	PkgSet.h
 
 #<INSTALL-HEADER-TARGET>

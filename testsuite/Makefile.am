@@ -4,7 +4,7 @@
 
 AUTOMAKE_OPTIONS = dejagnu
 
-INCLUDES= -I../src/include -I$(includedir)
+INCLUDES= -I$(top_srcdir)/src/include -I$(includedir) -I$(top_srcdir)/src/libPkgDb -I$(top_srcdir)/src/libPkgDep
 
 noinst_PROGRAMS = testinstall
 
@@ -14,4 +14,4 @@ testinstall_LDFLAGS = -L$(libdir)	\
 	$(top_srcdir)/src/libPkgDb/libPkgDb.la	\
 	$(top_srcdir)/src/libPkgDep/libPkgDep.la	\
 	-Xlinker --no-whole-archive
-
+testinstall_LDADD = -ly2util

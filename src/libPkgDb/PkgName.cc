@@ -1,4 +1,6 @@
-#include <PkgName.h>
+#include <y2pm/PkgName.h>
+
+using namespace std;
 
 UniqStr PkgName::PkgNameHash;
 

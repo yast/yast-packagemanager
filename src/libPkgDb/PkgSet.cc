@@ -1,7 +1,11 @@
-#include <PkgSet.h>
-#include <Package.h>
-#include <PkgDb.h>
 #include <functional>
+
+#include <y2pm/PkgSet.h>
+#include <y2pm/Package.h>
+#include <PkgDb.h>
+
+using namespace std;
+
 /*
 PkgSet::PkgSet( const DistTagList& tags )
 {
@@ -21,11 +25,11 @@ PkgSet::PkgSet( PackageDataProvider* provider )
 		if (pkg->is_from_provider( provider ))
 			add( pkg );
 	}
-	PkgPool.attach_set( this );
+	PkgPool.attach_set( PkgSet::Ref(this) );
 }
 
 PkgSet::~PkgSet() {
-	PkgPool.detach_set( this );
+	PkgPool.detach_set( PkgSet::Ref(this) );
 }
 
 #define RelList_for(field,var)											\

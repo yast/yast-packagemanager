@@ -1,12 +1,17 @@
-#include <Package.h>
-#include <PkgDb.h>
 #include <fstream>
 #include <sstream>
-#include <PkgEdition.h>
+
+#include <y2pm/PkgEdition.h>
+#include <y2pm/Package.h>
+#include <y2pm/PackageSource.h>
+
+#include <y2util/Pathname.h>
+#include <y2util/timeclass.h>
+
 #include <Exception.h>
-#include <PackageSource.h>
-#include <Pathname.h>
-#include <time.h>
+#include <PkgDb.h>
+
+using namespace std;
 
 hash<string,MediaAccess::Ref> media_access_handlers;
 

@@ -3,13 +3,13 @@
 
 // disabled overrides as they are dbheader dependant -- ln
 
-#include <hash.h>
-#include <PkgName.h>
-#include <Package.h>
-#include <PackageSource.h>
+#include <y2util/hash.h>
+#include <y2pm/PkgName.h>
+#include <y2pm/Package.h>
+#include <y2pm/PackageSource.h>
+#include <y2pm/PkgSet.h>
 
 size_t hashfun( const PkgNameEd& );
-class PkgSet;
 
 class PkgDb {
   public:
@@ -21,11 +21,11 @@ class PkgDb {
 	typedef PkgOverride_type::iterator PkgOverride_iterator;
 	typedef PkgOverride_type::const_iterator PkgOverride_const_iterator;
 */
-	typedef list<const char *> ReqFiles_type;
+	typedef std::list<const char *> ReqFiles_type;
 	typedef ReqFiles_type::iterator ReqFiles_iterator;
 	typedef ReqFiles_type::const_iterator ReqFiles_const_iterator;
 
-	typedef list<PkgName> AltDefaultList;
+	typedef std::list<PkgName> AltDefaultList;
 	typedef AltDefaultList::iterator AltDefaultList_iterator;
 	typedef AltDefaultList::const_iterator AltDefaultList_const_iterator;
 	typedef hash<PkgName,AltDefaultList> AltDefault_type;
@@ -42,7 +42,7 @@ class PkgDb {
 	AltDefault_type alt_defaults;
 	
 	// list of PkgSet using the pool (for new_provides notifications)
-	list<PkgSet*> attached_sets;
+	std::list<PkgSet::Ref> attached_sets;
 
 	// constructor helpers
 	void read_override_list();
@@ -118,10 +118,10 @@ class PkgDb {
 	}
 	
 	// attach and detach PkgSets
-	void attach_set( PkgSet *set ) {
+	void attach_set( PkgSet::Ref set ) {
 		attached_sets.push_back( set );
 	}
-	void detach_set( PkgSet *set ) {
+	void detach_set( PkgSet::Ref set ) {
 		attached_sets.remove( set );
 	}
 };

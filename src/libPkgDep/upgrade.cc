@@ -1,6 +1,8 @@
 #include <PkgDep.h>
 #include <PkgDep_int.h>
-#include <hash.h>
+#include <y2util/hash.h>
+
+using namespace std;
 
 static void deselect_referers(
 	PkgName pkgname,

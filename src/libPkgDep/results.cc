@@ -1,6 +1,7 @@
 #include <PkgDep.h>
 #include <PkgDep_int.h>
 
+using namespace std;
 
 PkgDep::Result::Result( const PkgDep& pkgdep, const Package *pkg )
 {

@@ -1,7 +1,9 @@
 #include <cstdio>
 #include <cstring>
-#include <PkgRelation.h>
-#include <Package.h>
+#include <y2pm/PkgRelation.h>
+#include <y2pm/Package.h>
+
+using namespace std;
 
 bool PkgRelation::matches( const Package* pkg ) const
 {

@@ -1,14 +1,16 @@
 #ifndef _PkgDep_h
 #define _PkgDep_h
 
-#include <PkgName.h>
-#include <PkgEdition.h>
-#include <PkgRevRel.h>
-#include <PkgSet.h>
 #include <iostream>
 #include <list>
 #include <deque>
-#include <hash.h>
+
+#include <y2util/hash.h>
+
+#include <y2pm/PkgName.h>
+#include <y2pm/PkgEdition.h>
+#include <y2pm/PkgRevRel.h>
+#include <y2pm/PkgSet.h>
 
 class PkgDep {
 
@@ -75,11 +77,11 @@ class PkgDep {
 		void merge( const PkgRelation& rel );
 	};
 
-	typedef list<PkgName> NameList;
+	typedef std::list<PkgName> NameList;
 	typedef NameList::iterator NameList_iterator;
 	typedef NameList::const_iterator NameList_const_iterator;
 
-	typedef list<RelInfo> RelInfoList;
+	typedef std::list<RelInfo> RelInfoList;
 	typedef RelInfoList::iterator RelInfoList_iterator;
 	typedef RelInfoList::const_iterator RelInfoList_const_iterator;
 
@@ -118,7 +120,7 @@ class PkgDep {
 		// true if not all requirements could be satisfied
 		RelInfoList unresolvable;
 		//
-		list<Alternative> alternatives;
+		std::list<Alternative> alternatives;
 		//
 		RelInfoList conflicts_with;
 		//
@@ -148,12 +150,12 @@ class PkgDep {
 
 	friend class Result;
 	friend class ErrorResult;
-	typedef list<Result> ResultList;
-	typedef list<ErrorResult> ErrorResultList;
+	typedef std::list<Result> ResultList;
+	typedef std::list<ErrorResult> ErrorResultList;
 
   private:
 
-	typedef list<PkgRevRelation> RevRelList;
+	typedef std::list<PkgRevRelation> RevRelList;
 	typedef RevRelList::iterator RevRelList_iterator;
 	typedef RevRelList::const_iterator RevRelList_const_iterator;
 
@@ -166,7 +168,7 @@ class PkgDep {
 		IRelInfo( const Package *p, PkgRelation r ) : pkg(p), rel(r) {}
 	};
 
-	typedef list<IRelInfo> IRelInfoList;
+	typedef std::list<IRelInfo> IRelInfoList;
 	typedef IRelInfoList::iterator IRelInfoList_iterator;
 	typedef IRelInfoList::const_iterator IRelInfoList_const_iterator;
 
@@ -198,7 +200,7 @@ class PkgDep {
 			: pkg(p), req(r), providers(l), result(rs) {}
 	};
 
-	typedef deque<AltInfo> AltInfoList;
+	typedef std::deque<AltInfo> AltInfoList;
 	typedef AltInfoList::iterator AltInfo_iterator;
 	typedef AltInfoList::const_iterator AltInfo_const_iterator;
 	
@@ -216,7 +218,7 @@ class PkgDep {
 	PkgSet vinstalled;
 	PkgSet *candidates;
 	Notes_type notes;
-	deque<const Package *> to_check;
+	std::deque<const Package *> to_check;
 	AltInfoList alts_to_check;
 	noval_hash<PkgName> alts_handled;
 	NameList i_obsoleted;
@@ -305,12 +307,12 @@ public:
 	}
 };
 
-ostream& operator<<( ostream& os, const PkgDep::Result& res );
-ostream& operator<<( ostream& os, const PkgDep::ErrorResult& res );
-ostream& operator<<( ostream& os, const PkgDep::RelInfoList& rl );
-ostream& operator<<( ostream& os, const list<PkgDep::Alternative>& al );
-ostream& operator<<( ostream& os, const PkgDep::NameList& nl );
-ostream& operator<<( ostream& os, const PkgDep::NeededEditionRange& range );
+std::ostream& operator<<( std::ostream& os, const PkgDep::Result& res );
+std::ostream& operator<<( std::ostream& os, const PkgDep::ErrorResult& res );
+std::ostream& operator<<( std::ostream& os, const PkgDep::RelInfoList& rl );
+std::ostream& operator<<( std::ostream& os, const std::list<PkgDep::Alternative>& al );
+std::ostream& operator<<( std::ostream& os, const PkgDep::NameList& nl );
+std::ostream& operator<<( std::ostream& os, const PkgDep::NeededEditionRange& range );
 
 #endif  /* _PkgDep_h */
 

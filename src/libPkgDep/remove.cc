@@ -1,6 +1,8 @@
 #include <PkgDep.h>
 #include <PkgDep_int.h>
 
+using namespace std;
+
 void PkgDep::remove( NameList& pkgs )
 {
 	typedef list<const Package *> PkgPList;
