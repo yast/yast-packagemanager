@@ -438,6 +438,16 @@ PMError InstSrcManager::scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r
   }
 
   ///////////////////////////////////////////////////////////////////
+  // be friendly to slideshow
+  ///////////////////////////////////////////////////////////////////
+#warning be friendly to slideshow hack
+  if ( ! Y2PM::runningFromSystem() && ! idlist_r.empty() ) {
+    Pathname slink( cache_tmp_dir() + "CurrentMedia" );
+    PathInfo::unlink( slink );
+    PathInfo::symlink( (*idlist_r.begin())->cache_media_dir(), slink );
+  }
+
+  ///////////////////////////////////////////////////////////////////
   // done
   ///////////////////////////////////////////////////////////////////
   DBG << "scanMedia " << mediaurl_r << " found " << idlist_r.size() << " InstSrc(es)" << endl;
