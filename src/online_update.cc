@@ -22,10 +22,13 @@ using namespace std;
 void usage()
 {
   cout << "Usage: online-update [-u url] [-p product] [-v version] "
-       << "[-a arch] [-d] [-s] [-n] [security] [recommended] [document]"
+       << "[-a arch] [-d] [-s] [-n] [-g] [-i] [security] [recommended] [document]"
        << " [optional]"
        << endl << endl
        << "-u url      Base URL of directory tree used to get patches from." << endl
+       << endl
+       << "-g          Only download patches, don't install." << endl
+       << "-i          Install downloaded patches, don't download." << endl
        << endl
        << "-p product  Name of product to get patches for." << endl
        << "-v version  Version of product to get patches for." << endl
@@ -65,13 +68,21 @@ int main( int argc, char **argv )
   bool showPatches = true;
   bool verbose = false;
   bool debug = false;
+  bool autoGet = false;
+  bool autoInstall = false;
 
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "hdnsVDu:p:v:a:l:" );
+    c = getopt( argc, argv, "gihdnsVDu:p:v:a:l:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
+      case 'g':
+        autoGet = true;
+        break;
+      case 'i':
+        autoInstall = true;
+        break;
       case 'd':
         dryrun = true;
         break;
@@ -179,19 +190,23 @@ int main( int argc, char **argv )
 
   Url url;
 
-  if ( urlStr ) {
-    url = Url( urlStr );
-    if ( !url.isValid() ) {
-      cerr << "Error: URL '" << urlStr << "' is not valid." << endl;
-      exit( 1 );
-    }
+  if ( autoInstall ) {
+    url = Url( "dir://" + you.paths()->localDir().asString() );
   } else {
-    error = you.paths()->requestServers();
-    if ( error ) {
-      cerr << "Error while requesting servers: " << error << endl;
-      exit( 1 );
+    if ( urlStr ) {
+      url = Url( urlStr );
+      if ( !url.isValid() ) {
+        cerr << "Error: URL '" << urlStr << "' is not valid." << endl;
+        exit( 1 );
+      }
+    } else {
+      error = you.paths()->requestServers();
+      if ( error ) {
+        cerr << "Error while requesting servers: " << error << endl;
+        exit( 1 );
+      }
+      url = you.paths()->defaultServer();
     }
-    url = you.paths()->defaultServer();
   }
   
   cout << "URL: " << url.asString() << endl;
@@ -214,6 +229,11 @@ int main( int argc, char **argv )
   if ( error ) {
     cerr << "Error retrieving packages: " << error << endl;
     exit( 1 );
+  }
+
+  if ( autoGet && !autoInstall ) {
+    cout << "Got patches." << endl;
+    return 0;
   }
 
   error = you.installPatches( dryrun );
