@@ -172,7 +172,7 @@ class InstSrcManager {
     /**
      * helper for cacheCopyTo fake
      **/
-    PMError intern_cacheCopyTo( const Pathname & newRoot_r );
+    PMError intern_cacheCopyTo();
 
   public:
 
