@@ -350,8 +350,8 @@ public:
 	CATEGORY,
 	VISIBLE,
 	ORDER,		// ordering data
-	SUGGESTS,
 	RECOMMENDS,
+	SUGGESTS,
 	REQUIRES,
 	PROVIDES,
 	CONFLICTS,
@@ -373,10 +373,10 @@ public:
 	createTag( "=Cat", CATEGORY);
 	createTag( "=Vis", VISIBLE);
 	createTag( "=Ord", ORDER);
-	t = createTag( "+Sug", SUGGESTS);	// list of suggests tags
-	t->setEndTag("-Sug");
 	t = createTag( "+Rec", RECOMMENDS);	// list of recommends tags
 	t->setEndTag("-Rec");
+	t = createTag( "+Sug", SUGGESTS);	// list of suggests tags
+	t->setEndTag("-Sug");
 	t = createTag( "+Req", REQUIRES);	// list of requires tags
 	t->setEndTag("-Req");
 	t = createTag( "+Prv", PROVIDES);	// list of provides tags

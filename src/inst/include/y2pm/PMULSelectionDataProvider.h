@@ -65,10 +65,10 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 	bool _attr_ISBASE;
 
 	bool _attr_VISIBLE;
-	TagCacheRetrievalPos _attr_SUGGESTS;
-	std::list<PMSelectionPtr> _ptrs_attr_SUGGESTS;
 	TagCacheRetrievalPos _attr_RECOMMENDS;
 	std::list<PMSelectionPtr> _ptrs_attr_RECOMMENDS;
+	TagCacheRetrievalPos _attr_SUGGESTS;
+	std::list<PMSelectionPtr> _ptrs_attr_SUGGESTS;
 	map <std::string,TagCacheRetrievalPos> _attr_INSPACKS;
 	map <std::string,std::list<PMPackagePtr> > _ptrs_attr_INSPACKS;
 	map <std::string,TagCacheRetrievalPos> _attr_DELPACKS;
