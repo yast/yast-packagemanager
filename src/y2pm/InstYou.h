@@ -376,6 +376,17 @@ class InstYou {
 
   private:
     std::vector<DeltaToApply*> _deltastoapply;
+
+    /** return the first usable delta for pkg, NULL otherwise.
+     * @param pkg the package to check
+     * @param quickcheck whether availability of the delta should only be
+     *        checked or also downloaded. quickcheck does not check if the
+     *        md5sum of every file in the filesystem matches since that takes
+     *        quite some time. when set to false a full check is done to make
+     *        really sure though.
+     * @return pointer to DeltaToApply. must be freed manually
+     * */
+    DeltaToApply* FetchSuitableDelta(PMYouPatchPtr patch, PMPackagePtr pkg, bool quickcheck = false);
 };
 
 ///////////////////////////////////////////////////////////////////

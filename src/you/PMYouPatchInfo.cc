@@ -81,12 +81,12 @@ static PMError parseDelta(PMPackagePtr pkg, PMYouPackageDataProviderPtr provider
 
   vector<string> deltaData;
   stringutil::split( line, deltaData );
-  if ( deltaData.size() < 6 )
+  if ( deltaData.size() < 7 ) // must match nr of fields below
   {
     string text = "Error parsing 'Deltas' attribute.";
     text += " ";
     text += stringutil::form(
-	"Line '%s' doesn't have form 'filename size md5sum name-edition-release buildtime srcmd5sum'.",
+	"Line '%s' doesn't have form 'filename size md5sum name-edition-release buildtime srcmd5sum seq'.",
 	line.c_str() );
     return PMError( YouError::E_parse_error, text );
   }
@@ -97,8 +97,9 @@ static PMError parseDelta(PMPackagePtr pkg, PMYouPackageDataProviderPtr provider
   PkgNameEd ned = PkgNameEd::fromString(deltaData[3]);
   Date buildtime = deltaData[4];
   string srcmd5 = deltaData[5];
+  string seq = deltaData[6]; // must match check above
 
-  PMPackageDelta delta(filename, size, md5sum, ned, buildtime, srcmd5);
+  PMPackageDelta delta(filename, size, md5sum, ned, buildtime, srcmd5, seq);
   provider->addDelta(pkg, delta);
 
   return PMError();

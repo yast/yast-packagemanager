@@ -37,11 +37,14 @@ class PMPackageDelta
 	const std::string& md5sum,
 	const PkgNameEd& ned,
 	Date buildtime,
-	const std::string& srcmd5
+	const std::string& srcmd5,
+	const std::string& seq
 	)
       : _filename( filename ), _size( size ),
 	  _md5sum(md5sum), _ned(ned),
-	  _buildtime(buildtime), _srcmd5(srcmd5) {}
+	  _buildtime(buildtime), _srcmd5(srcmd5),
+	 _seq(seq)
+	 {}
 
     const std::string& filename() const { return _filename; }
     FSize size() const { return _size; }
@@ -49,6 +52,7 @@ class PMPackageDelta
     const PkgNameEd& ned() const { return _ned; }
     Date buildtime() const { return _buildtime; }
     const std::string& srcmd5() const { return _srcmd5; }
+    const std::string& seq() const { return _seq; }
 
     // implementation in PMPackage.cc
     std::ostream& dumpOn(std::ostream& os) const;
@@ -60,6 +64,7 @@ class PMPackageDelta
     PkgNameEd _ned;
     Date _buildtime;
     std::string _srcmd5;
+    std::string _seq;
 };
 
 std::ostream& operator<<(std::ostream& os, const PMPackageDelta& delta);
