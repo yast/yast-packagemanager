@@ -115,11 +115,7 @@ class InstSrcManager {
 
     typedef std::set<InstSrcPtr>  ISrcPool;
 
-    typedef std::list<InstSrcPtr> ISrcList;
-
     ISrcPool _knownSources;
-
-    ISrcList _enabledSources;
 
     /**
      * Find InstSrcPtr in _knownSources by ISrcId.
@@ -157,14 +153,31 @@ class InstSrcManager {
      **/
     PMError scanMedia( ISrcIdList & idlist_r, const Url & mediaurl_r );
 
+    /**
+     * Enable InstSrc. Let it provide it's Objects to the Manager classes.
+     **/
     PMError enableSource( const ISrcId & isrc_r );
 
+    /**
+     * Disable InstSrc. Provided Objects are withdrawn from Manager classes.
+     **/
     PMError disableSource( const ISrcId & isrc_r );
+
 #if 0
     PMError deleteSource( const ISrcId & isrc_r );
 
     PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
 #endif
+
+  public:
+
+    /**
+     * PRELIMINARILY: Return via idlist_r the ISrcId's of all known
+     * InsrSrces. Or enabled InsrSrces only, if enabled_only == true.
+     *
+     * Should be replaced by some Iterator.
+     **/
+    void getSources( ISrcIdList & idlist_r, const bool enabled_only = false ) const;
 };
 
 ///////////////////////////////////////////////////////////////////

@@ -211,6 +211,8 @@ PMError InstSrc::disableSource()
   ///////////////////////////////////////////////////////////////////
   PMError err;
 
+  writeCache();
+
   _data->_instSrc_withdraw(); // withdraw Objects from Manager classes.
   _data->_instSrc_detach();   // clear backreferences to InstSrc.
   _data = 0;
@@ -239,64 +241,11 @@ PMError InstSrc::writeCache()
   }
 
   if ( _data ) {
-    _descr->writeCache( cache_data_dir() );
+    _data->writeCache( cache_data_dir() );
   }
 
   return Error::E_ok;
 }
-
-#if 0
-/**
- * generate PMSolvable objects for each patch on the source
- * @return list of PMSolvablePtr on this source
- */
-const std::list<PMYouPatchPtr>&
-InstSrc::getPatches() const
-{
-    D__ << __FUNCTION__ << std::endl;
-    if (!_data)
-    {
-	static std::list<PMYouPatchPtr> patches;
-	ERR << "InstSrc::getPatches() no _data" << endl;
-	return patches;
-    }
-    return _data->getPatches();
-}
-
-/**
- * generate PMSelection objects for each selection on the source
- * @return list of PMSelectionPtr on this source
- */
-const std::list<PMSelectionPtr>&
-InstSrc::getSelections() const
-{
-    MIL << __FUNCTION__ << std::endl;
-    if (!_data)
-    {
-	static std::list<PMSelectionPtr> selections;
-	ERR << "InstSrc::getSelections() no _data" << endl;
-	return selections;
-    }
-    return _data->getSelections();
-}
-
-/**
- * generate PMPackage objects for each Item on the source
- * @return list of PMPackagePtr on this source
- * */
-const std::list<PMPackagePtr>&
-InstSrc::getPackages() const
-{
-    MIL << __FUNCTION__ << std::endl;
-    if (!_data)
-    {
-	static std::list<PMPackagePtr> packages;
-	ERR << "InstSrc::getPackages() no _data" << endl;
-	return packages;
-    }
-    return _data->getPackages();
-}
-#endif
 
 ///////////////////////////////////////////////////////////////////
 //
