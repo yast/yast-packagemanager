@@ -31,6 +31,7 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/TagParser.h>
 #include <y2util/Pathname.h>
+#include <y2util/PathInfo.h>
 #include <y2util/ExternalDataSource.h>
 #include <y2pm/RpmDb.h>
 #include <y2pm/PkgEdition.h>
@@ -42,27 +43,7 @@
 #define _(X) X
 #endif
 
-//XXX make configurable
-#define ORIGINALRPMPATH "/var/lib/rpm/"
-//XXX make configurable
-#define RPMPATH "/var/lib/"
-//XXX make configurable
-#define RPMDBNAME "packages.rpm"
-
 using namespace std;
-
-/*-------------------------------------------------------------*/
-/* Create all parent directories of @param name, as necessary  */
-/*-------------------------------------------------------------*/
-static void
-create_directories(string name)
-{
-  size_t pos = 0;
-
-  while (pos = name.find('/', pos + 1), pos != string::npos)
-    mkdir (name.substr(0, pos).c_str(), 0777);
-}
-
 
 IMPL_HANDLES(RpmDb);
 
@@ -75,9 +56,13 @@ IMPL_HANDLES(RpmDb);
 /*-------------------------------------------------------------*/
 RpmDb::RpmDb(string name_of_root) :
     _progressfunc(NULL),
-    _rpminstflags(RPMINST_NONE)
+    _progressdata(NULL),
+    _rpminstflags(RPMINST_NONE),
+    _rootdir(name_of_root),
+    _varlibrpm("/var/lib/rpm"),
+    _varlib("/var/lib"),
+    _rpmdbname("packages.rpm")
 {
-   rootfs = name_of_root;
    process = 0;
    exit_code = -1;
    temporary = false;
@@ -96,15 +81,18 @@ RpmDb::~RpmDb()
       delete process;
 
    process = NULL;
-
+// only needed with createTmpDatabase
+#if 0
    if ( temporary )
    {
       // Removing all files of the temporary DB
       string command = "rm -R ";
 
-      command += dbPath;
+//XXX system
+      command += dbPath.asString();
       ::system ( command.c_str() );
    }
+#endif
 
    M__  << "~RpmDb() end" << endl;
 }
@@ -117,51 +105,60 @@ RpmDb::~RpmDb()
 /*--------------------------------------------------------------*/
 RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 {
-    Pathname     dbFilename = rootfs;
+    Pathname     dbFilename;
     struct stat  dummyStat;
     DbStatus	 dbStatus = RPMDB_OK;
 
     DBG << "calling initDatabase" << endl;
 
-    dbFilename += dbFilename + ORIGINALRPMPATH + RPMDBNAME;
+    dbFilename += _rootdir + _varlibrpm + _rpmdbname;
     if (  stat( dbFilename.asString().c_str(), &dummyStat ) != -1 )
     {
-       // DB found
-       dbPath = ORIGINALRPMPATH;
-       DBG << "Setting dbPath to " << dbPath.c_str() << endl;
+	// DB found
+	dbPath = _varlibrpm;
+	DBG << "Setting dbPath to " << dbPath.asString() << endl;
+    }
+    else if ( createNew )
+    {
+	DBG << "creating new database" << endl;
+	// New rpm-DB will be created
+	if(!PathInfo::mkdir(dbFilename.dirname()))
+	{
+	    dbPath = _varlibrpm;
+
+	    RpmArgVec opts(1);
+	    opts[0] = "--initdb";
+	    
+	    run_rpm(opts);
+
+	    string rpmerrormsg, str;
+	    while(systemReadLine(str))
+	    {
+		rpmerrormsg+=str;
+	    }
+	    if ( systemStatus() != 0 )
+	    {
+		// error
+		dbStatus = RPMDB_ERROR_CREATED;
+		ERR << "Error creating rpm database, rpm error was: " << rpmerrormsg << endl;
+	    }
+	    else
+	    {
+		dbStatus = RPMDB_NEW_CREATED;
+	    }
+	}
+	else
+	    dbStatus = RPMDB_ERROR_MKDIR;
     }
     else
     {
-       ERR << "dbFilename not found " << dbFilename.asString() << endl;
+	ERR << "dbFilename not found " << dbFilename.asString() << endl;
 
-       // DB not found
-       dbStatus = RPMDB_NOT_FOUND;
-
-       if ( createNew )
-       {
-	  // New rpm-DB will be created
-	  create_directories(rootfs + ORIGINALRPMPATH);
-	  RpmArgVec opts(1);
-	  opts[0] = "--initdb";
-	  run_rpm(opts);
-	  string rpmerrormsg, str;
-	  while(systemReadLine(str))
-	  {
-	      rpmerrormsg+=str;
-	  }
-	  if ( systemStatus() != 0 )
-	  {
-	     // error
-	     dbStatus = RPMDB_ERROR_CREATED;
-	     ERR << "Error creating rpm database, rpm error was: " << rpmerrormsg << endl;
-	  }
-	  else
-	  {
-	     dbStatus = RPMDB_NEW_CREATED;
-	  }
-       }
+	// DB not found
+	dbStatus = RPMDB_NOT_FOUND;
     }
 
+    // check for installed rpm package
     if ( dbStatus == RPMDB_OK )
     {
        // Check, if it is an old rpm-Db
@@ -209,6 +206,33 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
     return dbStatus;
 }
 
+// rebuild rpm database
+RpmDb::DbStatus RpmDb::rebuildDatabase()
+{
+    RpmArgVec opts(1);
+    DbStatus status = RPMDB_OK;
+
+    DBG << endl;
+
+    opts[0] = "--rebuilddb";
+    
+    run_rpm(opts);
+
+    string rpmerrormsg, str;
+    while(systemReadLine(str))
+    {
+	rpmerrormsg+=str;
+    }
+    if ( systemStatus() != 0 )
+    {
+	// error
+	status = RPMDB_ERROR_REBUILDDB;
+	ERR << "Error rebuilding rpm database, rpm error was: " << rpmerrormsg << endl;
+    }
+
+    return status;
+}
+
 /*--------------------------------------------------------------*/
 /* Creating a temporary rpm-database.				*/
 /* If copyOldRpm == true than the rpm-database from		*/
@@ -216,42 +240,47 @@ RpmDb::DbStatus RpmDb::initDatabase( bool createNew )
 /*--------------------------------------------------------------*/
 RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
 {
+    return RPMDB_OK;
+#warning "createTmpDatabase yet implemented"
+#if 0
    // searching a non-existing rpm-path
    int counter = 0;
    struct stat  dummyStat;
-   string rpmPath;
-   string saveDbPath = dbPath;
+   Pathname rpmPath;
+   Pathname saveDbPath = dbPath;
    DbStatus err = RPMDB_OK;
    char number[10];
 
    number[0] = 0;
 
-   rpmPath = rootfs + RPMPATH + "rpm.new";
+   rpmPath = _rootdir + _varlib + "rpm.new";
    for ( counter = 0;
-	counter < 1000 && stat( rpmPath.c_str(), &dummyStat ) != -1;
+	counter < 1000 && stat( rpmPath.asString().c_str(), &dummyStat ) != -1;
 	counter++)
    {
       // search free rpm-path
       snprintf ( number, 10, "%d", counter);
-      rpmPath = rootfs + RPMPATH + "rpm.new." + number;
+      rpmPath = _rootdir + _varlib + "rpm.new.";
+      rpmPath.extend(number);
    }
 
-   if ( mkdir ( rpmPath.c_str(), S_IRWXU ) == -1 )
+   if (!PathInfo::mkdir( rpmPath, S_IRWXU ))
    {
       err = RPMDB_ERROR_MKDIR;
-      ERR << "ERROR command: mkdir " << rpmPath.c_str() << endl;
+      ERR << "ERROR command: mkdir " << rpmPath.asString() << endl;
 
    }
 
    // setting global dbpath
-   dbPath = RPMPATH;
+   dbPath = _varlib;
    if ( counter == 0 )
    {
       dbPath = dbPath + "rpm.new";
    }
    else
    {
-      dbPath = dbPath + "rpm.new." + number;
+      dbPath = dbPath + "rpm.new.";
+      dbPath.extend(number);
    }
 
    if ( !err )
@@ -264,7 +293,7 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
 	 // error
 	 err = RPMDB_ERROR_INITDB;
 	 ERR << "ERROR command: rpm --initdb  --dbpath " <<
-		  dbPath.c_str() << endl;
+		  dbPath.asString() << endl;
       }
    }
 
@@ -273,9 +302,10 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
       // copy old RPM-DB into temporary RPM-DB
 
       string command = "cp -a ";
-      command = command + rootfs + ORIGINALRPMPATH + "* " +
-	 rpmPath;
+      command = command + Pathname::cat(_rootdir, _varlibrpm).asString() + "/* " +
+	 rpmPath.asString();
 
+//XXX system
       if ( system ( command.c_str() ) == 0 )
       {
 	 err = RPMDB_OK;
@@ -296,7 +326,7 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
 	    // error
 	    err = RPMDB_ERROR_REBUILDDB;
 	    ERR << "ERROR command: rpm --rebuilddb  --dbpath " <<
-		     dbPath.c_str() << endl;
+		     dbPath.asString() << endl;
 	 }
       }
    }
@@ -312,6 +342,7 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
    }
 
    return ( err );
+#endif
 }
 
 /*--------------------------------------------------------------*/
@@ -320,8 +351,11 @@ RpmDb::DbStatus RpmDb::createTmpDatabase ( bool copyOldRpm )
 /*--------------------------------------------------------------*/
 RpmDb::DbStatus RpmDb::installTmpDatabase( void )
 {
+    return RPMDB_OK;
+#warning "installTmpDatabase not yet implemented"
+#if 0
    DbStatus err = RPMDB_OK;
-   string oldPath;
+   Pathname oldPath;
    struct stat  dummyStat;
    int counter = 1;
 
@@ -333,7 +367,7 @@ RpmDb::DbStatus RpmDb::installTmpDatabase( void )
       return ( RPMDB_OK );
    }
 
-   if ( dbPath.length() <= 0 )
+   if ( dbPath.empty() )
    {
       ERR << "RPM-DB is not initialized." << endl;
       return ( RPMDB_ERROR_NOT_INITIALIZED );
@@ -342,18 +376,19 @@ RpmDb::DbStatus RpmDb::installTmpDatabase( void )
    if ( !err )
    {
       // creating path for saved rpm-DB
-      oldPath = rootfs + RPMPATH + "rpm.old";
-      while ( counter < 1000 && stat( oldPath.c_str(), &dummyStat ) != -1 )
+      oldPath = _rootdir + _varlib + "rpm.old";
+      while ( counter < 1000 && stat( oldPath.asString().c_str(), &dummyStat ) != -1 )
       {
 	 // search free rpm-path
 	 char number[10];
 	 snprintf ( number, 10, "%d", counter++);
-	 oldPath = rootfs + RPMPATH + "rpm.old." + number;
+	 oldPath = _rootdir + _varlib + "rpm.old.";
+	 oldPath.extend(number);
       }
 
-      if ( mkdir ( oldPath.c_str(), S_IRWXU ) == -1 )
+      if (!PathInfo::mkdir ( oldPath, S_IRWXU ))
       {
-	 ERR << "ERROR command: mkdir %s" << oldPath.c_str() << endl;
+	 ERR << "ERROR command: mkdir %s" << oldPath.asString() << endl;
 	 err = RPMDB_ERROR_MKDIR;
       }
    }
@@ -362,8 +397,9 @@ RpmDb::DbStatus RpmDb::installTmpDatabase( void )
    {
       // saving old rpm
       string command = "cp -a ";
-      command = command + rootfs + ORIGINALRPMPATH + "* " +oldPath;
+      command = command + Pathname::cat(_rootdir, _varlibrpm).asString() + "/* " + oldPath.asString();
 
+// XXX system
       if ( system ( command.c_str() ) == 0)
       {
 	 err = RPMDB_OK;
@@ -379,8 +415,8 @@ RpmDb::DbStatus RpmDb::installTmpDatabase( void )
    if ( !err )
    {
       string command = "cp -a ";
-      command = command + rootfs + dbPath + "/* " +
-	 rootfs + ORIGINALRPMPATH;
+      command = command + Pathname::cat(_rootdir, dbPath).asString() + "/* " +
+	 Pathname::cat(_rootdir, _varlibrpm).asString();
 
       if ( system ( command.c_str() ) == 0)
       {
@@ -398,14 +434,15 @@ RpmDb::DbStatus RpmDb::installTmpDatabase( void )
       // remove temporary RPM-DB
       string command = "rm -R ";
 
-      command += rootfs + dbPath;
+      command += Pathname::cat(_rootdir, dbPath).asString();
       system ( command.c_str() );
 
       temporary = false;
-      dbPath = ORIGINALRPMPATH;
+      dbPath = _varlibrpm;
    }
 
    return ( err );
+#endif
 }
 
 // split in into pieces seperated by sep, return vector out
@@ -649,7 +686,7 @@ RpmDb::DbStatus RpmDb::getPackages (std::list<PMPackagePtr>& pkglist)
 
 	    pkglist.push_back(p);
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
-	    D__ << p << endl;
+//	    D__ << p << endl;
 	}
 
 	output = process->receiveLine();
@@ -871,54 +908,6 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
 	return CHK_INCORRECT_FILEMD5;
     }
 
-   if ( version != "" )
-   {
-#warning "FIXME"
-#if 0
-      // Checking Version
-      const char *const opts[] = {
-	 "-qp", "--qf", "%{RPMTAG_VERSION}-%{RPMTAG_RELEASE} ",
-	 packagePath.c_str()
-      };
-      run_rpm(sizeof(opts) / sizeof(*opts), opts,
-	      ExternalProgram::Discard_Stderr);
-
-      if ( process == NULL )
-	 return false;
-
-      string value;
-      char buffer[4096];
-      size_t nread;
-      while ( nread = process->receive(buffer, sizeof(buffer)), nread != 0)
-	 value.append(buffer, nread);
-      if ( systemStatus() != 0 )
-      {
-	 // error
-	 ok = false;
-      }
-
-      if ( value.length() >= 1 && value.at(value.length()-1) == ' ' )
-      {
-	 if ( value.length() > 1 )
-	 {
-	    // remove last blank
-	    string dummy = value.substr(0,value.length()-1);
-	    value = dummy;
-	 }
-	 else
-	 {
-	    value = "";
-	 }
-      }
-      DBG <<  "comparing version " << version << " <-> " << value << endl;
-      if ( version != value )
-      {
-	 ok = false;
-      }
-#endif
-	return CHK_INCORRECT_VERSION;
-   }
-
     // checking --checksig
     const char *const argv[] = {
 	"rpm", "--checksig",  packagePath.c_str(), 0
@@ -1018,6 +1007,18 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
 	result |= CHK_OTHER_FAILURE;
     }
 
+    if ( !version.empty() )
+    {
+
+	string value = queryPackage("%{RPMTAG_VERSION}-%{RPMTAG_RELEASE}",packagePath,false);
+
+	D__ <<  "comparing version " << version << " <-> " << value << endl;
+	if ( version != value )
+	{
+	    result |= CHK_INCORRECT_VERSION;
+	}
+    }
+
     return ( result );
 }
 
@@ -1025,10 +1026,13 @@ unsigned RpmDb::checkPackage( string packagePath, string version, string md5 )
 /*--------------------------------------------------------------*/
 /* Query the current package using the specified query format	*/
 /*--------------------------------------------------------------*/
-string RpmDb::queryPackage(const char *format, string packageName)
+string RpmDb::queryPackage(const char *format, string packageName, bool installed)
 {
     RpmArgVec opts(4);
-    opts[0] = "-q";
+    if(installed)
+	opts[0] = "-q";
+    else
+	opts[0] = "-qp";
     opts[1] = "--queryformat";
     opts[2] = format;
     opts[3] = packageName.c_str();
@@ -1145,9 +1149,9 @@ void RpmDb::run_rpm(const RpmArgVec& options,
     RpmArgVec args(5);
     args[0] = "rpm";
     args[1] = "--root";
-    args[2] = rootfs.c_str();
+    args[2] = _rootdir.asString().c_str();
     args[3] = "--dbpath";
-    args[4] = dbPath.c_str();
+    args[4] = dbPath.asString().c_str();
 
     const char* argv[args.size()+options.size()+2];
     unsigned argc = 0;
@@ -1238,7 +1242,7 @@ bool RpmDb::installPackage(const string& filename, unsigned iflags)
     opts.push_back("--percent");
 
     if(flags&RPMINST_NODOCS)
-	opts.push_back("--nodocs");
+	opts.push_back("--excludedocs");
     if(flags&RPMINST_NOSCRIPTS)
 	opts.push_back("--noscripts");
     if(flags&RPMINST_FORCE)
@@ -1247,6 +1251,9 @@ bool RpmDb::installPackage(const string& filename, unsigned iflags)
 	opts.push_back("--nodeps");
     if(flags&RPMINST_IGNORESIZE)
 	opts.push_back("--ignoresize");
+    if(flags&RPMINST_JUSTDB)
+	opts.push_back("--justdb");
+
 
     opts.push_back(filename.c_str());
 
@@ -1288,14 +1295,16 @@ bool RpmDb::removePackage(const string& label, unsigned iflags)
 {
     unsigned flags = iflags|_rpminstflags;
 
-    RpmArgVec opts(2);
+    RpmArgVec opts;
 
-    opts[0]="-e";
+    opts.push_back("-e");
 
     if(flags&RPMINST_NOSCRIPTS)
 	opts.push_back("--noscripts");
     if(flags&RPMINST_NODEPS)
 	opts.push_back("--nodeps");
+    if(flags&RPMINST_JUSTDB)
+	opts.push_back("--justdb");
 
     opts.push_back(label.c_str());
 
@@ -1310,25 +1319,59 @@ bool RpmDb::removePackage(const string& label, unsigned iflags)
 string RpmDb::checkPackageResult2string(unsigned code)
 {
     string msg;
+    // begin of line characters
+    string bol = " - ";
+    // end of line characters
+    string eol = "\n";
     if(code == 0)
-	return _("Ok\n");
-
-    msg = _("Package is not OK for the following reasons:\n");
+	return string(_("Ok"))+eol;
+    
+    //translator: these are different kinds of how an rpm package can be broken
+    msg = _("Package is not OK for the following reasons:");
+    msg += eol;
 
     if(code&CHK_INCORRECT_VERSION)
-	msg+=_(" - Package contains different version than expected\n");
+    {
+	msg += bol;
+	msg+=_("Package contains different version than expected");
+	msg += eol;
+    }
     if(code&CHK_INCORRECT_FILEMD5)
-	msg+=_(" - Package file has incorrect MD5 sum\n");
+    {
+	msg += bol;
+	msg+=_("Package file has incorrect MD5 sum");
+	msg += eol;
+    }
     if(code&CHK_GPGSIG_MISSING)
-	msg+=_(" - Package is not signed\n");
+    {
+	msg += bol;
+	msg+=_("Package is not signed");
+	msg += eol;
+    }
     if(code&CHK_MD5SUM_MISSING)
-	msg+=_(" - Package has no MD5 sum\n");
+    {
+	msg += bol;
+	msg+=_("Package has no MD5 sum");
+	msg += eol;
+    }
     if(code&CHK_INCORRECT_GPGSIG)
-	msg+=_(" - Package has incorrect signature\n");
+    {
+	msg += bol;
+	msg+=_("Package has incorrect signature");
+	msg += eol;
+    }
     if(code&CHK_INCORRECT_PKGMD5)
-	msg+=_(" - Package archive has incorrect MD5 sum\n");
+    {
+	msg += bol;
+	msg+=_("Package archive has incorrect MD5 sum");
+	msg += eol;
+    }
     if(code&CHK_OTHER_FAILURE)
-	msg+=_(" - rpm failed for unkown reason, see log file\n");
+    {
+	msg += bol;
+	msg+=_("rpm failed for unkown reason, see log file");
+	msg += eol;
+    }
 
     return msg;
 }

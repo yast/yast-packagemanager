@@ -31,6 +31,7 @@
 
 #include <y2pm/RpmDbPtr.h>
 
+#include <y2util/Pathname.h>
 #include <y2util/ExternalProgram.h>
 #include <y2pm/PMSolvable.h>
 #include <y2pm/PMPackagePtr.h>
@@ -64,7 +65,8 @@ class RpmDb: virtual public Rep
 	    RPMDB_NUM_ERRORS
 	};
 
-	const char* const _errorstrings[];
+// TODO
+//	const char* const _errorstrings[];
 
 	typedef std::set<std::string> FileList;
 	
@@ -80,7 +82,8 @@ class RpmDb: virtual public Rep
 	    RPMINST_NOSCRIPTS  = 0x02,
 	    RPMINST_FORCE      = 0x04,
 	    RPMINST_NODEPS     = 0x08,
-	    RPMINST_IGNORESIZE = 0x10
+	    RPMINST_IGNORESIZE = 0x10,
+	    RPMINST_JUSTDB     = 0x20
 	};
 
 	/** Bits of possible package corruptions
@@ -120,21 +123,31 @@ class RpmDb: virtual public Rep
 
 	/**
 	 * Initialize the rpm database
-	 * If Flag "createNew" is set, than it will be created, if not
-	 * exist --> returns DbNewCreated if successfully created 
+	 * 
+	 * @param createNew create a new database if none exists. This
+	 * parameter does no harm if a database already exists.
 	 */
 	DbStatus initDatabase( bool createNew = false);
+
+	/** 
+	 * Rebuild the rpm database
+	 * */
+	DbStatus rebuildDatabase();
 
 	/**
 	 * Creating a temporary rpm-database.
 	 * If copyOldRpm == true than the rpm-database from
 	 * /var/lib/rpm will be copied.
+	 * 
+	 * not yet implemented
 	 */
 	DbStatus createTmpDatabase(bool copyOldRpm = false );
 
 	/**
 	 * Installing the rpm-database to /var/lib/rpm, if the
 	 * current has been created by "createTmpDatabase".
+	 *
+	 * not yet implemented
 	 */
 	DbStatus installTmpDatabase( void );
 
@@ -159,7 +172,7 @@ class RpmDb: virtual public Rep
 	/**
 	 * Returns the current-path of the rpm-DB
 	 * */
-	const std::string& queryCurrentDBPath ( void ) { return dbPath; };
+	std::string queryCurrentDBPath ( void ) { return dbPath.asString(); };
 
 	/**
 	 * general query of a package
@@ -169,8 +182,10 @@ class RpmDb: virtual public Rep
 	 * of the package to query. If you don't use the full label
 	 * but only the name, the return value could be the result
 	 * of multiple packages with different versions installed.
+	 * @param installed set to false to thread packagelabel as file, not as
+	 * installed package
 	 */
-	std::string queryPackage(const char *format, std::string packagelabel);
+	std::string queryPackage(const char *format, std::string packagelabel, bool installed = true);
 
 	/** set parameters to use on installation/update
 	 *
@@ -203,14 +218,21 @@ class RpmDb: virtual public Rep
 	 * installation
 	 *
 	 * @param func callback function, must accept double as argument
+	 * @param data arbitrary data to pass when function is called
 	 * */
-	void setProgressCallback(void (*func)(double))
-	    { _progressfunc = func; }
+	void setProgressCallback(void (*func)(double,void*), void* data)
+	{
+	    _progressfunc = func;
+	    _progressdata = data;
+	}
 
     private:
 
 	/** progress callback */
-	void (*_progressfunc)(double);
+	void (*_progressfunc)(double,void*);
+
+	/** arbitrary data to pass back for progress callback */
+	void* _progressdata;
 
 	/** parameters to use on installation/update
 	 * */
@@ -223,13 +245,13 @@ class RpmDb: virtual public Rep
 	/** 
 	 * The name of the install root.
 	 */
-	std::string rootfs;
+	Pathname _rootdir;
 
 
 	/**
 	 * current Path of the DB-path ( without "packages.rpm" )
 	 */
-	std::string dbPath; 
+	Pathname dbPath; 
 
 	/*
 	 * Flag that it is a temporary rpm-DB
@@ -270,11 +292,19 @@ class RpmDb: virtual public Rep
 	 */
 	void systemKill();
 
-
 	/**
 	 * The exit code of the rpm process, or -1 if not yet known.
 	 */
 	int exit_code;
+
+	/** /var/lib/rpm */
+	Pathname _varlibrpm;
+	
+	/** /var/lib */
+	Pathname _varlib;
+	
+	/** packages.rpm */
+	Pathname _rpmdbname;
 
 	/* parse string of the form name/number/version into rellist. number is
 	 * the rpm number representing the operator <, <=, = etc. number&64
@@ -296,7 +326,7 @@ class RpmDb: virtual public Rep
 	/** wrapper for _progressfunc, does nothing if it's unset
 	 * */
 	void ReportProgress(double p)
-	    { if(_progressfunc != NULL) (*_progressfunc)(p); }
+	    { if(_progressfunc != NULL) (*_progressfunc)(p,_progressdata); }
 
     public: // static members
 
