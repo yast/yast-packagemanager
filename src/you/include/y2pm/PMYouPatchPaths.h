@@ -48,7 +48,12 @@ class PMYouPatchPaths : virtual public Rep {
                      const std::string &baseArch );
 
     void init( const std::string &product, const std::string &version,
+               const std::string &baseArch, const std::string &path,
+               bool business );
+    void init( const std::string &product, const std::string &version,
                const std::string &baseArch );
+
+    PMError initProduct();
 
     void setPatchPath( const Pathname & );
     Pathname patchPath();
@@ -87,6 +92,9 @@ class PMYouPatchPaths : virtual public Rep {
     std::list<Url> servers();
     
     Url defaultServer();
+
+  protected:
+    void init( const std::string &path );
 
   private:
     Pathname _patchPath;
