@@ -20,6 +20,7 @@
 #define PMPackage_h
 
 #include <iosfwd>
+#include <string>
 
 #include <y2pm/PMPackageDataProviderPtr.h>
 #include <y2pm/PMPackagePtr.h>
@@ -35,6 +36,41 @@
  **/
 class REP_CLASS(PMPackage), public PMObject {
   REP_BODY(PMPackage)
+
+  public:
+
+  enum PMPackageAttribute
+  {
+      PKG_BUILDTIME = PMObject::PMOBJ_NUM_ATTRIBUTES,
+      PKG_BUILDHOST,
+      PKG_INSTALLTIME,
+      PKG_DISTRIBUTION,
+      PKG_VENDOR,
+      PKG_LICENSE,
+      PKG_PACKAGER,
+      PKG_GROUP,
+      PKG_CHANGELOG,
+      PKG_URL,
+      PKG_OS,
+      PKG_ARCH,
+      PKG_PREIN,
+      PKG_POSTIN,
+      PKG_PREUN,
+      PKG_POSTUN,
+      PKG_SOURCERPM,
+      PKG_ARCHIVESIZE,
+
+      PKG_NUM_ATTRIBUTES
+  };
+
+  private:
+
+	static const char* const
+	    PackageAttributeNames[PKG_NUM_ATTRIBUTES-PMOBJ_NUM_ATTRIBUTES];
+
+	/** stores rpm queryformat string for every attribute */
+	static const char* const
+	    PMPackage::PackageQueryFormat[PKG_NUM_ATTRIBUTES];
 
   protected:
 
@@ -56,7 +92,29 @@ class REP_CLASS(PMPackage), public PMObject {
 
   public:
 
-    virtual std::string Summary() const;
+//    virtual std::string Summary() const;
+
+    /** get attributes like Summary, Description, Group etc.
+     *
+     * @param attr Attribute number
+     * @return Attribute value
+     * */
+    std::string getAttributeValue(PMPackageAttribute attr);
+    
+    std::string getAttributeValue(PMObjectAttribute attr);;
+
+    /** get the name of an attribute
+     *
+     * @param attr Attribute number
+     * @return Attribute name
+     * */
+    std::string getAttributeName(PMPackageAttribute attr);
+
+    /** assign a data provider
+     * @param dataprovider the dataprovider
+     * */
+    void setDataProvider(PMPackageDataProviderPtr dataprovider)
+    { _dataProvider = dataprovider; }
 
   public:
 

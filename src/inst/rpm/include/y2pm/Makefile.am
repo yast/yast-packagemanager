@@ -7,7 +7,10 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
-	RpmDb.h
+	RpmDb.h \
+	RpmDbPtr.h \
+	PMRpmPackageDataProvider.h \
+	PMRpmPackageDataProviderPtr.h
 
 #<INSTALL-HEADER-TARGET>
 

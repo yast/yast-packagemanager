@@ -21,6 +21,12 @@
 
 using namespace std;
 
+const char* const PMObject::PMObjectAttributeNames[] = {
+      "Summary",
+      "Description",
+      "Size"
+};
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMObject
@@ -53,6 +59,11 @@ PMObject::PMObject( const PkgName &    name_r,
 //
 PMObject::~PMObject()
 {
+}
+
+string PMObject::getAttributeName(PMObjectAttribute attr)
+{
+    return PMObjectAttributeNames[attr];
 }
 
 ///////////////////////////////////////////////////////////////////

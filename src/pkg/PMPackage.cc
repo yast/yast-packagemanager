@@ -28,6 +28,54 @@
 
 using namespace std;
 
+
+const char* const PMPackage::PackageAttributeNames[] = {
+      "Buildtime",
+      "Installtime",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)",
+      "type yourself, i'm too lazy ;)"
+};
+
+const char* const PMPackage::PackageQueryFormat[] = {
+      "%{SUMMARY}",
+      "%{DESCRIPTION}",
+      "%{SIZE}",
+      "%{BUILDTIME}",
+      "%{INSTALLTIME}",
+      "%{DISTRIBUTION}",
+      "%{VENDOR}",
+      "%{LICENSE}",
+      "%{PACKAGER}",
+      "%{GROUP}",
+      "%{CHANGELOG}",
+      "%{URL}",
+      "%{OS}",
+      "%{ARCH}",
+      "%{PREIN}",
+      "%{POSTIN}",
+      "%{PREUN}",
+      "%{POSTUN}",
+      "%{SOURCERPM}",
+      "%{ARCHIVESIZE}"
+};
+
+
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMPackage
@@ -72,6 +120,8 @@ PMPackage::~PMPackage()
 //
 //	DESCRIPTION :
 //
+//
+/*
 string PMPackage::Summary() const
 {
   if ( !_dataProvider ) {
@@ -81,6 +131,33 @@ string PMPackage::Summary() const
 
   // TBD: get data from _dataProvider
   return string( "Faked summary for Package" ) + string( name() );
+}
+*/
+
+// get data from data provider
+std::string PMPackage::getAttributeValue(PMObjectAttribute attr)
+{
+    if(_dataProvider == NULL)
+    {
+	ERR << name() << ": no dataprovider set" << endl;
+	return "";
+    }
+    return _dataProvider->getAttributeValue(this,attr);
+}
+
+std::string PMPackage::getAttributeValue(PMPackageAttribute attr)
+{
+    if(_dataProvider == NULL)
+    {
+	ERR << name() << ": no dataprovider set" << endl;
+	return "";
+    }
+    return _dataProvider->getAttributeValue(this,attr);
+}
+
+std::string PMPackage::getAttributeName(PMPackageAttribute attr)
+{
+    return PackageAttributeNames[attr-PMOBJ_NUM_ATTRIBUTES];
 }
 
 ///////////////////////////////////////////////////////////////////
