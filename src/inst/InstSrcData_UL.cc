@@ -26,11 +26,16 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
+#include <y2util/stringutil.h>
 
 #include <y2pm/InstSrcData_UL.h>
 
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/MediaAccess.h>
+
+#include <y2pm/PkgName.h>
+#include <y2pm/PkgEdition.h>
+#include <y2pm/PkgArch.h>
 
 using namespace std;
 
@@ -265,6 +270,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 				     MediaAccessPtr media_r, const Pathname & descr_dir_r )
 {
     MIL << "InstSrcData_UL::tryGetData(" << descr_dir_r << ")" << endl;
+    int count = 0;
 
     ndata_r = 0;
     PMError err;
@@ -310,9 +316,9 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 	    switch( tagset->assign (tagstr.c_str(), parser, packages))
 	    {
 		case CommonPkdParser::Tag::ACCEPTED:
-		    std::cerr << "*** filling ***" << std::endl;
 		    // fill InstSrcDescr 
-		    //fillInstSrcData_UL( ndescr, tagset );
+		    Tag2Package( tagset );
+		    count++;
 		    repeatassign = false;
 		    err = Error::E_ok;
 		    break;
@@ -320,8 +326,7 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 		    repeatassign = false;
 		    break;
 		case CommonPkdParser::Tag::REJECTED_FULL:
-		    // not needed here because there is only one set of tags
-		    // fillInstSrcDescr( ndescr, tagset );
+		    //Tag2Package( tagset );
 		    tagset->clear();
 		    repeatassign = true;
 		    err = Error::E_ok;
@@ -337,11 +342,10 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     tagset->clear();
 
-    if( parse )
-	std::cerr << "**  +* parsing completed ***" << std::endl;
-    else
+    if( !parse )
 	std::cerr << "*** parsing was aborted ***" << std::endl;
-    
+    else
+	std::cerr << "*** parsed " << count << " packages ***" << std::endl;
     
     ///////////////////////////////////////////////////////////////////
     // done
@@ -354,3 +358,21 @@ PMError InstSrcData_UL::tryGetData( InstSrcDataPtr & ndata_r,
 
     return err;
 }
+
+
+PMPackagePtr
+InstSrcData_UL::Tag2Package( CommonPkdParser::TagSet * tagset )
+{
+    string package ((tagset->getTagByIndex(InstSrcData_ULTags::PACKAGE))->Data());
+    std::vector<std::string> package_splitted;
+    stringutil::split (package, package_splitted, " ", false);
+//MIL << package_splitted[0] << "-" << package_splitted[1] << "-" << package_splitted[2] << "." << package_splitted[3] << endl;
+    PkgName name (package_splitted[0]);
+    PkgEdition edition (package_splitted[1].c_str(), package_splitted[2].c_str());
+    PkgArch arch (package_splitted[3]);
+    PMPackagePtr pac( new PMPackage (name, edition, arch));
+
+    return pac;
+}
+
+
