@@ -74,7 +74,10 @@ class InstTargetError {
       E_ProdDB_not_open,
       E_ProdDB_file_bad_magic,
       E_ProdDB_install_failed,
-      E_ProdDB_not_installed
+      E_ProdDB_not_installed,
+      //
+      E_UpdateInf_not_found,
+      E_UpdateInf_malformed
     };
 };
 
