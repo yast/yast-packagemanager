@@ -8,9 +8,18 @@ function Err() {
 	Warn "$@"
 	echo "Usage: $PROG CLASSNAME [ FROMNAME BASENAME ]" >&2
 	echo "" >&2
-	echo "Create counted pointer class CLASSNAME as base class," >&2
-	echo "derived class, if FROMNAME BASENAME are supplied. See" >&2
-	echo "CountedPointer documentation." >&2
+	echo "Create counted pointer class CLASSNAME as either base class," >&2
+	echo "or derived class, if FROMNAME BASENAME are supplied. " >&2
+	echo "" >&2
+	echo "FROMNAME: The class CLASSNAME is derived from." >&2
+	echo "BASENAME: The bottommost(!) class of the derivation tree." >&2
+	echo "" >&2
+	echo "Example:" >&2
+	echo "  $PROG PMSolvable" >&2
+	echo "  $PROG PMObject  PMSolvable PMSolvable" >&2
+	echo "  $PROG PMPackage PMObject   PMSolvable" >&2
+	echo "" >&2
+	echo "See CountedPointer documentation." >&2
 	echo "" >&2
 	echo "Created files: {CLASSNAME}.h {CLASSNAME}.cc {CLASSNAME}Ptr.h" >&2
 	echo "" >&2
