@@ -190,6 +190,9 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch )
   value = tagValue( YOUPackageTagSet::RPMGROUP );
   _packageDataProvider->setRpmGroup( pkg, value );
 
+  string patchName = patch->name().asString() + "-" + patch->version();
+  _packageDataProvider->setSrcLabel( pkg, patchName );
+
   return PMError();
 }
 
