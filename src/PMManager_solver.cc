@@ -237,25 +237,75 @@ bad, PkgDep::SolvableList& to_remove)
     }
 }
 
-bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad)
+bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& bad,
+	bool filter_conflicts_with_installed)
 {
-    PkgSet installed; // already installed
-    PkgSet available; // available for installation
-    PkgSet toinstall; // user selected for installion
+    bool repeat = false;
+    short count = 5; // repeat maximal five times, shouldn't happen more then once but who knows ...
+    bool success = false;
 
-    buildSets(installed, available, toinstall);
+    do
+    {
+	repeat = false;
+	PkgSet installed; // already installed
+	PkgSet available; // available for installation
+	PkgSet toinstall; // user selected for installion
 
-    PkgDep engine( installed, available ); // TODO alternative_default
-//    engine.set_unresolvable_callback(unresolvable_callback); //TODO
+	buildSets(installed, available, toinstall);
 
-//    bool success = engine.install( toinstall, good, bad);
-    bool success = engine.solvesystemnoauto( toinstall, good, bad);
-    PkgDep::SolvableList to_remove;
+	PkgDep engine( installed, available ); // TODO alternative_default
 
-    PkgSet nowinstalled; // assumed state after operation
-    buildinstalledonly(*this,nowinstalled);
+	success = engine.solvesystemnoauto( toinstall, good, bad);
+	PkgDep::SolvableList to_remove;
 
-    setAutoState(nowinstalled, good, bad, to_remove);
+	PkgSet nowinstalled; // assumed state after operation
+	buildinstalledonly(*this,nowinstalled);
+	
+	if(filter_conflicts_with_installed)
+	{
+	    // iterate through error list
+	    for(PkgDep::ErrorResultList::iterator it = bad.begin();
+		    it != bad.end(); ++it)
+	    {
+		PMObjectPtr op = it->solvable; // who has conflict, e.g postfix
+		// must be an unavailable
+		if(!op) continue;
+		PMSelectablePtr who = op->getSelectable();
+		if(!who) continue;
+
+		// iterate through conflicts
+		for(PkgDep::RelInfoList_iterator rlit = it->conflicts_with.begin();
+		    rlit != it->conflicts_with.end(); ++rlit)
+		{
+		    DBG << "checking conflict introduced by " << rlit->name << endl;
+		    if(!it->solvable) continue;
+		    PMObjectPtr o = rlit->solvable;
+		    if(!o) continue;
+		    PMSelectablePtr what = o->getSelectable(); // what is causing the conflict, e.g. sendmail
+		    // only conflicts
+		    if(!what || !rlit->is_conflict) continue;
+
+		    if(what->has_installed() && who->by_appl())
+		    {
+			WAR << who->name()
+			    << " conflicts with installed "
+			    << what->name()
+			    << ", dropping "
+			    << who->name()
+			    << endl;
+			who->appl_unset();
+			repeat = true;
+		    }
+		}
+	    }
+	}
+	else
+	{
+	    setAutoState(nowinstalled, good, bad, to_remove);
+	}
+
+	count--;
+    } while(repeat && count > 0);
 
     return success;
 }

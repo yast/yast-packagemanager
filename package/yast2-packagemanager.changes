@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep 10 17:10:34 CEST 2002 - lnussel@suse.de
+
+- upgrade mode option. Packages marked for installation by a selection which
+  conflict with already installed will be ignored in this case
+
+-------------------------------------------------------------------
 Tue Sep 10 16:00:08 CEST 2002 - arvin@suse.de
 
 - added provides/obsoletes y2client (bug #19325)
