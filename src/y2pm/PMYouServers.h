@@ -42,11 +42,22 @@ class SysConfig;
 class PMYouServer
 {
   public:
-    PMYouServer() {}
-    PMYouServer( const std::string & );
+    /**
+      Type of server. This depends on how the URL to the server was provided:
+
+      Custom   Put in by the user
+      Local    From /etc/youservers
+      Remote   From URL provided by product
+      Slp      Detected via the SLP protocol
+      Unknown  Unknown
+    */
+    enum Type { Default, Custom, Local, Remote, Slp, Unknown };
+  
+    PMYouServer();
+    PMYouServer( const std::string &, Type type = Unknown );
     PMYouServer( const Url &url, const std::string &name,
-                 const std::string &directory, const std::string &type )
-      : _url( url ), _name( name ), _directory( directory ), _type( type ){}
+                 const std::string &directory, Type type )
+      : _url( url ), _name( name ), _directory( directory ), _type( type ) {}
 
     void setUrl( const Url &url ) { _url = url; }
     void setUrl( const std::string &url ) { _url = Url( url ); }
@@ -61,26 +72,30 @@ class PMYouServer
     void setDirectory( const std::string &dir ) { _directory = dir; }
     std::string directory() const { return _directory; }
 
-    void setType( const std::string &type ) { _type = type; }
-    std::string type() const { return _type;  }
+    void setType( Type type ) { _type = type; }
+    Type type() const { return _type; }
+    std::string typeAsString() const;
+
+    static std::string typeToString( Type );
+    static Type typeFromString( std::string );
 
     bool operator==( const PMYouServer &server ) const;
 
     bool fromString( const std::string & );
     std::string toString() const;
 
-    
   private:
     Url _url;
     std::string _name;
     std::string _directory;
-    std::string _type;		// custom|default|slp
+    Type _type;
 };
 
 /**
   This class provides access to the list of YOU servers.
 */
-class PMYouServers : public CountedRep {
+class PMYouServers : public CountedRep
+{
   REP_BODY(PMYouServers);
 
   public:
@@ -143,15 +158,15 @@ class PMYouServers : public CountedRep {
      */ 
     void addServer( const PMYouServer & );
 
-protected:
+  protected:
     std::string encodeUrl( const std::string &url );
 
     void addPackageVersion( const std::string &pkgName, std::string &url );
 
-    PMError readServers( const Pathname & );
+    PMError readServers( const Pathname &, PMYouServer::Type );
 
   private:
-    PMYouSettingsPtr _patchPaths;
+    PMYouSettingsPtr _settings;
 
     std::list<PMYouServer> _servers;
 };

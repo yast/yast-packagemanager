@@ -588,13 +588,10 @@ PMError PMYouPatchInfo::getPatches( vector<PMYouPatchPtr> &patches )
     url.setPassword( "" );
     server.setUrl( url );
 
-    _settings->config()->writeEntry( "LastServer", server.toString() );
-    _settings->config()->save();
-     
-    _settings->config()->writeEntry( "LastServerType", server.type() );
-    _settings->config()->save();
-
-    y2milestone ( "Wrote: LastServerType=\"%s\" to /var/lib/YaST2/you/config", server.type().c_str() );
+    SysConfig *cfg = _settings->config();
+    cfg->writeEntry( "LastServer", server.toString() );
+    cfg->writeEntry( "LastServerType", server.typeAsString() );
+    cfg->save();
 
     if ( !_doneMediaDir ) {
       PMError error = processMediaDir();

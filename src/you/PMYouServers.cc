@@ -128,7 +128,7 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
 	    static_cast<PMYouServers *>(mydata)->addServer( PMYouServer(splitted[2] + ":" + splitted[3],
 									descr,		// name of server
 									"",		// directory
-									"slp") );	// type
+									PMYouServer::Slp ) );	// type
 	}
     } 
 
@@ -146,9 +146,15 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
 //
 ///////////////////////////////////////////////////////////////////
 
-PMYouServer::PMYouServer( const std::string &line )
+PMYouServer::PMYouServer()
+  : _type( Unknown )
+{
+}
+
+PMYouServer::PMYouServer( const std::string &line, PMYouServer::Type type )
 {
   fromString( line );
+  setType( type );
 }
 
 void PMYouServer::setUsernamePassword( const string &username,
@@ -193,6 +199,41 @@ std::string PMYouServer::toString() const
   return _url.asString() + ";" + _name + ";" + _directory;
 }
 
+string PMYouServer::typeAsString() const
+{
+  return typeToString( _type );
+}
+
+string PMYouServer::typeToString( PMYouServer::Type type)
+{
+  switch ( type ) {
+    case Default:
+      return "default";
+    case Custom:
+      return "custom";
+    case Local:
+      return "local";
+    case Remote:
+      return "remote";
+    case Slp:
+      return "slp";
+    case Unknown:
+      return "unknown";
+  }
+
+  return "unknown";
+}
+
+PMYouServer::Type PMYouServer::typeFromString( string str )
+{
+  if ( str == "default" ) return Default;
+  if ( str == "custom" ) return Custom;
+  if ( str == "local" ) return Local;
+  if ( str == "remote" ) return Remote;
+  if ( str == "slp" ) return Slp;
+  return Unknown;
+}
+
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -204,7 +245,7 @@ IMPL_BASE_POINTER(PMYouServers);
 
 PMYouServers::PMYouServers( const PMYouSettingsPtr &patchPaths )
 {
-  _patchPaths = patchPaths;
+  _settings = patchPaths;
 }
 
 PMYouServers::~PMYouServers()
@@ -223,26 +264,37 @@ Pathname PMYouServers::localYouServers()
 
 Pathname PMYouServers::cachedYouServers()
 {
-  return _patchPaths->localWriteDir() + "youservers";
+  return _settings->localWriteDir() + "youservers";
 }
 
 PMError PMYouServers::requestServers( bool check )
 {
-  string lastServer = _patchPaths->config()->readEntry( "LastServer" );
+  SysConfig *cfg = _settings->config();
+  
+  string lastServerStr = cfg->readEntry( "LastServer" );
+  string lastServerTypeStr = cfg->readEntry( "LastServerType" );
+  PMYouServer::Type lastServerType = PMYouServer::typeFromString( lastServerTypeStr );
+  
+  PMYouServer lastServer( lastServerStr, lastServerType );
 
-  D__ << "Last Server: " << lastServer << endl;
+  D__ << "Last Server: " << lastServer.toString() << endl;
 
-  if ( !lastServer.empty() ) {
-    addServer( PMYouServer( lastServer ) );
+  if ( lastServer.type() == PMYouServer::Custom ) {
+    addServer( lastServer );
   }
 
-  PMError error = readServers( localYouServers() );
+  PMError error = readServers( localYouServers(), PMYouServer::Local );
   if ( error ) return error;
 
-  SysConfig cfg( "onlineupdate" );
-  
-  if ( cfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
-    PMYouProductPtr product = _patchPaths->primaryProduct();
+  SysConfig syscfg( "onlineupdate" );
+
+  if ( syscfg.readBoolEntry( "SLP_ENABLED", true ) ) {
+    y2milestone ("Cecking for SLP servers" );
+    addSLPServers();
+  }
+    
+  if ( syscfg.readBoolEntry( "YAST2_LOADFTPSERVER", true ) ) {
+    PMYouProductPtr product = _settings->primaryProduct();
     string url;
 
     if ( product )
@@ -253,7 +305,7 @@ PMError PMYouServers::requestServers( bool check )
 	url += "&basearch=" + string( product->baseArch() );
 	url += "&arch=" + string( product->arch() );
     
-	url += "&lang=" + string( _patchPaths->langCode() );
+	url += "&lang=" + string( _settings->langCode() );
     
 	url += "&business=";
 	if ( product->businessProduct() ) url += "1";
@@ -273,7 +325,7 @@ PMError PMYouServers::requestServers( bool check )
 
     DBG << "url: '" << url << "'" << endl;
 
-    Pathname writeDir = _patchPaths->localWriteDir();
+    Pathname writeDir = _settings->localWriteDir();
     int ret = PathInfo::assert_dir( writeDir );
     if ( ret != 0 ) {
       ERR << "Unable to create " << writeDir << ": errno " << ret
@@ -296,23 +348,28 @@ PMError PMYouServers::requestServers( bool check )
     }
   } else {
     // Backwards compatibility with SL8.1/SLES8
-    error = readServers( localSuseServers() );
+    error = readServers( localSuseServers(), PMYouServer::Local );
     if ( error ) return error;
   }
 
-  error = readServers( cachedYouServers() );
+  error = readServers( cachedYouServers(), PMYouServer::Remote );
 
-  SysConfig syscfg( "onlineupdate" );
-  if ( syscfg.readBoolEntry( "SLP_ENABLED", true ) )
-  {
-      y2milestone ("Cecking for SLP servers" );
-      addSLPServers( );
+  if ( lastServer.type() != PMYouServer::Custom && lastServer.url().isValid() ) {
+    list<PMYouServer>::iterator it;
+    for( it = _servers.begin(); it != _servers.end(); ++it ) {
+      if ( (*it).url() == lastServer.url() &&
+           (*it).directory() == lastServer.directory() ) {
+        _servers.erase( it );
+        _servers.push_front( lastServer );
+        break;
+      }
+    }
   }
-  
+
   return error;
 }
 
-PMError PMYouServers::readServers( const Pathname &file )
+PMError PMYouServers::readServers( const Pathname &file, PMYouServer::Type type )
 {
   DBG << "Reading servers from " << file << endl;
 
@@ -332,7 +389,7 @@ PMError PMYouServers::readServers( const Pathname &file )
     if ( !line.empty() && *line.begin() != '#' ) {
       PMYouServer server;
       if ( server.fromString( line ) ) {
-	  server.setType( "default" );
+	  server.setType( type );
 	  addServer( server );
       }
     }
@@ -430,7 +487,7 @@ PMYouServer PMYouServers::defaultServer()
 {
   if ( _servers.size() == 0 ) {
     PMYouServer server;
-    if ( _patchPaths->primaryProduct()->businessProduct() ) {
+    if ( _settings->primaryProduct()->businessProduct() ) {
       server.setUrl( "http://sdb.suse.de/download/" );
     } else {
       server.setUrl( "ftp://ftp.suse.com/pub/suse/" );

@@ -140,9 +140,11 @@ void PMYouProduct::init( const string &product, const string &version,
 void PMYouProduct::init( const string &path )
 {
   if ( _businessProduct  ) {
-    _settings.setPatchServer( PMYouServer( "http://support.suse.de/" ) );
+    _settings.setPatchServer( PMYouServer( "http://support.suse.de/",
+                                           PMYouServer::Default ) );
   } else {
-    _settings.setPatchServer( PMYouServer( "ftp://ftp.suse.com/pub/suse/" ) );
+    _settings.setPatchServer( PMYouServer( "ftp://ftp.suse.com/pub/suse/",
+                                           PMYouServer::Default ) );
   }
 
   _patchPath = path + "/patches/";
