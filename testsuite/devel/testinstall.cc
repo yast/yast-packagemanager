@@ -107,6 +107,48 @@ void testmediaorder(vector<string>& argv);
 
 void cdattach(vector<string>& argv);
 
+///////////////////////////////////////////////////////////////////
+// formerly RpmDb::tokenize
+///////////////////////////////////////////////////////////////////
+/** split string into tokens delimited by a one character
+ * seperator, empty fields will not be removed
+ *
+ * @param in string to tokenize
+ * @param sep separator character
+ * @param max produce up to this number of tokens, zero for unlimited
+ * @out out vector of tokens
+ *
+ * @return number of tokens found
+ **/
+unsigned
+tokenize(const string& in, char sep, unsigned max, vector<string>& out)
+{
+    unsigned count = 0;
+    string::size_type pos1=0, pos2=0;
+    while(pos1 != string::npos && (max>0?count<max-1:true))
+    {
+	count++;
+	pos2 = in.find(sep,pos1);
+	if(pos2 != string::npos)
+	{
+	    out.push_back(in.substr(pos1,pos2-pos1));
+	    pos1=pos2+1;
+	}
+	else
+	{
+	    out.push_back(in.substr(pos1));
+	    pos1=pos2;
+	}
+    }
+    if(max && count >= max-1 && pos1 != string::npos)
+    {
+	count++;
+	out.push_back(in.substr(pos1));
+    }
+    return count;
+}
+///////////////////////////////////////////////////////////////////
+
 struct Funcs {
     const char* name;
     void (*func)(vector<string>&);
@@ -133,7 +175,7 @@ class Variable
     public:
 	bool _can_unset;
 	ValidateFunc _valid;
-	
+
     public:
 	Variable();
 	Variable(const char* value, bool can_unset = true, ValidateFunc valid = NULL);
@@ -214,7 +256,7 @@ void varunset(vector<string>& argv)
 	cout << "unset <variable name>" << endl;
 	return;
     }
-    
+
     if(!variables.count(argv[1]))
     {
 	    cout << argv[1] << " not set" << endl;
@@ -226,7 +268,7 @@ void varunset(vector<string>& argv)
 	cout << argv[1] << " is protected" << endl;
 	return;
     }
-	
+
     variables.erase(argv[1]);
 }
 
@@ -891,7 +933,7 @@ void init(vector<string>& argv)
 
 
     Y2PM::instTarget().createPackageBackups(_createbackups);
-    
+
 #if 0
     Y2PM::packageManager().poolSetInstalled( Y2PM::instTarget().getPackages() );
     Y2PM::selectionManager().poolSetInstalled( Y2PM::instTarget().getSelections() );
@@ -909,7 +951,7 @@ void init(vector<string>& argv)
     Y2PM::setPackageStartCallback(pkgstartcallback, NULL);
     Y2PM::setPackageProgressCallback(progresscallback, NULL);
     Y2PM::setPackageDoneCallback(packagedonecallback, NULL);
-    
+
     Y2PM::setSourceChangeCallback(sourcechangecallback, NULL);
 #endif
 
@@ -1590,7 +1632,7 @@ int main( int argc, char *argv[] )
 
 	if(inputstr.empty()) goto readnext;
 
-	if(RpmDb::tokenize(inputstr, ';', 0, cmds) < 1)
+	if(tokenize(inputstr, ';', 0, cmds) < 1)
 	{
 	    cout << "invalid input" << endl;
 	    goto readnext;
@@ -1604,7 +1646,7 @@ int main( int argc, char *argv[] )
 	    string cmd = stringutil::trim(*vit);
 	    if(cmd.empty())
 		continue;
-	    if(RpmDb::tokenize(cmd, ' ', 0, argv) < 1)
+	    if(tokenize(cmd, ' ', 0, argv) < 1)
 	    {
 		cout << "invalid input" << endl;
 		continue;

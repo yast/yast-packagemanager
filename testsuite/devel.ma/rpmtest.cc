@@ -247,9 +247,9 @@ int main( int argc, const char * argv[] ) {
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  //Y2PM::instTargetUpdate();
-  SEC << Y2PM::instTargetInit("/") << endl;
-  SEC << TMGR.bringIntoCleanState() << endl;
+  Y2PM::instTargetUpdate();
+  //SEC << Y2PM::instTargetInit("/") << endl;
+  //SEC << TMGR.bringIntoCleanState() << endl;
 
   SEC << "STOP -> " << ret << endl;
   return ret;
