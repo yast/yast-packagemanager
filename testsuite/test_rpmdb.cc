@@ -3,7 +3,7 @@
 #include <y2pm/RpmDb.h>
 #include <y2pm/PMPackage.h>
 #include <iostream>
-#include <functional>
+#include <algorithm>
 
 using namespace std;
 
