@@ -2,3 +2,11 @@ Makefile
 Makefile.in
 Y2-components.html
 Y2-access.html
+PackageManagement
+*.aux
+*.junk
+*.log
+*.out
+*.pdf
+*.tex
+
