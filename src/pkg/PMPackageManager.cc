@@ -188,7 +188,8 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 		INT << "NULL installed to delete" << endl;
 	    }
 	}
-	else if (sel->source_install())
+
+	if (sel->source_install())
 	{
 	    if ( sel->candidateObj() )
 	    {
@@ -390,7 +391,6 @@ const PkgDuMaster & PMPackageManager::updateDu()
     WAR << "Unable to get mountpoint info" << endl;
   }
 
-  //S__ << _du_master << endl;
   return _du_master;
 }
 
