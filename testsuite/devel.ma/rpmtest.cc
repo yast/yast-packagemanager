@@ -28,7 +28,7 @@ extern int _hdr_debug;
 #include <y2pm/Timecount.h>
 #include <y2pm/PMPackageImEx.h>
 
-#include <PkgModuleFunctions.h>
+//#include <PkgModuleFunctions.h>
 
 #include "PMCB.h"
 
@@ -220,13 +220,11 @@ int mmain( int argc, const char * argv[] )
   int Finst = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE;
   int Fdel  = RpmDb::RPMINST_NODEPS;
 
-  PkgModuleFunctions x( 0 );
-
   RpmDb db;
   SEC << db << endl;
   INT << db.initDatabase( root, dbPath ) << endl;
   SEC << db << endl;
-  return 0;
+
   INT << db.removePackage( "test", Fdel ) << endl;
 
   INT << db.installPackage( "/Local/packages/test/RPMS/test-1-1.intern.i386.rpm", Finst ) << endl;

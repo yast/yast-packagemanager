@@ -11,9 +11,13 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		media/include		\
 		query/include		\
 		libPkgDep/include	\
-	   ) -I$(includedir) -I/Local/ma/yast2/current/source/core/wfm/src
+	   ) -I$(includedir)
 
-LDADD = $(top_builddir)/src/liby2pm.la /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
+# -I/Local/ma/yast2/current/source/core/wfm/src
+
+LDADD = $(top_builddir)/src/liby2pm.la
+
+# /Local/ma/yast2/current/source/core/wfm/src/liby2wfm.la
 
 #LDFLAGS = -static
 

@@ -394,8 +394,8 @@ PMError RpmDb::initDatabase( Pathname root_r, Pathname dbPath_r )
       } else {
 	// Performing an update: Keep the original rpm3 database
 	// and wait if the rpm4 database gets modified by installing
-	// or removing packages. Cleanup in closeDatabase.
-	MIL << "Update mode: Cleanup delayed until closeDatabase." << endl;
+	// or removing packages. Cleanup in closeOldDatabase.
+	MIL << "Update mode: Cleanup delayed until closeOldDatabase." << endl;
       }
     }
 #warning CHECK: notify root about conversion backup.
@@ -646,6 +646,31 @@ void RpmDb::removeV3( const Pathname & dbdir_r )
     pi( b );
     MIL << "(Re)moved rpm3 database to " << pi << endl;
   }
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : RpmDb::modifyDatabase
+//	METHOD TYPE : void
+//
+void RpmDb::modifyDatabase()
+{
+  if ( ! initialized() )
+    return;
+
+  // tag database as modified
+  dbsi_set( _dbStateInfo, DbSI_MODIFIED_V4 );
+
+  // Move outdated rpm3 database beside.
+  if ( dbsi_has( _dbStateInfo, DbSI_HAVE_V3 ) ) {
+    MIL << "Update mode: Delayed cleanup: state " << _dbStateInfo << endl;
+    removeV3( _root + _dbPath );
+    dbsi_clr( _dbStateInfo, DbSI_HAVE_V3 );
+  }
+
+  // invalidate Packages list
+  _packages._valid = false;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1469,10 +1494,8 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
 
     opts.push_back (filename.asString().c_str());
 
+    modifyDatabase(); // BEFORE run_rpm
     run_rpm( opts, ExternalProgram::Stderr_To_Stdout );
-#warning Combine tagModified and _packages._valid
-    tagModified();
-    _packages._valid = false;
 
     string line;
     string rpmmsg;
@@ -1578,10 +1601,8 @@ PMError RpmDb::removePackage( const string & label, unsigned flags )
 
     opts.push_back(label.c_str());
 
+    modifyDatabase(); // BEFORE run_rpm
     run_rpm (opts, ExternalProgram::Stderr_To_Stdout);
-#warning Combine tagModified and _packages._valid
-    tagModified();
-    _packages._valid = false;
 
     string line;
     string rpmmsg;

@@ -120,6 +120,12 @@ class RpmDb: virtual public Rep
      **/
     static void removeV3( const Pathname & dbdir_r );
 
+    /**
+     * Called before the database is modified by installPackage/removePackage.
+     * Invalidates Packages list and moves away any old database.
+     **/
+    void modifyDatabase();
+
   public:
 
     /**
@@ -147,12 +153,6 @@ class RpmDb: virtual public Rep
      * @return Whether we are initialized.
      **/
     bool initialized() const { return( ! _root.empty() ); }
-
-    /**
-     * There should be no need to call this from outside RpmDb, except for
-     * testing update mode (see @ref initDatabase).
-     **/
-    void tagModified() { if ( initialized() ) dbsi_set( _dbStateInfo, DbSI_MODIFIED_V4 ); }
 
     /**
      * Prepare access to the rpm database. Optional arguments may denote the
