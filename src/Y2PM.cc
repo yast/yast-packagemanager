@@ -1194,7 +1194,9 @@ int Y2PM::commitPackages( unsigned mediaNr_r,
   int ret = internal_commitPackages( mediaNr_r, errors_r, remaining_r, srcremaining_r, installrank_r );
 
   // Release all source media
-  instSrcManager().releaseAllMedia();
+  if ( runningFromSystem() || cacheToRamdisk() ) {
+    instSrcManager().releaseAllMedia();
+  } // else: we are in instsys and the InstSrc runs directly from CD
 
   if ( ! mediaNr_r ) {
     instTargetUpdate(); // reread modified databases
