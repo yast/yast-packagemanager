@@ -50,9 +50,9 @@ class YouError {
       // more specific errors start here:
       E_bad_sig_file,
       E_bad_sig_rpm,
-      E_get_suseservers_failed,
-      E_write_suseservers_failed,
-      E_read_suseservers_failed,
+      E_get_youservers_failed,
+      E_write_youservers_failed,
+      E_read_youservers_failed,
       E_auth_failed,
       E_user_abort,
       E_parse_error,

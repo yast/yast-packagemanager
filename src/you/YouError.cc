@@ -56,9 +56,9 @@ std::string YouError::errtext( const unsigned e )
   ///////////////////////////////////////////////////////////////////
   case E_bad_sig_file:  return N_("File has invalid signature.");
   case E_bad_sig_rpm:   return N_("RPM has invalid signature.");
-  case E_get_suseservers_failed: return N_("Error getting suseservers file.");
-  case E_write_suseservers_failed: return N_("Error writing suseservers file.");
-  case E_read_suseservers_failed: return N_("Error reading suseservers file.");
+  case E_get_youservers_failed: return N_("Error getting youservers file.");
+  case E_write_youservers_failed: return N_("Error writing youservers file.");
+  case E_read_youservers_failed: return N_("Error reading youservers file.");
   case E_auth_failed: return N_("Authentification failed.");
   case E_user_abort: return N_("User aborted operation.");
   case E_parse_error: return N_("Error parsing patch description.");

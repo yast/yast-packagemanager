@@ -396,24 +396,19 @@ PMError MediaAccess::getFile( const Url &from, const Pathname &to )
   MediaAccess media;
   
   PMError error = media.open( u );
-  MIL << error << endl;
   if ( error ) return error;
   
   error = media.attach();
-  MIL << error << endl;
   if ( error ) return error;
   
   error = media.provideFile( base );
-  MIL << error << endl;
   if ( error ) return error;
 
   if ( PathInfo::copy( media.localPath( base ), to ) != 0 ) {
-    return MediaError::E_system;
+    return MediaError::E_write_error;
   }
   
   error = media.release();
-
-  MIL << error << endl;
   
   return error;
 }
