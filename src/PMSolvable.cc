@@ -136,8 +136,8 @@ ostream& operator<<( ostream& os, const PMSolvable::PkgRelList_type& rl )
   for( PMSolvable::PkgRelList_const_iterator q = rl.begin();
        q != rl.end(); ++q ){
     if (q != rl.begin())
-      cout << ", ";
-    cout << *q;
+      os << ", ";
+    os << *q;
   }
   return os;
 }
