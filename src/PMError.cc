@@ -57,6 +57,7 @@ PMError::ErrClass PMError::errClass( const unsigned e )
   ENUM_OUT( InstSrcError );
   ENUM_OUT( MediaError );
   ENUM_OUT( InstTargetError );
+  ENUM_OUT( QueryError );
 
 #undef ENUM_OUT
 
@@ -90,6 +91,7 @@ std::string PMError::errstr( const unsigned e )
     ENUM_OUT( InstSrcError );
     ENUM_OUT( MediaError );
     ENUM_OUT( InstTargetError );
+    ENUM_OUT( QueryError );
 
 #undef ENUM_OUT
 
