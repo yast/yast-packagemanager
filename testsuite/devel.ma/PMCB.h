@@ -118,6 +118,35 @@ struct RebuildDbCallback : public RpmDbCallbacks::RebuildDbCallback {
 RebuildDbCallback rebuildDbCallback;
 
 ///////////////////////////////////////////////////////////////////
+// Reporting progress reading the rpm database
+///////////////////////////////////////////////////////////////////
+struct ScanDbCallback : public RpmDbCallbacks::ScanDbCallback {
+  ProgressCounter _pc;
+  virtual void reportbegin() {
+    _pc.reset();
+    SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl;
+  }
+  virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  virtual void start() {
+    MIL << XXX << __PRETTY_FUNCTION__ << endl;
+  }
+  virtual void progress( const ProgressData & prg ) {
+    _pc = prg;
+    if ( 1||_pc.updateIfNewPercent() ) {
+      MIL << XXX << __PRETTY_FUNCTION__ << YYY << _pc << YYY << endl;
+    }
+  }
+  virtual void stop( PMError error ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << endl;
+  }
+  ScanDbCallback() {
+    RpmDbCallbacks::scanDbReport.redirectTo( this );
+  }
+};
+
+ScanDbCallback scanDbCallback;
+
+///////////////////////////////////////////////////////////////////
 // Reporting progress of rpm package installation.
 ///////////////////////////////////////////////////////////////////
 struct InstallPkgCallback : public RpmDbCallbacks::InstallPkgCallback {
