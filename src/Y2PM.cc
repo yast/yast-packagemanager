@@ -591,7 +591,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
     // install loop
     ///////////////////////////////////////////////////////////////////
 
-    unsigned int current_src_media = 0;
+    unsigned int current_spm_media = 0;
     constInstSrcPtr current_src_ptr = 0;
     unsigned int pkgmedianr = 0;
 
@@ -614,10 +614,10 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	// check if we need a new media
 
 	if (((*it)->source() != current_src_ptr)	// source or media change
-	    || (pkgmedianr != current_src_media))
+	    || (pkgmedianr != current_spm_media))
 	{
 	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
-		&& (current_src_ptr != 0))
+		&& (current_src_ptr != 0))		// if we have an old media attached
 	    {
 		InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
 		ptr->releaseMedia (true);	// release if removable (CD/DVD)
@@ -770,9 +770,9 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	// if we're about to switch to a new media, install all source
 	// packages which are still due from the current media
 
-	if (current_src_media != pkgmedianr)			// new media number ?
+	if (current_spm_media != pkgmedianr)			// new media number ?
 	{							// Y: install all sources from this media
-	    current_src_media = pkgmedianr;
+	    current_spm_media = pkgmedianr;
 
 	    //-------------------------------------------------------
 	    // loop over all source rpms (.srpm) selected for installation
@@ -788,9 +788,9 @@ int Y2PM::commitPackages( unsigned int media_nr,
 		    continue;
 		}
 
-		unsigned int srcmedia = atoi (srcloc.c_str());
+		unsigned int spmmedia = atoi (srcloc.c_str());
 
-		if (srcmedia != current_src_media)			// wrong media
+		if (spmmedia != current_spm_media)			// wrong media
 		{
 		    ++it;
 		    continue;
