@@ -4,7 +4,12 @@
 
 SUBDIRS = include inst pkg media
 
-INCLUDES = -I$(QTDIR)/include -I$(top_srcdir)/src/include -I$(includedir)
+INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
+		include	\
+		pkg/include	\
+		inst/include	\
+		media/include	\
+	   ) -I$(includedir) -I$(QTDIR)/include
 
 lib_LTLIBRARIES = liby2pm.la
 
