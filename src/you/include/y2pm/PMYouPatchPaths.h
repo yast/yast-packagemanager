@@ -95,7 +95,7 @@ class PMYouPatchPaths : virtual public Rep {
 
     bool businessProduct();
 
-    PMError requestServers( const std::string &url = "", bool addFile = false );
+    PMError requestServers( const std::string &url = std::string() );
 
     std::list<Url> servers();
     
