@@ -46,6 +46,7 @@ IMPL_BASE_POINTER(InstSrcData);
 //	DESCRIPTION : initialization with new media
 //
 InstSrcData::InstSrcData(MediaAccessPtr media_r)
+    : _data (new InstData (media_r))
 {
 }
 
@@ -58,6 +59,7 @@ InstSrcData::InstSrcData(MediaAccessPtr media_r)
 //	DESCRIPTION : initialization with known media
 //
 InstSrcData::InstSrcData(const Pathname & contentcachefile)
+    : _data (new InstData (contentcachefile))
 {
 }
 
@@ -71,6 +73,7 @@ InstSrcData::InstSrcData(const Pathname & contentcachefile)
 //
 InstSrcData::~InstSrcData()
 {
+    delete _data;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -187,14 +190,15 @@ InstSrcData::getPackages() const
  * find list of packages
  * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
  */
-const std::list<PMPackagePtr> *
-InstSrcData::findPackages (const string& name, const string& version, const string& release, const string& arch) const
+const std::list<PMPackagePtr>
+InstSrcData::findPackages (const std::list<PMPackagePtr> *packages, const string& name, const string& version, const string& release, const string& arch) const
 {
     D__ << __FUNCTION__ << std::endl;
     if (!_data)
     {
 	cerr << "InstSrcData::findPackages() no _data" << endl;
-	return 0;
+	return std::list<PMPackagePtr>();
     }
-    return InstData::findPackages (getPackages(), name, version, release, arch);
+cerr << "calling InstData::findPackages ()" << endl;
+    return InstData::findPackages (packages, name, version, release, arch);
 }
