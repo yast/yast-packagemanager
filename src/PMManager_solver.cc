@@ -120,12 +120,16 @@ void PMManager::buildSets(PkgSet& installed, PkgSet& available, PkgSet& toinstal
     MIL << stringutil::form("%d installed, %d available, %d to install", ni, na, nt) << endl;
 }
 
-// set packages not from input list to auto
-static void setAutoState(PkgDep::ResultList& good, PkgDep::SolvableList& to_remove)
+// set packages not from input list to auto, those that can't be set to auto
+// are added to bad list
+static void setAutoState(PkgDep::ResultList& good, PkgDep::ErrorResultList&
+bad, PkgDep::SolvableList& to_remove)
 {
+    bool deletedone = false;
     for(PkgDep::ResultList::iterator it = good.begin();
-	    it != good.end(); ++it)
+	    it != good.end(); (deletedone?0:++it))
     {
+	deletedone = false;
 	if(it->solvable == NULL)
 	    { ERR << "good result with NULL solvable: " << it->name << endl; continue; }
 
@@ -155,6 +159,13 @@ static void setAutoState(PkgDep::ResultList& good, PkgDep::SolvableList& to_remo
 	    {
 		ERR << "could not set " << it->name <<
 		    " to status auto install, current state is " << selp->status() << endl;
+		PkgDep::ErrorResult err(*it);
+		err.state_change_not_possible = true;
+		bad.push_back(err);
+		deletedone = true;
+		PkgDep::ResultList::iterator it2 = it;
+		++it;
+		good.erase(it2);
 		continue;
 	    }
     }
@@ -192,7 +203,7 @@ bool PMManager::solveInstall(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
     bool success = engine.solvesystemnoauto( toinstall, good, bad);
     PkgDep::SolvableList to_remove;
 
-    setAutoState(good, to_remove);
+    setAutoState(good, bad, to_remove);
 
     return success;
 }
@@ -227,7 +238,7 @@ bool PMManager::solveUpgrade(PkgDep::ResultList& good, PkgDep::ErrorResultList& 
 
     bool success = engine.upgrade( toinstall, good, bad, to_remove, true);
 
-    setAutoState(good, to_remove);
+    setAutoState(good, bad, to_remove);
 
     return success;
 }

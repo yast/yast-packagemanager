@@ -52,6 +52,8 @@ ostream& operator<<( ostream& os, const PkgDep::ErrorResult& res )
 		}
 		os << endl;
 	}
+	if (res.state_change_not_possible)
+		os << "State-Change-Not-Possible: yes" << endl;
 
 	return os;
 }
