@@ -25,6 +25,9 @@
 #include <vector>
 
 #include <y2util/YRpmGroupsTree.h>
+#include <y2util/FSize.h>
+#include <y2util/Date.h>
+#include <y2util/Vendor.h>
 #include <y2pm/RpmDbPtr.h>
 #include <y2pm/PMRpmPackageDataProviderPtr.h>
 #include <y2pm/PMPackageDataProvider.h>
@@ -49,6 +52,7 @@ class PMRpmPackageDataProvider : virtual public Rep, public PMPackageDataProvide
 	std::string _attr_SUMMARY;
 	FSize _attr_SIZE;
 	YStringTreeItem *_attr_GROUP;
+	Vendor _attr_VENDOR;
 
 	/**
 	 * single package cache for _cachedPkg

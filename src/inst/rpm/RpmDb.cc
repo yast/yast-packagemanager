@@ -71,6 +71,7 @@ IMPL_BASE_POINTER(RpmDb);
 /* creates a RpmDb					       */
 /*-------------------------------------------------------------*/
 RpmDb::RpmDb() :
+    _backuppath ("/var/adm/backup"),
     _progressfunc(NULL),
     _progressdata(NULL),
     _rootdir("/"),
@@ -661,6 +662,7 @@ RpmDb::getPackages (void)
 	RPM_BUILDTIME,		// passed to PkgEdition()
 	RPM_SIZE,		// cached in dataprovider
 	RPM_GROUP,		// cached in dataprovider
+	RPM_VENDOR,
 	RPM_SUMMARY,      // summary MUST be last, could contain ';'
 	NUM_RPMTAGS
     };
@@ -683,7 +685,7 @@ RpmDb::getPackages (void)
     rpmquery += "[%{PROVIDENAME},%{PROVIDEFLAGS},%{PROVIDEVERSION},];";
     rpmquery += "[%{OBSOLETENAME},%{OBSOLETEFLAGS},%{OBSOLETEVERSION},];";
     rpmquery += "[%{CONFLICTNAME},%{CONFLICTFLAGS},%{CONFLICTVERSION},];";
-    rpmquery += "%{BUILDTIME};%{SIZE};%{GROUP};%{SUMMARY}";
+    rpmquery += "%{BUILDTIME};%{SIZE};%{GROUP};%{VENDOR};%{SUMMARY}";
     rpmquery += "\\n";
 
     RpmArgVec opts(4);
@@ -782,6 +784,7 @@ RpmDb::getPackages (void)
 	    dataprovider->_attr_SUMMARY = pkgattribs[RPM_SUMMARY];
 	    dataprovider->_attr_SIZE = FSize (atoll(pkgattribs[RPM_SIZE].c_str()));
 	    dataprovider->_attr_GROUP = Y2PM::packageManager().addRpmGroup(pkgattribs[RPM_GROUP]);
+	    dataprovider->_attr_VENDOR = Vendor (pkgattribs[RPM_VENDOR]);
 
 	    _packages.push_back (p);
 	    // D__ << pkgattribs[RPM_NAME] << " " << endl;
@@ -1242,9 +1245,9 @@ RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
     // WITHOUT ALSO CHANGING THE PARSING
     // BELOW
     //*** !!! ***
-    int querycount = 10;	// number of attributes
+    int querycount = 9;	// number of attributes
     string rpmquery = "%{BUILDHOST};%{INSTALLTIME};%{DISTRIBUTION};";
-    rpmquery += "%{VENDOR};%{LICENSE};%{PACKAGER};%{URL};%{OS};";
+    rpmquery += "%{LICENSE};%{PACKAGER};%{URL};%{OS};";
     rpmquery += "%{SOURCERPM};%{DESCRIPTION}";
     rpmquery += "\\n";
     //------------------------------------------------
@@ -1263,7 +1266,6 @@ RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
 	theCache->_buildhost.clear();
 	theCache->_installtime = Date();
 	theCache->_distribution.clear();
-	theCache->_vendor.clear();
 	theCache->_license.clear();
 	theCache->_packager.clear();
 	theCache->_url.clear();
@@ -1310,26 +1312,24 @@ RpmDb::queryCache (constPMPackagePtr package, struct rpmCache *theCache)
 //0	%{BUILDHOST};
 //1	%{INSTALLTIME};
 //2	%{DISTRIBUTION};
-//3	%{VENDOR};
-//4	%{LICENSE};
-//5	%{PACKAGER};
-//6	%{URL};
-//7	%{OS};
-//8	%{SOURCERPM};
-//9	%{DESCRIPTION}
+//3	%{LICENSE};
+//4	%{PACKAGER};
+//5	%{URL};
+//6	%{OS};
+//7	%{SOURCERPM};
+//8	%{DESCRIPTION}
 
     theCache->_buildhost = pkgattribs[0];
     theCache->_installtime = Date(pkgattribs[1]);
     theCache->_distribution = pkgattribs[2];
-    theCache->_vendor = pkgattribs[3];
-    theCache->_license = pkgattribs[4];
-    theCache->_packager = pkgattribs[5];
-    theCache->_url = pkgattribs[6];
-    theCache->_os = pkgattribs[7];
-    theCache->_sourcerpm = pkgattribs[8];
+    theCache->_license = pkgattribs[3];
+    theCache->_packager = pkgattribs[4];
+    theCache->_url = pkgattribs[5];
+    theCache->_os = pkgattribs[6];
+    theCache->_sourcerpm = pkgattribs[7];
 
     vector<string> description;
-    tokenize (pkgattribs[9], '\n', 0, description);
+    tokenize (pkgattribs[8], '\n', 0, description);
 
     theCache->_description.clear();
     for (unsigned int i = 0; i < description.size(); ++i)

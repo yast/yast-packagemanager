@@ -136,8 +136,7 @@ PMRpmPackageDataProvider::distribution ( const PMPackage & pkg_r ) const
 std::string
 PMRpmPackageDataProvider::vendor ( const PMPackage & pkg_r ) const
 {
-    fillCache (mkPtr(pkg_r));
-    return _theCache._vendor;
+    return _attr_VENDOR;
 }
 
 std::string
