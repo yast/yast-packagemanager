@@ -1,0 +1,211 @@
+# SuSE-Linux-Package-Selection 2.1 -- (c) 1994-2001 SuSE GmbH
+# generated on Sat Aug 10 03:12:14 UTC 2002
+
+=Ver: 3.0
+
+=Sel: UnitedLinux 8.1 1
+
+=Sum: Extra Packages for UnitedLinux
+=Sum.cs: Extra Packages for UnitedLinux
+=Sum.de: Extra Packages for UnitedLinux
+=Sum.en: Extra Packages for UnitedLinux
+=Sum.es: Extra Packages for UnitedLinux
+=Sum.fr: Extra Packages for UnitedLinux
+=Sum.gl: Extra Packages for UnitedLinux
+=Sum.hu: Extra Packages for UnitedLinux
+=Sum.it: Extra Packages for UnitedLinux
+=Sum.ja: Extra Packages for UnitedLinux
+=Sum.lt: Extra Packages for UnitedLinux
+=Sum.nl: Extra Packages for UnitedLinux
+=Sum.pt: Extra Packages for UnitedLinux
+=Sum.sv: Extra Packages for UnitedLinux
+=Sum.tr: Extra Packages for UnitedLinux
+
++Sug:
+Gnome
+Kde-Desktop
+LAMP
+LDAP-Server
+Network 
+-Sug:
++Req:
+X11
+Basis-Sound 
+-Req:
+=Cat: addon
+=Vis: true
+
++Ins:
+MyODBC-libiodbc
+MyODBC-unixODBC
+acct
+antiword
+arpwatch
+at-spi
+avm_fcdsl
+avmailgate
+binutils
+cadaver
+cipe
+dante
+db-utils
+dds2tar
+dmapi
+docbook_4
+drbd
+dump
+egenix-mx-base
+expect
+fltk
+freeswan
+g3utils
+gconf-editor
+gettyps
+glibc-i18ndata
+gnome-common
+gnuplot
+gtkglarea
+heartbeat-ldirectord
+heartbeat-stonith
+heimdal
+horde
+hp-officeJet
+htdig
+i4l-vbox
+icecast
+icmpinfo
+ipchains
+ipvsadm
+iso_ent
+jakarta-tomcat
+java2
+jserv
+kam2
+libgail-gnome
+libmcrypt-devel
+libnet
+libnetpbm
+libole2
+libraw1394
+libzvt2
+linux-iscsi
+lphdisk
+lsb
+lsb-runtime
+makedev
+mgetty
+mod_dav
+mod_perl
+mod_php4-servlet
+mod_python
+mon
+mozilla-mail
+mpg123
+mt_st
+mtr
+mtr-gtk
+mtx
+nagios
+nagios-nsca
+nagios-plugins
+nagios-plugins-extras
+nagios-www
+ncftp
+nessus
+netdate
+netsaint-pscwatch
+nis-utils
+nmap
+nss_db
+pam_krb5
+pam_radius
+pam_smb
+pax
+pbm2l7k
+pdksh
+perl-Convert-BER
+perl-Crypt-DES
+perl-DateManip
+perl-Digest-HMAC
+perl-Digest-SHA1
+perl-Mon
+perl-Net-SNMP
+perl-Parse-Yapp
+perl-Period
+perl-SGMLS
+perl-Tie-IxHash
+perl-XML-DOM
+perl-XML-XQL
+pidentd
+plip
+plotutils
+postgresql
+postgresql-jdbc
+postgresql-odbc
+postgresql-perl
+postgresql-python
+postgresql-server
+postgresql-tcl
+psutils
+python-gtk
+python-mysql
+python-nothreads
+qpopper
+qt
+qt3-mysql
+qt3-non-mt
+qt3-postgresql
+qt3-unixODBC
+rarpd
+rdist
+rep-gtk2
+rp-pppoe
+rstatd
+ruby
+saint
+sawfish2
+scanlogd
+scrollkeeper
+scsi
+scsi-changer
+sgml-skel
+sgrep
+sharutils
+sitecopy
+sniffit
+snort
+sslwrap
+star
+statserial
+stunnel
+susevbox
+sysstat
+tcl
+tclx
+tripwire
+ttcp
+type1inst
+umsprogs
+uucp
+vacation
+varmon
+vnc
+vtun
+wavplay
+wdiff
+webalizer
+wireless-tools
+x3270
+xdevel
+xfsdump
+xibod
+xinetd
+xled
+xlhtml
+xlhtml-cole
+xmlcharent
+xpp
+xscsi
+yelp
+-Ins:
+
