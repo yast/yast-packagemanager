@@ -60,6 +60,8 @@ class Y2PM {
     // packages of selections
     static std::list<LangCode> _requested_locales;
 
+    static PkgArch _base_arch;
+
   private:
 
     ///////////////////////////////////////////////////////////////////
@@ -89,6 +91,11 @@ class Y2PM {
      **/
     static std::list<LangCode> & getRequestedLocales () { return _requested_locales; }
     static void setRequestedLocales (std::list<LangCode> & requested_locales) { _requested_locales = requested_locales; }
+
+    /**
+     * Access to the (target) base architecture
+     **/
+    static PkgArch baseArch(void);
 
     /**
      * The local machine's rootdir. "/" if running from system.

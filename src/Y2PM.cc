@@ -42,6 +42,7 @@ Pathname Y2PM::_instTarget_rootdir( "/" );
 Pathname Y2PM::_system_rootdir    ( "/" );
 LangCode Y2PM::_preferred_locale ("en");
 std::list<LangCode> Y2PM::_requested_locales;
+PkgArch Y2PM::_base_arch;
 
 ///////////////////////////////////////////////////////////////////
 // components provided
@@ -74,6 +75,18 @@ Y2PM::CallBacks::CallBacks()
 };
 
 ///////////////////////////////////////////////////////////////////
+
+
+PkgArch
+Y2PM::baseArch(void)
+{
+#warning TBD init _base_arch from product
+    if (((const std::string &)_base_arch).empty())
+    {
+	_base_arch = instTarget().baseArch();
+    }
+    return _base_arch;
+}
 
 ///////////////////////////////////////////////////////////////////
 //
