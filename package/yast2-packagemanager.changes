@@ -1,7 +1,10 @@
 -------------------------------------------------------------------
 Fri Feb  4 12:26:11 CET 2005 - ma@suse.de
 
+- In commitPackages, do not delete packages in advance which will
+  be obsoleted anyway. (#50252)
 - Let selections and packages follow state changes in LanguageManager.
+  Save LanguageManager setting in commitPackages.
 - 2.11.13
 
 -------------------------------------------------------------------

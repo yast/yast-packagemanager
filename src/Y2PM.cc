@@ -1025,6 +1025,7 @@ static int internal_commitPackages( unsigned mediaNr_r,
   //
   ///////////////////////////////////////////////////////////////////
   {
+    rcSave(); // saves e.g. LanguageManager settings
     PMError res = Y2PM::selectionManager().installOnTarget();
     if ( res ) {
       ERR << "Error installing selection data: " << res << endl;

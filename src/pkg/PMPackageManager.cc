@@ -45,6 +45,66 @@ ostream & operator<<( ostream & str, const set<_Ct, Compare> & obj ) {
   }
   return str << '}';
 }
+///////////////////////////////////////////////////////////////////
+//
+//
+///////////////////////////////////////////////////////////////////
+
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : strip_obsoleted_to_delete
+**	FUNCTION TYPE : void
+**
+** strip packages to_delete which get obsoleted by
+** to_install (i.e. delay deletion in case the
+** obsoleting package likes to save whatever...
+*/
+void strip_obsoleted_to_delete( list<PMPackagePtr> & deleteList_r,
+				const list<PMPackagePtr> & instlist_r )
+{
+  if ( deleteList_r.size() == 0 )
+    return; // ---> nothing to do
+
+  // build obsoletes from instlist_r
+  list<PkgRelation> obsoletes;
+  for ( list<PMPackagePtr>::const_iterator it = instlist_r.begin();
+	it != instlist_r.end(); ++it ) {
+    obsoletes.insert( obsoletes.end(),
+		      (*it)->obsoletes_begin(), (*it)->obsoletes_end() );
+  }
+  if ( obsoletes.size() == 0 )
+    return; // ---> nothing to do
+
+  // match them... ;(
+  list<PMPackagePtr> undelayed;
+  // forall applDelete Packages...
+  for ( list<PMPackagePtr>::iterator it = deleteList_r.begin();
+	it != deleteList_r.end(); ++it ) {
+    PMPackagePtr ipkg( *it );
+    bool delayPkg = false;
+    // ...check whether an obsolets....
+    for ( list<PkgRelation>::iterator obs = obsoletes.begin();
+	  ! delayPkg && obs != obsoletes.end(); ++obs ) {
+      // ...matches anything provided by the package?
+      for ( PMSolvable::PkgRelList_const_iterator prov = ipkg->provides_begin();
+	    prov != ipkg->provides_end(); ++prov ) {
+	if ( obs->matches( *prov ) ) {
+	  // if so, delay package deletion
+	  DBG << "Ignore appl_delete (should be obsoleted): " << ipkg << endl;
+	  delayPkg = true;
+	  break;
+	}
+      }
+    }
+    if ( ! delayPkg ) {
+      undelayed.push_back( ipkg );
+    }
+  }
+  // Puhh...
+  deleteList_r.swap( undelayed );
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -216,10 +276,19 @@ void PMPackageManager::getPackagesToInsDel( std::list<PMPackagePtr> & dellist_r,
 	}
     }
 
-    MIL << "PackagesToInsDel: delete " << dellist_r.size() << ", install " << instlist_r.size() << ", srcinstall " << srclist_r.size() << endl;
 
-    if ( instlist_r.empty() )
+    MIL << "PackagesToInsDel: delete " << dellist_r.size() << ", install " << instlist_r.size() << ", srcinstall " << srclist_r.size() << endl;
+    if ( instlist_r.empty() ) {
       return;
+    }
+    ///////////////////////////////////////////////////////////////////
+    //
+    // strip packages to_delete which get obsoleted by
+    // to_install (i.e. delay deletion in case the
+    // obsoleting package likes to save whatever...
+    //
+    ///////////////////////////////////////////////////////////////////
+    strip_obsoleted_to_delete( dellist_r, instlist_r );
 
     ///////////////////////////////////////////////////////////////////
     //
