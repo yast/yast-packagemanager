@@ -396,12 +396,28 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg,
 {
 	bool error = false;
 	
+	// for all provides of the old package
 	ci_for( PMSolvable::Provides_, prov, oldpkg->all_provides_) {
 		D__ << "  checking provided name " << (*prov).name() << endl;
+		// for all packages that require this provide
 		RevRel_for( vinstalled.required()[(*prov).name()], req ) {
+			bool obsdoesntmatter = false;
 			D__ << "    requirement: " << req->relation()
 				 << " by installed/accepted " << req->pkg()->name() << endl;
-			if (!req_ok_after_upgrade( req->relation(), oldpkg, newpkg )) {
+
+			// check if newpkg obsoletes found package, in this
+			// case requirements of the found one do not matter
+			ci_for( PMSolvable::PkgRelList_, obs, newpkg->obsoletes_)
+			{
+				if (obs->matches( req->pkg()->self_provides() ))
+				{
+					W__ << "    satisfied as " << newpkg->name() <<
+						 " obsoletes " << *obs << endl;
+					obsdoesntmatter = true;
+				}
+			}
+
+			if (!obsdoesntmatter && !req_ok_after_upgrade( req->relation(), oldpkg, newpkg )) {
 				if (PMSolvablePtr upgrade = try_upgrade_requirerer(
 						req->pkg(), oldpkg, newpkg )) {
 					do_upgrade_for_conflict( upgrade );
