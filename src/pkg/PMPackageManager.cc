@@ -317,7 +317,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	    // compare only the rpm name, not the edition
 
 	    string name = (*splitit).substr (0, colonpos);
-	    string rpmname = Y2PM::instTarget().belongsTo (Pathname ((*splitit).substr (colonpos+1)));
+	    string rpmname = Y2PM::instTarget().belongsTo (Pathname ((*splitit).substr (colonpos+1)), false);	// name only
 	    DBG << "'" << name << "' matches '" << rpmname << "' ?" << endl;
 	    if (name == rpmname)		// name matches
 	    {
