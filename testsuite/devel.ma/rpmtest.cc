@@ -139,11 +139,18 @@ int main()
   INT << "Total Packages "   << PMGR.size() << endl;
   INT << "Total Selections " << SMGR.size() << endl;
 
+
+  INT << TMGR.getMountPoints() << endl;
+
+  SEC << "STOP" << endl;
+  return 0;
+  if ( 0 ) {
   SEC << "--------------------------------------------------------------------" << endl;
   dumpSelWhatIf( DBG, true );
   SBS( "default" );
   dumpSelWhatIf( DBG );
   dumpPkgWhatIf( DBG );
+  }
   SEC << "--------------------------------------------------------------------" << endl;
   SMGR["X11"]->user_set_delete();
   SMGR.activate (PMGR);

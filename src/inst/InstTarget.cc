@@ -542,14 +542,22 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 	if ( !(procmounts.fail() || procmounts.bad()) ) {
 	  // data to consume
 
+	  // rootfs 	/ 		rootfs 		rw 0 0
+	  // /dev/root 	/ 		reiserfs	rw 0 0
+	  // proc 	/proc 		proc		rw 0 0
+	  // devpts 	/dev/pts 	devpts		rw 0 0
+	  // /dev/hda5 	/boot 		ext2		rw 0 0
+	  // shmfs 	/dev/shm 	shm		rw 0 0
+	  // usbdevfs 	/proc/bus/usb 	usbdevfs	rw 0 0
+
 	  std::vector<std::string> words;
-	  if ( stringutil::split( l, words ) < 2 ) {
+	  if ( stringutil::split( l, words ) < 3 ) {
 	    WAR << "Suspicious entry in /proc/mounts: " << l << endl;
 	    continue;
 	  }
 
 	  //
-	  // Filter filesystems without '/' (porc,shmfs,..)
+	  // Filter devices without '/' (porc,shmfs,..)
 	  //
 	  if ( words[0].find( '/' ) == string::npos ) {
 	    DBG << "Discard mount point : " << l << endl;
@@ -576,6 +584,37 @@ std::set<PkgDuMaster::MountPoint> InstTarget::getMountPoints() const
 	      continue;
 	    }
 	  }
+
+	  //
+	  // Filter cdrom
+	  //
+	  if ( words[2] == "iso9660" ) {
+	    DBG << "Discard cdrom : " << l << endl;
+	    continue;
+	  }
+
+	  //
+	  // Filter some common unwanted mountpoints
+	  //
+	  char * mpunwanted[] = {
+	    "/mnt", "/media", "/mounts", "/floppy", "/cdrom",
+	    "/suse", "/var/tmp", "/var/adm/mount", "/var/adm/YaST",
+	    /*last*/0/*entry*/
+	  };
+
+	  char ** nomp = mpunwanted;
+	  for ( ; *nomp; ++nomp ) {
+	    string pre( *nomp );
+	    if ( mp.compare( 0, pre.size(), pre ) == 0 // mp has prefix pre
+		 && ( mp.size() == pre.size() || mp[pre.size()] == '/' ) ) {
+	      break;
+	    }
+	  }
+	  if ( *nomp ) {
+	    DBG << "Filter mount point : " << l << endl;
+	    continue;
+	  }
+
 
 	  //
 	  // statvfs (full path!) and get the data
