@@ -276,27 +276,38 @@ int
 PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPackagePtr>& nodelete_r)
 {
     int count = 0;
-    int i = 1;
+    int i = 0;
     noinstall_r.clear();
     nodelete_r.clear();
 
     DBG << "doUpdate..." << size() << " selectables" << endl;
 
+
     for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
     {
+	++i;
 	if (*it == 0)
 	{
 	    ERR << "Selectable NULL" << endl;
-	    ++i;
 	    continue;
 	}
-	DBG << i << ". " << (*it)->name() << ": ";
+	DBG << endl << i << ". @" << *it << endl;
+	DBG << endl << i << ". " << (*it)->name() << endl;
+    }
+    DBG << "Looping over "<< i << " selectables";
+    i = 0;
+
+    for ( PMSelectableVec::iterator it = begin(); it != end(); ++it )
+    {
 	++i;
+	DBG << endl << i << ". ";
+        DBG << (*it)->name() << ": ";
 
 	//-----------------------------------------------------------------
 	// pre check: candidate ? taboo ? user ? non-suse ?
 
-	if (!(*it)->has_candidate())
+	PMPackagePtr candidate = (*it)->candidateObj();
+	if (!candidate)
 	{
 	    DBG << "no candidate" << endl;
 	    continue;
@@ -312,14 +323,11 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	    continue;
 	}
 
-	PMPackagePtr candidate = (*it)->candidateObj();
-	if (!candidate)
-	{
-	    DBG << "no candidate" << endl;
-	    continue;
-	}
-
 	PMPackagePtr installed = (*it)->installedObj();
+	if (!installed)
+	{
+	    DBG << "not installed" << endl;
+	}
 
 	//-----------------------------------------------------------------
 	// check splitprovides
@@ -364,27 +372,31 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
 
 #warning TDB checks edition only
-	if (installed->edition() < candidate->edition())
+	if (installed)
 	{
-	    DBG << "Edition " << PkgEdition::toString(installed->edition()) << " < " << PkgEdition::toString(candidate->edition()) << endl;
-	    if (suse_vendor (installed))
+	    if (installed->edition() < candidate->edition())
 	    {
-		(*it)->appl_set_install ();
-		count++;
+		DBG << "Edition " << PkgEdition::toString(installed->edition()) << " < " << PkgEdition::toString(candidate->edition());
+		if (suse_vendor (installed))
+		{
+		    (*it)->appl_set_install ();
+		    count++;
+		}
+		else
+		    noinstall_r.push_back (installed);
 	    }
-	    else
-		noinstall_r.push_back (installed);
-	}
-	else if (installed->buildtime() < candidate->buildtime())
-	{
-	    DBG << "Buildtime " << installed->buildtime() << " < " << candidate->buildtime() << endl;
-	    if (suse_vendor (installed))
+	    else if (installed->buildtime() < candidate->buildtime())
 	    {
-		(*it)->appl_set_install ();
-		count++;
+		DBG << "Edition " << PkgEdition::toString(installed->edition()) << " ? " << PkgEdition::toString(candidate->edition()) << endl;
+		DBG << "Buildtime " << installed->buildtime() << " < " << candidate->buildtime();
+		if (suse_vendor (installed))
+		{
+		    (*it)->appl_set_install ();
+		    count++;
+		}
+		else
+		    noinstall_r.push_back (installed);
 	    }
-	    else
-		noinstall_r.push_back (installed);
 	}
 
 	//-----------------------------------------------------------------
@@ -394,63 +406,56 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	for (PMSolvable::PkgRelList_const_iterator obsit = obsoletes.begin();
 	     obsit != obsoletes.end(); ++obsit)
 	{
-	    DBG << "obsoletes '" << obsit->name() << "' ";
 	    PMSelectablePtr obsslc = getItem (obsit->name());
-	    if (!obsslc)				// unknown obsolete
+	    if (obsslc							// obsoletes is known
+		&& (obsslc->has_installed())				// and is installed
+		&& (!(obsslc->is_taboo() || obsslc->by_user())))	// and to taboo or set by user
 	    {
-		DBG << "not found" << endl;
-		continue;
-	    }
-	    if (!obsslc->has_installed())				// not installed
-	    {
-		DBG << "not installed" << endl;
-		continue;
-	    }
-	    if (obsslc->is_taboo()
-		|| obsslc->by_user())
-	    {
-		DBG << "taboo/user" << endl;
-		continue;
-	    }
 
-	    DBG << "delete!" << endl;
-	    PMPackagePtr installed = obsslc->installedObj();
-	    if (suse_vendor (installed))
-	    {
-		obsslc->appl_set_delete();
-		count++;
-	    }
-	    else
-		nodelete_r.push_back (installed);
+		PMPackagePtr installed = obsslc->installedObj();
 
-	    //-------------------------------------------------------
-	    // if the current candidate isn't selected for installation yet,
-	    // look for a matching provides
-
-	    if (!(*it)->to_install())
-	    {
-		const PMSolvable::PkgRelList_type provides = candidate->provides();
-		for (PMSolvable::PkgRelList_const_iterator prvit = provides.begin();
-		     prvit != provides.end(); ++prvit)
+		if (!(*it)->to_install())		// if not selected for installion yet
 		{
-		    if ((*obsit) != (*prvit))
-			continue;
+		    // look for a matching provides
 
-		    DBG << "matching provides" << endl;
+		    const PMSolvable::PkgRelList_type provides = candidate->provides();
+		    for (PMSolvable::PkgRelList_const_iterator prvit = provides.begin();
+			 prvit != provides.end(); ++prvit)
+		    {
+			if ((*obsit) != (*prvit))
+			    continue;
 
+		        DBG << "matching provides";
+
+			if (suse_vendor (installed))
+			{
+			    (*it)->appl_set_install ();
+			    count++;
+			}
+			else
+			    noinstall_r.push_back (installed);
+		    } // provides loop
+
+		} // not yet installed
+	
+		// re-test install flag, the above provides check might have changed it
+
+		if ((*it)->to_install())		// if selected for installion
+		{					// remove obsoletes
+		    DBG << "delete!";
 		    if (suse_vendor (installed))
 		    {
-			(*it)->appl_set_install ();
+			obsslc->appl_set_delete();
 			count++;
 		    }
 		    else
-			noinstall_r.push_back (installed);
-		}    
-	    }
+			nodelete_r.push_back (installed);
+		}
+
+	    } // obsoletes is installed
 
 	} // obsoletes loop
 
-	DBG << "next" << endl;
     } // selectable loop
 
     return count;
