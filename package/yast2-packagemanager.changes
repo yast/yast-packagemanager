@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Sep  3 22:30:46 CEST 2002 - kkaempf@suse.de
+
+- initial version for update
+- further online-update functionality
+- cleaned up callbacks
+- implement product db (ma@suse.de)
+- 2.6.5
+
+-------------------------------------------------------------------
 Wed Aug 28 22:06:32 CEST 2002 - kkaempf@suse.de
 
 - implement media change callbacks
