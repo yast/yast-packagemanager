@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 25 16:05:54 CET 2005 - lnussel@suse.de
+
+- remove root directory from diffs (#38240)
+- collect diffs in one file per day and use new update-message mechanism
+
+-------------------------------------------------------------------
 Tue Jan 25 14:02:41 CET 2005 - mir@suse.de
 
 - you bugfix: removed login and password from password file entries
