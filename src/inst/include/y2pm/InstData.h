@@ -84,13 +84,13 @@ class InstData {
      * find list of packages
      * @return list of PMPackagePtr matching name ,[version] ,[release] ,[architecture]
      */
-    static const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr>& packages, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "");
+    static const std::list<PMPackagePtr> findPackages (const std::list<PMPackagePtr>& packages, const std::string& name = "", const std::string& arch = "", const std::string& version = "", const std::string& release = "");
 
     /**
      * find list of selections
      * @return list of PMSelectionPtr matching name ,[version] ,[release] ,[architecture]
      */
-    static const std::list<PMSelectionPtr> findSelections (const std::list<PMSelectionPtr>& selections, const std::string& name = "", const std::string& version = "", const std::string& release = "", const std::string& arch = "");
+    static const std::list<PMSelectionPtr> findSelections (const std::list<PMSelectionPtr>& selections, const std::string& arch = "", const std::string& name = "", const std::string& version = "", const std::string& release = "");
 };
 
 ///////////////////////////////////////////////////////////////////

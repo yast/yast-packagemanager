@@ -13,7 +13,7 @@
   File:       PMULPackageDataProvider.h
 
   Author:     Michael Andres <ma@suse.de>
-  Maintainer: Michael Andres <ma@suse.de>
+  Maintainer: Klaus Kaempf <kkaempf@suse.de>
 
   Purpose: Realized PackageDataProvider for UnitedLinux packages format
 
@@ -27,7 +27,6 @@
 
 #include <y2util/Pathname.h>
 #include <y2util/YRpmGroupsTree.h>
-#include <y2util/TagParser.h>
 #include <y2util/TagCacheRetrieval.h>
 #include <y2util/TagCacheRetrievalPtr.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
@@ -53,10 +52,10 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 
 	// PMObject
 
-	TagCacheRetrievalPos _attr_SUMMARY;
-	TagCacheRetrievalPos _attr_DESCRIPTION;
-	TagCacheRetrievalPos _attr_INSNOTIFY;
-	TagCacheRetrievalPos _attr_DELNOTIFY;
+	TagRetrievalPos _attr_SUMMARY;
+	TagRetrievalPos _attr_DESCRIPTION;
+	TagRetrievalPos _attr_INSNOTIFY;
+	TagRetrievalPos _attr_DELNOTIFY;
 	FSize _attr_SIZE;
 
 	// PMPackage
@@ -65,7 +64,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// INSTALLTIME
 	// DISTRIBUTION
 	// VENDOR
-	TagCacheRetrievalPos _attr_LICENSE;
+	TagRetrievalPos _attr_LICENSE;
 	// PACKAGER
 	YStringTreeItem *_attr_GROUP;
 	// CHANGELOG
@@ -75,15 +74,15 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// POSTIN
 	// PREUN
 	// POSTUN
-	TagCacheRetrievalPos _attr_SOURCERPM;
+	TagRetrievalPos _attr_SOURCERPM;
 	FSize _attr_ARCHIVESIZE;
-	TagCacheRetrievalPos _attr_AUTHORS;
+	TagRetrievalPos _attr_AUTHORS;
 	// FILENAMES
-	TagCacheRetrievalPos _attr_RECOMMENDS;
-	TagCacheRetrievalPos _attr_SUGGESTS;
-	TagCacheRetrievalPos _attr_LOCATION;
+	TagRetrievalPos _attr_RECOMMENDS;
+	TagRetrievalPos _attr_SUGGESTS;
+	TagRetrievalPos _attr_LOCATION;
 	int _attr_MEDIANR;
-	TagCacheRetrievalPos _attr_KEYWORDS;
+	TagRetrievalPos _attr_KEYWORDS;
 
 	// retrieval pointer for packages data
 	TagCacheRetrievalPtr _package_retrieval;

@@ -69,7 +69,11 @@ class InstSrcError {
       // InstSrcMgr
       E_bad_id,
       E_isrc_cache_invalid,
-      E_isrc_cache_duplicate
+      E_isrc_cache_duplicate,
+      // InstSrcData
+      E_data_bad_packages,
+      E_data_bad_packages_lang,
+      E_data_bad_selection
     };
 };
 

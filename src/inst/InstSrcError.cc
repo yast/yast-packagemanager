@@ -82,6 +82,11 @@ std::string InstSrcError::errtext( const unsigned e )
     ENUM_OUT( E_isrc_cache_invalid );
     ENUM_OUT( E_isrc_cache_duplicate );
 
+      // InstSrcData
+    ENUM_OUT( E_data_bad_packages );
+    ENUM_OUT( E_data_bad_packages_lang );
+    ENUM_OUT( E_data_bad_selection );
+
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////
   // no default: let compiler warn '... not handled in switch'

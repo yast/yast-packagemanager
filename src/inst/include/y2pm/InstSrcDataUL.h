@@ -23,7 +23,7 @@
 
 #include <iosfwd>
 #include <fstream>
-#include <y2util/CommonPkdParser.h>
+#include <y2util/TaggedFile.h>
 #include <y2util/TagCacheRetrieval.h>
 
 #include <y2pm/PMULPackageDataProviderPtr.h>
@@ -82,19 +82,19 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 	 * fill tagset from packages to PMPackage
 	 *
 	 */
-	static PMPackagePtr PkgTag2Package( TagCacheRetrievalPtr pkgcache, CommonPkdParser::TagSet * tagset, const std::list<PMPackagePtr>& packags );
+	static PMPackagePtr PkgTag2Package( TagCacheRetrievalPtr pkgcache, TaggedFile::TagSet& tagset, const std::list<PMPackagePtr>& packags );
 
 	/**
 	 * fill tagset from packages.<lang> to PMPackage
 	 *
 	 */
-	static void LangTag2Package( TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, CommonPkdParser::TagSet * tagset );
+	static PMError LangTag2Package( TagCacheRetrievalPtr langcache, const std::list<PMPackagePtr>& packages, TaggedFile::TagSet& tagset );
 
 	/**
 	 * fill tagset from <name>.sel to PMSelection
 	 *
 	 */
-	static PMSelectionPtr Tag2Selection ( PMULSelectionDataProviderPtr dataprovider, CommonPkdParser::TagSet * tagset );
+	static PMSelectionPtr Tag2Selection ( PMULSelectionDataProviderPtr dataprovider, TaggedFile::TagSet& tagset );
 
 	/*
 	 * parse the 'packages' file
@@ -169,192 +169,5 @@ class InstSrcDataUL : virtual public Rep, public InstSrcData {
 };
 
 ///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : InstSrcDataULPkgTags
-/**
- * @short provides the tag set for the packages file
- * (to feed the tag parser)
- *
- **/
-class InstSrcDataULPkgTags : public CommonPkdParser::TagSet
-{
-
-public:
-
-    enum Tags {
-	VERSION,	// general file format version
-	PACKAGE,	// name version release arch
-	REQUIRES,	// list of requires tags
-	PREREQUIRES,	// list of pre-requires tags
-	PROVIDES,	// list of provides tags
-	CONFLICTS,	// list of conflicts tags
-	OBSOLETES,	// list of obsoletes tags
-	RECOMMENDS,	// list of recommends tags
-	SUGGESTS,	// list of suggests tags
-	LOCATION,	// file location
-	SIZE,		// packed and unpacked size
-	BUILDTIME,	// buildtime
-	SOURCERPM,	// source package
-	GROUP,		// rpm group
-	LICENSE,	// license
-	AUTHORS,	// list of authors
-	SHAREWITH,	// package to share data with
-	KEYWORDS,	// list of keywords
-	NUM_TAGS
-    };
-
-public:
-    InstSrcDataULPkgTags( )
-	: TagSet()	{
-
-	CommonPkdParser::Tag* t;
-	createTag( "=Ver", VERSION);		// general file format version
-	createTag( "=Pkg", PACKAGE);		// name version release arch
-	t = createTag( "+Req", REQUIRES);	// list of requires tags
-	t->setEndTag("-Req");
-	t = createTag( "+Prq", PREREQUIRES);	// list of pre-requires tags
-	t->setEndTag("-Prq");
-	t = createTag( "+Prv", PROVIDES);	// list of provides tags
-	t->setEndTag("-Prv");
-	t = createTag( "+Con", CONFLICTS);	// list of conflicts tags
-	t->setEndTag("-Con");
-	t = createTag( "+Obs", OBSOLETES);	// list of obsoletes tags
-	t->setEndTag("-Obs");
-	t = createTag( "+Rec", RECOMMENDS);	// list of recommends tags
-	t->setEndTag("-Rec");
-	t = createTag( "+Sug", SUGGESTS);	// list of suggests tags
-	t->setEndTag("-Sug");
-	createTag( "=Loc", LOCATION);		// file location
-	createTag( "=Siz", SIZE);		// packed and unpacked size
-	createTag( "=Tim", BUILDTIME);		// buildtime
-	createTag( "=Src", SOURCERPM);		// source package
-	createTag( "=Grp", GROUP);		// rpm group
-	createTag( "=Lic", LICENSE);		// license
-	t = createTag( "+Aut", AUTHORS);	// list of authors
-	t->setEndTag("-Aut");
-	createTag( "=Shr", SHAREWITH);		// package to share data with
-	t = createTag( "+Key", KEYWORDS);	// list of keywords
-	t->setEndTag("-Key");
-    };
-
-private:
-
-    CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
-
-	CommonPkdParser::Tag* t;
-	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
-	this->addTag(t);
-	addTagByIndex( tagEnum, t );
-
-	return t;
-    }
-
-};
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : InstSrcDataULLangTags
-/**
- * @short provides the tag set for the packages.<lang> file
- * (to feed the tag parser)
- *
- **/
-class InstSrcDataULLangTags : public CommonPkdParser::TagSet
-{
-
-public:
-
-    enum Tags {
-	VERSION,	// general file format version
-	PACKAGE,	// name version release arch
-	SUMMARY,	// short summary (label)
-	DESCRIPTION,	// long description
-	INSNOTIFY,	// install notification
-	DELNOTIFY,	// delete notification
-	NUM_TAGS
-    };
-
-public:
-    InstSrcDataULLangTags( )
-	: TagSet()	{
-
-	CommonPkdParser::Tag* t;
-	createTag( "=Ver", VERSION);		// general file format version
-	createTag( "=Pkg", PACKAGE);		// name version release arch
-	createTag( "=Sum", SUMMARY);
-	t = createTag( "+Des", DESCRIPTION);
-	t->setEndTag("-Des");
-	t = createTag( "+Ins", INSNOTIFY);
-	t->setEndTag("-Ins");
-	t = createTag( "+Del", DELNOTIFY);
-	t->setEndTag("-Del");
-    };
-
-private:
-
-    CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
-
-	CommonPkdParser::Tag* t;
-	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
-	this->addTag(t);
-	addTagByIndex( tagEnum, t );
-
-	return t;
-    }
-
-};
-
-
-///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : InstSrcDataULSelTags
-/**
- * @short provides the tag set for a <name>.sel file
- * (to feed the tag parser)
- *
- **/
-class InstSrcDataULSelTags : public CommonPkdParser::TagSet
-{
-
-public:
-
-    enum Tags {
-	VERSION,	// general file format version
-	SELECTION,	// name version release arch
-	SUMMARY,	// short summary (label)
-	CATEGORY,
-	VISIBLE,
-	ORDER,		// ordering data
-	RECOMMENDS,
-	SUGGESTS,
-	REQUIRES,
-	PROVIDES,
-	CONFLICTS,
-	OBSOLETES,
-	SIZE,
-	INSPACKS,
-	INSLANGPACKS,
-	DELPACKS,
-	NUM_TAGS
-    };
-
-public:
-    InstSrcDataULSelTags( );
-
-private:
-
-    CommonPkdParser::Tag* createTag( std::string tagName, Tags tagEnum ) {
-
-	CommonPkdParser::Tag* t;
-	t = new CommonPkdParser::Tag( tagName, CommonPkdParser::Tag::ACCEPTONCE );
-	this->addTag(t);
-	addTagByIndex( tagEnum, t );
-
-	return t;
-    }
-
-};
 
 #endif // InstSrcDataUL_h
