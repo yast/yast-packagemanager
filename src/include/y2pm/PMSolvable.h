@@ -104,9 +104,9 @@ class PMSolvable : virtual public Rep {
   protected:
 
     // name, edition, and architecture
-    PkgName _name;
+    PkgName    _name;
     PkgEdition _edition;
-    PkgArch _arch;
+    PkgArch    _arch;
 
     // relations of the package
     PkgRelList_type _requires, _conflicts, _provides, _obsoletes;
@@ -223,6 +223,11 @@ class PMSolvable : virtual public Rep {
      * @return true if this packages provides relation, false otherwise
      * */
     bool doesProvide(const PkgRelation& rel) const;
+
+    /**
+     * True if this obsoletes Solvable <code>item_r</code>.
+     **/
+    bool doesObsolete( const constPMSolvablePtr & item_r ) const;
 
     /**
      * access methods for components

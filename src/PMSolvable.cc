@@ -188,6 +188,26 @@ bool PMSolvable::doesProvide(const PkgRelation& rel) const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : PMSolvable::doesObsolete
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION :
+//
+bool PMSolvable::doesObsolete( const constPMSolvablePtr & item_r ) const
+{
+  if ( item_r ) {
+    for ( PkgRelList_const_iterator it = obsoletes_begin(); it != obsoletes_end(); ++it ) {
+      if ( it->matches( item_r ) ) {
+	return true;
+      }
+    }
+  }
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : PMSolvable::dumpOn
 //	METHOD TYPE : std::ostream &
 //

@@ -11,7 +11,7 @@
 
 using namespace std;
 
-bool PkgRelation::matches( const PMSolvablePtr pkg ) const
+bool PkgRelation::matches( constPMSolvablePtr pkg ) const
 {
 	if (pkg->name() != _name)
 		return false;
@@ -253,7 +253,7 @@ PMSolvable::PkgRelList_type PkgRelation::parseRelations( const string & data_tr 
   PMSolvable::PkgRelList_type ret_VCi;
   vector<string> data_Vti( TagParser::split2words( data_tr ) );
 
-  struct 
+  struct
   {
     string name;
     rel_op compare;
