@@ -17,7 +17,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		media/include		\
 	   ) -I$(includedir) -I$(includedir)/y2util/qt
 
-lib_LTLIBRARIES = liby2pmquery.la
+noinst_LTLIBRARIES = liby2pmquery.la
 
 liby2pmquery_la_SOURCES = QueryScanner.cc QueryParser.cc QueryError.cc Query.cc
 liby2pmquery_la_LDFLAGS = -version-info 2:0

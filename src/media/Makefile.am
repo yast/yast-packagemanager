@@ -17,7 +17,7 @@ INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
 		media/include	\
 	   ) -I$(includedir) -I$(QTDIR)/include
 
-lib_LTLIBRARIES = liby2pmMedia.la
+noinst_LTLIBRARIES = liby2pmMedia.la
 
 liby2pmMedia_la_SOURCES = \
 	MediaError.cc		\
