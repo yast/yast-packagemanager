@@ -47,7 +47,7 @@ liby2pm_la_LIBADD = 	pkg/liby2pmpkg.la	\
 			libPkgDep/libPkgDep.la	\
 			-ly2util -lrpm -lpopt
 
-bin_PROGRAMS = online_update installation_sources
+bin_PROGRAMS = online_update installation_sources genIS_PLAINcache
 
 online_update_SOURCES = online_update.cc
 online_update_LDADD = liby2pm.la
@@ -56,6 +56,11 @@ online_update_LDADD = liby2pm.la
 installation_sources_SOURCES = installation_sources.cc
 installation_sources_LDADD = liby2pm.la
 #installation_sources_LDFLAGS = -static
+
+genIS_PLAINcache_SOURCES =	genIS_PLAINcache.cc
+genIS_PLAINcache_LDADD =	liby2pm.la
+#genIS_PLAINcache_LDFLAGS =	-static
+
 
 admdir = /var/adm/fillup-templates
 

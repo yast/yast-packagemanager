@@ -696,7 +696,8 @@ unsigned phcAddFile( FD_t fd, const PathInfo & cpath_r, const Pathname & citem_r
 **	FUNCTION NAME : phcScanDir
 **	FUNCTION TYPE : unsigned
 */
-unsigned phcScanDir( FD_t fd, const PathInfo & cpath_r, const Pathname & prfx_r )
+unsigned phcScanDir( FD_t fd, const PathInfo & cpath_r, const Pathname & prfx_r,
+		     const PkgHeaderCache::buildOpts & options_r )
 {
   DBG << "SCAN " << cpath_r << " (" << prfx_r << ")" << endl;
 
@@ -708,11 +709,20 @@ unsigned phcScanDir( FD_t fd, const PathInfo & cpath_r, const Pathname & prfx_r 
   }
 
   unsigned count = 0;
-  for (  list<string>::const_iterator it = retlist.begin(); it != retlist.end(); ++it ) {
+  list<string> downlist;
+
+  for ( list<string>::const_iterator it = retlist.begin(); it != retlist.end(); ++it ) {
     PathInfo cpath( cpath_r.path() + *it, PathInfo::LSTAT );
     if ( cpath.isFile() ) {
       count += phcAddFile( fd, cpath, prfx_r + *it );
+    } else if ( options_r.recurse && cpath.isDir() ) {
+      downlist.push_back( *it );
     }
+  }
+  retlist.clear();
+
+  for ( list<string>::const_iterator it = downlist.begin(); it != downlist.end(); ++it ) {
+    count += phcScanDir( fd, cpath_r.path() + *it, prfx_r + *it, options_r );
   }
 
   return count;
@@ -725,8 +735,19 @@ unsigned phcScanDir( FD_t fd, const PathInfo & cpath_r, const Pathname & prfx_r 
 //	METHOD TYPE : int
 //
 int PkgHeaderCache::buildPkgHeaderCache( const Pathname & cache_r,
-					 const Pathname & pkgroot_r, const list<Pathname> & pkglist_r )
+					 const Pathname & pkgroot_r,
+					 const buildOpts & options_r )
 {
+  ///////////////////////////////////////////////////////////////////
+  // Check pkgroot
+  ///////////////////////////////////////////////////////////////////
+
+  PathInfo pkgroot( pkgroot_r );
+  if ( !pkgroot.isDir() ) {
+    ERR << "Not a directory: Pkgroot " << pkgroot << endl;
+    return -1;
+  }
+
   ///////////////////////////////////////////////////////////////////
   // Prepare cache file
   ///////////////////////////////////////////////////////////////////
@@ -735,61 +756,23 @@ int PkgHeaderCache::buildPkgHeaderCache( const Pathname & cache_r,
     ERR << "Can't open cache for writing: " << cache_r << " (" << ::Fstrerror(fd) << ")" << endl;
     if ( fd )
       ::Fclose( fd );
-    return -1;
+    return -2;
   }
 
   phcAddMagic( fd );
 
   ///////////////////////////////////////////////////////////////////
-  // Check pkgroot
+  // Scan pkgroot_r
   ///////////////////////////////////////////////////////////////////
-
-  PathInfo pkgroot( pkgroot_r );
-  if ( !pkgroot.isDir() ) {
-    ERR << "Not a directory: Pkgroot " << pkgroot << endl;
-    ::Fclose( fd );
-    return -2;
-  }
-
-  if ( pkglist_r.empty() ) {
-    ERR << "Pkglist is empty" << endl;
-    ::Fclose( fd );
-    return -3;
-  }
-
-  ///////////////////////////////////////////////////////////////////
-  // Scan pkglist
-  // Symlinks to directories are ok. Symlinks to files are ignored,
-  // as we frequently use constructs like:
-  //  package-1.0-1.rpm
-  //  package-1.1-1.rpm
-  //  package-1.2-1.rpm
-  //  package-2.0-1.rpm
-  //  package.rmp -> package-2.0-1.rpm
-  ///////////////////////////////////////////////////////////////////
-  MIL << "Start scan below " << pkgroot_r << endl;
-  unsigned count = 0;
-
-  for ( list<Pathname>::const_iterator it = pkglist_r.begin(); it != pkglist_r.end(); ++it ) {
-    Pathname citem( it->absolutename() );
-    PathInfo cpath( pkgroot_r + citem, PathInfo::LSTAT );
-    DBG << "CPATH " << cpath << endl;
-    if ( cpath.isFile() ) {
-      count += phcAddFile( fd, cpath, citem );
-    } else {
-      if ( cpath.isLink() ) {
-	cpath.stat(); // restat
-      }
-      if ( cpath.isDir() ) {
-	count += phcScanDir( fd, cpath, citem );
-      }
-    }
-  }
+  MIL << "Start scan below " << pkgroot_r
+    << " (recurse=" << (options_r.recurse?"yes":"no")
+    << ")" << endl;
+  unsigned count = phcScanDir( fd, pkgroot_r, "/", options_r );
 
   if ( ::Ferror(fd) ) {
     ERR << "Error writing cache: " << cache_r << " (" << ::Fstrerror(fd) << ")" << endl;
     ::Fclose( fd );
-    return -1;
+    return -3;
   }
 
   MIL << "Found " << count << " package(s) below " << pkgroot_r << endl;

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sun Mar 16 02:57:08 CET 2003 - ma@suse.de
+
+- Added genIS_PLAINcache. Standalone binary to create a chachefile
+  for plain RPM InstSource. Cachefile is mandatory for plain RPM
+  InstSources accessed via FTP/HTTP.
+- 2.7.35
+
+-------------------------------------------------------------------
 Fri Mar 14 20:21:21 CET 2003 - kkaempf@suse.de
 
 - fix name display of source rpm
