@@ -221,8 +221,12 @@ PMError PMYouPatchInfo::parseFiles( const string &files,
     vector<string> fileData;
     stringutil::split( *it, fileData );
     if ( fileData.size() != 2 ) {
-      return PMError( YouError::E_parse_error,
-                      "Error parsing 'Files' attribute" );
+      string text = "Error parsing 'Files' attribute.";
+      text += " ";
+      text += stringutil::form(
+          "Line '%s' doesn't have form 'url size'.",
+          (*it).c_str() );
+      return PMError( YouError::E_parse_error, text );
     }
     patch->addFile( PMYouFile( fileData[ 0 ], FSize( fileData[ 1 ] ) ) );
   }
