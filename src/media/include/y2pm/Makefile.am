@@ -10,7 +10,6 @@ pkginclude_HEADERS =	\
 	MediaAccess.h \
 	MediaDIR.h \
 	MediaHTTP.h \
-	MediaInfoPtr.h \
 	MediaSMB.h \
 	MediaAccessPtr.h \
 	MediaDISK.h \
@@ -18,7 +17,6 @@ pkginclude_HEADERS =	\
 	MediaNFS.h \
 	MediaCD.h \
 	MediaFTP.h \
-	MediaInfo.h \
 	MediaResult.h
 
 #<INSTALL-HEADER-TARGET>
