@@ -92,8 +92,12 @@ InstSrcDescr::~InstSrcDescr()
 std::string InstSrcDescr::label() const
 {
   LabelMap::const_iterator found = _content_labelmap.find( Y2PM::getPreferredLocale() );
+  if ( found == _content_labelmap.end() && Y2PM::getPreferredLocale().hasCountry() )
+    found = _content_labelmap.find( Y2PM::getPreferredLocale().languageOnly() );
+
   if ( found != _content_labelmap.end() )
     return found->second;
+
   return content_label();
 }
 
