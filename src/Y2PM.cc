@@ -36,6 +36,7 @@
 #include <y2pm/PMSelectionManager.h>
 #include <y2pm/PMYouPatchManager.h>
 #include <y2pm/InstYou.h>
+#include <y2pm/PMLocale.h>
 
 using namespace std;
 using namespace Y2PMCallbacks;
@@ -409,6 +410,11 @@ PMYouPatchManager & Y2PM::youPatchManager()
 {
   if ( !_youPatchManager ) {
     MIL << "Launch YouPatchManager..." << endl;
+
+    // The text domain should rather be set at a more central place at startup
+    // of the packagemanager.
+#warning FIXME: Move setTextdomain call to a more central place
+    PMLocale::setTextdomain();
 
     _youPatchManager = new PMYouPatchManager;
 
