@@ -45,7 +45,7 @@
  *
  **/
 class InstSrc: virtual public Rep {
-  REP_BODY(InstSrc)
+  REP_BODY(InstSrc);
 
   protected:
 
@@ -70,7 +70,7 @@ class InstSrc: virtual public Rep {
      *   used for access to new/unknown media
      * @param: URL specification for media access
      *
-     * keeps the media open 
+     * keeps the media open
      */
     InstSrc ( const std::string & mediaurl );
 
@@ -146,7 +146,7 @@ class InstSrc: virtual public Rep {
      * @return list of PMSolvablePtr on this source
      */
     const std::list<PMSolvablePtr> *getSelections() const;
-    
+
     /**
      * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source

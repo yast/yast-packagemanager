@@ -44,7 +44,7 @@
  *
  **/
 class DataOldSuSE: virtual public Rep {
-  REP_BODY(DataOldSuSE)
+  REP_BODY(DataOldSuSE);
 
   private:
     std::list<PMSolvablePtr> *_selections;
@@ -68,7 +68,7 @@ class DataOldSuSE: virtual public Rep {
      * @return ptr to list of selections on old SuSE source
      */
     const std::list<PMSolvablePtr> *getSelections (void) const;
-    
+
     /**
      * @return ptr to list of packages on old SuSE source
      * */

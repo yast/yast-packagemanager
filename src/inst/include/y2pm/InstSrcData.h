@@ -37,7 +37,7 @@
 //
 //	CLASS NAME : InstSrcData
 class InstSrcData: virtual public Rep {
-  REP_BODY(InstSrcData)
+  REP_BODY(InstSrcData);
 
   private:
     InstData *_data;
@@ -93,7 +93,7 @@ class InstSrcData: virtual public Rep {
      * @return list of PMSolvablePtr on this source
      */
     const std::list<PMSolvablePtr> *getSelections (void) const;
-    
+
     /**
      * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source

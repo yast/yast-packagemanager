@@ -52,7 +52,7 @@
  *
  **/
 class InstTarget: virtual public Rep {
-  REP_BODY(InstTarget)
+  REP_BODY(InstTarget);
 
   protected:
 
