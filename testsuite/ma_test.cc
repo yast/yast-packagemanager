@@ -34,7 +34,7 @@ inline string dec( unsigned i ) {
 */
 int main()
 {
-  Y2SLog::setLogfileName("-");
+  Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
 
   InstSrcManager MGR;

@@ -104,15 +104,15 @@ void verbose(vector<string>& argv)
 
 void debug(vector<string>& argv)
 {
-    if(Y2SLog::dbg_enabled_bm)
+    if(Y2SLog::dbg_enabled_bm.isEnabled())
     {
 	cout << "debug disabled" << endl;
-	Y2SLog::dbg_enabled_bm = false;
+	Y2SLog::dbg_enabled_bm.setEnabled(false);
     }
     else
     {
 	cout << "debug enabled" << endl;
-	Y2SLog::dbg_enabled_bm = true;
+	Y2SLog::dbg_enabled_bm.setEnabled(true);
     }
 }
 

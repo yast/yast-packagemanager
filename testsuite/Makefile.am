@@ -13,11 +13,10 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		inst/rpm/include\
 		media/include	\
 		libPkgDep/include \
-	   ) -I$(includedir) -I$(QTDIR)/include
+	   ) -I$(includedir) -I$(includedir)/y2util/qt
 
 noinst_PROGRAMS = \
 	test_rpmdb	\
-	ma_test.exe	\
 	test_tofromString.exe	\
 	testinstall	\
 	test_patchinfo	\
@@ -29,9 +28,11 @@ noinst_PROGRAMS = \
         test_you \
         cschum_test
 
-ma_test_exe_SOURCES = ma_test.cc
-ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
-ma_test_exe_LDFLAGS = -static
+#	ma_test.exe
+#
+#ma_test_exe_SOURCES = ma_test.cc
+#ma_test_exe_LDADD = $(top_builddir)/src/liby2pm.la
+#ma_test_exe_LDFLAGS = -static
 
 gs_test_SOURCES = gs_test.cc
 gs_test_LDADD =  $(top_builddir)/src/liby2pm.la		\

@@ -65,7 +65,7 @@ bool chk( const PkgRelation & ed ) {
 */
 int main()
 {
-  Y2SLog::setLogfileName("-");
+  Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
 
   chk( PkgEdition(PkgEdition::UNSPEC) );

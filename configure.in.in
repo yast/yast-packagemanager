@@ -7,7 +7,6 @@
 ## some common checks
 @YAST2-CHECKS-COMMON@
 @YAST2-CHECKS-LIB@
-@YAST2-CHECKS-QT@
 
 ## and generate the output
 #AC_CONFIG_FILES(doc/Y2-access.html doc/Y2-components.html)
