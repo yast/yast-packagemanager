@@ -141,9 +141,9 @@ PMError MediaDISK::getFile (const Pathname & filename) const
 //
 //	DESCRIPTION : Asserted that media is attached.
 //
-PMError MediaDISK::getDir (const Pathname & dirname) const
+PMError MediaDISK::getDir( const Pathname & dirname, bool recurse_r ) const
 {
-  return MediaHandler::getDir( dirname );
+  return MediaHandler::getDir( dirname, recurse_r );
 }
 
 ///////////////////////////////////////////////////////////////////

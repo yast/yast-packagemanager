@@ -358,8 +358,7 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
       } else {
 	MIL << "Downloading slide show data..." << endl;
 	Pathname slide_dir( descr_dir_r.dirname() + "slide" );
-	PMError err = media_r->provideDir( slide_dir );
-	DBG << "provideDir(" << slide_dir << ") " << err << endl;
+	media_r->provideDirTree( slide_dir );
 	// shot to nothing: ignore any error
       }
     }

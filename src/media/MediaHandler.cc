@@ -262,11 +262,36 @@ PMError MediaHandler::provideDir( Pathname dirname ) const
     return Error::E_not_attached;
   }
 
-  PMError err = getDir( dirname ); // pass to concrete handler
+  PMError err = getDir( dirname, /*recursive*/false ); // pass to concrete handler
   if ( err ) {
     WAR << "provideDir(" << dirname << "): " << err << endl;
   } else {
     MIL << "provideDir(" << dirname << ")" << endl;
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaHandler::provideDirTree
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError MediaHandler::provideDirTree( Pathname dirname ) const
+{
+  if ( !_isAttached ) {
+    INT << Error::E_not_attached << " on provideDirTree(" << dirname << ")" << endl;
+    return Error::E_not_attached;
+  }
+
+  PMError err = getDir( dirname, /*recursive*/true ); // pass to concrete handler
+  if ( err ) {
+    WAR << "provideDirTree(" << dirname << "): " << err << endl;
+  } else {
+    MIL << "provideDirTree(" << dirname << ")" << endl;
   }
 
   return err;
@@ -473,7 +498,7 @@ PMError MediaHandler::getFile( const Pathname & filename ) const
 //	DESCRIPTION : Asserted that media is attached.
 //                    Default implementation of pure virtual.
 //
-PMError MediaHandler::getDir( const Pathname & dirname ) const
+PMError MediaHandler::getDir( const Pathname & dirname, bool recurse_r ) const
 {
   PathInfo info( localPath( dirname ) );
   if( info.isDir() ) {

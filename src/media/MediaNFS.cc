@@ -145,9 +145,9 @@ PMError MediaNFS::getFile (const Pathname & filename) const
 //
 //	DESCRIPTION : Asserted that media is attached.
 //
-PMError MediaNFS::getDir (const Pathname & dirname) const
+PMError MediaNFS::getDir( const Pathname & dirname, bool recurse_r ) const
 {
-  return MediaHandler::getDir( dirname );
+  return MediaHandler::getDir( dirname, recurse_r );
 }
 
 ///////////////////////////////////////////////////////////////////
