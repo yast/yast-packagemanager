@@ -1,0 +1,28 @@
+#
+# Makefile.am for packagemanager/testsuite
+#
+
+AUTOMAKE_OPTIONS = dejagnu
+PACKAGE = query
+
+INCLUDES = $(addprefix -I$(top_srcdir)/src/,	\
+		include			\
+		query/include		\
+		pkg/include		\
+		inst/include		\
+		inst/rpm/include	\
+		media/include		\
+	   ) -I$(includedir) -I$(includedir)/y2util/qt
+
+noinst_PROGRAMS = scanner parser
+
+scanner_SOURCES = scanner.cc
+scanner_LDADD = $(top_builddir)/src/liby2pm.la -ly2util
+scanner.cc: ../tools/keywords.h
+
+parser_SOURCES = parser.cc
+parser_LDADD = $(top_builddir)/src/liby2pm.la -ly2util
+
+clean-local:
+	rm -f matchword
+	rm -f *.log *.bak *.sum *.out *.exp

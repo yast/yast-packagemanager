@@ -1,0 +1,37 @@
+#
+# parser.exp
+# 'main' file for parser
+#
+
+set program "parser"
+
+set datadir "$srcdir/data.parser"
+
+set data [glob $datadir/*.in]
+
+foreach file $data {
+    set result ""
+
+    set path [split $file "/"]    
+    set filename [lindex $path [expr [llength $path]-1]]
+    set basename [lindex [split $filename "."] 0]
+
+    set oops [catch { set result [exec ./$program < $file > "$basename.out" ] } catched]
+    if {$oops != 0} {
+	fail "test case failed for $program: $catched"
+	return -1
+    }
+
+    if {$result != ""} {
+	warning "Run of $program results in '$result'"
+	return -1
+    }
+
+    if {[diff $basename.out $datadir/$basename.out] != 1} {
+	fail "Wrong stdout for $basename"
+    }
+    pass $basename
+}
+
+return 0
+
