@@ -280,8 +280,8 @@ public:
 	CONFLICTS,
 	OBSOLETES,
 	SIZE,
-	INSTALL,
-	DELETE,
+	INSPACKS,
+	DELPACKS,
 	NUM_TAGS
     };
 
@@ -304,9 +304,9 @@ public:
 	t = createTag( "+Obs", OBSOLETES);	// list of obsoletes tags
 	t->setEndTag("-Obs");
 	createTag( "=Siz", SIZE);		// packed and unpacked size
-	t = createTag( "+Ins", INSTALL);
+	t = createTag( "+Ins", INSPACKS);
 	t->setEndTag("-Ins");
-	t = createTag( "+Del", DELETE);
+	t = createTag( "+Del", DELPACKS);
 	t->setEndTag("-Del");
     };
 

@@ -25,6 +25,7 @@
 #include <string>
 #include <fstream>
 
+#include <y2util/FSize.h>
 #include <y2util/Pathname.h>
 #include <y2util/TagParser.h>
 #include <y2util/TagCacheRetrieval.h>
@@ -42,30 +43,27 @@
  **/
 class PMULSelectionDataProvider : public PMSelectionDataProvider  {
     REP_BODY(PMULSelectionDataProvider);
-    private:
 
-	// save file position and size data for multi line attributes
-	TagCacheRetrieval::retrieval_t attr_REQUIRES;
-	TagCacheRetrieval::retrieval_t attr_PROVIDES;
-	TagCacheRetrieval::retrieval_t attr_CONFLICTS;
-	TagCacheRetrieval::retrieval_t attr_OBSOLETES;
+    friend class InstSrcData_UL;
+    protected:
 
-	TagCacheRetrieval::retrieval_t attr_INSTALL;
-	TagCacheRetrieval::retrieval_t attr_DELETE;
+	// the data belongs to this selection
+	PMSelectionPtr _selection;
 
-	// save PkgAttributeValue for single line attributes
+	// PMObject
 
-	PkgAttributeValue attr_NAME;
-	PkgAttributeValue attr_VERSION;
-	PkgAttributeValue attr_RELEASE;
-	PkgAttributeValue attr_ARCH;
+	TagCacheRetrieval::retrieval_t _attr_SUMMARY;
+	TagCacheRetrieval::retrieval_t _attr_DESCRIPTION;
+	TagCacheRetrieval::retrieval_t _attr_INSNOTIFY;
+	TagCacheRetrieval::retrieval_t _attr_DELNOTIFY;
+	FSize _attr_SIZE;
 
-	PkgAttributeValue attr_SUMMARY;
-
-	PkgAttributeValue attr_ARCHIVESIZE;
-	PkgAttributeValue attr_SIZE;
-	PkgAttributeValue attr_CATEGORY;
-	PkgAttributeValue attr_VISIBLE;
+	bool _attr_CATEGORY;	// true == "base", false == "addon"
+	bool _attr_VISIBLE;
+	TagCacheRetrieval::retrieval_t _attr_SUGGESTS;
+	TagCacheRetrieval::retrieval_t _attr_INSPACKS;
+	TagCacheRetrieval::retrieval_t _attr_DELPACKS;
+	FSize _attr_ARCHIVESIZE;
 
 	// retrieval pointer for *.sel data
 	TagCacheRetrieval *_selection_retrieval;
@@ -79,6 +77,29 @@ class PMULSelectionDataProvider : public PMSelectionDataProvider  {
 
 	PMULSelectionDataProvider (TagCacheRetrieval *selection_retrieval = 0);
 	virtual ~PMULSelectionDataProvider();
+
+	void setSelection ( PMSelectionPtr selection) { _selection = selection; }
+
+	/**
+	 * access functions for PMObject attributes
+	 */
+
+	const std::string summary(const std::string& lang = "") const;
+	const std::list<std::string> description(const std::string& lang = "") const;
+	const std::list<std::string> insnotify(const std::string& lang = "") const;
+	const std::list<std::string> delnotify(const std::string& lang = "") const;
+	const FSize size() const;
+
+	/**
+	 * access functions for PMSelection attributes
+	 */
+
+	const std::string category () const;
+	const bool visible () const;
+	const std::list<std::string> suggests() const;
+	const std::list<std::string> inspacks(const std::string& lang = "") const;
+	const std::list<std::string> delpacks(const std::string& lang = "") const;
+	const FSize archivesize() const;
 
 	/**
 	 * Object attribute retrieval. (DataProvider interface)

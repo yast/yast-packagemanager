@@ -42,30 +42,45 @@
  **/
 class PMULPackageDataProvider : public PMPackageDataProvider  {
     REP_BODY(PMULPackageDataProvider);
-    private:
 
-	// save file position and size data for multi line attributes
+    friend class InstSrcData_UL;
+    protected:
 
-	TagCacheRetrieval::retrieval_t attr_SUMMARY;
+	// the data belongs to this package
+	PMPackagePtr _package;
 
-	TagCacheRetrieval::retrieval_t attr_RECOMMENDS;
-	TagCacheRetrieval::retrieval_t attr_SUGGESTS;
-	TagCacheRetrieval::retrieval_t attr_AUTHORS;
-	TagCacheRetrieval::retrieval_t attr_KEYWORDS;
+	// PMObject
 
-	TagCacheRetrieval::retrieval_t attr_DESCRIPTION;
-	TagCacheRetrieval::retrieval_t attr_INSNOTIFY;
-	TagCacheRetrieval::retrieval_t attr_DELNOTIFY;
+	TagCacheRetrieval::retrieval_t _attr_SUMMARY;
+	TagCacheRetrieval::retrieval_t _attr_DESCRIPTION;
+	TagCacheRetrieval::retrieval_t _attr_INSNOTIFY;
+	TagCacheRetrieval::retrieval_t _attr_DELNOTIFY;
+	FSize _attr_SIZE;
 
-	// save PkgAttributeValue for single line attributes
-
-	PkgAttributeValue attr_LOCATION;
-	PkgAttributeValue attr_ARCHIVESIZE;
-	PkgAttributeValue attr_SIZE;
-	PkgAttributeValue attr_BUILDTIME;
-	PkgAttributeValue attr_SOURCERPM;
-	PkgAttributeValue attr_GROUP;
-	PkgAttributeValue attr_LICENSE;
+	// PMPackage
+	Date _attr_BUILDTIME;
+	// BUILDHOST
+	// INSTALLTIME
+	// DISTRIBUTION
+	// VENDOR
+	TagCacheRetrieval::retrieval_t _attr_LICENSE;
+	// PACKAGER
+	TagCacheRetrieval::retrieval_t _attr_GROUP;
+	// CHANGELOG
+	// URL
+	// OS
+	// PREIN
+	// POSTIN
+	// PREUN
+	// POSTUN
+	TagCacheRetrieval::retrieval_t _attr_SOURCERPM;
+	FSize _attr_ARCHIVESIZE;
+	TagCacheRetrieval::retrieval_t _attr_AUTHORS;
+	// FILENAMES
+	TagCacheRetrieval::retrieval_t _attr_RECOMMENDS;
+	TagCacheRetrieval::retrieval_t _attr_SUGGESTS;
+	TagCacheRetrieval::retrieval_t _attr_LOCATION;
+	TagCacheRetrieval::retrieval_t _attr_KEYWORDS;
 
 	// retrieval pointer for packages data
 	TagCacheRetrieval *_package_retrieval;
@@ -78,15 +93,58 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 
     private:
 	// internal attribute value provider
-	PkgAttributeValue getValue( constPMObjectPtr obj_r,
-				    PMPackage::PMPackageAttribute attr_r );
+	PkgAttributeValue getValue( constPMObjectPtr obj_r, PMPackage::PMPackageAttribute attr_r );
+
+    public:
+	void setValue( PMPackage::PMPackageAttribute attr_r, std::string& value_r );
+	void setValue( PMPackage::PMPackageAttribute attr_r, std::streampos begin, std::streampos end);
 
     public:
 
 	PMULPackageDataProvider (TagCacheRetrieval *package_retrieval = 0, TagCacheRetrieval *language_retrieval = 0);
 	virtual ~PMULPackageDataProvider();
 
+	void setPackage ( PMPackagePtr package ) { _package = package; }
 	void setShared ( PMULPackageDataProviderPtr provider_r ) { _fallback_provider = provider_r; }
+
+	/**
+	 * access functions for PMObject attributes
+	 */
+
+	const std::string summary() const;
+	const std::list<std::string> description() const;
+	const std::list<std::string> insnotify() const;
+	const std::list<std::string> delnotify() const;
+	const FSize size() const;
+
+	/**
+	 * access functions for PMPackage attributes
+	 */
+
+	const Date buildtime() const;
+	const std::string buildhost() const;
+	const Date installtime() const;
+	const std::string distribution() const;
+	const std::string vendor() const;
+	const std::string license() const;
+	const std::string packager() const;
+	const std::string group() const;
+	const std::list<std::string> changelog() const;
+	const std::string url() const;
+	const std::string os() const;
+	const std::list<std::string> prein() const;
+	const std::list<std::string> postin() const;
+	const std::list<std::string> preun() const;
+	const std::list<std::string> postun() const;
+	const std::string sourcerpm() const;
+	const FSize archivesize() const;
+	const std::list<std::string> authors() const;
+	const std::list<std::string> filenames() const;
+	// suse packages values
+	const std::list<std::string> recommends() const;
+	const std::list<std::string> suggests() const;
+	const std::list<std::string> location() const;
+	const std::list<std::string> keywords() const;
 
 	/**
 	 * Object attribute retrieval. (DataProvider interface)

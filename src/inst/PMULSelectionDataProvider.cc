@@ -59,6 +59,88 @@ PMULSelectionDataProvider::~PMULSelectionDataProvider()
 {
 }
 
+const std::string
+PMULSelectionDataProvider::summary(const std::string& lang) const
+{
+    std::string value;
+    _selection_retrieval->retrieveData (_attr_SUMMARY, value);
+    return value;
+}
+
+const std::list<std::string>
+PMULSelectionDataProvider::description(const std::string& lang) const
+{
+    std::list<std::string> value;
+    _selection_retrieval->retrieveData (_attr_DESCRIPTION, value);
+    return value;
+}
+
+const std::list<std::string>
+PMULSelectionDataProvider::insnotify(const std::string& lang) const
+{
+    std::list<std::string> value;
+    _selection_retrieval->retrieveData (_attr_INSNOTIFY, value);
+    return value;
+}
+
+const std::list<std::string>
+PMULSelectionDataProvider::delnotify(const std::string& lang) const
+{
+    std::list<std::string> value;
+    _selection_retrieval->retrieveData (_attr_DELNOTIFY, value);
+    return value;
+}
+
+const FSize
+PMULSelectionDataProvider::size() const
+{
+    return _attr_SIZE;
+}
+
+
+const std::string
+PMULSelectionDataProvider::category () const
+{
+    return _attr_CATEGORY?"base":"addon";
+}
+const bool
+PMULSelectionDataProvider::visible () const
+{
+    return _attr_VISIBLE;
+}
+
+const std::list<std::string>
+PMULSelectionDataProvider::suggests() const
+{
+    std::list<std::string> value;
+    _selection_retrieval->retrieveData (_attr_SUGGESTS, value);
+    return value;
+}
+
+const std::list<std::string>
+PMULSelectionDataProvider::inspacks(const std::string& lang) const
+{
+    std::list<std::string> value;
+    _selection_retrieval->retrieveData (_attr_INSPACKS, value);
+    return value;
+}
+
+const std::list<std::string>
+PMULSelectionDataProvider::delpacks(const std::string& lang) const
+{
+    std::list<std::string> value;
+    _selection_retrieval->retrieveData (_attr_DELPACKS, value);
+    return value;
+}
+
+const FSize
+PMULSelectionDataProvider::archivesize () const
+{
+    return _attr_ARCHIVESIZE;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -71,76 +153,25 @@ PkgAttributeValue
 PMULSelectionDataProvider::getValue( constPMObjectPtr obj_r,
 				PMSelection::PMSelectionAttribute attr )
 {
-    TagCacheRetrieval::retrieval_t *pos_ptr;
-
     switch (attr)
     {
-	case PMSelection::ATTR_REQUIRES:
-	    pos_ptr = &attr_REQUIRES;
+	case PMSelection::ATTR_CATEGORY:	return PkgAttributeValue (category());
 	break;
-	case PMSelection::ATTR_PROVIDES:
-	    pos_ptr = &attr_PROVIDES;
+	case PMSelection::ATTR_VISIBLE:		return PkgAttributeValue (_attr_VISIBLE?"true":"false");
 	break;
-	case PMSelection::ATTR_CONFLICTS:
-	    pos_ptr = &attr_CONFLICTS;
+	case PMSelection::ATTR_SUGGESTS:	return PkgAttributeValue (suggests());
 	break;
-	case PMSelection::ATTR_OBSOLETES:
-	    pos_ptr = &attr_OBSOLETES;
+	case PMSelection::ATTR_INSPACKS:	return PkgAttributeValue (inspacks());
 	break;
-
-	case PMSelection::ATTR_INSTALL:
-	    pos_ptr = &attr_INSTALL;
+	case PMSelection::ATTR_DELPACKS:	return PkgAttributeValue (delpacks());
 	break;
-	case PMSelection::ATTR_DELETE:
-	    pos_ptr = &attr_DELETE;
+	case PMSelection::ATTR_ARCHIVESIZE:	return PkgAttributeValue (_attr_ARCHIVESIZE.asString());
 	break;
-	case PMSelection::ATTR_NAME:
-	    return PkgAttributeValue (obj_r->name());
+	case PMSelection::PMSEL_NUM_ATTRIBUTES:
 	break;
-	case PMSelection::ATTR_VERSION:
-	    return PkgAttributeValue (obj_r->version());
-	break;
-	case PMSelection::ATTR_RELEASE:
-	    return PkgAttributeValue (obj_r->release());
-	break;
-	case PMSelection::ATTR_ARCH:
-	    return PkgAttributeValue (obj_r->arch());
-	break;
-
-	case PMSelection::ATTR_SUMMARY:
-	    return attr_SUMMARY;
-	break;
-
-	case PMSelection::ATTR_CATEGORY:
-	    return attr_CATEGORY;
-	break;
-	case PMSelection::ATTR_ARCHIVESIZE:
-	    return attr_ARCHIVESIZE;
-	break;
-	case PMSelection::ATTR_SIZE:
-	    return attr_SIZE;
-	break;
-	case PMSelection::ATTR_VISIBLE:
-	    return attr_VISIBLE;
-	break;
-
-	default:
-	    return PkgAttributeValue();
     }
 
-    if (pos_ptr->begin >= pos_ptr->end)
-	return PkgAttributeValue ();
-
-    std::list<std::string> value;
-
-    if (!_selection_retrieval->retrieveData (*pos_ptr, value))
-    {
-	return PkgAttributeValue("ERR");
-    }
-    if (value.empty())
-	return PkgAttributeValue ();
-
-    return PkgAttributeValue (value);
+    return PkgAttributeValue ();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -190,6 +221,7 @@ PMULSelectionDataProvider::setAttributeValue(
 
     switch (attr)
     {
+#if 0
 	case PMSelection::ATTR_NAME:	  attr_NAME = value; break;
 	case PMSelection::ATTR_VERSION:	  attr_VERSION = value; break;
 	case PMSelection::ATTR_RELEASE:	  attr_RELEASE = value; break;
@@ -200,7 +232,7 @@ PMULSelectionDataProvider::setAttributeValue(
 	case PMSelection::ATTR_SIZE:	    attr_SIZE = value; break;
 	case PMSelection::ATTR_CATEGORY:    attr_CATEGORY = value; break;
 	case PMSelection::ATTR_VISIBLE:	    attr_VISIBLE = value; break;
-
+#endif
 	default:
 	    break;
     }
@@ -228,6 +260,7 @@ PMULSelectionDataProvider::setAttributeValue(
 
     switch (attr)
     {
+#if 0
 	case PMSelection::ATTR_REQUIRES:  SET_RETRIEVAL (REQUIRES,begin,end); break;
 	case PMSelection::ATTR_PROVIDES:  SET_RETRIEVAL (PROVIDES,begin,end); break;
 	case PMSelection::ATTR_CONFLICTS: SET_RETRIEVAL (CONFLICTS,begin,end); break;
@@ -235,7 +268,7 @@ PMULSelectionDataProvider::setAttributeValue(
 	case PMSelection::ATTR_INSTALL:	  SET_RETRIEVAL (INSTALL,begin,end); break;
 	case PMSelection::ATTR_DELETE:	  SET_RETRIEVAL (DELETE,begin,end); break;
 	break;
-
+#endif
 #undef SET_RETRIEVAL
 	default:
 	    break;
