@@ -319,8 +319,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 	    string name = (*splitit).substr (0, colonpos);
 	    string rpmname = Y2PM::instTarget().belongsTo (Pathname ((*splitit).substr (colonpos+1)));
 	    DBG << "'" << name << "' matches '" << rpmname << "' ?" << endl;
-	    if ((name.compare (0, name.size(), rpmname) == 0)		// name matches
-		&& (rpmname[name.size()] == '-'))			// up to edition separator
+	    if (name == rpmname)		// name matches
 	    {
 		DBG << "Yes !" << endl;
 		if (suse_vendor (installed))
@@ -426,6 +425,7 @@ PMPackageManager::doUpdate (std::list<PMPackagePtr>& noinstall_r, std::list<PMPa
 
 	} // obsoletes loop
 
+	DBG << "next" << endl;
     } // selectable loop
 
     return count;

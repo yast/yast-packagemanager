@@ -1385,7 +1385,7 @@ std::string
 RpmDb::belongsTo (const Pathname& name)
 {
     std::string result;
-    queryRPM (name.asString(), "-qf", 0, false, result);
+    queryRPM (name.asString(), "-qf", "%{NAME}", false, result);
     return result;
 }
     
