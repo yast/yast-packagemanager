@@ -352,6 +352,7 @@ PMYouPatchManager & Y2PM::youPatchManager()
 //	installed. media_nr==0 means install all packages from all media.
 //
 //	returns number of sucessfully installed packages
+//	  negated if the installation was aborted
 //
 //	returns failed packages in 'errors_r'
 //	returns uninstalled packages (because media not available) in 'remaining_r'
@@ -552,7 +553,7 @@ Y2PM::commitPackages (unsigned int media_nr, std::list<std::string>& errors_r,
 	srcremaining_r.push_back ((*it)->name());
     }
 
-    return count;
+    return (go_on ? count : -count);
 }
 
 
