@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jul  3 12:16:00 CEST 2003 - cschum@suse.de
+
+- Added "lang" parameter to suseserver.cgi call.
+
+-------------------------------------------------------------------
 Wed Jun 25 13:40:23 CEST 2003 - cschum@suse.de
 
 - MediaNFS: Call mount with option "nolock" to prevent the mount

@@ -141,6 +141,8 @@ PMError PMYouServers::requestServers( bool check )
     url += "&basearch=" + string( _patchPaths->baseArch() );
     url += "&arch=" + string( _patchPaths->arch() );
     
+    url += "&lang=" + string( _patchPaths->langCode() );
+    
     url += "&business=";
     if ( _patchPaths->businessProduct() ) url += "1";
     else url += "0";
