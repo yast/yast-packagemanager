@@ -192,7 +192,19 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 	{
 	    string sharewith ((_tagset.getTagByIndex (SHAREWITH))->Data());
 	    pkgmaptype::iterator it = _pkgmap.find (sharewith);		// get binary for this source
-	    if (it != _pkgmap.end())
+	    if ( it == _pkgmap.end() ) {
+	      // 2nd attempt: might be sharewith is .x86_64 but we're doing 32bit install.
+	      // Thus look for some N-V-R.*
+	      PkgName n( splitted[0].c_str() );
+	      for ( it = _pkgmap.begin(); it != _pkgmap.end(); ++it ) {
+		if ( it->second.first
+		     && it->second.first->name() == n
+		     && it->second.first->version() ==  splitted[1]
+		     && it->second.first->release() ==  splitted[2] )
+		  break;
+	      }
+	    }
+	    if (it != _pkgmap.end() )
 	    {
 		PMULPackageDataProviderPtr dataprovider = it->second.second;	// get dataprovider
 

@@ -247,6 +247,8 @@ bad, PkgDep::ErrorResultList& obsolete)
 	    PkgSet fakei;
 	    D__ << "before assign" << endl;
 	    fakei = installed;
+	    if(it->solvable)
+		fakei.remove(it->solvable);
 	    D__ << "after assign" << endl;
 	    for(PkgDep::RelInfoList::iterator rit = it->referers.begin()
 		; rit != it->referers.end(); ++rit)
@@ -258,8 +260,12 @@ bad, PkgDep::ErrorResultList& obsolete)
 		if(p == it->solvable) continue; // do not remove the package that has the conflict
 
 		if(!fakei.includes(p->name())) continue;
-		D__ << "remove " <<  p->name() << endl;
-		PkgDep::remove_package(&fakei, p, it->remove_referers);
+
+		if(PkgDep::count_providers_for(&fakei, rit->rel ) < 1)
+		{
+		    D__ << "remove " <<  p->name() << endl;
+		    PkgDep::remove_package(&fakei, p, it->remove_referers);
+		}
 	    }
 	}
     }
