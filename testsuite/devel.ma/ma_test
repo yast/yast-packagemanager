@@ -16,16 +16,18 @@ test -p "$LPIPE" || {
         test -e "$LPIPE" && { echo "No pipe '$LPIPE' exists"; exit 1; }
         mkfifo $LPIPE
 }
-#if ! fuser $LPIPE >/dev/null; then
-        #~ma/bin/sy2l.tcl $LPIPE &
-#fi
+if ! fuser $LPIPE >/dev/null; then
+	#echo
+        ~ma/bin/sy2l.tcl $LPIPE &
+fi
 
 make -C ../../src || exit 1
+make -C /Local/ma/yast2/current/source/core/wfm/src || exit 1
 make $PRG || exit 1
 
 export Y2SLOG_FILE=-
 export Y2SLOG_DEBUG=
 # export Y2DEBUG=1
 # exec gdb ./$PRG
-./$PRG "$@" 2> log
-#./$PRG "$@" 2> $LPIPE
+#./$PRG "$@" 2> log
+./$PRG "$@" 2> $LPIPE

@@ -186,6 +186,8 @@ void xx( RpmDb & db ) {
   DBG << "-------------" << endl;
 }
 
+extern void TcommitCkeckMediaGpg( PMPackagePtr pkg_r );
+
 /******************************************************************
  ******************************************************************/
 int mmain( int argc, const char * argv[] );
@@ -210,9 +212,21 @@ int main( int argc, const char * argv[] ) {
   }
 
   Y2PM::instSrcManager();
-  Y2PM::instTargetUpdate();
+  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
+      DBG << (*it) << endl;
+  }
 
-  MIL << PMGR["aaa_base"] << endl;
+  Y2PM::instTargetUpdate();
+  librpmDb::dumpState( SEC ) << endl;
+  PMSelectablePtr s( PMGR["test"] );
+  INT << s << endl;
+  if ( s ) {
+    PMPackagePtr p( s->candidateObj() );
+    INT << p << endl;
+    TcommitCkeckMediaGpg( p );
+    TcommitCkeckMediaGpg( p );
+  }
+  librpmDb::dumpState( SEC ) << endl;
 
   SEC << "STOP -> " << ret << endl;
   return ret;
@@ -231,13 +245,6 @@ int mmain( int argc, const char * argv[] )
   _rpmdb_debug = 0;
   _hdr_debug = 0;
 
-  int Finst = RpmDb::RPMINST_NODEPS|RpmDb::RPMINST_FORCE|RpmDb::RPMINST_IGNORESIZE;
-  int Fdel  = RpmDb::RPMINST_NODEPS;
-
-  RpmDb db;
-  SEC << db << endl;
-  INT << db.initDatabase( root, dbPath ) << endl;
-  SEC << db << endl;
 
   return 0;
 }

@@ -3,8 +3,14 @@
 #include <string>
 #include <list>
 
+#include <y2util/Y2SLog.h>
+#include <y2util/Date.h>
+#include <y2util/stringutil.h>
+#include <y2util/ExternalProgram.h>
+
 #include <Y2PM.h>
 #include <y2pm/RpmDb.h>
+#include <y2pm/librpmDb.h>
 
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrc.h>
@@ -16,10 +22,11 @@
 #include <y2pm/Timecount.h>
 #include <y2pm/PMPackageImEx.h>
 
-#include <y2util/Y2SLog.h>
-#include <y2util/Date.h>
-#include <y2util/stringutil.h>
-#include <y2util/ExternalProgram.h>
+#include <YCP.h>
+#include <ycp/y2log.h>
+#include <PkgModuleFunctions.h>
+
+#include "PMCB.h"
 
 using namespace std;
 
@@ -136,38 +143,103 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
-#include <y2pm/Y2PMCallbacks.h>
+/******************************************************************
+ ******************************************************************/
 
-#define dumpCB(n) MIL << pfx; if ( ptr && ptr != &n::defaults() ) { MIL << ptr << " <-- "; } else { ptr = &n::defaults(); MIL << ptr << " DEFAULT "; } MIL << #n << endl
-#define dumpF(n) DBG << pfx << (void*)ptr->n.func() << " - " #n << endl
-
-void dump( const RpmDbCallbacks * ptr, string pfx = "" ) {
-  dumpCB( RpmDbCallbacks );
-  pfx += "  ";
-  dumpF( _convertDb );
-  dumpF( _rebuildDb );
-  dumpF( _installPkg );
+ostream & operator<<( ostream & str, const YCPValue & val ) {
+  string outstr( "YT_UNKNOWN" );
+  //SEC << val->valuetype() << endl;
+  switch ( val->valuetype() ) {
+  case YT_UNDEFINED:
+    outstr = "YT_UNDEFINED";
+    break;
+#define ENUMOUT(V,v) case YT_##V: outstr = val->as##v()->toString(); break
+    ENUMOUT( VOID,	Void );
+    ENUMOUT( BOOLEAN,	Boolean );
+    ENUMOUT( INTEGER,	Integer );
+    ENUMOUT( FLOAT,	Float );
+    ENUMOUT( STRING,	String );
+    ENUMOUT( BYTEBLOCK,	Byteblock );
+    ENUMOUT( PATH,	Path );
+    ENUMOUT( SYMBOL,	Symbol );
+    ENUMOUT( DECLARATION,	Declaration );
+    ENUMOUT( LOCALE,	Locale );
+    ENUMOUT( LIST,	List );
+    ENUMOUT( TERM,	Term );
+    ENUMOUT( MAP,	Map );
+    ENUMOUT( BLOCK,	Block );
+    ENUMOUT( BUILTIN,	Builtin );
+    ENUMOUT( IDENTIFIER,	Identifier );
+    ENUMOUT( ERROR,	Error );
+  }
+#undef ENUMOUT
+  return str << outstr;
 }
 
-void dump( const InstTargetCallbacks * ptr, string pfx = "" ) {
-  dumpCB( InstTargetCallbacks );
-  pfx += "  ";
-  dump( &ptr->rpmDb, pfx );
-  dumpF( _scriptExec );
-}
+/******************************************************************
+ ******************************************************************/
+struct WFM {
+  YCPInterpreter * _dummy;
+  PkgModuleFunctions * _pkgmod;
+#define OUT SEC
 
+  WFM()
+  {
+    _dummy = 0;
+    _pkgmod = 0;
+  }
+  ~WFM() {
+    //delete _pkgmod;
+  }
+  void init() {
+    if ( !_pkgmod ) {
+      _pkgmod = new PkgModuleFunctions( _dummy );
+    }
+  }
+  void close() {
+    delete _pkgmod;
+    _pkgmod = 0;
+  }
 
-void dump( const Y2PMCallbacks * ptr, string pfx = "" ) {
-  dumpCB( Y2PMCallbacks );
-  pfx += "  ";
-  dump( &ptr->instTarget, pfx );
-}
+  void SourceStartManager( bool ena ) {
+    YCPList args;
+    args->add( YCPBoolean(ena) );
+    OUT << "SourceStartManager" << args;
+    YCPValue ret = _pkgmod->SourceStartManager( args );
+    OUT << " --> " << ret << endl;
+  }
+  void SourceStartCache( bool ena ) {
+    YCPList args;
+    args->add( YCPBoolean(ena) );
+    OUT << "SourceStartCache" << args;
+    YCPValue ret = _pkgmod->SourceStartCache( args );
+    OUT << " --> " << ret << endl;
+  }
+  void SourceGetCurrent() {
+    YCPList args;
+    OUT << "SourceGetCurrent" << args;
+    YCPValue ret = _pkgmod->SourceGetCurrent( args );
+    OUT << " --> " << ret << endl;
+  }
+  void SourceProduct( int id ) {
+    YCPList args;
+    args->add( YCPInteger(id) );
+    OUT << "SourceProduct" << args;
+    YCPValue ret = _pkgmod->SourceProduct( args );
+    OUT << " --> " << ret << endl;
+  }
+};
 
-void dumpCallbacks() {
-  dump( (Y2PMCallbacks *)0 );
-  dump( Y2PMCallbacks::inUse() );
-  dump( InstTargetCallbacks::inUse() );
-  dump( RpmDbCallbacks::inUse() );
+static WFM wfm;
+
+void st() {
+  InstSrcManager::ISrcIdList sids;
+  ISM.getSources( sids );
+  unsigned n = 0;
+  for ( InstSrcManager::ISrcIdList::const_iterator it = sids.begin();
+	it != sids.end(); ++it, ++n ) {
+    SEC << "InstSrc[" << n << "] " << ((*it)->enabled()?"enabled":"disabled") << endl;
+  }
 }
 
 /******************************************************************
@@ -180,6 +252,7 @@ void dumpCallbacks() {
 */
 int main()
 {
+  y2error( "xxx" );
   Y2Logging::setLogfileName("-");
   MIL << "START" << endl;
 
@@ -187,7 +260,7 @@ int main()
     //Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
-    Y2PM::instTarget(true,"/");
+    Y2PM::instTargetInit("/");
     _t.start( "Launch PMPackageManager" );
     Y2PM::packageManager();
     _t.start( "Launch PMSelectionManager" );
@@ -199,12 +272,24 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  dumpCallbacks();
-  SEC << "====================================" << endl;
-  Y2PMCallbacks::use( 0 );
-  dumpCallbacks();
+  PMError err( 12, "wrzl" );
+  ERR << err << endl;
+  return 0;
+
+  wfm.init();
+  INT << "START" << endl;
+
+  wfm.SourceStartCache( true );
+
+  wfm.SourceStartManager( false );
+  wfm.SourceStartCache( false );
+  wfm.SourceGetCurrent();
+
+  wfm.SourceStartCache( true );
+  st();
 
   SEC << "STOP" << endl;
+  wfm.close();
   return 0;
 }
 
