@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov 14 10:13:41 CET 2002 - cschum@suse.de
+
+- Use libcurl as media backend for FTP and HTTP instead of wget.
+
+-------------------------------------------------------------------
 Mon Nov  4 14:39:50 CET 2002 - ma@suse.de
 
 - Fixed PMULPackageDataProvider::providesSources returning the inverse.
