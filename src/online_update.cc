@@ -150,6 +150,13 @@ int main( int argc, char **argv )
     }
   }
 
+  if ( getuid() != 0 && !checkUpdates && !quickCheckUpdates ) {
+    cerr << "You need root permissions to run this command. Use the -q or -k\n"
+         << "options to check for the availabilty of updates without needing\n"
+         << "root permissions." << endl;
+    exit( 1 );
+  }
+
   int kinds = PMYouPatch::kind_invalid;
 
   if (optind < argc) {
@@ -170,12 +177,14 @@ int main( int argc, char **argv )
     kinds = PMYouPatch::kind_security | PMYouPatch::kind_recommended;
   }
 
-  cout << "Types of patches to be installed:";
-  if ( kinds & PMYouPatch::kind_security ) cout << " security";
-  if ( kinds & PMYouPatch::kind_recommended ) cout << " recommended";
-  if ( kinds & PMYouPatch::kind_document ) cout << " document";
-  if ( kinds & PMYouPatch::kind_optional ) cout << " optional";
-  cout << endl;
+  if ( verbose ) {
+    cout << "Types of patches to be installed:";
+    if ( kinds & PMYouPatch::kind_security ) cout << " security";
+    if ( kinds & PMYouPatch::kind_recommended ) cout << " recommended";
+    if ( kinds & PMYouPatch::kind_document ) cout << " document";
+    if ( kinds & PMYouPatch::kind_optional ) cout << " optional";
+    cout << endl;
+  }
 
   PMError error;
 
@@ -236,7 +245,7 @@ int main( int argc, char **argv )
       }
     } else {
       PMYouServers youServers( you.paths() );
-      error = youServers.requestServers();
+      error = youServers.requestServers( checkUpdates || quickCheckUpdates );
       if ( error ) {
         cerr << "Error while requesting servers: " << error << endl;
         exit( -1 );
@@ -244,9 +253,11 @@ int main( int argc, char **argv )
       url = youServers.currentServer();
     }
   }
-  
-  cout << "URL: " << url.asString() << endl;
-  cout << "Path: " << you.paths()->patchPath() << endl;
+
+  if ( verbose ) {
+    cout << "URL: " << url.asString() << endl;
+    cout << "Path: " << you.paths()->patchPath() << endl;
+  }
 
   if ( quickCheckUpdates ) {
     int updates = you.quickCheckUpdates( url );

@@ -34,6 +34,8 @@
 
 using namespace std;
 
+Pathname MediaCurl::_cookieFile = "/var/lib/YaST2/cookies";
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaCurl
@@ -49,6 +51,11 @@ MediaCurl::MediaCurl( const Url &      url_r,
 		    type_r ),
       _curl( 0 )
 {
+}
+
+void MediaCurl::setCookieFile( const Pathname &fileName )
+{
+  _cookieFile = fileName;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -116,14 +123,14 @@ PMError MediaCurl::attachTo (bool next)
     }
   }
 
-  const char *cookieFile = "/var/lib/YaST2/cookies";
-
-  ret = curl_easy_setopt( _curl, CURLOPT_COOKIEFILE, cookieFile );
+  ret = curl_easy_setopt( _curl, CURLOPT_COOKIEFILE,
+                          _cookieFile.asString().c_str() );
   if ( ret != 0 ) {
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
 
-  ret = curl_easy_setopt( _curl, CURLOPT_COOKIEJAR, cookieFile );
+  ret = curl_easy_setopt( _curl, CURLOPT_COOKIEJAR,
+                          _cookieFile.asString().c_str() );
   if ( ret != 0 ) {
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }

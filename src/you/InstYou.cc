@@ -958,7 +958,7 @@ int InstYou::quickCheckUpdates( const Url &u )
   path += _paths->patchPath() + _paths->directoryFileName();
   url.setPath( path.asString() );
   
-  Pathname dest = _paths->localDir() + "quickcheck";
+  Pathname dest = _paths->localWriteDir() + "quickcheck";
   
   PMError error = MediaAccess::getFile( url, dest );
   if ( error ) {
@@ -969,7 +969,7 @@ int InstYou::quickCheckUpdates( const Url &u )
   list<string> newPatchFiles;
   _info->readDirectoryFile( dest, newPatchFiles );
 
-  Pathname dirFile = _paths->attachPoint() + _paths->patchPath() +
+  Pathname dirFile = _paths->rootAttachPoint() + _paths->patchPath() +
                      _paths->directoryFileName();
 
   DBG << "Old directory file: " << dirFile << endl;

@@ -166,10 +166,25 @@ class PMYouPatchPaths : virtual public Rep {
     Pathname localDir();
 
     /**
+      Return local base directory for you related files suited for writing to
+      it. This depends on the identity of the user. root gets a directory
+      under /var, non-root users get a directory in their home directory.
+    */
+    Pathname localWriteDir();
+
+    /**
       Return directory used as attach point for media interface, i.e. for
       mounting CDs or NFS servers or for downloading files via FTP, HTTP etc.
+      This function returns a writable location.
     */
     Pathname attachPoint();
+
+    /**
+      Return directory used as attach point for media interface, i.e. for
+      mounting CDs or NFS servers or for downloading files via FTP, HTTP etc.
+      This function returns the location used by root.
+    */
+    Pathname rootAttachPoint();
 
     /**
       Return directory where information about installed patches is stored.
