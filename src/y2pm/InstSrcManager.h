@@ -121,11 +121,6 @@ class InstSrcManager {
 
   public:
 
-    /**
-     * default error class
-     **/
-    typedef InstSrcError Error;
-
     typedef PM::ISrcId     ISrcId;
     typedef PM::ISrcIdList ISrcIdList;
 
