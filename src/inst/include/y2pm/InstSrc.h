@@ -31,6 +31,9 @@
 #include <y2util/Pathname.h>
 #include <y2util/Url.h>
 
+#include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSolvablePtr.h>
+
 #include <y2pm/InstSrcPtr.h>
 #include <y2pm/InstSrcError.h>
 
@@ -275,17 +278,17 @@ class InstSrc: virtual public Rep {
     const std::list<PMSolvablePtr> *getSelections() const;
 
     /**
-     * generate PMPackage objects for each Item on the source
-     * @return list of PMPackagePtr on this source
-     * */
-    const std::list<PMPackagePtr> *getPackages() const;
-
-    /**
      * generate PMSolvable objects for each patch on the source
      * @return list of PMSolvablePtr on this source
      */
     const std::list<PMSolvablePtr> *getPatches() const;
 #endif
+
+    /**
+     * generate PMPackage objects for each Item on the source
+     * @return list of PMPackagePtr on this source
+     * */
+    const std::list<PMPackagePtr> *getPackages() const;
 
   public:
 

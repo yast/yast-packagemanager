@@ -26,8 +26,13 @@
 
 #include <y2util/Pathname.h>
 
+#include <y2pm/InstData.h>
+
 #include <y2pm/InstSrcDataPtr.h>
 #include <y2pm/InstSrcError.h>
+
+#include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSolvablePtr.h>
 
 #include <y2pm/InstSrcPtr.h>
 #include <y2pm/InstSrcDescrPtr.h>
@@ -50,12 +55,7 @@ class InstSrcData: virtual public Rep {
     typedef InstSrcError Error;
 
 
-  public:
-
-    InstSrcData();
-
-    virtual ~InstSrcData();
-#if 0
+#if 1
   private:
     InstData *_data;
 
@@ -65,7 +65,7 @@ class InstSrcData: virtual public Rep {
      * constructor
      * initialization with new media
      */
-    InstSrcData (MediaAccess *media);
+    InstSrcData (MediaAccessPtr media_r);
 
     /**
      * constructor
@@ -106,16 +106,22 @@ class InstSrcData: virtual public Rep {
     int numPatches() const;
 
     /**
-     * generate PMSolvable objects for each selection on the source
-     * @return list of PMSolvablePtr on this source
-     */
-    const std::list<PMSolvablePtr> *getSelections (void) const;
+     * generate PMPackage objects for each Item on the source
+     * @return list of PMPackagePtr on this source
+     * */
+    void setPackages(std::list<PMPackagePtr> *pacs) { _data->setPackages(pacs); }
 
     /**
      * generate PMPackage objects for each Item on the source
      * @return list of PMPackagePtr on this source
      * */
     const std::list<PMPackagePtr> *getPackages (void) const;
+
+    /**
+     * generate PMSolvable objects for each selection on the source
+     * @return list of PMSolvablePtr on this source
+     */
+    const std::list<PMSolvablePtr> *getSelections (void) const;
 
     /**
      * generate PMSolvable objects for each patch on the source
