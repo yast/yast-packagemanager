@@ -18,6 +18,9 @@
 
 /*
  * $Log$
+ * Revision 1.6  2002/09/04 09:22:42  cschum
+ * Implemented user/password authentification.
+ *
  * Revision 1.5  2002/08/12 13:26:27  cschum
  * Return ok, when the http server sent an ok.
  *
@@ -56,6 +59,8 @@
 
 #include <y2util/ExternalDataSource.h>
 #include <y2util/Y2SLog.h>
+#include <y2util/PathInfo.h>
+
 #include <y2pm/Wget.h>
 
 #define HTTP_OK "200 OK"
@@ -96,8 +101,6 @@ create_directories(string name)
 /*-------------------------------------------------------------*/
 Wget::Wget()
 {
-//    user = "";
-//    password = "";
     proxyUser = "";
     proxyPassword = "";
     process = 0;
@@ -146,6 +149,9 @@ string Wget::error_string ( WgetStatus status )
 	case WGET_ERROR_SERVER:
 	    ret = N_("remote server error");
 	    break;
+	case WGET_ERROR_INVALID_URL:
+	    ret = N_("invalid URL");
+	    break;
 	default:
 	    ret = N_("unexpected error");
 	    break;
@@ -154,17 +160,6 @@ string Wget::error_string ( WgetStatus status )
     return ret;
 }
 
-/*--------------------------------------------------------------*/
-/* Set password and user					*/
-/*--------------------------------------------------------------*/
-/*
-void Wget::setUser( const string username,
-			  const string passwd )
-{
-    user = username;
-    password = passwd;
-}
-*/
 /*--------------------------------------------------------------*/
 /* Set password and user of a proxy				*/
 /*--------------------------------------------------------------*/
@@ -175,6 +170,40 @@ void Wget::setProxyUser( const string username,
     proxyPassword = passwd;
 }
 
+
+WgetStatus Wget::getFile( const Url &url, const Pathname &destination )
+{
+    if ( !url.isValid() ) return WGET_ERROR_INVALID_URL;
+
+    string username = url.getUsername();
+    string password = url.getPassword();
+    
+    if ( !username.empty() && !password.empty() ) {
+        string host = url.getHost();
+
+        string home = getenv( "HOME" );
+
+        string netrcStr = "machine " + host + " login " + username +
+                          " password " + password;
+        string netrcFile = home + "/.netrc";
+        string netrcBackup = home + "/.netrc.orig.yast";
+
+        bool netrcExists = PathInfo( netrcFile ).isExist();
+        if ( netrcExists ) rename( netrcFile.c_str(), netrcBackup.c_str() );
+
+        ofstream out( netrcFile.c_str() );
+        out << netrcStr << endl;
+
+        WgetStatus status = getFile( url.asString(), destination.asString() );
+
+        unlink( netrcFile.c_str() );
+        if ( netrcExists ) rename( netrcBackup.c_str(), netrcFile.c_str() );
+
+        return status;
+    } else {
+        return getFile( url.asString(), destination.asString() );
+    }
+}
 
 /*--------------------------------------------------------------*/
 /* Retrieving a file 						*/
@@ -218,7 +247,7 @@ WgetStatus Wget::getFile ( const string url, const string destFilename )
 
       if  ( value.find ( WRONGUSER ) != string::npos )
       {
-	  // wget returns always ohne unauthorize error message
+	  // wget returns always one unauthorize error message
 	  if ( !firstUnauthorized )
 	  {
 	      firstUnauthorized = true;
@@ -291,15 +320,12 @@ void Wget::run_wget(int n_opts, const char *const *options,
 		       ExternalProgram::Stderr_Disposition disp)
 {
   exit_code = -1;
-  int argc = n_opts + 5 /* wget --http-user=<user> --http-passwd=<password> */
-                        /*  --proxy-user=user  --porxy-passwd=password */
+  int argc = n_opts + 5 /*  --proxy-user=user  --porxy-passwd=password */
              + 1 /* NULL */;
 
   // Create the argument array
   const char *argv[argc];
   int i = 0;
-//  string passwd = "--http-passwd=" + password;
-//  string usr = "--http-user=" + user;
   string proxyUsr = "--proxy-user=" + proxyUser;
   string proxyPasswd = "--proxy-passwd=" + proxyPassword;
 
@@ -307,24 +333,6 @@ void Wget::run_wget(int n_opts, const char *const *options,
 
   argv[i++] = "--tries=3";
   argv[i++] = "--waitretry=2";
-  /*
-  if ( user != "" )
-  {
-      argv[i++] = usr.c_str();
-  }
-  else
-  {
-      argv[i++] = "";
-  }
-  if ( password != "" )
-  {
-      argv[i++] = passwd.c_str();
-  }
-  else
-  {
-      argv[i++] = "";
-  }
-*/
   if ( proxyUser != "" )
   {
       argv[i++] = proxyUsr.c_str();
