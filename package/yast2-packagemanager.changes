@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug 18 14:51:16 CEST 2004 - ma@suse.de
+
+- Do not include directories used as mountpoint in yast2-packagemanager.rpm.
+  Installation of package may fail, if mountpoint is in use. (#43839)
+- 2.10.8
+
+-------------------------------------------------------------------
 Fri Aug 13 12:21:58 CEST 2004 - lnussel@suse.de
 
 - re-enable hack to check dependencies of packages that obsolete installed ones
