@@ -17,6 +17,7 @@ SRC_INCLUDEDIRS =	$(addprefix $(top_srcdir)/src/,	\
 				inst/include		\
 				inst/rpm/include	\
 				media/include		\
+				libPkgDep/include	\
 			)
 
 SRC_INCLUDEHEADER =	$(wildcard	\

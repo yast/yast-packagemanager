@@ -13,13 +13,13 @@ clean-local:
 	dvips $< -o
 
 %.dvi: %.tex
-	./run-tex.pl latex $<
+	$(top_srcdir)/doc/Solver/run-tex.pl latex $<
 
 %.eps: %.fig
 	fig2dev -L ps $< $@
 
-pathmacros.tex: gen-pathmacros.pl ../../src/libPkgDb/paths.h
-	./gen-pathmacros.pl
+pathmacros.tex: $(top_srcdir)/doc/Solver/gen-pathmacros.pl $(top_srcdir)/src/libPkgDb/paths.h
+	$(top_srcdir)/doc/Solver/gen-pathmacros.pl
 
 libPkgDb.tex: relationmatch.eps pathmacros.tex header.eps
 
