@@ -17,6 +17,11 @@
    
 /*
  * $Log$
+ * Revision 1.6  2002/09/09 13:56:12  lnussel
+ * - remove proxy settings from wget class, works automatically through ~/.wgetrc
+ * - make wget function that only accepts strings private, adapt PMYouPatchPaths.cc
+ * - use saveAsString in InstSrcDescr
+ *
  * Revision 1.5  2002/09/05 12:57:06  cschum
  * Add optional Cookie support to Wget class.
  * Support Cookies when getting the server list from www.suse.de.
@@ -87,20 +92,10 @@ public:
   ~Wget();
 
   /**
-   * Retrieving a file 
-   */
-  WgetStatus getFile ( const std::string url, const std::string destFilename );
-
-  /**
     Get a file. Uses username and password, if included in given url.
   */
   WgetStatus getFile( const Url &url, const Pathname &destination );
    
-  /**
-   * Set password and user of the proxy
-   */
-  void setProxyUser( const std::string username, const std::string passwd);
-    
   /**
     Set file used to load and save cookies. If this isn't set cookies aren't
     handled.
@@ -113,12 +108,6 @@ public:
   std::string error_string ( WgetStatus status );
     
 private:
-
-  /** 
-   * proxy user 
-   */
-    std::string proxyUser;
-    std::string proxyPassword;
 
   std::string _cookiesFile;
     
@@ -159,6 +148,11 @@ private:
    * The exit code of the rpm process, or -1 if not yet known.
    */
   int exit_code;
+
+  /**
+   * Retrieving a file 
+   */
+  WgetStatus getFile ( const std::string& url, const std::string& destFilename );
 };
 
 #endif

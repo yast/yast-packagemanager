@@ -263,7 +263,7 @@ PMError PMYouPatchPaths::requestServers( const string &u, bool addFile )
     Wget wget;
     wget.setCookiesFile( cookiesFile().asString() );
 
-    WgetStatus status = wget.getFile( url, localSuseServers().asString() );
+    WgetStatus status = wget.getFile( Url(url), localSuseServers() );
 
     if ( status != WGET_OK ) return PMError( YouError::E_get_suseservers_failed );
   }

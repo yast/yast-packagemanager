@@ -234,7 +234,7 @@ private:
 PMError InstSrcDescr::writeStream( std::ostream & str ) const
 {
   str << TypeTag << ": " << InstSrc::toString(_type) << endl;
-  str << UrlTag << ": " << _url << endl;
+  str << UrlTag << ": " << _url.saveAsString() << endl;
   str << ProdDirTag << ": " << _product_dir << endl;
   str << DefActTag << ": " << (_default_activate?"1":"0") << endl;
   // data from media file
