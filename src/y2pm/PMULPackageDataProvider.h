@@ -66,6 +66,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	// DISTRIBUTION
 	// VENDOR
 	TagRetrievalPos		_attr_LICENSE;
+	TagRetrievalPos		_attr_LICENSETOCONFIRM;
 	// PACKAGER
 	YStringTreeItem *	_attr_GROUP;
 	// CHANGELOG
@@ -140,6 +141,7 @@ class PMULPackageDataProvider : public PMPackageDataProvider  {
 	//virtual std::string            distribution( const PMPackage & pkg_r ) const;
 	virtual Vendor                 vendor      ( const PMPackage & pkg_r ) const;
 	virtual std::string            license     ( const PMPackage & pkg_r ) const;
+	virtual std::list<std::string> licenseToConfirm( const PMPackage & pkg_r ) const;
 	//virtual std::string            packager    ( const PMPackage & pkg_r ) const;
 	virtual std::string            group       ( const PMPackage & pkg_r ) const;
 	virtual YStringTreeItem *      group_ptr   ( const PMPackage & pkg_r ) const;

@@ -90,6 +90,7 @@ class PMPackage : public PMObject {
     std::string            distribution() const;
     Vendor                 vendor()       const;
     std::string            license()      const;
+    std::list<std::string> licenseToConfirm() const;
     std::string            packager()     const;
     std::string            group()        const;
     YStringTreeItem *      group_ptr()    const;

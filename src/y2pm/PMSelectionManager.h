@@ -23,10 +23,10 @@
 #include <list>
 #include <map>
 
-#include <y2pm/PMError.h>
+#include <y2pm/PMTypes.h>
 #include <y2pm/PMManager.h>
-#include <y2pm/PMSelectable.h>
 #include <y2pm/PMSelection.h>
+#include <y2pm/PMSelectable.h>
 #include <y2pm/PMPackageManager.h>
 
 ///////////////////////////////////////////////////////////////////
@@ -126,6 +126,12 @@ class PMSelectionManager : public PMManager {
      * Same as above using Y2PM::packageManager().
      **/
     PMError activate();
+
+    /**
+     *
+     **/
+    PMError requestedLocalesChanged( const PM::LocaleSet & addLocales_r,
+				     const PM::LocaleSet & delLocales_r );
 
     /**
      * Remember all activated selections in InstTargetSelDB. Reset all

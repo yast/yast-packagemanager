@@ -80,6 +80,7 @@ class PMPackageDataProvider : public CountedRep {
     static std::string            distribution(){ return std::string(); }
     static Vendor                 vendor()      { return Vendor(); }
     static std::string            license()     { return std::string(); }
+    static std::list<std::string> licenseToConfirm() { return std::list<std::string>(); }
     static std::string            packager()    { return std::string(); }
     static std::string            group()       { return std::string(); }
     static YStringTreeItem *      group_ptr()   { return 0; }
@@ -156,6 +157,7 @@ class PMPackageDataProvider : public CountedRep {
     virtual std::string            distribution( const PMPackage & pkg_r ) const { return distribution(); }
     virtual Vendor                 vendor      ( const PMPackage & pkg_r ) const { return vendor(); }
     virtual std::string            license     ( const PMPackage & pkg_r ) const { return license(); }
+    virtual std::list<std::string> licenseToConfirm( const PMPackage & pkg_r ) const { return licenseToConfirm(); }
     virtual std::string            packager    ( const PMPackage & pkg_r ) const { return packager(); }
     virtual std::string            group       ( const PMPackage & pkg_r ) const { return group(); }
     virtual YStringTreeItem *      group_ptr   ( const PMPackage & pkg_r ) const { return group_ptr(); }

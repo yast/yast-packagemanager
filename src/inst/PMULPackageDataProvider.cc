@@ -188,6 +188,15 @@ PMULPackageDataProvider::license ( const PMPackage & pkg_r ) const
     return value;
 }
 
+std::list<std::string>
+PMULPackageDataProvider::licenseToConfirm ( const PMPackage & pkg_r ) const
+{
+    FALLBACK(_attr_LICENSETOCONFIRM,licenseToConfirm);
+    std::list<std::string> value;
+    _locale_retrieval->retrieveData (_attr_LICENSETOCONFIRM, value);
+    return value;
+}
+
 std::string
 PMULPackageDataProvider::group ( const PMPackage & pkg_r ) const
 {
@@ -394,7 +403,7 @@ PMError PMULPackageDataProvider::provideSrcPkgToInstall( const PMPackage & pkg_r
     {
 	dir = Pathname (locsplit[2]);			// get the directory part
     }
-	
+
     if (!_source)
     {
 	ERR << "No source for '" << dir << "/" << rpmname << "'" << endl;

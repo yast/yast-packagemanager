@@ -149,13 +149,11 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
  ******************************************************************/
 
 struct WFM {
-  YCPInterpreter * _dummy;
   PkgModuleFunctions * _pkgmod;
 #define OUT SEC
 
   WFM()
   {
-    _dummy = 0;
     _pkgmod = 0;
   }
   ~WFM() {
@@ -163,7 +161,7 @@ struct WFM {
   }
   void init() {
     if ( !_pkgmod ) {
-      _pkgmod = new PkgModuleFunctions( _dummy );
+      _pkgmod = new PkgModuleFunctions();
     }
   }
   void close() {
@@ -175,42 +173,42 @@ struct WFM {
     YCPList args;
     args->add( YCPBoolean(ena) );
     OUT << "SourceStartManager" << args;
-    YCPValue ret = _pkgmod->SourceStartManager( args );
+    YCPValue ret = _pkgmod->SourceStartManager( YCPBoolean(ena) );
     OUT << " --> " << ret << endl;
   }
   void SourceStartCache( bool ena ) {
     YCPList args;
     args->add( YCPBoolean(ena) );
     OUT << "SourceStartCache" << args;
-    YCPValue ret = _pkgmod->SourceStartCache( args );
+    YCPValue ret = _pkgmod->SourceStartCache( YCPBoolean(ena) );
     OUT << " --> " << ret << endl;
   }
   void SourceGetCurrent( bool ena ) {
     YCPList args;
     args->add( YCPBoolean(ena) );
     OUT << "SourceGetCurrent" << args;
-    YCPValue ret = _pkgmod->SourceGetCurrent( args );
+    YCPValue ret = _pkgmod->SourceGetCurrent( YCPBoolean(ena) );
     OUT << " --> " << ret << endl;
   }
   void SourceProduct( int id ) {
     YCPList args;
     args->add( YCPInteger(id) );
     OUT << "SourceProduct" << args;
-    YCPValue ret = _pkgmod->SourceProduct( args );
+    YCPValue ret = _pkgmod->SourceProduct( YCPInteger(id) );
     OUT << " --> " << ret << endl;
   }
   void SourceGeneralData( int id ) {
     YCPList args;
     args->add( YCPInteger(id) );
     OUT << "SourceGeneralData" << args;
-    YCPValue ret = _pkgmod->SourceGeneralData( args );
+    YCPValue ret = _pkgmod->SourceGeneralData( YCPInteger(id) );
     OUT << " --> " << ret << endl;
   }
   void SourceCreate( const string & url_r ) {
     YCPList args;
     args->add( YCPString(url_r) );
     OUT << "SourceCreate" << args;
-    YCPValue ret = _pkgmod->SourceCreate( args );
+    YCPValue ret = _pkgmod->SourceCreate( YCPString(url_r), YCPString("/") );
     OUT << " --> " << ret << endl;
   }
   void SourceSetEnabled( int id, bool ena ) {
@@ -218,13 +216,13 @@ struct WFM {
     args->add( YCPInteger(id) );
     args->add( YCPBoolean(ena) );
     OUT << "SourceSetEnabled" << args;
-    YCPValue ret = _pkgmod->SourceSetEnabled( args );
+    YCPValue ret = _pkgmod->SourceSetEnabled( YCPInteger(id), YCPBoolean(ena) );
     OUT << " --> " << ret << endl;
   }
   void SourceEditGet() {
     YCPList args;
     OUT << "SourceEditGet" << args;
-    YCPValue ret = _pkgmod->SourceEditGet( args );
+    YCPValue ret = _pkgmod->SourceEditGet();
     OUT << " --> " << ret << endl;
   }
   void SourceEditSet( const InstSrcManager::SrcStateVector & source_states ) {
@@ -241,7 +239,27 @@ struct WFM {
     args->add( a1 );
 
     OUT << "SourceEditSet" << args;
-    YCPValue ret = _pkgmod->SourceEditSet( args );
+    YCPValue ret = _pkgmod->SourceEditSet( a1 );
+    OUT << " --> " << ret << endl;
+  }
+  void PkgGetLicenseToConfirm( const string & name_r ) {
+    YCPList args;
+    args->add( YCPString(name_r) );
+    OUT << "PkgGetLicenseToConfirm" << args;
+    YCPValue ret = _pkgmod->PkgGetLicenseToConfirm(YCPString(name_r));
+    OUT << " --> " << ret << endl;
+  }
+  void PkgGetLicensesToConfirm( const list<string> & name_r ) {
+    YCPList args;
+
+    YCPList a1;
+    for ( list<string>::const_iterator it = name_r.begin(); it != name_r.end(); ++it ) {
+      a1->add( YCPString( *it ) );
+    }
+    args->add( a1 );
+
+    OUT << "PkgGetLicensesToConfirm" << args;
+    YCPValue ret = _pkgmod->PkgGetLicensesToConfirm(a1);
     OUT << " --> " << ret << endl;
   }
 };
@@ -253,6 +271,20 @@ void WFMtest() {
   INT << "WFM START" << endl;
   wfm.SourceStartManager( false );
   wfm.SourceStartCache( true );
+
+  list<string> l;
+  l.push_back( "3d_chess" );
+  l.push_back( "3ddiag" );
+  l.push_back( "3dpong" );
+  l.push_back( "wrzl" );
+  l.push_back( "" );
+
+  for ( list<string>::const_iterator it = l.begin(); it != l.end(); ++it ) {
+    wfm.PkgGetLicenseToConfirm( *it );
+  }
+  wfm.PkgGetLicensesToConfirm( list<string>() );
+  wfm.PkgGetLicensesToConfirm( l );
+
   INT << "WFM STOP" << endl;
   wfm.close();
 }
@@ -287,9 +319,7 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  MIL << Y2PM::getPreferredLocale() << endl;
-  MIL << Y2PM::getRequestedLocales() << endl;
-
+  WFMtest();
 
   SEC << "STOP" << endl;
   return 0;

@@ -48,7 +48,7 @@ class ULPackagesParser : public CountedRep {
     private:
 	// the source
 	const InstSrcPtr _source;
-		
+
 	// tag ids for the TaggedParser
 	enum Tags {
 	    PACKAGE,	// name version release arch
@@ -75,6 +75,7 @@ class ULPackagesParser : public CountedRep {
 	    DESCRIPTION,// long description
 	    INSNOTIFY,	// install notification
 	    DELNOTIFY,	// delete notification
+	    LICENSETOCONFIRM,	// license to confirm upon install
 
 	    // packages.DU
 	    DU,		// disk usage data
@@ -100,7 +101,7 @@ class ULPackagesParser : public CountedRep {
 	// look if arch is allowed
 	bool allowedArch (const PkgArch& arch) const;
 
-	// create package from tagset and cache and add to _pkgmap  
+	// create package from tagset and cache and add to _pkgmap
 	PMError fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr localecache, TagCacheRetrievalPtr ducache);
 
 	// augment package data (_pkgmap) with data from packages.<locale> cache

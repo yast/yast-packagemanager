@@ -188,11 +188,11 @@ int main()
   MIL << Y2PM::getRequestedLocales() << endl;
   Y2PM::setRequestedLocales( LangCode("de_AT") );
   MIL << Y2PM::getRequestedLocales() << endl;
-  Y2PM::addRequestedLocales( LangCode("de_DE") );
+  Y2PM::addRequestedLocales( LangCode("de_DE@euro") );
   MIL << Y2PM::getRequestedLocales() << endl;
   Y2PM::delRequestedLocales( LangCode("de_AT") );
   MIL << Y2PM::getRequestedLocales() << endl;
-  Y2PM::setRequestedLocales( Y2PM::LocaleSet() );
+  Y2PM::setRequestedLocales( LangCode("de_DE@euro") );
   MIL << Y2PM::getRequestedLocales() << endl;
 
   SEC << "STOP" << endl;

@@ -61,6 +61,7 @@ Date                   PMPackage::installtime()  const { DP_GET( installtime ); 
 std::string            PMPackage::distribution() const { DP_GET( distribution ); }
 Vendor                 PMPackage::vendor()       const { DP_GET( vendor ); }
 std::string            PMPackage::license()      const { DP_GET( license ); }
+std::list<std::string> PMPackage::licenseToConfirm() const { DP_GET( licenseToConfirm ); }
 std::string            PMPackage::packager()     const { DP_GET( packager ); }
 std::string            PMPackage::group()        const { DP_GET( group ); }
 YStringTreeItem *      PMPackage::group_ptr()    const { DP_GET( group_ptr ); }

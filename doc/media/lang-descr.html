@@ -20,6 +20,8 @@ An informal message to be shown to the user if the package is selected.<br>
 <LI><b>Deletion notify</b><br>
 An informal message to be shown to the user if the package is de-selected.<br>
 (i.e. a 'your system will be unusable without this package' warning.</li>
+<LI><b>License to confirm</b><br>
+License the user has to read and confirm if the package should be installed.</li>
 </OL>
 <br>
 <H2>Implementation</H2>
@@ -51,6 +53,7 @@ translation have to be <b>UTF-8</b> encoded now.
 <tr><td valign=top>+Des<br>-Des</td><td valign=top><i>description</i></td><td>multi-line description</td></tr>
 <tr><td valign=top>+Ins<br>-Ins</td><td valign=top><i>installation notify</i></td><td>User notification when package is selected for installation</td></tr>
 <tr><td valign=top>+Del<br>-Del</td><td valign=top><i>deletion notify</i></td><td>User notification when package is selected for deletion</td></tr>
+<tr><td valign=top>+Eul<br>-Eul</td><td valign=top><i>license to confirm</i></td><td>License to be confirmed when the package gets installed</td></tr>
 <tr><td valign=top>=Shr</td><td valign=top><i>name</i> <i>version</i> <i>release</i> <i>architecture</i></td><td>of another package.<br>
 All values not explicitly set in the current package entry are shared with
 the mentioned package.<br>

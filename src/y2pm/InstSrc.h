@@ -31,8 +31,10 @@
 #include <y2util/Pathname.h>
 #include <y2util/Url.h>
 
-#include <y2pm/PMSelectionPtr.h>
+#include <y2pm/PMTypes.h>
+
 #include <y2pm/PMPackagePtr.h>
+#include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
 
 #include <y2pm/InstSrcPtr.h>
@@ -75,29 +77,30 @@ class InstSrc: public CountedRep {
     /**
      * Unique InstSrc ID
      **/
-    typedef unsigned  UniqueID;
+    typedef PM::NumericISrcID NumericISrcID;
+    typedef PM::NumericISrcID UniqueID;
 
     /**
      * No or invalid unique InstSrc ID
      **/
-    static const UniqueID noID;
+    static const NumericISrcID noID;
 
     /**
      * @return The unique InstSrc ID
      **/
-    UniqueID srcID() const { return _srcID; }
+    NumericISrcID srcID() const { return _srcID; }
 
   private:
 
     /**
      * Static counter to create unique InstSrc IDs
      **/
-    static UniqueID _SRCID;
+    static NumericISrcID _SRCID;
 
     /**
      * The unique InstSrc ID
      **/
-    const UniqueID _srcID;
+    const NumericISrcID _srcID;
 
     ///////////////////////////////////////////////////////////////////
   public:
