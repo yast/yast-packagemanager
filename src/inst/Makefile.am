@@ -31,7 +31,8 @@ liby2pminstsrc_la_SOURCES = \
 	PMULSelectionDataProvider.cc	\
 	\
 	InstTarget.cc			\
-	InstTargetError.cc
+	InstTargetError.cc		\
+	InstTargetSelDB.cc
 
 
 liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la

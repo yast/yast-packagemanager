@@ -45,8 +45,9 @@
 #include <y2pm/PMSelectionPtr.h>
 #include <y2pm/PMYouPatchPtr.h>
 #include <y2pm/InstTargetError.h>
-#include <y2pm/InstData.h>	// InstTarget implements InstData
-#include <y2pm/RpmDb.h>		// InstTarget is tied to RpmDb atm
+#include <y2pm/InstData.h>	 // InstTarget implements InstData
+#include <y2pm/RpmDb.h>		 // InstTarget is tied to RpmDb atm
+#include <y2pm/InstTargetSelDBPtr.h>// Installed Selections
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -130,12 +131,6 @@ class InstTarget: virtual public Rep, public InstData {
 	//-----------------------------
 	// InstData interface
 	// target content access
-
-	/**
-	 * generate PMSelection objects for each selection on the source
-	 * @return list of PMSelectionPtr on this source
-	 */
-	virtual const std::list<PMSelectionPtr>& getSelections (void) const;
 
 	/**
 	 * generate PMPackage objects for each Item on the source/target
@@ -262,6 +257,44 @@ class InstTarget: virtual public Rep, public InstData {
 
         mutable std::list<PMYouPatchPtr> _patches;
         mutable bool _patchesInitialized;
+
+    private:
+      ///////////////////////////////////////////////////////////////////
+      // Selection related interface
+      ///////////////////////////////////////////////////////////////////
+
+      /**
+       * Selection database
+       **/
+      InstTargetSelDBPtr _seldb;
+
+    public:
+
+      /**
+       * generate PMSelection objects for each selection on the source
+       * @return list of PMSelectionPtr on this source
+       **/
+      virtual const std::list<PMSelectionPtr>& getSelections (void) const;
+
+
+      /**
+       * Install Selection. That's nothing but copying the Selection
+       * file into the local SelectionDB.
+       **/
+      PMError installSelection( const Pathname & selfile_r );
+
+      /**
+       * Return true if Selection selfile_r is installed. Actually
+       * only checks whether a file named $(basename selfile_r)
+       * is installed.
+       **/
+      bool isInstalledSelection( const Pathname & selfile_r ) const;
+
+      /**
+       * Removes a file named $(basename selfile_r) from the
+       * SelectionDB.
+       **/
+      PMError removeSelection( const Pathname & selfile_r );
 };
 
 ///////////////////////////////////////////////////////////////////

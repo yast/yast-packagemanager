@@ -60,7 +60,14 @@ class InstTargetError {
       E_RpmDB_not_initialized,
       E_RpmDB_subprocess_failed,
       E_RpmDB_old_db,
-
+      //
+      E_SelDB_already_open,
+      E_SelDB_open_failed,
+      E_SelDB_not_open,
+      E_SelDB_file_not_found,
+      E_SelDB_file_bad_magic,
+      E_SelDB_install_failed,
+      E_SelDB_not_installed
     };
 };
 
