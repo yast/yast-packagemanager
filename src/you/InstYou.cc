@@ -88,6 +88,30 @@ static void clearDeltasToApplyList(std::vector<InstYou::DeltaToApply*>& list)
 
 static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackageDelta& delta );
 
+static PMError check_md5(const std::string& md5, const Pathname& path)
+{
+  PMError err;
+
+  cerr << "check " << md5 << " " << path << endl;
+
+  if(md5.empty())
+    return err;
+
+  string has = PathInfo::md5sum(path);
+  if(has != md5)
+  {
+    err = InstSrcError::E_corrupted_file;
+    err.setDetails(
+	// translator: filename, md5sum, md5sum
+	stringutil::form(_("%s has an md5sum of '%s' but '%s' was expected"),
+	  path.asString().c_str(),
+	  has.c_str(),
+	  md5.c_str()));
+  }
+
+  return err;
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : InstYou
@@ -652,6 +676,9 @@ PMError InstYou::processPatches()
       Pathname rpmPath = delta->_patch->product()->rpmPath( delta->_pkg, false );
       Pathname dest = _media.localPath( rpmPath );
 
+      error = patchProgress( 0 );
+      if ( error ) return error;
+
       log(stringutil::form(_("Fetching package %s from installation medium"), delta->_basepkg->name()->c_str()) + " ... ");
 
       Pathname orig;
@@ -697,14 +724,39 @@ PMError InstYou::processPatches()
 
       log(string(_("Applying delta")) + " ... ");
 
+      error = patchProgress( 0 );
+      if ( error ) return error;
+
       ExternalProgram prg(argv);
       string output;
+      ProgressCounter counter;
+      counter.init(0,delta->_pkg->size(), 0);
       for ( string line( prg.receiveLine() ); line.length(); line = prg.receiveLine() )
       {
-	ERR << line << endl;
-	output += line;
+	if(line.substr(0, sizeof("progress: ")-1) == "progress: ")
+	{
+	  FSize cursize(line.substr(sizeof("progress: ")-1), FSize::B);
+
+	  if(cursize <= 0 ||  cursize > delta->_pkg->size())
+	    continue;
+
+	  counter.set(cursize);
+	  if(counter.updateIfNewPercent(3) && counter.percent())
+	  {
+	    error = patchProgress( counter.percent() );
+	    if ( error ) break;
+	  }
+	}
+	else
+	{
+	  ERR << line << endl;
+	  output += line;
+	}
       }
       ret = prg.close();
+
+      error = patchProgress( 100 );
+      if ( error ) return error;
 
       if(ret)
       {
@@ -715,6 +767,13 @@ PMError InstYou::processPatches()
       }
       else
 	log(_("Ok\n"));
+
+      error = check_md5( delta->_pkg->md5sum(), dest );
+      if ( error )
+      {
+	log(_("File integrity check failed: ") + error.errstr() + "\n");
+	return error;
+      }
 
       // if ok
       _info->packageDataProvider()->setLocation( delta->_pkg, rpmPath.asString() );
@@ -1355,9 +1414,10 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
       if ( err ) return err;
     }
 
-    _info->packageDataProvider()->setLocation( pkg, media.localPath( path ).asString() );
+    Pathname localpath = media.localPath( path );
+    _info->packageDataProvider()->setLocation( pkg, localpath.asString() );
 
-    return PMError();
+    return check_md5( pkg->md5sum(), localpath );
   }
 
   bool patchRpm = hasPatchRpm( pkg );
@@ -1366,6 +1426,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
   Pathname rpmPath;
 
   bool gotRpm = false;
+  string md5;
 
   if ( patchRpm ) {
     // If the package has a version installed, try to get patch RPM first.
@@ -1380,6 +1441,11 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
     } else {
       gotRpm = true;
     }
+    md5 = pkg->patchRpmMD5();
+  }
+  else
+  {
+    md5 = pkg->md5sum();
   }
 
   if ( !gotRpm || _settings->getAll() ) {
@@ -1397,7 +1463,7 @@ PMError InstYou::retrievePackage( const PMPackagePtr &pkg,
   if ( !error ) {
     _info->packageDataProvider()->setLocation( pkg, rpmPath.asString() );
     DBG << "RPM: " << pkg->name() << ": " << pkg->location() << endl;
-    return PMError();
+    return check_md5(md5, _media.localPath(rpmPath));
   }
 
   ERR << "Error retrieving RPM " << pkg->name() << endl;

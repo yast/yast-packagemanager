@@ -124,6 +124,7 @@ class PMPackage : public PMObject {
     std::list<PkgEdition>  patchRpmBaseVersions() const;
     FSize                  patchRpmSize() const;
     bool                   forceInstall() const;
+    std::string            patchRpmMD5()  const;
 
     std::list<PMPackageDelta> deltas() const;
 

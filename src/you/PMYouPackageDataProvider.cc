@@ -195,12 +195,37 @@ bool PMYouPackageDataProvider::forceInstall( const PMPackage &pkg ) const
   else return it->second;
 }
 
+void PMYouPackageDataProvider::setMD5sum( const PMPackagePtr &pkg,
+                                                const std::string& s )
+{
+  _md5sum[ pkg ] = s;
+}
+
+std::string PMYouPackageDataProvider::md5sum( const PMPackage &pkg ) const
+{
+  map<PMPackagePtr,string>::const_iterator it = _md5sum.find( mkPtr( pkg ) );
+  if ( it == _md5sum.end() ) return string();
+  else return it->second;
+}
+
+void PMYouPackageDataProvider::setPatchRpmMD5sum( const PMPackagePtr &pkg,
+                                                const std::string& s )
+{
+  _patchrpmmd5sum[ pkg ] = s;
+}
+
+std::string PMYouPackageDataProvider::patchRpmMD5( const PMPackage &pkg ) const
+{
+  map<PMPackagePtr,string>::const_iterator it = _patchrpmmd5sum.find( mkPtr( pkg ) );
+  if ( it == _patchrpmmd5sum.end() ) return string();
+  else return it->second;
+}
+
 void PMYouPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) const {
   dudata_r.clear();
   dudata_r.add( "/var/lib/YaST2/you/mnt/", pkg_r.archivesize().fullBlock(), 1 );
   D__ << "Package: " << pkg_r.summary() << dudata_r << endl;
 }
-
 
 void PMYouPackageDataProvider::addDelta(PMPackagePtr pkg, const PMPackageDelta& delta)
 {

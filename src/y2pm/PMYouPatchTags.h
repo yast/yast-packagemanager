@@ -59,6 +59,7 @@ class YOUPackageTagSet : public TaggedFile::TagSet
       INSTPATH,
       SIZE,
       PATCHRPMSIZE,
+      PATCHRPMMD5,
       BUILDTIME,
       BUILTFROM,
       RPMGROUP,
@@ -72,6 +73,7 @@ class YOUPackageTagSet : public TaggedFile::TagSet
       PATCHRPMBASEVERSIONS,
       ARCH,
       FORCEINSTALL,
+      MD5SUM,
       DELTAS
     };
  

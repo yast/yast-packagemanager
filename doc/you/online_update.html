@@ -403,6 +403,13 @@ Segakcap:
   <td>List of version numbers which can be updated by using the patch RPM.</td>
 </tr>
 <tr>
+  <td>PatchRpmMD5</td>
+  <td>32byte lower case hex string</td>
+  <td>MD5 digest of the patch RPM archive file. No MD5 check will be performed
+    when this tag is missing or empty.
+  <br><em>Since 9.2</em></td>
+</tr>
+<tr>
   <td>Buildtime</td>
   <td>integer</td>
   <td>Build time as extracted from RPM</td>
@@ -419,6 +426,23 @@ Segakcap:
   UpdateOnlyInstalled flag set to "true" and no previous version of the package is
   present on the system. The default value for ForceInstall is "false".
   <br><em>Since 9.1</em></td>
+</tr>
+<tr>
+  <td>MD5sum</td>
+  <td>32byte lower case hex string</td>
+  <td>MD5 digest of the RPM archive file. No MD5 check will be performed when
+    this tag is missing or empty.
+  <br><em>Since 9.2</em></td>
+</tr>
+<tr>
+  <td>Deltas</td>
+  <td>list of delta descriptions</td>
+  <td>Multi-line tag. Each line describes the attributes of a delta file.
+    Attributes of the delta file are specified in columns separated by space.
+    The meaning of the columns are: delta filename, delta size, delta md5sum,
+    name-edition-release of base, buildtime of base, md5sum of base.<br>
+    More tags may be added to the list in the future.
+  <br><em>Since 9.2</em></td>
 </tr>
 </table>
 </a>

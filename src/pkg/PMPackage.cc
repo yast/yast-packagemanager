@@ -17,14 +17,19 @@
 
   Purpose: Defines the Package object.
 
+  Textdomain: packagemanager
+
 /-*/
 
 #include <iostream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/PathInfo.h>
 
 #include <y2pm/PMPackage.h>
+#include <y2pm/InstSrcError.h>
 #include <y2pm/PkgDu.h>
+#include <y2pm/PMLocale.h>
 
 using namespace std;
 
@@ -88,12 +93,41 @@ std::string            PMPackage::externalUrl()  const { DP_GET( externalUrl ); 
 std::list<PkgEdition>  PMPackage::patchRpmBaseVersions() const { DP_GET( patchRpmBaseVersions ); }
 FSize                  PMPackage::patchRpmSize() const { DP_GET( patchRpmSize ); }
 bool                   PMPackage::forceInstall() const { DP_GET( forceInstall ); }
+std::string            PMPackage::patchRpmMD5()  const { DP_GET( patchRpmMD5 ); }
 // package file comes from remote
 bool		       PMPackage::isRemote()	 const { DP_GET( isRemote ); }
 std::list<PMPackageDelta> PMPackage::deltas() const{ DP_GET( deltas ); }
 
+
 // physical access to the rpm file.
-PMError                PMPackage::providePkgToInstall(Pathname& path) const { DP_ARG_GET( providePkgToInstall, path ); }
+PMError PMPackage::providePkgToInstall(Pathname& dest) const
+{
+  PMError err;
+
+  if ( _dataProvider )
+    err = _dataProvider->providePkgToInstall( *this, dest );
+  else
+    err = PMPackageDataProvider::providePkgToInstall( dest );
+
+  std::string md5 = md5sum();
+  if(!err && !md5.empty())
+  {
+    string has = PathInfo::md5sum(dest);
+    if(has != md5)
+    {
+      err = InstSrcError::E_corrupted_file;
+      err.setDetails(
+	  // translator: filename, md5sum, md5sum
+	  stringutil::form(_("%s has an md5sum of '%s' but '%s' was expected"),
+	    dest.asString().c_str(),
+	    has.c_str(),
+	    md5.c_str()));
+    }
+  }
+  return err;
+}
+
+
 // physical access to the src.rpm file.
 PMError                PMPackage::provideSrcPkgToInstall(Pathname& path) const { DP_ARG_GET( provideSrcPkgToInstall, path ); }
 // who's providing this package

@@ -148,6 +148,27 @@ class PMYouPackageDataProvider : public PMPackageDataProvider {
         bool forceInstall( const PMPackage & ) const;
 
         /**
+          Set md5sum
+        */
+        void setMD5sum( const PMPackagePtr &, const std::string& md5sum );
+        
+        /**
+          Get md5sum
+        */
+	std::string md5sum( const PMPackage & ) const;
+
+	/**
+          Set patch rpm md5sum
+        */
+        void setPatchRpmMD5sum( const PMPackagePtr &, const std::string& md5sum );
+        
+        /**
+          Get patch rpm md5sum
+        */
+	std::string patchRpmMD5( const PMPackage & ) const;
+
+
+        /**
           Return disk usage information. This includes the required disk space
           for downloading the RPMs.
         */
@@ -169,6 +190,8 @@ class PMYouPackageDataProvider : public PMPackageDataProvider {
         std::map<PMPackagePtr,FSize> _patchRpmSizes;
         std::map<PMPackagePtr,bool> _forceInstalls;
         std::map<PMPackagePtr,std::list<PMPackageDelta> > _deltas;
+        std::map<PMPackagePtr,std::string> _md5sum;
+        std::map<PMPackagePtr,std::string> _patchrpmmd5sum;
 };
 
 #endif // PMYouPackageDataProvider_h

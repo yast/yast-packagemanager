@@ -108,6 +108,7 @@ class PMPackageDataProvider : public CountedRep {
     static std::list<PkgEdition>  patchRpmBaseVersions() { return std::list<PkgEdition>(); }
     static FSize                  patchRpmSize() { return FSize( 0 ); }
     static bool                   forceInstall() { return false; }
+    static std::string            patchRpmMD5()  { return std::string(); }
 
     static bool isRemote()			{ return false; }
     // physical access to the rpm file.
@@ -188,6 +189,7 @@ class PMPackageDataProvider : public CountedRep {
     virtual std::list<PkgEdition>  patchRpmBaseVersions( const PMPackage & pkg_r ) const { return patchRpmBaseVersions(); }
     virtual FSize                  patchRpmSize( const PMPackage & pkg_r ) const { return patchRpmSize(); }
     virtual bool                   forceInstall( const PMPackage & pkg_r ) const { return forceInstall(); }
+    virtual std::string            patchRpmMD5 ( const PMPackage & pkg_r ) const { return patchRpmMD5(); }
 
     virtual bool		   isRemote    ( const PMPackage & pkg_r ) const { return isRemote(); }
     // physical access to the rpm file.

@@ -48,6 +48,7 @@ YOUPackageTagSet::YOUPackageTagSet() : TagSet()
   addTag( "InstPath",        INSTPATH,             TaggedFile::SINGLE );
   addTag( "Size",            SIZE,                 TaggedFile::SINGLE );
   addTag( "PatchRpmSize",    PATCHRPMSIZE,         TaggedFile::SINGLE );
+  addTag( "PatchRpmMD5",     PATCHRPMMD5,          TaggedFile::SINGLE );
   addTag( "Buildtime",       BUILDTIME,            TaggedFile::SINGLE );
   addTag( "BuiltFrom",       BUILTFROM,            TaggedFile::SINGLE );
   addTag( "RpmGroup",        RPMGROUP,             TaggedFile::SINGLE );
@@ -61,5 +62,6 @@ YOUPackageTagSet::YOUPackageTagSet() : TagSet()
   addTag( "PatchRpmBasedOn", PATCHRPMBASEVERSIONS, TaggedFile::SINGLE );
   addTag( "Series",          ARCH,                 TaggedFile::SINGLE );
   addTag( "ForceInstall",    FORCEINSTALL,         TaggedFile::SINGLE );
+  addTag( "MD5sum",          MD5SUM,               TaggedFile::SINGLE );
   addTag( "Deltas",          DELTAS,               TaggedFile::MULTIOLD);
 }

@@ -930,7 +930,7 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir,
     path_r = theMedia->localPath( filename );
 
     if ( isRemote() && ! RpmHeader::readPackage( path_r, /*checkDigest*/true ) ) {
-      err = Error::E_corupted_file;
+      err = Error::E_corrupted_file;
       err.setDetails( (dir+name).asString() );
       PathInfo::unlink( path_r );
       ERR << "Bad digest '" << path_r << "': " << err << endl;
