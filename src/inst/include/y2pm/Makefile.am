@@ -7,6 +7,8 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
+	InstSrcManager.h			\
+	\
 	InstSrcError.h				\
 	InstSrc.h	InstSrcPtr.h		\
 	InstSrcDescr.h	InstSrcDescrPtr.h	\

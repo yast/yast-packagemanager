@@ -60,6 +60,8 @@ std::string InstSrcError::errtext( const unsigned e )
   ///////////////////////////////////////////////////////////////////
 #define ENUM_OUT(V) case V: return #V
 
+    case E_TBD: return "not yet implemented";
+
     ENUM_OUT( E_cache_dir_exists );
     ENUM_OUT( E_cache_dir_create );
     ENUM_OUT( E_bad_cache_dir );
@@ -69,6 +71,9 @@ std::string InstSrcError::errtext( const unsigned e )
     //
     ENUM_OUT( E_bad_url );
     ENUM_OUT( E_no_instsrc_on_media );
+    ENUM_OUT( E_no_instsrcdata_on_media );
+    ENUM_OUT( E_src_already_enabled );
+    ENUM_OUT( E_src_no_description );
 
 #undef ENUM_OUT
   ///////////////////////////////////////////////////////////////////

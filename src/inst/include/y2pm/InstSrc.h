@@ -206,14 +206,39 @@ class InstSrc: virtual public Rep {
   public:
 
     /**
-     * Access to installation source description
+     * Const access to installation source description
      **/
     constInstSrcDescrPtr descr() const { return _descr; }
 
     /**
+     * Access to installation source description
+     **/
+    InstSrcDescrPtr descr() { return _descr; }
+
+    /**
+     * Const access to installation source data
+     **/
+    constInstSrcDataPtr data() const { return _data; }
+
+    /**
      * Access to installation source data
      **/
-    constInstSrcDataPtr  data() const { return _data; }
+    InstSrcDataPtr data() { return _data; }
+
+  public:
+
+
+    /**
+     * From InstSrcManager: Provide concrete InstSrcData according to Type
+     * info stored in _descr. InstSrcData must be able to provide lists of
+     * packages, selection, etc. located on the media.
+     **/
+    PMError enableSource();
+
+    /**
+     * From InstSrcManager:
+     **/
+    PMError disableSource();
 
 #if 0
     bool initialized() const { return( _descr != 0 ); }
