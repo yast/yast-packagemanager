@@ -19,6 +19,7 @@ pkginclude_HEADERS =	\
 	UpdateInfParser.h			\
 	InstData.h				\
 	FileDeps.h				\
+	UpdateInfParser.h			\
 	\
 	InstTargetError.h			\
 	InstTarget.h				\
