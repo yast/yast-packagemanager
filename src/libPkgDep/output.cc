@@ -1,4 +1,4 @@
-#include <PkgDep.h>
+#include <y2pm/PkgDep.h>
 #include <iostream>
 
 using namespace std;

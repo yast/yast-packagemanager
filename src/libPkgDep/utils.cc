@@ -1,6 +1,6 @@
 #include <cassert>
-#include <PkgDep.h>
-#include <PkgDep_int.h>
+#include <y2pm/PkgDep.h>
+#include <y2pm/PkgDep_int.h>
 
 // initialization of static class vars
 //const PkgSet* PkgDep::default_avail = new PkgSet();
