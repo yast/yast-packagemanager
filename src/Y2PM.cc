@@ -26,6 +26,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <Y2PM.h>
+#include "PMRcValues.h"
 #include <y2pm/Y2PMCallbacks.h>
 
 #include <y2pm/InstTarget.h>
@@ -114,9 +115,8 @@ PMError Y2PM::requestedLocalesChanged( const LocaleSet & addLocales_r, const Loc
     MIL << " " << *it;
   }
   MIL << " }" << endl;
-
+  PM::rcValues().requestedLocales = getRequestedLocales();
   selectionManager().requestedLocalesChanged( addLocales_r, delLocales_r );
-#warning SAVE requestedLocales in some RCfile
   return PMError::E_ok;
 }
 
@@ -231,7 +231,7 @@ PMError Y2PM::instTargetInit( Pathname root_r )
 
     } else {
       MIL << "InstTarget initialized at '" << root_r << "'" << endl;
-
+      rcInit();
       // provide data to already existing managers
       if ( _packageManager ) {
 	_packageManager->poolSetInstalled( instTarget().getPackages() );
@@ -283,7 +283,7 @@ PMError Y2PM::instTargetClose()
 {
   if ( _instTarget && instTarget().initialized() ) {
     MIL << "Shutdown InstTarget..." << endl;
-
+    rcSave();
     // withdraw data from already existing managers
     if ( _packageManager ) {
       std::list<PMPackagePtr> empty;

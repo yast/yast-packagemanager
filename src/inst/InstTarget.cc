@@ -166,7 +166,6 @@ InstTarget::~InstTarget()
 //
 PMError InstTarget::init( const Pathname & rootpath )
 {
-#warning Deprecated argument createnew in InstTarget::init
     _rootdir = rootpath;
 
     _proddb->open( _rootdir );

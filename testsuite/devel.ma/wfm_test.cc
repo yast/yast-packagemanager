@@ -296,6 +296,30 @@ void WFMtest() {
   wfm.close();
 }
 
+void instPkg() {
+  RpmDbCallbacks::InstallPkgReport::Send( report( RpmDbCallbacks::installPkgReport ) );
+
+  report->start( "some/pkg.rpm" );
+
+  ProgressData pd;
+  report->progress( pd.init( 20 ) );
+  report->progress( pd.set( 10 ) );
+  report->progress( pd.set( 15 ) );
+
+  report->stop( PMError::E_ok );
+}
+
+void commInst() {
+  PMPackagePtr pkg( PMGR["aaa_base"]->installedObj() );
+  Y2PMCallbacks::CommitInstallReport::Send report( Y2PMCallbacks::commitInstallReport );
+  report->start( pkg, false, "some/pkg.rpm" );
+  report->attempt( 1 );
+  instPkg();
+  report->result( PMError::E_ok );
+  report->stop( PMError::E_ok );
+}
+
+
 /******************************************************************
 **
 **
@@ -310,7 +334,7 @@ int main()
   set_log_filename( "-" );
   MIL << "START" << endl;
 
-  if ( 0 ) {
+  if ( 1 ) {
     //Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
@@ -326,7 +350,14 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  WFMtest();
+  wfm.init();
+  // WFMtest();
+  SEC << "===========================================================" << endl;
+  instPkg();
+  SEC << "===========================================================" << endl;
+  commInst();
+  SEC << "===========================================================" << endl;
+  wfm.close();
 
   SEC << "STOP" << endl;
   return 0;
