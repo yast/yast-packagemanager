@@ -465,7 +465,7 @@ bool PMSelectable::intern_set_status( const UI_Status state_r, const bool doit )
 {
   switch ( state_r ) {
 
-  case S_Keep:
+  case S_Protected:
     if ( !_state.has_installed() )
       return false;
     return _state.user_set_taboo( doit );
@@ -546,7 +546,7 @@ PMSelectable::UI_Status PMSelectable::status() const
 {
   if ( !_state.to_modify() ) {
     if ( _state.has_installed() )
-      return ( _state.is_taboo() ? S_Keep :S_KeepInstalled );
+      return ( _state.is_taboo() ? S_Protected :S_KeepInstalled );
     return( _state.is_taboo() ? S_Taboo : S_NoInst );
   }
 
@@ -626,7 +626,7 @@ std::ostream & operator<<( std::ostream & str, PMSelectable::UI_Status obj )
   switch ( obj ) {
 #define ENUM_OUT(V) case PMSelectable::V: return str << #V; break
 
-    ENUM_OUT( S_Keep );
+    ENUM_OUT( S_Protected );
     ENUM_OUT( S_Taboo );
     ENUM_OUT( S_Del );
     ENUM_OUT( S_Install );
