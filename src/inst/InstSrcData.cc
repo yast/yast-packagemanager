@@ -50,7 +50,7 @@ IMPL_BASE_POINTER(InstSrcData);
 InstSrcData::InstSrcData()
     : _propagating( false )
 {
-  MIL << "New InstSrcData " << *this << endl;
+// -> *this calls dumpOn which is *NOT* ready yet  MIL << "New InstSrcData " << *this << endl;
 }
 
 ///////////////////////////////////////////////////////////////////
