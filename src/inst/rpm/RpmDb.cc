@@ -1573,7 +1573,7 @@ RpmDb::installPackage(const string& filename, unsigned flags)
     opts.push_back(filename.c_str());
 
     // %s = filename of rpm package
-    _progresslogstream << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
+//    _progresslogstream << stringutil::form(_("Installing %s"), Pathname::basename(filename).c_str()) << endl;
 
     run_rpm( opts, ExternalProgram::Stderr_To_Stdout);
 
@@ -1620,7 +1620,7 @@ RpmDb::installPackage(const string& filename, unsigned flags)
 	return Error::E_RpmDB_subprocess_failed;
     }
     // %s = filename of rpm package
-    _progresslogstream << stringutil::form(_("%s ok"), Pathname::basename(filename).c_str()) << endl;
+    _progresslogstream << stringutil::form(_("%s installed ok"), Pathname::basename(filename).c_str()) << endl;
     if(!rpmmsg.empty())
     {
 	_progresslogstream << _("Additional rpm output:") << endl << rpmmsg << endl;
