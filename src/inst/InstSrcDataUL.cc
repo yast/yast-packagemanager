@@ -130,7 +130,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     while (content.good())
     {
 	// If not reading trimmed, at least rtrim value
-	string value = stringutil::getline( content, true );
+	string value = stringutil::getline( content, stringutil::TRIM );
 
 	if ( ! (content.fail() || content.bad()) ) {
 	string tag = stringutil::stripFirstWord( value );

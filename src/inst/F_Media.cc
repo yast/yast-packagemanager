@@ -73,7 +73,7 @@ PMError F_Media::read( istream & stream_r, const bool quick_r )
   }
 
   // vendor
-  string line = stringutil::getline( stream_r, true );
+  string line = stringutil::getline( stream_r, stringutil::TRIM );
   if ( line.empty() ) {
     ERR << "Parse error: missing 'vendor'" << endl;
     return InstSrcError::E_no_instsrc_on_media;
@@ -82,7 +82,7 @@ PMError F_Media::read( istream & stream_r, const bool quick_r )
   }
 
   // ident
-  line = stringutil::getline( stream_r, true );
+  line = stringutil::getline( stream_r, stringutil::TRIM );
   if ( line.empty() ) {
     ERR << "Parse error: missing 'ident'" << endl;
     return InstSrcError::E_no_instsrc_on_media;
@@ -91,7 +91,7 @@ PMError F_Media::read( istream & stream_r, const bool quick_r )
   }
 
   // count
-  line = stringutil::getline( stream_r, true );
+  line = stringutil::getline( stream_r, stringutil::TRIM );
   if ( line.empty() ) {
     ERR << "Parse error: missing 'count'" << endl;
     return InstSrcError::E_no_instsrc_on_media;
@@ -108,7 +108,7 @@ PMError F_Media::read( istream & stream_r, const bool quick_r )
   // optional flags / or 1st medianame
   // fortunately there's currently just one flag
   bool skipread = false; // in case we get the 1st medianame here
-  line = stringutil::getline( stream_r, true );
+  line = stringutil::getline( stream_r, stringutil::TRIM );
   if ( line == "doublesided" ) {
     _flags |= DOUBLESIDED;
   } else if ( line.substr( 0, 5 ) == "MEDIA" ) {
@@ -122,7 +122,7 @@ PMError F_Media::read( istream & stream_r, const bool quick_r )
     if ( skipread ) {
       skipread = false;
     } else {
-      line = stringutil::getline( stream_r, true );
+      line = stringutil::getline( stream_r, stringutil::TRIM );
     }
     if ( !(stream_r.fail() || stream_r.bad()) ) {
       string tag = stringutil::stripFirstWord( line );
