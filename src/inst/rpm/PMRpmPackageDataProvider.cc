@@ -56,10 +56,6 @@ PkgAttributeValue PMRpmPackageDataProvider::getAttributeValue( constPMObjectPtr 
 
     switch(attr)
     {
-#warning FIXME PMSolvable::ATTR_ARCH
-	case PMObject::ATTR_ARCH:
-	    queryformat = "%{ARCH}\n";
-	    break;
 	case PMObject::ATTR_SUMMARY:
 	    queryformat = "%{SUMMARY}\n";
 	    break;
