@@ -386,6 +386,16 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   PMError error = patchProgress( 0 );
   if ( error ) return error;
 
+  list<PMPackagePtr> packages = patch->packages();
+
+  int progressTotal = packages.size() + 2; // number of packages plus pre and post script
+  int progressCurrent = 0;
+
+  list<PMPackagePtr>::const_iterator itPkg;
+  for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+    if ( (*itPkg)->location().empty() ) return YouError::E_empty_location;
+  }
+
   Pathname scriptPath;
   if ( !patch->preScript().empty() ) {
     scriptPath = _paths->localScriptPath( patch->preScript() );
@@ -400,10 +410,6 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch, bool dryrun )
   error = patchProgress( 1 );
   if ( error ) return error;
 
-  list<PMPackagePtr> packages = patch->packages();
-  int progressTotal = packages.size() + 2; // number of packages plus pre and post script
-  int progressCurrent = 0;
-  list<PMPackagePtr>::const_iterator itPkg;
   for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
     error = patchProgress( ( progressCurrent++ + 1 ) * 100 /
                            progressTotal );

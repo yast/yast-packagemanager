@@ -59,7 +59,8 @@ class YouError {
       E_prescript_failed,
       E_postscript_failed,
       E_rpm_failed,
-      E_install_failed
+      E_install_failed,
+      E_empty_location
     };
 
     friend std::ostream & operator<<( std::ostream & str, const Error & obj ) {
