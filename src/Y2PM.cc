@@ -533,6 +533,7 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 	}
 
 	bool is_remote = (*it)->isRemote();		// if current package source is remote
+        Pathname path;
 
 	//---------------------------------------------------
 	// fetch (provide) source package for installation
@@ -549,13 +550,12 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 		(*_callbacks._provide_start_func)(srcloc, (*it)->sourcesize(), true, _callbacks._provide_start_data);
 	    }
 
-	    Pathname path;
 	    err = (*it)->provideSrcPkgToInstall(path);
 
 	    if ((err || is_remote)
 		&& (_callbacks._provide_done_func != 0))
 	    {
-		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), (*it)->name(), _callbacks._provide_done_data);
+		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), path.asString(), _callbacks._provide_done_data);
 
 		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
 		if (done_result == "C")
@@ -582,8 +582,6 @@ Y2PM::installSpmFromMedia (unsigned int current_src_media,
 
 	//---------------------------------------------------
 	// install provided source package
-
-	Pathname path;
 
 	do
 	{
@@ -826,7 +824,7 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	    if ((err || is_remote)
 		&& (_callbacks._provide_done_func != 0))
 	    {
-		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), (*it)->name(), _callbacks._provide_done_data);
+		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), path.asString(), _callbacks._provide_done_data);
 
 		// check for "" (ignore), "R" retry, "C" cancel/abort all, "S" skip remaining
 		if (done_result == "C")
