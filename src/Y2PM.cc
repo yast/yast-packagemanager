@@ -176,5 +176,3 @@ PMYouPatchManager & Y2PM::youPatchManager()
   }
   return *_youPatchManager;
 }
-
-

@@ -447,21 +447,23 @@ InstSrcDataUL::parsePackages (std::list<PMPackagePtr>& packages,
 
     Pathname filename = descr_dir_r + "/packages";
 
-    MediaAccess::FileProvider packages_file( media_r, filename );
-    if ( packages_file.error() ) {
-      ERR << "Media can't provide '" << filename << "' " << packages_file.error() << endl;
-      return packages_file.error();
+    err = media_r->provideFile ( filename );
+    if ( err ) {
+	ERR << "Media can't provide '" << filename << "' : " << err.errstr() << endl;
+	return err;
     }
 
-    MIL << "fopen(" << packages_file() << ")" << endl;
-    TagCacheRetrievalPtr pkgcache ( new TagCacheRetrieval( packages_file() ));
+    Pathname fullpath = media_r->localPath (filename);
+    MIL << "fopen(" << fullpath << ")" << endl;
+    TagCacheRetrievalPtr pkgcache ( new TagCacheRetrieval( fullpath ));
 
     // --------------------------------
     // read package data
 
-    std::ifstream& package_stream = pkgcache->getStream();
-    if( !package_stream)
+    std::ifstream package_stream (fullpath.asString().c_str());
+    if( !package_stream.is_open())
     {
+	ERR << "Can't open " << fullpath << endl;
 	return InstSrcError::E_open_file;
     }
 
@@ -518,6 +520,8 @@ InstSrcDataUL::parsePackages (std::list<PMPackagePtr>& packages,
     else
 	MIL << "*** parsed " << count << " packages ***" << std::endl;
 
+    // implict stream close
+
     return PMError::E_ok;
 }
 
@@ -544,22 +548,27 @@ InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
     Pathname filename = descr_dir_r + "/packages";
     filename = filename.extend( langext );
 
-    MediaAccess::FileProvider packages_lang_file( media_r, filename );
-    if ( packages_lang_file.error() ) {
-	ERR << "Media can't provide '" << filename << "' " << packages_lang_file.error() << endl;
-	return packages_lang_file.error();
+    err = media_r->provideFile ( filename );
+
+    Pathname fullpath = media_r->localPath (filename);
+    if ( err )
+    {
+	ERR << "Media can't provide '" << fullpath << "' " << err.errstr() << endl;
+	return err;
     }
 
-    MIL << "fopen(" << packages_lang_file() << ")" << endl;
-    TagCacheRetrievalPtr langcache ( new TagCacheRetrieval( packages_lang_file() ));
+
+    MIL << "fopen(" << fullpath << ")" << endl;
+    TagCacheRetrievalPtr langcache ( new TagCacheRetrieval( filename ));
 
     ///////////////////////////////////////////////////////////////////
     // parse language data
     ///////////////////////////////////////////////////////////////////
 
-    std::ifstream& language_stream = langcache->getStream();
-    if( !language_stream)
+    std::ifstream language_stream (fullpath.asString().c_str());
+    if( !language_stream.is_open())
     {
+	ERR << "Can't open " << fullpath << endl;
 	return InstSrcError::E_open_file;
     }
 
@@ -615,6 +624,8 @@ InstSrcDataUL::parsePackagesLang (std::list<PMPackagePtr>& packages,
     else
 	MIL << "*** parsed " << count << " packages.<lang> entries ***" << std::endl;
 
+    // implicit stream close
+
     return PMError::E_ok;
 }
 
@@ -637,18 +648,21 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 
     Pathname filename = descr_dir_r + "/selections";
 
-    MediaAccess::FileProvider selections_file( media_r, filename );
-    if ( selections_file.error() ) {
-	WAR << "Media can't provide '" << filename << "' " << selections_file.error() << endl;
-    }
-    else {
+    err = media_r->provideFile ( filename );
 
+    Pathname fullpath = media_r->localPath (filename);
+    if ( err )
+    {
+	WAR << "Media can't provide '" << fullpath << "' " << err.errstr() << endl;
+    }
+    else
+    {
 	while ( true )
 	{
-	    std::ifstream selstream (selections_file().asString().c_str());
+	    std::ifstream selstream (fullpath.asString().c_str());
 	    if (!selstream)
 	    {
-		ERR << "Cant open " << selections_file() << ": " << Error::E_open_file << endl;
+		ERR << "Cant open " << fullpath << ": " << Error::E_open_file << endl;
 		break;
 	    }
 
@@ -672,6 +686,7 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 	    }
 	    break;
 	}
+	// implicit close of selstream
     }
     MIL << "*** Expecting " << selection_names.size() << " selections ***" << endl;
 
@@ -687,20 +702,21 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 	 ++selfile)
     {
 
-	Pathname selectionname = descr_dir_r + *selfile;
-	MediaAccess::FileProvider sel_file( media_r, selectionname );
+	Pathname filename = descr_dir_r + *selfile;
+	err = media_r->provideFile ( filename );
 
-	selection_stream.open (sel_file().asString().c_str());
+	Pathname fullpath = media_r->localPath (filename);
+	selection_stream.open (fullpath.asString().c_str());
 
 	if (!selection_stream.is_open())
 	{
-	    ERR << "Cant open " << sel_file().asString() << endl;
+	    ERR << "Cant open " << fullpath.asString() << endl;
 	    continue;
 	}
 
-	MIL << "Reading " << sel_file().asString() << endl;
+	MIL << "Reading " << fullpath.asString() << endl;
 
-	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (selectionname));
+	PMULSelectionDataProviderPtr dataprovider ( new PMULSelectionDataProvider (fullpath));
 	TagParser& parser = dataprovider->getParser();
 
 	MIL << "start " << *selfile << " parsing" << endl;
@@ -745,6 +761,7 @@ InstSrcDataUL::parseSelections (std::list<PMSelectionPtr>& selections,
 	tagset->clear();
 
 	selection_stream.clear();
+	// close own copy of selection_stream
 	selection_stream.close();
 	MIL << "done " << *selfile << " parsing" << endl;
     } // for ()
