@@ -267,7 +267,7 @@ void test() {
 int main()
 {
   y2error( "xxx" );
-  Y2Logging::setLogfileName( "-" );
+  set_log_filename( "-" );
   MIL << "START" << endl;
 
   if ( 0 ) {

@@ -154,7 +154,7 @@ static bool do_test( const Pathname & file_r )
 
 int main()
 {
-  Y2Logging::setLogfileName("-");
+  set_log_filename("-");
   MIL << "START" << endl;
 
   int err = 0;

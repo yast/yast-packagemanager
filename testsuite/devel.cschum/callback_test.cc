@@ -52,7 +52,7 @@ bool myOtherCallback( int, const string &str, void * )
 */
 int main( int argc, char **argv )
 {
-  Y2Logging::setLogfileName( "-" );
+  set_log_filename( "-" );
 
   cout << "Hallo" << endl;
 

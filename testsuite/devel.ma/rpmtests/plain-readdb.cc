@@ -50,7 +50,7 @@ ostream & operator<<( ostream & str, const Header & h )
 */
 int main()
 {
-  Y2Logging::setLogfileName("-");
+  set_log_filename("-");
   MIL << "BEGIN" << endl;
 
   _rpmdb_debug = -1;

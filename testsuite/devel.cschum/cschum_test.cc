@@ -55,7 +55,7 @@ void printEd( PkgEdition ed )
 */
 int main( int argc, char **argv )
 {
-  Y2Logging::setLogfileName( "-" );
+  set_log_filename( "-" );
 
   MediaAccess media;
   

@@ -37,7 +37,7 @@ using namespace std;
 */
 int main( int argc, char **argv )
 {
-  Y2Logging::setLogfileName( "-" );
+  set_log_filename( "-" );
   
   PMError err;
   DBG << err << endl;
