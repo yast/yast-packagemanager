@@ -59,6 +59,7 @@ class InstTargetError {
       E_RpmDB_rebuilddb_failed,
       E_RpmDB_not_initialized,
       E_RpmDB_subprocess_failed,
+      E_RpmDB_old_db,
 
     };
 };

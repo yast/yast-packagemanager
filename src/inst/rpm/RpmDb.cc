@@ -57,6 +57,7 @@ using namespace std;
 IMPL_BASE_POINTER(RpmDb);
 
 #define FAILIFNOTINITIALIZED \
+	if(_old_present) return Error::E_RpmDB_old_db; \
 	if(!_initialized) return Error::E_RpmDB_not_initialized;
 
 #define WARNINGMAILPATH "/var/adm/notify/warnings"
@@ -629,6 +630,7 @@ RpmDb::getPackages (void)
 
     _packages.clear();
 
+    if (_old_present) return _packages;
     if (!_initialized) return _packages;
 
     // this enum tells the position in rpmquery string
@@ -1121,6 +1123,7 @@ RpmDb::queryPackage (const std::string& package, const char *qparam, const char 
 {
     RpmArgVec opts(4);
 
+    if(_old_present) return false;
     if(!_initialized) return false;
 
     opts[0] = qparam;
@@ -1143,6 +1146,7 @@ RpmDb::queryPackage (const std::string& package, const char *qparam, const char 
 {
     RpmArgVec opts(4);
 
+    if(_old_present) return false;
     if(!_initialized) return false;
 
     opts[0] = qparam;
