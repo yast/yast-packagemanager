@@ -473,6 +473,177 @@ inline void commitSrcSucceeded( const PMPackagePtr & pkg_r )
   }
 }
 
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : installSpmFromMedia
+**	FUNCTION TYPE : bool
+**
+**	install spms from package source 'current_src_ptr',
+**	  media number 'current_src_media'
+**	loop through srclist and pick all spms matching the wanted
+**	  media
+*/
+bool
+Y2PM::installSpmFromMedia (unsigned int current_src_media,
+			   constInstSrcPtr current_src_ptr,
+			   std::list<PMPackagePtr>& srclist)
+{
+    // no-op if we don't have a medium yet
+
+    if (current_src_media == 0)
+	return true;
+    if (current_src_ptr == 0)
+	return true;
+
+    bool go_on = true;
+    bool retry;		// flag for inner 'retry' loops
+    PMError err;
+
+    //---------------------------------------------
+    // install spm packages while the current media is still available
+
+    //-------------------------------------------------------
+    // loop over all source rpms (.srpm) selected for installation
+
+    for (std::list<PMPackagePtr>::iterator it = srclist.begin();
+	 it != srclist.end();)				// NO ++it here, see erase() at bottom !
+    {
+	string srcloc = (*it)->sourceloc();
+	if (srcloc.empty())
+	{
+	    ERR << "No source location for " << (*it)->name() << endl;
+	    ++it;
+	    continue;
+	}
+
+	if ((*it)->source() != current_src_ptr)			// wrong package source
+	{
+	    ++it;
+	    continue;
+	}
+
+	unsigned int spmmedia = atoi (srcloc.c_str());
+
+	if (spmmedia != current_src_media)			// wrong media
+	{
+	    ++it;
+	    continue;
+	}
+
+	bool is_remote = (*it)->isRemote();		// if current package source is remote
+
+	//---------------------------------------------------
+	// fetch (provide) source package for installation
+
+	do		// retry loop for package providing (fetching rpm from possibly remote source)
+	{
+	    retry = false;	// default: don't retry
+
+	    // if source is remote, show progress bar while fetching package
+
+	    if (is_remote
+		&& (_callbacks._provide_start_func != 0))
+	    {
+		(*_callbacks._provide_start_func)(srcloc, (*it)->sourcesize(), true, _callbacks._provide_start_data);
+	    }
+
+	    Pathname path;
+	    err = (*it)->provideSrcPkgToInstall(path);
+
+	    if ((err || is_remote)
+		&& (_callbacks._provide_done_func != 0))
+	    {
+		std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), (*it)->name(), _callbacks._provide_done_data);
+
+		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+		if (done_result == "C")
+		{
+		    err = InstSrcError::E_cancel_media;		// cancel it all
+		}
+		else if (done_result == "S")
+		{
+		    err = InstSrcError::E_skip_media;		// skip current media
+		}
+		else if (done_result == "R")
+		{
+		    retry = true;				// retry !
+		}
+	    }
+	}
+	while (retry);
+
+	if (err != PMError::E_ok)				// pack source provide
+	{
+	    ++it;
+	    continue;
+	}
+
+	//---------------------------------------------------
+	// install provided source package
+
+	Pathname path;
+
+	do
+	{
+	    retry = false;	// default: don't retry
+
+	    if (_callbacks._package_start_func)
+	    {
+		go_on = (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
+		if (!go_on)
+		{
+		    break;
+		}
+	    }
+
+	    err = instTarget().installPackage (path);
+	    if ( ! err ) {
+	      commitSrcSucceeded( *it );
+	    }
+
+	    if (_callbacks._package_done_func)
+	    {
+		std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
+
+		// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
+		if (done_result == "C")
+		{
+		    err = InstSrcError::E_cancel_media;		// cancel it all
+		    go_on = false;
+		}
+		else if (done_result == "S")
+		{
+		    err = InstSrcError::E_skip_media;		// skip current media
+		}
+		else if (done_result == "R")
+		{
+		    retry = true;				// retry !
+		}
+	    }
+	}
+	while (retry);
+
+	if (!go_on)
+	{
+	    break;
+	}
+
+	if (err == PMError::E_ok)
+	{
+	    it = srclist.erase(it);			// ok, take out of list
+	}
+	else
+	{
+	    ++it;					// bad, keep in list
+	}
+
+    } // loop over source packages
+
+    return go_on;
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -591,31 +762,33 @@ int Y2PM::commitPackages( unsigned int media_nr,
     // install loop
     ///////////////////////////////////////////////////////////////////
 
-    unsigned int current_spm_media = 0;
-    constInstSrcPtr current_src_ptr = 0;
-    unsigned int pkgmedianr = 0;
+    unsigned int current_src_media = 0;			// number of currently attached media
+    constInstSrcPtr current_src_ptr = 0;		// pointer to media handler
+    unsigned int pkgmedianr = 0;			// media number of current package
 
     for (std::list<PMPackagePtr>::iterator it = inslist.begin();
 	 it != inslist.end(); ++it)
     {
 	pkgmedianr = (*it)->medianr();
-	if ((media_nr > 0)
-	    && (pkgmedianr != media_nr))
+	if ((media_nr > 0)				// if a specific media number is requested
+	    && (pkgmedianr != media_nr))		// and the current package is not on this media
 	{
 #warning loosing version information
-	    remaining_r.push_back ((*it)->name());
+	    remaining_r.push_back ((*it)->name());	// push it to the remaining list for later
 	    continue;
 	}
 
-	bool is_remote = (*it)->isRemote();
+	bool is_remote = (*it)->isRemote();		// if current package source is remote
 	string fullname = (*it)->nameEd();
 
 	//-----------------------------------------------------------
 	// check if we need a new media
 
 	if (((*it)->source() != current_src_ptr)	// source or media change
-	    || (pkgmedianr != current_spm_media))
+	    || (pkgmedianr != current_src_media))
 	{
+	    go_on = installSpmFromMedia (current_src_media, current_src_ptr, srclist);	// install sources from it while we have it attached
+
 	    if (((*it)->source() != current_src_ptr)	// source change -> release old source media
 		&& (current_src_ptr != 0))		// if we have an old media attached
 	    {
@@ -624,6 +797,8 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	    }
 
 	    current_src_ptr = (*it)->source();
+	    current_src_media = pkgmedianr;
+
 	    if (_callbacks._source_change_func != 0)
 	    {
 		(*_callbacks._source_change_func)(current_src_ptr, pkgmedianr, _callbacks._source_change_data);
@@ -766,146 +941,47 @@ int Y2PM::commitPackages( unsigned int media_nr,
 	    count++;
 	}
 
-	//-----------------------------------------------------------
-	// if we're about to switch to a new media, install all source
-	// packages which are still due from the current media
-
-	if (current_spm_media != pkgmedianr)			// new media number ?
-	{							// Y: install all sources from this media
-	    current_spm_media = pkgmedianr;
-
-	    //-------------------------------------------------------
-	    // loop over all source rpms (.srpm) selected for installation
-
-	    for (std::list<PMPackagePtr>::iterator it = srclist.begin();
-		 it != srclist.end();)				// NO ++it here, see erase() at bottom !
-	    {
-		string srcloc = (*it)->sourceloc();
-		if (srcloc.empty())
-		{
-		    ERR << "No source location for " << (*it)->name() << endl;
-		    ++it;
-		    continue;
-		}
-
-		unsigned int spmmedia = atoi (srcloc.c_str());
-
-		if (spmmedia != current_spm_media)			// wrong media
-		{
-		    ++it;
-		    continue;
-		}
-
-		//---------------------------------------------------
-		// fetch (provide) source package for installation
-
-		do		// retry loop for package providing (fetching rpm from possibly remote source)
-		{
-		    retry = false;	// default: don't retry
-
-		    // if source is remote, show progress bar while fetching package
-
-		    if (is_remote
-			&& (_callbacks._provide_start_func != 0))
-		    {
-			(*_callbacks._provide_start_func)(srcloc, (*it)->sourcesize(), true, _callbacks._provide_start_data);
-		    }
-
-		    Pathname path;
-		    err = (*it)->provideSrcPkgToInstall(path);
-
-		    if ((err || is_remote)
-			&& (_callbacks._provide_done_func != 0))
-		    {
-			std::string done_result = (*_callbacks._provide_done_func)(err, err.errstr(), (*it)->name(), _callbacks._provide_done_data);
-
-			// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
-			if (done_result == "C")
-			{
-			    err = InstSrcError::E_cancel_media;		// cancel it all
-			}
-			else if (done_result == "S")
-			{
-			    err = InstSrcError::E_skip_media;		// skip current media
-			}
-			else if (done_result == "R")
-			{
-			    retry = true;				// retry !
-			}
-		    }
-
-		}
-		while (retry);
-
-		if (err != PMError::E_ok)				// pack source provide
-		{
-		    ++it;
-		    continue;
-		}
-
-		//---------------------------------------------------
-		// install provided source package
-
-
-		do
-		{
-		    retry = false;	// default: don't retry
-
-		    if (_callbacks._package_start_func)
-		    {
-			go_on = (*_callbacks._package_start_func) (srcloc, (*it)->summary(), (*it)->sourcesize(), false, _callbacks._package_start_data);
-			if (!go_on)
-			{
-			    break;
-			}
-		    }
-
-		    err = instTarget().installPackage (path);
-		    if ( ! err ) {
-		      commitSrcSucceeded( *it );
-		    }
-
-		    if (_callbacks._package_done_func)
-		    {
-			std::string done_result = (*_callbacks._package_done_func) (err, err.errstr(), _callbacks._package_done_data);
-
-			// check for "" (ok), "R" retry, "I" ignore err, "C" cancel all, "S" skip remaining
-			if (done_result == "C")
-			{
-			    err = InstSrcError::E_cancel_media;		// cancel it all
-			    go_on = false;
-			}
-			else if (done_result == "S")
-			{
-			    err = InstSrcError::E_skip_media;		// skip current media
-			}
-			else if (done_result == "R")
-			{
-			    retry = true;				// retry !
-			}
-		    }
-		}
-		while (retry);
-
-		if (!go_on)
-		{
-		    break;
-		}
-
-		if (err == PMError::E_ok)
-		{
-		    it = srclist.erase(it);			// ok, take out of list
-		}
-		else
-		{
-		    ++it;					// bad, keep in list
-		}
-
-	    } // loop over source packages
-
-	} // media change due
-
     } // loop over inslist
+
+
+    // all binary packages installed
+    // install remaining sources
+
+    while (go_on)
+    {
+	go_on = installSpmFromMedia (current_src_media, current_src_ptr, srclist);	// install sources from it while we have it attached
+	if (!go_on)
+	    break;
+
+	if (media_nr > 0)				// if a specific media number is requested
+	    break;
+
+	if (srclist.size() == 0)			// we're done
+	    break;
+
+	// peek to first package in source list to determine which is the next medium
+
+	PMPackagePtr spm = srclist.front();
+
+	if ((spm->source() != current_src_ptr)		// source or media change ?
+	    || (spm->medianr() != current_src_media))
+	{
+	    if ((spm->source() != current_src_ptr)	// source change -> release old source media
+		&& (current_src_ptr != 0))		// if we have an old media attached
+	    {
+		InstSrcPtr ptr = InstSrcPtr::cast_away_const (current_src_ptr);
+		ptr->releaseMedia (true);	// release if removable (CD/DVD)
+	    }
+
+	    current_src_ptr = spm->source();
+	    current_src_media = spm->medianr();
+
+	    if (_callbacks._source_change_func != 0)
+	    {
+		(*_callbacks._source_change_func)(current_src_ptr, pkgmedianr, _callbacks._source_change_data);
+	    }
+	}
+    }
 
     if (current_src_ptr != 0)
     {
