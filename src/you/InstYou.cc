@@ -1112,6 +1112,17 @@ static PMPackagePtr getPackageForDelta( const PMPackagePtr &pkg, const PMPackage
 	PMPackagePtr p = *it;
 	if(!p || p == pkg) continue;
 	DBG << "check " << pkg->nameEd() << endl;
+	if(!p->source() || !p->source()->descr())
+	{
+	    INT << "package has no installation source?" << endl;
+	    continue;
+	}
+	else if(!p->source()->descr()->usefordeltas())
+	{
+	    DBG << "package installation source is not usable for deltas" << endl;
+	    continue;
+	}
+
 	if(p->edition() == delta.ned().edition && p->buildtime() == delta.buildtime())
 	{
 	    if(p->md5sum().empty() || p->md5sum() != delta.srcmd5())
@@ -1141,7 +1152,8 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
   MediaCurl::setCallbacks( &callbacks );
 
   list<PMPackagePtr>::const_iterator itPkg;
-  for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg ) {
+  for ( itPkg = packages.begin(); itPkg != packages.end(); ++itPkg )
+  {
     callbacks.setBaseProgress( progressCurrent );
     PMError error = patchProgress( progressCurrent * 100 / progressTotal );
     if ( error ) {
