@@ -182,7 +182,7 @@ void PMManager::poolSetInstalled( PMObjectContainerIter iter_r )
     }
   }
   DBG << "installed objects set!" << endl;
-  checkPool();
+  poolAdjust();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ void PMManager::poolAddCandidates( PMObjectContainerIter iter_r )
     }
   }
   DBG << "objects added!" << endl;
-  checkPool();
+  poolAdjust();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
   MIL << "Going to remove " << iter_r.size() << " objects..." << endl;
 
   for ( iter_r.setBegin(); !iter_r.atEnd(); iter_r.setNext() ) {
-    M__ << "--remove object " << *iter_r << endl;
+    DBG << "--remove object " << *iter_r << endl;
     ///////////////////////////////////////////////////////////////////
     // check the Object.
     ///////////////////////////////////////////////////////////////////
@@ -276,22 +276,58 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
     ///////////////////////////////////////////////////////////////////
     PMSelectablePtr pitem = iter_r->_selectable;
     pitem->clistDel( *iter_r );
-
-#if 0
-    ///////////////////////////////////////////////////////////////////
-    // check whether to drop the selectable.
-    // ASSUMES _candidateList is empty if no _candidateObj.
-    ///////////////////////////////////////////////////////////////////
-    if ( ! ( pitem->_installedObj || pitem->_candidateObj ) ) {
-#warning must save pools state on dropping items
-	D__ << "    drop selectable" << endl;
-	_itemPool.erase( pitem->name() );
-	pitem->_mgr_detach = 0;
-    }
-#endif
   }
-  M__ << "objects removed!" << endl;
-  checkPool();
+  DBG << "objects removed!" << endl;
+  poolAdjust();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMManager::poolAdjust
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//
+void PMManager::poolAdjust()
+{
+  DBG << "SATRT Pool size " << _items.size() << endl;
+  Rep::dumpRepStats( DBG ) << endl;
+
+  for ( PMSelectableVec::iterator it = begin(); it != end(); /*advanced inside*/ ) {
+    if ( ! (*it) ) {
+      INT << "  Null selectable" << endl;
+      continue;
+    }
+
+    if ( (*it)->isEmpty() ) {
+      PMSelectableVec::iterator tdel = it;
+      ++it;
+
+      // delete tdel
+      if ( (*tdel)->rep_cnt() != 2 )
+	DBG << "(OUTSIDE REFERENCED) ";
+      DBG << "Going to delete " << *tdel << endl;
+
+      // pool first
+      PMSelectablePool::iterator iter = _itemPool.find( (*tdel)->name() );
+      if ( iter != _itemPool.end() ) {
+	_itemPool.erase( iter );
+      } else
+	INT << "item not in pool" << endl;
+      // then _items
+      (*tdel)->_mgr_detach();
+      _items.erase( tdel );
+
+    } else {
+      ++it;
+    }
+  }
+
+  Rep::dumpRepStats( DBG ) << endl;
+  DBG << "END Pool size " << _items.size() << endl;
+
+  checkPool(); // for sanity
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -304,13 +340,10 @@ void PMManager::poolRemoveCandidates( PMObjectContainerIter iter_r )
 //
 void PMManager::checkPool() const
 {
-  // test whether to remove empty items
-
   if ( _itemPool.size() == _items.size() )
     DBG << "Pool size " << _items.size() << endl;
   else
     INT << "Pool size missmatch " << _itemPool.size() << " <-> " << _items.size() << endl;
-
   Rep::dumpRepStats( DBG ) << endl;
 
   for ( PMSelectableVec::iterator it = begin(); it != end(); ++it ) {
@@ -320,7 +353,6 @@ void PMManager::checkPool() const
     } else {
       if ( c->_manager != this )
 	INT << "  wrong manager->" << endl;
-
       c->check();
     }
   }
