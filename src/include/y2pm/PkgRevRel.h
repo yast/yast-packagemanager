@@ -10,17 +10,17 @@ class PkgRevRelation {
 	// somebody asks for the PkgRelation, a faked one is returned.
 
 	const PkgRelation *_relation;
-	const Solvable _pkg;
+	const PMSolvablePtr _pkg;
 
   public:
-	PkgRevRelation( const PkgRelation *r, const Solvable p )
+	PkgRevRelation( const PkgRelation *r, const PMSolvablePtr p )
 		: _relation(r), _pkg(p) {}
 	// default copy constructor and assigment are ok
 
 	const PkgRelation relation() const {
 		return _relation ? *_relation : _pkg->self_provides();
 	}
-	const Solvable pkg() const { return _pkg; }
+	const PMSolvablePtr pkg() const { return _pkg; }
 };
 
 #endif  /* _PkgRevRel_h */
