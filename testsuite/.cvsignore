@@ -9,3 +9,4 @@ tmp.log*
 *.log
 *.sum
 test_rpmdb
+testinstall
