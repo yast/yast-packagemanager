@@ -12,6 +12,7 @@ INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
 		inst/include	\
 		inst/rpm/include\
 		media/include	\
+		query/include	\
 		libPkgDep/include \
 	   ) -I$(includedir)
 
@@ -25,6 +26,7 @@ noinst_PROGRAMS = \
 	test_content	\
 	test_packages	\
 	test_selections	\
+	test_query	\
 	order	\
 	ma_test.exe	\
 	gs_test \
@@ -68,6 +70,10 @@ test_packages_LDFLAGS = -static
 test_selections_SOURCES = test_selections.cc show_pm.cc
 test_selections_LDADD = $(top_builddir)/src/liby2pm.la
 test_selections_LDFLAGS = -static
+
+test_query_SOURCES = test_query.cc show_pm.cc
+test_query_LDADD = $(top_builddir)/src/liby2pm.la
+test_query_LDFLAGS = -static
 
 order_SOURCES = order.cc
 order_LDADD = $(top_builddir)/src/liby2pm.la
