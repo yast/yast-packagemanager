@@ -103,7 +103,7 @@ class PMSolvable : virtual public Rep {
 	{}
 
 	PkgRelation operator* () const {
-	      return pkg ? PkgRelation(pkg->name(), EQ, pkg->edition()) : *iter;
+	      return (pkg!= NULL) ? PkgRelation(pkg->name(), EQ, pkg->edition()) : *iter;
 	}
 
 	Provides_iterator& operator++ () {
@@ -246,6 +246,15 @@ class PMSolvable : virtual public Rep {
     PkgRelation self_provides() const {
       return PkgRelation( _name, EQ, _edition );
     }
+
+    /**
+     * check if Solvable provides a relation
+     *
+     * @param rel Relation to check for
+     *
+     * @return true if this packages provides relation, false otherwise
+     * */
+    bool doesProvide(const PkgRelation& rel) const;
 
     /**
      * access methods for components
