@@ -39,6 +39,9 @@
 #include <y2pm/RpmDb.h>
 #include <y2pm/PkgDep.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/InstTarget.h>
+#include <y2pm/PMPackageManager.h>
+#include <y2pm/PMSelectionManager.h>
 
 #include "show_pm.h"
 

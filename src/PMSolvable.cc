@@ -23,6 +23,7 @@
 #include <y2util/Y2SLog.h>
 
 #include <y2pm/PMSolvable.h>
+#include <y2pm/InstTarget.h>
 #include <Y2PM.h>
 
 using namespace std;

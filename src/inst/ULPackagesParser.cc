@@ -34,6 +34,7 @@
 #include <y2pm/ULPackagesParser.h>
 #include <y2pm/PMULPackageDataProvider.h>
 #include <y2pm/PMULPackageDataProviderPtr.h>
+#include <y2pm/PMPackageManager.h>
 
 #include <y2pm/InstSrcError.h>
 #include <y2pm/MediaAccess.h>

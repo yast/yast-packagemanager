@@ -36,6 +36,7 @@
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMYouPackageDataProvider.h>
 #include <y2pm/PMPackage.h>
+#include <y2pm/PMYouPatchManager.h>
 
 #include <y2pm/PMYouPatchInfo.h>
 

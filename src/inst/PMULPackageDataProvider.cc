@@ -25,6 +25,7 @@
 
 #include <y2pm/PMULPackageDataProvider.h>
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/PMPackageManager.h>
 #include <Y2PM.h>
 
 using namespace std;

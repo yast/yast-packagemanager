@@ -27,6 +27,9 @@
 
 #include <y2pm/PMULSelectionDataProvider.h>
 #include <y2pm/InstData.h>
+#include <y2pm/PMSelection.h>
+#include <y2pm/PMSelectable.h>
+#include <y2pm/PMPackageManager.h>
 
 using namespace std;
 

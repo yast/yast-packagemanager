@@ -29,6 +29,7 @@
 #include <y2pm/PMPackage.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/Query.h>
+#include <y2pm/InstTarget.h>
 
 #include "show_pm.h"
 
