@@ -7,13 +7,15 @@ pkgincludedir = $(includedir)/y2pm
 # these go to $(pkgincludedir)
 
 pkginclude_HEADERS =	\
+	Alternatives.h	\
+	PkgSet.h	\
 	PkgName.h PkgEdition.h PkgRelation.h PkgRevRel.h PkgArch.h	\
-	PkgAttributeValue.h	\
+	PkgAttributeValue.h			\
 	\
-	PMError.h	\
+	PMError.h				\
 	\
 	PMSolvable.h PMSolvablePtr.h	\
-		PMObject.h PMObjectPtr.h	\
+	PMObject.h PMObjectPtr.h	\
 	\
 	PMManager.h	\
 	PMObjectContainerIter.h	\
