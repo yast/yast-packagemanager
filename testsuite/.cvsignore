@@ -14,4 +14,5 @@ testinstall
 test_patchinfo
 test_content
 test_packages
+test_selections
 gs_test
