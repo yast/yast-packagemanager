@@ -60,3 +60,7 @@ PMYouPackageDataProvider::~PMYouPackageDataProvider()
 std::string PMYouPackageDataProvider::location( const PMPackage & pkg_r ) const {
   return _patchInfo->location( mkPtr(pkg_r) );
 }
+
+FSize PMYouPackageDataProvider::size( const PMPackage & pkg_r ) const {
+  return _patchInfo->size( mkPtr(pkg_r) );
+}
