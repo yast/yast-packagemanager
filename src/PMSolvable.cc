@@ -66,7 +66,7 @@ PMSolvable::StringList2PkgRelList ( const list<string>& relationlist,
 	  PkgRelation newrel = PkgRelation::fromString (*it);
 	  // ignore provides/conflicts/obsoletes/requires on own name
 	  if ( forPkg->size() && newrel.name() == forPkg ) {
-	    _INT("DEPCHECK") << forPkg << " self " << kind << ": " << newrel << endl;
+	    _I__("DEPCHECK") << forPkg << " self " << kind << ": " << newrel << endl;
 	  }
 	  else
 	  {
