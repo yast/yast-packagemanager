@@ -330,8 +330,11 @@ PMSelectionManager::activate (PMPackageManager & package_mgr)
     for (PMSelectableVec::const_iterator it = begin();
 	 it != end(); ++it)
     {
-	setSelection ((*it)->candidateObj(), package_mgr);
-	_currently_actives.push_back (*it);
+	if ((*it)->to_install())
+	{
+	    setSelection ((*it)->candidateObj(), package_mgr);
+	    _currently_actives.push_back (*it);
+	}
     }
     MIL << _currently_actives.size() << " are active now" << endl;
 
