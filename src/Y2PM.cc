@@ -714,7 +714,17 @@ static PMError commitInstall( PMPackagePtr pkg_r, bool srcpkg_r, const Pathname 
       break; // canceled
     }
 
+#if 0 // for keepOriginal
+    if ( pkg_r->keepOriginal() ) {
+      unsigned flags = Y2PM::instTarget().getPkgInstFlags();
+      flags |= RpmDb::RPMINST_NOUPGRADE;
+      err = Y2PM::instTarget().installPackage( path_r, flags );
+    } else {
+      err = Y2PM::instTarget().installPackage( path_r );
+    }
+#else
     err = Y2PM::instTarget().installPackage( path_r );
+#endif
     if ( ! err ) {
       if ( srcpkg_r ) {
 	commitSrcSucceeded( pkg_r );
