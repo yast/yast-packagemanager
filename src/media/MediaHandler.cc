@@ -333,8 +333,11 @@ PMError MediaHandler::dirInfo( std::list<std::string> & retlist,
     string line;
     while( getline( dir, line ) ) {
       if ( line == "directory.yast" ) continue;
-      if ( !dots && *line.begin() == '.' ) continue;
-      if ( line == "." ) continue;
+      if ( dots ) {
+        if ( line == "." || line == ".." ) continue;
+      } else {
+        if ( *line.begin() == '.' ) continue;
+      }
       retlist.push_back( line );
     }
     return Error::E_ok;

@@ -38,15 +38,26 @@ int main( int argc, char **argv )
   media.attach();
 
   list<string> files;
+  
+  cout << "Without dots:" << endl;
   err = media.dirInfo( files, dir, false );
   if ( err ) {
     cerr << "Error dirInfo: " << err << endl;
     return 1;
   }
-
   list<string>::const_iterator it;
   for( it = files.begin(); it != files.end(); ++it ) {
-    cout << *it << endl;
+    cout << "  " << *it << endl;
+  }
+
+  cout << "With dots:" << endl;
+  err = media.dirInfo( files, dir, true );
+  if ( err ) {
+    cerr << "Error dirInfo: " << err << endl;
+    return 1;
+  }
+  for( it = files.begin(); it != files.end(); ++it ) {
+    cout << "  " << *it << endl;
   }
 
   MIL << "END" << endl;
