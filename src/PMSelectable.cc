@@ -39,6 +39,119 @@ using namespace std;
 IMPL_BASE_POINTER(PMSelectable);
 
 ///////////////////////////////////////////////////////////////////
+
+#define DEAFAULT_CLISTCOMPARE clistAVS
+
+PMSelectable::ClistCompare PMSelectable::_clistCompare = DEAFAULT_CLISTCOMPARE;
+
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::setCandidateOrder
+//	METHOD TYPE : bool
+//
+bool PMSelectable::setCandidateOrder( PM::CandidateOrder neworder_r )
+{
+  ClistCompare newcomp_r = DEAFAULT_CLISTCOMPARE;
+
+  switch ( neworder_r ) {
+  case PM::CO_AVS:
+    newcomp_r = clistAVS;
+    break;
+  case PM::CO_ASV:
+    newcomp_r = clistASV;
+    break;
+  case PM::CO_DEFAULT:
+    // default
+    break;
+  }
+
+  if ( _clistCompare == newcomp_r )
+    return false;
+
+  _clistCompare = newcomp_r;
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::clistAVS
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION : Compare objects by Arch, Version then instSrc priority.
+//
+bool PMSelectable::clistAVS( const PMObjectPtr & lhs, const PMObjectPtr & rhs )
+{
+  ///////////////////////////////////////////////////////////////////
+  // arch
+  ///////////////////////////////////////////////////////////////////
+  int acmp = PkgArch::compare( lhs->arch(), rhs->arch() );
+  if ( acmp < 0 )
+    return true; // lhs better arch
+
+  if ( acmp == 0 ) {
+    ///////////////////////////////////////////////////////////////////
+    // version
+    ///////////////////////////////////////////////////////////////////
+    if ( lhs->edition() > rhs->edition() )
+      return true; // lhs better version
+
+    if ( lhs->edition() == rhs->edition() ) {
+      ///////////////////////////////////////////////////////////////////
+      // instSrc priority
+      ///////////////////////////////////////////////////////////////////
+      if ( lhs->instSrcRank() < rhs->instSrcRank() )
+	return true; // lhs lower rank -> higher priority
+    }
+  }
+  ///////////////////////////////////////////////////////////////////
+  // ran out of sort criteria
+  ///////////////////////////////////////////////////////////////////
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : PMSelectable::clistASV
+//	METHOD TYPE : bool
+//
+//	DESCRIPTION : Compare objects by Arch, instSrc priority then Version.
+//
+bool PMSelectable::clistASV( const PMObjectPtr & lhs, const PMObjectPtr & rhs )
+{
+  ///////////////////////////////////////////////////////////////////
+  // arch
+  ///////////////////////////////////////////////////////////////////
+  int acmp = PkgArch::compare( lhs->arch(), rhs->arch() );
+  if ( acmp < 0 )
+    return true; // lhs better arch
+
+  if ( acmp == 0 ) {
+    ///////////////////////////////////////////////////////////////////
+    // instSrc priority
+    ///////////////////////////////////////////////////////////////////
+    if ( lhs->instSrcRank() < rhs->instSrcRank() )
+      return true; // lhs lower rank -> higher priority
+
+    if ( lhs->instSrcRank() == rhs->instSrcRank() ) {
+      ///////////////////////////////////////////////////////////////////
+      // version
+      ///////////////////////////////////////////////////////////////////
+      if ( lhs->edition() > rhs->edition() )
+	return true; // lhs better version
+    }
+  }
+  ///////////////////////////////////////////////////////////////////
+  // ran out of sort criteria
+  ///////////////////////////////////////////////////////////////////
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMSelectable::PMSelectable
@@ -225,44 +338,20 @@ void PMSelectable::setInstalledObj( PMObjectPtr obj_r )
 //
 bool PMSelectable::clistIsBetter( const PMObjectPtr & lhs, const PMObjectPtr & rhs )
 {
+  if ( lhs == rhs )
+    return false;
+
   if ( !lhs )
-    return false; // anything better than nothing
+    return false; // any rhs better than nothing
 
   if ( !rhs )
-    return true; // anything better than nothing
+    return true; // any lhs better than nothing
 
-  if ( lhs->prefererCandidate() )
-    return true; // lhs always best.
-
-  if ( rhs->prefererCandidate() )
-    return false; // rhs always best.
-
-  ///////////////////////////////////////////////////////////////////
-  // arch
-  ///////////////////////////////////////////////////////////////////
-  int acmp = PkgArch::compare( lhs->arch(), rhs->arch() );
-  if ( acmp < 0 )
-    return true; // lhs better arch
-
-  if ( acmp == 0 ) {
-    ///////////////////////////////////////////////////////////////////
-    // version
-    ///////////////////////////////////////////////////////////////////
-    if ( lhs->edition() > rhs->edition() )
-      return true; // lhs better version
-
-    if ( lhs->edition() == rhs->edition() ) {
-      ///////////////////////////////////////////////////////////////////
-      // instSrc priority
-      ///////////////////////////////////////////////////////////////////
-      if ( lhs->instSrcRank() < rhs->instSrcRank() )
-	return true; // lhs lower rank -> higher priority
-    }
+  if ( lhs->prefererCandidate() != rhs->prefererCandidate() ) {
+    return lhs->prefererCandidate(); // either lhs or rhs is always best.
   }
-  ///////////////////////////////////////////////////////////////////
-  // ran out of sort criteria
-  ///////////////////////////////////////////////////////////////////
-  return false;
+
+  return _clistCompare( lhs, rhs ); // compare objects
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -51,7 +51,7 @@ Obsoletes:	yast2-agent-ftp-devel
 Provides:	yast2-agent-http-devel
 Obsoletes:	yast2-agent-http-devel
 
-Requires:	rpm-devel >= 4.1.1
+Requires:	rpm-devel >= 4.1.1 liby2util-devel curl-devel openslp-devel openssl-devel
 
 %description devel
 -

@@ -38,6 +38,7 @@
 #include <y2pm/F_Media.h>
 
 #include <y2pm/InstSrc.h>
+#include <y2pm/ProductIdent.h>
 #include <y2pm/PkgRelation.h>
 #include <y2pm/PkgArch.h>
 
@@ -139,10 +140,10 @@ class InstSrcDescr : public CountedRep {
     // content file ( _url / _product_dir / content )
     ///////////////////////////////////////////////////////////////////
 
-    PkgNameEd   _content_product;
-    PkgNameEd   _content_distproduct;
-    PkgNameEd   _content_baseproduct;
-    Vendor      _content_vendor;
+    ProductIdent _content_product;
+    PkgNameEd    _content_distproduct;
+    ProductIdent _content_baseproduct;
+    Vendor       _content_vendor;
 
     std::string _content_defaultbase;
     ArchMap     _content_archmap;
@@ -195,9 +196,9 @@ class InstSrcDescr : public CountedRep {
       F_Media::LabelMap::const_iterator found( _media_labels.find( number_r ) );
       return( found == _media_labels.end() ? F_Media::_noLabel : found->second );
     }
-    const PkgNameEd &    content_product()     const { return _content_product; }
+    const ProductIdent & content_product()     const { return _content_product; }
     const PkgNameEd &    content_distproduct() const { return _content_distproduct; }
-    const PkgNameEd &    content_baseproduct() const { return _content_baseproduct; }
+    const ProductIdent & content_baseproduct() const { return _content_baseproduct; }
     const Vendor &       content_vendor()      const { return _content_vendor; }
     const std::string &  content_defaultbase() const { return _content_defaultbase; }
     const ArchMap &      content_archmap()     const { return _content_archmap; }
@@ -253,9 +254,9 @@ class InstSrcDescr : public CountedRep {
     void set_media_doublesided( bool val_r )                  { _media_doublesided = val_r; }
     void set_media_labels( const F_Media::LabelMap & val_r )  { _media_labels = val_r; }
 
-    void set_content_product( const PkgNameEd & val_r )       { _content_product = val_r; }
+    void set_content_product( const ProductIdent & val_r )    { _content_product = val_r; }
     void set_content_distproduct( const PkgNameEd & val_r )   { _content_distproduct = val_r; }
-    void set_content_baseproduct( const PkgNameEd & val_r )   { _content_baseproduct = val_r; }
+    void set_content_baseproduct( const ProductIdent & val_r ){ _content_baseproduct = val_r; }
     void set_content_vendor( const Vendor & val_r )           { _content_vendor = val_r; }
     void set_content_defaultbase( const std::string & val_r ) { _content_defaultbase = val_r; }
     void set_content_archmap( const ArchMap & val_r )         { _content_archmap = val_r; }
@@ -274,6 +275,22 @@ class InstSrcDescr : public CountedRep {
     void set_content_youpath( const std::string & val_r )     { _content_youpath = val_r; }
 
   public:
+
+    /**
+     * Return whether this is a base product. (it has no baseproduct)
+     **/
+    bool isBaseProduct() const { return _content_baseproduct.undefined(); }
+
+    /**
+     * Return whether this has base product base_r. If base_r is NULL,
+     * whether this is a base product.
+     **/
+    bool hasBaseProduct( const constInstSrcDescrPtr & base_r ) const {
+      if ( base_r ) {
+	return _content_baseproduct.sameProduct( base_r->content_product() );
+      }
+      return isBaseProduct();
+    }
 
     /**
      * Test for equal content_product.

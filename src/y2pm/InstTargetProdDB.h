@@ -61,6 +61,7 @@ class InstTargetProdDB : public CountedRep {
 
     std::map<unsigned,constInstSrcDescrPtr> _prodmap;
     std::list<constInstSrcDescrPtr>         _prodlist;
+    std::list<constInstSrcDescrPtr>         _sortedProdlist;
 
   private:
 
@@ -73,6 +74,8 @@ class InstTargetProdDB : public CountedRep {
 
     PMError     read_db_file( const std::string & fname_r,
 			      unsigned & idx_r, InstSrcDescrPtr & ndescr_r ) const;
+
+    void sortProdlist();
 
   public:
 
@@ -88,7 +91,7 @@ class InstTargetProdDB : public CountedRep {
 
     const Pathname & dbPath() const { return _db; }
 
-    const std::list<constInstSrcDescrPtr> & getProducts() const { return _prodlist; }
+    const std::list<constInstSrcDescrPtr> & getProducts() const { return _sortedProdlist; }
 
   public:
 

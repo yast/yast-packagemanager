@@ -33,7 +33,8 @@ liby2pm_la_SOURCES = \
 	PMManager.cc PMManager_solver.cc	\
 	PMSelectable.cc	SelState.cc \
         PMLocale.cc	\
-        PMLangCode.cc
+        PMLangCode.cc	\
+        ProductIdent.cc
 
 liby2pm_la_LDFLAGS = -version-info 2:0
 

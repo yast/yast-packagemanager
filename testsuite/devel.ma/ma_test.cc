@@ -32,9 +32,14 @@ using namespace std;
 #define SMGR Y2PM::selectionManager()
 #define ISM  Y2PM::instSrcManager()
 
+ostream & operator<<( ostream & str, const PathInfo::direntry & obj ) {
+  str << obj.name << "\t" << obj.type;
+  return str;
+}
+
 template<typename _Ct>
 ostream & operator<<( ostream & str, const list<_Ct> & obj ) {
-  str << '{';
+  str << "[" << obj.size() << "]{";
   for ( typename list<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
     if ( it == obj.begin() )
       str << endl;
@@ -43,10 +48,10 @@ ostream & operator<<( ostream & str, const list<_Ct> & obj ) {
   return str << '}';
 }
 
-template<typename _Ct>
-ostream & operator<<( ostream & str, const set<_Ct> & obj ) {
-  str << '{';
-  for ( typename set<_Ct>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
+template<typename _Ct, class Compare>
+ostream & operator<<( ostream & str, const set<_Ct, Compare> & obj ) {
+  str << "[" << obj.size() << "]{";
+  for ( typename set<_Ct, Compare>::const_iterator it = obj.begin(); it != obj.end(); ++it ) {
     if ( it == obj.begin() )
       str << endl;
     str << "  " << *it << endl;
@@ -151,16 +156,129 @@ ostream & dumpSelWhatIf( ostream & str, bool all = false  )
   return str;
 }
 
+void WAIT() {
+  INT << "WAIT FOR INPUT...." << endl;
+  cout << endl << "GET INPUT: " << flush;
+  string s;
+  cin >> s;
+}
+
+
+InstSrcDescrPtr mkddesc( const ProductIdent & p, const ProductIdent & b ) {
+  InstSrcDescrPtr ret = new InstSrcDescr;
+  ret->set_content_product( p );
+  ret->set_content_baseproduct( b );
+  return ret;
+}
+
+constInstSrcDescrPtr getChild( list<constInstSrcDescrPtr> & src_r, list<constInstSrcDescrPtr> & dst_r,
+			       constInstSrcDescrPtr base_r ) {
+  for ( list<constInstSrcDescrPtr>::iterator it = src_r.begin(); it != src_r.end(); /*++ in loop*/ ) {
+    if ( (*it)->hasBaseProduct( base_r ) ) {
+      constInstSrcDescrPtr ret = *it;
+      dst_r.splice( dst_r.end(), src_r, it );
+      return ret;
+    } else {
+      ++it;
+    }
+  }
+  return 0;
+}
+
+void getTree( list<constInstSrcDescrPtr> & src_r, list<constInstSrcDescrPtr> & dst_r,
+	      constInstSrcDescrPtr base_r )
+{
+  constInstSrcDescrPtr got;
+  while ( (got = getChild( src_r, dst_r, base_r )) ) {
+    getTree( src_r, dst_r, got );
+  }
+}
+
+
+list<constInstSrcDescrPtr> sortProdlist( const list<constInstSrcDescrPtr> & _prodlist ) {
+  list<constInstSrcDescrPtr> _sortedProdlist;
+  /////////////////////////////////////////////////////////////////////////
+  list<constInstSrcDescrPtr> scrlist = _prodlist;
+  list<constInstSrcDescrPtr> dstlist;
+  scrlist.reverse();
+
+  MIL << "SRC   " << scrlist << endl;
+  MIL << "RESLT " << dstlist << endl;
+  INT << "===================================================" << endl;
+
+  getTree( scrlist, dstlist, 0 );
+  MIL << "SRC   " << scrlist << endl;
+  MIL << "RESLT " << dstlist << endl;
+  INT << "===================================================" << endl;
+  getTree( scrlist, dstlist, 0 );
+  MIL << "SRC   " << scrlist << endl;
+  MIL << "RESLT " << dstlist << endl;
+  INT << "===================================================" << endl;
+
+  dstlist.reverse();
+  if ( scrlist.size() ) {
+    WAR << "Found products without existing baseproduct: " << scrlist << endl;
+
+    dstlist.splice( dstlist.end(), scrlist );
+  }
+
+  _sortedProdlist.swap( dstlist );
+  /////////////////////////////////////////////////////////////////////////
+  return _sortedProdlist;
+}
+
 void xx() {
-  PMSelectablePtr s( PMGR["3ddiag"] );
-  DBG << "Sel " << s << endl;
-  if ( !s )
-    return;
-  PMPackagePtr p( s->theObject() );
-  DBG << "Pkg " << p << endl;
-  if ( !p )
-    return;
-  MIL << "Des " << p->description() << endl;
+  PkgNameEd noex ( PkgName("noex"),   PkgEdition("dsf") );
+
+  PkgNameEd none ( PkgName("foo"),    PkgEdition("") );
+  PkgNameEd core ( PkgName("core"),   PkgEdition("9") );
+  PkgNameEd core8( PkgName("core"),   PkgEdition("8") );
+  PkgNameEd sls8 ( PkgName("Sles"),   PkgEdition("8") );
+  PkgNameEd sls9 ( PkgName("sles"),   PkgEdition("9") );
+  PkgNameEd sls93( PkgName("slesSP"), PkgEdition("3") );
+  PkgNameEd sld  ( PkgName("sld"),    PkgEdition("1-1") );
+
+  PkgNameEd foo   ( PkgName("foo"),   PkgEdition("1") );
+  PkgNameEd dummy ( PkgName("dummy"), PkgEdition("2") );
+  PkgNameEd dumm  ( PkgName("noba"),  PkgEdition("99") );
+
+
+  WAR << TMGR.installProduct( mkddesc( sls8, core8 ) ) << endl;
+  INT << TMGR.getProducts() << endl;
+  WAR << TMGR.installProduct( mkddesc( sls9, core ) ) << endl;
+  INT << TMGR.getProducts() << endl;
+  WAR << TMGR.removeProduct( mkddesc( sls9, core ) ) << endl;
+  INT << TMGR.getProducts() << endl;
+  return;
+  list<constInstSrcDescrPtr> prods;
+
+  prods.push_back( mkddesc( sls93,sls9 ) );
+  prods.push_back( mkddesc( sld , core ) );
+  prods.push_back( mkddesc( dumm, noex ) );
+  prods.push_back( mkddesc( sls9, core ) );
+  prods.push_back( mkddesc( sls8, core8 ) );
+  prods.push_back( mkddesc( dummy, foo ) );
+  prods.push_back( mkddesc( core, none ) );
+  prods.push_back( mkddesc( foo,  none ) );
+
+  SEC << prods << endl;
+  SEC << sortProdlist( prods ) << endl;
+}
+
+struct PMSelectionByOrder : public binary_function<PMSelectablePtr, PMSelectablePtr, bool>
+{
+  bool operator()( const PMSelectablePtr & x, const PMSelectablePtr & y ) {
+    return( PMSelection::compareByOrder( x->theObject(), y->theObject() ) < 0 );
+  }
+};
+
+void pcandlog( constPMSelectablePtr p ) {
+  INT << constPMPackagePtr( p->candidateObj() )->source() << endl;
+  INT << "   " << p->candidateObj() << endl;
+  for ( PMSelectable::PMObjectList::const_iterator it = p->av_begin();
+	it != p->av_end(); ++it ) {
+    INT << "      " << *it << endl;
+  }
 }
 
 /******************************************************************
@@ -171,16 +289,15 @@ void xx() {
 **
 **	DESCRIPTION :
 */
-int main()
+int main( int argc, char * argv[] )
 {
   y2error( "xxx" );
   set_log_filename( "-" );
-  MIL << "START" << endl;
+  MIL << "START (" << argc << ")" << endl;
 
-  //Y2PM::setNotRunningFromSystem();
-  //Y2PM::setCacheToRamdisk( false );
-
-  if ( 1 ) {
+  if ( 0 ) {
+    //Y2PM::setNotRunningFromSystem();
+    //Y2PM::setCacheToRamdisk( false );
     //Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
@@ -196,19 +313,71 @@ int main()
     INT << "Total Selections " << SMGR.size() << endl;
   }
 
-  MIL << PMGR.updateDu() << endl;
-  unsigned srccnt = 0;
-  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
-    if ( (*it)->set_source_install( true ) ) {
-      ++srccnt;
-    }
-    if ( (*it)->providesSources() && ! (*it)->source_install() ) {
-      WAR << "set_source_install error" << endl;
-    }
-  }
-  SEC << "srccnt " << srccnt << endl;
-  MIL << PMGR.updateDu() << endl;
+  Y2PM::packageManager();
+  Y2PM::selectionManager();
 
+  Pathname localp;
+  Y2PM::instTargetInit("/");
+  Y2PM::instSrcManager();
+
+  pcandlog( PMGR["3ddiag"] );
+  pcandlog( PMGR["rpm"] );
+
+
+#if 0
+  Y2PM::setNotRunningFromSystem();
+
+  PMPackagePtr pkg ( PMGR["3ddiag"]->candidateObj() );
+  INT << pkg->providePkgToInstall( localp ) << endl;
+  INT << localp << endl;
+
+  pkg = PMGR["rpm"]->candidateObj();
+  INT << pkg->providePkgToInstall( localp ) << endl;
+  INT << localp << endl;
+
+
+
+#endif
+  ISM.disableAllSources();
+  Y2PM::instTargetClose();
+
+#if 0
+  PMError err;
+  //Url mediaurl_r( "ftp://schnell/CD-ARCHIVE/9.0/SuSE-9.0-FTP-i386-RC1" );
+  //Url mediaurl_r( "ftp://machcd2/CDs/SuSE-9.1-DVD-i386-RC2/CD1" );
+  Url mediaurl_r( "/tmp/isrc" );
+  MediaAccessPtr  media = new MediaAccess;
+  if ( (err = media->open( mediaurl_r )) ) {
+    ERR << "Failed to open " << mediaurl_r << " " << err << endl;
+    return err;
+  }
+  if ( (err = media->attach()) ) {
+    ERR << "Failed to attach media: " << err << endl;
+    return err;
+  }
+
+  INT << media << endl;
+
+  PathInfo::dircontent content;
+  if ( (err = media->dirInfo( content, "" )) ) {
+    ERR << "Failed dirInfo: " << err << endl;
+    return err;
+  }
+
+  MIL << content << endl;
+
+  if ( (err = media->provideDir( "" )) ) {
+    ERR << "Failed to provideDir: " << err << endl;
+    return err;
+  }
+
+  //if ( (err = media->provideFile( "media.1/media" )) ) {
+  //  ERR << "Failed to provideFile: " << err << endl;
+  //}
+  int i;
+  cout << "get:" << endl;
+  cin >> i;
+#endif
 
 #if 0
   MIL << "=========================" << endl;
@@ -228,5 +397,4 @@ int main()
   SEC << "STOP" << endl;
   return 0;
 }
-
 

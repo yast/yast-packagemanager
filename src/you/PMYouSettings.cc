@@ -168,6 +168,29 @@ Pathname PMYouSettings::pathPrefix()
   return _pathPrefix;
 }
 
+void PMYouSettings::filterExclusiveProducts( const list<string> &exclusiveProducts )
+{
+  if ( exclusiveProducts.empty() ) return;
+
+  DBG << "Filter exclusive products" << endl;
+
+  std::list<PMYouProductPtr>::iterator it = _products.begin();
+  while( it != _products.end() ) {
+    string product = (*it)->product() + "-" + (*it)->version();
+    list<string>::const_iterator it2;
+    for( it2 = exclusiveProducts.begin(); it2 != exclusiveProducts.end();
+         ++it2 ) {
+       if ( product == *it2 ) break;
+    }
+    if ( it2 == exclusiveProducts.end() ) {
+      DBG << "Remove product " << product << endl;
+      it = _products.erase( it );
+    } else {
+      ++it;
+    }
+  }
+}
+
 void PMYouSettings::setPatchServer( const PMYouServer &server )
 {
   _patchServer = server;
@@ -204,8 +227,8 @@ Pathname PMYouSettings::localWriteDir()
   if ( getuid() == 0 ) {
     return localDir();
   } else {
-    string user = getpwuid( getuid() )->pw_name;
-    Pathname path = "/var/tmp/you-" + user;
+    string homedir = getpwuid( getuid() )->pw_dir;
+    Pathname path = homedir + "/.yast2/you";
     int err = PathInfo::assert_dir( path );
     if ( err ) {
       ERR << "Unable to assert '" << path << "' errno: " << err << endl;

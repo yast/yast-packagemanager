@@ -1,14 +1,144 @@
 -------------------------------------------------------------------
-Thu Apr 15 09:14:19 CEST 2004 - nashif@suse.de
+Tue Jun 15 11:54:05 CEST 2004 - lnussel@suse.de
 
-- #38391: fix for http/ftp installation of multiple sources 
+- fix selection delpacks (#40589)
+- 2.9.51
+
+-------------------------------------------------------------------
+Fri Jun  4 16:09:34 CEST 2004 - lnussel@suse.de
+
+- store temporary downloads in /var/adm/YaST (#41650)
+- 2.9.50
+
+-------------------------------------------------------------------
+Thu Jun  3 17:55:55 CEST 2004 - ma@suse.de
+
+- Ability to configure a different candidate selection algorithm
+  uprating the InstSrc priority. (#34536)
+- 2.9.49
+
+-------------------------------------------------------------------
+Fri May 28 22:19:13 CEST 2004 - ma@suse.de
+
+- On installation/update via FTP/HTTP try to avoid downloading
+  packages into the ramdisk. Use the systems Harddisk if it's
+  accessible. (#38633)
+- 2.9.48
+
+-------------------------------------------------------------------
+Thu May 27 17:21:04 CEST 2004 - ma@suse.de
+
+- /var/log/YaST2/y2logRPM: Write timestamps (#34781) and provide more
+  rpm installation error details (#37529 as far as packagemanager is
+  concerned).
+- 2.9.47
+
+-------------------------------------------------------------------
+Tue May 25 17:20:33 CEST 2004 - ma@suse.de
+
+- Check package digest immediately after download. So one may retry
+  the download, if a package got corrupted during transfer. (#31632)
+- 2.9.46
+
+-------------------------------------------------------------------
+Tue May 25 14:58:02 CEST 2004 - cschum@suse.de
+
+- YOU: Add support for updates from Patch CDs containing only a subset
+  of installed products. (#40852)
+- 2.9.45
+
+-------------------------------------------------------------------
+Fri May 21 18:51:33 CEST 2004 - ma@suse.de
+
+- Final attempt to get slide show data (#38708)
+- 2.9.44
+
+-------------------------------------------------------------------
+Wed May 12 11:59:38 CEST 2004 - ma@suse.de
+
+- Equality of certain product names must be taken into account
+  whenever product names are compared. (clean fix for #39520)
+- List of installed products (from ProdDB) is now sorted with
+  respect to product/baseproduct relation. Installation time is
+  not reliable, as it's not under control of the packagemanager.
+  (#38963)
+- Fixed handling of language dependent selection packages when
+  requested locales change.
+- 2.9.43
+
+-------------------------------------------------------------------
+Thu Apr 29 14:42:33 CEST 2004 - cschum@suse.de
+
+- Consider "SuSE SLES" and "SUSE SLES" to be the same product.
+- Consider "UnitedLinux" and "SUSE CORE" to be the same product.
+- Partly fixes #39520.
+- 2.9.42
+
+-------------------------------------------------------------------
+Wed Apr 28 17:20:13 CEST 2004 - cschum@suse.de
+
+- Add options to online_update command to select patches to be
+  installed and to show installed patches.
+- Replace ' ' by '-' in product name when constructing YOU path
+  from product name so that the path matches the one on the server.
+
+-------------------------------------------------------------------
+Sat Apr 24 00:01:58 CEST 2004 - ma@suse.de
+
+- Don't erase a deleted InstSrc cache if media unmount failed.
+  (#29540)
+- 2.9.41
+
+-------------------------------------------------------------------
+Fri Apr 23 13:01:20 CEST 2004 - ma@suse.de
+
+- MediaCD: For url protocol 'dvd:' use /dev/dvd as default device.
+  (#37229)
+
+-------------------------------------------------------------------
+Thu Apr 22 23:35:17 CEST 2004 - ma@suse.de
+
+- When adding a new InstSource prepare the data cache and release
+  the media after this. (#38347)
+- 2.9.40
+
+-------------------------------------------------------------------
+Thu Apr 22 17:24:43 CEST 2004 - ma@suse.de
+
+- Prepare code for upcoming new directory.yast format.
+
+-------------------------------------------------------------------
+Thu Apr 15 17:13:58 CEST 2004 - cschum@suse.de
+
+- Correctly identify "SUSE LINUX" as non-business product, so that
+  YOU server synchronisation for this product uses the correct path.
+
+-------------------------------------------------------------------
+Thu Apr 15 09:40:31 CEST 2004 - nashif@suse.de
+
+- #38391: Hotfix for http/ftp installation of multiple sources
   (SLES/CORE)
-- 2.9.35
+
+-------------------------------------------------------------------
+Wed Apr  7 16:56:36 CEST 2004 - cschum@suse.de
+
+- Consider "SuSE Linux" and "SUSE LINUX" to be the same product, so
+  that the 9.0 product information is deleted when doing an upate
+  to 9.1.
+- 2.9.37
 
 -------------------------------------------------------------------
 Tue Apr  6 22:38:59 CEST 2004 - ma@suse.de
 
 - Install y2pmrc in system after installation/update.
+- 2.9.36
+
+-------------------------------------------------------------------
+Tue Apr  6 10:51:40 CEST 2004 - cschum@suse.de
+
+- YOU: Write to home directory instead of /var/tmp when running as
+  user. (#38431)
+  2.9.35
 
 -------------------------------------------------------------------
 Mon Apr  5 21:13:53 CEST 2004 - ma@suse.de

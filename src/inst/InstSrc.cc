@@ -34,6 +34,7 @@
 #include <Y2PM.h>
 #include <y2pm/Timecount.h>
 
+#include <y2pm/InstTarget.h>
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcError.h>
 #include <y2pm/InstSrcManagerCallbacks.h>
@@ -44,6 +45,8 @@
 #include <y2pm/InstSrcData.h>
 #include <y2pm/InstSrcDataUL.h>
 #include <y2pm/InstSrcDataPLAIN.h>
+
+#include <y2pm/RpmHeader.h>
 
 using namespace std;
 using namespace InstSrcManagerCallbacks;
@@ -99,7 +102,12 @@ InstSrc::~InstSrc()
   if ( _media )
   {
     _media->release();
-    _media->close();
+    if ( _media->close() ) {
+      if ( _cache_deleteOnExit ) {
+	ERR << "Media close failed! Can't delete cache!" << endl;
+      }
+      return;
+    }
   }
 
   if ( _cache_deleteOnExit ) {
@@ -568,6 +576,16 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
 
     _descr = ndescr;
     MIL << "Found InstSrc " << _descr << endl;
+
+#warning Fix setup of source data
+    if ( Y2PM::runningFromSystem() && ctype == T_UnitedLinux ) {
+      PathInfo cpath( cache_data_dir() );
+      MIL << "Try to load cache " << cpath << endl;
+      if ( cpath.isDir() ) {
+	InstSrcDataUL::initDataCache( cpath.path(), this );
+      }
+      _media->release();
+    }
   }
 
   return err;
@@ -875,16 +893,49 @@ InstSrc::providePackage (int medianr, const Pathname& name, const Pathname& dir,
 	return err;
 
     Pathname filename = _descr->datadir() + dir + name;
-    err = _media->provideFile (filename);
+
+    MediaAccessPtr theMedia( _media );
+
+    if ( ! Y2PM::runningFromSystem() && isRemote() && Y2PM::instTarget().initialized() ) {
+      // A little bit different handling for ftp/http
+      // during installation/update. Try not to download
+      // into the ramdisk, but use tmp dir on the harddisk.
+      PathInfo tmpdir( Y2PM::instTarget().rootdir() + "/var/adm/YaST/InstSrcManager/tmp" );
+
+      if ( ! tmpdir.isDir() ) {
+	PathInfo::assert_dir( tmpdir.path() );
+	tmpdir(); // (re)stat
+      }
+
+      if ( tmpdir.isDir() ) {
+	theMedia = new MediaAccess;
+	if ( theMedia->open( _media->url(), tmpdir.path() ) || theMedia->attach() ) {
+	  // error, so we try it the common way
+	  theMedia = _media;
+	}
+      }
+    }
+
+    err = theMedia->provideFile( filename );
 
     if (err != PMError::E_ok)
     {
-	ERR << "Media can't provide '" << dir+name << "': " << err << endl;
+ 	ERR << "Media can't provide '" << dir+name << "': " << err << endl;
 	path_r = filename;		// pass back complete filename of missing package
 	return err;
     }
 
-    path_r = _media->localPath (filename);
+    path_r = theMedia->localPath( filename );
+
+    if ( isRemote() && ! RpmHeader::readPackage( path_r, /*checkDigest*/true ) ) {
+      err = Error::E_corupted_file;
+      err.setDetails( (dir+name).asString() );
+      PathInfo::unlink( path_r );
+      ERR << "Bad digest '" << path_r << "': " << err << endl;
+      path_r = filename;		// pass back complete filename of missing package
+      return err;
+    }
+
     rememberPreviouslyDnlPackage( path_r ); // Hack not to keep more than one downloaded package
 
     return PMError::E_ok;

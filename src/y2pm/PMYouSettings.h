@@ -97,6 +97,12 @@ class PMYouSettings : public CountedRep
     Pathname pathPrefix();
 
     /**
+      Filter exclusive products. Remove all products which are not contained in
+      the argument list. If the list is empty no products are removed.
+    */
+    void filterExclusiveProducts( const std::list<std::string> & );
+
+    /**
       Set patch server where patches are read from.
     */
     void setPatchServer( const PMYouServer & );

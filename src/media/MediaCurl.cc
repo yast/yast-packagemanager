@@ -364,6 +364,49 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : MediaCurl::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached
+//
+PMError MediaCurl::getDir( const Pathname & dirname ) const
+{
+  PathInfo::dircontent content;
+  PMError err = getDirInfo( content, dirname, /*dots*/false );
+
+  if ( ! err ) {
+    for ( PathInfo::dircontent::const_iterator it = content.begin(); it != content.end(); ++it ) {
+      Pathname filename = dirname + it->name;
+      int res = 0;
+
+      switch ( it->type ) {
+      case PathInfo::NOT_AVAIL: // old directory.yast contains no typeinfo at all
+      case PathInfo::T_FILE:
+	err = getFile( filename );
+	break;
+      case PathInfo::T_DIR: // newer directory.yast contain at least directory info
+	res = PathInfo::assert_dir( localPath( filename ) );
+	if ( res ) {
+	  WAR << "Ignore error (" << res <<  ") on creating local directory '" << localPath( filename ) << "'" << endl;
+	}
+	break;
+      default:
+	// don't provide devices, sockets, etc.
+	break;
+      }
+
+      if ( err ) {
+	break;
+      }
+    }
+  }
+
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : MediaCurl::getDirInfo
 //	METHOD TYPE : PMError
 //
@@ -372,7 +415,29 @@ PMError MediaCurl::getFile( const Pathname & filename ) const
 PMError MediaCurl::getDirInfo( std::list<std::string> & retlist,
 			       const Pathname & dirname, bool dots ) const
 {
-  return Error::E_not_supported_by_media;
+  PMError err = getDirectoryYast( retlist, dirname, dots );
+  if ( err ) {
+    err = Error::E_not_supported_by_media;
+  }
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : MediaCurl::getDirInfo
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
+//
+PMError MediaCurl::getDirInfo( PathInfo::dircontent & retlist,
+			       const Pathname & dirname, bool dots ) const
+{
+  PMError err = getDirectoryYast( retlist, dirname, dots );
+  if ( err ) {
+    err = Error::E_not_supported_by_media;
+  }
+  return err;
 }
 
 ///////////////////////////////////////////////////////////////////

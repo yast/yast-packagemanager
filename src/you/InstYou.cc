@@ -414,7 +414,7 @@ PMError InstYou::processPatches()
     if ( !preInfo.empty() ) {
       if ( !hasPreInformation ) {
         hasPreInformation = true;
-        log( _("Show pre-installation messages...\n") );
+        log( _("Show Preinstallation Messages...\n") );
       }
       list<PMYouPatchPtr> patches;
       patches.push_back( patch );
@@ -576,7 +576,7 @@ PMError InstYou::processPatches()
     }
   }
   if ( !patches.empty() ) {
-    log( _("Show post-installation messages...\n") );
+    log( _("Show Postinstallation Messages...\n") );
     PMError callbackError = showMessage( "postinfo", patches );
   }
 
@@ -1682,7 +1682,7 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
         log( _("Ok.\n") );
         // retry
       } else if ( result == "I" ) {
-        log( _("Ignore.\n" ) );
+        log( _("Ignore.\n") );
         // Ignore bad media id
         break;
       } else if ( result == "S" ) {

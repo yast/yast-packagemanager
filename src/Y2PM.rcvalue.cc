@@ -127,6 +127,7 @@ struct Y2pmRc : public RcValues, public TextParser {
     RC_VERSION,
     // data
     REQUESTEDLOCALES,
+    CANDIDATEORDER,
     // last entry:
     NUM_TAGS
   };
@@ -145,6 +146,7 @@ struct Y2pmRc : public RcValues, public TextParser {
 
     // data
     _tagset.addTag( "requestedLocales",	REQUESTEDLOCALES,	TaggedFile::MULTI );
+    _tagset.addTag( "candidateOrder",	CANDIDATEORDER,		TaggedFile::SINGLE );
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -182,6 +184,10 @@ struct Y2pmRc : public RcValues, public TextParser {
       // data
       case REQUESTEDLOCALES:
 	assignValue( cache, *tg, rcValues_r.requestedLocales );
+	break;
+
+      case CANDIDATEORDER:
+	assignValue( cache, *tg, rcValues_r.candidateOrder );
 	break;
 
       // last entry:
@@ -227,6 +233,10 @@ struct Y2pmRc : public RcValues, public TextParser {
       // data
       case REQUESTEDLOCALES:
 	writeValue( rcstream_r, *tg, rcValues_r.requestedLocales );
+	break;
+
+      case CANDIDATEORDER:
+	writeValue( rcstream_r, *tg, rcValues_r.candidateOrder );
 	break;
 
       // last entry:
@@ -415,6 +425,7 @@ PMError Y2PM::rcInit()
 
   // postprocess
   if ( runningFromSystem() ) {
+
     if ( rcfile.empty() ) {
       // Writing an initial rcfile:
 
@@ -429,11 +440,18 @@ PMError Y2PM::rcInit()
       MIL << "Writing initial rcfile..." << endl;
       rcSave();
     }
-  } else {
+
+  } else { // installation/update
+
     // Disable automated writing to system. If new settings are to be copied
     // to the system, it's done at the end when updating the InstSrces.
     _yp2pmrc._rcfile = Pathname();
+
+    // Assert that the DEFAULT ordering is used.
+    _yp2pmrc.candidateOrder = PM::CO_DEFAULT;
   }
+
+  Y2PM::setCandidateOrder( _yp2pmrc.candidateOrder );
 
   return err;
 }

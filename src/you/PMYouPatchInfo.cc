@@ -653,6 +653,14 @@ PMError PMYouPatchInfo::processMediaDir()
         D__ << "Prefix: " << prefix << endl;
 
         _settings->setPathPrefix( prefix );
+
+        list<string> exclusiveProducts;
+        while( getline( in, line ) ) {
+          if ( !line.empty() && (*line.begin() != '#') ) {
+            exclusiveProducts.push_back( line );
+          }
+        }
+        _settings->filterExclusiveProducts( exclusiveProducts );
     }
     
     media.release();

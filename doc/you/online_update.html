@@ -140,12 +140,32 @@ to <tt>/var/lib/YaST2/you/files/pub/suse/myfile.txt</tt>.
 <tt>directory.3</tt> from the URL constructed from the base URL by adding the product
 specific path and the </tt>patches</tt> directory. The <tt>directory.3</tt> file contains a
 list of filenames which have to be present in the same directory. Patches are downloaded
-and installed in the order of the names in this file. If more than one product is installed
-patches for each product are downloaded and installed. Products are handled in the order of their
-installation which goes from the less specific to the more specific one.</p>
+and installed in the order of the names in this file.</p>
 
 <p>All files downloaded from the server are checked for valid signatures.</p>
 
+<h4>Multiple products</h4>
+
+<em>Multiple products are supported since 9.1/SLES 9</em>
+
+<p>If more than one product is installed
+patches for each product are downloaded and installed. Products are handled in the order of their
+installation which goes from the less specific to the more specific one.</p>
+
+<p>Normally there need to be update directories available for all installed
+products. If there are no patches for a given product the patch list in the
+<tt>directory.3</tt> file has to be empty. If the patch list for a product is
+missing YOU reports that as an error and aborts. There are two exceptions to
+that rule:</p>
+
+<ul>
+<li>If a product is marked with the <tt>noyou</tt> flag in the product content
+file (see YaST media specification) it is ignored for the update.</li>
+<li>If the <tt>patches</tt> file in the <tt>media.1</tt> directory contains a
+list of products (see YaST media specification), only products which are
+installed and contained in this list are used for updating. All other products
+are ignored.</li>
+</ul>
 
 <h3>Filename of the patch description files</h3>
 

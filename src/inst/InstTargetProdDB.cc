@@ -147,6 +147,79 @@ PMError InstTargetProdDB::read_db_file( const string & fname_r,
   return Error::E_ok;
 }
 
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : getChild
+**	FUNCTION TYPE : constInstSrcDescrPtr
+**
+** Lookup a product based on base_r (or a core product if base_r is 0),
+** remove it from src_r, append it to dst_r.
+*/
+inline constInstSrcDescrPtr getChild( list<constInstSrcDescrPtr> & src_r,
+				      list<constInstSrcDescrPtr> & dst_r,
+				      constInstSrcDescrPtr base_r )
+{
+  for ( list<constInstSrcDescrPtr>::iterator it = src_r.begin(); it != src_r.end(); /*++ in loop*/ ) {
+    if ( (*it)->hasBaseProduct( base_r ) ) {
+      constInstSrcDescrPtr ret = *it;
+      dst_r.splice( dst_r.end(), src_r, it );
+      return ret;
+    } else {
+      ++it;
+    }
+  }
+  return 0;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : getTree
+**	FUNCTION TYPE : void
+**
+** Recursive lookup products based on base_r (or core products if base_r is 0),
+** and move them from src_r to dst_r (deep first).
+*/
+inline void getTree( list<constInstSrcDescrPtr> & src_r, list<constInstSrcDescrPtr> & dst_r,
+		     constInstSrcDescrPtr base_r )
+{
+  constInstSrcDescrPtr got;
+  while ( (got = getChild( src_r, dst_r, base_r )) ) {
+    getTree( src_r, dst_r, got );
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstTargetProdDB::sortProdlist
+//	METHOD TYPE : void
+//
+#warning fix ProdDB handling
+void InstTargetProdDB::sortProdlist()
+{
+  _sortedProdlist.clear();
+
+  list<constInstSrcDescrPtr> scrlist = _prodlist;
+  scrlist.reverse(); // oldest products first
+  list<constInstSrcDescrPtr> dstlist;
+
+  // collect trees of all existing core products
+  getTree( scrlist, dstlist, 0 );
+
+  dstlist.reverse(); // oldest products last
+
+  if ( scrlist.size() ) {
+    // place them at the verry end
+    dstlist.splice( dstlist.end(), scrlist );
+  }
+
+  _sortedProdlist.swap( dstlist );
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -223,7 +296,6 @@ PMError InstTargetProdDB::open( const Pathname & system_root_r )
   if ( !err ) {
     for ( map<unsigned,constInstSrcDescrPtr>::const_iterator it = _prodmap.begin();
 	  it != _prodmap.end(); ++ it ) {
-      DBG << *this << ": [" << it->first << "] " << it->second << endl;
       _prodlist.push_front( it->second ); // reversed by id
     }
     _nextIdx = ( _prodmap.empty() ? 1 : _prodmap.rbegin()->first + 1 );
@@ -233,7 +305,15 @@ PMError InstTargetProdDB::open( const Pathname & system_root_r )
     _prodlist.clear();
     ERR << *this << " open failed" << endl;
   }
-
+  sortProdlist(); // after manipulation
+  {
+    unsigned idx = 1;
+    for ( list<constInstSrcDescrPtr>::const_iterator it = _sortedProdlist.begin();
+	  it != _sortedProdlist.end(); ++it, ++idx ) {
+      MIL << "[" << idx << "] " << (*it)->content_product()
+	<< " (based on: " << (*it)->content_baseproduct() << ")" << endl;
+    }
+  }
   return err;
 }
 
@@ -333,15 +413,14 @@ PMError InstTargetProdDB::install( const constInstSrcDescrPtr & isd_r )
     DBG << *this << ":i[" << _nextIdx << "] " << ndescr << endl;
     _prodlist.push_front( ndescr ); // reversed by id
     ++_nextIdx;
-
+    sortProdlist(); // after manipulation
     MIL << *this << " installed " << isd_r << endl;
   }
 
   // look for other versions of this product
   list<constInstSrcDescrPtr> dellist;
   for ( list<constInstSrcDescrPtr>::const_iterator it = _prodlist.begin(); it != _prodlist.end(); ++it ) {
-    if (    (*it)->content_product().name   == isd_r->content_product().name
-	 && (*it)->content_product().edition != isd_r->content_product().edition ) {
+    if ( isd_r->content_product().obsoletes( (*it)->content_product() ) ) {
       dellist.push_back( *it );
     }
   }
@@ -397,6 +476,7 @@ PMError InstTargetProdDB::remove( const constInstSrcDescrPtr & isd_r )
       }
       // finaly from _prodmap
       _prodmap.erase( it );
+      sortProdlist(); // after manipulation
       break;
     }
   }

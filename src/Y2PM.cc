@@ -121,6 +121,34 @@ PMError Y2PM::requestedLocalesChanged( const LocaleSet & addLocales_r, const Loc
 }
 
 ///////////////////////////////////////////////////////////////////
+//
+// package/selection candidate selection
+//
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : Y2PM::setCandidateOrder
+//	METHOD TYPE : PMError
+//
+PMError Y2PM::setCandidateOrder( PM::CandidateOrder neworder_r )
+{
+  MIL << "setCandidateOrder " << neworder_r << endl;
+  if ( PMSelectable::setCandidateOrder( neworder_r ) ) {
+    // order actually changed -> sort candidate lists
+    PM::rcValues().candidateOrder = neworder_r;
+    if ( _packageManager ) {
+      packageManager().poolSortCandidates();
+    }
+    if ( _selectionManager ) {
+      selectionManager().poolSortCandidates();
+    }
+  }
+  return PMError::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
 // packageSelection [package/selectionManager]
 ///////////////////////////////////////////////////////////////////
 

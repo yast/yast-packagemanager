@@ -94,6 +94,17 @@ PMError MediaDIR::getFile( const Pathname & filename ) const
   return MediaHandler::getFile( filename );
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : MediaDIR::getDir
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION : Asserted that media is attached.
+//
+PMError MediaDIR::getDir (const Pathname & dirname) const
+{
+  return MediaHandler::getDir( dirname );
+}
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -109,40 +120,16 @@ PMError MediaDIR::getDirInfo( std::list<std::string> & retlist,
   return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
 
-#if 0
 ///////////////////////////////////////////////////////////////////
 //
 //
-//	METHOD NAME : MediaDIR::findFile
+//	METHOD NAME : MediaDIR::getDirInfo
 //	METHOD TYPE : PMError
 //
-//	DESCRIPTION :
-//	find file denoted by pattern
-//	filename is interpreted relative to the attached url
+//	DESCRIPTION : Asserted that media is attached and retlist is empty.
 //
-//	pattern is a string with an optional trailing '*'
-//
-const Pathname *
-MediaDIR::findFile (const Pathname & dirname, const string & pattern) const
+PMError MediaDIR::getDirInfo( PathInfo::dircontent & retlist,
+			   const Pathname & dirname, bool dots ) const
 {
-    return scanDirectory (dirname, pattern);
+  return MediaHandler::getDirInfo( retlist, dirname, dots );
 }
-
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : MediaDIR::getInfo
-//	METHOD TYPE : const PathInfo *
-//
- //	DESCRIPTION :
-//	get file information
-
-const PathInfo *
-MediaDIR::fileInfo (const Pathname & filename) const
-{
-    // no retrieval needed, DIR is mounted at destination
-    return new PathInfo (filename);
-}
-
-#endif

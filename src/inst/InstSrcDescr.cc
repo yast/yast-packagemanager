@@ -65,9 +65,7 @@ InstSrcDescr::InstSrcDescr()
     , _default_rank       ( NO_RANK )
     , _media_count        ( 0 )
     , _media_doublesided  ( false )
-    , _content_product    ( PkgName(), PkgEdition() )
     , _content_distproduct( PkgName(), PkgEdition() )
-    , _content_baseproduct( PkgName(), PkgEdition() )
     , _content_requires   ( PkgName(), NONE, PkgEdition() )
 {
 }
@@ -122,7 +120,7 @@ bool InstSrcDescr::sameContentProduct( const constInstSrcDescrPtr & rhs,
     return true;
   if ( ! ( rhs && lhs ) )
     return false;
-  return( rhs->content_product() == lhs->content_product() );
+  return rhs->content_product().sameProduct( lhs->content_product() );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -211,9 +209,9 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
 
   // product data from content file
   str << "+" << ProductTag << ":" << endl;
-  str << PkgNameEd::toString(_content_product) << endl;
+  str << ProductIdent::toString(_content_product) << endl;
   str << PkgNameEd::toString(_content_distproduct) << endl;
-  str << PkgNameEd::toString(_content_baseproduct) << endl;
+  str << ProductIdent::toString(_content_baseproduct) << endl;
   str << _content_vendor << endl;
   str << "-" << ProductTag << ":" << endl;
 

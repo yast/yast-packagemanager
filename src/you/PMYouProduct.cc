@@ -51,7 +51,7 @@ PMYouProduct::PMYouProduct( const constInstSrcDescrPtr &descr,
                             PMYouSettings &settings )
   : _productDescr( descr ), _settings( settings )
 {
-  PkgNameEd prodEd = descr->content_product();
+  PkgNameEd prodEd = descr->content_product().asPkgNameEd();
 
   string product = prodEd.name;
   string version = prodEd.edition.version();
@@ -126,11 +126,17 @@ void PMYouProduct::init( const string &product, const string &version,
   _version = version;
   _baseArch = PkgArch( baseArch );
 
-  _businessProduct = ( product != "SuSE-Linux" );
+  _businessProduct = ( product != "SuSE-Linux" && product != "SuSE Linux" &&
+                       product != "SUSE LINUX" );
+
+  string pathproduct = _product;
+  for( uint i = 0; i < pathproduct.length(); ++i ) {
+    if ( pathproduct[ i ] == ' ' ) pathproduct[ i ] = '-';
+  }
 
   string path = baseArch + "/update/";
   if ( _businessProduct  ) {
-    path += product + "/";
+    path += pathproduct + "/";
   }
   path += version;
 
