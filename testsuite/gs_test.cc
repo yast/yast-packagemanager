@@ -38,7 +38,7 @@ int main()
     descr->set_type( type );
     descr->set_media_vendor( string( "SuSE" ) );
     descr->set_media_id( string( "12432" ) );
-    descr->set_media_count( string( "7" ) );
+    descr->set_media_count( 7 );
     descr->set_url( url ); 
     MIL << "URL: " << url << endl;
     MIL << "TYPE: " << descr->type() << endl;
