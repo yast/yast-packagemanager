@@ -1379,3 +1379,47 @@ PMError InstSrcDataUL::loadObjects()
 #endif
 }
 
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::writeCache
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcDataUL::writeCache( const Pathname & cache_dir_r ) const
+{
+  PathInfo destdir( cache_dir_r );
+  if ( !destdir.isDir() ) {
+    WAR << "Cache disabled: cachedir does not exist: " << destdir << endl;
+    return Error::E_ok;
+  }
+
+  destdir( cache_dir_r + "descr" );
+  if ( destdir.isExist() ) {
+    MIL << "Cache data already exist: " << destdir << endl;
+    return Error::E_ok;
+  }
+
+  if ( !attached() || !_instSrc->media() || !_instSrc->media()->isOpen() ) {
+    ERR << "Not attached to InstSrc or instSrc media not open" << endl;
+    return Error::E_error;
+  }
+
+  // uggly: missing provide stuff...
+  PathInfo srcdir( _instSrc->media()->localPath( _instSrc->descr()->descrdir() ) );
+  if ( !srcdir.isDir() ) {
+    ERR << "Cannot access descr dir on media: " << srcdir << endl;
+    return Error::E_error;
+  }
+
+  int ret = PathInfo::copy_dir( srcdir.path(), cache_dir_r );
+  if ( ret ) {
+    ERR << "Copy cache data failed: copyDir returned " << ret << endl;
+    return Error::E_error;
+  }
+
+  MIL << *this << " wrote cache " << cache_dir_r << endl;
+  return Error::E_ok;
+}
+
