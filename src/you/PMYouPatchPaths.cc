@@ -136,6 +136,7 @@ PMError PMYouPatchPaths::initProduct()
   string youUrl = descr->content_youurl();
   string youType = descr->content_youtype();
   string youPath = descr->content_youpath();
+  _distProduct = descr->content_distproduct().asString();
 
   DBG << "Product Name: " << product << endl;
   DBG << "Prpduct Version: " << version << endl;
@@ -143,6 +144,7 @@ PMError PMYouPatchPaths::initProduct()
   DBG << "YouUrl: " << youUrl << endl;
   DBG << "YouType: " << youType << endl;
   DBG << "YouPatch: " << youPath << endl;
+  DBG << "DistProduct: " << _distProduct << endl;
 
   if ( youPath.empty() ) {
     init( product, version, baseArch );
@@ -262,6 +264,11 @@ string PMYouPatchPaths::product()
   return _product;
 }
 
+string PMYouPatchPaths::distProduct()
+{
+  return _distProduct;
+}
+
 string PMYouPatchPaths::version()
 {
   return _version;
@@ -301,41 +308,11 @@ PMError PMYouPatchPaths::requestServers( const string &u )
       if ( businessProduct() ) url += "1";
       else url += "0";
 
-      PMSelectablePtr selectable = Y2PM::packageManager().getItem( "yast2-online-update" );
-      if ( !selectable ) {
-        WAR << "yast2-online-update not installed." << endl;
-      } else {
-        PMPackagePtr pkg = selectable->installedObj();
-        if ( !pkg ) {
-          WAR << "No installed object for yast2-online-update" << endl;
-        } else {
-          url += "&yast2-online-update=" + pkg->edition().asString();
-        }
-      }
+      url += "&distproduct=" + distProduct();
 
-      selectable = Y2PM::packageManager().getItem( "yast2-packagemanager" );
-      if ( !selectable ) {
-        ERR << "yast2-packagemanager not installed." << endl;
-      } else {
-        PMPackagePtr pkg = selectable->installedObj();
-        if ( !pkg ) {
-          ERR << "No installed object for yast2-packagemanager" << endl;
-        } else {
-          url += "&yast2-packagemanager=" + pkg->edition().asString();
-        }
-      }
-
-      selectable = Y2PM::packageManager().getItem( "liby2util" );
-      if ( !selectable ) {
-        ERR << "liby2util not installed." << endl;
-      } else {
-        PMPackagePtr pkg = selectable->installedObj();
-        if ( !pkg ) {
-          ERR << "No installed object for liby2util" << endl;
-        } else {
-          url += "&liby2util=" + pkg->edition().asString();
-        }
-      }
+      addPackageVersion( "yast2-online-update", url );
+      addPackageVersion( "yast2-packagemanager", url );
+      addPackageVersion( "liby2util", url );
     }
 
     url = encodeUrl( url );
@@ -367,6 +344,22 @@ PMError PMYouPatchPaths::requestServers( const string &u )
   return PMError();
 }
 
+void PMYouPatchPaths::addPackageVersion( const string &pkgName,
+                                         string &url )
+{
+  PMSelectablePtr selectable = Y2PM::packageManager().getItem( pkgName );
+  if ( !selectable ) {
+    WAR << pkgName << " is not installed." << endl;
+  } else {
+    PMPackagePtr pkg = selectable->installedObj();
+    if ( !pkg ) {
+      WAR << "No installed object for " << pkgName << endl;
+    } else {
+      url += "&" + pkgName + "=" + pkg->edition().asString();
+    }
+  }
+}
+
 list<Url> PMYouPatchPaths::servers()
 {
   if ( _servers.size() == 0 ) {
@@ -389,6 +382,11 @@ Url PMYouPatchPaths::defaultServer()
   } else {
     return *_servers.begin();
   }
+}
+
+Url PMYouPatchPaths::currentServer()
+{
+  return Url();
 }
 
 string PMYouPatchPaths::encodeUrl( const string &url )
