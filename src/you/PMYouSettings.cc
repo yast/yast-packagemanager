@@ -411,3 +411,13 @@ bool PMYouSettings::isLogEnabled() const
 {
   return _isLogEnabled;
 }
+
+void PMYouSettings::setMasterMedia( const PMYouMediaPtr &m )
+{
+  _masterMedia = m;
+}
+
+PMYouMediaPtr PMYouSettings::masterMedia()
+{
+  return _masterMedia;
+}

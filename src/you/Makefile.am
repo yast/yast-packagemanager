@@ -19,7 +19,8 @@ liby2pmyou_la_SOURCES = \
         PMYouPatchTags.cc \
         InstYou.cc \
         YouError.cc \
-        PMYouProduct.cc
+        PMYouProduct.cc \
+        PMYouMedia.cc
 
 ybin_SCRIPTS = create_you_patch
 

@@ -71,6 +71,7 @@ std::string YouError::errtext( const unsigned e )
   case E_read_mediapatches_failed: return _("Error getting media.1/patches file.");
   case E_callback_missing: return _("No callback function is set.");
   case E_missing_sig_file: return _("Missing signature.");
+  case E_wrong_media: return _("Wrong media.");
   };
 
   return stringutil::numstring( e );

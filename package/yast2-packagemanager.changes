@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 17 11:55:45 CET 2004 - cschum@suse.de
+
+- Implemented basic support for Patch CD updates from multiple CDs.
+- Changed MediaChange callback to not pass an InstSrc reference
+  anymore.
+
+-------------------------------------------------------------------
 Tue Mar 16 23:17:05 CET 2004 - ma@suse.de
 
 - Added download progess cllback
