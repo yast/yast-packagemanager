@@ -32,6 +32,8 @@
 #include <errno.h>
 #include <dirent.h>
 
+#include "config.h"
+
 using namespace std;
 
 Pathname MediaCurl::_cookieFile = "/var/lib/YaST2/cookies";
@@ -99,6 +101,17 @@ PMError MediaCurl::attachTo (bool next)
                           &passwordCallback );
   if ( ret != 0 ) {
       return PMError( Error::E_curl_setopt_failed, _curlError );
+  }
+
+  if ( _url.protocol() == Url::ftp && _url.username().empty() ) {
+    string id = "yast2@";
+    id += VERSION;
+    DBG << "Anonymous FTP identification: '" << id << "'" << endl;
+    _userpwd += "anonymous:" + id;
+    ret = curl_easy_setopt( _curl, CURLOPT_USERPWD, _userpwd.c_str() );
+    if ( ret != 0 ) {
+        return PMError( Error::E_curl_setopt_failed, _curlError );
+    }
   }
 
   SysConfig cfg( "proxy" );
