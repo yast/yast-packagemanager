@@ -23,6 +23,8 @@
 #include <y2pm/Timecount.h>
 #include <y2pm/PMPackageImEx.h>
 #include <y2pm/InstTargetSelDB.h>
+#include <y2pm/RpmHeaderCache.h>
+#include <y2pm/RpmHeader.h>
 
 #include "PMCB.h"
 
@@ -206,12 +208,32 @@ int main( int argc, char * argv[] )
   }
 
   //Y2PM::setNotRunningFromSystem();
-  //Y2PM::instSrcManager();
-  //InstSrcManager::ISrcId nid = newSrc( "ftp://schnell/CD-ARCHIVE/9.1/SuSE-9.1-FTP-i386-RC2/CD1" );
+  //Y2PM::instTargetInit("/");
+  Y2PM::instSrcManager();
+  //InstSrcManager::ISrcId nid = newSrc( "/mounts/work/CDs/all/full-x86_64/suse/i586" );
+  //InstSrcManager::ISrcId nid = newSrc( "/tmp/foo" );
   //ISM.enableSource( nid );
-  //ISM.disableAllSources();
-  Y2PM::instTargetInit("/");
-  DBG << TMGR.getMountPoints() << endl;
+  ISM.disableAllSources();
+
+#if 0
+  Pathname cachefile_r( "/tmp/foo/IS_PLAINcache" );
+
+  RpmHeaderCache _cache( cachefile_r );
+  if ( !_cache.open() ) {
+    ERR << "Failed to open cache " << cachefile_r << endl;
+  } else {
+    MIL << "Scan cachefile " << cachefile_r << endl;
+
+    unsigned hpos;
+    Pathname pkgfile;
+    int      isSource;
+    for ( constRpmHeaderPtr iter = _cache.getFirst( pkgfile, isSource, hpos );
+	  iter; iter = _cache.getNext( pkgfile, isSource, hpos ) ) {
+      D__ << " At " << hpos << (isSource?" src ":" bin ") << endl;
+      D__ << "    " << iter->tag_name() << endl;
+    }
+  }
+#endif
 
   SEC << "STOP" << endl;
   return 0;

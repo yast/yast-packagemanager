@@ -139,7 +139,6 @@ constRpmHeaderPtr RpmHeader::readPackage( const Pathname & path_r,
 //
 ostream & RpmHeader::dumpOn( ostream & str ) const
 {
-  binHeader::dumpOn( str );
   return binHeader::dumpOn( str ) << '{' << tag_name() << "-" << tag_edition() << ( isSrc() ? ".src}" : "}");
 }
 
