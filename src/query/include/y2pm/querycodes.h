@@ -1,0 +1,47 @@
+/*
+   querycodes.h
+
+   *** PRELIMINARY ***
+ */
+#ifndef QUERYCODES_H
+#define QUERYCODES_H
+
+#define QCODE_LIKE 1
+#define QCODE_CONTAINS 2
+
+#define QCODE_ISINSTALLED 3
+#define QCODE_ISAVAILABLE 4
+#define QCODE_TOINSTALL 5
+#define QCODE_TODELETE 6
+#define QCODE_TOUPDATE 7
+#define QCODE_ISTABOO 8
+#define QCODE_ISAUTOMATIC 9
+#define QCODE_ISINCOMPLETE 10
+#define QCODE_ISCANDIDATE 11
+
+// values,  100..999
+#define QCODE_VERSION 12
+#define QCODE_VENDOR 13
+#define QCODE_GROUP 14
+#define QCODE_NAME 15
+#define QCODE_REQUIRES 16
+#define QCODE_PROVIDES 17
+#define QCODE_CONFLICTS 18
+#define QCODE_INSTALLDATE 19
+#define QCODE_BUILDDATE 21
+#define QCODE_SELECTION 23
+#define QCODE_PATCH 24
+#define QCODE_FILES 25
+#define QCODE_MIME 27
+#define QCODE_KEYWORDS 28
+#define QCODE_SUPPORTS 29
+#define QCODE_NEEDS 30
+#define QCODE_SUMMARY 31
+#define QCODE_DESCRIPTION 33
+#define QCODE_FROM 34		// InstSrc
+#define QCODE_IVERSION 35	// installed version
+#define QCODE_AVERSION 36	// available version
+#define QCODE_CVERSION 37	// candidate version
+#define QCODE_EMPTY 38
+
+#endif	// QUERYCODES_H
