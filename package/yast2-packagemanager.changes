@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Apr 21 15:03:55 CEST 2005 - ma@suse.de
+
+- Fix you hash generation (swamp#916/bugzilla#64937)
+  /usr/bin/machid_hash added.
+
+-------------------------------------------------------------------
 Thu Mar 24 16:17:32 CET 2005 - ma@suse.de
 
 - Fixed lost source packages on 32bit install. (#74030)

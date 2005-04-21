@@ -73,6 +73,7 @@ mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2/you
 %defattr(-,root,root)
 %{_libdir}/liby2pm.so.*
 /usr/bin/online_update
+/usr/bin/machid_hash
 /usr/bin/installation_sources
 /usr/bin/genIS_PLAINcache
 %config(noreplace) /etc/youservers
