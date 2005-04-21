@@ -19,6 +19,9 @@
 
 /-*/
 
+#include <sys/types.h>
+#include <sys/wait.h>		// for waitpid()
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -137,6 +140,55 @@ SLPBoolean PMSLPSrvURLCallback( SLPHandle hslp,
     /* if more services were found                        */
 
     return SLP_TRUE;
+}
+
+#define MACHID_FILE "/var/lib/YaST2/machid"
+#define MACHID_CMD "/usr/bin/machid_hash"
+
+static string fetchMachID()
+{
+  DBG << "fetchMachID checking ..." << endl;
+  int pid = ::fork();
+  if (pid == 0)
+    {
+       // inside child
+      ::close(0);
+      ::close(1);
+      ::close(2);
+      ::open("/dev/null", O_RDONLY);
+      ::open("/dev/null", O_RDWR);
+      ::open("/dev/null", O_RDWR);
+
+      ::execl(MACHID_CMD, "machid_hash", NULL);
+      ::exit(0);
+    }
+
+  if (pid < 0)
+    {
+      DBG << MACHID_CMD << ": fork failed. " << endl;
+    }
+  if (pid > 0)
+    {
+      // we have a child. wait for him.
+      int status = 0;
+      int r = ::waitpid(pid, &status, 0);
+      DBG << MACHID_CMD << " done. pid=" << r << " status=" << status << endl;
+      // don't really care about return values
+    }
+
+  int fd = ::open( MACHID_FILE, O_RDONLY|O_NONBLOCK );
+  static char buf[19];
+  int len = 0;
+  if ((len = ::read(fd, buf, 18)) < 18)
+    {
+      ::close(fd);
+      DBG << "fetchMachID returns empty." << endl;
+      return (string)"";
+    }
+  buf[18] = '\0';	// 18 bytes are valid in MACHID_FILE
+  DBG << "machid from " << MACHID_FILE << ": " << buf << endl;
+
+  return (string)buf;
 }
 
 
@@ -325,6 +377,12 @@ PMError PMYouServers::requestServers( bool check )
     SysConfig clock( "clock" );
     string timezone = clock.readEntry( "TIMEZONE" );
     url += "&timezone=" + timezone;
+
+    SysConfig youcfg( "onlineupdate" );
+    if (youcfg.readBoolEntry("YOU_USE_MACHID", true))
+      {
+        url += "&machid=" + fetchMachID();
+      }
 
     url = encodeUrl( url );
 
