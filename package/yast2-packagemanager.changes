@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Apr 28 15:35:36 CEST 2005 - ma@suse.de
+
+- Media change: Don't try to rewrite the URL replacing trailing
+  digits with the media number, if we actually found a media
+  description file. If it contains a wrong media identification,
+  trigger the callback. (#78998)
+- 2.11.29
+
+-------------------------------------------------------------------
 Mon Mar 21 20:18:06 CET 2005 - ma@suse.de
 
 - Fixed lost source packages on 32bit install. (#74030)
