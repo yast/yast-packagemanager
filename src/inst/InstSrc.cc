@@ -712,17 +712,27 @@ PMError InstSrc::provideMedia ( int medianr ) const
 
 	    _medianr = medianr; // everything ok
 	    return InstSrcError::E_ok; // -----------------------------> return ok
+
+	  } else {
+	    // NOTE: We've got the medianr, but with wrong mediaident. Former versions
+	    // asked via callback and offered to ignore the wrong mediaident. This might
+	    // be ok for a single source product, but not for multisource (e.g. SLES/CORE).
+	    //
+	    // At least the content file should be scanned, to check whether product id and
+	    // version match, before offering to use the media as substitute.
+	    err = InstSrcError::E_bad_id;
+	    err.setDetails( mediafile.asString() );
 	  }
-
-	  // NOTE: We've got the medianr, but with wrong mediaident. Former versions
-	  // asked via callback and offered to ignore the wrong mediaident. This might
-	  // be ok for a single source product, but not for multisource (e.g. SLES/CORE).
-	  //
-	  // At least the content file should be scanned, to check whether product id and
-	  // version match, before offering to use the media as substitute.
-
+	} else {
+	  // media file read/parse error
+	  err.setDetails( mediafile.asString() );
 	}
+	// as we got a media file there is no reason to rewrite the URL
+	// replacing trailing digits with the media number.
+	triedReOpen = true;
+
       } else {
+	// media file not found
 	err.setDetails( mediafile.asString() );
       }
     }
