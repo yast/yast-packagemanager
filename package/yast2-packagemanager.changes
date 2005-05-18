@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Apr 28 15:14:30 CEST 2005 - ma@suse.de
+
+- Media change: Don't try to rewrite the URL replacing trailing
+  digits with the media number, if we actually found a media
+  description file. If it contains a wrong media identification,
+  trigger the callback. (#78998)
+- 2.12.3
+
+-------------------------------------------------------------------
 Thu Apr 21 15:03:55 CEST 2005 - ma@suse.de
 
 - Fix you hash generation (swamp#916/bugzilla#64937)
