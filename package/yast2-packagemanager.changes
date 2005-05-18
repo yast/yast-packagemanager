@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May 18 13:50:06 CEST 2005 - ma@suse.de
+
+- Fix you hash generation (swamp#916/bugzilla#64937)
+  /usr/bin/machid_hash added.
+
+-------------------------------------------------------------------
 Thu Apr 28 15:35:36 CEST 2005 - ma@suse.de
 
 - Media change: Don't try to rewrite the URL replacing trailing

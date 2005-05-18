@@ -26,3 +26,4 @@ ybin_SCRIPTS = create_you_patch
 
 EXTRA_DIST = youservers $(ybin_SCRIPTS)
 
+dist_bin_SCRIPTS = machid_hash
