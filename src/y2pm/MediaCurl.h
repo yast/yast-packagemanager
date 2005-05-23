@@ -54,6 +54,7 @@ class MediaCurl : public MediaHandler {
     class Callbacks
     {
       public:
+	virtual ~Callbacks() {}
         virtual bool progress( int percent ) = 0;
     };
 
