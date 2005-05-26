@@ -30,6 +30,9 @@
 #include <y2pm/PkgArch.h>
 #include <y2pm/PMObjectPtr.h>
 
+class PMManager;
+class SavedState;
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : PMSelectable
