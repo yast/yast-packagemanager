@@ -179,10 +179,29 @@ PMError MediaCurl::attachTo (bool next)
     SysConfig cfg( "proxy" );
 
     if ( cfg.readBoolEntry( "PROXY_ENABLED", false ) ) {
-      if ( _url.protocol() == Url::ftp ) {
-	_proxy = cfg.readEntry( "FTP_PROXY" );
-      } else if ( _url.protocol() == Url::http ) {
-	_proxy = cfg.readEntry( "HTTP_PROXY" );
+      bool useproxy = true;
+
+      std::vector<std::string> nope;
+      stringutil::split( cfg.readEntry( "NO_PROXY" ), nope, ", \t" );
+      for ( unsigned i = 0; i < nope.size(); ++i ) {
+	// no proxy: if nope equals host,
+	// or is a suffix preceeded by a '.'
+	string::size_type pos = _url.host().find( nope[i] );
+	if ( pos != string::npos
+	     && ( pos + nope[i].size() == _url.host().size() )
+	     && ( pos == 0 || _url.host()[pos -1] == '.' ) ) {
+	  D__ << "NO_PROXY: " << nope[i] << " matches host " << _url.host() << endl;
+	  useproxy = false;
+	  break;
+	}
+      }
+
+      if ( useproxy ) {
+	if ( _url.protocol() == Url::ftp ) {
+	  _proxy = cfg.readEntry( "FTP_PROXY" );
+	} else if ( _url.protocol() == Url::http ) {
+	  _proxy = cfg.readEntry( "HTTP_PROXY" );
+	}
       }
     }
 
