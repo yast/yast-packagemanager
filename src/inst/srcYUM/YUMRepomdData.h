@@ -2,6 +2,9 @@
 #define YUMRepomdData_h
 
 #include <string>
+#include <YUMRepomdDataIterator.h>
+
+typedef XMLNodeIterator<YUMRepomdDataPtr> YUMRepomdDataIterator;
 
 class YUMRepomdData : public CountedRep {
   REP_BODY(YUMRepomdData);
@@ -14,6 +17,10 @@ public:
   std::string _timestamp;
   std::string _openChecksumType;
   std::string _openChecksum;
+
+  static YUMRepomdDataIteratorPtr parse(std::istream is);
 };
+
+
 
 #endif

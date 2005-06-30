@@ -20,10 +20,12 @@
 
 */
 
+#include <stream>
+
 class YUMRepomdParser {
 
 public:
-  YumRepomdParser (Istream istream);
+  YumRepomdParser (std::istream &istream);
   virtual ~YumRepomdParser();
   XMLNodeIterator<YUMRepomdDataPtr> parse(istream &is);
 }
