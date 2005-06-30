@@ -20,13 +20,13 @@
 
 */
 
-class YUMRepomdParser : public iterator<input_iterator_tag,{
+class YUMRepomdParser {
+
 public:
   YumRepomdParser (Istream istream);
-  ~YumRepomdParser();
-  begin();
-  end();
-  next();
+  virtual ~YumRepomdParser();
+  XMLNodeIterator<YUMRepomdDataPtr> parse(istream &is);
+}
 
 
 
