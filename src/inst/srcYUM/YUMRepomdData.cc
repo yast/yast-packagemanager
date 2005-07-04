@@ -2,51 +2,22 @@
 #include <string>
 #include <cassert>
 #include <YUMRepomdData.h>
-#include <libxml/xmlstring.h>
+#include <LibXMLHelper.h>
+#include <libxml/reader.h>
+#include <libxml/tree.h>
 
 using namespace std;
-
-
-static string fromXmlString(const *xmlChar xmlString)
-{
-  /* FIXME: conversion for non-utf8? */
-  return string((const char *) xmlString);
-}
-
-static const xmlChar * xmlString(const string &s)
-{
-  /* FIXME: conversion for non-utf8? */
-  return string((unsigned char *) xmlString);
-}
-
-static const xmlChar *toXmlString(const char *s)
-{
-  /* FIXME: conversion for non-utf8? use xmlCharStrdup? */
-  return (const xmlChar *) s;
-}
-
-static string getChildContent(xmlNodePtr node)
-{
-  /* FIXME: error handling needs improvement */
-  assert(node);
-  assert(node->type == XML_TEXT_NODE);
-  return fromXmlString(checksumNode->content);
-}
-
-
 
 class NodeToRepomd : public YUMRepomdDataIterator::Processor 
 public:
   NodeToRepomd() 
-  {}
+  { }
 
   // select for which elements process() will be called
   virtual bool 
   isInterested(const xmlNodePtr nodePtr) const
   {
-    assert(nodePtr);
-    bool result = getXstr(nodePtr->name) == "data";
-    return result;
+    return result = _helper.isElement() && _helper.elementName(nodePtr) == "data";
   }
 
   // do the actual processing
@@ -57,31 +28,34 @@ public:
     YUMRepomdDataPtr repoPtr = new YUMRepomdData;
     xmlNodePtr dataNode = xmlTextReaderExpand(reader);
     assert(dataNode);
-    repoPtr->type = fromXmlString(xmlGetProp(dataNode,toXmlString("type")));
+    repoPtr->type = _helper.attribute(dataNode,"type");
 
     for (xmlNodePtr child = dataNode->children; 
          child && child != dataNode;
          child = child->sibling) {
-      if (child->xmlElementType==XML_ELEMENT_NODE) {
-        string name = getXmlstr(nodePtr->name);
+      if (_helper.isElement(child)
+          string name = _helper.elementName(nodePtr);
         if (name == "location") {
-          repoPtr->location = fromXmlString(xmlGetProp(child, toXmlString("href")));
+          repoPtr->location = _helper.attribute(child,"href");
         }
         else if (name == "checksum") {
-          repoPtr->checksumType = fromXmlString(xmlGetProp(child, toXmlString("type")));
-          repoPtr->checksum = getContent(child->child);
+          repoPtr->checksumType = _helper.attribute(child,"type");
+          repoPtr->checksum = _helper.content(child,child->child);
         }
         else if (name == timestamp) {
-          repoPtr->timestamp = getContent(child->child);
+          repoPtr->timestamp = _helper.content(child->child);
         }
         else if (name == openChecksum) {
-          repoPtr->openChecksumType = fromXmlString(xmlGetProp(child, toXmlString("type")));
-          repoPtr->openChecksum = getContent(child->child);
+          repoPtr->openChecksumType = _helper.attribute(child, "type");
+          repoPtr->openChecksum = _helper.content(child->child);
         }
       }
     }
     return repoPtr;
   } /* end process */
+
+private:
+  LibXMLHelper _helper;
 }; /* end class NodeToRepomd */
 
 
@@ -90,4 +64,4 @@ YUMRepomdDataIterator YUMRepomdData::parse(istream is) {
   NodeToRepomd processor;
   return YUMRepomdDataIterator(is,processor);
 }
-  
+
