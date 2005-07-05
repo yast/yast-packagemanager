@@ -1,23 +1,27 @@
 #ifndef YUMPrimaryData_h
 #define YUMPrimaryData_h
 
+#include "YUMRepomdDataIterator.h"
+#include "YUMDependency.h"
 #include <string>
-#include <YUMRepomdDataIterator.h>
-#include <YUMDependency.h>
-
-typedef XMLNodeIterator<YUMPrimaryDataPtr> YUMPrimaryDataIterator;
+#include <list>
 
 class YUMPrimaryData : public CountedRep {
-  REP_BODY(YUMRepomdData);
+  REP_BODY(YUMPrimaryData)
 
 public:
 
+  YUMPrimaryData();
+
   struct FileData {
-    std::string type;
     std::string name;
+    std::string type;
+    FileData(const std::string &name,
+             const std::string &type);
   };
 
   std::string type;
+  std::string name;
   std::string arch;
   std::string epoch;
   std::string ver;

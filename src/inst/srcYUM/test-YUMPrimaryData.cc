@@ -4,7 +4,33 @@
 
 using namespace std;
 
-void debugPrint(const YUMPrimaryDataPtr data)
+typedef list<YUMDependency> DepList;
+
+static void debugPrintDepList(const DepList& dlist)
+{
+  for (DepList::const_iterator iter=dlist.begin();
+       iter != dlist.end();
+       ++iter) {
+    cout << "  " << iter->name << " " << iter->flags << " ";
+    if (iter->epoch != string())
+      cout << "epoch_" << iter->epoch << "-";
+    cout << iter->ver << "-" << iter->rel << endl;
+  }
+}
+
+typedef list<YUMPrimaryData::FileData> FileList;
+
+static void debugPrintFileList(const FileList& flist)
+{
+  for (FileList::const_iterator iter=flist.begin();
+       iter != flist.end();
+       ++iter) {
+    cout << "  " << "(" << iter->type << ") "
+         << iter->name << endl;
+  }
+}
+
+static void debugPrint(const YUMPrimaryDataPtr data)
 {
   cout << "Primary Data: " << endl
        << "  type: '" << data->type << endl
@@ -31,47 +57,22 @@ void debugPrint(const YUMPrimaryDataPtr data)
        << "headerStart: '" << data->headerStart << endl
        << "headerEnd: '" << data->headerEnd << endl
        << "provides:" << endl;
-  debugPrint(provides);
+  debugPrintDepList(data->provides);
   cout << "conflicts:" << endl;
-  debugPrint(conflicts);
+  debugPrintDepList(data->conflicts);
   cout << "obsoletes:" << endl;
-  debugPrint(obsoletes);
+  debugPrintDepList(data->obsoletes);
   cout << "requires:" << endl;
-  debugPrint(requires);
+  debugPrintDepList(data->requires);
   cout << "files:" << endl;
-  debugPrint(files);
+  debugPrintFileList(data->files);
 }
 
-typedef list<YUMDependency> DepList;
-
-void debugPrint(const DepList& dlist)
-{
-  for (DepList::iterator iter=dlist.begin();
-       iter != dlist.end();
-       ++iter) {
-    cout << "  " << iter->name << " " << flags << " ";
-    if (iter->epoch != string())
-      cout << "epoch_" << iter->epoch << -;
-    cout << iter->ver << "-" << iter->rel << endl;
-  }
-}
-
-typedef list<YUMPrimaryData::FileData> FileList;
-
-void debugPrint(const FileList& flist)
-{
-  for (FileList::iterator iter=flist.begin();
-       iter != flist.end();
-       ++iter) {
-    cout << "  " << "(" << iter->type << ") "
-         << iter->name << endl;
-  }
-}
   
 
 int main()
 {
-  for (YUMRepomdDataIterator iter(cin,"");
+  for (YUMPrimaryDataIterator iter(cin,"");
        !iter.atEnd();
        ++iter) {
     debugPrint(*iter());
