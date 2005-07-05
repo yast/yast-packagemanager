@@ -67,7 +67,9 @@ public:
   {  
     d.reset(new Data(s, 
                  xmlReaderForIO(ioread, ioclose, &s, baseUrl.c_str(), "utf-8",0)));
-    fetchNext();
+    /* Derived classes must call fetchNext() themselves,
+       XMLNodeIterator has no access to their virtual functions during 
+       construction */
   }
 
 
@@ -158,12 +160,9 @@ protected:
   virtual ENTRYTYPE 
   process(const xmlTextReaderPtr readerPtr) = 0;
   
-private:
-  
   void fetchNext()
   {
     int status;
-    assert (! atEnd());
     if (d.get() == 0) {
       /* this is a trivial iterator over only one element,
          and we reach the end now. */
@@ -176,8 +175,9 @@ private:
       while ((status = xmlTextReaderRead(d->reader))==1) {
         xmlNodePtr node = xmlTextReaderCurrentNode(d->reader);
         if (isInterested(node)) {
+          // xmlDebugDumpNode(stdout,node,5);
           _currentDataPtr.reset(new ENTRYTYPE(process(d->reader)));
-          // status = xmlTextReaderNext(d->reader);     <--- do we need to skip the subtree?
+          status = xmlTextReaderNext(d->reader);     // <--- do we need to skip the subtree?
           break;
         }
       }
@@ -191,6 +191,8 @@ private:
     }
   }
 
+private:
+
   /* forbid assignment: We can't copy an xmlTextReader */
   XMLNodeIterator<ENTRYTYPE> & operator=(const XMLNodeIterator<ENTRYTYPE>& otherNode);
 
@@ -199,6 +201,7 @@ private:
 
   /* hold the private data that might
      not exist in a trivial iterator */
+  /* FIXME: Do this class without Data */
   class Data {
   public:
     std::istream& s;
@@ -208,10 +211,6 @@ private:
       : s(s), reader(reader)
     { }
 
-    ~Data() 
-    {
-      xmlFreeTextReader(reader);
-    }
   }; /* end class Data */
 
   std::auto_ptr<ENTRYTYPE> _currentDataPtr;
