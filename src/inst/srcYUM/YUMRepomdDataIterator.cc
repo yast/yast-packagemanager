@@ -46,7 +46,7 @@ YUMRepomdDataIterator::process(const xmlTextReaderPtr reader)
       else if (name == "timestamp") {
         repoPtr->timestamp = _helper.content(child);
       }
-      else if (name == "openChecksum") {
+      else if (name == "open-checksum") {
         repoPtr->openChecksumType = _helper.attribute(child, "type");
         repoPtr->openChecksum = _helper.content(child);
       }
@@ -58,4 +58,6 @@ YUMRepomdDataIterator::process(const xmlTextReaderPtr reader)
   
 YUMRepomdDataIterator::YUMRepomdDataIterator(istream &is, const string &baseUrl)
   : XMLNodeIterator<YUMRepomdDataPtr>(is, baseUrl)
-{ }
+{ 
+  fetchNext();
+}
