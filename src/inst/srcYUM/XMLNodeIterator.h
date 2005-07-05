@@ -18,30 +18,29 @@
   Purpose: Provides an iterator interface for XML files
 
   Use like:
-  typedef Iterator XMLNodeIterator<ContentClass>
-  aNodeProcessor = Iterator::ProcessorSubclass();
-  for (Iterator iter(anIstream, aNodeProcessor),
+  Create a subclass YourIterator : public XMLNodeIterator<ContentClass>, and
+  override isInterested() and process() to implement the actual processing.
+
+  for (Iterator iter(anIstream, baseUrl),
        iter != Iterator.end(),     -- or: iter() != 0, or ! iter.atEnd()
        ++iter) {
      doSomething(*iter)
   }
 
-  processNode() uses the xmlTextReaderPtr to find the data it needs 
-  and returns a ContentClass object. (Hint: xmlTextReaderCurrentNode() 
-  returns the current node)
+  (Hint: xmlTextReaderCurrentNode() returns the current node)
 
   FIXME: error handling (esp. out of memory) missing
-         NodeProcessor should be referenced with reference counting?
+         Create a common subclass to reduce template bloat
 
 */
 
+#ifndef XMLNodeIterator_h
+#define XMLNodeIterator_h
 
 #include <libxml/xmlreader.h>
 // #include <libxml/debugXML.h>
 #include <iostream>
 #include <cassert>
-
-struct xmlDoc;
 
 static int ioread(void *context,
                   char *buffer,
@@ -63,15 +62,11 @@ static int ioclose(void * context)
 template <class ENTRYTYPE>
 class XMLNodeIterator {
 public:
-  class Processor;
   XMLNodeIterator(std::istream &s, 
-                  const std::string &baseUrl,
-                  Processor &processor)
-  {
-    d = new Data({s, 
-                  xmlReaderForIO(ioread, ioclose, &s, baseUrl.c_str(), "utf-8",0),
-                  processor});
-    _currentDataPtr = 0;
+                  const std::string &baseUrl)
+  {  
+    d.reset(new Data(s, 
+                 xmlReaderForIO(ioread, ioclose, &s, baseUrl.c_str(), "utf-8",0)));
     fetchNext();
   }
 
@@ -89,9 +84,9 @@ public:
     : _currentDataPtr(0), d(0)
   { }
       
-  ~XMLNodeIterator() 
+  virtual ~XMLNodeIterator() 
   { /* FIXME */
-    if (d) {
+    if (d.get()) {
       if (d->reader != 0)
         xmlFreeTextReader(d->reader);
     }
@@ -105,7 +100,7 @@ public:
 
   bool atEnd() const
   {
-    return _currentDataPtr == 0;
+    return _currentDataPtr.get() == 0;
   }
 
   bool 
@@ -153,38 +148,23 @@ public:
     return tmp;
   }
 
-  class Processor {
-  public:
-    Processor(const xmlDoc *docPtr) 
-    {}
+protected:
 
-    virtual ~Processor()
-    { }
-
-    virtual Processor & 
-    operator=(const Processor& otherProcessor)
-    {
-      return *this;
-    }
-
-    virtual bool 
-    isInterested(const xmlNodePtr nodePtr) const = 0;
-
-    virtual ENTRYTYPE 
-    process(const xmlTextReaderPtr readerPtr) = 0;
-  }; /* end class Processor */
-
-
-
-
+  /* which nodes result in an ENTRYTYPE? */
+  virtual bool 
+  isInterested(const xmlNodePtr nodePtr) = 0;
+  
+  /* convert a node to ENTRYTYPE */
+  virtual ENTRYTYPE 
+  process(const xmlTextReaderPtr readerPtr) = 0;
+  
 private:
-
-  void fetchNext() /* this might be the only stuff that makes sense to be overloaded.
-                      declare as virtual this is needed once */
+  
+  void fetchNext()
   {
     int status;
     assert (! atEnd());
-    if (d == 0) {
+    if (d.get() == 0) {
       /* this is a trivial iterator over only one element,
          and we reach the end now. */
       _currentDataPtr.reset();
@@ -192,11 +172,11 @@ private:
     else {
       assert(d->reader);
       /* repeat as long as we successfully read nodes
-         breaks out when Processor is interested */
+         breaks out an interesting node has been found */
       while ((status = xmlTextReaderRead(d->reader))==1) {
         xmlNodePtr node = xmlTextReaderCurrentNode(d->reader);
-        if (d->processor.isInterested(node)) {
-          _currentDataPtr.reset(d->processor.process(node));
+        if (isInterested(node)) {
+          _currentDataPtr.reset(new ENTRYTYPE(process(d->reader)));
           // status = xmlTextReaderNext(d->reader);     <--- do we need to skip the subtree?
           break;
         }
@@ -220,22 +200,28 @@ private:
   /* hold the private data that might
      not exist in a trivial iterator */
   class Data {
-    std::istream &s;
+  public:
+    std::istream& s;
     xmlTextReaderPtr reader;
-    Processor &processor;
-    ~Data() {
+    Data(std::istream& s, 
+         xmlTextReaderPtr reader)
+      : s(s), reader(reader)
+    { }
+
+    ~Data() 
+    {
       xmlFreeTextReader(reader);
     }
   }; /* end class Data */
 
-  std::auto_ptr(ENTRYTYPE) _currentDataPtr;
+  std::auto_ptr<ENTRYTYPE> _currentDataPtr;
       
   std::auto_ptr<Data> d;
  
 }; /* end class XMLNodeIterator */
 
 
-
+#endif
 
 
 
