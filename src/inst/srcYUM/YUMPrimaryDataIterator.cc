@@ -1,7 +1,8 @@
+#include "YUMPrimaryDataIterator.h"
+#include "YUMPrimaryData.h"
 #include <istream>
 #include <string>
 #include <cassert>
-#include <YUMRepomdData.h>
 #include <libxml/xmlstring.h>
 #include <LibXMLHelper.h>
 

@@ -48,8 +48,6 @@ public:
   std::list<YUMDependency> obsoletes;
   std::list<YUMDependency> requires;
   std::list<FileData> files;
-
-  static YUMPrimaryDataIteratorPtr parse(std::istream is);
 };
 
 

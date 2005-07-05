@@ -124,25 +124,25 @@ public:
   operator*() const 
   {
     assert (! atEnd());
-    return * _currentDataPtr;
+    return *(_currentDataPtr.get());
   }
 
   const ENTRYTYPE * 
   operator()() const 
   {
-    return _currentDataPtr;
+    return (_currentDataPtr.get());
   }
 
   XMLNodeIterator<ENTRYTYPE> &  /* ++iter */
   operator++() {
-    assert (d && !atEnd());
+    assert (d.get() && !atEnd());
     fetchNext();
     return *this;
   }
 
   XMLNodeIterator operator++(int)   /* iter++ */
   {
-    assert (d && !atEnd());
+    assert (d.get() && !atEnd());
     XMLNodeIterator<ENTRYTYPE> tmp(*currentDataPtr);
     fetchNext();
     return tmp;
@@ -191,11 +191,11 @@ private:
     }
   }
 
-  /* forbid copy constructor */
-  XMLNodeIterator<ENTRYTYPE> & operator=(const XMLNodeIterator<ENTRYTYPE>& otherNode)
-  { 
-    /* copy cannot work since you cannot copy a xmlTextReader */
-  }
+  /* forbid assignment: We can't copy an xmlTextReader */
+  XMLNodeIterator<ENTRYTYPE> & operator=(const XMLNodeIterator<ENTRYTYPE>& otherNode);
+
+  /* forbid copy constructor: We can't copy an xmlTextReader */
+  XMLNodeIterator<ENTRYTYPE>(const XMLNodeIterator<ENTRYTYPE>& otherNode);
 
   /* hold the private data that might
      not exist in a trivial iterator */
