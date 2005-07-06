@@ -3,6 +3,7 @@
 #include "YUMPrimaryData.h"
 
 using namespace std;
+using namespace YUM;
 
 typedef list<YUMDependency> DepList;
 
