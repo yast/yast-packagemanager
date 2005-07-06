@@ -6,66 +6,77 @@ using namespace std;
 
 typedef list<YUMDependency> DepList;
 
-static void debugPrintDepList(const DepList& dlist)
+static void debugPrint(const DepList& dlist)
 {
   for (DepList::const_iterator iter=dlist.begin();
        iter != dlist.end();
        ++iter) {
     cout << "  " << iter->name << " " << iter->flags << " ";
-    if (iter->epoch != string())
-      cout << "epoch_" << iter->epoch << "-";
-    cout << iter->ver << "-" << iter->rel << endl;
+    if (! (iter->epoch.empty() 
+           && iter->ver.empty()
+           && iter->rel.empty())) {
+      if (iter->epoch != string())
+        cout << "epoch_" << iter->epoch << "-";
+      cout << iter->ver << "-" << iter->rel ;
+    }
+    cout << endl;
   }
 }
 
 typedef list<YUMPrimaryData::FileData> FileList;
 
-static void debugPrintFileList(const FileList& flist)
+static void debugPrint(const FileList& flist)
 {
   for (FileList::const_iterator iter=flist.begin();
        iter != flist.end();
        ++iter) {
-    cout << "  " << "(" << iter->type << ") "
-         << iter->name << endl;
+    cout << "  " << iter->name;
+    if (! iter->type.empty()) {
+      cout << ": " << iter->type;
+    }
+    cout << endl;
   }
 }
 
 static void debugPrint(const YUMPrimaryDataPtr data)
 {
-  cout << "Primary Data: " << endl
-       << "  type: '" << data->type << endl
-       << " arch: '" << data->arch << endl
-       << " ver: '" << data->ver << endl
-       << "checksumType: '" << data->checksumType << endl
-       << "checksumPkgid: '" << data->checksumPkgid << endl
-       << "checksum: '" << data->checksum << endl
-       << "summary: '" << data->summary << endl
-       << "description: '" << data->description << endl
-       << "packager: '" << data->packager << endl
-       << "url: '" << data->url << endl
-       << "timeFile: '" << data->timeFile << endl
-       << "timeBuild: '" << data->timeBuild << endl
-       << "sizePackage: '" << data->sizePackage << endl
-       << "sizeInstalled: '" << data->sizeInstalled << endl
-       << "sizeArchive: '" << data->sizeArchive << endl
-       << "location: '" << data->location << endl
-       << "license: '" << data->license << endl
-       << "vendor: '" << data->vendor << endl
-       << "group: '" << data->group << endl
-       << "buildhost: '" << data->buildhost << endl
-       << "sourcerpm: '" << data->sourcerpm << endl
-       << "headerStart: '" << data->headerStart << endl
-       << "headerEnd: '" << data->headerEnd << endl
+  cout << "-------------------------------------------------" << endl
+       << "Primary Data: " << endl
+       << "name: '" << data->name << "'" << endl
+       << "type: '" << data->type << "'" << endl
+      << " arch: '" << data->arch << "'" << endl
+      << " ver: '" << data->ver << "'" << endl
+      << "checksumType: '" << data->checksumType << "'" << endl
+      << "checksumPkgid: '" << data->checksumPkgid << "'" << endl
+      << "checksum: '" << data->checksum << "'" << endl
+      << "summary: '" << data->summary << "'" << endl
+      << "description: '" << data->description << "'" << endl
+      << "packager: '" << data->packager << "'" << endl
+      << "url: '" << data->url << "'" << endl
+      << "timeFile: '" << data->timeFile << "'" << endl
+      << "timeBuild: '" << data->timeBuild << "'" << endl
+      << "sizePackage: '" << data->sizePackage << "'" << endl
+      << "sizeInstalled: '" << data->sizeInstalled << "'" << endl
+      << "sizeArchive: '" << data->sizeArchive << "'" << endl
+      << "location: '" << data->location << "'" << endl
+      << "license: '" << data->license << "'" << endl
+      << "vendor: '" << data->vendor << "'" << endl
+      << "group: '" << data->group << "'" << endl
+      << "buildhost: '" << data->buildhost << "'" << endl
+      << "sourcerpm: '" << data->sourcerpm << "'" << endl
+      << "headerStart: '" << data->headerStart << "'" << endl
+      << "headerEnd: '" << data->headerEnd << "'" << endl
        << "provides:" << endl;
-  debugPrintDepList(data->provides);
+  debugPrint(data->provides);
   cout << "conflicts:" << endl;
-  debugPrintDepList(data->conflicts);
+  debugPrint(data->conflicts);
   cout << "obsoletes:" << endl;
-  debugPrintDepList(data->obsoletes);
+  debugPrint(data->obsoletes);
   cout << "requires:" << endl;
-  debugPrintDepList(data->requires);
+  debugPrint(data->requires);
   cout << "files:" << endl;
-  debugPrintFileList(data->files);
+  debugPrint(data->files);
+  cout << endl;
 }
 
   
