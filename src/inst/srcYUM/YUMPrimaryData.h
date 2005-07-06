@@ -3,6 +3,7 @@
 
 #include "YUMRepomdDataIterator.h"
 #include "YUMDependency.h"
+#include "YUMDirSize.h"
 #include <string>
 #include <list>
 
@@ -54,6 +55,14 @@ namespace YUM {
     std::list<YUMDependency> obsoletes;
     std::list<YUMDependency> requires;
     std::list<FileData> files;
+
+    // SuSE specific data
+    std::list<std::string> authors;
+    std::list<std::string> keywords;
+    std::string  media;
+    std::list<YUMDirSize> dirSizes;
+    std::list<YUMDependency> freshen;
+    bool installOnly;
   };
 }
 
