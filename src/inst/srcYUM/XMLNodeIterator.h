@@ -41,6 +41,7 @@
 // #include <libxml/debugXML.h>
 #include <iostream>
 #include <cassert>
+#include <iterator>
 
 static int ioread(void *context,
                   char *buffer,
@@ -60,14 +61,15 @@ static int ioclose(void * context)
 }
 
 template <class ENTRYTYPE>
-class XMLNodeIterator {
+class XMLNodeIterator : public std::iterator<std::input_iterator_tag, ENTRYTYPE> {
 public:
-  XMLNodeIterator(std::istream &s, 
+  XMLNodeIterator(std::istream &input, 
                   const std::string &baseUrl)
+    : _input(& input),
+      _reader(xmlReaderForIO(ioread, ioclose, _input, baseUrl.c_str(), "utf-8",0)),
+      _currentDataPtr(0)
   {  
-    d.reset(new Data(s, 
-                 xmlReaderForIO(ioread, ioclose, &s, baseUrl.c_str(), "utf-8",0)));
-    /* Derived classes must call fetchNext() themselves,
+    /* Derived classes must call fetchNext() in their constructors themselves,
        XMLNodeIterator has no access to their virtual functions during 
        construction */
   }
@@ -76,22 +78,18 @@ public:
   /* this is a trivial iterator over only one element
      needed e.g. for postinc (iter++) */
   XMLNodeIterator(const ENTRYTYPE &entry)
-  { 
-    d = 0;
-    _currentDataPtr = new ENTRYTYPE(entry);
-  }
+    : _input(0), _reader(0), _currentDataPtr(& entry)
+  { }
     
   /* this is the final NodeIterator returned by last() */
   XMLNodeIterator() 
-    : _currentDataPtr(0), d(0)
+    : _input(0), _reader(0), _currentDataPtr(0)
   { }
       
   virtual ~XMLNodeIterator() 
-  { /* FIXME */
-    if (d.get()) {
-      if (d->reader != 0)
-        xmlFreeTextReader(d->reader);
-    }
+  {
+    if (_reader != 0)
+      xmlFreeTextReader(_reader);
   }
 
   static XMLNodeIterator<ENTRYTYPE> 
@@ -122,14 +120,14 @@ public:
     return ! operator==(otherNode);
   }
 
-  const ENTRYTYPE & 
+  ENTRYTYPE & 
   operator*() const 
   {
     assert (! atEnd());
     return *(_currentDataPtr.get());
   }
 
-  const ENTRYTYPE * 
+  ENTRYTYPE * 
   operator()() const 
   {
     return (_currentDataPtr.get());
@@ -137,17 +135,24 @@ public:
 
   XMLNodeIterator<ENTRYTYPE> &  /* ++iter */
   operator++() {
-    assert (d.get() && !atEnd());
+    assert (_reader && !atEnd());
     fetchNext();
     return *this;
   }
 
   XMLNodeIterator operator++(int)   /* iter++ */
   {
-    assert (d.get() && !atEnd());
+    assert (!atEnd());
     XMLNodeIterator<ENTRYTYPE> tmp(*currentDataPtr);
     fetchNext();
     return tmp;
+  }
+
+  const ENTRYTYPE * 
+  operator->()
+  {
+    assert(! atEnd());
+    return _currentDataPtr.get();
   }
 
 protected:
@@ -163,21 +168,20 @@ protected:
   void fetchNext()
   {
     int status;
-    if (d.get() == 0) {
-      /* this is a trivial iterator over only one element,
+    if (_reader == 0) {
+      /* this is a trivial iterator over (max) only one element,
          and we reach the end now. */
       _currentDataPtr.reset();
     }
     else {
-      assert(d->reader);
       /* repeat as long as we successfully read nodes
          breaks out an interesting node has been found */
-      while ((status = xmlTextReaderRead(d->reader))==1) {
-        xmlNodePtr node = xmlTextReaderCurrentNode(d->reader);
+      while ((status = xmlTextReaderRead(_reader))==1) {
+        xmlNodePtr node = xmlTextReaderCurrentNode(_reader);
         if (isInterested(node)) {
           // xmlDebugDumpNode(stdout,node,5);
-          _currentDataPtr.reset(new ENTRYTYPE(process(d->reader)));
-          status = xmlTextReaderNext(d->reader);     // <--- do we need to skip the subtree?
+          _currentDataPtr.reset(new ENTRYTYPE(process(_reader)));
+          status = xmlTextReaderNext(_reader);
           break;
         }
       }
@@ -199,23 +203,9 @@ private:
   /* forbid copy constructor: We can't copy an xmlTextReader */
   XMLNodeIterator<ENTRYTYPE>(const XMLNodeIterator<ENTRYTYPE>& otherNode);
 
-  /* hold the private data that might
-     not exist in a trivial iterator */
-  /* FIXME: Do this class without Data */
-  class Data {
-  public:
-    std::istream& s;
-    xmlTextReaderPtr reader;
-    Data(std::istream& s, 
-         xmlTextReaderPtr reader)
-      : s(s), reader(reader)
-    { }
-
-  }; /* end class Data */
-
+  std::istream* _input;
+  xmlTextReaderPtr _reader;
   std::auto_ptr<ENTRYTYPE> _currentDataPtr;
-      
-  std::auto_ptr<Data> d;
  
 }; /* end class XMLNodeIterator */
 
