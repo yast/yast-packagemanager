@@ -7,7 +7,7 @@
 #include "LibXMLHelper.h"
 
 using namespace std;
-
+using namespace YUM;
 
 
 YUMPrimaryDataIterator::YUMPrimaryDataIterator(istream &is, const string& baseUrl)

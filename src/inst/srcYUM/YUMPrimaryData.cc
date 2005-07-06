@@ -1,6 +1,7 @@
 #include "YUMPrimaryData.h"
 
 using namespace std;
+using namespace YUM;
 
 YUMPrimaryData::YUMPrimaryData()
 { }

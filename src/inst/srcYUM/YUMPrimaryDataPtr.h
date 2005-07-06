@@ -3,6 +3,8 @@
 
 #include <y2util/RepDef.h>
 
-DEFINE_BASE_POINTER(YUMPrimaryData);
+namespace YUM {
+  DEFINE_BASE_POINTER(YUMPrimaryData);
+}
 
 #endif

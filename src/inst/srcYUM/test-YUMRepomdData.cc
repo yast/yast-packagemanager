@@ -3,6 +3,7 @@
 #include "YUMRepomdData.h"
 
 using namespace std;
+using namespace YUM;
 
 void debugPrint(const YUMRepomdDataPtr data)
 {

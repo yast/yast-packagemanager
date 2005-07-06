@@ -9,23 +9,26 @@
 #include "YUMDependency.h"
 #include <list>
 
-class YUMDependency;
+namespace YUM {
 
-class YUMPrimaryDataIterator : public XMLNodeIterator<YUMPrimaryDataPtr>
-{
-public:
-  YUMPrimaryDataIterator(std::istream &is, const std::string &baseUrl);
-  virtual ~YUMPrimaryDataIterator();
+  class YUMDependency;
 
-private:
-  virtual bool isInterested(const xmlNodePtr nodePtr);
-  virtual YUMPrimaryDataPtr process(const xmlTextReaderPtr reader);
-  void parseFormatNode(YUMPrimaryDataPtr dataPtr,
-                       xmlNodePtr formatNode);
-  void parseDependencyEntries(std::list<YUMDependency> *depList, 
-                              xmlNodePtr depNode);
+  class YUMPrimaryDataIterator : public XMLNodeIterator<YUMPrimaryDataPtr>
+  {
+  public:
+    YUMPrimaryDataIterator(std::istream &is, const std::string &baseUrl);
+    virtual ~YUMPrimaryDataIterator();
 
-  LibXMLHelper _helper;
-};
+  private:
+    virtual bool isInterested(const xmlNodePtr nodePtr);
+    virtual YUMPrimaryDataPtr process(const xmlTextReaderPtr reader);
+    void parseFormatNode(YUMPrimaryDataPtr dataPtr,
+                         xmlNodePtr formatNode);
+    void parseDependencyEntries(std::list<YUMDependency> *depList, 
+                                xmlNodePtr depNode);
+
+    LibXMLHelper _helper;
+  };
+}
 
 #endif

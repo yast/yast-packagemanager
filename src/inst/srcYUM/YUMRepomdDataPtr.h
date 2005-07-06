@@ -3,6 +3,9 @@
 
 #include <y2util/RepDef.h>
 
-DEFINE_BASE_POINTER(YUMRepomdData);
+namespace YUM {
+
+  DEFINE_BASE_POINTER(YUMRepomdData);
+}
 
 #endif 

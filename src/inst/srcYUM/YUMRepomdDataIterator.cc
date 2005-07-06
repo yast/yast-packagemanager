@@ -8,7 +8,7 @@
 #include <libxml/tree.h>
 
 using namespace std;
-
+using namespace YUM;
 
 YUMRepomdDataIterator::~YUMRepomdDataIterator()
 { }
