@@ -44,6 +44,7 @@ YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
   assert(dataNode);
 
   dataPtr->type = _helper.attribute(dataNode,"type");
+  dataPtr->installOnly = false;
   
   for (xmlNodePtr child = dataNode->children; 
        child != 0;
@@ -145,7 +146,27 @@ YUMPrimaryDataIterator::parseFormatNode(YUMPrimaryDataPtr dataPtr,
         dataPtr->files.push_back
           (YUMPrimaryData::FileData(_helper.content(child),
                                     _helper.attribute(child,"type")));
-      }     
+      }
+      /* SUSE specific elements */
+      else if (name == "authors") {
+        parseAuthorEntries(& dataPtr->authors, child);
+      }
+      else if (name == "keywords") {
+        parseKeywordEntries(& dataPtr->keywords, child);
+      }
+      else if (name == "media") {
+        dataPtr->media = _helper.attribute(child,"mediaid");
+      }
+      else if (name == "dirsize") {
+        parseDirsizeEntries(& dataPtr->dirSizes, child);
+      }
+      else if (name == "freshen") {
+        parseDependencyEntries(& dataPtr->freshen, child);
+      }
+      else if (name == "install_only") {
+        dataPtr->installOnly = true;
+      }
+      else { /* FIXME: log parse warning */ }
     }
   }
 }
@@ -175,3 +196,58 @@ YUMPrimaryDataIterator::parseDependencyEntries(list<YUMDependency> *depList,
   }
 }
 
+void
+YUMPrimaryDataIterator::parseAuthorEntries(list<string> *authors,
+                                           xmlNodePtr node)
+{
+  assert(authors);
+  assert(node);
+
+  for (xmlNodePtr child = node->children; 
+       child != 0;
+       child = child ->next) {
+    if (_helper.isElement(child)) {
+      string name = _helper.name(child);
+      if (name == "author") { 
+        authors->push_back(_helper.content(child));
+      }
+    }
+  }
+}
+
+void YUMPrimaryDataIterator::parseKeywordEntries(list<string> *keywords,
+                                                 xmlNodePtr node)
+{
+  assert(keywords);
+  assert(node);
+
+  for (xmlNodePtr child = node->children; 
+       child != 0;
+       child = child ->next) {
+    if (_helper.isElement(child)) {
+      string name = _helper.name(child);
+      if (name == "keyword") { 
+        keywords->push_back(_helper.content(child));
+      }
+    }
+  }
+}
+
+void YUMPrimaryDataIterator::parseDirsizeEntries(list<YUMDirSize> *sizes,
+                                                 xmlNodePtr node)
+{
+  assert(sizes);
+  assert(node);
+
+  for (xmlNodePtr child = node->children; 
+       child != 0;
+       child = child ->next) {
+    if (_helper.isElement(child)) {
+      string name = _helper.name(child);
+      if (name == "dirsize") { 
+        sizes->push_back(YUMDirSize(_helper.attribute(child,"path"),
+                                    _helper.attribute(child,"size")));
+      }
+    }
+  }
+}

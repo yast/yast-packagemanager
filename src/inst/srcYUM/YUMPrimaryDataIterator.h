@@ -7,6 +7,7 @@
 #include "XMLNodeIterator.h"
 #include "LibXMLHelper.h"
 #include "YUMDependency.h"
+#include "YUMDirSize.h"
 #include <list>
 
 namespace YUM {
@@ -26,6 +27,12 @@ namespace YUM {
                          xmlNodePtr formatNode);
     void parseDependencyEntries(std::list<YUMDependency> *depList, 
                                 xmlNodePtr depNode);
+    void YUMPrimaryDataIterator::parseAuthorEntries(std::list<std::string> *authors,
+                                                    xmlNodePtr node);
+    void YUMPrimaryDataIterator::parseKeywordEntries(std::list<std::string> *keywords,
+                                                     xmlNodePtr node);
+    void YUMPrimaryDataIterator::parseDirsizeEntries(std::list<YUMDirSize> *sizes,
+                                                     xmlNodePtr node);
 
     LibXMLHelper _helper;
   };
