@@ -3,17 +3,18 @@
 
 #include <string>
 
-struct YUMDependency {
-  std::string name;
-  std::string flags;
-  std::string epoch;
-  std::string ver;
-  std::string rel;
+class YUMDependency {
+public:
   YUMDependency(const std::string& name,
                 const std::string& flags,
                 const std::string& epoch,
                 const std::string& ver,
                 const std::string& rel);
+  std::string name;
+  std::string flags;
+  std::string epoch;
+  std::string ver;
+  std::string rel;
 };
 
 #endif

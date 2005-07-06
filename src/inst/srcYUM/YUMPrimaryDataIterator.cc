@@ -9,6 +9,21 @@
 using namespace std;
 
 
+
+YUMPrimaryDataIterator::YUMPrimaryDataIterator(istream &is, const string& baseUrl)
+  : XMLNodeIterator<YUMPrimaryDataPtr>(is, baseUrl)
+{
+  fetchNext();
+}
+
+
+YUMPrimaryDataIterator::~YUMPrimaryDataIterator()
+{
+}
+  
+
+
+
 // select for which elements process() will be called
 bool 
 YUMPrimaryDataIterator::isInterested(const xmlNodePtr nodePtr)
@@ -27,12 +42,11 @@ YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
   YUMPrimaryDataPtr dataPtr = new YUMPrimaryData;
   xmlNodePtr dataNode = xmlTextReaderExpand(reader);
   assert(dataNode);
-  
+
   dataPtr->type = _helper.attribute(dataNode,"type");
-  list<YUMDependency> *currentDependency = 0; // for <entry>, determines which dependency to add to
   
   for (xmlNodePtr child = dataNode->children; 
-       child && child != dataNode;
+       child != 0;
        child = child->next) {
     if (_helper.isElement(child)) {
       string name = _helper.name(child);
@@ -49,6 +63,7 @@ YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
       }
       else if (name == "checksum") {
         dataPtr->checksumType = _helper.attribute(child,"type");
+        dataPtr->checksumPkgid = _helper.attribute(child,"pkgid");
         dataPtr->checksum = _helper.content(child);
       }
       else if (name == "summary") {
@@ -67,10 +82,35 @@ YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
         dataPtr->timeFile = _helper.attribute(child,"file");
         dataPtr->timeBuild = _helper.attribute(child,"build");
       }
+      else if (name == "size") {
+        dataPtr->sizePackage = _helper.attribute(child,"package");
+        dataPtr->sizeInstalled = _helper.attribute(child,"installed");
+        dataPtr->sizeArchive = _helper.attribute(child,"archive");
+      }
       else if (name == "location") {
         dataPtr->location = _helper.attribute(child,"href");
       }
-      else if (name == "license") {
+      else if (name == "format") {
+        parseFormatNode(dataPtr, child);
+      }
+    }
+  }
+  return dataPtr;
+} /* end process */
+
+
+
+void 
+YUMPrimaryDataIterator::parseFormatNode(YUMPrimaryDataPtr dataPtr,
+                                        xmlNodePtr formatNode)
+{
+  assert(formatNode);
+  for (xmlNodePtr child = formatNode->children; 
+       child != 0;
+       child = child ->next) {
+    if (_helper.isElement(child)) {
+      string name = _helper.name(child);
+      if (name == "license") {
         dataPtr->license = _helper.content(child);
       }
       else if (name == "vendor") {
@@ -82,7 +122,7 @@ YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
       else if (name == "buildhost") {
         dataPtr->buildhost = _helper.content(child);
       }
-      else if (name == "sourerpm") {
+      else if (name == "sourcerpm") {
         dataPtr->sourcerpm = _helper.content(child);
       }
       else if (name == "header-range") {
@@ -90,47 +130,48 @@ YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
         dataPtr->headerEnd = _helper.attribute(child,"end");
       }
       else if (name == "provides") {
-        currentDependency = &dataPtr->provides;
+        parseDependencyEntries(& dataPtr->provides, child);
       }
       else if (name == "conflicts") {
-        currentDependency = &dataPtr->conflicts;
+        parseDependencyEntries(& dataPtr->conflicts, child);
       }
       else if (name == "obsoletes") {
-        currentDependency = &dataPtr->obsoletes;
+        parseDependencyEntries(& dataPtr->obsoletes, child);
       }
       else if (name == "requires") {
-        currentDependency = &dataPtr->requires;
+        parseDependencyEntries(& dataPtr->requires, child);
       }
-      else if (name == "entry") {
-        assert(currentDependency != 0);
-        currentDependency->push_back
+      else if (name == "file") {
+        dataPtr->files.push_back
+          (YUMPrimaryData::FileData(_helper.content(child),
+                                    _helper.attribute(child,"type")));
+      }     
+    }
+  }
+}
+
+
+void
+YUMPrimaryDataIterator::parseDependencyEntries(list<YUMDependency> *depList, 
+                                               xmlNodePtr depNode)
+{
+  assert(depList);
+  assert(depNode);
+
+  for (xmlNodePtr child = depNode->children; 
+       child != 0;
+       child = child ->next) {
+    if (_helper.isElement(child)) {
+      string name = _helper.name(child);
+      if (name == "entry") { 
+        depList->push_back
           (YUMDependency(_helper.attribute(child,"name"),
                          _helper.attribute(child,"flags"),
                          _helper.attribute(child,"epoch"),
                          _helper.attribute(child,"ver"),
                          _helper.attribute(child,"rel")));
       }
-      else if (name == "file") {
-        dataPtr->files.push_back
-          (YUMPrimaryData::FileData(_helper.attribute(child,"type"),
-                                    _helper.content(child)));
-      }
     }
   }
-  return dataPtr;
-} /* end process */
-
-
-YUMPrimaryDataIterator::YUMPrimaryDataIterator(istream &is, const string& baseUrl)
-  : XMLNodeIterator<YUMPrimaryDataPtr>(is, baseUrl)
-{
-  fetchNext();
 }
-
-
-YUMPrimaryDataIterator::~YUMPrimaryDataIterator()
-{
-}
-  
-
 

@@ -15,3 +15,7 @@ noinst_LTLIBRARIES = liby2pmsrcYUM.la
 liby2pmsrcYUM_la_SOURCES =
 #	InstSrcDataYUM.cc	\
 	PMYUMPackageDataProvider.cc
+noinst_HEADERS = InstSrcDataYUM.cc LibXMLHelper.cc PMYUMPackageDataProvider.cc \
+	test-YUMPrimaryData test-YUMPrimaryData.cc test-YUMRepomdData.cc YUMDependency.cc \
+	YUMPrimaryData.cc YUMPrimaryDataIterator.cc YUMPrimaryDataPtr.cc YUMRepomdData.cc \
+	YUMRepomdDataIterator.cc YUMRepomdDataPtr.cc
