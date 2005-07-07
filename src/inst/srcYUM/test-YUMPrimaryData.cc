@@ -7,6 +7,20 @@ using namespace YUM;
 
 typedef list<YUMDependency> DepList;
 
+static string join(const list<string>& aList,
+                   const string& joiner)
+{
+  string res;
+  for (list<string>::const_iterator iter = aList.begin();
+       iter != aList.end();
+       ++ iter) {
+         if (iter != aList.begin())
+           res += joiner;
+         res += *iter;
+       }
+  return res;
+}
+
 static void debugPrint(const DepList& dlist)
 {
   for (DepList::const_iterator iter=dlist.begin();
@@ -37,6 +51,20 @@ static void debugPrint(const FileList& flist)
     }
     cout << endl;
   }
+}
+
+typedef list<YUMDirSize> DirSizeList;
+
+static void debugPrint(const DirSizeList& aList)
+{
+  for (DirSizeList::const_iterator iter=aList.begin();
+       iter != aList.end();
+       ++iter) {
+       cout << "  " << iter->path
+           << ": " << iter->sizeKByte << " kByte, "
+           << iter->fileCount << " files"
+           << endl;
+       }
 }
 
 static void debugPrint(const YUMPrimaryDataPtr data)
@@ -77,7 +105,14 @@ static void debugPrint(const YUMPrimaryDataPtr data)
   debugPrint(data->requires);
   cout << "files:" << endl;
   debugPrint(data->files);
-  cout << endl;
+  cout << "authors: " << join(data->authors,", ") << endl
+    << "keywords: " << join(data->keywords,", ") << endl
+    << "media: " << data->media << endl
+    << "dirsizes: " << endl;
+  debugPrint(data->dirSizes);
+  cout << "freshen: " << endl;
+  debugPrint(data->freshen);
+  cout << "install-only: '" << data->installOnly << "'" << endl;
 }
 
   

@@ -69,11 +69,11 @@ namespace{
 }
 
 
-/***********************************************************
+/**
  *
  * @short Abstract class to iterate over an xml stream
  *
- * Derive from XMLNodeIterator<ENTRYTYPE> to produce an iterator
+ * Derive from XMLNodeIterator<ENTRYTYPE> to get an iterator
  * that returns ENTRYTYPE objects. A derived class must provide
  * isInterested() and process(). It should also provide a
  * Constructor Derived(std::stream,std::string baseUrl) which
@@ -91,7 +91,7 @@ namespace{
  * The iterator owns the pointer (i.e., caller must not delete it)
  * until the next ++ operator is called. At this time, it will be
  * destroyed (and a new ENTRYTYPE is created.)
- **************/
+ */
 
  
 
@@ -132,7 +132,6 @@ public:
    * Constructor for an empty iterator.
    * An empty iterator is already at its end.
    * This is what end() returns ...
-   * @return 
    */
   XMLNodeIterator() 
     : _input(0), _reader(0), _currentDataPtr(0)
@@ -149,7 +148,7 @@ public:
 
   /**
    * This is the end.
-   * @return the element behind the last element.
+   * @return an iterator that has reached the end.
    */
   static XMLNodeIterator<ENTRYTYPE> 
   end()
@@ -167,8 +166,10 @@ public:
   }
 
   /**
-   * Two iterators are equal if both are at the end or if
-   * they point to equal elements.
+   * Two iterators are equal if both are at the end
+   * or if they are identical.
+   * Since you cannot copy an XMLNodeIterator, everything
+   * else is not equal.
    * @param other the other iterator
    * @return true if equal
    */
@@ -177,10 +178,8 @@ public:
   {
     if (atEnd())
       return other.atEnd();
-    else if (other.atEnd())
-      return false;
     else 
-      return *_currentDataPtr == *otherNode._currentDataPtr;
+      return this != & other;
   }
 
   /**
