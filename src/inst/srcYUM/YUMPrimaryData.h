@@ -11,7 +11,7 @@
 namespace YUM {
 
   class YUMPrimaryData : public CountedRep {
-    REP_BODY(YUMPrimaryData)
+    REP_BODY(YUMPrimaryData);
 
   public:
 

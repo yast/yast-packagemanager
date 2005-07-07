@@ -106,6 +106,7 @@ YUMPrimaryDataIterator::parseFormatNode(YUMPrimaryDataPtr dataPtr,
                                         xmlNodePtr formatNode)
 {
   assert(formatNode);
+  dataPtr->installOnly = false;
   for (xmlNodePtr child = formatNode->children; 
        child != 0;
        child = child ->next) {
@@ -157,7 +158,7 @@ YUMPrimaryDataIterator::parseFormatNode(YUMPrimaryDataPtr dataPtr,
       else if (name == "media") {
         dataPtr->media = _helper.attribute(child,"mediaid");
       }
-      else if (name == "dirsize") {
+      else if (name == "dirsizes") {
         parseDirsizeEntries(& dataPtr->dirSizes, child);
       }
       else if (name == "freshen") {
@@ -246,7 +247,8 @@ void YUMPrimaryDataIterator::parseDirsizeEntries(list<YUMDirSize> *sizes,
       string name = _helper.name(child);
       if (name == "dirsize") { 
         sizes->push_back(YUMDirSize(_helper.attribute(child,"path"),
-                                    _helper.attribute(child,"size")));
+                                    _helper.attribute(child,"size-kbyte"),
+                                    _helper.attribute(child,"filecount")));
       }
     }
   }

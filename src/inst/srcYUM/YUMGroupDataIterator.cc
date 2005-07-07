@@ -36,7 +36,7 @@ YUMGroupDataIterator::process(const xmlTextReaderPtr reader)
          if (_helper.isElement(child)) {
            string name = _helper.name(child);
            if (name == "groupid") {
-             dataPtr->groupid = _helper.content(child);
+             dataPtr->groupId = _helper.content(child);
            }
            else if (name == "name") {
              dataPtr->name.push_back
@@ -44,10 +44,10 @@ YUMGroupDataIterator::process(const xmlTextReaderPtr reader)
                                         _helper.content(child)));
            }
            else if (name == "default") {
-             dataPtr->default = _helper.content(child);
+             dataPtr->default_ = _helper.content(child);
            }
            else if (name == "uservisible") {
-             dataPtr->uservisible = _helper.content(child);
+             dataPtr->userVisible = _helper.content(child);
            }
            else if (name == "description") {
              dataPtr->description.push_back
@@ -57,31 +57,65 @@ YUMGroupDataIterator::process(const xmlTextReaderPtr reader)
            else if (name == "grouplist") {
              parseGrouplist(dataPtr, child);
            }
-           else if (name == "packagelist)
-
-           
-           if (name == "location") {
-             repoPtr->location = _helper.attribute(child,"href");
+           else if (name == "packagelist") {
+             parsePackageList(dataPtr, child);
            }
-           else if (name == "checksum") {
-             repoPtr->checksumType = _helper.attribute(child,"type");
-             repoPtr->checksum = _helper.content(child);
-           }
-           else if (name == "timestamp") {
-             repoPtr->timestamp = _helper.content(child);
-           }
-           else if (name == "open-checksum") {
-             repoPtr->openChecksumType = _helper.attribute(child, "type");
-             repoPtr->openChecksum = _helper.content(child);
+           else {
+             /* FIXME: Log file problem */
            }
          }
        }
-  return repoPtr;
+  return dataPtr;
 } /* end process */
+
+void YUMGroupDataIterator::parseGrouplist(YUMGroupDataPtr dataPtr,
+                                          xmlNodePtr node)
+{
+  assert(dataPtr);
+  assert(node);
+  
+  for (xmlNodePtr child = node->children;
+       child != 0;
+       child = child ->next) {
+         if (_helper.isElement(child)) {
+           string name = _helper.name(child);
+           if (name == "metapkg" || name == "groupreq") {
+             dataPtr->grouplist.push_back
+               (YUMGroupData::MetaPkg(_helper.attribute(child,"type"),
+                                      _helper.content(child)));
+           }
+         }
+       }
+}
+
+
+void YUMGroupDataIterator::parsePackageList(YUMGroupDataPtr dataPtr,
+                                            xmlNodePtr node)
+{
+  assert(dataPtr);
+  assert(node);
+  
+  for (xmlNodePtr child = node->children;
+       child != 0;
+       child = child ->next) {
+         if (_helper.isElement(child)) {
+           string name = _helper.name(child);
+           if (name == "packagereq") {
+           dataPtr->packageList.push_back
+             (YUMGroupData::PackageReq(_helper.attribute(child,"type"),
+                                       _helper.attribute(child,"epoch"),
+                                       _helper.attribute(child,"ver"),
+                                       _helper.attribute(child,"rel"),
+                                       _helper.content(child)));
+           }
+         }
+       }
+}
+
 
 
 YUMGroupDataIterator::YUMGroupDataIterator(istream &is, const string &baseUrl)
-: XMLNodeIterator<YUMRepomdDataPtr>(is, baseUrl)
+: XMLNodeIterator<YUMGroupDataPtr>(is, baseUrl)
 { 
   fetchNext();
 }
