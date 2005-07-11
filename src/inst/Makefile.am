@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src/instsrc
 #
 
-SUBDIRS = rpm
+SUBDIRS = rpm srcYUM
 
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
 AM_LDFLAGS = -L$(libdir)
