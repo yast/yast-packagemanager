@@ -1,5 +1,5 @@
-#include <YUMGroupDataIterator.h>
-#include <YUMGroupData.h>
+#include <YUMGroupParser.h>
+#include <YUMData.h>
 #include <LibXMLHelper.h>
 #include <istream>
 #include <string>
@@ -10,20 +10,20 @@
 using namespace std;
 using namespace YUM;
 
-YUMGroupDataIterator::~YUMGroupDataIterator()
+YUMGroupParser::~YUMGroupParser()
 { }
 
 
 // select for which elements process() will be called
 bool 
-YUMGroupDataIterator::isInterested(const xmlNodePtr nodePtr)
+YUMGroupParser::isInterested(const xmlNodePtr nodePtr)
 {
   return _helper.isElement(nodePtr) && _helper.name(nodePtr) == "group";
 }
 
 // do the actual processing
 YUMGroupDataPtr
-YUMGroupDataIterator::process(const xmlTextReaderPtr reader)
+YUMGroupParser::process(const xmlTextReaderPtr reader)
 {
   assert(reader);
   YUMGroupDataPtr dataPtr = new YUMGroupData;
@@ -68,7 +68,7 @@ YUMGroupDataIterator::process(const xmlTextReaderPtr reader)
   return dataPtr;
 } /* end process */
 
-void YUMGroupDataIterator::parseGrouplist(YUMGroupDataPtr dataPtr,
+void YUMGroupParser::parseGrouplist(YUMGroupDataPtr dataPtr,
                                           xmlNodePtr node)
 {
   assert(dataPtr);
@@ -89,7 +89,7 @@ void YUMGroupDataIterator::parseGrouplist(YUMGroupDataPtr dataPtr,
 }
 
 
-void YUMGroupDataIterator::parsePackageList(YUMGroupDataPtr dataPtr,
+void YUMGroupParser::parsePackageList(YUMGroupDataPtr dataPtr,
                                             xmlNodePtr node)
 {
   assert(dataPtr);
@@ -114,7 +114,7 @@ void YUMGroupDataIterator::parsePackageList(YUMGroupDataPtr dataPtr,
 
 
 
-YUMGroupDataIterator::YUMGroupDataIterator(istream &is, const string &baseUrl)
+YUMGroupParser::YUMGroupParser(istream &is, const string &baseUrl)
 : XMLNodeIterator<YUMGroupDataPtr>(is, baseUrl)
 { 
   fetchNext();

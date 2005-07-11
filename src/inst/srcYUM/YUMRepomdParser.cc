@@ -1,5 +1,5 @@
-#include <YUMRepomdDataIterator.h>
-#include <YUMRepomdData.h>
+#include <YUMRepomdParser.h>
+#include <YUMData.h>
 #include <LibXMLHelper.h>
 #include <istream>
 #include <string>
@@ -10,20 +10,20 @@
 using namespace std;
 using namespace YUM;
 
-YUMRepomdDataIterator::~YUMRepomdDataIterator()
+YUMRepomdParser::~YUMRepomdParser()
 { }
 
 
 // select for which elements process() will be called
 bool 
-YUMRepomdDataIterator::isInterested(const xmlNodePtr nodePtr) 
+YUMRepomdParser::isInterested(const xmlNodePtr nodePtr)
 {
   return _helper.isElement(nodePtr) && _helper.name(nodePtr) == "data";
 }
 
 // do the actual processing
 YUMRepomdDataPtr
-YUMRepomdDataIterator::process(const xmlTextReaderPtr reader)
+YUMRepomdParser::process(const xmlTextReaderPtr reader)
 {
   assert(reader);
   YUMRepomdDataPtr repoPtr = new YUMRepomdData;
@@ -56,7 +56,7 @@ YUMRepomdDataIterator::process(const xmlTextReaderPtr reader)
 } /* end process */
 
   
-YUMRepomdDataIterator::YUMRepomdDataIterator(istream &is, const string &baseUrl)
+YUMRepomdParser::YUMRepomdParser(istream &is, const string &baseUrl)
   : XMLNodeIterator<YUMRepomdDataPtr>(is, baseUrl)
 { 
   fetchNext();

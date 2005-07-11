@@ -16,7 +16,8 @@ Author:     Michael Radziej <mir@suse.de>
 Maintainer: Michael Radziej <mir@suse.de>
 
 Purpose:    Boring constructors of YUM repository data structures.
-            Don't read this in a tired mood.
+            There's no actual content in this file.
+            Don't read in a tired mood.
 /-*/
 
 
@@ -54,7 +55,7 @@ YUMRepomdData::YUMRepomdData()
 YUMPrimaryData::YUMPrimaryData()
 { }
 
-YUMPrimaryData::FileSize::FileSize()
+YUMPrimaryData::FileData::FileData()
 { }
 
 YUMPrimaryData::FileData::FileData(const std::string &name,
@@ -92,4 +93,10 @@ YUMGroupData::PackageReq::PackageReq(const std::string& type,
                            const std::string& name)
 : type(type), epoch(epoch), ver(ver), rel(rel), name(name)
 { }
+
+/* Define pointer classes */
+
+IMPL_BASE_POINTER(YUMRepomdData);
+IMPL_BASE_POINTER(YUMPrimaryData);
+IMPL_BASE_POINTER(YUMGroupData);
 
