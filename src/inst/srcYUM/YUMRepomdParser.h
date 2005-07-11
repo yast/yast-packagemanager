@@ -1,19 +1,19 @@
 
 
-#ifndef YUMRepomdDataIterator_h
-#define YUMRepomdDataIterator_h
+#ifndef YUMRepomdParser_h
+#define YUMRepomdParser_h
 
-#include "YUMRepomdDataPtr.h"
-#include "XMLNodeIterator.h"
-#include "LibXMLHelper.h"
+#include <YUMData.h>
+#include <XMLNodeIterator.h>
+#include <LibXMLHelper.h>
 
 namespace YUM {
 
-  class YUMRepomdDataIterator : public XMLNodeIterator<YUMRepomdDataPtr>
+  class YUMRepomdParser : public XMLNodeIterator<YUMRepomdDataPtr>
   {
   public:
-    YUMRepomdDataIterator(std::istream &is, const std::string &baseUrl);
-    virtual ~YUMRepomdDataIterator();
+    YUMRepomdParser(std::istream &is, const std::string &baseUrl);
+    virtual ~YUMRepomdParser();
 
   private:
     virtual bool isInterested(const xmlNodePtr nodePtr);

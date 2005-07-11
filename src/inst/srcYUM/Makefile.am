@@ -14,17 +14,10 @@ noinst_LTLIBRARIES = liby2pmsrcYUM.la
 
 liby2pmsrcYUM_la_SOURCES =		\
 	LibXMLHelper.cc			\
-	YUMDependency.cc		\
-	YUMDirSize.cc			\
-	YUMGroupData.cc			\
-	YUMGroupDataPtr.cc		\
-	YUMGroupDataIterator.cc		\
-	YUMPrimaryData.cc		\
-	YUMPrimaryDataPtr.cc		\
-	YUMPrimaryDataIterator.cc	\
-	YUMRepomdData.cc		\
-	YUMRepomdDataPtr.cc		\
-	YUMRepomdDataIterator.cc
+	YUMData.cc			\
+	YUMGroupParser.cc		\
+	YUMPrimaryParser.cc		\
+	YUMRepomdParser.cc
 #	InstSrcDataYUM.cc
 #	PMYUMPackageDataProvider.cc
 

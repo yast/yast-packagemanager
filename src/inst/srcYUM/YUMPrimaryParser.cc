@@ -1,5 +1,4 @@
-#include <YUMPrimaryDataIterator.h>
-#include <YUMPrimaryData.h>
+#include <YUMPrimaryParser.h>
 #include <istream>
 #include <string>
 #include <cassert>
@@ -10,14 +9,14 @@ using namespace std;
 using namespace YUM;
 
 
-YUMPrimaryDataIterator::YUMPrimaryDataIterator(istream &is, const string& baseUrl)
+YUMPrimaryParser::YUMPrimaryParser(istream &is, const string& baseUrl)
   : XMLNodeIterator<YUMPrimaryDataPtr>(is, baseUrl)
 {
   fetchNext();
 }
 
 
-YUMPrimaryDataIterator::~YUMPrimaryDataIterator()
+YUMPrimaryParser::~YUMPrimaryParser()
 {
 }
   
@@ -26,7 +25,7 @@ YUMPrimaryDataIterator::~YUMPrimaryDataIterator()
 
 // select for which elements process() will be called
 bool 
-YUMPrimaryDataIterator::isInterested(const xmlNodePtr nodePtr)
+YUMPrimaryParser::isInterested(const xmlNodePtr nodePtr)
 {
   bool result = (_helper.isElement(nodePtr)
                  && _helper.name(nodePtr) == "package");
@@ -36,7 +35,7 @@ YUMPrimaryDataIterator::isInterested(const xmlNodePtr nodePtr)
 
 // do the actual processing
 YUMPrimaryDataPtr
-YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
+YUMPrimaryParser::process(const xmlTextReaderPtr reader)
 {
   assert(reader);
   YUMPrimaryDataPtr dataPtr = new YUMPrimaryData;
@@ -102,7 +101,7 @@ YUMPrimaryDataIterator::process(const xmlTextReaderPtr reader)
 
 
 void 
-YUMPrimaryDataIterator::parseFormatNode(YUMPrimaryDataPtr dataPtr,
+YUMPrimaryParser::parseFormatNode(YUMPrimaryDataPtr dataPtr,
                                         xmlNodePtr formatNode)
 {
   assert(formatNode);
@@ -174,7 +173,7 @@ YUMPrimaryDataIterator::parseFormatNode(YUMPrimaryDataPtr dataPtr,
 
 
 void
-YUMPrimaryDataIterator::parseDependencyEntries(list<YUMDependency> *depList, 
+YUMPrimaryParser::parseDependencyEntries(list<YUMDependency> *depList,
                                                xmlNodePtr depNode)
 {
   assert(depList);
@@ -198,7 +197,7 @@ YUMPrimaryDataIterator::parseDependencyEntries(list<YUMDependency> *depList,
 }
 
 void
-YUMPrimaryDataIterator::parseAuthorEntries(list<string> *authors,
+YUMPrimaryParser::parseAuthorEntries(list<string> *authors,
                                            xmlNodePtr node)
 {
   assert(authors);
@@ -216,7 +215,7 @@ YUMPrimaryDataIterator::parseAuthorEntries(list<string> *authors,
   }
 }
 
-void YUMPrimaryDataIterator::parseKeywordEntries(list<string> *keywords,
+void YUMPrimaryParser::parseKeywordEntries(list<string> *keywords,
                                                  xmlNodePtr node)
 {
   assert(keywords);
@@ -234,7 +233,7 @@ void YUMPrimaryDataIterator::parseKeywordEntries(list<string> *keywords,
   }
 }
 
-void YUMPrimaryDataIterator::parseDirsizeEntries(list<YUMDirSize> *sizes,
+void YUMPrimaryParser::parseDirsizeEntries(list<YUMDirSize> *sizes,
                                                  xmlNodePtr node)
 {
   assert(sizes);

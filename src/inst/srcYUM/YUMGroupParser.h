@@ -1,20 +1,20 @@
 
 
-#ifndef YUMGroupDataIterator_h
-#define YUMGroupDataIterator_h
+#ifndef YUMGroupParser_h
+#define YUMGroupParser_h
 
-#include <YUMGroupDataPtr.h>
+#include <YUMData.h>
 #include <XMLNodeIterator.h>
 #include <LibXMLHelper.h>
 #include <list>
 
 namespace YUM {
 
-  class YUMGroupDataIterator : public XMLNodeIterator<YUMGroupDataPtr>
+  class YUMGroupParser : public XMLNodeIterator<YUMGroupDataPtr>
   {
   public:
-    YUMGroupDataIterator(std::istream &is, const std::string &baseUrl);
-    virtual ~YUMGroupDataIterator();
+    YUMGroupParser(std::istream &is, const std::string &baseUrl);
+    virtual ~YUMGroupParser();
     
   private:
     virtual bool isInterested(const xmlNodePtr nodePtr);

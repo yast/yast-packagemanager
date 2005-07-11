@@ -84,6 +84,9 @@ namespace YUM {
     std::string openChecksum;
   };
 
+  DEFINE_BASE_POINTER(YUMRepomdData);
+
+
   /**
    * @short Describes a package in a YUM repository
    **/
@@ -143,6 +146,8 @@ namespace YUM {
     bool installOnly;
   };
 
+  DEFINE_BASE_POINTER(YUMPrimaryData);
+
 
   /**
   * @short Describes the groups in a YUM repository
@@ -192,5 +197,11 @@ namespace YUM {
     std::list<MetaPkg> grouplist;
     std::list<PackageReq> packageList;
   };
+
+  DEFINE_BASE_POINTER(YUMGroupData);
+}
+
+
+
 
 #endif

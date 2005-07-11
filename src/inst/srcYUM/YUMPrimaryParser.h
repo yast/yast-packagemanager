@@ -1,24 +1,22 @@
 
 
-#ifndef YUMPrimaryDataIterator_h
-#define YUMPrimaryDataIterator_h
+#ifndef YUMPrimaryParser_h
+#define YUMPrimaryParser_h
 
-#include <YUMPrimaryDataPtr.h>
+#include <YUMData.h>
 #include <XMLNodeIterator.h>
 #include <LibXMLHelper.h>
-#include <YUMDependency.h>
-#include <YUMDirSize.h>
 #include <list>
 
 namespace YUM {
 
   class YUMDependency;
 
-  class YUMPrimaryDataIterator : public XMLNodeIterator<YUMPrimaryDataPtr>
+  class YUMPrimaryParser : public XMLNodeIterator<YUMPrimaryDataPtr>
   {
   public:
-    YUMPrimaryDataIterator(std::istream &is, const std::string &baseUrl);
-    virtual ~YUMPrimaryDataIterator();
+    YUMPrimaryParser(std::istream &is, const std::string &baseUrl);
+    virtual ~YUMPrimaryParser();
 
   private:
     virtual bool isInterested(const xmlNodePtr nodePtr);
@@ -27,12 +25,12 @@ namespace YUM {
                          xmlNodePtr formatNode);
     void parseDependencyEntries(std::list<YUMDependency> *depList, 
                                 xmlNodePtr depNode);
-    void YUMPrimaryDataIterator::parseAuthorEntries(std::list<std::string> *authors,
-                                                    xmlNodePtr node);
-    void YUMPrimaryDataIterator::parseKeywordEntries(std::list<std::string> *keywords,
-                                                     xmlNodePtr node);
-    void YUMPrimaryDataIterator::parseDirsizeEntries(std::list<YUMDirSize> *sizes,
-                                                     xmlNodePtr node);
+    void parseAuthorEntries(std::list<std::string> *authors,
+                            xmlNodePtr node);
+    void parseKeywordEntries(std::list<std::string> *keywords,
+                             xmlNodePtr node);
+    void parseDirsizeEntries(std::list<YUMDirSize> *sizes,
+                             xmlNodePtr node);
 
     LibXMLHelper _helper;
   };
