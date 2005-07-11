@@ -1,6 +1,6 @@
-#include "YUMGroupDataIterator.h"
-#include "YUMGroupDataPtr.h"
-#include "YUMGroupData.h"
+#include <YUMGroupDataIterator.h>
+#include <YUMGroupDataPtr.h>
+#include <YUMGroupData.h>
 #include <list>
 
 using namespace std;

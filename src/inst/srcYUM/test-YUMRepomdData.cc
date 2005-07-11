@@ -1,6 +1,6 @@
-#include "YUMRepomdDataIterator.h"
-#include "YUMRepomdDataPtr.h"
-#include "YUMRepomdData.h"
+#include <YUMRepomdDataIterator.h>
+#include <YUMRepomdDataPtr.h>
+#include <YUMRepomdData.h>
 
 using namespace std;
 using namespace YUM;

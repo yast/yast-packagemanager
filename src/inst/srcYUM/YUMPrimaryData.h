@@ -1,9 +1,9 @@
 #ifndef YUMPrimaryData_h
 #define YUMPrimaryData_h
 
-#include "YUMRepomdDataIterator.h"
-#include "YUMDependency.h"
-#include "YUMDirSize.h"
+#include <YUMRepomdDataIterator.h>
+#include <YUMDependency.h>
+#include <YUMDirSize.h>
 #include <string>
 #include <list>
 
@@ -20,6 +20,7 @@ namespace YUM {
     struct FileData {
       std::string name;
       std::string type;
+      FileData();
       FileData(const std::string &name,
                const std::string &type);
     };

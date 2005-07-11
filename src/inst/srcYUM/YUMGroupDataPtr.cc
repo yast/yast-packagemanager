@@ -1,5 +1,5 @@
-#include "YUMGroupDataPtr.h"
-#include "YUMGroupData.h"
+#include <YUMGroupDataPtr.h>
+#include <YUMGroupData.h>
 #include <y2util/RepDef.h>
 
 using namespace YUM;
