@@ -1,5 +1,5 @@
-#include "YUMPrimaryDataPtr.h"
-#include "YUMPrimaryData.h"
+#include <YUMPrimaryDataPtr.h>
+#include <YUMPrimaryData.h>
 
 using namespace YUM;
 

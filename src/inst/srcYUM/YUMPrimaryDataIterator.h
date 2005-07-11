@@ -3,11 +3,11 @@
 #ifndef YUMPrimaryDataIterator_h
 #define YUMPrimaryDataIterator_h
 
-#include "YUMPrimaryDataPtr.h"
-#include "XMLNodeIterator.h"
-#include "LibXMLHelper.h"
-#include "YUMDependency.h"
-#include "YUMDirSize.h"
+#include <YUMPrimaryDataPtr.h>
+#include <XMLNodeIterator.h>
+#include <LibXMLHelper.h>
+#include <YUMDependency.h>
+#include <YUMDirSize.h>
 #include <list>
 
 namespace YUM {

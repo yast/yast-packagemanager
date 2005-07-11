@@ -3,9 +3,9 @@
 #ifndef YUMGroupDataIterator_h
 #define YUMGroupDataIterator_h
 
-#include "YUMGroupDataPtr.h"
-#include "XMLNodeIterator.h"
-#include "LibXMLHelper.h"
+#include <YUMGroupDataPtr.h>
+#include <XMLNodeIterator.h>
+#include <LibXMLHelper.h>
 #include <list>
 
 namespace YUM {

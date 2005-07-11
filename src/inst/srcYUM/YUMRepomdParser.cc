@@ -1,6 +1,6 @@
-#include "YUMRepomdDataIterator.h"
-#include "YUMRepomdData.h"
-#include "LibXMLHelper.h"
+#include <YUMRepomdDataIterator.h>
+#include <YUMRepomdData.h>
+#include <LibXMLHelper.h>
 #include <istream>
 #include <string>
 #include <cassert>

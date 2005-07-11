@@ -1,6 +1,6 @@
-#include "YUMGroupDataIterator.h"
-#include "YUMGroupData.h"
-#include "LibXMLHelper.h"
+#include <YUMGroupDataIterator.h>
+#include <YUMGroupData.h>
+#include <LibXMLHelper.h>
 #include <istream>
 #include <string>
 #include <cassert>

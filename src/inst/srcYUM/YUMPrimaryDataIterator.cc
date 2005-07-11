@@ -1,10 +1,10 @@
-#include "YUMPrimaryDataIterator.h"
-#include "YUMPrimaryData.h"
+#include <YUMPrimaryDataIterator.h>
+#include <YUMPrimaryData.h>
 #include <istream>
 #include <string>
 #include <cassert>
 #include <libxml/xmlstring.h>
-#include "LibXMLHelper.h"
+#include <LibXMLHelper.h>
 
 using namespace std;
 using namespace YUM;
