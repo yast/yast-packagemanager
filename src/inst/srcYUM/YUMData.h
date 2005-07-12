@@ -105,6 +105,7 @@ namespace YUM {
 
   /**
    * @short A Package reference, e.g. within YUMGroupData
+   * this is without architecture.
    **/
   class PackageReq {
   public:
@@ -217,7 +218,9 @@ namespace YUM {
 
   DEFINE_BASE_POINTER(YUMGroupData);
 
-
+  /**
+   * @short Contains the YUM file list for a package.
+   **/
   class YUMFileListData : public CountedRep
   {
     REP_BODY(YUMFileListData);
