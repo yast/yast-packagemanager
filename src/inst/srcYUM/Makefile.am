@@ -17,7 +17,8 @@ liby2pmsrcYUM_la_SOURCES =		\
 	YUMData.cc			\
 	YUMGroupParser.cc		\
 	YUMPrimaryParser.cc		\
-	YUMRepomdParser.cc
+	YUMRepomdParser.cc		\
+	YUMFileListParser.cc
 #	InstSrcDataYUM.cc
 #	PMYUMPackageDataProvider.cc
 

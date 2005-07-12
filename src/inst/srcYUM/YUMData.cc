@@ -94,9 +94,13 @@ PackageReq::PackageReq(const std::string& type,
 : type(type), epoch(epoch), ver(ver), rel(rel), name(name)
 { }
 
+YUMFileListData::YUMFileListData()
+{ }
+
+
 /* Define pointer classes */
 
 IMPL_BASE_POINTER(YUMRepomdData);
 IMPL_BASE_POINTER(YUMPrimaryData);
 IMPL_BASE_POINTER(YUMGroupData);
-
+IMPL_BASE_POINTER(YUMFileListData);
