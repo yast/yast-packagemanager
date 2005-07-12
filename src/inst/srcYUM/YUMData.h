@@ -122,6 +122,20 @@ namespace YUM {
     std::string name;
   };
 
+  /**
+  * @short A single changelog entry
+  **/
+  class ChangelogEntry {
+  public:
+    ChangelogEntry();
+    ChangelogEntry(const std::string& author,
+                  const std::string& date,
+                  const std::string& entry);
+    std::string author;
+    std::string date;
+    std::string entry;
+  };
+
 
   /**
    * @short Holds the metadata about a YUM repository
@@ -219,10 +233,9 @@ namespace YUM {
   DEFINE_BASE_POINTER(YUMGroupData);
 
   /**
-   * @short Contains the YUM file list for a package.
+   * @short Contains the file list for a YUM package.
    **/
-  class YUMFileListData : public CountedRep
-  {
+  class YUMFileListData : public CountedRep {
     REP_BODY(YUMFileListData);
 
   public:
@@ -239,8 +252,25 @@ namespace YUM {
   };
 
   DEFINE_BASE_POINTER(YUMFileListData);
-}
 
+  /**
+  * @short Data from other.mxl, i.e., changelogs
+  **/
+  class YUMOtherData : public CountedRep {
+    REP_BODY(YUMOtherData);
+  public:
+    YUMOtherData();
+    std::string pkgId;
+    std::string name;
+    std::string arch;
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::list<ChangelogEntry> changelog;
+  };
+
+  DEFINE_BASE_POINTER(YUMOtherData);
+}
 
 
 
