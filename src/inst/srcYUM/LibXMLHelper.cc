@@ -2,6 +2,7 @@
 #include <libxml/tree.h>
 #include <libxml/xmlstring.h>
 #include <cassert>
+#include <sstream>
 
 using namespace std;
 
@@ -48,7 +49,7 @@ std::string LibXMLHelper::name(const xmlNodePtr nodePtr) const
 {
   assert(nodePtr);
   return string((const char*) nodePtr->name);
-}    
+}
 
 
 bool LibXMLHelper::isElement(const xmlNodePtr nodePtr) const
@@ -56,3 +57,9 @@ bool LibXMLHelper::isElement(const xmlNodePtr nodePtr) const
   return nodePtr->type == XML_ELEMENT_NODE;
 }
 
+std::string LibXMLHelper::positionInfo(const xmlNodePtr nodePtr) const
+{
+  stringstream<char> strm;
+  strm << nodePtr->line;
+  return string("at line ") + strm.str();
+}

@@ -6,6 +6,7 @@
 #include <cassert>
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
+#include <y2util/Y2SLog.h>
 
 using namespace std;
 using namespace YUM;
@@ -61,7 +62,8 @@ YUMGroupParser::process(const xmlTextReaderPtr reader)
              parsePackageList(dataPtr, child);
            }
            else {
-             /* FIXME: Log file problem */
+             WAR << "YUM <group> contains the unknown element <" << name << "> "
+               << _helper.positionInfo(child) << ", skipping" << endl;
            }
          }
        }
@@ -83,6 +85,10 @@ void YUMGroupParser::parseGrouplist(YUMGroupDataPtr dataPtr,
              dataPtr->grouplist.push_back
                (MetaPkg(_helper.attribute(child,"type"),
                         _helper.content(child)));
+           }
+           else {
+             WAR << "YUM <grouplist> contains the unknown element <" << name << "> "
+               << _helper.positionInfo(child) << ", skipping" << endl;
            }
          }
        }
@@ -107,6 +113,10 @@ void YUMGroupParser::parsePackageList(YUMGroupDataPtr dataPtr,
                          _helper.attribute(child,"ver"),
                          _helper.attribute(child,"rel"),
                          _helper.content(child)));
+           }
+           else {
+             WAR << "YUM <packagelist> contains the unknown element <" << name << "> "
+               << _helper.positionInfo(child) << ", skipping" << endl;
            }
          }
        }

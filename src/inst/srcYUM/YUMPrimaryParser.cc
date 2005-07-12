@@ -4,6 +4,8 @@
 #include <cassert>
 #include <libxml/xmlstring.h>
 #include <LibXMLHelper.h>
+#include <y2util/Y2SLog.h>
+
 
 using namespace std;
 using namespace YUM;
@@ -93,6 +95,10 @@ YUMPrimaryParser::process(const xmlTextReaderPtr reader)
       else if (name == "format") {
         parseFormatNode(dataPtr, child);
       }
+      else {
+        WAR << "YUM <metadata> contains the unknown element <" << name << "> "
+          << _helper.positionInfo(child) << ", skipping" << endl;
+      }
     }
   }
   return dataPtr;
@@ -166,7 +172,10 @@ YUMPrimaryParser::parseFormatNode(YUMPrimaryDataPtr dataPtr,
       else if (name == "install_only") {
         dataPtr->installOnly = true;
       }
-      else { /* FIXME: log parse warning */ }
+      else {
+        WAR << "YUM <format> contains the unknown element <" << name << "> "
+          << _helper.positionInfo(child) << ", skipping" << endl;
+      }
     }
   }
 }
@@ -192,6 +201,10 @@ YUMPrimaryParser::parseDependencyEntries(list<YUMDependency> *depList,
                          _helper.attribute(child,"ver"),
                          _helper.attribute(child,"rel")));
       }
+      else {
+        WAR << "YUM dependency within <format> contains the unknown element <" << name << "> "
+          << _helper.positionInfo(child) << ", skipping" << endl;
+      }
     }
   }
 }
@@ -211,6 +224,10 @@ YUMPrimaryParser::parseAuthorEntries(list<string> *authors,
       if (name == "author") { 
         authors->push_back(_helper.content(child));
       }
+      else {
+        WAR << "YUM <authors> contains the unknown element <" << name << "> "
+          << _helper.positionInfo(child) << ", skipping" << endl;
+      }
     }
   }
 }
@@ -228,6 +245,10 @@ void YUMPrimaryParser::parseKeywordEntries(list<string> *keywords,
       string name = _helper.name(child);
       if (name == "keyword") { 
         keywords->push_back(_helper.content(child));
+      }
+      else {
+        WAR << "YUM <keywords> contains the unknown element <" << name << "> "
+          << _helper.positionInfo(child) << ", skipping" << endl;
       }
     }
   }
@@ -248,6 +269,10 @@ void YUMPrimaryParser::parseDirsizeEntries(list<YUMDirSize> *sizes,
         sizes->push_back(YUMDirSize(_helper.attribute(child,"path"),
                                     _helper.attribute(child,"size-kbyte"),
                                     _helper.attribute(child,"filecount")));
+      }
+      else {
+        WAR << "YUM <dirsizes> contains the unknown element <" << name << "> "
+          << _helper.positionInfo(child) << ", skipping" << endl;
       }
     }
   }

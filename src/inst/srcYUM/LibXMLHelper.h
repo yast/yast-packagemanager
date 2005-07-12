@@ -58,6 +58,14 @@ public:
    * @return true if it is an element node
    */
   bool isElement(const xmlNodePtr nodePtr) const;
+
+  /**
+   * returns a string that identifies the position of an element nodes
+   * e.g. for error messages
+   * @param nodePtr the xmlNode
+   * @return the position information
+   */
+  std::string positionInfo(const xmlNodePtr nodePtr) const;
 };
 
 #endif

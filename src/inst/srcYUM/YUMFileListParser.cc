@@ -26,6 +26,9 @@ Purpose:    Parses file list files in a YUM repository
 #include <cassert>
 #include <libxml/xmlstring.h>
 #include <LibXMLHelper.h>
+#include <y2util/Y2SLog.h>
+
+
 
 using namespace std;
 using namespace YUM;
@@ -84,7 +87,8 @@ YUMFileListParser::process(const xmlTextReaderPtr reader)
                          _helper.attribute(child,"type")));
            }
            else {
-             /* FIXME: error logging */
+             WAR << "YUM <filelists> contains the unknown element <" << name << "> "
+               << _helper.positionInfo(child) << ", skipping" << endl;
            }
          }
        }
