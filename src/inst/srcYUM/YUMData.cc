@@ -94,7 +94,20 @@ PackageReq::PackageReq(const std::string& type,
 : type(type), epoch(epoch), ver(ver), rel(rel), name(name)
 { }
 
+ChangelogEntry::ChangelogEntry()
+{ }
+
+ChangelogEntry::ChangelogEntry(const std::string& author,
+                               const std::string& date,
+                               const std::string& entry)
+: author(author), date(date), entry(entry)
+{ }
+
+                
 YUMFileListData::YUMFileListData()
+{ }
+
+YUMOtherData::YUMOtherData()
 { }
 
 
@@ -104,3 +117,4 @@ IMPL_BASE_POINTER(YUMRepomdData);
 IMPL_BASE_POINTER(YUMPrimaryData);
 IMPL_BASE_POINTER(YUMGroupData);
 IMPL_BASE_POINTER(YUMFileListData);
+IMPL_BASE_POINTER(YUMOtherData);
