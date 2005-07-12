@@ -53,8 +53,7 @@ namespace YUM {
   /**
   * @short Holds data about how much space will be needed per directory
   **/
-  class YUMDirSize
-  {
+  class YUMDirSize {
   public:
     YUMDirSize();
     YUMDirSize(const std::string& path,
@@ -65,6 +64,62 @@ namespace YUM {
     const std::string fileCount;
   };
 
+  /**
+   * @short Holds Data about file and file type
+   *  (directory, plain) within other YUM data
+   **/
+  class FileData {
+  public:
+    std::string name;
+    std::string type;
+    FileData();
+    FileData(const std::string &name,
+             const std::string &type);
+  };
+
+  /**
+   * @short A Multi-language text
+   * (usually you have a list<MultiLang>)
+   **/
+  class MultiLang {
+  public:
+    MultiLang();
+    MultiLang(const std::string& langugage,
+              const std::string& text);
+    std::string language;
+    std::string text;
+  };
+
+  /**
+   * @short Defines "meta packages" that are in YUMGroupData
+   * FIXME: I'm not certain what this is ;-)
+   **/
+  class MetaPkg {
+  public:
+    MetaPkg();
+    MetaPkg(const std::string& type,
+            const std::string& name);
+    std::string type;
+    std::string name;
+  };
+
+  /**
+   * @short A Package reference, e.g. within YUMGroupData
+   **/
+  class PackageReq {
+  public:
+    PackageReq();
+    PackageReq(const std::string& type,
+              const std::string& epoch,
+              const std::string& ver,
+              const std::string& rel,
+              const std::string& name);
+    std::string type;
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::string name;
+  };
 
 
   /**
@@ -96,14 +151,6 @@ namespace YUM {
   public:
     
     YUMPrimaryData();
-    
-    struct FileData {
-      std::string name;
-      std::string type;
-      FileData();
-      FileData(const std::string &name,
-               const std::string &type);
-    };
     
     std::string type;
     std::string name;
@@ -157,36 +204,6 @@ namespace YUM {
     REP_BODY(YUMGroupData);
     
   public:
-    class MultiLang {
-    public:
-      MultiLang();
-      MultiLang(const std::string& langugage,
-                const std::string& text);
-      std::string language;
-      std::string text;
-    };
-    class MetaPkg {
-    public:
-      MetaPkg();
-      MetaPkg(const std::string& type,
-              const std::string& name);
-      std::string type;
-      std::string name;
-    };
-    class PackageReq {
-    public:
-      PackageReq();
-      PackageReq(const std::string& type,
-                const std::string& epoch,
-                const std::string& ver,
-                const std::string& rel,
-                const std::string& name);
-      std::string type;
-      std::string epoch;
-      std::string ver;
-      std::string rel;
-      std::string name;
-    };
     
     YUMGroupData();
     std::string groupId;
@@ -199,6 +216,26 @@ namespace YUM {
   };
 
   DEFINE_BASE_POINTER(YUMGroupData);
+
+
+  class YUMFileListData : public CountedRep
+  {
+    REP_BODY(YUMFileListData);
+
+  public:
+
+    YUMFileListData();
+
+    std::string pkgId;
+    std::string name;
+    std::string arch;
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::list<FileData> files;
+  };
+
+  DEFINE_BASE_POINTER(YUMFileListData);
 }
 
 

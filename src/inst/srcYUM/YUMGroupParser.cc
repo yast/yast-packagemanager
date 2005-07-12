@@ -40,8 +40,8 @@ YUMGroupParser::process(const xmlTextReaderPtr reader)
            }
            else if (name == "name") {
              dataPtr->name.push_back
-               (YUMGroupData::MultiLang(_helper.attribute(child,"lang"),
-                                        _helper.content(child)));
+               (MultiLang(_helper.attribute(child,"lang"),
+                          _helper.content(child)));
            }
            else if (name == "default") {
              dataPtr->default_ = _helper.content(child);
@@ -51,8 +51,8 @@ YUMGroupParser::process(const xmlTextReaderPtr reader)
            }
            else if (name == "description") {
              dataPtr->description.push_back
-               (YUMGroupData::MultiLang(_helper.attribute(child,"lang"),
-                                        _helper.content(child)));
+               (MultiLang(_helper.attribute(child,"lang"),
+                          _helper.content(child)));
            }
            else if (name == "grouplist") {
              parseGrouplist(dataPtr, child);
@@ -81,8 +81,8 @@ void YUMGroupParser::parseGrouplist(YUMGroupDataPtr dataPtr,
            string name = _helper.name(child);
            if (name == "metapkg" || name == "groupreq") {
              dataPtr->grouplist.push_back
-               (YUMGroupData::MetaPkg(_helper.attribute(child,"type"),
-                                      _helper.content(child)));
+               (MetaPkg(_helper.attribute(child,"type"),
+                        _helper.content(child)));
            }
          }
        }
@@ -102,11 +102,11 @@ void YUMGroupParser::parsePackageList(YUMGroupDataPtr dataPtr,
            string name = _helper.name(child);
            if (name == "packagereq") {
            dataPtr->packageList.push_back
-             (YUMGroupData::PackageReq(_helper.attribute(child,"type"),
-                                       _helper.attribute(child,"epoch"),
-                                       _helper.attribute(child,"ver"),
-                                       _helper.attribute(child,"rel"),
-                                       _helper.content(child)));
+             (PackageReq(_helper.attribute(child,"type"),
+                         _helper.attribute(child,"epoch"),
+                         _helper.attribute(child,"ver"),
+                         _helper.attribute(child,"rel"),
+                         _helper.content(child)));
            }
          }
        }
