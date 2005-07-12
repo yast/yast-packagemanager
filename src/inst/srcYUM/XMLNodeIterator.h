@@ -233,7 +233,7 @@ public:
   XMLNodeIterator operator++(int)   /* iter++ */
   {
     assert (!atEnd());
-    XMLNodeIterator<ENTRYTYPE> tmp(*currentDataPtr);
+    XMLNodeIterator<ENTRYTYPE> tmp(*_currentDataPtr);
     fetchNext();
     return tmp;
   }
