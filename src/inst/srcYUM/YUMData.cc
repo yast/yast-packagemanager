@@ -55,11 +55,11 @@ YUMRepomdData::YUMRepomdData()
 YUMPrimaryData::YUMPrimaryData()
 { }
 
-YUMPrimaryData::FileData::FileData()
+FileData::FileData()
 { }
 
-YUMPrimaryData::FileData::FileData(const std::string &name,
-                                   const std::string &type)
+FileData::FileData(const std::string &name,
+                   const std::string &type)
 : name(name), type(type)
 { }
 
@@ -67,30 +67,30 @@ YUMPrimaryData::FileData::FileData(const std::string &name,
 YUMGroupData::YUMGroupData()
 { }
 
-YUMGroupData::MultiLang::MultiLang()
+MultiLang::MultiLang()
 { }
 
-YUMGroupData::MultiLang::MultiLang(const std::string& langugage,
-                                   const std::string& text)
+MultiLang::MultiLang(const std::string& langugage,
+                     const std::string& text)
 : language(language), text(text)
 { }
 
 
-YUMGroupData::MetaPkg::MetaPkg()
+MetaPkg::MetaPkg()
 { }
 
-YUMGroupData::MetaPkg::MetaPkg(const std::string& type,
+MetaPkg::MetaPkg(const std::string& type,
                                const std::string& name)
 { }
 
-YUMGroupData::PackageReq::PackageReq()
+PackageReq::PackageReq()
 { }
 
-YUMGroupData::PackageReq::PackageReq(const std::string& type,
-                           const std::string& epoch,
-                           const std::string& ver,
-                           const std::string& rel,
-                           const std::string& name)
+PackageReq::PackageReq(const std::string& type,
+                       const std::string& epoch,
+                       const std::string& ver,
+                       const std::string& rel,
+                       const std::string& name)
 : type(type), epoch(epoch), ver(ver), rel(rel), name(name)
 { }
 

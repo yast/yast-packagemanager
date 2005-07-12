@@ -144,8 +144,8 @@ YUMPrimaryParser::parseFormatNode(YUMPrimaryDataPtr dataPtr,
       }
       else if (name == "file") {
         dataPtr->files.push_back
-          (YUMPrimaryData::FileData(_helper.content(child),
-                                    _helper.attribute(child,"type")));
+          (FileData(_helper.content(child),
+                    _helper.attribute(child,"type")));
       }
       /* SUSE specific elements */
       else if (name == "authors") {
