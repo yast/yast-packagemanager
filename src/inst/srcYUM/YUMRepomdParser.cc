@@ -6,6 +6,7 @@
 #include <cassert>
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
+#include <y2util/Y2SLog.h>
 
 using namespace std;
 using namespace YUM;
@@ -49,6 +50,10 @@ YUMRepomdParser::process(const xmlTextReaderPtr reader)
       else if (name == "open-checksum") {
         repoPtr->openChecksumType = _helper.attribute(child, "type");
         repoPtr->openChecksum = _helper.content(child);
+      }
+      else {
+        WAR << "YUM <data> contains the unknown element <" << name << "> "
+          << _helper.positionInfo(child) << ", skipping" << endl;
       }
     }
   }

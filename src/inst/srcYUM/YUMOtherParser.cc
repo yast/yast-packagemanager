@@ -26,6 +26,7 @@ Purpose:    Parses other.xml files in a YUM repository
 #include <cassert>
 #include <libxml/xmlstring.h>
 #include <LibXMLHelper.h>
+#include <y2util/Y2SLog.h>
 
 using namespace std;
 using namespace YUM;
@@ -85,7 +86,8 @@ YUMOtherParser::process(const xmlTextReaderPtr reader)
                                _helper.content(child)));
            }
            else {
-             /* FIXME: error logging */
+             WAR << "YUM <otherdata> contains the unknown element <" << name << "> "
+               << _helper.positionInfo(child) << ", skipping" << endl;
            }
          }
        }
