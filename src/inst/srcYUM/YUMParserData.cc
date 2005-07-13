@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-File:       YUMData.cc
+File:       YUMParserData.cc
 
 Author:     Michael Radziej <mir@suse.de>
 Maintainer: Michael Radziej <mir@suse.de>
@@ -21,7 +21,7 @@ Purpose:    Boring constructors of YUM repository data structures
 /-*/
 
 
-#include <YUMData.h>
+#include <YUMParserData.h>
 
 using namespace YUM;
 using namespace std;

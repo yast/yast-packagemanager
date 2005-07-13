@@ -23,7 +23,7 @@ Purpose:    Parses other.xml files in a YUM repository
 #define YUMOtherParser_h
 
 
-#include <YUMData.h>
+#include <YUMParserData.h>
 #include <XMLNodeIterator.h>
 #include <LibXMLHelper.h>
 #include <list>

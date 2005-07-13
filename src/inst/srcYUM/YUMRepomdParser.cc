@@ -1,5 +1,4 @@
 #include <YUMRepomdParser.h>
-#include <YUMData.h>
 #include <LibXMLHelper.h>
 #include <istream>
 #include <string>

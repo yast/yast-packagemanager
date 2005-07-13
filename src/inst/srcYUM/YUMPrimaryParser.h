@@ -3,7 +3,7 @@
 #ifndef YUMPrimaryParser_h
 #define YUMPrimaryParser_h
 
-#include <YUMData.h>
+#include <YUMParserData.h>
 #include <XMLNodeIterator.h>
 #include <LibXMLHelper.h>
 #include <list>

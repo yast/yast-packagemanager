@@ -23,7 +23,7 @@ Purpose: Parses file list files in a YUM repository
 #define YUMFileListParser_h
 
 
-#include <YUMData.h>
+#include <YUMParserData.h>
 #include <XMLNodeIterator.h>
 #include <LibXMLHelper.h>
 #include <list>
