@@ -25,9 +25,10 @@ Purpose: Declares the various YUMData classes, which are rather dumb
 #ifndef YUMData_h
 #define YUMData_h
 
+#include <y2util/RepDef.h>
 #include <string>
 #include <list>
-#include <y2util/RepDef.h>
+#include <iostream>
 
 namespace YUM {
 
@@ -270,7 +271,26 @@ namespace YUM {
   };
 
   DEFINE_BASE_POINTER(YUMOtherData);
-}
+
+
+
+  /* Easy output */
+
+  std::ostream& operator<<(std::ostream &out, const YUMDependency& data);
+  std::ostream& operator<<(std::ostream &out, const YUMDirSize& data);
+  std::ostream& operator<<(std::ostream &out, const YUMRepomdData& data);
+  std::ostream& operator<<(std::ostream &out, const FileData& data);
+  std::ostream& operator<<(std::ostream &out, const MultiLang& data);
+  std::ostream& operator<<(std::ostream &out, const MetaPkg& data);
+  std::ostream& operator<<(std::ostream &out, const PackageReq& data);
+  std::ostream& operator<<(std::ostream &out, const ChangelogEntry& data);
+  std::ostream& operator<<(std::ostream &out, const YUMRepomdData& data);
+  std::ostream& operator<<(std::ostream &out, const YUMPrimaryData& data);
+  std::ostream& operator<<(std::ostream &out, const YUMGroupData& data);
+  std::ostream& operator<<(std::ostream &out, const YUMFileListData& data);
+  std::ostream& operator<<(std::ostream& out, const YUMOtherData& data);
+
+} /* end of namespace YUM */
 
 
 
