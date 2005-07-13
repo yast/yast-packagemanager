@@ -311,7 +311,7 @@ ostream& operator<<(ostream &out, const YUMFileListData& data)
 {
   out << "-------------------------------------------------" << endl
     << "File List: " << endl
-    << "pkgid: " << data.pkgId
+    << "pkgid: " << data.pkgId << endl
     << "package: " << data.name << " "
     << data.epoch << "-" << data.ver << "-" << data.rel << endl
     << "files:" << endl
