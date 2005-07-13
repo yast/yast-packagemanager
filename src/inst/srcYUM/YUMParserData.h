@@ -10,7 +10,7 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-File:       YUMData.h
+File:       YUMParserData.h
 
 Author:     Michael Radziej <mir@suse.de>
 Maintainer: Michael Radziej <mir@suse.de>
@@ -22,8 +22,8 @@ Purpose: Declares the various YUMData classes, which are rather dumb
          objects.
 /-*/
 
-#ifndef YUMData_h
-#define YUMData_h
+#ifndef YUMParserData_h
+#define YUMParserData_h
 
 #include <y2util/RepDef.h>
 #include <string>

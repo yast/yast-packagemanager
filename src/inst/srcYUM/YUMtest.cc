@@ -24,7 +24,7 @@ Purpose:    main() to test the YUM parsers
 #include <YUMFileListParser.h>
 #include <YUMOtherParser.h>
 #include <y2util/RepDef.h>
-
+#include <YUMParserData.h>
 
 using namespace YUM;
 using namespace std;
