@@ -71,7 +71,7 @@ YUMGroupData::YUMGroupData()
 MultiLang::MultiLang()
 { }
 
-MultiLang::MultiLang(const std::string& langugage,
+MultiLang::MultiLang(const std::string& language,
                      const std::string& text)
 : language(language), text(text)
 { }
