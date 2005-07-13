@@ -15,8 +15,8 @@ File:       YUMData.cc
 Author:     Michael Radziej <mir@suse.de>
 Maintainer: Michael Radziej <mir@suse.de>
 
-Purpose:    Boring constructors of YUM repository data structures.
-            There's no actual content in this file.
+Purpose:    Boring constructors of YUM repository data structures
+            and also boring output operators
             Don't read in a tired mood.
 /-*/
 
@@ -123,7 +123,13 @@ IMPL_BASE_POINTER(YUMOtherData);
 /* output operators */
 
 namespace {
-  template<class T> 
+  /**
+   * @short Generic stream output for lists of Ptrs
+   * @param out the ostream where the output goes to
+   * @param aList the list to output
+   * @return is out
+   */
+  template<class T>
   ostream& operator<<(ostream &out, const list<T>& aList)
   {
     typedef typename list<T>::const_iterator IterType;
@@ -132,11 +138,20 @@ namespace {
         ++iter) {
           if (iter != aList.begin())
             out << endl;
-          out << *iter;
+          ::operator<<(out,*iter);
         }
     return out;
   }
+}
 
+
+
+  /**
+   * Join a list of strings into a single string
+   * @param aList the list of strings
+   * @param joiner what to put between the list elements
+   * @return the joined string
+   */
   string join(const list<string>& aList,
               const string& joiner)
   {
@@ -150,7 +165,7 @@ namespace {
         }
     return res;
   }
-}
+
 
   
 ostream& operator<<(ostream &out, const YUMDependency& data)

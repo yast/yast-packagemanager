@@ -141,7 +141,7 @@ namespace YUM {
   /**
    * @short Holds the metadata about a YUM repository
    **/
-  class YUMRepomdData : public CountedRep {
+  class YUMRepomdData : public Rep {
     REP_BODY(YUMRepomdData);
     
   public:
@@ -161,7 +161,7 @@ namespace YUM {
   /**
    * @short Describes a package in a YUM repository
    **/
-  class YUMPrimaryData : public CountedRep {
+  class YUMPrimaryData : public Rep {
     REP_BODY(YUMPrimaryData);
     
   public:
@@ -215,7 +215,7 @@ namespace YUM {
   /**
   * @short Describes the groups in a YUM repository
   **/
-  class YUMGroupData : public CountedRep
+  class YUMGroupData : public Rep
   {
     REP_BODY(YUMGroupData);
     
@@ -236,7 +236,7 @@ namespace YUM {
   /**
    * @short Contains the file list for a YUM package.
    **/
-  class YUMFileListData : public CountedRep {
+  class YUMFileListData : public Rep {
     REP_BODY(YUMFileListData);
 
   public:
@@ -257,7 +257,7 @@ namespace YUM {
   /**
   * @short Data from other.mxl, i.e., changelogs
   **/
-  class YUMOtherData : public CountedRep {
+  class YUMOtherData : public Rep {
     REP_BODY(YUMOtherData);
   public:
     YUMOtherData();
@@ -272,25 +272,25 @@ namespace YUM {
 
   DEFINE_BASE_POINTER(YUMOtherData);
 
+} /* end of namespace YUM */
 
 
   /* Easy output */
 
-  std::ostream& operator<<(std::ostream &out, const YUMDependency& data);
-  std::ostream& operator<<(std::ostream &out, const YUMDirSize& data);
-  std::ostream& operator<<(std::ostream &out, const YUMRepomdData& data);
-  std::ostream& operator<<(std::ostream &out, const FileData& data);
-  std::ostream& operator<<(std::ostream &out, const MultiLang& data);
-  std::ostream& operator<<(std::ostream &out, const MetaPkg& data);
-  std::ostream& operator<<(std::ostream &out, const PackageReq& data);
-  std::ostream& operator<<(std::ostream &out, const ChangelogEntry& data);
-  std::ostream& operator<<(std::ostream &out, const YUMRepomdData& data);
-  std::ostream& operator<<(std::ostream &out, const YUMPrimaryData& data);
-  std::ostream& operator<<(std::ostream &out, const YUMGroupData& data);
-  std::ostream& operator<<(std::ostream &out, const YUMFileListData& data);
-  std::ostream& operator<<(std::ostream& out, const YUMOtherData& data);
+std::ostream& operator<<(std::ostream &out, const YUM::YUMDependency& data);
+std::ostream& operator<<(std::ostream &out, const YUM::YUMDirSize& data);
+std::ostream& operator<<(std::ostream &out, const YUM::YUMRepomdData& data);
+std::ostream& operator<<(std::ostream &out, const YUM::FileData& data);
+std::ostream& operator<<(std::ostream &out, const YUM::MultiLang& data);
+std::ostream& operator<<(std::ostream &out, const YUM::MetaPkg& data);
+std::ostream& operator<<(std::ostream &out, const YUM::PackageReq& data);
+std::ostream& operator<<(std::ostream &out, const YUM::ChangelogEntry& data);
+std::ostream& operator<<(std::ostream &out, const YUM::YUMRepomdData& data);
+std::ostream& operator<<(std::ostream &out, const YUM::YUMPrimaryData& data);
+std::ostream& operator<<(std::ostream &out, const YUM::YUMGroupData& data);
+std::ostream& operator<<(std::ostream &out, const YUM::YUMFileListData& data);
+std::ostream& operator<<(std::ostream& out, const YUM::YUMOtherData& data);
 
-} /* end of namespace YUM */
 
 
 
