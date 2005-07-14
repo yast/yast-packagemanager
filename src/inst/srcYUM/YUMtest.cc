@@ -40,50 +40,56 @@ namespace {
 
 int main(int argc, char **argv)
 {
-
   if (argc < 2) {
     usage();
     return 2;
   }
 
-  if (!strcmp(argv[1],"repomd")) {
-    for (YUMRepomdParser iter(cin,"");
-         !iter.atEnd();
-         ++iter) {
-           cout << **iter;
-         }
+  try {
+    if (!strcmp(argv[1],"repomd")) {
+      for (YUMRepomdParser iter(cin,"");
+          !iter.atEnd();
+          ++iter) {
+            cout << **iter;
+          }
+    }
+    else if (!strcmp(argv[1],"primary")) {
+      for (YUMPrimaryParser iter(cin,"");
+          !iter.atEnd();
+          ++iter) {
+            cout << **iter;
+          }
+    }
+    else if (!strcmp(argv[1],"group")) {
+      for (YUMGroupParser iter(cin,"");
+          !iter.atEnd();
+          ++iter) {
+            cout << **iter;
+          }
+    }
+    else if (!strcmp(argv[1],"filelist")) {
+      for (YUMFileListParser iter(cin,"");
+          !iter.atEnd();
+          ++iter) {
+            cout << **iter;
+          }
+    }
+    else if (!strcmp(argv[1],"other")) {
+      for (YUMOtherParser iter(cin,"");
+          !iter.atEnd();
+          ++iter) {
+            cout << **iter;
+          }
+    }
+    else {
+      usage();
+      return 2;
+    }
   }
-  else if (!strcmp(argv[1],"primary")) {
-    for (YUMPrimaryParser iter(cin,"");
-         !iter.atEnd();
-         ++iter) {
-           cout << **iter;
-         }
-  }
-  else if (!strcmp(argv[1],"group")) {
-    for (YUMGroupParser iter(cin,"");
-         !iter.atEnd();
-         ++iter) {
-           cout << **iter;
-         }
-  }
-  else if (!strcmp(argv[1],"filelist")) {
-    for (YUMFileListParser iter(cin,"");
-         !iter.atEnd();
-         ++iter) {
-           cout << **iter;
-         }
-  }
-  else if (!strcmp(argv[1],"other")) {
-    for (YUMOtherParser iter(cin,"");
-         !iter.atEnd();
-         ++iter) {
-           cout << **iter;
-         }
-  }
-  else {
-    usage();
-    return 2;
+  catch (XMLParserError& err) {
+  cerr << "syntax error encountered in XML input:" << endl
+      << err.msg << endl;
+    return 1;
   }
 
   return 0;
