@@ -87,8 +87,10 @@ int main(int argc, char **argv)
     }
   }
   catch (XMLParserError& err) {
-  cerr << "syntax error encountered in XML input:" << endl
-      << err.msg << endl;
+    cerr << "ouch" << endl;
+    cerr << "syntax error encountered in XML input:" << endl
+      << err.what() << " " << err.position() << endl
+      << err.where() << endl;
     return 1;
   }
 

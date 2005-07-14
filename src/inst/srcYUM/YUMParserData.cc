@@ -81,7 +81,8 @@ MetaPkg::MetaPkg()
 { }
 
 MetaPkg::MetaPkg(const std::string& type,
-                               const std::string& name)
+                 const std::string& name)
+: type(type), name(name)
 { }
 
 PackageReq::PackageReq()
