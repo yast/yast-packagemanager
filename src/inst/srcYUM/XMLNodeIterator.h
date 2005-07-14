@@ -27,11 +27,14 @@
 #define XMLNodeIterator_h
 
 #include <libxml/xmlreader.h>
+#include <LibXMLHelper.h>
 // #include <libxml/debugXML.h>
 #include <iostream>
+#include <sstream>
 #include <cassert>
 #include <iterator>
 #include <y2util/Y2SLog.h>
+#include <y2util/Exception.h>
 
 
 
@@ -74,28 +77,71 @@ namespace{
 /**
  * @short Exception class for syntax errors in XMLNodeIterator.
  */
-class XMLParserError {
+class XMLParserError : public Exception {
 public:
   /**
    * Constructor
    */
-  XMLParserError()
+  XMLParserError(const char *msg,
+                 xmlParserSeverities severity,
+                 xmlTextReaderLocatorPtr locator,
+                 int docLine,
+                 int docColumn)
+    throw()
+    : Exception(msg), _severity(severity), _locator(locator),
+    _docLine(docLine), _docColumn(docColumn)
   { }
 
-  /**
-   * The message as given from libxml2
-   */
-  std::string msg;
+  ~XMLParserError() throw()
+  { }
 
   /**
    * The severity of this error
    */
-  xmlParserSeverities severity;
+  xmlParserSeverities severity() const throw()
+  { return _severity; }
 
   /**
    * See libxml2 documentation
    */
-  xmlTextReaderLocatorPtr locator;
+  xmlTextReaderLocatorPtr locator() const throw()
+  { return _locator; }
+
+  /**
+   * The line number in the xml document where the error occurred.
+   */
+  int docLine() const throw()
+  { return _docLine; }
+
+  /**
+   * The column number in the xml document where the error occurred.
+   */
+  int docColumn() const throw()
+  { return _docColumn; }
+
+  /**
+   * Gives a string describing the position in the xml document.
+   * (either empty, or "at line ..., column ...")
+   **/
+  std::string position() const throw()
+  {
+    if (_docLine!=-1 && _docLine!=-1) {
+      std::stringstream<char> strm;
+      strm << "at line " << _docLine
+        <<", column " << _docColumn;
+      return strm.str();
+    }
+    else
+      return "";
+  }
+
+    
+
+private:
+  xmlParserSeverities _severity;
+  xmlTextReaderLocatorPtr _locator;
+  int _docLine;
+  int _docColumn;
 };
 
 
@@ -199,7 +245,7 @@ public:
    */
   bool atEnd() const
   {
-    return (_error.get()!= 0
+    return (_error.get() == 0
             && _currentDataPtr.get() == 0);
   }
 
@@ -333,14 +379,16 @@ protected:
   void fetchNext()
   {
     int status;
+    /* throw away the old entry */
+    _currentDataPtr.reset();
     if (_reader == 0) {
       /* this is a trivial iterator over (max) only one element,
          and we reach the end now. */
-      _currentDataPtr.reset();
+      ;
     }
     else {
       /* repeat as long as we successfully read nodes
-         breaks out an interesting node has been found */
+         breaks out when an interesting node has been found */
       while ((status = xmlTextReaderRead(_reader))==1) {
         xmlNodePtr node = xmlTextReaderCurrentNode(_reader);
         if (isInterested(node)) {
@@ -350,15 +398,10 @@ protected:
           break;
         }
       }
-      if (status == 0) {  // no more nodes to read
-        _currentDataPtr.reset();
-      }
-      else if (status != 1) {  // error occured
-        _currentDataPtr.reset();
-        if (_error.get() != 0) {
-          _error.reset(new XMLParserError);
-          _error->msg="Unknown error reason.";
-          _error->severity = XML_PARSER_SEVERITY_ERROR;
+      if (status == -1) {  // error occured
+        if (_error.get() == 0) {
+          errorHandler(this, "Unknown error while parsing xml file\n",
+                       XML_PARSER_SEVERITY_ERROR, 0);
         }
         /* next checkError will throw this error */
       }
@@ -384,30 +427,40 @@ protected:
     XMLNodeIterator<ENTRYTYPE> *obj;
     obj = (XMLNodeIterator<ENTRYTYPE>*) arg;
     assert(obj);
-    if (severity & XML_PARSER_SEVERITY_ERROR) {
-      ERR << "XML syntax error: " << msg << endl;
-      if (obj->_error.get()) {
-        /* There's already an error in the queue */
-        WAR << "XML syntax error encountered during error recovery." << endl;
-      }
-      else {
-        obj->_error.reset(new XMLParserError);
-        obj->_error->msg = std::string(msg);
-        obj->_error->severity = severity;
-        obj->_error->locator = locator;
-        /* Will be thrown by next checkError() */
-      }
+    xmlTextReaderPtr reader = obj->_reader;
+    const char *errOrWarn = (severity & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
+    std::ostream& out = (severity & XML_PARSER_SEVERITY_ERROR) ? ERR : WAR;
+    
+    /* Log it */
+    out << "XML syntax " << errOrWarn << ": " << msg;
+    if (obj->_error.get()) {
+      out << "(encountered during error recovery!)" << endl;
     }
-    else {
-      /* Just a warning */
-      WAR << "XML syntax warning: " << msg << endl;
+    if (reader)
+      out  << "at line " << xmlTextReaderGetParserLineNumber(reader)
+      << ", column " << xmlTextReaderGetParserColumnNumber(reader);
+    out << endl;
+
+    /* save it */
+    if ((severity & XML_PARSER_SEVERITY_ERROR)
+        && ! obj->_error.get()) {
+      if (reader)
+        obj->_error.reset(new XMLParserError
+                          (msg, severity,locator,
+                           xmlTextReaderGetParserLineNumber(reader),
+                           xmlTextReaderGetParserColumnNumber(reader)));
+      else
+        obj->_error.reset(new XMLParserError
+                          (msg, severity, locator,
+                           -1, -1));
+      obj->_error->setLocation(SOURCECODELOCATION);
     }
   }
 
+
+
   /**
-   * log everything
-   * if we've seen an error, throw it
-   * warnings are ignored
+   * check for pending error. Throw it.
    */
   virtual void checkError() const
   {
