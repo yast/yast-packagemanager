@@ -25,6 +25,7 @@ Purpose:    main() to test the YUM parsers
 #include <YUMOtherParser.h>
 #include <y2util/RepDef.h>
 #include <YUMParserData.h>
+#include <y2util/Y2SLog.h>
 
 using namespace YUM;
 using namespace std;
@@ -44,6 +45,8 @@ int main(int argc, char **argv)
     usage();
     return 2;
   }
+
+  set_log_filename("-");
 
   try {
     if (!strcmp(argv[1],"repomd")) {

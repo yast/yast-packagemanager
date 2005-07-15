@@ -6,6 +6,7 @@
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
 #include <y2util/Y2SLog.h>
+#include "schemanames.h"
 
 using namespace std;
 using namespace YUM;
@@ -61,7 +62,7 @@ YUMRepomdParser::process(const xmlTextReaderPtr reader)
 
   
 YUMRepomdParser::YUMRepomdParser(istream &is, const string &baseUrl)
-  : XMLNodeIterator<YUMRepomdDataPtr>(is, baseUrl)
-{ 
+: XMLNodeIterator<YUMRepomdDataPtr>(is, baseUrl,REPOMDSCHEMA)
+{
   fetchNext();
 }

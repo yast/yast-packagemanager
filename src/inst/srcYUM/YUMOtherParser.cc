@@ -27,13 +27,14 @@ Purpose:    Parses other.xml files in a YUM repository
 #include <libxml/xmlstring.h>
 #include <LibXMLHelper.h>
 #include <y2util/Y2SLog.h>
+#include "schemanames.h"
 
 using namespace std;
 using namespace YUM;
 
 
 YUMOtherParser::YUMOtherParser(istream &is, const string& baseUrl)
-: XMLNodeIterator<YUMOtherDataPtr>(is, baseUrl)
+: XMLNodeIterator<YUMOtherDataPtr>(is, baseUrl,OTHERSCHEMA)
 {
   fetchNext();
 }

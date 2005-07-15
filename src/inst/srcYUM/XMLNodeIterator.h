@@ -185,13 +185,19 @@ public:
    * @param baseUrl is the base URL of the xml document
    */
   XMLNodeIterator(std::istream &input, 
-                  const std::string &baseUrl)
+                  const std::string &baseUrl,
+                  const char *validationPath = 0)
     : _error(0),
       _input(& input),
       _reader(xmlReaderForIO(ioread, ioclose, _input, baseUrl.c_str(), "utf-8",0)),
       _currentDataPtr(0)
   {
     xmlTextReaderSetErrorHandler(_reader, errorHandler, this);
+    if (_reader && validationPath)
+      if (xmlTextReaderRelaxNGValidate
+          (_reader,validationPath)==-1)
+            WAR << "Could not enable validation of repomd document" << endl;
+            
     /* Derived classes must call fetchNext() in their constructors themselves,
        XMLNodeIterator has no access to their virtual functions during 
        construction */
