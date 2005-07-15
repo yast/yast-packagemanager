@@ -5,6 +5,7 @@
 #include <libxml/xmlstring.h>
 #include <LibXMLHelper.h>
 #include <y2util/Y2SLog.h>
+#include "schemanames.h"
 
 
 using namespace std;
@@ -12,7 +13,7 @@ using namespace YUM;
 
 
 YUMPrimaryParser::YUMPrimaryParser(istream &is, const string& baseUrl)
-  : XMLNodeIterator<YUMPrimaryDataPtr>(is, baseUrl)
+  : XMLNodeIterator<YUMPrimaryDataPtr>(is, baseUrl,PRIMARYSCHEMA)
 {
   fetchNext();
 }

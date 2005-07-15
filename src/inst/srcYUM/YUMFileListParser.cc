@@ -27,6 +27,7 @@ Purpose:    Parses file list files in a YUM repository
 #include <libxml/xmlstring.h>
 #include <LibXMLHelper.h>
 #include <y2util/Y2SLog.h>
+#include "schemanames.h"
 
 
 
@@ -35,7 +36,7 @@ using namespace YUM;
 
 
 YUMFileListParser::YUMFileListParser(istream &is, const string& baseUrl)
-: XMLNodeIterator<YUMFileListDataPtr>(is, baseUrl)
+: XMLNodeIterator<YUMFileListDataPtr>(is, baseUrl,FILELISTSCHEMA)
 {
   fetchNext();
 }

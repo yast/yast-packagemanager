@@ -6,6 +6,7 @@
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
 #include <y2util/Y2SLog.h>
+#include "schemanames.h"
 
 using namespace std;
 using namespace YUM;
@@ -125,7 +126,7 @@ void YUMGroupParser::parsePackageList(YUMGroupDataPtr dataPtr,
 
 
 YUMGroupParser::YUMGroupParser(istream &is, const string &baseUrl)
-: XMLNodeIterator<YUMGroupDataPtr>(is, baseUrl)
+: XMLNodeIterator<YUMGroupDataPtr>(is, baseUrl,GROUPSCHEMA)
 { 
   fetchNext();
 }
