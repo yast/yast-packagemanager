@@ -17,9 +17,7 @@ Maintainer: Michael Radziej <mir@suse.de>
 
 Purpose:    Helper class to deal with libxml2 with C++
 
-
-
-
+/-*/
 #ifndef LibXMLHelper_h
 #define LibXMLHelper_h
 #include <libxml2/libxml/tree.h>
@@ -40,12 +38,12 @@ public:
    * in different namespaces isElement() will return false).
    */
   LibXMLHelper();
-  
+
   /**
    * Destructor
    */
   virtual ~LibXMLHelper();
-  
+
   /**
    * Fetch an attribute
    * @param node the xmlNode
@@ -53,10 +51,10 @@ public:
    * @param defaultValue the value to return if this attribute does not exist
    * @return the value of the attribute
    */
-  std::string attribute(const xmlNodePtr node, 
-                        const std::string &name, 
+  std::string attribute(const xmlNodePtr node,
+                        const std::string &name,
                         const std::string &defaultValue = std::string()) const;
-  
+
   /**
    * @short The TEXT content of the node and all child nodes
    * Read the value of a node, this can be either the text carried directly by this node if
@@ -66,14 +64,14 @@ public:
    * @return the content
    */
   std::string content(const xmlNodePtr nodePtr) const;
-  
+
   /**
    * The name of the node
    * @param nodePtr the xmlNode
    * @return the name
    */
   std::string name(const xmlNodePtr nodePtr) const;
-  
+
   /**
    * returns whether this is an element node (and not, e.g., a attribute or namespace node)
    * @param nodePtr the xmlNode
