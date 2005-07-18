@@ -29,6 +29,7 @@
 #include <y2pm/LibXMLHelper.h>
 // #include <libxml/debugXML.h>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <cassert>
 #include <iterator>
@@ -150,6 +151,20 @@ private:
   int _docColumn;
 };
 
+std::ostream& operator<<(std::ostream &out, const XMLParserError& error)
+{
+  const char *errOrWarn = (error.severity() & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
+  out << "XML syntax " << errOrWarn << ": " << error.msg();
+  if (error.docLine()!=-1) {
+    out  << "at line " << error.docLine()
+         << ", column " << error.docColumn();
+  }
+  out << std::endl;
+  return out;
+}
+
+
+
 
 
 /**
@@ -189,6 +204,7 @@ public:
    * Constructor. Derived classes must call fetchNext() here.
    * @param input is the input stream (contains the xml stuff)
    * @param baseUrl is the base URL of the xml document
+   * FIXME: use XMLParserError::operator<< instead of doing it on my own.
    */
   XMLNodeIterator(std::istream &input, 
                   const std::string &baseUrl,

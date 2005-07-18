@@ -24,3 +24,7 @@ liby2pmsrcYUM_la_SOURCES =		\
 #	PMYUMPackageDataProvider.cc
 
 # liby2pmsrcyum_la_LIBADD = rpm/liby2pmsrcYUM.la
+
+schemafilesdir =  $(schemadir)/packagemanager
+schemafiles_DATA = $(wildcard *.rng)
+EXTRA_DIST = $(schemafiles_DATA)

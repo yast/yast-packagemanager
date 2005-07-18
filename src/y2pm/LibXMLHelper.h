@@ -20,8 +20,12 @@ Purpose:    Helper class to deal with libxml2 with C++
 /-*/
 #ifndef LibXMLHelper_h
 #define LibXMLHelper_h
-#include <libxml2/libxml/tree.h>
 #include <string>
+
+extern "C" {
+  struct _xmlNode;
+  typedef _xmlNode xmlNode;
+}
 
 /**
  * @short Easy access to xmlNodes for C++
@@ -51,8 +55,8 @@ public:
    * @param defaultValue the value to return if this attribute does not exist
    * @return the value of the attribute
    */
-  std::string attribute(const xmlNodePtr node,
-                        const std::string &name,
+  std::string attribute(xmlNode * node, 
+                        const std::string &name, 
                         const std::string &defaultValue = std::string()) const;
 
   /**
@@ -63,21 +67,21 @@ public:
    * @param nodePtr the xmlNode
    * @return the content
    */
-  std::string content(const xmlNodePtr nodePtr) const;
+  std::string content(xmlNode * nodePtr) const;
 
   /**
    * The name of the node
    * @param nodePtr the xmlNode
    * @return the name
    */
-  std::string name(const xmlNodePtr nodePtr) const;
+  std::string name(const xmlNode * nodePtr) const;
 
   /**
    * returns whether this is an element node (and not, e.g., a attribute or namespace node)
    * @param nodePtr the xmlNode
    * @return true if it is an element node
    */
-  bool isElement(const xmlNodePtr nodePtr) const;
+  bool isElement(const xmlNode * nodePtr) const;
 
   /**
    * returns a string that identifies the position of an element nodes
@@ -85,7 +89,7 @@ public:
    * @param nodePtr the xmlNode
    * @return the position information
    */
-  std::string positionInfo(const xmlNodePtr nodePtr) const;
+  std::string positionInfo(const xmlNode * nodePtr) const;
 };
 
 #endif

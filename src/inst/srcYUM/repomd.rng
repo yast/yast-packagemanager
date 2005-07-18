@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element name="repomd" ns="http://linux.duke.edu/metadata/repo" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <oneOrMore>
+    <element name="data">
+      <attribute name="type">
+        <choice>
+          <value>other</value>
+          <value>filelists</value>
+          <value>primary</value>
+        </choice>
+      </attribute>
+      <element name="location">
+        <attribute name="href">
+          <data type="anyURI"/>
+        </attribute>
+        <empty/>
+      </element>
+      <element name="checksum">
+        <attribute name="type">
+          <choice>
+            <value>md5</value>
+            <value>sha</value>
+          </choice>
+        </attribute>
+        <text/>
+      </element>
+      <element name="timestamp">
+        <data type="integer"/>
+      </element>
+      <element name="open-checksum">
+        <attribute name="type">
+          <choice>
+            <value>md5</value>
+            <value>sha</value>
+          </choice>
+        </attribute>
+        <text/>
+      </element>
+    </element>
+  </oneOrMore>
+  <empty/>
+</element>
