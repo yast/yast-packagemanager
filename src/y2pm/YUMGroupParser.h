@@ -36,6 +36,8 @@ namespace YUM {
   {
   public:
     YUMGroupParser(std::istream &is, const std::string &baseUrl);
+    YUMGroupParser();
+    YUMGroupParser(YUMGroupDataPtr& entry);
     virtual ~YUMGroupParser();
     
   private:

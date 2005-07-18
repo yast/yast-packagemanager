@@ -33,6 +33,8 @@ namespace YUM {
   {
   public:
     YUMRepomdParser(std::istream &is, const std::string &baseUrl);
+    YUMRepomdParser();
+    YUMRepomdParser(YUMRepomdDataPtr& entry);
     virtual ~YUMRepomdParser();
 
   private:

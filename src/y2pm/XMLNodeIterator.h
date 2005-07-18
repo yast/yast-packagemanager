@@ -235,7 +235,7 @@ public:
    * postinc (iter++) operator
    * @param entry is the one and only element of this iterator.
    */
-  XMLNodeIterator(const ENTRYTYPE &entry)
+  XMLNodeIterator(ENTRYTYPE &entry)
     : _error(0), _input(0), _reader(0), _currentDataPtr(& entry)
   { }
     
@@ -515,6 +515,7 @@ private:
   /**
    * copy constructor is forbidden.
    * Reason: We can't copy an xmlTextReader
+   * FIXME: This prevents implementing the end() method for derived classes.
    * 
    * @param otherNode 
    * @return 
