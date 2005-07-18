@@ -30,67 +30,41 @@
 #include <y2util/Vendor.h>
 
 #include <y2pm/InstSrcDataYUMPtr.h>
-#include <y2pm/RpmHeaderPtr.h>
 
-#include <y2pm/PMYUMPackageDataProviderPtr.h>
+#include "PMYUMPackageDataProviderPtr.h"
 #include <y2pm/PMPackageDataProvider.h>
 #include <y2pm/PMPackage.h>
+
+#include "y2pm/InstSrcDataYUM.h"
+#include "YUMImpl.h"
 
 class PMYUMPackageDataProvider : public PMPackageDataProvider
 {
   REP_BODY(PMYUMPackageDataProvider);
 
   friend class InstSrcDataYUM;
-
-  private:
-
-    // back pointer to InstSrc for on-demand data access
-    constInstSrcDataYUMPtr _instSrcData;
-
-    // cached values per package
-    unsigned          _cachepos;
-    Pathname          _pkgfile;
-
-    PkgSplitSet	      _attr_SPLITPROVIDES;
-    std::string       _attr_SUMMARY;
-    FSize             _attr_SIZE;
-    YStringTreeItem * _attr_GROUP;
-    Vendor            _attr_VENDOR;
-
-    Pathname          _attr_SOURCELOC;  // empty if no source
-    FSize	      _attr_SOURCESIZE;	// 0 if no source
-    /**
-     * Called from RpmDb to setup cached values.
-     **/
-    void loadStaticData( constRpmHeaderPtr h );
-
-    /**
-     * single package cache for _cachedPkg
-     *
-     * will be re-filled if attribute request
-     * for a package != _cachedPkg is issued
-    */
-    static PMPackagePtr         _cachedPkg;
-    static constRpmHeaderPtr _cachedData;
-
-    constRpmHeaderPtr fillCache( PMPackagePtr package ) const;
+  friend class YUM::Impl;
 
   public:
 
     /**
      * constructor, destructor
     */
-    PMYUMPackageDataProvider( constInstSrcDataYUMPtr instSrc_r,
-				unsigned cachepos_r, const Pathname & pkgfile_r );
+    PMYUMPackageDataProvider( constInstSrcDataYUMPtr instSrcData_r );
 
     virtual ~PMYUMPackageDataProvider();
 
   public:
 
+    // PMObject attributes
+    virtual std::string            summary     ( const PMPackage & pkg_r ) const
+    { return _attr_SUMMARY; }
+    virtual std::list<std::string> description ( const PMPackage & pkg_r ) const
+    { return _attr_DESCRIPTION; }
     /**
      * Package attributes provided by RpmDb
      **/
-
+#if 0
     // PMObject attributes
     virtual std::string            summary     ( const PMPackage & pkg_r ) const;
     virtual std::list<std::string> description ( const PMPackage & pkg_r ) const;
@@ -144,6 +118,18 @@ class PMYUMPackageDataProvider : public PMPackageDataProvider
 
     // dudata is special
     virtual void du( const PMPackage & pkg_r, PkgDu & dudata_r ) const;
+#endif
+
+  private:
+
+    // the source
+    constInstSrcDataYUMPtr _instSrcData;
+
+    PkgSplitSet	_attr_SPLITPROVIDES;
+
+    std::string _attr_SUMMARY;
+
+    std::list<std::string> _attr_DESCRIPTION;
 };
 
 #endif // PMYUMPackageDataProvider_h

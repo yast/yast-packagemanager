@@ -2,13 +2,11 @@
 # Makefile.am for packagemanager/src/instsrc
 #
 
-#SUBDIRS = rpm
-
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
-AM_LDFLAGS = -L$(libdir) -lxml2
+AM_LDFLAGS = -L$(libdir)
 
 # first look into source tree, then into $(includedir)
-INCLUDES = -I$(top_srcdir)/src -I$(oldincludedir)/libxml2 -I$(includedir) 
+INCLUDES = -I$(top_srcdir)/src -I$(oldincludedir)/libxml2 -I$(includedir)
 
 noinst_LTLIBRARIES = liby2pmsrcYUM.la
 
@@ -19,11 +17,16 @@ liby2pmsrcYUM_la_SOURCES =		\
 	YUMPrimaryParser.cc		\
 	YUMRepomdParser.cc		\
 	YUMFileListParser.cc		\
-	YUMOtherParser.cc
-#	InstSrcDataYUM.cc
-#	PMYUMPackageDataProvider.cc
+	YUMOtherParser.cc		\
+	\
+	InstSrcDataYUM.cc		\
+	YUMImpl.cc YUMImpl.h		\
+	YUMRepodata.cc YUMRepodata.h	\
+	PMYUMPackageDataProvider.cc
+		PMYUMPackageDataProvider.h	\
+		PMYUMPackageDataProviderPtr.h
 
-# liby2pmsrcyum_la_LIBADD = rpm/liby2pmsrcYUM.la
+liby2pmsrcYUM_la_LIBADD = -lxml2
 
 schemafilesdir =  $(schemadir)/packagemanager
 schemafiles_DATA = $(wildcard *.rng)

@@ -49,8 +49,9 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	ULPackagesParser.h ULPackagesParserPtr.h	\
 	ULParsePackagesLang.h				\
 	F_Media.h \
-	InstSrcDataPLAIN.h InstSrcDataPLAINPtr.h	\
+	InstSrcDataPLAIN.h InstSrcDataPLAINPtr.h			\
 	PMPLAINPackageDataProvider.h PMPLAINPackageDataProviderPtr.h	\
+	InstSrcDataYUM.h InstSrcDataYUMPtr.h				\
 	UpdateInfParser.h			\
 	InstData.h				\
 	FileDeps.h				\

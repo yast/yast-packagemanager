@@ -1,42 +1,75 @@
+#define _GLIBCXX_CONCEPT_CHECKS
 #include <iomanip>
 #include <fstream>
 #include <string>
-#include <list>
 
 #include <y2util/Y2SLog.h>
-#include <y2util/Date.h>
-#include <y2util/stringutil.h>
-#include <y2util/ExternalProgram.h>
 
-#include <Y2PM.h>
-#include <y2pm/RpmDb.h>
-#include <y2pm/librpmDb.h>
-
-#include <y2pm/InstSrcManager.h>
-#include <y2pm/InstSrc.h>
-#include <y2pm/InstSrcDescr.h>
-#include <y2pm/MediaAccess.h>
-#include <y2pm/PMPackageManager.h>
-#include <y2pm/PMSelectionManager.h>
-#include <y2pm/InstTarget.h>
-#include <y2pm/Timecount.h>
-#include <y2pm/PMPackageImEx.h>
-
-#include "PMCB.h"
+#include <y2pm/YUMParserData.h>
+#include <y2pm/YUMRepomdParser.h>
+#include <y2pm/YUMPrimaryParser.h>
+#include <y2pm/YUMGroupParser.h>
+#include <y2pm/YUMFileListParser.h>
+#include <y2pm/YUMOtherParser.h>
 
 using namespace std;
+using namespace YUM;
 
-#define TMGR Y2PM::instTarget()
-#define PMGR Y2PM::packageManager()
-#define SMGR Y2PM::selectionManager()
-#define ISM  Y2PM::instSrcManager()
+#undef Y2LOG
+#define Y2LOG "MA-TEST"
 
-struct NotifySelState : public PMSelectable::NotifySelState {
-  virtual void operator()( PkgName name_r,
-			   const SelState & old_r, const SelState & new_r ) {
-    DBG << name_r << old_r << " -> " << new_r << endl;
+#if 0
+#define _IsUnused __attribute__ ((__unused__))
+
+template <class _Concept>
+  inline void __function_requires()
+  {
+    void (_Concept::*__x)() _IsUnused = &_Concept::__constraints;
   }
-};
+
+template <class _Tp>
+  struct _CopyConstructibleConcept
+  {
+    void __constraints() {
+      _Tp __a(__b);                     // require copy constructor
+      _Tp* __ptr _IsUnused = &__a;      // require address of operator
+      __const_constraints(__a);
+    }
+    void __const_constraints(const _Tp& __a) {
+      _Tp __c _IsUnused(__a);           // require const copy constructor
+      const _Tp* __ptr _IsUnused = &__a; // require const address of operator
+    }
+    _Tp __b;
+  };
+#endif
+///////////////////////////////////////////////////////////////////
+template<typename _Tp>
+  struct _Verbose
+  {
+    friend std::ostream & operator<<( std::ostream & str, const _Verbose & obj_r )
+    { return str << __PRETTY_FUNCTION__ << obj_r._obj; }
+  public:
+    explicit
+    _Verbose( const _Tp & obj_r )
+    : _obj( obj_r )
+    { __glibcxx_function_requires( _CopyConstructibleConcept<_Tp> ); }
+  private:
+    const _Tp & _obj;
+  };
+
+template<typename _Tp>
+  _Verbose<_Tp> mverbose( const _Tp & obj_r )
+  {
+    return _Verbose<_Tp>( obj_r ); }
+
+///////////////////////////////////////////////////////////////////
+
+std::ostream & operator<<( std::ostream & str, const _Verbose<ifstream> & obj_r )
+{ return str << __PRETTY_FUNCTION__ << 13;}
+
+
+
+
 
 /******************************************************************
 **
@@ -46,24 +79,43 @@ struct NotifySelState : public PMSelectable::NotifySelState {
 **
 **	DESCRIPTION :
 */
-int main()
+int main( int argc, char * argv[] )
 {
   set_log_filename( "-" );
   MIL << "START" << endl;
+  --argc;
+  ++argv;
+  string fin( "" );
+  if ( argc )
+    fin = argv[0];
 
-  SelState s;
-  MIL << s << endl;
+  list<YUMDirSize> L;
+  L.push_back( YUM::YUMDirSize("foo","baa","kah") );
 
-  NotifySelState n;
+  YUM::YUMDirSize __a;
+  YUM::YUMDirSize __b;
+  __a = __b;
 
-  PMSelectable t( PkgName("foo"), &n );
-  t.user_set_delete();
-  t.user_set_delete();
-  t.auto_set_install();
-  t.appl_set_install();
-  t.user_set_taboo();
-  t.appl_set_install();
-  t.user_set_offSystem();
+  const YUM::YUMDirSize & __c( __a );
+  YUM::YUMDirSize __d( __c );
+  __a = __c;
+
+
+
+  YUM::YUMDirSize a("foo","baa","kah");
+  YUM::YUMDirSize b = a;
+  MIL << a << endl;
+  MIL << b << endl;
+  ifstream in( "/Local/EXPORT/YUM-9.3/repodata/repomd.xml" );
+  for ( YUMRepomdParser iter(in,"");
+        !iter.atEnd();
+        ++iter)
+    {
+      cout << **iter;
+    }
+  //SEC << mverbose(in) << endl;
+  in.close();
+
 
   SEC << "STOP" << endl;
   return 0;
