@@ -59,6 +59,8 @@ namespace YUM {
      * @param baseUrl the base URL of the XML document. Can be left empty.
      */
     YUMFileListParser(std::istream &is, const std::string &baseUrl);
+    YUMFileListParser();
+    YUMFileListParser(YUMFileListDataPtr& entry);
 
     
     /**

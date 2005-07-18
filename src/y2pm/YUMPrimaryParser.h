@@ -34,6 +34,8 @@ namespace YUM {
   {
   public:
     YUMPrimaryParser(std::istream &is, const std::string &baseUrl);
+    YUMPrimaryParser();
+    YUMPrimaryParser(YUMPrimaryDataPtr& entry);
     virtual ~YUMPrimaryParser();
 
   private:

@@ -60,6 +60,8 @@ namespace YUM {
      */
     YUMOtherParser(std::istream &is, const std::string &baseUrl);
 
+    YUMOtherParser();
+    YUMOtherParser(YUMOtherDataPtr& entry);
     
     /**
      * Destructor.
