@@ -473,7 +473,7 @@ protected:
       if (reader)
         obj->_error.reset(new XMLParserError
                           (msg, severity,locator,
-                           xmlTextReaderGetParserLineNumber(reader),
+                           xmlTextReaderLocatorLineNumber(locator),
                            xmlTextReaderGetParserColumnNumber(reader)));
       else
         obj->_error.reset(new XMLParserError
