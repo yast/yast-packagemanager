@@ -34,7 +34,6 @@
 #include <cassert>
 #include <iterator>
 #include <y2util/Y2SLog.h>
-#include <y2util/Exception.h>
 
 
 
