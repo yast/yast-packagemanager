@@ -59,7 +59,7 @@ bool LibXMLHelper::isElement(const xmlNodePtr nodePtr) const
 
 std::string LibXMLHelper::positionInfo(const xmlNodePtr nodePtr) const
 {
-  stringstream<char> strm;
+  stringstream strm;
   strm << nodePtr->line;
   return string("at line ") + strm.str();
 }

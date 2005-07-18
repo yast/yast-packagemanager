@@ -50,52 +50,66 @@ int main(int argc, char **argv)
 
   try {
     if (!strcmp(argv[1],"repomd")) {
-      for (YUMRepomdParser iter(cin,"");
-          !iter.atEnd();
-          ++iter) {
-            cout << **iter;
-          }
+      YUMRepomdParser iter(cin,"");
+      for (;
+           !iter.atEnd();
+           ++iter) {
+             cout << **iter;
+           }
+      if (iter.errorStatus())
+        throw *iter.errorStatus();
     }
     else if (!strcmp(argv[1],"primary")) {
-      for (YUMPrimaryParser iter(cin,"");
-          !iter.atEnd();
-          ++iter) {
-            cout << **iter;
-          }
+      YUMPrimaryParser iter(cin,"");
+      for (;
+           !iter.atEnd();
+           ++iter) {
+             cout << **iter;
+           }
+      if (iter.errorStatus())
+        throw *iter.errorStatus();
     }
     else if (!strcmp(argv[1],"group")) {
-      for (YUMGroupParser iter(cin,"");
-          !iter.atEnd();
-          ++iter) {
-            cout << **iter;
-          }
+      YUMGroupParser iter(cin,"");
+      for (;
+           !iter.atEnd();
+           ++iter) {
+             cout << **iter;
+           }
+      if (iter.errorStatus())
+        throw *iter.errorStatus();
     }
     else if (!strcmp(argv[1],"filelist")) {
-      for (YUMFileListParser iter(cin,"");
-          !iter.atEnd();
-          ++iter) {
-            cout << **iter;
-          }
+      YUMFileListParser iter(cin,"");
+      for (;
+           !iter.atEnd();
+           ++iter) {
+             cout << **iter;
+           }
+      if (iter.errorStatus())
+        throw *iter.errorStatus();
     }
     else if (!strcmp(argv[1],"other")) {
-      for (YUMOtherParser iter(cin,"");
-          !iter.atEnd();
-          ++iter) {
-            cout << **iter;
-          }
+      YUMOtherParser iter(cin,"");
+      for (;
+           !iter.atEnd();
+           ++iter) {
+             cout << **iter;
+           }
+      if (iter.errorStatus())
+        throw *iter.errorStatus();
     }
     else {
       usage();
       return 2;
     }
-  }
+  }  
   catch (XMLParserError& err) {
     cerr << "ouch" << endl;
-    cerr << "syntax error encountered in XML input:" << endl
-      << err.what() << " " << err.position() << endl
-      << err.where() << endl;
+  cerr << "syntax error encountered in XML input:" << endl
+      << err.msg() << " " << err.position() << endl;
     return 1;
   }
-
-  return 0;
+  
+           return 0;
 }
