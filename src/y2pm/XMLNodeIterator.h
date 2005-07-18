@@ -151,6 +151,9 @@ private:
   int _docColumn;
 };
 
+
+namespace {
+/* FIXME: this must go into a separate file */
 std::ostream& operator<<(std::ostream &out, const XMLParserError& error)
 {
   const char *errOrWarn = (error.severity() & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
@@ -161,6 +164,7 @@ std::ostream& operator<<(std::ostream &out, const XMLParserError& error)
   }
   out << std::endl;
   return out;
+}
 }
 
 
