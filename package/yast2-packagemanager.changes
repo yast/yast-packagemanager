@@ -3,7 +3,7 @@ Mon Jul 18 20:47:26 CEST 2005 - ma@suse.de
 
 - Rudimentary YUM source (you can view packages, but not install
   from it).
-- 2.12.5
+- 2.12.6
 
 -------------------------------------------------------------------
 Thu Jun 23 15:30:58 CEST 2005 - ma@suse.de
