@@ -39,6 +39,14 @@ YUMOtherParser::YUMOtherParser(istream &is, const string& baseUrl)
   fetchNext();
 }
 
+YUMOtherParser::YUMOtherParser()
+{ }
+
+YUMOtherParser::YUMOtherParser(YUMOtherDataPtr& entry)
+: XMLNodeIterator<YUMOtherDataPtr>(entry)
+{ }
+
+
 
 YUMOtherParser::~YUMOtherParser()
 {

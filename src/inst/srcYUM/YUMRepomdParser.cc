@@ -14,6 +14,13 @@ using namespace YUM;
 YUMRepomdParser::~YUMRepomdParser()
 { }
 
+YUMRepomdParser::YUMRepomdParser()
+{ }
+
+YUMRepomdParser::YUMRepomdParser(YUMRepomdDataPtr& entry)
+: XMLNodeIterator<YUMRepomdDataPtr>(entry)
+{ }
+
 
 // select for which elements process() will be called
 bool 
