@@ -41,6 +41,14 @@ YUMFileListParser::YUMFileListParser(istream &is, const string& baseUrl)
   fetchNext();
 }
 
+YUMFileListParser::YUMFileListParser()
+{ }
+
+YUMFileListParser::YUMFileListParser(YUMFileListDataPtr& entry)
+: XMLNodeIterator<YUMFileListDataPtr>(entry)
+{ }
+
+
 
 YUMFileListParser::~YUMFileListParser()
 {

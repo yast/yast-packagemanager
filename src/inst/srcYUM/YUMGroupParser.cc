@@ -11,6 +11,14 @@
 using namespace std;
 using namespace YUM;
 
+YUMGroupParser::YUMGroupParser()
+{ }
+
+YUMGroupParser::YUMGroupParser(YUMGroupDataPtr& entry)
+: XMLNodeIterator<YUMGroupDataPtr>(entry)
+{ }
+
+
 YUMGroupParser::~YUMGroupParser()
 { }
 

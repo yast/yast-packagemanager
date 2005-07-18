@@ -18,6 +18,13 @@ YUMPrimaryParser::YUMPrimaryParser(istream &is, const string& baseUrl)
   fetchNext();
 }
 
+YUMPrimaryParser::YUMPrimaryParser()
+{ }
+
+YUMPrimaryParser::YUMPrimaryParser(YUMPrimaryDataPtr& entry)
+: XMLNodeIterator<YUMPrimaryDataPtr>(entry)
+{ }
+
 
 YUMPrimaryParser::~YUMPrimaryParser()
 {
