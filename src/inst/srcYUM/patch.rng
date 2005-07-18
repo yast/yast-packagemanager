@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<element name="patch" xmlns:ns2="http://linux.duke.edu/metadata/rpm" xmlns:ns1="http://novell.com/package/metadata/suse/common" ns="http://novell.com/package/metadata/suse/patch" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <attribute name="patchid"/>
+  <attribute name="timestamp">
+    <data type="nonNegativeInteger"/>
+  </attribute>
+  <element name="name">
+    <text/>
+  </element>
+  <oneOrMore>
+    <element name="summary">
+      <attribute name="lang"/>
+      <text/>
+    </element>
+  </oneOrMore>
+  <oneOrMore>
+    <element name="description">
+      <attribute name="lang"/>
+      <text/>
+    </element>
+  </oneOrMore>
+  <element name="version">
+    <attribute name="epoch">
+      <data type="nonNegativeInteger"/>
+    </attribute>
+    <attribute name="ver"/>
+    <attribute name="rel"/>
+  </element>
+  <element name="ns2:provides">
+    <oneOrMore>
+      <element name="ns2:entry">
+        <attribute name="name"/>
+        <optional>
+          <attribute name="flags">
+            <choice>
+              <value>EQ</value>
+              <value>LE</value>
+              <value>GE</value>
+            </choice>
+          </attribute>
+          <attribute name="epoch">
+            <data type="nonNegativeInteger"/>
+          </attribute>
+          <attribute name="ver"/>
+          <optional>
+            <attribute name="rel"/>
+          </optional>
+        </optional>
+        <empty/>
+      </element>
+    </oneOrMore>
+  </element>
+  <optional>
+    <element name="ns2:conflicts">
+      <oneOrMore>
+        <element name="ns2:entry">
+          <attribute name="name"/>
+          <optional>
+            <attribute name="flags">
+              <choice>
+                <value>EQ</value>
+                <value>LE</value>
+                <value>GE</value>
+                <value>LT</value>
+                <value>GT</value>
+              </choice>
+            </attribute>
+            <attribute name="epoch">
+              <data type="nonNegativeInteger"/>
+            </attribute>
+            <attribute name="ver"/>
+            <optional>
+              <attribute name="rel"/>
+            </optional>
+          </optional>
+          <empty/>
+        </element>
+      </oneOrMore>
+    </element>
+  </optional>
+  <optional>
+    <element name="ns2:obsoletes">
+      <oneOrMore>
+        <element name="ns2:entry">
+          <attribute name="name"/>
+          <optional>
+            <attribute name="flags">
+              <choice>
+                <value>EQ</value>
+                <value>LE</value>
+                <value>GE</value>
+                <value>LT</value>
+              </choice>
+            </attribute>
+            <attribute name="epoch">
+              <data type="nonNegativeInteger"/>
+            </attribute>
+            <attribute name="ver"/>
+            <optional>
+              <attribute name="rel"/>
+            </optional>
+          </optional>
+          <empty/>
+        </element>
+      </oneOrMore>
+    </element>
+  </optional>
+  <optional>
+    <element name="ns1:freshen">
+      <oneOrMore>
+        <element name="ns1:entry">
+          <attribute name="name"/>
+          <optional>
+            <attribute name="flags">
+              <choice>
+                <value>EQ</value>
+                <value>LE</value>
+                <value>GE</value>
+                <value>LT</value>
+                <value>GT</value>
+              </choice>
+            </attribute>
+            <attribute name="epoch">
+              <data type="nonNegativeInteger"/>
+            </attribute>
+            <attribute name="ver"/>
+            <optional>
+              <attribute name="rel"/>
+            </optional>
+          </optional>
+          <empty/>
+        </element>
+      </oneOrMore>
+    </element>
+  </optional>
+  <element name="ns2:requires">
+    <zeroOrMore>
+      <element name="ns2:entry">
+        <attribute name="name"/>
+        <optional>
+          <attribute name="flags">
+            <choice>
+              <value>EQ</value>
+              <value>LE</value>
+              <value>GE</value>
+              <value>LT</value>
+              <value>GT</value>
+            </choice>
+          </attribute>
+          <attribute name="epoch">
+            <data type="nonNegativeInteger"/>
+          </attribute>
+          <attribute name="ver"/>
+          <optional>
+            <attribute name="rel"/>
+          </optional>
+        </optional>
+        <optional>
+          <attribute name="pre">
+            <choice>
+              <value>1</value>
+              <value>0</value>
+            </choice>
+          </attribute>
+        </optional>
+        <empty/>
+      </element>
+    </zeroOrMore>
+  </element>
+  <element name="category">
+    <choice>
+      <value>security</value>
+      <value>recommended</value>
+      <value>bonus</value>
+      <value>beta</value>
+    </choice>
+  </element>
+  <optional>
+    <element name="reboot_needed">
+      <empty/>
+    </element>
+  </optional>
+  <optional>
+    <element name="package_manager">
+      <empty/>
+    </element>
+  </optional>
+  <element name="atoms">
+    <oneOrMore>
+      <element name="package">
+        <!-- TODO put the dependency stuff here -->
+        <empty/>
+        <!--
+          required for validator as long as dependency stuff is
+          missing
+        -->
+      </element>
+    </oneOrMore>
+    <oneOrMore>
+      <element name="script">
+        <group>
+          <element name="do">
+            <data type="string"/>
+          </element>
+          <element name="undo">
+            <data type="string"/>
+          </element>
+        </group>
+        <!-- TODO put the dependency stuff here -->
+      </element>
+    </oneOrMore>
+    <oneOrMore>
+      <element name="message">
+        <group>
+          <attribute name="type">
+            <choice>
+              <value>OK</value>
+              <value>YesNo</value>
+            </choice>
+          </attribute>
+          <element name="text">
+            <data type="string"/>
+          </element>
+        </group>
+        <!-- TODO put the dependency stuff here -->
+      </element>
+    </oneOrMore>
+  </element>
+</element>

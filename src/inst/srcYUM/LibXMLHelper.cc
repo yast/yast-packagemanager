@@ -16,7 +16,7 @@ LibXMLHelper::LibXMLHelper()
 LibXMLHelper::~LibXMLHelper()
 { }
 
-std::string LibXMLHelper::attribute(const xmlNodePtr nodePtr, 
+std::string LibXMLHelper::attribute(xmlNode * nodePtr, 
                                     const string &name, 
                                     const string &defaultValue) const
 {
@@ -32,7 +32,7 @@ std::string LibXMLHelper::attribute(const xmlNodePtr nodePtr,
 }
 
 
-std::string LibXMLHelper::content(const xmlNodePtr nodePtr) const
+std::string LibXMLHelper::content(xmlNode * nodePtr) const
 {
   assert(nodePtr);
   xmlChar *xmlRes = xmlNodeGetContent(nodePtr);
@@ -45,19 +45,19 @@ std::string LibXMLHelper::content(const xmlNodePtr nodePtr) const
   }
 }
 
-std::string LibXMLHelper::name(const xmlNodePtr nodePtr) const
+std::string LibXMLHelper::name(const xmlNode * nodePtr) const
 {
   assert(nodePtr);
   return string((const char*) nodePtr->name);
 }
 
 
-bool LibXMLHelper::isElement(const xmlNodePtr nodePtr) const
+bool LibXMLHelper::isElement(const xmlNode * nodePtr) const
 {
   return nodePtr->type == XML_ELEMENT_NODE;
 }
 
-std::string LibXMLHelper::positionInfo(const xmlNodePtr nodePtr) const
+std::string LibXMLHelper::positionInfo(const xmlNode * nodePtr) const
 {
   stringstream strm;
   strm << nodePtr->line;
