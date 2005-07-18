@@ -22,7 +22,7 @@ liby2pmsrcYUM_la_SOURCES =		\
 	InstSrcDataYUM.cc		\
 	YUMImpl.cc YUMImpl.h		\
 	YUMRepodata.cc YUMRepodata.h	\
-	PMYUMPackageDataProvider.cc
+	PMYUMPackageDataProvider.cc	\
 		PMYUMPackageDataProvider.h	\
 		PMYUMPackageDataProviderPtr.h
 
