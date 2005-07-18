@@ -45,6 +45,10 @@ namespace YUM {
   * The iterator owns the pointer (i.e., caller must not delete it)
   * until the next ++ operator is called. At this time, it will be
   * destroyed (and a new ENTRYTYPE is created.)
+  *
+  * If the input is fundamentally flawed so that it makes no sense to
+  * continue parsing, XMLNodeIterator will log it and consider the input as finished.
+  * You can query the exit status with errorStatus().
   */
   class YUMFileListParser : public XMLNodeIterator<YUMFileListDataPtr>
   {
