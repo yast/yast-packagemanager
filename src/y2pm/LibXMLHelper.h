@@ -1,6 +1,28 @@
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                        (C) SuSE GmbH |
+\----------------------------------------------------------------------/
+
+File:       LibXMLHelper.h
+
+Author:     Michael Radziej <mir@suse.de>
+Maintainer: Michael Radziej <mir@suse.de>
+
+Purpose:    Helper class to deal with libxml2 with C++
+
+
+
+
 #ifndef LibXMLHelper_h
 #define LibXMLHelper_h
-#include <libxml/tree.h>
+#include <libxml2/libxml/tree.h>
 #include <string>
 
 /**

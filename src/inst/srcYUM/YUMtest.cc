@@ -18,13 +18,8 @@ Maintainer: Michael Radziej <mir@suse.de>
 Purpose:    main() to test the YUM parsers
 /-*/
 
-#include <YUMRepomdParser.h>
-#include <YUMPrimaryParser.h>
-#include <YUMGroupParser.h>
-#include <YUMFileListParser.h>
-#include <YUMOtherParser.h>
+#include <y2pm/YUMParser.h>
 #include <y2util/RepDef.h>
-#include <YUMParserData.h>
 #include <y2util/Y2SLog.h>
 
 using namespace YUM;

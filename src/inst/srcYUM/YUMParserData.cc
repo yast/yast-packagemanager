@@ -21,7 +21,7 @@ Purpose:    Boring constructors of YUM repository data structures
 /-*/
 
 
-#include <YUMParserData.h>
+#include <y2pm/YUMParserData.h>
 
 using namespace YUM;
 using namespace std;

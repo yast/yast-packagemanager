@@ -1,12 +1,12 @@
-#include <YUMGroupParser.h>
-#include <LibXMLHelper.h>
+#include <y2pm/YUMGroupParser.h>
+#include <y2pm/LibXMLHelper.h>
 #include <istream>
 #include <string>
 #include <cassert>
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
 #include <y2util/Y2SLog.h>
-#include "schemanames.h"
+#include <y2pm/schemanames.h>
 
 using namespace std;
 using namespace YUM;

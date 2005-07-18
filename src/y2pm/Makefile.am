@@ -121,7 +121,18 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	PMInserter.h			\
 	PMDequeInserter.h		\
 	PMPackageDelta.h		\
-	CheckSetDeps.h
+	CheckSetDeps.h			\
+	YUMParser.h			\
+	YUMParserData.h			\
+	YUMFileListParser.h		\
+	YUMGroupParser.h		\
+	YUMOtherParser.h		\
+	YUMParserData.h			\
+	YUMPrimaryParser.h		\
+	YUMRepomdParser.h		\
+	XMLNodeIterator.h		\
+	LibXMLHelper.h			\
+	schemanames.h
 
 #<INSTALL-HEADER-TARGET>
 
