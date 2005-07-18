@@ -26,6 +26,13 @@ if [[ "$yast_found_libpopt" = "no" ]]; then
  AC_MSG_ERROR(Headers for libpopt are missing. Please install the package popt-devel.)
 fi
 
+yast_found_libxml2=no
+AC_HECK_HEADER(libxml2/libxml/tree.h,[yast_found_libxml2=yes])
+if [[ "$yast_found_libxml2" = "no" ]]; then
+ AC_MSG_ERROR(Headers for libxml2 are missing. Please install the package libxml2.)
+fi
+
+
 yast_found_librpm=no
 AC_CHECK_HEADER(rpm/rpmdb.h,[yast_found_librpm=yes])
 if [[ "$yast_found_librpm" = "yes" ]]; then

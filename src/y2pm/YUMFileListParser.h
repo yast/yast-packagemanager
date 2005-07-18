@@ -10,34 +10,34 @@
 |                                                        (C) SuSE GmbH |
 \----------------------------------------------------------------------/
 
-File:       YUMOtherParser.h
+File:       YUMFileListParser.h
 
 Author:     Michael Radziej <mir@suse.de>
 Maintainer: Michael Radziej <mir@suse.de>
 
-Purpose:    Parses other.xml files in a YUM repository
+Purpose: Parses file list files in a YUM repository
 
 /-*/
 
-#ifndef YUMOtherParser_h
-#define YUMOtherParser_h
+#ifndef YUMFileListParser_h
+#define YUMFileListParser_h
 
 
-#include <YUMParserData.h>
-#include <XMLNodeIterator.h>
-#include <LibXMLHelper.h>
+#include <y2pm/YUMParserData.h>
+#include <y2pm/XMLNodeIterator.h>
+#include <y2pm/LibXMLHelper.h>
 #include <list>
 
 namespace YUM {
 
   /**
-  * @short Parser for YUM other.xml files
+  * @short Parser for YUM filelists files
   * Use this class as an iterator that produces, one after one,
-  * YUMOtherDataPtr(s) for the XML package elements.
+  * YUMFileListDataPtr(s) for the XML package elements.
   * Here's an example:
   * 
-  * for (YUMOtherParser iter(anIstream, baseUrl),
-  *      iter != YUMOtherParser.end(),     // or: iter() != 0, or ! iter.atEnd()
+  * for (YUMFileListParser iter(anIstream, baseUrl),
+  *      iter != YUMFileListParser.end(),     // or: iter() != 0, or ! iter.atEnd()
   *      ++iter) {
   *    doSomething(*iter)
   * }
@@ -45,12 +45,12 @@ namespace YUM {
   * The iterator owns the pointer (i.e., caller must not delete it)
   * until the next ++ operator is called. At this time, it will be
   * destroyed (and a new ENTRYTYPE is created.)
-  * 
+  *
   * If the input is fundamentally flawed so that it makes no sense to
   * continue parsing, XMLNodeIterator will log it and consider the input as finished.
   * You can query the exit status with errorStatus().
   */
-  class YUMOtherParser : public XMLNodeIterator<YUMOtherDataPtr>
+  class YUMFileListParser : public XMLNodeIterator<YUMFileListDataPtr>
   {
   public:
     /**
@@ -58,13 +58,13 @@ namespace YUM {
      * @param is the istream to read from
      * @param baseUrl the base URL of the XML document. Can be left empty.
      */
-    YUMOtherParser(std::istream &is, const std::string &baseUrl);
+    YUMFileListParser(std::istream &is, const std::string &baseUrl);
 
     
     /**
      * Destructor.
      */
-    virtual ~YUMOtherParser();
+    virtual ~YUMFileListParser();
     
   private:
     /**
@@ -79,7 +79,7 @@ namespace YUM {
      * @param reader 
      * @return 
      */
-    virtual YUMOtherDataPtr process(const xmlTextReaderPtr reader);
+    virtual YUMFileListDataPtr process(const xmlTextReaderPtr reader);
 
     /**
      * converts the xml stuff to c++ stuff and filters the right namespaces

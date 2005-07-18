@@ -1,4 +1,4 @@
-#include <LibXMLHelper.h>
+#include <y2pm/LibXMLHelper.h>
 #include <libxml/tree.h>
 #include <libxml/xmlstring.h>
 #include <cassert>

@@ -17,7 +17,6 @@
 
   Purpose: Provides an iterator interface for XML files
 
-  Use like:
   FIXME: Create a common subclass to reduce template bloat
          Put the internal functions separate.
 
@@ -26,8 +25,8 @@
 #ifndef XMLNodeIterator_h
 #define XMLNodeIterator_h
 
-#include <libxml/xmlreader.h>
-#include <LibXMLHelper.h>
+#include <libxml2/libxml/xmlreader.h>
+#include <y2pm/LibXMLHelper.h>
 // #include <libxml/debugXML.h>
 #include <iostream>
 #include <sstream>
@@ -132,7 +131,7 @@ public:
   std::string position() const throw()
   {
     if (_docLine!=-1 && _docLine!=-1) {
-      std::stringstream<char> strm;
+      std::stringstream strm;
       strm << "at line " << _docLine
         <<", column " << _docColumn;
       return strm.str();
@@ -203,7 +202,7 @@ public:
     if (_reader && validationPath)
       if (xmlTextReaderRelaxNGValidate
           (_reader,validationPath)==-1)
-            WAR << "Could not enable validation of repomd document" << endl;
+        WAR << "Could not enable validation of repomd document" << std::endl;
             
     /* Derived classes must call fetchNext() in their constructors themselves,
        XMLNodeIterator has no access to their virtual functions during 
@@ -460,12 +459,12 @@ protected:
     /* Log it */
     out << "XML syntax " << errOrWarn << ": " << msg;
     if (obj->_error.get()) {
-      out << "(encountered during error recovery!)" << endl;
+      out << "(encountered during error recovery!)" << std::endl;
     }
     if (reader)
       out  << "at line " << xmlTextReaderGetParserLineNumber(reader)
       << ", column " << xmlTextReaderGetParserColumnNumber(reader);
-    out << endl;
+    out << std::endl;
 
     /* save it */
     if ((severity & XML_PARSER_SEVERITY_ERROR)

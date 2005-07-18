@@ -3,9 +3,9 @@
 #ifndef YUMGroupParser_h
 #define YUMGroupParser_h
 
-#include <YUMParserData.h>
-#include <XMLNodeIterator.h>
-#include <LibXMLHelper.h>
+#include <y2pm/YUMParserData.h>
+#include <y2pm/XMLNodeIterator.h>
+#include <y2pm/LibXMLHelper.h>
 #include <list>
 
 namespace YUM {

@@ -20,14 +20,14 @@ Purpose:    Parses other.xml files in a YUM repository
 /-*/
 
 
-#include <YUMOtherParser.h>
+#include <y2pm/YUMOtherParser.h>
 #include <istream>
 #include <string>
 #include <cassert>
 #include <libxml/xmlstring.h>
-#include <LibXMLHelper.h>
+#include <y2pm/LibXMLHelper.h>
 #include <y2util/Y2SLog.h>
-#include "schemanames.h"
+#include <y2pm/schemanames.h>
 
 using namespace std;
 using namespace YUM;
