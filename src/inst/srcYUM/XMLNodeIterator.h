@@ -75,9 +75,9 @@ namespace{
 
 
 /**
- * @short Exception class for syntax errors in XMLNodeIterator.
+ * @short class for reporting syntax errors in XMLNodeIterator.
  */
-class XMLParserError : public Exception {
+class XMLParserError {
 public:
   /**
    * Constructor
@@ -88,12 +88,18 @@ public:
                  int docLine,
                  int docColumn)
     throw()
-    : Exception(msg), _severity(severity), _locator(locator),
+    : _msg(msg), _severity(severity), _locator(locator),
     _docLine(docLine), _docColumn(docColumn)
   { }
 
   ~XMLParserError() throw()
   { }
+
+  /**
+   * The message of the errors
+   */
+  std::string msg() const throw()
+  { return _msg; }
 
   /**
    * The severity of this error
@@ -138,6 +144,7 @@ public:
     
 
 private:
+  std::string _msg;
   xmlParserSeverities _severity;
   xmlTextReaderLocatorPtr _locator;
   int _docLine;
@@ -170,8 +177,8 @@ private:
  * destroyed (and a new ENTRYTYPE is created.)
  *
  * If the input is fundamentally flawed so that it makes no sense to
- * continue parsing, the functions that access the current item
- * will throw an XMLParserError.
+ * continue parsing, XMLNodeIterator will log it and consider the input as finished.
+ * You can query the exit status with errorStatus().
  */
 
  
@@ -247,12 +254,13 @@ public:
 
   /**
    * Have we reached the end?
+   * A parser error also means "end reached"
    * @return whether the end has been reached. 
    */
   bool atEnd() const
   {
-    return (_error.get() == 0
-            && _currentDataPtr.get() == 0);
+    return (_error.get() != 0
+            || _currentDataPtr.get() == 0);
   }
 
   /**
@@ -291,7 +299,6 @@ public:
   operator*() const 
   {
     assert (! atEnd());
-    checkError();
     return *(_currentDataPtr.get());
   }
 
@@ -302,7 +309,6 @@ public:
   ENTRYTYPE * 
   operator()() const 
   {
-    checkError();
     return (_currentDataPtr.get());
   }
 
@@ -314,7 +320,6 @@ public:
   operator++() {
     assert (_reader && !atEnd());
     fetchNext();
-    checkError();
     return *this;
   }
 
@@ -328,7 +333,6 @@ public:
   XMLNodeIterator operator++(int)   /* iter++ */
   {
     assert (!atEnd());
-    checkError();
     XMLNodeIterator<ENTRYTYPE> tmp(*_currentDataPtr);
     fetchNext();
     return tmp;
@@ -342,10 +346,21 @@ public:
   operator->()
   {
     assert(! atEnd());
-    checkError();
     return _currentDataPtr.get();
   }
 
+  /**
+   * returns the error status or 0 if no error
+   * the returned pointer is not-owning,
+   * it will be deleted upon destruction of the XMLNodeIterator.
+   * @return pointer to error status (if exists)
+   */
+  const XMLParserError *
+  errorStatus() const
+  {
+    return _error.get();
+  }
+    
 protected:
 
   /**
@@ -436,7 +451,12 @@ protected:
     xmlTextReaderPtr reader = obj->_reader;
     const char *errOrWarn = (severity & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
     std::ostream& out = (severity & XML_PARSER_SEVERITY_ERROR) ? ERR : WAR;
-    
+    if (strcmp("%s",msg) == 0) {
+      /* This is a buglet in libxml2, you often get "%s" as message
+         Better treat it like an empty message. */
+      msg = "";
+    }
+
     /* Log it */
     out << "XML syntax " << errOrWarn << ": " << msg;
     if (obj->_error.get()) {
@@ -459,20 +479,10 @@ protected:
         obj->_error.reset(new XMLParserError
                           (msg, severity, locator,
                            -1, -1));
-      obj->_error->setLocation(SOURCECODELOCATION);
     }
   }
 
 
-
-  /**
-   * check for pending error. Throw it.
-   */
-  virtual void checkError() const
-  {
-    if (_error.get() != 0)
-      throw *_error;
-  }
 
   /**
    * contains the latest error

@@ -29,7 +29,6 @@ YUMGroupParser::process(const xmlTextReaderPtr reader)
   assert(reader);
   YUMGroupDataPtr dataPtr = new YUMGroupData;
   xmlNodePtr dataNode = xmlTextReaderExpand(reader);
-  checkError();
   assert(dataNode);
   
   for (xmlNodePtr child = dataNode->children;
