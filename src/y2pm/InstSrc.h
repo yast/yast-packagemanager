@@ -116,6 +116,8 @@ class InstSrc: public CountedRep {
       T_UNKNOWN,
       // :first entry
       T_UnitedLinux,
+      T_YUM,
+      // one but last entry:
       T_PlainDir,
       // last entry:
       T_AUTODETECT

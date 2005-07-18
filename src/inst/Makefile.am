@@ -40,4 +40,6 @@ liby2pminstsrc_la_SOURCES = \
 	InstTargetProdDB.cc		\
 	UpdateInfParser.cc
 
-liby2pminstsrc_la_LIBADD = rpm/liby2pminstrpmsrc.la
+liby2pminstsrc_la_LIBADD = \
+	srcYUM/liby2pmsrcYUM.la	\
+	rpm/liby2pminstrpmsrc.la

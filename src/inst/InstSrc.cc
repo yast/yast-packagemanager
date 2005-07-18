@@ -45,6 +45,7 @@
 #include <y2pm/InstSrcData.h>
 #include <y2pm/InstSrcDataUL.h>
 #include <y2pm/InstSrcDataPLAIN.h>
+#include <y2pm/InstSrcDataYUM.h>
 #include <y2pm/F_Media.h>
 
 #include <y2pm/RpmHeader.h>
@@ -233,6 +234,10 @@ PMError InstSrc::enableSource()
 
   case T_PlainDir:
     err = InstSrcDataPLAIN::tryGetData( ndata, this );
+    break;
+
+  case T_YUM:
+    err = InstSrcDataYUM::tryGetData( ndata, this );
     break;
 
     ///////////////////////////////////////////////////////////////////
@@ -543,6 +548,10 @@ PMError InstSrc::_init_newMedia( const Url & mediaurl_r, const Pathname & produc
 	err = InstSrcDataPLAIN::tryGetDescr( ndescr, this, _media, product_dir_r, mediaurl_r );
 	break;
 
+    case T_YUM:
+	err = InstSrcDataYUM::tryGetDescr( ndescr, this, _media, product_dir_r, mediaurl_r );
+	break;
+
     ///////////////////////////////////////////////////////////////////
     // no default: let compiler warn '... not handled in switch'
     ///////////////////////////////////////////////////////////////////
@@ -623,6 +632,7 @@ string InstSrc::toString( const Type t )
 
 #define ENUM_OUT(V) case T_##V: return #V; break
     ENUM_OUT( UnitedLinux );
+    ENUM_OUT( YUM );
     ENUM_OUT( PlainDir );
     ENUM_OUT( AUTODETECT );
 #undef ENUM_OUT

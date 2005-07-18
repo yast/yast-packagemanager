@@ -22,11 +22,9 @@
 #include <y2util/Y2SLog.h>
 #include <y2util/stringutil.h>
 
-#include <y2pm/PMYUMPackageDataProvider.h>
+#include "PMYUMPackageDataProvider.h"
 #include <y2pm/InstSrcDataYUM.h>
 #include <y2pm/InstSrcDescr.h>
-#include <y2pm/RpmHeader.h>
-#include <y2pm/PMPackageManager.h>
 
 #include <Y2PM.h>
 
@@ -39,29 +37,13 @@ using namespace std;
 IMPL_DERIVED_POINTER(PMYUMPackageDataProvider, PMPackageDataProvider );
 
 ///////////////////////////////////////////////////////////////////
-// static class members
-///////////////////////////////////////////////////////////////////
-
-PMPackagePtr         PMYUMPackageDataProvider::_cachedPkg;
-constRpmHeaderPtr PMYUMPackageDataProvider::_cachedData;
-
-#define TRY_CACHE(fnc) \
-  constRpmHeaderPtr h = fillCache( mkPtr(pkg_r) ); \
-  if ( !h ) return PMPackageDataProvider::fnc()
-
-///////////////////////////////////////////////////////////////////
 //
 //
 //	METHOD NAME : PMYUMPackageDataProvider::PMYUMPackageDataProvider
 //	METHOD TYPE : Constructor
 //
-PMYUMPackageDataProvider::PMYUMPackageDataProvider( constInstSrcDataYUMPtr instSrcData_r,
-							unsigned cachepos_r, const Pathname & pkgfile_r )
+PMYUMPackageDataProvider::PMYUMPackageDataProvider( constInstSrcDataYUMPtr instSrcData_r )
     : _instSrcData( instSrcData_r )
-    , _cachepos( cachepos_r )
-    , _pkgfile( pkgfile_r )
-    , _attr_GROUP( 0 )
-    , _attr_SOURCESIZE( 0 )
 {
 }
 
@@ -75,24 +57,7 @@ PMYUMPackageDataProvider::~PMYUMPackageDataProvider()
 {
 }
 
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PMYUMPackageDataProvider::loadStaticData
-//	METHOD TYPE : void
-//
-void PMYUMPackageDataProvider::loadStaticData( constRpmHeaderPtr h )
-{
-  if ( !h ) {
-    INT << "Got NULL static data from RpmDb!" << endl;
-    return;
-  }
-  _attr_SUMMARY     = h->tag_summary();
-  _attr_SIZE        = h->tag_size();
-  _attr_GROUP       = Y2PM::packageManager().addRpmGroup( h->tag_group() );
-  _attr_VENDOR      = Vendor( h->tag_vendor() );
-}
-
+#if 0
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -370,3 +335,4 @@ void PMYUMPackageDataProvider::du( const PMPackage & pkg_r, PkgDu & dudata_r ) c
     h->tag_du( dudata_r );
 }
 
+#endif

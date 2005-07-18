@@ -1,17 +1,7 @@
 #
 # Makefile.am for packagemanager/testsuite/devel.ma
 #
-INCLUDES= $(addprefix -I$(top_srcdir)/src/,	\
-		include			\
-		pkg/include		\
-		sel/include		\
-		you/include		\
-		inst/include		\
-		inst/rpm/include	\
-		media/include		\
-		query/include		\
-		libPkgDep/include	\
-	   ) -I$(includedir)
+INCLUDES= -I$(top_srcdir)/src -I$(includedir) -I$(top_srcdir)/src/y2pm
 
 LDADD = $(top_builddir)/src/liby2pm.la
 
