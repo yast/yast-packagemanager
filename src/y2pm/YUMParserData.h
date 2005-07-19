@@ -42,12 +42,14 @@ namespace YUM {
                   const std::string& flags,
                   const std::string& epoch,
                   const std::string& ver,
-                  const std::string& rel);
+                  const std::string& rel,
+                  const std::string& pre);
     std::string name;
     std::string flags;
     std::string epoch;
     std::string ver;
     std::string rel;
+    std::string pre;
   };
 
 

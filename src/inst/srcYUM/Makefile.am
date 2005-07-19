@@ -12,6 +12,7 @@ noinst_LTLIBRARIES = liby2pmsrcYUM.la
 
 liby2pmsrcYUM_la_SOURCES =		\
 	LibXMLHelper.cc			\
+	XMLNodeIterator.cc		\
 	YUMParserData.cc		\
 	YUMGroupParser.cc		\
 	YUMPrimaryParser.cc		\

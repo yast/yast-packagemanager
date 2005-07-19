@@ -33,12 +33,14 @@ YUMDependency::YUMDependency(const std::string& name,
                              const std::string& flags,
                              const std::string& epoch,
                              const std::string& ver,
-                             const std::string& rel)
+                             const std::string& rel,
+                             const std::string& pre)
 : name(name),
 flags(flags),
 epoch(epoch),
 ver(ver),
-rel(rel)
+rel(rel),
+pre(pre)
 { };
 
 YUMDirSize::YUMDirSize()
@@ -175,6 +177,8 @@ ostream& operator<<(ostream &out, const YUMDependency& data)
   if (! data.epoch.empty())
     out << data.epoch << "-";
   out << data.ver << "-" << data.rel ;
+  if (! data.pre.empty() && data.pre != "0")
+    out << " (pre=" << data.pre << ")";
   return out;
 }
   
