@@ -17,15 +17,11 @@
 
   Purpose: Provides an iterator interface for XML files
 
-  FIXME: Create a common subclass to reduce template bloat
-         Put the internal functions separate.
-
 */
 
 #ifndef XMLNodeIterator_h
 #define XMLNodeIterator_h
 
-#include <libxml2/libxml/xmlreader.h>
 #include <y2pm/LibXMLHelper.h>
 // #include <libxml/debugXML.h>
 #include <iostream>
@@ -35,42 +31,19 @@
 #include <iterator>
 #include <y2util/Y2SLog.h>
 
-
-
-namespace{
-  /**
-   * Internal function to read from the input stream.
-   * This feeds the xmlTextReader used in the XMLNodeIterator.
-   * @param context points to the istream to read from
-   * @param buffer is to be filled with what's been read
-   * @param bufferLen max memory bytes to read
-   * @return 
-   */
-  int ioread(void *context,
-             char *buffer,
-             int bufferLen)
-  {
-  assert(buffer);
-  std::istream *streamPtr = (std::istream *) context;
-  assert(streamPtr);
-  streamPtr->read(buffer,bufferLen);
-  return streamPtr->gcount();
+extern "C" {
+  typedef void * xmlTextReaderLocatorPtr;
+  struct _xmlNode;
+  typedef struct _xmlNode xmlNode;
+  typedef xmlNode *xmlNodePtr;
+  
+  
+  struct _xmlTextReader;
+  typedef _xmlTextReader xmlTextReader;
+  typedef xmlTextReader *xmlTextReaderPtr;
 }
 
-  /**
-   * Internal function to finish reading.
-   * This is required by the xmlTextReader API, but
-   * not needed since the stream will be created when
-   * the istream object vanishes.
-   * @param context points to the istream to read from
-   * @return 0 on success.
-   */
-  int ioclose(void * context)
-  {
-  /* don't close. destructor will take care. */
-  return 0;
-  }
-}
+
 
 
 /**
@@ -82,91 +55,55 @@ public:
    * Constructor
    */
   XMLParserError(const char *msg,
-                 xmlParserSeverities severity,
+                 int severity,
                  xmlTextReaderLocatorPtr locator,
                  int docLine,
-                 int docColumn)
-    throw()
-    : _msg(msg), _severity(severity), _locator(locator),
-    _docLine(docLine), _docColumn(docColumn)
-  { }
+                 int docColumn) throw();
 
-  ~XMLParserError() throw()
-  { }
+  ~XMLParserError() throw();
 
   /**
    * The message of the errors
    */
-  std::string msg() const throw()
-  { return _msg; }
+  std::string msg() const throw();
 
   /**
    * The severity of this error
    */
-  xmlParserSeverities severity() const throw()
-  { return _severity; }
+  int severity() const throw();
 
   /**
    * See libxml2 documentation
    */
-  xmlTextReaderLocatorPtr locator() const throw()
-  { return _locator; }
+  xmlTextReaderLocatorPtr locator() const throw();
 
   /**
    * The line number in the xml document where the error occurred.
    */
-  int docLine() const throw()
-  { return _docLine; }
+  int docLine() const throw();
 
   /**
    * The column number in the xml document where the error occurred.
    */
-  int docColumn() const throw()
-  { return _docColumn; }
+  int docColumn() const throw();
 
   /**
    * Gives a string describing the position in the xml document.
    * (either empty, or "at line ..., column ...")
    **/
-  std::string position() const throw()
-  {
-    if (_docLine!=-1 && _docLine!=-1) {
-      std::stringstream strm;
-      strm << "at line " << _docLine
-        <<", column " << _docColumn;
-      return strm.str();
-    }
-    else
-      return "";
-  }
-
-    
+  std::string position() const throw();
 
 private:
+
   std::string _msg;
-  xmlParserSeverities _severity;
+  int _severity;
   xmlTextReaderLocatorPtr _locator;
   int _docLine;
   int _docColumn;
 };
 
 
-namespace {
-/* FIXME: this must go into a separate file */
-std::ostream& operator<<(std::ostream &out, const XMLParserError& error)
-{
-  const char *errOrWarn = (error.severity() & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
-  out << "XML syntax " << errOrWarn << ": " << error.msg();
-  if (error.docLine()!=-1) {
-    out  << "at line " << error.docLine()
-         << ", column " << error.docColumn();
-  }
-  out << std::endl;
-  return out;
-}
-}
-
-
+std::ostream& operator<<(std::ostream &out, const XMLParserError& error);
 
 
 
@@ -199,9 +136,7 @@ std::ostream& operator<<(std::ostream &out, const XMLParserError& error)
  */
 
  
-
-template <class ENTRYTYPE>
-class XMLNodeIterator : public std::iterator<std::input_iterator_tag, ENTRYTYPE> {
+class XMLNodeIteratorBase {
 public:
   /**
    * Constructor. Derived classes must call fetchNext() here.
@@ -209,77 +144,28 @@ public:
    * @param baseUrl is the base URL of the xml document
    * FIXME: use XMLParserError::operator<< instead of doing it on my own.
    */
-  XMLNodeIterator(std::istream &input, 
-                  const std::string &baseUrl,
-                  const char *validationPath = 0)
-    : _error(0),
-      _input(& input),
-      _reader(xmlReaderForIO(ioread, ioclose, _input, baseUrl.c_str(), "utf-8",0)),
-      _currentDataPtr(0)
-  {
-    xmlTextReaderSetErrorHandler(_reader, errorHandler, this);
-    if (_reader && validationPath)
-      if (xmlTextReaderRelaxNGValidate
-          (_reader,validationPath)==-1)
-        WAR << "Could not enable validation of repomd document" << std::endl;
-            
-    /* Derived classes must call fetchNext() in their constructors themselves,
-       XMLNodeIterator has no access to their virtual functions during 
-       construction */
-  }
+  XMLNodeIteratorBase(std::istream &input, 
+                      const std::string &baseUrl,
+                      const char *validationPath = 0);
 
-
-  /* this is a trivial iterator over only one element
-     needed e.g. for postinc (iter++) */
-  /**
-   * Constructor for a trivial iterator.
-   * A trivial iterator contains only one element.
-   * This is at least needed internally for the 
-   * postinc (iter++) operator
-   * @param entry is the one and only element of this iterator.
-   */
-  XMLNodeIterator(ENTRYTYPE &entry)
-    : _error(0), _input(0), _reader(0), _currentDataPtr(& entry)
-  { }
-    
   /**
    * Constructor for an empty iterator.
    * An empty iterator is already at its end.
    * This is what end() returns ...
    */
-  XMLNodeIterator() 
-    : _error(0), _input(0), _reader(0), _currentDataPtr(0)
-  { }
-      
+  XMLNodeIteratorBase();
+
   /**
    * Destructor
    */
-  virtual ~XMLNodeIterator() 
-  {
-    if (_reader != 0)
-      xmlFreeTextReader(_reader);
-  }
-
-  /**
-   * This is the end.
-   * @return an iterator that has reached the end.
-   */
-  static XMLNodeIterator<ENTRYTYPE> 
-  end()
-  {
-    return XMLNodeIterator<ENTRYTYPE>();
-  }
+  virtual ~XMLNodeIteratorBase();
 
   /**
    * Have we reached the end?
    * A parser error also means "end reached"
-   * @return whether the end has been reached. 
+   * @return whether the end has been reached.
    */
-  bool atEnd() const
-  {
-    return (_error.get() != 0
-            || _currentDataPtr.get() == 0);
-  }
+  bool atEnd() const;
 
   /**
    * Two iterators are equal if both are at the end
@@ -290,13 +176,7 @@ public:
    * @return true if equal
    */
   bool 
-  operator==(const XMLNodeIterator<ENTRYTYPE> &other) const 
-  {
-    if (atEnd())
-      return other.atEnd();
-    else 
-      return this != & other;
-  }
+  operator==(const XMLNodeIteratorBase &other) const;
 
   /**
    * Opposit of operator==
@@ -304,67 +184,9 @@ public:
    * @return true if not equal
    */
   bool 
-  operator!=(const XMLNodeIterator<ENTRYTYPE> &otherNode) const 
+  operator!=(const XMLNodeIteratorBase &otherNode) const
   {
     return ! operator==(otherNode);
-  }
-
-  /**
-   * Fetch a pointer to the current element
-   * @return pointer to the current element.
-   */
-  ENTRYTYPE & 
-  operator*() const 
-  {
-    assert (! atEnd());
-    return *(_currentDataPtr.get());
-  }
-
-  /**
-   * Fetch the current element
-   * @return the current element
-   */
-  ENTRYTYPE * 
-  operator()() const 
-  {
-    return (_currentDataPtr.get());
-  }
-
-  /**
-   * Go to the next element and return it
-   * @return the next element
-   */
-  XMLNodeIterator<ENTRYTYPE> &  /* ++iter */
-  operator++() {
-    assert (_reader && !atEnd());
-    fetchNext();
-    return *this;
-  }
-
-  /**
-   * remember the current element, go to next and return remembered one.
-   * avoid this, usually you need the preinc operator (++iter)
-   * This function may throw ParserError if something is fundamentally wrong
-   * with the input.
-   * @return the current element
-   */
-  XMLNodeIterator operator++(int)   /* iter++ */
-  {
-    assert (!atEnd());
-    XMLNodeIterator<ENTRYTYPE> tmp(*_currentDataPtr);
-    fetchNext();
-    return tmp;
-  }
-
-  /**
-   * similar to operator*, allows direct member access
-   * @return pointer to current element
-   */
-  const ENTRYTYPE * 
-  operator->()
-  {
-    assert(! atEnd());
-    return _currentDataPtr.get();
   }
 
   /**
@@ -374,10 +196,7 @@ public:
    * @return pointer to error status (if exists)
    */
   const XMLParserError *
-  errorStatus() const
-  {
-    return _error.get();
-  }
+  errorStatus() const;
     
 protected:
 
@@ -396,7 +215,7 @@ protected:
   isInterested(const xmlNodePtr nodePtr) = 0;
   
   /**
-   * process an xml node
+   * process an xml node and set it as next element
    * The derived class has to produce the ENTRYTYPE object here.
    * Details about the xml reader is in the libxml2 documentation.
    * You'll most probably want to use xmlTextReaderExpand(reader) to
@@ -407,45 +226,14 @@ protected:
    * Instead, in case of a fundamental syntax error the error is saved
    * and will be thrown with the next checkError().
    * @param readerPtr points to the xmlTextReader that reads the xml stream.
-   * @return 
    */
-  virtual ENTRYTYPE 
-  process(const xmlTextReaderPtr readerPtr) = 0;
+  virtual void
+  _process(const xmlTextReaderPtr readerPtr) = 0;
   
   /**
-   * Fetch the next element and save it in _currentDataPtr
+   * Fetch the next element and save it as next element
    */
-  void fetchNext()
-  {
-    int status;
-    /* throw away the old entry */
-    _currentDataPtr.reset();
-    if (_reader == 0) {
-      /* this is a trivial iterator over (max) only one element,
-         and we reach the end now. */
-      ;
-    }
-    else {
-      /* repeat as long as we successfully read nodes
-         breaks out when an interesting node has been found */
-      while ((status = xmlTextReaderRead(_reader))==1) {
-        xmlNodePtr node = xmlTextReaderCurrentNode(_reader);
-        if (isInterested(node)) {
-          // xmlDebugDumpNode(stdout,node,5);
-          _currentDataPtr.reset(new ENTRYTYPE(process(_reader)));
-          status = xmlTextReaderNext(_reader);
-          break;
-        }
-      }
-      if (status == -1) {  // error occured
-        if (_error.get() == 0) {
-          errorHandler(this, "Unknown error while parsing xml file\n",
-                       XML_PARSER_SEVERITY_ERROR, 0);
-        }
-        /* next checkError will throw this error */
-      }
-    }
-  }
+  void fetchNext();
 
   /**
    * Internal function to set the _error variable
@@ -460,52 +248,11 @@ protected:
   static void
   errorHandler(void * arg,
                const char * msg,
-               xmlParserSeverities severity,
-               xmlTextReaderLocatorPtr locator)
-  {
-    XMLNodeIterator<ENTRYTYPE> *obj;
-    obj = (XMLNodeIterator<ENTRYTYPE>*) arg;
-    assert(obj);
-    xmlTextReaderPtr reader = obj->_reader;
-    const char *errOrWarn = (severity & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
-    std::ostream& out = (severity & XML_PARSER_SEVERITY_ERROR) ? ERR : WAR;
-    if (strcmp("%s",msg) == 0) {
-      /* This is a buglet in libxml2, you often get "%s" as message
-         Better treat it like an empty message. */
-      msg = "";
-    }
+               int severity,
+               xmlTextReaderLocatorPtr locator);
 
-    /* Log it */
-    out << "XML syntax " << errOrWarn << ": " << msg;
-    if (obj->_error.get()) {
-      out << "(encountered during error recovery!)" << std::endl;
-    }
-    if (reader)
-      out  << "at line " << xmlTextReaderGetParserLineNumber(reader)
-      << ", column " << xmlTextReaderGetParserColumnNumber(reader);
-    out << std::endl;
-
-    /* save it */
-    if ((severity & XML_PARSER_SEVERITY_ERROR)
-        && ! obj->_error.get()) {
-      if (reader)
-        obj->_error.reset(new XMLParserError
-                          (msg, severity,locator,
-                           xmlTextReaderLocatorLineNumber(locator),
-                           xmlTextReaderGetParserColumnNumber(reader)));
-      else
-        obj->_error.reset(new XMLParserError
-                          (msg, severity, locator,
-                           -1, -1));
-    }
-  }
-
-
-
-  /**
-   * contains the latest error
-   **/
-  std::auto_ptr<XMLParserError> _error;
+  virtual void setCurrent(const void *data) = 0;
+  virtual void* getCurrent() const = 0;
 
 private:
 
@@ -513,7 +260,7 @@ private:
    * assignment is forbidden.
    * Reason: We can't copy an xmlTextReader
    */
-  XMLNodeIterator<ENTRYTYPE> & operator=(const XMLNodeIterator<ENTRYTYPE>& otherNode);
+  XMLNodeIteratorBase & operator=(const XMLNodeIteratorBase& otherNode);
 
   /**
    * copy constructor is forbidden.
@@ -523,11 +270,16 @@ private:
    * @param otherNode 
    * @return 
    */
-  XMLNodeIterator<ENTRYTYPE>(const XMLNodeIterator<ENTRYTYPE>& otherNode);
+  XMLNodeIteratorBase(const XMLNodeIteratorBase& otherNode);
+
+  /**
+   * if an error occured, this contains the error.
+   */
+  std::auto_ptr<XMLParserError> _error;
 
   /**
    * contains the istream to read the xml file from.
-   * Can be 0 if at end or if _currentDataPtr is the only element left.
+   * Can be 0 if at end or if the current element is the only element left.
    **/
   std::istream* _input;
   
@@ -536,20 +288,183 @@ private:
    **/
   xmlTextReaderPtr _reader;
   
+}; /* end class XMLNodeIteratorBase */
+
+
+
+/* --------------------------------------------------------------------------- */
+
+template <class ENTRYTYPE>
+class XMLNodeIterator : public XMLNodeIteratorBase,
+                        public std::iterator<std::input_iterator_tag, ENTRYTYPE>  {
+public:
+  /**
+   * Constructor. Derived classes must call fetchNext() here.
+   * @param input is the input stream (contains the xml stuff)
+   * @param baseUrl is the base URL of the xml document
+   * FIXME: use XMLParserError::operator<< instead of doing it on my own.
+   */
+  XMLNodeIterator(std::istream &input,
+                  const std::string &baseUrl,
+                  const char *validationPath = 0)
+    : XMLNodeIteratorBase(input, baseUrl, validationPath), _current(0)
+  {
+    /* Derived classes must call fetchNext() in their constructors themselves,
+       XMLNodeIterator has no access to their virtual functions during
+       construction */
+  }
+  
+  
+  /**
+   * Constructor for a trivial iterator.
+   * A trivial iterator contains only one element.
+   * This is at least needed internally for the
+   * postinc (iter++) operator
+   * @param entry is the one and only element of this iterator.
+   */
+  XMLNodeIterator(ENTRYTYPE &entry)
+    : XMLNodeIteratorBase()
+  { 
+    setCurrent((void *)& entry);
+  }
+  
+  /**
+   * Constructor for an empty iterator.
+   * An empty iterator is already at its end.
+   * This is what end() returns ...
+   */
+  XMLNodeIterator()
+    : XMLNodeIteratorBase(), _current(0)
+  { }
+  
+  /**
+   * Destructor
+   */
+  virtual ~XMLNodeIterator()
+  { }
+  
+  /**
+   * Fetch a pointer to the current element
+   * @return pointer to the current element.
+   */
+  ENTRYTYPE &
+    operator*() const
+  {
+    assert (! atEnd());
+    return * (ENTRYTYPE *) getCurrent();
+  }
+  
+  /**
+   * Fetch the current element
+   * @return the current element
+   */
+  ENTRYTYPE *
+    operator()() const
+  {
+    if (_error)
+      return 0;
+    else
+      return getCurrent();
+  }
+  
+  /**
+   * Go to the next element and return it
+   * @return the next element
+   */
+  XMLNodeIterator<ENTRYTYPE> &  /* ++iter */
+  operator++() {
+    fetchNext();
+    return *this;
+  }
+  
+  /**
+   * remember the current element, go to next and return remembered one.
+   * avoid this, usually you need the preinc operator (++iter)
+   * This function may throw ParserError if something is fundamentally wrong
+   * with the input.
+   * @return the current element
+   */
+  XMLNodeIterator operator++(int)   /* iter++ */
+  {
+    assert (!atEnd());
+    XMLNodeIterator<ENTRYTYPE> tmp(operator()());
+    fetchNext();
+    return tmp;
+  }
+  
+  /**
+   * similar to operator*, allows direct member access
+   * @return pointer to current element
+   */
+  const ENTRYTYPE *
+    operator->()
+  {
+    assert(! atEnd());
+    return getCurrent();
+  }
+  
+protected:
+  
+  /**
+   * filter for the xml nodes
+   * The derived class decides which xml nodes it is actually interested in.
+   * For each that is selected, process() will be called an the resulting ENTRYTYPE
+   * object used as the next value for the iterator.
+   * Documentation for the node structure can be found in the libxml2 documentation.
+   * Have a look at LibXMLHelper to access node attributes and contents.
+   * @param nodePtr points to the xml node in question. Only the node is available, not the subtree.
+   *                See libxml2 documentation.
+   * @return true if interested
+   */
+  virtual bool
+    isInterested(const xmlNodePtr nodePtr) = 0;
+  
+  /**
+   * process an xml node
+   * The derived class has to produce the ENTRYTYPE object here.
+   * Details about the xml reader is in the libxml2 documentation.
+   * You'll most probably want to use xmlTextReaderExpand(reader) to
+   * request the full subtree, and then use the links in the resulting
+   * node structure to traverse, and class LibXMLHelper to access the
+   * attributes and element contents.
+   * fetchNext() cannot throw an error since it will be called in the constructor.
+   * Instead, in case of a fundamental syntax error the error is saved
+   * and will be thrown with the next checkError().
+   * @param readerPtr points to the xmlTextReader that reads the xml stream.
+   * @return
+   */
+  virtual ENTRYTYPE
+  process(const xmlTextReaderPtr readerPtr) = 0;
+
+  void
+  _process(const xmlTextReaderPtr readerPtr)
+  {
+    setCurrent(new ENTRYTYPE(process(readerPtr)));
+  }
+
+private:
+
+  void setCurrent(const void *data)
+  {
+    if (data)
+      _current.reset(new ENTRYTYPE(* (ENTRYTYPE *) data));
+    else
+      _current.reset(0);
+  }
+
+  void *getCurrent() const
+  {
+    return _current.get();
+  }
+  
   /**
    * contains the current element of the iterator.
    * a pointer is used to be able to handle non-assigneable ENTRYTYPEs.
    * The iterator owns the element until the next ++ operation.
    * It can be 0 when the end has been reached.
    **/
-  std::auto_ptr<ENTRYTYPE> _currentDataPtr; 
+  std::auto_ptr<ENTRYTYPE> _current;
 }; /* end class XMLNodeIterator */
 
 
 #endif
-
-
-
-
-
-

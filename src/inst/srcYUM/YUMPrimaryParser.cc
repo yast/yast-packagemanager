@@ -3,6 +3,8 @@
 #include <string>
 #include <cassert>
 #include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
+#include <libxml/tree.h>
 #include <y2pm/LibXMLHelper.h>
 #include <y2util/Y2SLog.h>
 #include <y2pm/schemanames.h>
@@ -207,7 +209,8 @@ YUMPrimaryParser::parseDependencyEntries(list<YUMDependency> *depList,
                          _helper.attribute(child,"flags"),
                          _helper.attribute(child,"epoch"),
                          _helper.attribute(child,"ver"),
-                         _helper.attribute(child,"rel")));
+                         _helper.attribute(child,"rel"),
+                         _helper.attribute(child,"pre")));
       }
       else {
         WAR << "YUM dependency within <format> contains the unknown element <" << name << "> "
