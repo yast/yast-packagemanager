@@ -20,13 +20,14 @@
 /-*/
 
 #include <iostream>
+#include <sstream>
 
 #include <y2util/Y2SLog.h>
 #include <y2util/gzstream.h>
 #include <y2util/stringutil.h>
 
 #include "YUMImpl.h"
-#include "PMYUMPackageDataProvider.h"
+#include "YUMPackageDataProvider.h"
 
 #include "Y2PM.h"
 
@@ -78,38 +79,62 @@ namespace YUM
 
   /******************************************************************
    **
+   **	FUNCTION NAME : YUM2PkgEdition
+   **	FUNCTION TYPE : PkgEdition
+  */
+  inline PkgEdition YUM2PkgEdition( const string & e_r,
+                                    const string & v_r, const string & r_r,
+                                    const string & bt_r = string() )
+  {
+    // Clip unwanted negative epoch strings ("-1") to zero.
+    unsigned e = stringutil::clipneg( stringutil::strtoi( e_r ) );
+#warning insert buildtime
+    return PkgEdition( e, v_r, r_r );
+  }
+
+  /******************************************************************
+   **
    **	FUNCTION NAME : YUM2PkgRelList
    **	FUNCTION TYPE : PMSolvable::PkgRelList_type
   */
-  PMSolvable::PkgRelList_type
+  inline PMSolvable::PkgRelList_type
   YUM2PkgRelList( const std::list<YUMDependency> & yumlist )
   {
-    static map<string,string> flagconv;
-    if ( flagconv.empty() )
-      {
-        flagconv["EQ"] = "=";
-        flagconv["LT"] = "<";
-        flagconv["LE"] = "<=";
-        flagconv["GT"] = ">";
-        flagconv["GE"] = ">=";
-      }
+    PMSolvable::PkgRelList_type rellist;
 
-    list<string> tmplist;
-    for ( std::list<YUMDependency>::const_iterator it = yumlist.begin(); it != yumlist.end(); ++it )
+    for ( std::list<YUMDependency>::const_iterator it = yumlist.begin();
+          it != yumlist.end(); ++it )
       {
-        string tmp( it->name );
-        string tflag = flagconv[it->flags];
-        if ( tflag.size() )
+        if ( it->name.empty() )
+          continue;
+
+        PkgName n( it->name );
+        rel_op  op = str2rel_op( it->flags );
+
+        if ( op == NONE )
           {
-            tmp += " " + tflag + " " + it->ver;
-            if ( it->rel.size() )
-              tmp += "-" + it->rel;
+            rellist.push_back( PkgRelation( n ) );
           }
-        tmplist.push_back( tmp );
+        else
+          {
+            PkgEdition ed( YUM2PkgEdition( it->ver, it->rel, it->epoch ) );
+            rellist.push_back( PkgRelation( n, op, ed) );
+          }
+
+        if ( stringutil::strtoi( it->pre ) )
+          {
+            rellist.back().setPreReq( true );
+          }
       }
 
-    return PMSolvable::StringList2PkgRelList( tmplist );
+    return rellist;
   }
+
+  ///////////////////////////////////////////////////////////////////
+  //
+  //	CLASS NAME : Impl
+  //
+  ///////////////////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////////////////
   //
@@ -120,6 +145,7 @@ namespace YUM
   : _parent( parent ), _repodata( repoDir_r )
   {
     Pathname primary( _repodata.primaryFile() );
+
     if ( primary.empty() )
       {
         WAR << "No 'primary' file" << endl;
@@ -170,23 +196,22 @@ namespace YUM
 
         if ( pdata->type != "rpm" )
           {
-            //DBG << pdata->name << ": Skip type '" << pdata->type << "'" << endl;
+            DBG << pdata->name << ": Skip type '" << pdata->type << "'" << endl;
             continue;
           }
 
         PkgArch arch( pdata->arch );
         if ( compatArch.find( arch ) == compatArch.end() )
           {
-            //DBG << pdata->name << ": Drop incompatible " << arch << " (" << Y2PM::baseArch() << ")" << endl;
+            DBG << pdata->name << ": Drop incompatible arch '" << arch << "' (" << Y2PM::baseArch() << ")" << endl;
             continue;
           }
 
         // create dataprovider and package
-        // XXX: FIXME no epochs
         PkgName    name( pdata->name );
-        PkgEdition edition( pdata->ver, pdata->rel );
+        PkgEdition edition( YUM2PkgEdition( pdata->ver, pdata->rel, pdata->epoch ) );
 
-        PMYUMPackageDataProviderPtr ndp = new PMYUMPackageDataProvider( &_parent );
+        PackageDataProviderPtr ndp = new PackageDataProvider( &_parent );
         PMPackagePtr nptr = new PMPackage( name, edition, arch, ndp );
 
         // add PMSolvable data to package

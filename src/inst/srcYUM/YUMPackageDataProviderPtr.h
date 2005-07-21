@@ -10,26 +10,34 @@
 |                                                     (C) 2002 SuSE AG |
 \----------------------------------------------------------------------/
 
-   File:       PMYUMPackageDataProviderPtr.h
-   Purpose:    pointer class for PMYUMPackageDataProvider
-   Author:     Ludwig Nussel <lnussel@suse.de>
-   Maintainer: Ludwig Nussel <lnussel@suse.de>
+   File:       YUMPackageDataProviderPtr.h
+   Purpose:    pointer class for YUM::PackageDataProvider
+   Author:     Michael Andres <ma@suse.de>
+   Maintainer: Michael Andres <ma@suse.de>
 
 /-*/
 
-#ifndef PMYUMPackageDataProviderPtr_h
-#define PMYUMPackageDataProviderPtr_h
+#ifndef YUMPackageDataProviderPtr_h
+#define YUMPackageDataProviderPtr_h
 
 #include <y2pm/PMPackageDataProviderPtr.h>
 
 ///////////////////////////////////////////////////////////////////
-//
-//	CLASS NAME : PMYUMPackageDataProviderPtr
-//	CLASS NAME : constPMYUMPackageDataProviderPtr
-/**
- *
- **/
-DEFINE_DERIVED_POINTER(PMYUMPackageDataProvider, PMPackageDataProvider );
+namespace YUM
+{ /////////////////////////////////////////////////////////////////
 
-#endif // PMYUMPackageDataProviderPtr_h
+  ///////////////////////////////////////////////////////////////////
+  //
+  //	CLASS NAME : PackageDataProviderPtr
+  //	CLASS NAME : constPackageDataProviderPtr
+  /**
+   *
+   **/
+  DEFINE_DERIVED_POINTER(PackageDataProvider, PMPackageDataProvider );
+
+  /////////////////////////////////////////////////////////////////
+} // namespace YUM
+///////////////////////////////////////////////////////////////////
+
+#endif // YUMPackageDataProviderPtr_h
 

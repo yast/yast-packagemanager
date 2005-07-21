@@ -51,7 +51,7 @@ namespace YUM
     PathInfo repomd( _repodataDir + defaultRepomd_Xml() );
     if ( ! repomd.isFile() )
       {
-        ERR << repomd << endl;
+        WAR << repomd << endl;
         return;
       }
     else
