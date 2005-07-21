@@ -13,7 +13,102 @@
 
 using namespace std;
 
-const char* op_str[GE+1] = { "none","==","!=","<","<=",">",">=" };
+///////////////////////////////////////////////////////////////////
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : str2rel_op
+**	FUNCTION TYPE : rel_op
+*/
+rel_op
+str2rel_op( const std::string & str_r )
+{
+  switch ( str_r.size() )
+    {
+    case 1:
+      switch ( str_r[0] )
+        {
+        case '<': return LT;
+        case '>': return GT;
+        case '=': return EQ;
+        }
+      break;
+    case 2:
+      switch ( str_r[1] )
+        {
+        case '=':
+          switch ( str_r[0] )
+            {
+            case '<': return LE;
+            case '>': return GE;
+            case '=': return EQ;
+            case '!': return NE;
+            }
+          break;
+        case 'E':
+          switch ( str_r[0] )
+            {
+            case 'L': return LE;
+            case 'G': return GE;
+            case 'N': return NE;
+            }
+          break;
+        case 'T':
+          switch ( str_r[0] )
+            {
+            case 'L': return LT;
+            case 'G': return GT;
+            }
+          break;
+        case 'Q':
+          switch ( str_r[0] )
+            {
+            case 'E': return EQ;
+            }
+          break;
+        }
+      break;
+    }
+  return NONE;
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : asString
+**	FUNCTION TYPE : std::string
+*/
+std::string
+asString( rel_op op_r )
+{
+  switch( op_r )
+    {
+    case LT:   return "<";  break;
+    case GT:   return ">";  break;
+    case EQ:   return "=";  break;
+    case LE:   return "<="; break;
+    case GE:   return ">="; break;
+    case NE:   return "!="; break;
+    case NONE: break;
+    }
+  return "none";
+}
+
+/******************************************************************
+**
+**
+**	FUNCTION NAME : operator<<
+**	FUNCTION TYPE : std::ostream &
+*/
+std::ostream & operator<<( std::ostream & str, rel_op obj )
+{
+  return str << asString( obj );
+}
+
+///////////////////////////////////////////////////////////////////
+
+
 
 // Use a 'version-release' form for these strings.
 // (i.e. exactly one '-'). Needed for toString/fromString
