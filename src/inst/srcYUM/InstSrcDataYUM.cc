@@ -27,7 +27,6 @@
 
 #include "y2pm/InstSrcDataYUM.h"
 #include "YUMImpl.h"
-#include "YUMRepodata.h"
 
 #include <y2pm/InstSrcDescr.h>
 #include <y2pm/InstSrcError.h>
@@ -100,20 +99,20 @@ InstSrcDataYUM::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 {
   ndescr_r = 0;
   PMError err;
-  SEC << "InstSrcDataYUM::tryGetDescr "
-      << source_r << endl
-      << source_r->media() << endl
-      << media_r << endl
-      << product_dir_r << endl
-      << mediaurl_r << endl
-      << source_r->cache_data_dir() << endl;
 
   ///////////////////////////////////////////////////////////////////
   // Prepare Repodata either from cache or media.
   ///////////////////////////////////////////////////////////////////
-  Pathname repodataDir;
+  Pathname repodataDir( source_r->cache_data_dir() );
+
   if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() )
-    repodataDir = source_r->cache_data_dir();
+    {
+      PathInfo cpath( repodataDir );
+      if ( !cpath.isDir() ) {
+        WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
+        return Error::E_src_cache_disabled;
+      }
+    }
   else
     {
       ERR << Error::E_src_cache_disabled << endl;
@@ -124,8 +123,8 @@ InstSrcDataYUM::tryGetDescr( InstSrcDescrPtr & ndescr_r,
   // Fill cache
   ///////////////////////////////////////////////////////////////////
   Repodata repodata( repodataDir );
-  err = repodata.update( media_r, product_dir_r + Repodata::defaultRepodataDir() );
 
+  err = repodata.update( media_r, product_dir_r + Repodata::defaultRepodataDir() );
   if ( err )
     {
       ERR << "Failed to create cache! " << err << endl;
@@ -167,12 +166,11 @@ InstSrcDataYUM::tryGetData( InstSrcDataPtr & ndata_r,
   ///////////////////////////////////////////////////////////////////
   // Check local cache
   ///////////////////////////////////////////////////////////////////
-  PathInfo cpath;
-  Pathname cdir( source_r->cache_data_dir() );
+  Pathname repodataDir( source_r->cache_data_dir() );
 
   if ( Y2PM::runningFromSystem() || Y2PM::cacheToRamdisk() )
     {
-      cpath( cdir );
+      PathInfo cpath( repodataDir );
       if ( !cpath.isDir() ) {
         WAR << "Cache disabled: cachedir does not exist: " << cpath << endl;
         return Error::E_src_cache_disabled;
@@ -187,8 +185,12 @@ InstSrcDataYUM::tryGetData( InstSrcDataPtr & ndata_r,
   ///////////////////////////////////////////////////////////////////
   // parse InstSrcData from cache and fill ndata
   ///////////////////////////////////////////////////////////////////
+  InstSrcDataYUMPtr ndata( new InstSrcDataYUM( repodataDir ) );
 
-  InstSrcDataYUMPtr ndata( new InstSrcDataYUM( cpath.path() ) );
+  if ( ! ndata->_impl->repodata().hasData() )
+    {
+      return Error::E_isrc_cache_invalid;
+    }
 
   ///////////////////////////////////////////////////////////////////
   // done

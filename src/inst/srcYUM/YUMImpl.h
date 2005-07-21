@@ -68,6 +68,10 @@ namespace YUM
     getPackages() const
     { return _packages; }
 
+    const Repodata &
+    repodata() const
+    { return _repodata; }
+
   private:
 
     bool

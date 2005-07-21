@@ -21,11 +21,12 @@ liby2pmsrcYUM_la_SOURCES =		\
 	YUMOtherParser.cc		\
 	\
 	InstSrcDataYUM.cc		\
+	\
 	YUMImpl.cc YUMImpl.h		\
 	YUMRepodata.cc YUMRepodata.h	\
-	PMYUMPackageDataProvider.cc	\
-		PMYUMPackageDataProvider.h	\
-		PMYUMPackageDataProviderPtr.h
+	YUMPackageDataProvider.cc	\
+	  YUMPackageDataProvider.h	\
+	  YUMPackageDataProviderPtr.h
 
 liby2pmsrcYUM_la_LIBADD = -lxml2
 
