@@ -119,37 +119,6 @@ string PkgRelation::toString( const PkgRelation & t )
 //
 //	DESCRIPTION : name[ op edition]
 //
-inline rel_op str2op( const string & t ) {
-  switch ( t.size() ) {
-  case 1:
-    switch ( t[0] ) {
-    case '<': return LT;
-    case '>': return GT;
-    case '=': return EQ;
-    }
-    break;
-  case 2:
-    if ( t[1] == '=' ) {
-      switch ( t[0] ) {
-      case '<': return LE;
-      case '>': return GE;
-      case '=': return EQ;
-      case '!': return NE;
-      }
-    }
-    break;
-  }
-  return NONE;
-}
-
-///////////////////////////////////////////////////////////////////
-//
-//
-//	METHOD NAME : PkgRelation::fromString
-//	METHOD TYPE : PkgRelation
-//
-//	DESCRIPTION : name[ op edition]
-//
 PkgRelation PkgRelation::fromString( string s )
 {
   vector<string> words;
@@ -167,7 +136,7 @@ PkgRelation PkgRelation::fromString( string s )
 
   case 3:
     {
-      rel_op op = str2op( words[1] );
+      rel_op op = str2rel_op( words[1] );
       if ( op != NONE )
 	return PkgRelation( PkgName(words[0]), op, PkgEdition::fromString(words[2]) );
     }
@@ -291,7 +260,7 @@ PMSolvable::PkgRelList_type PkgRelation::parseRelations( const string & data_tr 
     } else {
       // operator value
       if ( cdep_Ci.name.empty() || cdep_Ci.compare != NONE ) {
-	ERR << "Missplaced operator " << op_str[depOp_ei] << " in dependency of "
+	ERR << "Missplaced operator " << depOp_ei << " in dependency of "
 	  << cdep_Ci.name << " (" << data_tr << ")" << endl;
 	cdep_Ci.clear();
 	break;
@@ -307,7 +276,7 @@ PMSolvable::PkgRelList_type PkgRelation::parseRelations( const string & data_tr 
                        PkgEdition( PkgEdition::fromString(cdep_Ci.version) ) );
       ret_VCi.push_back( dep );
     } else {
-	ERR << "Missplaced operator " << op_str[depOp_ei] << " in dependency of "
+	ERR << "Missplaced operator " << depOp_ei << " in dependency of "
 	  << cdep_Ci.name << " (" << data_tr << ")" << endl;
     }
   }

@@ -13,10 +13,13 @@ class PkgRelation {
 	PkgEdition _edition;
 	bool       _isprereq;  // whether this is a prerequirement
   public:
-	PkgRelation( const PkgName& n ) :
-		_name(n), _op(NONE), _isprereq(false) {};
-	PkgRelation( const PkgName& n, rel_op o, const PkgEdition& e ) :
-		_name(n), _op(o), _edition(e), _isprereq(false) {};
+	PkgRelation( const PkgName& n )
+        : _name(n), _op(NONE), _isprereq(false)
+        {}
+
+	PkgRelation( const PkgName& n, rel_op o, const PkgEdition& e )
+        : _name(n), _op(o), _edition(e), _isprereq(false)
+        {}
 	// default copy constructor and assigment are ok
 
 	const PkgName&    name()    const { return _name; }

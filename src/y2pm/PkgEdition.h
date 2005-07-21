@@ -5,8 +5,24 @@
 #include <string>
 #include <iosfwd>
 
+///////////////////////////////////////////////////////////////////
+
 enum rel_op { NONE, EQ, NE, LT, LE, GT, GE };
-extern const char* op_str[];
+
+/**
+ * Converts < <= > >= = == != LT LE GT GE EQ NE; everything
+ * else is NONE. (<b>NOTE:</b> !=/NE is not supported by rpm).
+ **/
+extern rel_op
+str2rel_op( const std::string & str_r );
+
+extern std::string
+asString( rel_op op_r );
+
+extern std::ostream &
+operator<<( std::ostream & str, rel_op obj );
+
+///////////////////////////////////////////////////////////////////
 
 /**
  * @short PkgEdition represents <code>[epoch:]version[-release]</code>
