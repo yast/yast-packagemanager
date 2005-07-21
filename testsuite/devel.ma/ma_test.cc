@@ -16,6 +16,7 @@
 #include <y2pm/InstSrcManager.h>
 #include <y2pm/InstSrc.h>
 #include <y2pm/InstSrcDescr.h>
+#include <y2pm/InstSrcData.h>
 #include <y2pm/MediaAccess.h>
 #include <y2pm/PMPackageManager.h>
 #include <y2pm/PMSelectionManager.h>
@@ -105,8 +106,8 @@ void dataDump( ostream & str, constPMPackagePtr p ) {
   str << "KEYWORDS:      " << p->keywords() << endl;
   str << "INSTSOURCE:    " << p->source() << endl;
   str << "IS REMOTE:     " << p->isRemote() << endl;
-  str << "PROVIDES:      " << p->provides().size() << endl;
-  str << "REQUIRES:      " << p->requires().size() << endl;
+  str << "PROVIDES:      " << p->provides().size() << endl << p->provides() << endl;
+  str << "REQUIRES:      " << p->requires().size() << endl << p->requires() << endl;
   str << "CONFLICTS:     " << p->conflicts().size() << endl;
   str << "OBSOLETES:     " << p->obsoletes().size() << endl;
   str << "PREREQUIRES:   " << p->prerequires().size() << endl;
@@ -285,6 +286,22 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
+  Y2PM::instSrcManager();
+  InstSrcManager::ISrcId nid = ISM.getSources(true).front();
+  INT << nid << endl;
+  if ( nid )
+    {
+      const list<PMPackagePtr> & plist( nid->data()->getPackages() );
+      for ( list<PMPackagePtr>::const_iterator it = plist.begin();
+            it != plist.end(); ++it )
+        {
+          dataDump( MIL, *it );
+        }
+
+    }
+
+#if 0
+  Y2PM::noAutoInstSrcManager();
   InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/YUM-9.3" );
   ISM.enableSource( nid );
   if ( nid )
@@ -332,7 +349,7 @@ int main( int argc, char * argv[] )
           nsrc->enableSource();
         }
     }
-
+#endif
   SEC << "STOP" << endl;
   return 0;
 }
