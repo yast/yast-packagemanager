@@ -81,15 +81,51 @@ namespace YUM
    **
    **	FUNCTION NAME : YUM2PkgEdition
    **	FUNCTION TYPE : PkgEdition
-  */
-  inline PkgEdition YUM2PkgEdition( const string & e_r,
-                                    const string & v_r, const string & r_r,
-                                    const string & bt_r = string() )
+   **/
+  inline PkgEdition
+  YUM2PkgEdition( const string & e_r,
+                  const string & v_r, const string & r_r,
+                  const string & bt_r = string() )
   {
-    // Clip unwanted negative epoch strings ("-1") to zero.
-    unsigned e = stringutil::clipneg( stringutil::strtoi( e_r ) );
-#warning insert buildtime
-    return PkgEdition( e, v_r, r_r );
+    unsigned e = 0;
+    stringutil::strtonum( e_r, e );
+    time_t bt = 0;
+    stringutil::strtonum( bt_r, bt );
+    return PkgEdition( e, v_r, r_r, bt );
+  }
+
+  inline PkgEdition
+  YUM2PkgEdition( const YUMDependency & ydep_r )
+  { return YUM2PkgEdition( ydep_r.epoch, ydep_r.ver, ydep_r.rel ); }
+
+  inline PkgEdition
+  YUM2PkgEdition( constYUMPrimaryDataPtr ydat_r )
+  { return YUM2PkgEdition( ydat_r->epoch, ydat_r->ver, ydat_r->rel, ydat_r->timeBuild ); }
+
+  /******************************************************************
+   **
+   **	FUNCTION NAME : YUM2PkgRelation
+   **	FUNCTION TYPE : PkgRelation
+   **/
+  inline PkgRelation
+  YUM2PkgRelation( const YUMDependency & ydep_r )
+  {
+    PkgRelation ret;
+    PkgName     n( ydep_r.name );
+    rel_op      op = str2rel_op( ydep_r.flags );
+
+    if ( op == NONE )
+      ret = PkgRelation( n );
+    else
+      {
+        PkgEdition ed( YUM2PkgEdition( ydep_r ) );
+        ret = PkgRelation( n, op, ed );
+      }
+
+    if ( stringutil::strtonum<int>( ydep_r.pre ) )
+      ret.setPreReq( true );
+
+    return ret;
   }
 
   /******************************************************************
@@ -107,24 +143,7 @@ namespace YUM
       {
         if ( it->name.empty() )
           continue;
-
-        PkgName n( it->name );
-        rel_op  op = str2rel_op( it->flags );
-
-        if ( op == NONE )
-          {
-            rellist.push_back( PkgRelation( n ) );
-          }
-        else
-          {
-            PkgEdition ed( YUM2PkgEdition( it->ver, it->rel, it->epoch ) );
-            rellist.push_back( PkgRelation( n, op, ed) );
-          }
-
-        if ( stringutil::strtoi( it->pre ) )
-          {
-            rellist.back().setPreReq( true );
-          }
+        rellist.push_back( YUM2PkgRelation( *it ) );
       }
 
     return rellist;
@@ -209,7 +228,7 @@ namespace YUM
 
         // create dataprovider and package
         PkgName    name( pdata->name );
-        PkgEdition edition( YUM2PkgEdition( pdata->ver, pdata->rel, pdata->epoch ) );
+        PkgEdition edition( YUM2PkgEdition( pdata ) );
 
         PackageDataProviderPtr ndp = new PackageDataProvider( &_parent );
         PMPackagePtr nptr = new PMPackage( name, edition, arch, ndp );
