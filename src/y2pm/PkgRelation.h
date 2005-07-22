@@ -13,6 +13,10 @@ class PkgRelation {
 	PkgEdition _edition;
 	bool       _isprereq;  // whether this is a prerequirement
   public:
+	PkgRelation()
+        : _op(NONE), _isprereq(false)
+        {}
+
 	PkgRelation( const PkgName& n )
         : _name(n), _op(NONE), _isprereq(false)
         {}
