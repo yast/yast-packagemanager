@@ -1,0 +1,187 @@
+proposal for a generic query interface
+
+
+Why ?
+
+- use single Query() function for all kinds of package queries
+- allow for arbitrary query expressions containing
+   package attributes, values, and operators
+- keep logic inside of Query()
+- queries are strings and can be
+  - saved
+  - entered by user
+
+
+How ?
+
+std::list <PMPackagePtr> Query (const string &query)
+
+
+BNF-Syntax (keywords are case-insensitive, mix case is for readability)
+
+<query> ::=	<qexpr>
+	|	'(' <query> ')'
+	;
+
+<qexpr>	::=	[ '!' ] <battr>			# boolean attribute
+	|	<vattr> <vop> <value>		# value attribute / operation
+	|	<query> <bop> <query>		# boolean operation
+	;
+
+<battr>	::=	isInstalled			# installed on target
+	|	isAvailable
+	|	isSelected			# selected for installation
+	|	isDeleted			# selected for deletion
+	|	isUpdated			# selected for update
+	|	isTaboo
+	|	isAutomatic			# selection was done automatically
+	|	isIncomplete			# has open dependencies
+	;
+
+<vattr>	::=	Version
+	|	Vendor
+	|	Group
+	|	Name
+	|	Requires		# [string list]
+	|	Provides		# [string list]
+	|	Conflicts		# [string list]
+	|	InstallDate
+	|	BuildDate
+	|	Files			# [string list]
+	|	Selection
+	|	Patch
+	|	MIME			# [string list], supported mime types
+	|	Keywords		# [string list]
+	|	Supports		# [string list] hardware
+	|	Needs			# [string list] hardware
+	|	Summary			# aka 'Label'
+	|	Description
+	|	From			# installation source
+	;
+
+<vop>	::=	==
+	|	!=
+	|	<
+	|	>
+	|	<=
+	|	>=
+	|	like			# regexp match
+	|	contains		# string match in string list
+	;
+
+<bop>	::=	&&
+	|	||
+	;
+# && binds stronger than ||
+
+<value> ::=	"<astring>"
+	|	<sstring>
+	;
+
+<astring>:	apostrophed string, normal C-string, '"' inside must
+		be escaped by preceding it with '\'
+		'\' before a newline escapes only the newline, not
+		whitespaces after the newline
+<sstring>:	standalone string, '=', '!', '<', '>', '(', ')',
+		'&', '|', space, tab, and newline must be escaped.
+
+	
+--------
+
+Samples
+
+				Package Queries
+                               =================
+
+Author:  Stefan Hundhammer <sh@suse.de>
+Updated: 2002-07-04
+
+
+- Return all packages with RPM group tag XY
+Group == XY
+
+- Return all packages whose RPM group tag begins with (!) XY
+Group like XY*
+
+- Return all packages that belong to SW selection XY
+Selection == XY
+
+- Return all packages that belong to YOU patch XY
+-> Patch attribute
+
+- Return all packages that match keyword X (and/or Y)
+Keywords contains X, like Y
+
+- Return all packages that can handle MIME type X (and/or Y)
+Mime contains X
+
+- Return all packages that support hardware X (and/or Y)
+Supports contains X
+
+- Return all packages that require hardware X (and/or Y)
+Needs contains X
+
+- Return all packages whose name matches/begins with X
+Name == X, like X*
+
+- Return all packages whose summary contains X
+Summary contains X
+
+- Return all packages whose description contains X
+Description contains X
+
+- Return all installed packages 
+isInstalled
+
+- Return all packages
+""
+
+- Return all packages required (directly/indirectly) by package X
+-> Package attribute
+
+- Return all packages that require package X (directly/indirectly)
+Requires contains X
+
+- Return all available instances (version) of packages X
+Name == X && isAvailable
+
+- Return all packages installed since date XY
+InstallDate >= 2002-06-01
+
+- Return all packages (automatically/explicitly) marked for installation
+isSelected && isAutomatic / isSelected && !isAutomatic
+
+- Return all packages marked for update
+isUpdated
+
+- Return all packages marked for removal
+isDeleted
+
+- Return all packages marked as "taboo"
+isTaboo
+
+- Return all packages with file/directory XY in the file list (exact match)
+Files contains X
+
+- Return all packages with file/directory XY in the file list (wildcard match)
+Files like X
+
+- ?? Return all packages with unresolved dependency conflicts
+isIncomplete
+
+- ?? Return all packages on installation source XY
+From == XY
+
+- ?? Return all packages with change log entry since date XY
+??
+
+
+- Return all RPM group tags used in any available package
+- ?? Return all RPM group tags used in any installed package
+- Return all available SW selections
+-> selection attribute
+- Return all available YOU patches
+-> patch attribute
+- Return all available keywords
+- Return all available MIME types
+

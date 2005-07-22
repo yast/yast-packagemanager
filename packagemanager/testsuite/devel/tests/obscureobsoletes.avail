@@ -1,0 +1,44 @@
+Name: foo2
+Edition: 2.0-1
+Obsoletes: foo, foo-devel
+
+Name: foo2old
+Edition: 2.0-1
+Obsoletes: fooold
+
+Name: barold
+Edition: 4.0-1
+
+Name: barold2
+Edition: 4.0-1
+Obsoletes: bar2
+
+Name: aaa
+Edition: 1.0-1
+Obsoletes: bbb
+
+Name: bbb
+Edition: 2.0-1
+
+Name: ccc
+Edition: 1.0-1
+Requires: bbb
+
+Name: ddd
+Edition: 1.0-1
+Requires: aaa
+
+Name: eee
+Edition: 1.0-1
+
+Name: fff
+Edition: 1.0-1
+Obsoletes: eee
+
+Name: ggg
+Edition: 1.0-1
+Requires: fff
+
+Name: hhh
+Edition: 1.0-1
+Requires: eee

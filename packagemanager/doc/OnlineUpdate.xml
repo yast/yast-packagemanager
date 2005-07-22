@@ -1,0 +1,664 @@
+<!-- Maintainer: cschum@suse.de -->
+
+<chapter><title>Online Update Requirements</title>
+
+<section><title>Patch sources</title>
+<para>
+<itemizedlist>
+  <listitem><para>Sources:
+    <itemizedlist>
+      <listitem><para>FTP or HTTP server
+	<itemizedlist>
+	  <listitem><para>Authentification for business products.</para></listitem>
+	  <listitem><para>Proxy support.</para></listitem>
+	</itemizedlist>
+      </para></listitem>
+      <listitem><para>CD, local or network filesystem.</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Specific for product, platform, version.</para></listitem>
+  <listitem><para>Provide list of servers which can be used as source on "master" server.</para></listitem>
+  <listitem><para>Remember source settings (server names, filesystem paths etc.)</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section><title>Patch descriptions</title>
+<para>
+<itemizedlist>
+  <listitem><para>Patch content:
+    <itemizedlist>
+      <listitem><para>Meta information (description, attributes, size etc.)</para></listitem>
+      <listitem><para>Dependencies</para></listitem>
+      <listitem><para>References to patch elements:
+	<itemizedlist>
+	  <listitem><para>Scripts (could also be inlined in patch description)</para></listitem>
+	  <listitem><para>RPMS
+	    <itemizedlist>
+	      <listitem><para>Meta information</para></listitem>
+	      <listitem><para>Attributes: required, optional</para></listitem>
+	      <listitem><para>Reference (URL) to RPM</para></listitem>
+	    </itemizedlist>
+	  </para></listitem>
+	  <listitem><para>Images (files not handled by RPM, e.g. driver disks)</para></listitem>
+	</itemizedlist>
+      </para></listitem>
+      <listitem><para>Signatures of descriptions have to be checked.</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section><title>Patch dependencies</title>
+<para>
+<itemizedlist>
+  <listitem><para>Dependencies of packages in patch have to be resolved.</para></listitem>
+  <listitem><para>Patch as a whole can have dependencies
+    <itemizedlist>
+      <listitem><para>Requires: Patches which have to be present before patch can be installed</para></listitem>
+      <listitem><para>Obsoletes (better Supercedes? or introduce a version number?): patch which
+        supercedes other patch. Superceded patch isn't offered for installation.</para></listitem>
+      <listitem><para>Conflicts: Patches which have to be deinstalled before patch can be installed.</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Patch can require a minimum yast version.</para></listitem>
+  <listitem><para>Dependencies determine sequence of patch installation.</para></listitem>
+  <listitem><para>Dependencies can require to install packages from other sources before patch can be installed.</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section><title>Patch selection</title>
+<para>
+<itemizedlist>
+  <listitem><para>Display
+    <itemizedlist>
+      <listitem><para>Show installed patches.</para></listitem>
+      <listitem><para>Show new patches.</para></listitem>
+      <listitem><para>Information presented to the user:
+	<itemizedlist>
+	  <listitem><para>Translated short description</para></listitem>
+	  <listitem><para>Translated long description</para></listitem>
+	  <listitem><para>Attributes: security, required, recommended, optional, document, yast</para></listitem>
+	  <listitem><para>Size of patch (calculated dynamically )</para></listitem>
+	  <listitem><para>Per package
+	    <itemizedlist>
+	      <listitem><para>Name, Description</para></listitem>
+	      <listitem><para>Size of RPM/patch RPM</para></listitem>
+	    </itemizedlist>
+	  </para></listitem>
+	</itemizedlist>
+      </para></listitem>
+      <listitem><para>Sort shown patches by attribute.</para></listitem>
+      <listitem><para>Option to print decriptions (maybe from support server).</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Selection
+    <itemizedlist>
+      <listitem><para>Automatic selection (all security, required and recommended)</para></listitem>
+      <listitem><para>User defined selection (e.g. only security)</para></listitem>
+      <listitem><para>Interactive selection:
+	<itemizedlist>
+	  <listitem><para>Default selection of patches:
+	    <itemizedlist>
+	      <listitem><para>Required patches are selected</para></listitem>
+	      <listitem><para>Security patches are selected if at least one package is already installed</para></listitem>
+	      <listitem><para>Recommended patches are selected if at least one packages is already installed</para></listitem>
+	      <listitem><para>If patch description specifies InstallTriggerPackages or InstallTriggerScript and condition is met select patch.</para></listitem>
+	      <listitem><para>Optional patches are not selected.</para></listitem>
+	    </itemizedlist>
+	  </para></listitem>
+	</itemizedlist>
+      </para></listitem>
+      <listitem><para>Remember selection state of patches.</para></listitem>
+      <listitem><para>Select individual packages from patches
+	<itemizedlist>
+	  <listitem><para>default selection:
+	    <itemizedlist>
+	      <listitem><para>all required packages.</para></listitem>
+	      <listitem><para>optional packages which are already installed.</para></listitem>
+	    </itemizedlist>
+	  </para></listitem>
+	  <listitem><para>Required packages have to be installed, if patch is installed.</para></listitem>
+	  <listitem><para>Optional packages are installed if selected by user.</para></listitem>
+	</itemizedlist>
+      </para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>If there are required yast patches, they have to be installed and yast has to be restarted before any other patch can be installed.</para></listitem>
+  <listitem><para>Option to reinstall patches.</para></listitem>
+  <listitem><para>Make sure that size of patches to be installed does not exceed available disk space.</para></listitem>
+  <listitem><para>Make sure that older patches do not override newer patches.</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section><title>Patch installation</title>
+<para>
+<itemizedlist>
+  <listitem><para>Download patch elements
+    <itemizedlist>
+      <listitem><para>Download patch RPMs, if available for the installed version of the package.</para></listitem>
+      <listitem><para>Signatures have to be checked.</para></listitem>
+      <listitem><para>Make sure that there is enough disk space for download or issue error message.</para></listitem>
+      <listitem><para>If download fails due to problems on the server side try a different server.</para></listitem>
+      <listitem><para>If download fails after downloading a part of the elements, allow to resume download later without starting all over.</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Process patch elements in order determined by patch description
+    <itemizedlist>
+      <listitem><para>Show pre/post information (special case of script)</para></listitem>
+      <listitem><para>Execute pre/postinstall script</para></listitem>
+      <listitem><para>Install packages
+	<itemizedlist>
+	  <listitem><para>Skip non-installed packages, if specified in patch description.</para></listitem>
+	</itemizedlist>
+      </para></listitem>
+      <listitem><para>Install images (might also be a special case of a script)</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>(Optionally) remove downloaded packages after installation.</para></listitem>
+  <listitem><para>Store which patches have been installed.</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section><title>Patch deinstallation</title>
+<para>
+<itemizedlist>
+  <listitem><para>Call Postinstall script with --uninstall option</para></listitem>
+  <listitem><para>Deinstall RPMs and remove images</para></listitem>
+  <listitem><para>Call Preinstall script with --uninstall option</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section><title>Script execution</title>
+<para>
+<itemizedlist>
+  <listitem><para>pre and post package installation</para></listitem>
+  <listitem><para>If user input is required use ycp module to get it.</para></listitem>
+  <listitem><para>log files for stdout and stderr</para></listitem>
+  <listitem><para>script management?</para></listitem>
+  <listitem><para>requirement for scripts: install and uninstall mode</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+<section><title>Workflows</title>
+<para>
+<itemizedlist>
+  <listitem><para>Yast Online Update (start with source selection).</para></listitem>
+  <listitem><para>Yast Patch CD (start with patch/package selection).</para></listitem>
+  <listitem><para>Command line call</para></listitem>
+</itemizedlist>
+</para>
+</section>
+
+</chapter>
+
+<chapter><title>Online Update Implementation</title>
+
+<para>
+<itemizedlist>
+  <listitem><para>Special you installation source.
+    <itemizedlist>
+      <listitem><para>Provides set of patches (including dependencies etc.)</para></listitem>
+      <listitem><para>uses common file transfer service for downloading patch descriptions.</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Patch selection is done by standard package selection widget
+    <itemizedlist>
+      <listitem><para>Patches are handled like selections</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Dependency resolving is done by standard solver
+    <itemizedlist>
+      <listitem><para>Determines order of patches and packages to be installed.</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Installation should be done by standard installation service.
+    <itemizedlist>
+      <listitem><para>Includes downloading packages, if required (Uses common file transfer service).</para></listitem>
+      <listitem><para>Special requirement to execute scripts at certain points of the installation process.</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Common file transfer service
+    <itemizedlist>
+      <listitem><para>Shared service for downloading files (so that server connections haven't to be established multiple times and authorization is only needed once).</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+  <listitem><para>Patch Database
+    <itemizedlist>
+      <listitem><para>use same mechanism as for selections?</para></listitem>
+    </itemizedlist>
+  </para></listitem>
+</itemizedlist>
+</para>
+</chapter>
+
+
+<chapter>
+<title>YOU test requirements</title>
+
+<para>This chapter outlines the requirements for testing the YaST Online Update
+(YOU). Ensuring correct functionality of the online update is of particular
+importance because errors in the online update have an impact on our ability to
+provide fixes for the system at all.</para>
+
+<para>The following sections describe what tests are needed to ensure correct
+functionality of YOU. These tests take place on different levels of complexity
+and automatisation and have very different requirements on the test environment
+and the effort to maintain them. Concrete test cases are given and some
+proposals how to implement them.</para>
+
+
+<section>
+<title>Unit tests</title>
+
+<para>Unit tests take place on the source code level and test small blocks of
+code. These tests are contained in the standard YaST testsuites and are part of
+the normal build process so that regressions are found at a very early stage of
+development.</para>
+
+<para>Unit tests suit well for the lower layers of code YOU depends on, in
+particular the code from liby2util and the common infrastructure parts of the
+packagemanager.</para>
+
+<para>The following section lists test cases for classes of particular
+importance for YOU.</para>
+
+<section>
+<title>Test cases</title>
+
+<section>
+<title>liby2util</title>
+
+<itemizedlist>
+  <title>Url</title>
+  <listitem>
+    <para>Parsing of different types of URLs to its components</para>
+  </listitem>
+  <listitem>
+    <para>Setting and reading individual components of a URL</para>
+  </listitem>
+  <listitem>
+    <para>Assembling URL from components</para>
+  </listitem>
+  <listitem>
+    <para>Conversion of URL to string</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Parser</title>
+  <listitem>
+    <para>Parsing of YOU type tags (single line, multi line).</para>
+  </listitem>
+  <listitem>
+    <para>Tolerance of parser to changes in order of tags and unknown tags</para>
+  </listitem>
+  <listitem>
+    <para>Parsing of multi-language tags</para>
+  </listitem>
+  <listitem>
+    <para>Parsing of files containing extra data like PGP signatures.</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Pathname</title>
+  <listitem>
+    <para>Parsing of different types of path names (absolute, relative,
+    directories, files)</para>
+  </listitem>
+  <listitem>  
+    <para>Adding path components</para>
+  </listitem>
+  <listitem>
+    <para>Conversion of Pathname to string</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>PathInfo</title>
+  <listitem>
+    <para>isExist</para>
+  </listitem>
+  <listitem>
+    <para>assert_dir</para>
+  </listitem>
+  <listitem>
+    <para>unlink</para>
+  </listitem>
+  <listitem>
+    <para>rename</para>
+  </listitem>
+  <listitem>
+    <para>copy</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>ExternalProgram</title>
+  <listitem>
+    <para>Execution of shell commands and scripts</para>
+  </listitem>
+  <listitem>
+    <para>Checking return value of executed commands</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>GPGCheck</title>
+  <listitem>
+    <para>Check signature of text file</para>
+  </listitem>
+  <listitem>
+    <para>Check and remove signature of text file</para>
+  </listitem>
+</itemizedlist>
+
+</section>
+
+
+<section>
+<title>packagemanager</title>
+
+<itemizedlist>
+  <title>Classes handling names, version, release of patches and packages</title>
+  <listitem>
+    <para>Parsing of name and edition from strings</para>
+  </listitem>
+  <listitem>
+    <para>Comparisons of editions</para>
+  </listitem>
+  <listitem>
+    <para>Conversion of name and editions to strings</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+  <title>PMManager, PMSelectable</title>
+  <listitem>
+    <para>Adding installed and available objects to manager</para>
+  </listitem>
+  <listitem>
+    <para>Iterating over objects of manager</para>
+  </listitem>
+  <listitem>
+    <para>Setting and reading states of selectables</para>
+  </listitem>
+  <listitem>
+    <para>Multiple available objects</para>
+  </listitem>
+  <listitem>
+    <para>Correct setting of candidate object</para>
+  </listitem>
+  <listitem>
+    <para>Access to selectable states via PMObject class</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>InstTarget</title>
+  <listitem>
+    <para>Provide correct product information (single product, multiple products)</para>
+  </listitem>
+  <listitem>
+    <para>package installation</para>
+  </listitem>
+  <listitem>
+    <para>installPatch()</para>
+  </listitem>
+  <listitem>
+    <para>executeScript()</para>
+  </listitem>
+</itemizedlist>
+
+</section>
+
+
+<section>
+<title>YOU</title>
+
+<itemizedlist>
+  <listitem><para>Parsing of patch files</para></listitem>
+  <listitem><para>Setting and reading of all patch attributes</para></listitem>
+  <listitem><para>Access to patches, patch attributes and patch states via PMYouPatchManager</para></listitem>
+  <listitem><para>Provide correct path information based on product</para></listitem>
+  <listitem><para>Assemble request to suseservers.cgi</para></listitem>
+  <listitem><para>Iterate through patches with InstYou functions</para></listitem>
+</itemizedlist>
+
+</section>
+
+</section>
+
+</section>
+
+
+<section>
+<title>Component tests</title>
+
+<para>Component tests are testing certain parts of the YOU functionality within
+a special environment. They require a more special setup than available in the
+normal build system of the packages, e.g access to a ftp server or special
+patches or packages to be installed during the test process. Most of these tests
+can be done using the command line version of YOU.</para>
+
+<para>These tests are more sensitive to changes in the code than the unit tests
+and the test setup requires a higher maintenance effort. They still can be
+performed automatically.</para>
+
+<para>Component tests could be done in special test packages using the autobuild
+infrastructure. This would have the advantage that it's easy to setup test
+environments and the tests would performed automatically as part of the build
+process, but the test environment wouldn't affect the normal build process of
+the packages and errors in the test suite itself wouldn't prevent the packages
+to be built.</para>
+
+<section>
+<title>Test cases</title>
+
+<itemizedlist>
+<title>Reading server lists</title>
+  <listitem><para>Request list of servers from suseservers.cgi</para></listitem>
+  <listitem><para>Reading server lists from disk</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Download of patch information</title>
+  <listitem>
+    <para>Check signature of patch information</para>
+  </listitem>
+  <listitem>
+    <para>Handling of download errors</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Sources for downloading patch information</title>
+  <listitem><para>Local directory</para></listitem>
+  <listitem><para>Anonymous FTP</para></listitem>
+  <listitem><para>HTTP with password authentification</para></listitem>
+  <listitem><para>HTTP without authentification</para></listitem>
+  <listitem><para>NFS</para></listitem>
+  <listitem><para>Samba</para></listitem>
+  <listitem><para>FTP through proxy</para></listitem>
+  <listitem><para>FTP through proxy with authentification</para></listitem>
+  <listitem><para>HTTP through proxy</para></listitem>
+  <listitem><para>HTTP through proxy with authentification</para></listitem>
+  <listitem><para>FTP through firewall</para></listitem>
+  <listitem><para>HTTP through firewall</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Default selection of patches</title>
+  <listitem>
+    <para>Patch with no packages installed</para>
+  </listitem>
+  <listitem>
+    <para>Patch with some packages in previous versions installed</para>
+  </listitem>
+  <listitem>
+    <para>Patch with all packages in previous versions installed</para>
+  </listitem>
+  <listitem>
+    <para>Patch with some packages in previous and some in current versions
+    installed</para>
+  </listitem>
+  <listitem>
+    <para>Patch with all packages in current versions installed</para>
+  </listitem>
+  <listitem>
+    <para>Patch with some packages in newer versions and some in current
+    versions installed</para>
+  </listitem>
+  <listitem>
+    <para>Patch with some packages in newer and some in older versions
+    installed</para>
+  </listitem>
+  <listitem>
+    <para>All variants of installed packages for all kinds of patches
+    (yast, security, recommended, optional )</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Download of patches and packages</title>
+  <listitem>
+    <para>Download of selected patches from different sources as listed for
+    patch information</para>
+  </listitem>
+  <listitem>
+    <para>Download of patch RPM or full RPM depending on versions of packages
+    in the installed system</para>
+  </listitem>
+  <listitem>
+    <para>Download of correct architecture depending on architecture of packages
+    in the installed system</para>
+  </listitem>
+  <listitem>
+    <para>Check signature of RPMs</para>
+  </listitem>
+  <listitem>
+    <para>Check signature of scripts</para>
+  </listitem>
+  <listitem>
+    <para>Handling of download errors</para>
+  </listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Installation of patches</title>
+  <listitem>
+    <para>Correct installation of RPMs</para>
+  </listitem>
+  <listitem>
+    <para>UpdateOnlyInstall option</para>
+  </listitem>
+  <listitem>
+    <para>Execution of pre and post scripts</para>
+  </listitem>
+  <listitem>
+    <para>Copying of patch information to target system</para>
+  </listitem>
+</itemizedlist>
+
+</section>
+
+</section>
+
+
+<section>
+<title>Module tests</title>
+
+<para>Some tests have to be performed on the level of the YaST module. This
+includes tests of the GUI.</para>
+
+<para>Part of these tests could be automated using the YaST macro recorder.
+This makes them very sensitive to code changes and requires a high degree of
+maintance of the test environment. Some tests can't be automated because they
+require manual interaction by the user, e.g. inserting a CD. The patch selection
+widget also can't be tested automatically, as it doesn't provide the YCP hooks
+required by the macro recorder and it is too complex for checking for correct
+behaviour automatically.</para>
+
+<section>
+<title>Test cases</title>
+
+<itemizedlist>
+  <listitem>
+    <para>Patch CD installation</para>
+  </listitem>
+  <listitem>
+    <para>Putting in custom URLs</para>
+  </listitem>
+  <listitem>
+    <para>Setup of automatic update using the GUI</para>
+  </listitem>
+  <listitem>
+    <para>Putting in register code and password information</para>
+  </listitem>
+  <listitem>
+    <para>Selecting patches using the GUI</para>
+  </listitem>
+  <listitem>
+    <para>Aborting update while download or installation is active</para>
+  </listitem>
+  <listitem>
+    <para>Showing patch information in correct language</para>
+  </listitem>
+  <listitem>
+    <para>Display of pre and post messages</para>
+  </listitem>
+  <listitem>
+    <para>Run SuSEconfig after patches have been installed</para>
+  </listitem>
+</itemizedlist>
+
+</section>
+
+</section>
+
+
+<section>
+<title>Real-life tests</title>
+
+<para>In addition to automatic test suites it's important that the online
+update is also tested by real users with real data under real-world conditions
+to catch errors which aren't covered by the test suites.</para>
+
+<para>To make it possible to test the update during the preview and beta phase
+of a product it must be possible to create updates for these development
+versions, e.g. by taking newer packages from the autobuild system and put them
+as update on a server by using the normal update creation mechanism. This could
+be done manually or automatically for some typical cases of updates.</para>
+
+<para>It's also important to have a mechanism to easily create test updates from
+some given RPMs. This includes generation of patch RPMs and signing of the patch
+files. This mechanism should not depend on cron jobs running at fixed times to
+avoid the long latency of the production patch generation process.</para>
+
+</section>
+
+
+<section>
+<title>Tests of patches</title>
+
+<para>In addition to testing YOU it is also important to test the patches
+itself. Each patch being put on the public servers should be tested, if it is
+shown, selected, downloaded and installed correctly by YOU. This is necessary to
+find problems in the update generation mechanism.</para>
+
+<para>It would also be helpful to have some tools to automatically check the
+patches on the server for consistency, e.g. vaild patch information files,
+missing packages or scripts, valid signatures, correct listing in the directory
+file.</para>
+
+</section>
+
+
+</chapter>

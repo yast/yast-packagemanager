@@ -1,0 +1,13 @@
+# This file is read by the YaST Online Update (YOU) to build the list of servers
+# used for getting updates. It may contain URLs to the base directories where
+# an update tree is located.
+#
+# This file is not overwritten with the list from the master server as it was
+# the case with /etc/suseservers in previous YOU versions. /etc/suseservers is
+# obsolete.
+#
+# Examples:
+#
+#ftp://ftp.suse.com/pub/suse
+#cd:///
+#dir:///var/lib/YaST2/you/mnt

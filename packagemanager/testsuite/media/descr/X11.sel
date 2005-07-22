@@ -1,0 +1,134 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:38 UTC 2002
+
+=Ver: 3.0
+
+=Sel:  X11
+
+=Sum: Graphical Basis System
+=Sum.cs: Graphical Basis System
+=Sum.de: Graphical Basis System
+=Sum.en: Graphical Basis System
+=Sum.es: Graphical Basis System
+=Sum.fr: Graphical Basis System
+=Sum.gl: Graphical Basis System
+=Sum.hu: Graphical Basis System
+=Sum.it: Graphical Basis System
+=Sum.ja: Graphical Basis System
+=Sum.nl: Graphical Basis System
+=Sum.pt: Graphical Basis System
+=Sum.sv: Graphical Basis System
+=Sum.tr: Graphical Basis System
+
+=Cat: addon
+
+=Vis: true
+
+=Ord: 10
+
++Ins:
+3ddiag
+CheckHardware
+WindowMaker
+WindowMaker-applets
+WindowMaker-themes
+addonlibs-32bit
+freetype
+freetype2
+glib
+glibc-locale
+gtk
+hermes
+ifnteuro
+imlib
+imwheel
+intlfnts
+libPropList
+libjpeg
+liblcms
+libmng
+libpng
+libtiff
+libungif
+libusb
+listexec
+mesa
+mesaglu
+mesaglut
+mesasoft
+openssh-askpass
+patch
+perl-Tk
+perl-gettext
+qt3
+sax2
+sax2_sbus
+saxident
+saxtools
+susewm
+tcl
+tk
+ttmkfdir
+unclutter
+w3m-inline-image
+wget
+xanim
+xaw3d
+xbanner
+xdmbgrd
+xf86
+xf86_glx
+xf86tools
+xfine
+xfntscl
+xloader
+xlock
+xman
+xmodules
+xpenguins
+xshared
+xtermset
+yast2-control-center
+yast2-qt
+yast2-x11
+-Ins:
+
++Ins.cs:
+xfntl2
+xfntscl2
+-Ins.cs:
+
++Ins.el:
+xfntgreek
+-Ins.el:
+
++Ins.hu:
+xfntl2
+xfntscl2
+-Ins.hu:
+
++Ins.ja:
+canna
+canna-libs
+cannadic
+kinput2
+kterm
+termcap
+ttf-kochi-gothic
+ttf-kochi-mincho
+xfntjp
+-Ins.ja:
+
++Ins.ru:
+xfntcyr
+-Ins.ru:
+
++Ins.sl_SI:
+xfntl2
+xfntscl2
+-Ins.sl_SI:
+
++Ins.tu:
+xfntturk
+-Ins.tu:
+

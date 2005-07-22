@@ -1,0 +1,11 @@
+Makefile
+Makefile.in
+*.o
+*.lo
+*.la
+.deps
+.libs
+online_update
+installation_sources
+genIS_PLAINcache
+*.loT

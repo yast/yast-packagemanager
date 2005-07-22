@@ -1,0 +1,60 @@
+#!/bin/bash
+TESTS="01simple 02conflict bug21829 inconsistent1 inconsistent2 inconsistent3 inconsistent4 inconsistent5 inconsistent6 obscureobsoletes"
+
+make autosolvertest >/dev/null 2>&1
+
+Y2DEBUG=1
+Y2SLOG_FILE=autosolvertest.y2log
+
+export Y2DEBUG Y2SLOG_FILE
+
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+		-l)
+			while read t; do
+				t=${t##*/}
+				echo ${t%.t}
+			done < <(ls -1 tests/*.t)
+			exit 0
+			;;
+		-d) showdiff=1; shift ;;
+		--) break ;;
+		*) break ;;
+	esac
+done
+
+if [ -n "$*" ]; then
+	TESTS="$*"
+fi
+
+set -e
+
+> "$Y2SLOG_FILE"
+> autosolvertest.out
+
+for test in $TESTS; do
+	msg="############# run test $test ##################"
+	echo $msg >> $Y2SLOG_FILE
+	echo $msg >> autosolvertest.out
+	./autosolvertest tests/$test >>autosolvertest.out 2>&1
+done
+
+ret=0
+for test in $TESTS; do
+	echo -n "test $test: "
+	diff=tests/$test.diff
+	rm -f $diff
+	[ ! -e "tests/$test.ref" ] && > tests/$test.ref || true
+	if diff -u tests/$test.ref tests/$test.out > $diff; then
+		echo passed
+		rm $diff
+	else
+		echo FAILED: $diff
+		ret=$((ret+1))
+		if [ "$showdiff" = 1 ]; then
+			cat $diff
+		fi
+	fi
+done
+exit $ret

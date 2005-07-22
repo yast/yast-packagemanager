@@ -1,0 +1,7 @@
+Name: at
+Edition: 1-1
+Requires: shadow
+
+Name: shadow
+Edition: 1.0-1
+Requires: libsomething.so.0

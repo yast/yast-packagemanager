@@ -1,0 +1,86 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:32 UTC 2002
+
+=Ver: 3.0
+
+=Sel:  Kde
+
+=Sum: All of KDE
+=Sum.cs: Vše z KDE
+=Sum.de: KDE komplett
+=Sum.en: All of KDE
+=Sum.es: Todo el KDE
+=Sum.fr: Tout de KDE
+=Sum.gl: Todo o KDE
+=Sum.hu: Minden, ami KDE
+=Sum.it: Tutto KDE
+=Sum.ja: KDE システム
+=Sum.nl: KDE compleet
+=Sum.pt: All of KDE
+=Sum.sv: Hela KDE
+=Sum.tr: All of KDE
+
++Req:
+Kde-Desktop
+X11
+-Req:
+
++Con:
+Minimal
+-Con:
+
+=Cat: addon
+
+=Vis: true
+
+=Ord: 12
+
++Ins:
+cdda2wav
+gettext
+gmp
+kalamaris
+kappdock
+kaptain
+karchiver
+kbear
+kde2-compat
+kdegraphics3-extra
+kdoc
+kfilecoder
+kgoodstuff
+klassie
+kleandisk
+klock
+klogic
+kmag
+kmago
+kmlocfg
+kmlofax
+kmlovoice
+koffice
+kpicframer
+kpl
+kpncalc
+kpooka
+kreatecd
+krusader
+ksetiwatch
+kshowmail
+ksnuffle
+kssh
+ksteak
+ktamaga
+kwatch
+kwintv
+kxicq2
+mpg123
+postgresql-libs
+python
+qt
+quanta
+sane
+steak
+tse3
+-Ins:
+
