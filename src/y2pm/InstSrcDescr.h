@@ -122,6 +122,11 @@ class InstSrcDescr : public CountedRep {
     bool _default_activate;
 
     /**
+     * Should InstSrc be refreshed before enable.
+     **/
+    bool _default_refresh;
+
+    /**
      * Rank of this InstSrc.(0 is highest)
      **/
     unsigned _default_rank;
@@ -191,6 +196,7 @@ class InstSrcDescr : public CountedRep {
     const Pathname &     product_dir()         const { return _product_dir; }
 
     bool                 default_activate()    const { return _default_activate; }
+    bool                 default_refresh()     const { return _default_refresh; }
     unsigned             default_rank()        const { return _default_rank; }
     bool                 usefordeltas()        const { return _usefordeltas; }
 
@@ -257,6 +263,7 @@ class InstSrcDescr : public CountedRep {
     void set_product_dir( const Pathname & val_r )            { _product_dir = val_r; }
 
     void set_default_activate( bool val_r )                   { _default_activate = val_r; }
+    void set_default_refresh( bool val_r )                    { _default_refresh = val_r; }
     void set_default_rank( unsigned val_r )                   { _default_rank = val_r; }
     void set_usefordeltas( bool val_r )                       { _usefordeltas = val_r; }
 
