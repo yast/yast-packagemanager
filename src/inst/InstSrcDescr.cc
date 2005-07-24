@@ -62,6 +62,7 @@ const Pathname InstSrcDescr::_cache_file( "description" );
 InstSrcDescr::InstSrcDescr()
     : _type               ( InstSrc::T_UNKNOWN )
     , _default_activate   ( true )
+    , _default_refresh    ( true )
     , _default_rank       ( NO_RANK )
     , _usefordeltas	  ( true )
     , _media_count        ( 0 )
@@ -165,6 +166,7 @@ static const std::string TypeTag	= "Type";
 static const std::string UrlTag		= "URL";
 static const std::string ProdDirTag	= "ProductDir";
 static const std::string DefActTag	= "Default_activate";
+static const std::string DefRefreshTag	= "Default_refresh";
 static const std::string DefRankTag	= "Default_rank";
 static const std::string UseForDeltasTag= "UseForDeltas";
 static const std::string MediaTag	= "Media";
@@ -201,6 +203,7 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
   str << "=" << UrlTag << ": " << _url.asString (true, true, true) << endl;
   str << "=" << ProdDirTag << ": " << _product_dir << endl;
   str << "=" << DefActTag << ": " << (_default_activate?"1":"0") << endl;
+  str << "=" << DefRefreshTag << ": " << (_default_refresh?"1":"0") << endl;
   str << "=" << DefRankTag << ": " << _default_rank << endl;
   str << "=" << UseForDeltasTag << ": " << (_usefordeltas?"1":"0") << endl;
   // data from media file
@@ -376,7 +379,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     tagset.setAllowUnknownTags (true);		// skip unknown tags
 
     enum Tags { TYPE, URL, PRODUCTDIR,
-	        ACTIVATE, RANK,
+	        ACTIVATE, REFRESH, RANK,
 		FORDELTAS,
 	        MEDIA, PRODUCT, DEFBASE, ARCH,
 		REQUIRES, LANGUAGE, LABEL, LABELMAP, LINGUAS, TIMEZONE, DESCRDIR, DATADIR,
@@ -389,6 +392,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     tagset.addTag (UrlTag,		URL,	    TaggedFile::SINGLE);
     tagset.addTag (ProdDirTag,  	PRODUCTDIR, TaggedFile::SINGLE);	// product dir below _url
     tagset.addTag (DefActTag,		ACTIVATE,   TaggedFile::SINGLE);	// 1 = true (default activated), 0 = false
+    tagset.addTag (DefRefreshTag,	REFRESH,    TaggedFile::SINGLE);	// 1 = true (default refresh), 0 = false
     tagset.addTag (DefRankTag,		RANK,       TaggedFile::SINGLE);	// RankValue, if provided
     tagset.addTag (UseForDeltasTag,	FORDELTAS,  TaggedFile::SINGLE);	// 1 = true, 0 = false
     tagset.addTag (MediaTag,		MEDIA,	    TaggedFile::MULTI);		// _media_vendor, _media_id, _media_count
@@ -425,14 +429,17 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 #define GET_TAG(tagname) tagset.getTagByIndex (tagname)
 #define GET_STRING(tagname) tagset.getTagByIndex (tagname)->Data()
 #define GET_POS(tagname) tagset.getTagByIndex (tagname)->Pos()
+    string tmpval;
 
     ndescr->set_default_activate (GET_STRING(ACTIVATE) == "1");
+    if ( (tmpval = GET_STRING(REFRESH)).size() ) // else use constructor default
+      ndescr->set_default_refresh (tmpval == "1");
     ndescr->set_type ( InstSrc::fromString (GET_STRING(TYPE)));
     ndescr->set_usefordeltas (GET_STRING(FORDELTAS) == "1");
 
-    string val = GET_STRING(RANK);
-    if ( val.size() ) {
-      ndescr->set_default_rank( atoi( val.c_str() ) );
+    tmpval = GET_STRING(RANK);
+    if ( tmpval.size() ) {
+      ndescr->set_default_rank( atoi( tmpval.c_str() ) );
     }
 
     std::list<std::string> multi;

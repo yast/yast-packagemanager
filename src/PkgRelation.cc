@@ -130,6 +130,10 @@ PkgRelation PkgRelation::fromString( string s )
 
   switch ( num ) {
 
+  case 0:
+    return PkgRelation();
+    break;
+
   case 1:
     return PkgRelation( PkgName(words[0]), NONE, PkgEdition() );
     break;
@@ -144,7 +148,7 @@ PkgRelation PkgRelation::fromString( string s )
   }
 
   ERR << "Error parsing PkgRelation from '" << s << "'" << endl;
-  return PkgRelation( PkgName(), NONE, PkgEdition() );
+  return PkgRelation();
 }
 
 ///////////////////////////////////////////////////////////////////
