@@ -60,8 +60,17 @@ namespace PM {
 
   typedef std::vector<NumericISrcID> InstOrder;
 
-  typedef std::pair<NumericISrcID, bool> SrcState;
-  typedef std::vector<SrcState>          SrcStateVector;
+  struct SrcState
+  {
+    NumericISrcID _id;
+    bool          _autoenable;
+    bool          _autorefresh;
+
+    SrcState();         // impl. in InstSrcManager.cc
+    explicit
+    SrcState( ISrcId ); // impl. in InstSrcManager.cc
+  };
+  typedef std::vector<SrcState> SrcStateVector;
 
 
   ///////////////////////////////////////////////////////////////////

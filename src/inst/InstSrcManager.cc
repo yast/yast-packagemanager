@@ -35,6 +35,22 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////
 
+namespace PM
+{
+  // from PMTypes.h
+  SrcState::SrcState()
+  : _id( InstSrc::noID )
+  , _autoenable( true ), _autorefresh( true )
+  {}
+  SrcState::SrcState( ISrcId srcId_r )
+  : _id( srcId_r->srcID() )
+  , _autoenable( srcId_r->descr()->default_activate() )
+  , _autorefresh( srcId_r->descr()->default_refresh() )
+  {}
+}
+
+///////////////////////////////////////////////////////////////////
+
 Pathname InstSrcManager::_cache_root_dir( "/var/adm/YaST/InstSrcManager" );
 
 const Pathname InstSrcManager::_cache_tmp_dir( "tmp" );
@@ -725,8 +741,7 @@ InstSrcManager::SrcStateVector InstSrcManager::editGet() const
   ret.reserve( _knownSources.size() );
 
   for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it ) {
-    ret.push_back( SrcState( (*it)->srcID(),
-			     (*it)->descr()->default_activate() ) );
+    ret.push_back( SrcState( *it ) );
   }
 
   return ret;
@@ -752,16 +767,16 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
   // Check new known sources. Remember the sources we saw.
   ///////////////////////////////////////////////////////////////////
   for ( SrcStateVector::const_iterator it = keep_r.begin(); it != keep_r.end(); ++it ) {
-    InstSrcPtr item( lookupSourceByID( it->first ) );
+    InstSrcPtr item( lookupSourceByID( it->_id ) );
     if ( ! item ) {
-      ERR << "bad srcId " << it->first << endl;
+      ERR << "bad srcId " << it->_id << endl;
       return Error::E_bad_id;
     }
     if ( ! seen.insert( item ).second ) {
-      ERR << "srcId(" << it->first << ") listed twice" << endl;
+      ERR << "srcId(" << it->_id << ") listed twice" << endl;
       return Error::E_isrc_cache_duplicate;
     }
-    DBG << "To keep: srcID(" << it->first << ") " << item << endl;
+    DBG << "To keep: srcID(" << it->_id << ") " << item << endl;
     known.push_back( item );
   }
 
@@ -780,10 +795,12 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
       todel.push_back( *it );
     } else {
       // still known
-      if ( !new_ranks && (*it)->srcID() != keep_r[idx].first ) {
+      if ( !new_ranks && (*it)->srcID() != keep_r[idx]._id ) {
 	new_ranks = new_states = true;
       }
-      if ( !new_states && (*it)->descr()->default_activate() != keep_r[idx].second ) {
+      if ( ! new_states
+           && ( (*it)->descr()->default_activate() != keep_r[idx]._autoenable
+                || (*it)->descr()->default_refresh() != keep_r[idx]._autorefresh ) ) {
 	new_states = true;
       }
       ++idx;
@@ -809,7 +826,8 @@ PMError InstSrcManager::editSet( const SrcStateVector & keep_r )
   if ( new_states ) {
     idx = 0;
     for ( ISrcPool::const_iterator it = _knownSources.begin(); it != _knownSources.end(); ++it, ++idx ) {
-      (*it)->descr()->set_default_activate( keep_r[idx].second );
+      (*it)->descr()->set_default_activate( keep_r[idx]._autoenable );
+      (*it)->descr()->set_default_refresh( keep_r[idx]._autorefresh );
       (*it)->descr()->set_default_rank( idx );
       (*it)->_mgr_attach();
     }
@@ -918,7 +936,9 @@ ostream & operator<<( ostream & str, const InstSrcManager & obj )
   str << "===[known sources]===================" << endl;
   for ( InstSrcManager::ISrcPool::const_iterator it = obj._knownSources.begin();
 	it != obj._knownSources.end(); ++it ) {
-    str << (*it)->descr()->default_activate() << " [" << (*it)->descr()->default_rank() << "] "
+    str << ((*it)->descr()->default_activate() ? 'A' : '-' )
+        << ((*it)->descr()->default_refresh() ? '*' : ' ' )
+        << " [" << (*it)->descr()->default_rank() << "] "
 	<< (*it) << endl;
   }
   str << "=====================================" << endl;
