@@ -529,6 +529,21 @@ PMError InstSrcManager::scanMedia( ISrcId & isrc_r, const Url & mediaurl_r, cons
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcManager::refreshSource
+//	METHOD TYPE : PMError
+//
+PMError InstSrcManager::refreshSource( const ISrcId & isrc_r )
+{
+  PMError err;
+#warning TBD InstSrcManager::refreshSource
+  err = Error::E_TBD;
+  INT << err << " refreshSource " << isrc_r << endl;
+  return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcManager::setAutoenable
 //	METHOD TYPE : PMError
 //
@@ -540,6 +555,29 @@ PMError InstSrcManager::setAutoenable( const ISrcId isrc_r, const bool yesno )
   if ( it ) {
     if ( it->descr()->default_activate() != yesno ) {
       it->descr()->set_default_activate( yesno );
+      return it->writeDescrCache();
+    }
+    return Error::E_ok;
+  }
+
+  WAR << "bad ISrcId " << isrc_r << endl;
+  return Error::E_bad_id;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::setAutorefresh
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrcManager::setAutorefresh( const ISrcId isrc_r, const bool yesno )
+{
+  InstSrcPtr it( lookupId( isrc_r ) );
+  if ( it ) {
+    if ( it->descr()->default_refresh() != yesno ) {
+      it->descr()->set_default_refresh( yesno );
       return it->writeDescrCache();
     }
     return Error::E_ok;
