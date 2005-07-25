@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Jul 25 13:35:36 CEST 2005 - ma@suse.de
+
+- Added installation source attribute 'autorefresh' (default: TRUE).
+  Adapted InstSrcManager to allow attribute manipulation. Added explicit
+  'refreshSource' call to InstSrcManager interface.
+- 2.12.7
+
+-------------------------------------------------------------------
 Wed Jul 20 09:21:47 CEST 2005 - ma@suse.de
 
 - Fix spec file.
