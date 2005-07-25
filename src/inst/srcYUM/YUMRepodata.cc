@@ -70,7 +70,7 @@ namespace YUM
       }
 
     //
-    _repodataId = PathInfo::md5sum( repomd.path() );
+    _repodataId = PathInfo::sha1sum( repomd.path() );
   }
 
   ///////////////////////////////////////////////////////////////////

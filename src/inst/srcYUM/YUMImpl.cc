@@ -28,6 +28,7 @@
 
 #include "YUMImpl.h"
 #include "YUMPackageDataProvider.h"
+#include "y2pm/RpmHeader.h"
 
 #include "Y2PM.h"
 
@@ -36,6 +37,32 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////
 namespace YUM
 { /////////////////////////////////////////////////////////////////
+
+  struct Counter
+  {
+    Counter()
+    : _counter( 0 )
+    {}
+    operator unsigned &()
+    { return _counter; }
+    operator const unsigned &() const
+    { return _counter; }
+  private:
+    unsigned _counter;
+  };
+  struct CounterMap : public map<string,Counter>
+  {};
+  ostream &
+  operator <<( ostream & str, const CounterMap & obj )
+  {
+    if ( obj.empty() )
+      return str << "none";
+    for ( CounterMap::const_iterator it = obj.begin(); it != obj.end(); ++it )
+      {
+        str << "'" << it->first << "':" << it->second << "; ";
+      }
+    return str;
+  }
 
 #warning FIX archCompat handling
   /******************************************************************
@@ -207,6 +234,9 @@ namespace YUM
     bool ret = true;
     set<PkgArch> compatArch( archCompat( Y2PM::baseArch() ) );
 
+    CounterMap wrongType;
+    CounterMap wrongArch;
+
     unsigned pkgs = 0;
     for ( ; ! iter_r.atEnd(); ++iter_r )
       {
@@ -215,14 +245,14 @@ namespace YUM
 
         if ( pdata->type != "rpm" )
           {
-            DBG << pdata->name << ": Skip type '" << pdata->type << "'" << endl;
+            ++wrongType[pdata->type];
             continue;
           }
 
         PkgArch arch( pdata->arch );
         if ( compatArch.find( arch ) == compatArch.end() )
           {
-            DBG << pdata->name << ": Drop incompatible arch '" << arch << "' (" << Y2PM::baseArch() << ")" << endl;
+            ++wrongArch[pdata->arch];
             continue;
           }
 
@@ -230,7 +260,7 @@ namespace YUM
         PkgName    name( pdata->name );
         PkgEdition edition( YUM2PkgEdition( pdata ) );
 
-        PackageDataProviderPtr ndp = new PackageDataProvider( &_parent );
+        PackageDataProviderPtr ndp = new PackageDataProvider( makeVarPtr(this) );
         PMPackagePtr nptr = new PMPackage( name, edition, arch, ndp );
 
         // add PMSolvable data to package
@@ -264,9 +294,8 @@ namespace YUM
         rellist = YUM2PkgRelList( pdata->obsoletes );
         nptr->setObsoletes( rellist );
 
-        // minor data
-        ndp->_attr_SUMMARY = pdata->summary;
-        ndp->_attr_DESCRIPTION = stringutil::splitToLines( pdata->description );
+        // more attribute data
+        ndp->loadAttr( pdata );
 
         _packages.push_back( nptr );
       }
@@ -278,9 +307,78 @@ namespace YUM
       }
     else
       {
+        WAR << "Skipped unsupported types: " << wrongType << endl;
+        WAR << "Skipped incompatible arch: " << wrongArch << endl;
         DBG << "Found " << _packages.size() << " packages" << endl;
       }
     return ret;
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  //
+  //
+  //	METHOD NAME : Impl::providePkgToInstall
+  //	METHOD TYPE : PMError
+  //
+  PMError Impl::providePkgToInstall( const Pathname & pkgfile_r, Pathname & path_r ) const
+  {
+    path_r = Pathname();
+
+    if ( pkgfile_r.empty() ) {
+      ERR << "Empty path to provide!" << endl;
+      return Error::E_no_source;
+    }
+
+    if ( !_parent.attached() ) {
+      ERR << "Not attached to an instSrc!" << endl;
+      return Error::E_src_not_enabled;
+    }
+
+    MediaAccessPtr media( _parent._instSrc->media() );
+
+    if ( ! media ) {
+      ERR << "No instSrc media" << endl;
+      return Error::E_no_media;
+    }
+
+    if ( ! media->isOpen() ) {
+      PMError ret = media->open( _parent._instSrc->descr()->url(),
+                                 _parent._instSrc->cache_media_dir() );
+      if ( ret ) {
+        ERR << "Failed to open media " << _parent._instSrc->descr()->url() << ": " << ret << endl;
+        return Error::E_no_media;
+      }
+    }
+
+    if ( ! media->isAttached() ) {
+      PMError ret = media->attach();
+      if ( ret ) {
+        ERR << "Failed to attach media: " << ret << endl;
+        return Error::E_no_media;
+      }
+    }
+
+    Pathname pkgfile( _parent._instSrc->descr()->datadir() + pkgfile_r );
+    PMError err = media->provideFile( pkgfile );
+    if ( err ) {
+      ERR << "Media can't provide '" << pkgfile << "' (" << err << ")" << endl;
+      return err;
+    }
+
+    path_r = media->localPath( pkgfile );
+
+    if ( _parent._instSrc->isRemote() && ! RpmHeader::readPackage( path_r, RpmHeader::NOSIGNATURE ) ) {
+      err = Error::E_corrupted_file;
+      err.setDetails( pkgfile.asString() );
+      PathInfo::unlink( path_r );
+      ERR << "Bad digest '" << path_r << "': " << err << endl;
+      path_r = Pathname();
+      return err;
+    }
+
+    _parent._instSrc->rememberPreviouslyDnlPackage( path_r );
+
+    return PMError::E_ok;
   }
 
   /////////////////////////////////////////////////////////////////

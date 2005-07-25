@@ -44,6 +44,11 @@ namespace YUM
 
   public:
     /**
+     * Default error class
+     **/
+    typedef InstSrcError Error;
+
+    /**
      * Ctor
      **/
     Impl( InstSrcDataYUM & parent, const Pathname & repoDir_r );
@@ -68,6 +73,24 @@ namespace YUM
     getPackages() const
     { return _packages; }
 
+  public:
+
+    /**
+     * Return the InstSrcPtr
+     **/
+    constInstSrcPtr
+    instSrc() const
+    { return _parent._instSrc; }
+
+    /**
+     * Let the InstSrc provide
+     **/
+    PMError
+    providePkgToInstall( const Pathname & pkgfile_r, Pathname & path_r ) const;
+
+    /**
+     * Return handle to the repodata cache
+     **/
     const Repodata &
     repodata() const
     { return _repodata; }
