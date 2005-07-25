@@ -286,70 +286,33 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
+  if ( 0 )
+    {
+      Y2PM::noAutoInstSrcManager();
+      InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/YUM-9.3" );
+      ISM.enableSource( nid );
+      if ( nid )
+        {
+          PMGR["at"]->user_set_install();
+          dumpPkgWhatIf( SEC );
+          doSolve( PMGR );
+          dumpPkgWhatIf( SEC );
+          dataDump( INT, PMGR["at"]->theObject() );
+        }
+
+      return 0;
+    }
+
   Y2PM::instSrcManager();
-  InstSrcManager::ISrcId nid = ISM.getSources(true).front();
-  INT << nid << endl;
-  if ( nid )
-    {
-      const list<PMPackagePtr> & plist( nid->data()->getPackages() );
-      for ( list<PMPackagePtr>::const_iterator it = plist.begin();
-            it != plist.end(); ++it )
-        {
-          dataDump( MIL, *it );
-        }
+  Y2PM::packageManager();
 
-    }
+  if ( PMGR["wdiff"] ) {
+    PMPackagePtr pkg( PMGR["wdiff"]->theObject() );
+    Pathname     lpath;
+    PMError      err = pkg->providePkgToInstall( lpath );
+    INT << err << ": " << PathInfo(lpath) << endl;
+  }
 
-#if 0
-  Y2PM::noAutoInstSrcManager();
-  InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/YUM-9.3" );
-  ISM.enableSource( nid );
-  if ( nid )
-    {
-      PMGR["at"]->user_set_install();
-      dumpPkgWhatIf( SEC );
-      doSolve( PMGR );
-      dumpPkgWhatIf( SEC );
-      dataDump( INT, PMGR["at"]->theObject() );
-    }
-
-  return 0;
-
-  Pathname srccache   ( "YUMSrcCache" );
-  InstSrcPtr nsrc;
-
-  if ( ! PathInfo( srccache ).isDir() )
-    {
-      Url      mediaurl   ( "dir:///Local/EXPORT" );
-      Pathname product_dir( "/YUM-9.3" );
-
-      MIL << "scanMedia " << mediaurl << " (" << product_dir << ")" << endl;
-      PMError err = InstSrc::vconstruct( nsrc, srccache, mediaurl, product_dir, InstSrc::T_YUM );
-      if ( err )
-        {
-          ERR << err << endl;
-        }
-      else
-        {
-          MIL << nsrc << endl;
-          nsrc->enableSource();
-        }
-    }
-  else
-    {
-      MIL << "scanCache " << srccache << endl;
-      PMError err = InstSrc::vconstruct( nsrc, srccache );
-      if ( err )
-        {
-          ERR << err << endl;
-        }
-      else
-        {
-          MIL << nsrc << endl;
-          nsrc->enableSource();
-        }
-    }
-#endif
   SEC << "STOP" << endl;
   return 0;
 }
