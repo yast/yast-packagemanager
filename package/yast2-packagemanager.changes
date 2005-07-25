@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jul 25 22:57:59 CEST 2005 - ma@suse.de
+
+- YUM: Provide more package attributes. Support retrieval
+  and installation of packages.
+- 2.12.8
+
+-------------------------------------------------------------------
 Mon Jul 25 13:35:36 CEST 2005 - ma@suse.de
 
 - Added installation source attribute 'autorefresh' (default: TRUE).
