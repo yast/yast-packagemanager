@@ -228,6 +228,12 @@ class InstSrcManager {
      **/
     PMError disableSource( const ISrcId & isrc_r ) { return activateSource( isrc_r, false ); }
 
+    /**
+     * Let the source refresh its meta data. If meta data have changed and the
+     * source is enabled, it is disabled and reenabled using the new metadata.
+     **/
+    PMError refreshSource( const ISrcId & isrc_r );
+
   public:
 
     /**
@@ -239,6 +245,12 @@ class InstSrcManager {
      * enabale/disable an InstSrc (i.e. let it provide/withdraw Objects).
      **/
     PMError setAutoenable( const ISrcId isrc_r, const bool yesno );
+
+    /**
+     * Set whether this source should automaticaly refresh it's
+     * meta data when it gets enabled. (default true, if not CD/DVD)
+     **/
+    PMError setAutorefresh( const ISrcId isrc_r, const bool yesno );
 
     /**
      * Raise priority by one
