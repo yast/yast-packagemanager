@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 26 15:05:35 CEST 2005 - mir@suse.de
+
+- work around error reporting bug in libxml2 (#98487)
+
+-------------------------------------------------------------------
 Mon Jul 25 22:57:59 CEST 2005 - ma@suse.de
 
 - YUM: Provide more package attributes. Support retrieval

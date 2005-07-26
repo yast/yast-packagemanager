@@ -29,18 +29,20 @@
 #include <sstream>
 #include <cassert>
 #include <iterator>
-#include <y2util/Y2SLog.h>
 
 extern "C" {
   typedef void * xmlTextReaderLocatorPtr;
   struct _xmlNode;
   typedef struct _xmlNode xmlNode;
   typedef xmlNode *xmlNodePtr;
-  
-  
+
   struct _xmlTextReader;
   typedef _xmlTextReader xmlTextReader;
   typedef xmlTextReader *xmlTextReaderPtr;
+
+  struct _xmlError;
+  typedef _xmlError xmlError;
+  typedef xmlError *xmlErrorPtr;
 }
 
 
@@ -197,7 +199,7 @@ public:
    */
   const XMLParserError *
   errorStatus() const;
-    
+
 protected:
 
   /**
@@ -251,6 +253,7 @@ protected:
                int severity,
                xmlTextReaderLocatorPtr locator);
 
+  
   virtual void setCurrent(const void *data) = 0;
   virtual void* getCurrent() const = 0;
 
@@ -287,7 +290,11 @@ private:
    * contains the xmlTextReader used to parse the xml file.
    **/
   xmlTextReaderPtr _reader;
-  
+
+  /**
+   * contains the base URL of the xml documentation
+   */
+  std::string _baseUrl;
 }; /* end class XMLNodeIteratorBase */
 
 

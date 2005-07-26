@@ -21,6 +21,8 @@
 
 #include <y2pm/XMLNodeIterator.h>
 #include <libxml2/libxml/xmlreader.h>
+#include <libxml2/libxml/xmlerror.h>
+#include <y2util/Y2SLog.h>
 
 using namespace std;
 
@@ -127,9 +129,12 @@ XMLNodeIteratorBase::XMLNodeIteratorBase(std::istream &input,
                                          const char *validationPath)
   : _error(0),
   _input(& input),
-  _reader(xmlReaderForIO(ioread, ioclose, _input, baseUrl.c_str(), "utf-8",0))
+  _reader(xmlReaderForIO(ioread, ioclose, _input, baseUrl.c_str(), "utf-8",
+                         XML_PARSE_PEDANTIC)),
+  _baseUrl(baseUrl)
 {
   xmlTextReaderSetErrorHandler(_reader, (xmlTextReaderErrorFunc) errorHandler, this);
+  // xmlTextReaderSetStructuredErrorHandler(_reader, structuredErrorHandler, this);
   if (_reader && validationPath)
     if (xmlTextReaderRelaxNGValidate
         (_reader,validationPath)==-1)
@@ -223,22 +228,28 @@ XMLNodeIteratorBase::errorHandler(void * arg,
   obj = (XMLNodeIteratorBase*) arg;
   assert(obj);
   xmlTextReaderPtr reader = obj->_reader;
-  const char *errOrWarn = (severity & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
-std::ostream& out = (severity & XML_PARSER_SEVERITY_ERROR) ? ERR : WAR;
   if (strcmp("%s",msg) == 0) {
-      /* This is a buglet in libxml2, you often get "%s" as message
-         Better treat it like an empty message. */
-    msg = "";
+      /* This works around a buglet in libxml2, you often get "%s" as message
+         and the message is in "severity". Does this work for other
+         architectures??? FIXME */
+    msg = (char *) severity;
+    severity = XML_PARSER_SEVERITY_WARNING;
   }
-  
+  const char *errOrWarn = (severity & XML_PARSER_SEVERITY_ERROR) ? "error" : "warning";
+  std::ostream& out = (severity & XML_PARSER_SEVERITY_ERROR) ? ERR : WAR;
+
     /* Log it */
 out << "XML syntax " << errOrWarn << ": " << msg;
   if (obj->_error.get()) {
     out << "(encountered during error recovery!)" << std::endl;
   }
-  if (reader)
-    out  << "at line " << xmlTextReaderGetParserLineNumber(reader)
+  if (reader && msg[0] != 0) {
+    out  << "at ";
+    if (! obj->_baseUrl.empty())
+      out << obj->_baseUrl << ", ";
+    out << "line " << xmlTextReaderGetParserLineNumber(reader)
     << ", column " << xmlTextReaderGetParserColumnNumber(reader);
+  }
   out << std::endl;
   
     /* save it */
