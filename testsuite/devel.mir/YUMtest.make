@@ -1,28 +1,30 @@
 
 CXXFLAGS = -ggdb -Wall -I/usr/include/YaST2 -I/usr/include/libxml2 -l stdc++ -l xml2
+YUMsrc = ../../src/inst/srcYUM
+incl = ../../src/y2pm
 
 # All:	YUMRepomdDataIterator.o YUMRepomdData.o LibXMLHelper.o test-YUMRepomdData.o
 
 All: YUMtest
 
-YUMtest:	YUMtest.o YUMParserData.o YUMRepomdParser.o YUMPrimaryParser.o YUMGroupParser.o YUMFileListParser.o YUMOtherParser.o LibXMLHelper.o XMLNodeIterator.o
-			gcc -ggdb -Wall -I/usr/include/libxml2 -l stdc++ -l xml2 -l y2util YUMtest.o YUMParserData.o YUMRepomdParser.o YUMPrimaryParser.o YUMGroupParser.o YUMFileListParser.o YUMOtherParser.o LibXMLHelper.o XMLNodeIterator.o -o YUMtest
+YUMtest:	YUMtest.o $(YUMsrc)/YUMParserData.o $(YUMsrc)/YUMRepomdParser.o $(YUMsrc)/YUMPrimaryParser.o $(YUMsrc)/YUMGroupParser.o $(YUMsrc)/YUMFileListParser.o $(YUMsrc)/YUMOtherParser.o $(YUMsrc)/LibXMLHelper.o $(YUMsrc)/XMLNodeIterator.o
+			gcc -ggdb -Wall -I/usr/include/libxml2 -l stdc++ -l xml2 -l y2util YUMtest.o $(YUMsrc)/YUMParserData.o $(YUMsrc)/YUMRepomdParser.o $(YUMsrc)/YUMPrimaryParser.o $(YUMsrc)/YUMGroupParser.o $(YUMsrc)/YUMFileListParser.o $(YUMsrc)/YUMOtherParser.o $(YUMsrc)/LibXMLHelper.o $(YUMsrc)/XMLNodeIterator.o -o YUMtest
 
 
-YUMtest.o:	YUMtest.cc ../../y2pm/YUMParserData.h ../../y2pm/YUMRepomdParser.h ../../y2pm/YUMPrimaryParser.h ../../y2pm/YUMGroupParser.h ../../y2pm/YUMFileListParser.h ../../y2pm/YUMOtherParser.h
+YUMtest.o:	YUMtest.cc $(incl)/YUMParserData.h $(incl)/YUMRepomdParser.h $(incl)/YUMPrimaryParser.h $(incl)/YUMGroupParser.h $(incl)/YUMFileListParser.h $(incl)/YUMOtherParser.h
 
-LibXMLHelper.o:		LibXMLHelper.cc ../../y2pm/LibXMLHelper.h
+$(YUMsrc)/LibXMLHelper.o:		$(YUMsrc)/LibXMLHelper.cc $(incl)/LibXMLHelper.h
 
-YUMParserData.o:	YUMParserData.cc ../../y2pm/YUMParserData.h
+$(YUMsrc)/YUMParserData.o:	$(YUMsrc)/YUMParserData.cc $(incl)/YUMParserData.h
 
-YUMRepomdParser.o:	YUMRepomdParser.cc ../../y2pm/YUMRepomdParser.h ../../y2pm/YUMParserData.h ../../y2pm/LibXMLHelper.h ../../y2pm/YUMParserData.h
+$(YUMsrc)/YUMRepomdParser.o:	$(YUMsrc)/YUMRepomdParser.cc $(incl)/YUMRepomdParser.h $(incl)/YUMParserData.h $(incl)/LibXMLHelper.h $(incl)/YUMParserData.h
 
-YUMPrimaryParser.o:	YUMPrimaryParser.cc ../../y2pm/YUMPrimaryParser.h ../../y2pm/YUMParserData.h  ../../y2pm/LibXMLHelper.h ../../y2pm/YUMParserData.h
+$(YUMsrc)/YUMPrimaryParser.o:	$(YUMsrc)/YUMPrimaryParser.cc $(incl)/YUMPrimaryParser.h $(incl)/YUMParserData.h  $(incl)/LibXMLHelper.h $(incl)/YUMParserData.h
 
-YUMGroupParser.o:	YUMGroupParser.cc ../../y2pm/YUMGroupParser.h ../../y2pm/YUMParserData.h  ../../y2pm/LibXMLHelper.h ../../y2pm/YUMParserData.h
+$(YUMsrc)/YUMGroupParser.o:	$(YUMsrc)/YUMGroupParser.cc $(incl)/YUMGroupParser.h $(incl)/YUMParserData.h  $(incl)/LibXMLHelper.h $(incl)/YUMParserData.h
 
-YUMFileListParser.o:	YUMFileListParser.cc ../../y2pm/YUMFileListParser.h ../../y2pm/YUMParserData.h ../../y2pm/LibXMLHelper.h ../../y2pm/YUMParserData.h
+$(YUMsrc)/YUMFileListParser.o:	$(YUMsrc)/YUMFileListParser.cc $(incl)/YUMFileListParser.h $(incl)/YUMParserData.h $(incl)/LibXMLHelper.h $(incl)/YUMParserData.h
 
-YUMOtherParser.o:	YUMOtherParser.cc ../../y2pm/YUMOtherParser.h ../../y2pm/YUMParserData.h ../../y2pm/LibXMLHelper.h ../../y2pm/YUMParserData.h
+$(YUMsrc)/YUMOtherParser.o:	$(YUMsrc)/YUMOtherParser.cc $(incl)/YUMOtherParser.h $(incl)/YUMParserData.h $(incl)/LibXMLHelper.h $(incl)/YUMParserData.h
 
-XMLNodeIterator.h:	XMLNodeIterator.cc ../../y2pm/XMLNodeIterator.h 
+$(YUMsrc)/XMLNodeIterator.cc:	$(YUMsrc)/XMLNodeIterator.cc $(incl)/XMLNodeIterator.h 
