@@ -348,6 +348,12 @@ class InstSrc: public CountedRep {
     PMError disableSource();
 
     /**
+     * From InstSrcManager: Let the source refresh its meta data. If meta data have changed and the
+     * source is enabled, it is disabled and reenabled using the new metadata.
+     **/
+    PMError refreshSource();
+
+    /**
      * True if enabled (i.e. providing data to Manager classes ).
      **/
     bool enabled() const { return _data; }
