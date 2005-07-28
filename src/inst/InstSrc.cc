@@ -326,6 +326,73 @@ PMError InstSrc::disableSource()
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrc::refreshSource
+//	METHOD TYPE : PMError
+//
+//	DESCRIPTION :
+//
+PMError InstSrc::refreshSource()
+{
+  return Error::E_TBD;
+  //////// DISABELED /////////
+
+  Timecount _t( "InstSrc::refreshSource" );
+  MIL << "Refresh InstSrc " << *this << endl;
+  ///////////////////////////////////////////////////////////////////
+  // Try to get the current mediaId at description URL. No refresh is
+  // done for CD/DVD.
+  ///////////////////////////////////////////////////////////////////
+  if ( !_descr )
+    {
+      ERR << "Cannot refresh without source description" << endl;
+      return Error::E_src_no_description;
+    }
+
+  switch ( _descr->url().protocol() )
+    {
+    case Url::cd:
+    case Url::dvd:
+      MIL << "No need to refresh CD/DVD media." << endl;
+      return Error::E_ok;
+
+    default: break;
+    }
+
+  PMError err;
+  string  testMediaId;
+
+  switch ( _descr->type() )
+    {
+    case T_UnitedLinux:
+      err = InstSrcDataUL::tryGetMediaId( _descr->url(), testMediaId );
+      break;
+
+    case T_PlainDir:
+    case T_YUM:
+      WAR << _descr->type() << " type of source does not support refresh!" << endl;
+      return Error::E_ok;
+      break;
+
+      ///////////////////////////////////////////////////////////////////
+      // no default: let compiler warn '... not handled in switch'
+      ///////////////////////////////////////////////////////////////////
+    case T_UNKNOWN:
+    case T_AUTODETECT:
+      break;
+    }
+
+  ///////////////////////////////////////////////////////////////////
+  //
+  //
+  ///////////////////////////////////////////////////////////////////
+
+
+
+  return err;
+}
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrc::writeDescrCache
 //	METHOD TYPE : PMError
 //

@@ -263,7 +263,6 @@ int main( int argc, char * argv[] )
 {
   y2error( "xxx" );
   set_log_filename( "-" );
-  MIL << "START (" << argc << ")" << endl;
 
   if ( 0 ) {
     //Y2PM::setNotRunningFromSystem();
@@ -303,9 +302,18 @@ int main( int argc, char * argv[] )
       return 0;
     }
 
+  PMError err;
   Y2PM::instSrcManager();
-  Y2PM::packageManager();
 
+  InstSrcManager::ISrcId nid = ISM.getSources().front();
+  if ( nid )
+    {
+      err = ISM.refreshSource( nid );
+      SEC << err << endl;
+    }
+
+  SEC << "STOP" << endl;
+  return 0;
   if ( PMGR["wdiff"] ) {
     PMPackagePtr pkg( PMGR["wdiff"]->theObject() );
     Pathname     lpath;

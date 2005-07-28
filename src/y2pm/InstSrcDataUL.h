@@ -134,6 +134,11 @@ class InstSrcDataUL : public InstSrcData {
 			       MediaAccessPtr media_r, Pathname descr_dir_r,
 			       const std::list<PkgArch>& allowed_archs, const LangCode& locale);
 
+    /**
+     *
+     **/
+    static PMError tryGetMediaId( Url url_r, std::string & mediaId_r );
+
   private:
 
     friend class InstSrc;

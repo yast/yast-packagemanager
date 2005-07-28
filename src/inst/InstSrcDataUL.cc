@@ -408,6 +408,54 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
 }
 
 ///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataUL::tryGetMediaId
+//	METHOD TYPE : PMError
+//
+PMError InstSrcDataUL::tryGetMediaId( Url url_r, std::string & mediaId_r )
+{
+  // reset
+  mediaId_r = string();
+
+  // access media at url
+  MediaAccessPtr media( new MediaAccess );
+  PMError err;
+
+  if ( (err = media->open( url_r )) )
+    {
+      ERR << "Failed to open " << url_r << " " << err << endl;
+      return err;
+    }
+
+  if ( (err = media->attach()) )
+    {
+      ERR << "Failed to attach media: " << err << endl;
+      return err;
+    }
+
+  // retrieve /media.1/media
+  Pathname filename( "/media.1/media" );
+  MediaAccess::FileProvider mediafile( media, filename );
+  if ( (err = mediafile.error()) )
+    {
+      ERR << "Media can't provide '" << filename << "' " << err << endl;
+      return err;
+    }
+
+  // parse /media.1/media
+  F_Media f_media;
+  if( (err = f_media.read( mediafile() )) )
+    {
+      return InstSrcError::E_no_instsrc_on_media;
+    }
+
+  // return
+  mediaId_r = f_media.ident();
+  return Error::E_ok;
+}
+
+///////////////////////////////////////////////////////////////////
 // PUBLIC
 ///////////////////////////////////////////////////////////////////
 

@@ -550,10 +550,14 @@ PMError InstSrcManager::scanMedia( ISrcId & isrc_r, const Url & mediaurl_r, cons
 //
 PMError InstSrcManager::refreshSource( const ISrcId & isrc_r )
 {
-  PMError err;
-#warning TBD InstSrcManager::refreshSource
-  err = Error::E_TBD;
-  INT << err << " refreshSource " << isrc_r << endl;
+  InstSrcPtr it( lookupId( isrc_r ) );
+  if ( ! it )
+    {
+      WAR << "bad ISrcId " << isrc_r << endl;
+      return Error::E_bad_id;
+    }
+
+  PMError err = it->refreshSource();
   return err;
 }
 
