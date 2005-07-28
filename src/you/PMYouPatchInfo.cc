@@ -122,7 +122,7 @@ PMError PMYouPatchInfo::createPackage( const PMYouPatchPtr &patch, std::istream&
 
   if ( value.empty() ) {
     DBG << "No Filename. Skipping this package." << endl;
-    return PMError(YouError::E_parse_error, _("missing filename"));
+    return PMError(YouError::E_parse_error, _("No filename.  Skipping this package."));
   }
 
   string nameStr;
