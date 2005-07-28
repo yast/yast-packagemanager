@@ -1,0 +1,15 @@
+# Test suite for YUM parsing stand-alone unit tests
+
+set testname YUMParser
+
+set errorCode "NONE"
+
+catch {
+  set result [ exec ./testit.sh $testname.test ]
+}
+
+if { $errorCode == "NONE" } {
+  pass $testname
+} else {
+  fail $testname
+}

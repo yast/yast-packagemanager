@@ -20,7 +20,8 @@ Purpose:    main() to test the YUM parsers
 
 #include <y2pm/YUMParser.h>
 #include <y2util/RepDef.h>
-#include <y2util/Y2SLog.h>
+#define y2log_component "YUMtest"
+#include <ycp/y2log.h>
 
 using namespace YUM;
 using namespace std;
@@ -100,8 +101,8 @@ int main(int argc, char **argv)
     }
   }  
   catch (XMLParserError& err) {
-    cerr << "ouch" << endl;
-  cerr << "syntax error encountered in XML input:" << endl
+    cerr << "** ouch **" << endl
+      << "syntax error encountered in XML input:" << endl
       << err.msg() << " " << err.position() << endl;
     return 1;
   }
