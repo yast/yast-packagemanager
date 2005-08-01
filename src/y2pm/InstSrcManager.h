@@ -55,6 +55,13 @@ class InstSrcManager {
 
     friend class Y2PM;
     InstSrcManager( const bool autoEnable_r = true );
+    /**
+     * Constructor part two. initSrcPool may cause source refreshs,
+     * which may require access to pubkeyCache via Y2PM. This does
+     * not work (loops endless), if we initSrcPool from within the
+     * constructor ;(
+     **/
+    void launch();
     ~InstSrcManager();
 
   private:

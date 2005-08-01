@@ -29,6 +29,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/PathInfo.h>
+#include <y2util/TmpPath.h>
 #include <y2util/stringutil.h>
 
 #include <Y2PM.h>
@@ -177,7 +178,7 @@ void InstSrc::_mgr_attach()
 //
 //	DESCRIPTION :
 //
-PMError InstSrc::enableSource()
+PMError InstSrc::enableSource( bool checkRefresh_r )
 {
   MIL << "Enable InstSrc " << *this << endl;
 
@@ -195,6 +196,11 @@ PMError InstSrc::enableSource()
     return Error::E_src_no_description;
   }
 
+  if ( checkRefresh_r && _descr->default_refresh() ) {
+    PMError err = refreshSource();
+    if ( err )
+      return err;
+  }
 
   //-----------------------------------------------------------------
   // Determine search path for providePackage
@@ -331,16 +337,13 @@ PMError InstSrc::disableSource()
 //
 //	DESCRIPTION :
 //
-PMError InstSrc::refreshSource()
+PMError InstSrc::refreshSource( bool force_r )
 {
-  return Error::E_TBD;
-  //////// DISABELED /////////
-
   Timecount _t( "InstSrc::refreshSource" );
-  MIL << "Refresh InstSrc " << *this << endl;
+  MIL << "Refresh InstSrc " << (force_r?"(forced) ":"") << *this << endl;
   ///////////////////////////////////////////////////////////////////
-  // Try to get the current mediaId at description URL. No refresh is
-  // done for CD/DVD.
+  // Try to get the current MediaId avaiable at Url.
+  // Never attempt to refresh from CD/DVD.
   ///////////////////////////////////////////////////////////////////
   if ( !_descr )
     {
@@ -352,7 +355,7 @@ PMError InstSrc::refreshSource()
     {
     case Url::cd:
     case Url::dvd:
-      MIL << "No need to refresh CD/DVD media." << endl;
+      MIL << "No need to refresh from CD/DVD media." << endl;
       return Error::E_ok;
 
     default: break;
@@ -373,21 +376,76 @@ PMError InstSrc::refreshSource()
       return Error::E_ok;
       break;
 
-      ///////////////////////////////////////////////////////////////////
       // no default: let compiler warn '... not handled in switch'
-      ///////////////////////////////////////////////////////////////////
     case T_UNKNOWN:
     case T_AUTODETECT:
       break;
     }
 
+  if ( err )
+    {
+      // So we could not figure out the MediaId available at Url.
+      // We actually don't know wheter it makes sense to proceed and
+      // run into the same kind of error at install time. Maybe it's
+      // just a temporary exception. We don't even know, whether it
+      // makes sense to use the current cached data or to discard the
+      // source.
+#warning Need a callback to user on failed refresh.
+      ERR << "No InstSrc type " << _descr->type() << " found on media "
+      << _descr->url() << endl;
+      return Error::E_no_instsrc_on_media;
+    }
+
   ///////////////////////////////////////////////////////////////////
-  //
-  //
+  // Check the MediaId and refresh if neccessary.
   ///////////////////////////////////////////////////////////////////
+  if ( ! force_r && testMediaId == _descr->media_id() )
+    {
+      MIL << "InstSrc is up-to-date: " << *this << endl;
+      return Error::E_ok;
+    }
 
+  // prepare a temporary cache and load the new data
+  // keeping the type of source.
+  Pathname tmpCache( cache_dir()+"tmp" );
+  PathInfo::erase( tmpCache );
+  // InstSrc recreates tmpCache and cleans up at the end
+  InstSrcPtr nsrc;
+  err = InstSrc::vconstruct( nsrc, tmpCache,
+                             _descr->url(), _descr->product_dir(), _descr->type() );
+#warning Need a callback to user on failed refresh.
+  if ( err )
+    {
+      ERR << "Loading data from " << _descr->url() << " failed. " << err << endl;
+      return err;
+    }
 
+  // Set InstSrcManager provided data
+  nsrc->descr()->set_default_activate( descr()->default_activate() );
+  nsrc->descr()->set_default_refresh ( descr()->default_refresh() );
+  nsrc->descr()->set_default_rank    ( descr()->default_rank() );
+  nsrc->descr()->set_usefordeltas    ( descr()->usefordeltas() );
 
+  ///////////////////////////////////////////////////////////////////
+  // Now reload. Move data dir and exchange description
+  ///////////////////////////////////////////////////////////////////
+  bool isenabled = enabled();
+  if ( isenabled )
+    {
+      disableSource();
+    }
+
+  PathInfo::erase( cache_data_dir() );
+  PathInfo::rename( nsrc->cache_data_dir(), cache_data_dir() );
+
+  _descr = nsrc->descr();
+  writeDescrCache();
+
+  if ( isenabled )
+    {
+      // omit endless refresh loop
+      enableSource( /*checkRefresh_r*/false );
+    }
   return err;
 }
 ///////////////////////////////////////////////////////////////////

@@ -314,14 +314,5 @@ int main( int argc, char * argv[] )
 
   SEC << "STOP" << endl;
   return 0;
-  if ( PMGR["wdiff"] ) {
-    PMPackagePtr pkg( PMGR["wdiff"]->theObject() );
-    Pathname     lpath;
-    PMError      err = pkg->providePkgToInstall( lpath );
-    INT << err << ": " << PathInfo(lpath) << endl;
-  }
-
-  SEC << "STOP" << endl;
-  return 0;
 }
 
