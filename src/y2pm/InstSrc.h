@@ -332,6 +332,13 @@ class InstSrc: public CountedRep {
      **/
     void preferredLocaleChanged() const;
 
+  private:
+
+    /**
+     * internal
+     **/
+    PMError enableSource( bool checkRefresh_r );
+
   public:
 
     /**
@@ -339,7 +346,7 @@ class InstSrc: public CountedRep {
      * info stored in _descr. InstSrcData must provide Objects located on
      * the media to the appropriate Manager classes.
      **/
-    PMError enableSource();
+    PMError enableSource() { return enableSource( true ); }
 
     /**
      * From InstSrcManager: Release concrete InstSrcData. InstSrcData must
@@ -348,10 +355,14 @@ class InstSrc: public CountedRep {
     PMError disableSource();
 
     /**
-     * From InstSrcManager: Let the source refresh its meta data. If meta data have changed and the
-     * source is enabled, it is disabled and reenabled using the new metadata.
+     * From InstSrcManager: Let the source refresh its meta data. If meta data
+     * have changed and the source is enabled, it is disabled and reenabled
+     * using the new metadata.
+     * If force_r is true, then meta data are reloaded, even if the media ID
+     * did not change.
+     * Never attempts to refresh from CD/DVD.
      **/
-    PMError refreshSource();
+    PMError refreshSource( bool force_r = false );
 
     /**
      * True if enabled (i.e. providing data to Manager classes ).

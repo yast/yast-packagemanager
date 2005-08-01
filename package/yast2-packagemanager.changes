@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug  2 00:46:28 CEST 2005 - ma@suse.de
+
+- InstSrc/InstSrcManager: Consider 'autorefresh' attribute when
+  enabling InstSrc.
+- InstSrcDataUL: Support autorefresh.
+
+-------------------------------------------------------------------
 Thu Jul 28 15:33:19 CEST 2005 - mir@suse.de
 
 - merged in changes from translation

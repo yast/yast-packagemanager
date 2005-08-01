@@ -413,7 +413,7 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
 //	METHOD NAME : InstSrcDataUL::tryGetMediaId
 //	METHOD TYPE : PMError
 //
-PMError InstSrcDataUL::tryGetMediaId( Url url_r, std::string & mediaId_r )
+PMError InstSrcDataUL::tryGetMediaId( const Url & url_r, std::string & mediaId_r )
 {
   // reset
   mediaId_r = string();

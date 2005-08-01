@@ -77,6 +77,24 @@ InstSrcManager::InstSrcManager( const bool autoEnable_r )
 
   _pubkeyCache.setCachedir( cache_pubkey_dir() );
 
+  // initSrcPool in launch()!
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcManager::launch
+//	METHOD TYPE : void
+//
+//	DESCRIPTION :
+//      Constructor part two. initSrcPool may cause source refreshs,
+//      which may require access to pubkeyCache via Y2PM. This does
+//      not work (loops endless), if we initSrcPool from within the
+//      constructor ;( Things are getting worse. Time to cleanup the
+//      code.
+//
+void InstSrcManager::launch()
+{
   if ( Y2PM::runningFromSystem() ) {
     initSrcPool( _want_sources_enabled );
   } else {

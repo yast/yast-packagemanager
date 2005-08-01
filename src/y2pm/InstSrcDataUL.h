@@ -137,7 +137,7 @@ class InstSrcDataUL : public InstSrcData {
     /**
      *
      **/
-    static PMError tryGetMediaId( Url url_r, std::string & mediaId_r );
+    static PMError tryGetMediaId( const Url & url_r, std::string & mediaId_r );
 
   private:
 
