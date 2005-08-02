@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug  2 14:19:46 CEST 2005 - ma@suse.de
+
+- InstSrcDataYUM: Support autorefresh.
+- 2.12.9
+
+-------------------------------------------------------------------
 Tue Aug  2 00:46:28 CEST 2005 - ma@suse.de
 
 - InstSrc/InstSrcManager: Consider 'autorefresh' attribute when

@@ -157,8 +157,7 @@ InstSrcDataYUM::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 //	METHOD TYPE : PMError
 //
 PMError
-InstSrcDataYUM::tryGetData( InstSrcDataPtr & ndata_r,
-                            const InstSrcPtr source_r )
+InstSrcDataYUM::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr source_r )
 {
   ndata_r = 0;
   PMError err;
@@ -199,4 +198,52 @@ InstSrcDataYUM::tryGetData( InstSrcDataPtr & ndata_r,
     ndata_r = ndata;
   }
   return err;
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : InstSrcDataYUM::tryGetMediaId
+//	METHOD TYPE : PMError
+//
+PMError InstSrcDataYUM::tryGetMediaId( const Url & url_r, const Pathname & product_dir_r,
+                                       std::string & mediaId_r )
+{
+  // reset
+  mediaId_r = string();
+
+  // access media at url
+  MediaAccessPtr media( new MediaAccess );
+  PMError err;
+
+  if ( (err = media->open( url_r )) )
+    {
+      ERR << "Failed to open " << url_r << " " << err << endl;
+      return err;
+    }
+
+  if ( (err = media->attach()) )
+    {
+      ERR << "Failed to attach media: " << err << endl;
+      return err;
+    }
+
+  // retrieve repomd.xml
+  Pathname filename( product_dir_r
+                     + Repodata::defaultRepodataDir() + Repodata::defaultRepomd_Xml() );
+  MediaAccess::FileProvider mediafile( media, filename );
+  if ( (err = mediafile.error()) )
+    {
+      ERR << "Media can't provide '" << filename << "' " << err << endl;
+      return err;
+    }
+
+  // parse repomd.xml
+  Repodata repodata( mediafile().dirname() );
+  if ( ! repodata.hasData() )
+    return InstSrcError::E_no_instsrc_on_media;
+
+  // return ID
+  mediaId_r = repodata.getId();
+  return Error::E_ok;
 }

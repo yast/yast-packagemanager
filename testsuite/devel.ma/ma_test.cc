@@ -304,7 +304,6 @@ int main( int argc, char * argv[] )
 
   PMError err;
   Y2PM::instSrcManager();
-
   InstSrcManager::ISrcId nid = ISM.getSources().front();
   if ( nid )
     {
