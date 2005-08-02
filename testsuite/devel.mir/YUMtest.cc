@@ -21,7 +21,7 @@ Purpose:    main() to test the YUM parsers
 #include <y2pm/YUMParser.h>
 #include <y2util/RepDef.h>
 #define y2log_component "YUMtest"
-#include <ycp/y2log.h>
+#include <y2util/y2log.h>
 
 using namespace YUM;
 using namespace std;

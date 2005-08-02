@@ -16,8 +16,8 @@ do
     cut -d \  -f 5- < "$testcase.err.tmp" > "$testcase.err.out"
     rm "$testcase.err.tmp"
 
-    if diff -q "$ref" "$testcase.out" > /dev/null \
-       && diff -q "$err_ref" "$testcase.err.out" > /dev/null
+    if diff "$ref" "$testcase.out" \
+       && diff "$err_ref" "$testcase.err.out" 
     then
         echo "OK: $testcase"
     else

@@ -1,7 +1,7 @@
 #
 # Makefile.am for packagemanager/testsuite
 #
-SUBDIRS = devel.ma devel.cschum devel
+SUBDIRS = devel.ma devel.cschum devel devel.mir
 
 AUTOMAKE_OPTIONS = dejagnu
 
