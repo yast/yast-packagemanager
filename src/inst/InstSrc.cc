@@ -367,11 +367,16 @@ PMError InstSrc::refreshSource( bool force_r )
   switch ( _descr->type() )
     {
     case T_UnitedLinux:
-      err = InstSrcDataUL::tryGetMediaId( _descr->url(), testMediaId );
+      err = InstSrcDataUL::tryGetMediaId( _descr->url(), _descr->product_dir(),
+                                          testMediaId );
+      break;
+
+    case T_YUM:
+      err = InstSrcDataYUM::tryGetMediaId( _descr->url(), _descr->product_dir(),
+                                           testMediaId );
       break;
 
     case T_PlainDir:
-    case T_YUM:
       WAR << _descr->type() << " type of source does not support refresh!" << endl;
       return Error::E_ok;
       break;
@@ -392,7 +397,7 @@ PMError InstSrc::refreshSource( bool force_r )
       // source.
 #warning Need a callback to user on failed refresh.
       ERR << "No InstSrc type " << _descr->type() << " found on media "
-      << _descr->url() << endl;
+      << _descr->url() << '(' << _descr->product_dir() << ')' << endl;
       return Error::E_no_instsrc_on_media;
     }
 
@@ -416,7 +421,7 @@ PMError InstSrc::refreshSource( bool force_r )
 #warning Need a callback to user on failed refresh.
   if ( err )
     {
-      ERR << "Loading data from " << _descr->url() << " failed. " << err << endl;
+      ERR << "Loading data from " << _descr->url() << '(' << _descr->product_dir() << ") failed. " << err << endl;
       return err;
     }
 

@@ -413,10 +413,15 @@ PMError InstSrcDataUL::tryGetData( const InstSrcPtr source, InstSrcDataPtr& ndat
 //	METHOD NAME : InstSrcDataUL::tryGetMediaId
 //	METHOD TYPE : PMError
 //
-PMError InstSrcDataUL::tryGetMediaId( const Url & url_r, std::string & mediaId_r )
+PMError InstSrcDataUL::tryGetMediaId( const Url & url_r, const Pathname & product_dir_r,
+                                      std::string & mediaId_r )
 {
   // reset
   mediaId_r = string();
+
+  // We check the media ID loacted url. There is no product specific
+  // test here. In case of multiple products on one media all or nothing
+  // will be refreshed. We should try to change this in the future.
 
   // access media at url
   MediaAccessPtr media( new MediaAccess );

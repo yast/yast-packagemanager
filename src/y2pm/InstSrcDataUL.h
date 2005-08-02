@@ -135,9 +135,11 @@ class InstSrcDataUL : public InstSrcData {
 			       const std::list<PkgArch>& allowed_archs, const LangCode& locale);
 
     /**
-     *
+     * Quick check whether we need to refresh the source.
+     * Return media ID laocated at url, or an empty string.
      **/
-    static PMError tryGetMediaId( const Url & url_r, std::string & mediaId_r );
+    static PMError tryGetMediaId( const Url & url_r, const Pathname & product_dir_r,
+                                  std::string & mediaId_r );
 
   private:
 

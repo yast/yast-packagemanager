@@ -113,6 +113,13 @@ class InstSrcDataYUM : public InstSrcData
     static PMError
     tryGetData( InstSrcDataPtr & ndata_r,
                 const InstSrcPtr source_r );
+
+    /**
+     * Quick check whether we need to refresh the source.
+     * Return media ID laocated at url, or an empty string.
+     **/
+    static PMError tryGetMediaId( const Url & url_r, const Pathname & product_dir_r,
+                                  std::string & mediaId_r );
 };
 ///////////////////////////////////////////////////////////////////
 
