@@ -4,8 +4,8 @@
 #define YUMRepomdParser_h
 
 #include <y2pm/YUMParserData.h>
-#include <y2pm/XMLNodeIterator.h>
-#include <y2pm/LibXMLHelper.h>
+#include <y2util/XMLNodeIterator.h>
+#include <y2util/LibXMLHelper.h>
 
 namespace YUM {
 

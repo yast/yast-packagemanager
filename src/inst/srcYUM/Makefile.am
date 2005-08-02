@@ -11,8 +11,6 @@ INCLUDES = -I$(top_srcdir)/src -I$(oldincludedir)/libxml2 -I$(includedir)
 noinst_LTLIBRARIES = liby2pmsrcYUM.la
 
 liby2pmsrcYUM_la_SOURCES =		\
-	LibXMLHelper.cc			\
-	XMLNodeIterator.cc		\
 	YUMParserData.cc		\
 	YUMGroupParser.cc		\
 	YUMPrimaryParser.cc		\

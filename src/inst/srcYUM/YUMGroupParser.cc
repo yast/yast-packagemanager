@@ -1,5 +1,5 @@
 #include <y2pm/YUMGroupParser.h>
-#include <y2pm/LibXMLHelper.h>
+#include <y2util/LibXMLHelper.h>
 #include <istream>
 #include <string>
 #include <cassert>

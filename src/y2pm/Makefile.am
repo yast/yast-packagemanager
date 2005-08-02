@@ -131,8 +131,6 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	YUMParserData.h			\
 	YUMPrimaryParser.h		\
 	YUMRepomdParser.h		\
-	XMLNodeIterator.h		\
-	LibXMLHelper.h			\
 	schemanames.h
 
 #<INSTALL-HEADER-TARGET>
