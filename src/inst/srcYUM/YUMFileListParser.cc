@@ -27,7 +27,7 @@ Purpose:    Parses file list files in a YUM repository
 #include <libxml/xmlstring.h>
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
-#include <y2pm/LibXMLHelper.h>
+#include <y2util/LibXMLHelper.h>
 #include <y2util/Y2SLog.h>
 #include <y2pm/schemanames.h>
 

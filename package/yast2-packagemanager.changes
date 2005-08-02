@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug  2 16:51:08 CEST 2005 - mir@suse.de
+
+- move XMLNodeIterator and LibXMLHelper to liby2util
+  (it is not packagemanager specific)
+
+-------------------------------------------------------------------
 Tue Aug  2 14:54:00 CEST 2005 - mir@suse.de
 
 - XMLNodeIteratorBase: errorHandler  warns when it gets "%s" as 
