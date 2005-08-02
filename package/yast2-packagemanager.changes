@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug  2 14:54:00 CEST 2005 - mir@suse.de
+
+- XMLNodeIteratorBase: errorHandler  warns when it gets "%s" as 
+  error message and tries to figure out what libxml2 really means
+- activated YUMParser tests
+
+-------------------------------------------------------------------
 Tue Aug  2 14:19:46 CEST 2005 - ma@suse.de
 
 - InstSrcDataYUM: Support autorefresh.

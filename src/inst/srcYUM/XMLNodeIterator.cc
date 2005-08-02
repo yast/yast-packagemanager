@@ -232,6 +232,7 @@ XMLNodeIteratorBase::errorHandler(void * arg,
       /* This works around a buglet in libxml2, you often get "%s" as message
          and the message is in "severity". Does this work for other
          architectures??? FIXME */
+    WAR << "libxml2 error reporting defect, got '%s' as message" << endl;
     msg = (char *) severity;
     severity = XML_PARSER_SEVERITY_WARNING;
   }

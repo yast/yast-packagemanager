@@ -1,13 +1,39 @@
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 11, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 11, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 22, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 22, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 22, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 22, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 22, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 22, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 22, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 30, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 30, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 30, column 1
-[packagemanager] XMLNodeIterator.cc(errorHandler):227 XML syntax warning: at line 30, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element bla there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 11, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element package there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 11, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element version there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 22, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element package there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 22, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element version there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 22, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element package there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 22, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element version there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 22, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element package there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 22, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element version there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 22, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element package there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 30, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element version there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 30, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element package there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 30, column 1
+[packagemanager] XMLNodeIterator.cc(errorHandler):235 libxml2 error reporting defect, got '%s' as message
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 XML syntax warning: Did not expect element version there
+[packagemanager] XMLNodeIterator.cc(errorHandler):240 at line 30, column 1
