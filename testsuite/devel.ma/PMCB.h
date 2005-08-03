@@ -261,6 +261,35 @@ struct MediaChangeCallback  : public InstSrcManagerCallbacks::MediaChangeCallbac
 
 MediaChangeCallback mediaChangeCallback;
 
+///////////////////////////////////////////////////////////////////
+// Reporting SourceRefresh
+///////////////////////////////////////////////////////////////////
+#undef Y2LOG
+#define Y2LOG "SourceRefresh"
+struct SourceRefreshCallback  : public InstSrcManagerCallbacks::SourceRefreshCallback  {
+  virtual void reportbegin() { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+
+  virtual void start( constInstSrcDescrPtr descr_r ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << descr_r << YYY << endl;
+  }
+  virtual Result error( Error error_r,
+                        const std::string & detail = std::string() ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << error_r << YYY << detail << YYY << endl;
+    return InstSrcManagerCallbacks::SourceRefreshCallback::error( error_r, detail );
+  }
+  virtual void stop( Result result_r, Cause cause_r,
+                     const std::string & detail = std::string() ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << result_r << YYY << cause_r << YYY << detail << YYY << endl;
+  }
+
+  SourceRefreshCallback() {
+    InstSrcManagerCallbacks::sourceRefreshReport.redirectTo( this );
+  }
+};
+
+SourceRefreshCallback sourceRefreshCallback;
+
 #undef Y2LOG
 #define Y2LOG "DEFINE_Y2LOG"
 #endif // PMCB_h

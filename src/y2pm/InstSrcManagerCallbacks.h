@@ -105,6 +105,53 @@ namespace InstSrcManagerCallbacks {
 
   extern MediaChangeReport mediaChangeReport;
 
+  ///////////////////////////////////////////////////////////////////
+  // Reporting SourceRefresh
+  ///////////////////////////////////////////////////////////////////
+  struct SourceRefreshCallback : public RedirectCallback<SourceRefreshCallback> {
+    enum Result
+      {
+        SUCCESS = 0,
+        RERTY,
+        SKIP_REFRESH,
+        DISABLE_SOURCE
+      };
+    enum Cause
+      {
+        REFRESH_SKIP_CD_DVD,
+        REFRESH_NOT_SUPPORTED_BY_SOURCE,
+        SOURCE_IS_UPTODATE,
+        SOURCE_REFRESHED,
+        USERREQUEST
+      };
+    enum Error
+      {
+        NO_SOURCE_FOUND,
+        INCOMPLETE_SOURCE_DATA
+      };
+    virtual void   start( constInstSrcDescrPtr descr_r ) = 0;
+    virtual Result error( Error error_r,
+                          const std::string & detail = std::string() ) = 0;
+    virtual void   stop( Result result_r, Cause cause_r,
+                         const std::string & detail = std::string() ) = 0;
+  };
+
+  class SourceRefreshReport : public Report<SourceRefreshCallback> {
+    virtual void start( constInstSrcDescrPtr descr_r ) {
+      SourceRefreshCallback::start( descr_r );
+    }
+    virtual Result error( Error error_r,
+                          const std::string & detail = std::string() ) {
+      return SourceRefreshCallback::error( error_r, detail );
+    }
+    virtual void   stop( Result result_r, Cause cause_r,
+                         const std::string & detail = std::string() ) {
+      SourceRefreshCallback::stop( result_r, cause_r, detail );
+    }
+  };
+
+  extern SourceRefreshReport sourceRefreshReport;
+
 #if 0
   ///////////////////////////////////////////////////////////////////
   // Reporting @
