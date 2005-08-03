@@ -62,16 +62,55 @@ namespace InstSrcManagerCallbacks {
   ///////////////////////////////////////////////////////////////////
   SourceRefreshReport sourceRefreshReport;
 
-  void SourceRefreshCallback::start( constInstSrcDescrPtr descr_r ) {
-  }
+  void
+  SourceRefreshCallback::start( constInstSrcDescrPtr descr_r )
+  {}
+
   SourceRefreshCallback::Result
   SourceRefreshCallback::error( Error error_r,
-                                const std::string & detail ) {
-    return SUCCESS; // let the implementaion decide what to do
-  }
+                                const std::string & detail )
+  { return SUCCESS; } // let the implementaion decide what to do
+
   void SourceRefreshCallback::stop( Result result_r, Cause cause_r,
-                                    const std::string & detail ) {
+                                    const std::string & detail )
+  {}
+
+#define ENUM_OUT(V) case V: return #V
+  std::string SourceRefreshCallback::asString( Result val_r ) const
+  {
+    switch ( val_r )
+      {
+        ENUM_OUT( SUCCESS );
+        ENUM_OUT( RERTY );
+        ENUM_OUT( SKIP_REFRESH );
+        ENUM_OUT( DISABLE_SOURCE );
+      }
+    return "?";
   }
+
+  std::string SourceRefreshCallback::asString( Cause val_r ) const
+  {
+    switch ( val_r )
+      {
+        ENUM_OUT( REFRESH_SKIP_CD_DVD );
+        ENUM_OUT( REFRESH_NOT_SUPPORTED_BY_SOURCE );
+        ENUM_OUT( SOURCE_IS_UPTODATE );
+        ENUM_OUT( SOURCE_REFRESHED );
+        ENUM_OUT( USERREQUEST );
+      }
+    return "?";
+  }
+
+  std::string SourceRefreshCallback::asString( Error val_r ) const
+  {
+    switch ( val_r )
+      {
+        ENUM_OUT( NO_SOURCE_FOUND );
+        ENUM_OUT( INCOMPLETE_SOURCE_DATA );
+      }
+    return "?";
+  }
+#undef ENUM_OUT
 
 #if 0
   ///////////////////////////////////////////////////////////////////
