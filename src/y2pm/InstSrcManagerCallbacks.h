@@ -116,6 +116,7 @@ namespace InstSrcManagerCallbacks {
         SKIP_REFRESH,
         DISABLE_SOURCE
       };
+    std::string asString( Result val_r ) const;
     enum Cause
       {
         REFRESH_SKIP_CD_DVD,
@@ -124,11 +125,14 @@ namespace InstSrcManagerCallbacks {
         SOURCE_REFRESHED,
         USERREQUEST
       };
+    std::string asString( Cause val_r ) const;
     enum Error
       {
         NO_SOURCE_FOUND,
         INCOMPLETE_SOURCE_DATA
       };
+    std::string asString( Error val_r ) const;
+
     virtual void   start( constInstSrcDescrPtr descr_r ) = 0;
     virtual Result error( Error error_r,
                           const std::string & detail = std::string() ) = 0;
