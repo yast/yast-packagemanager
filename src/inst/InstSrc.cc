@@ -347,15 +347,20 @@ PMError InstSrc::refreshSource( bool force_r )
   ///////////////////////////////////////////////////////////////////
   if ( !_descr )
     {
-      ERR << "Cannot refresh without source description" << endl;
+      INT << "Cannot refresh without source description" << endl;
       return Error::E_src_no_description;
     }
+
+  SourceRefreshReport::Send report( sourceRefreshReport );
+  typedef SourceRefreshCallback Report;
+  report->start( _descr );
 
   switch ( _descr->url().protocol() )
     {
     case Url::cd:
     case Url::dvd:
       MIL << "No need to refresh from CD/DVD media." << endl;
+      report->stop( Report::SUCCESS, Report::REFRESH_SKIP_CD_DVD );
       return Error::E_ok;
 
     default: break;
@@ -378,6 +383,7 @@ PMError InstSrc::refreshSource( bool force_r )
 
     case T_PlainDir:
       WAR << _descr->type() << " type of source does not support refresh!" << endl;
+      report->stop( Report::SKIP_REFRESH, Report::REFRESH_NOT_SUPPORTED_BY_SOURCE );
       return Error::E_ok;
       break;
 
@@ -395,10 +401,28 @@ PMError InstSrc::refreshSource( bool force_r )
       // just a temporary exception. We don't even know, whether it
       // makes sense to use the current cached data or to discard the
       // source.
-#warning Need a callback to user on failed refresh.
       ERR << "No InstSrc type " << _descr->type() << " found on media "
       << _descr->url() << '(' << _descr->product_dir() << ')' << endl;
-      return Error::E_no_instsrc_on_media;
+
+      Report::Result res = report->error( Report::NO_SOURCE_FOUND, err.asString() );
+      WAR << "Report::Result = " << res << endl;
+      switch ( res )
+        {
+        case Report::SUCCESS:
+          res = Report::SKIP_REFRESH; // fall through
+        case Report::SKIP_REFRESH:
+          err = Error::E_ok;
+          break;
+        case Report::DISABLE_SOURCE:
+          err = Error::E_no_instsrc_on_media;
+          break;
+        case Report::RERTY:
+          report->stop( res, Report::USERREQUEST );
+          return refreshSource( force_r );
+          break;
+        }
+      report->stop( res, Report::USERREQUEST );
+      return err;
     }
 
   ///////////////////////////////////////////////////////////////////
@@ -407,6 +431,7 @@ PMError InstSrc::refreshSource( bool force_r )
   if ( ! force_r && testMediaId == _descr->media_id() )
     {
       MIL << "InstSrc is up-to-date: " << *this << endl;
+      report->stop( Report::SUCCESS, Report::SOURCE_IS_UPTODATE );
       return Error::E_ok;
     }
 
@@ -422,6 +447,25 @@ PMError InstSrc::refreshSource( bool force_r )
   if ( err )
     {
       ERR << "Loading data from " << _descr->url() << '(' << _descr->product_dir() << ") failed. " << err << endl;
+
+      Report::Result res = report->error( Report::INCOMPLETE_SOURCE_DATA, err.asString() );
+      WAR << "Report::Result = " << res << endl;
+      switch ( res )
+        {
+        case Report::SUCCESS:
+          res = Report::SKIP_REFRESH; // fall through
+        case Report::SKIP_REFRESH:
+          err = Error::E_ok;
+          break;
+        case Report::DISABLE_SOURCE:
+          // keep error;
+          break;
+        case Report::RERTY:
+          report->stop( res, Report::USERREQUEST );
+          return refreshSource( force_r );
+          break;
+        }
+      report->stop( res, Report::USERREQUEST );
       return err;
     }
 
@@ -451,6 +495,8 @@ PMError InstSrc::refreshSource( bool force_r )
       // omit endless refresh loop
       enableSource( /*checkRefresh_r*/false );
     }
+
+  report->stop( Report::SUCCESS, Report::SOURCE_REFRESHED, _descr->label() );
   return err;
 }
 ///////////////////////////////////////////////////////////////////

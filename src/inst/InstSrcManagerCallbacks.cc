@@ -56,6 +56,23 @@ namespace InstSrcManagerCallbacks {
                                            bool doublesided ) {
     return "S";
   }
+
+  ///////////////////////////////////////////////////////////////////
+  // Reporting SourceRefresh
+  ///////////////////////////////////////////////////////////////////
+  SourceRefreshReport sourceRefreshReport;
+
+  void SourceRefreshCallback::start( constInstSrcDescrPtr descr_r ) {
+  }
+  SourceRefreshCallback::Result
+  SourceRefreshCallback::error( Error error_r,
+                                const std::string & detail ) {
+    return SUCCESS; // let the implementaion decide what to do
+  }
+  void SourceRefreshCallback::stop( Result result_r, Cause cause_r,
+                                    const std::string & detail ) {
+  }
+
 #if 0
   ///////////////////////////////////////////////////////////////////
   // Reporting @
