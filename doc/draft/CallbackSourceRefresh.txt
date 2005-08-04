@@ -1,0 +1,130 @@
+
+There are now 3 YCP callbacks on InsrSrcRefresh available:
+
+  YCPValue PKG::CallbackStartSourceRefresh( const YCPString& func );
+  YCPValue PKg::CallbackErrorSourceRefresh( const YCPString& func );
+  YCPValue PKG::CallbackDoneSourceRefresh ( const YCPString& func );
+
+
+The callback functions signatures are:
+
+  YCPVoid   StartSourceRefresh( YCPMap<YCPString,any> );
+  YCPSymbol ErrorSourceRefresh( YCPMap<YCPString,any> );
+  YCPVoid   DoneSourceRefresh ( YCPMap<YCPString,any> );
+
+General:
+
+On explicit request 'PKG::SourceRefreshNow(SrcId)', or whenever a source is
+enabled and it's autorefresh attribute is set true, the source is refreshed (if
+needed).
+
+If we can't figure out whether a source needs refresh, we leave it as it is.
+If we know the source needs refresh, but are not able to load the newmeta data,
+the old metadata remain in place, but the source stays disabled.
+
+There are no constraints on the content of the source, except that it must be the
+same type of source (UnitedLinux/YUM/PlainDir). There are currently no product
+related checks, so refresh may turn a SL9.3 into a SL10.0 or whatever.
+
+
+YCPVoid StartSourceRefresh( YCPMap<YCPString,any> )
+---------------------------------------------------
+  YCPMap contains URL, productdir, and label of the source
+  "url":	 YCPString
+  "product_dir": YCPString
+  "label":       YCPString
+
+  Triggered when we start to refresh a source.
+
+
+YCPVoid DoneSourceRefresh ( YCPMap<YCPString,any> )
+---------------------------------------------------
+  YCPMap
+  "result":      YCPSymbol
+  "cause":       YCPSymbol
+  "detail":      YCPString
+
+  Result will tell what happens and Cause will tell why.
+
+  Result:
+        SUCCESS         - everything is fine (we don't had to refresh or
+                          succeeded).
+        RETRY           - stop on error, but we're going to retry immediately
+                          (by user request only)
+        SKIP_REFRESH    - leaving the source as it is, pretending it's up-to-date
+                          (return no error)
+        DISABLE_SOURCE  - leaving the source as it is, but return an error which
+                          will cause the source to stay disabled.
+
+  Cause:
+        REFRESH_SKIP_CD_DVD             - media is CD/DVD so we don't need to
+                                          refresh
+        REFRESH_NOT_SUPPORTED_BY_SOURCE - source type does not support refresh.
+                                          (currently PlainDir)
+        SOURCE_IS_UPTODATE              - media is up-to-date
+        SOURCE_REFRESHED                - media was successfully refreshed
+        USERREQUEST                     - requested by user
+
+  Detail:
+        The (probably new) "label" of a successfully refreshed source if
+        (SUCCESS/SOURCE_REFRESHED).
+        Otherwise a more or less helpful translated or untranslated error
+        string or empty.
+
+  Not all Result/Cause combinations do occur.
+
+  SUCCESS - everything is fine
+      REFRESH_SKIP_CD_DVD             - media is CD/DVD
+      SOURCE_IS_UPTODATE              - media was up-to-date
+      SOURCE_REFRESHED                - media was refreshed
+
+  RETRY - retry on error
+      USERREQUEST                     - requested by user
+
+  SKIP_REFRESH - pretend it's up-to-date
+      USERREQUEST                     - requested by user
+      REFRESH_NOT_SUPPORTED_BY_SOURCE - source type does not support refresh
+
+  DISABLE_SOURCE - error, source stays disabled
+      USERREQUEST                     - requested by user
+
+
+
+YCPSymbol ErrorSourceRefresh( YCPMap<YCPString,any> )
+-----------------------------------------------------
+  YCPMap
+  "error":       YCPSymbol
+  "detail":      YCPString
+
+  Error:
+        NO_SOURCE_FOUND        - We were not able to retrieve the remote source
+                                 description. Without source description we
+                                 can't tell whether the source need to be
+                                 refreshed or not. We don't know whether this
+                                 is a temporary exception (network failure,
+                                 update on the server) or the source has vanished.
+        INCOMPLETE_SOURCE_DATA - We got the remote source description and know the
+                                 source needs to be refreshed. But there's been
+                                 an error while retrieving the new metadata.
+
+  Detail:
+        The well known PMError as string, which might give a hint how to
+        proceed.
+
+
+  This callback is invoked in case of an error. It is expected to return one
+  of the Result-YCPSymbols, telling how to proceed.
+
+        RETRY           - stop on error, but we're going to retry immediately
+                          (by user request only)
+        SKIP_REFRESH    - leaving the source as it is, pretending it's up-to-date
+                          (return no error)
+        DISABLE_SOURCE  - leaving the source as it is, but return an error which
+
+
+        SUCCESS         - or any unknown Symbol simply does what I implemented as
+                          default in case there's no callback recipient:
+
+                          NO_SOURCE_FOUND        ==> SKIP_REFRESH
+                          INCOMPLETE_SOURCE_DATA ==> DISABLE_SOURCE
+
