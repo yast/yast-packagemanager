@@ -401,6 +401,7 @@ PMError InstSrc::refreshSource( bool force_r )
       // just a temporary exception. We don't even know, whether it
       // makes sense to use the current cached data or to discard the
       // source.
+      // DEFAULT: We leave the source as it is: unrefrehed.
       ERR << "No InstSrc type " << _descr->type() << " found on media "
       << _descr->url() << '(' << _descr->product_dir() << ')' << endl;
 
@@ -408,14 +409,16 @@ PMError InstSrc::refreshSource( bool force_r )
       WAR << "Report::Result = " << res << endl;
       switch ( res )
         {
-        case Report::SUCCESS:
+        case Report::SUCCESS:         // returned from error() if no callback set
           res = Report::SKIP_REFRESH; // fall through
         case Report::SKIP_REFRESH:
           err = Error::E_ok;
           break;
+
         case Report::DISABLE_SOURCE:
           err = Error::E_no_instsrc_on_media;
           break;
+
         case Report::RERTY:
           report->stop( res, Report::USERREQUEST );
           return refreshSource( force_r );
@@ -446,20 +449,26 @@ PMError InstSrc::refreshSource( bool force_r )
 #warning Need a callback to user on failed refresh.
   if ( err )
     {
+      // As we now the source needs refresh, it does not make sense
+      // to proceed using the old data.
+      // DEFAULT: we leave the source as it is: unrefrehed, but return an
+      // error, which prevents the source from being enabled.
       ERR << "Loading data from " << _descr->url() << '(' << _descr->product_dir() << ") failed. " << err << endl;
 
       Report::Result res = report->error( Report::INCOMPLETE_SOURCE_DATA, err.asString() );
       WAR << "Report::Result = " << res << endl;
       switch ( res )
         {
-        case Report::SUCCESS:
-          res = Report::SKIP_REFRESH; // fall through
         case Report::SKIP_REFRESH:
           err = Error::E_ok;
           break;
+
+        case Report::SUCCESS:            // returned from error() if no callback set
+          res = Report::DISABLE_SOURCE;  // fall through
         case Report::DISABLE_SOURCE:
           // keep error;
           break;
+
         case Report::RERTY:
           report->stop( res, Report::USERREQUEST );
           return refreshSource( force_r );
