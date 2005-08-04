@@ -112,7 +112,7 @@ namespace InstSrcManagerCallbacks {
     enum Result
       {
         SUCCESS = 0,
-        RERTY,
+        RETRY,
         SKIP_REFRESH,
         DISABLE_SOURCE
       };
