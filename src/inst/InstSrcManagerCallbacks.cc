@@ -81,7 +81,7 @@ namespace InstSrcManagerCallbacks {
     switch ( val_r )
       {
         ENUM_OUT( SUCCESS );
-        ENUM_OUT( RERTY );
+        ENUM_OUT( RETRY );
         ENUM_OUT( SKIP_REFRESH );
         ENUM_OUT( DISABLE_SOURCE );
       }

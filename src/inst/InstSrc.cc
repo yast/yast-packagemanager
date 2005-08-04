@@ -419,7 +419,7 @@ PMError InstSrc::refreshSource( bool force_r )
           err = Error::E_no_instsrc_on_media;
           break;
 
-        case Report::RERTY:
+        case Report::RETRY:
           report->stop( res, Report::USERREQUEST );
           return refreshSource( force_r );
           break;
@@ -469,7 +469,7 @@ PMError InstSrc::refreshSource( bool force_r )
           // keep error;
           break;
 
-        case Report::RERTY:
+        case Report::RETRY:
           report->stop( res, Report::USERREQUEST );
           return refreshSource( force_r );
           break;
