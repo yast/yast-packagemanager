@@ -191,6 +191,8 @@ PMError InstSrc::enableSource( bool checkRefresh_r )
     return Error::E_ok;
   }
 
+  Timecount _t( "InstSrc::enableSource" );
+
   if ( !_descr ) {
     ERR << "Cannot enable without source description" << endl;
     return Error::E_src_no_description;
@@ -227,7 +229,6 @@ PMError InstSrc::enableSource( bool checkRefresh_r )
   // create InstSrcData according to Type stored in InstSrcDescr
   // and let it load it's data.
   ///////////////////////////////////////////////////////////////////
-  Timecount _t( "InstSrc::enableSource" );
 
   PMError err;
   InstSrcDataPtr ndata;
