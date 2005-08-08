@@ -113,14 +113,16 @@ of the set.<BR>
 
 
 <!--------------------------------------------------------------------!>
+<a name=media>
 <H2>The <tt>/media.<i>N</i>/media</tt> file</H2>
-This should contain a key to quickly identify correctness of the inserted
+<!--------------------------------------------------------------------!>
+<P>This should contain a key to quickly identify correctness of the inserted
 media. It is not shown to the user but should contain human-readable
-data for debugging purposes.<BR>
-<BR>
-Proposal: Encode Vendor and Timestamp information in a file<BR>
-<br>
-<TABLE border>
+data for debugging purposes.
+
+<P>Proposal: Encode Vendor and Timestamp information in a file
+
+<P><TABLE border>
 <tr><td>File:</td><td><tt>media</tt></td></tr>
 <tr><td>Location</td><td> <tt>/media.<i>N</i>/</tt> directory on media</td></tr>
 <tr><td valign="top">Content</td><td>two or more lines of ASCII as follows<BR>
@@ -131,18 +133,21 @@ Proposal: Encode Vendor and Timestamp information in a file<BR>
   <i>[<tt>&lt;media names&gt;</tt>]</i><br>
 </td></tr>
 </TABLE>
-<br>
-The identification data is stored inside the file on purpose. It could
+
+<P>The identification data is stored inside the file on purpose. It could
 also be encoded in the file name (older SuSE media did it). But this
-requires a directory scan for file access and should be avoided.<BR>
-<br>
-By storing the vendor name in the file, the timestamp can be kept vendor
+requires a directory scan for file access and should be avoided.
+
+<P>By storing the vendor name in the file, the timestamp can be kept vendor
 specific. (It's the name of the vendor who created the media which might
 be different from a product vendor! It's just used as an additional key
-for media identification.)<BR>
-<br>
-All media of a media-set must provide identical vendor and timestamp
-information in the <tt>media</tt> file.<br>
+for media identification.)
+
+<P><UL>
+ <LI>All media of a media-set must provide identical vendor and timestamp
+  information in the <tt>media</tt> file.</LI>
+ <LI>If the source contents changes, the timestamp</LI>
+</UL>
 
 <H3>The <tt>/media.1/media</tt> file</H3>
 
@@ -206,6 +211,7 @@ linux#
 
 <!--------------------------------------------------------------------!>
 <H2>The <tt>products</tt> file</H2>
+<!--------------------------------------------------------------------!>
 This file contains the directory name for each product contained on
 the media.<br>
 <hr>
@@ -259,6 +265,7 @@ other products have their own sub-directories.
 <!--------------------------------------------------------------------!>
 <a name="content"/>
 <H2>The <tt>content</tt> file</H2>
+<!--------------------------------------------------------------------!>
 This file resides inside the product directory as specified by the <tt>products</tt>
 file on the media. It contains all product-specfic data to describe
 and identify the contents of the product.
@@ -351,15 +358,31 @@ Pkg::InstallPackage.</p>
 The <tt>FLAGS</tt> line is used to describe the (installation) capabilities of
 the product. It's value is a list of space separated keywords.<br>
 The following keywords are currently defined:<br>
-<table>
-<tr><td><tt>update</tt></td><td>&nbsp;&nbsp;</td><td>Offer update button in YaST</td></tr>
-<tr><td><tt>usercwd</tt></td><td>&nbsp;&nbsp;</td><td>Add '.' (current working dir) to PATH environment.<br>
-  Normally, this is a risk but some users can't live without it.</td></tr>
-<tr><td><tt>no_you</tt></td><td>&nbsp;&nbsp;</td><td>Do <b>not</b> offer online update <i>during</i> installation</td></tr>
-<tr><td><tt>no_remote_slides</tt></td><td>&nbsp;&nbsp;</td>
-    <td>Do <b>not</b> download slide show data on installation or update
-        via FTP/HTTP</td></tr>
-</table>
+
+ <table>
+  <tr>
+   <td><tt>update</tt></td><td>&nbsp;&nbsp;</td>
+   <td>Offer update button in YaST</td></tr>
+  <tr>
+   <td><tt>usercwd</tt></td><td>&nbsp;&nbsp;</td>
+   <td>Add '.' (current working dir) to PATH environment.<br> Normally, this is
+    a risk but some users can't live without it.</td></tr>
+  <tr>
+   <td><tt>no_you</tt></td><td>&nbsp;&nbsp;</td>
+   <td>Do <b>not</b> offer online update <i>during</i> installation</td></tr>
+  <tr>
+   <td><tt>no_remote_slides</tt></td><td>&nbsp;&nbsp;</td>
+   <td>Do <b>not</b> download slide show data on installation or update via
+    FTP/HTTP</td></tr>
+  <tr>
+   <td><tt>volatile_content</tt></td><td>&nbsp;&nbsp;</td>
+   <td>The content of this source is expected to change, so <tt>autorefreh</tt>
+    shoud be turned on per default. Everytime the source gets enabled, YaST
+    will check whether the metadata have changed, and reloads them if.
+    Indicator for changed metadata is a different media ID (timestamp) in
+    the <A HREF=#media><tt>/media.N/media</tt></A> file.</td></tr>
+ </table>
+
 <br>
 The location of the rpm file for a package on the installation media
 is determined by the <tt>=Loc:</tt> line
@@ -398,6 +421,7 @@ linux#
 <!--------------------------------------------------------------------!>
 <a name=patches>
 <H2>The <tt>patches</tt> file</H2>
+<!--------------------------------------------------------------------!>
 This file contains a single directory name for the root of the
 patches directory contained on the media and an optional list of exclusive
 products the patches apply to.<br>
@@ -448,6 +472,7 @@ SUSE CORE-9
 
 <!--------------------------------------------------------------------!>
 <H2>The package description directory</H2>
+<!--------------------------------------------------------------------!>
 
 Each such directory contains a file listing the selections (<tt>selections</tt>)
 and a file listing the packages (<tt>packages</tt>).<BR>
@@ -465,7 +490,9 @@ selections
 linux#
 </pre>
 
+<!--------------------------------------------------------------------!>
 <H2>The <tt>packages</tt> file</H2>
+<!--------------------------------------------------------------------!>
 This is basically a cache file for package data needed for
 package selection and dependency resolution.<br>
 See current <A HREF="package-descr.html">here</A> for the syntax.<br>
@@ -489,7 +516,9 @@ defaults to <tt>name-version-release.architecture</tt> in this case.
 See <A HREF="lang-descr.html">here</A> for a format definition of such a file.<br>
 <br>
 
+<!--------------------------------------------------------------------!>
 <H2>The <tt>packages.DU</tt> file</H2>
+<!--------------------------------------------------------------------!>
 This file contains disk usage information for each package and directory
 used by the package.<br>
 It it used to approximate file system requirements esp. when multiple
@@ -529,7 +558,9 @@ noarch/
 linux#
 </pre>
 
+<!--------------------------------------------------------------------!>
 <H2>The <tt>selections</tt> file</H2>
+<!--------------------------------------------------------------------!>
 This file contains a list of selections file names (one per line,
 possibly with directory pathes,
 relative to the <tt>DESCRDIR</tt> directory).<br>
@@ -563,6 +594,7 @@ linux#
 
 <!--------------------------------------------------------------------!>
 <H2>Reading directories</H2>
+<!--------------------------------------------------------------------!>
 <P>When YaST reads a directory by first listing its content, it looks for a file
 <tt>directory.yast</tt> and takes its content as directory listing, if it
 exists. If it doesn't exist, it tries to list the directory by using the media

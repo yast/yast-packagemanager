@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Aug  8 20:34:24 CEST 2005 - ma@suse.de
+
+- Per default disable 'autorefresh' for InstSrcUL, unless flag
+  'volatile_content' is set in the content file.
+- Substitute any '%a' in content_relnotesurl with target architecture.
+- 2.12.11
+
+-------------------------------------------------------------------
 Mon Aug  8 11:46:25 CEST 2005 - lnussel@suse.de
 
 - put forced refresh into InstSrcManager API
@@ -18,7 +26,7 @@ Tue Aug  2 16:51:08 CEST 2005 - mir@suse.de
 -------------------------------------------------------------------
 Tue Aug  2 14:54:00 CEST 2005 - mir@suse.de
 
-- XMLNodeIteratorBase: errorHandler  warns when it gets "%s" as 
+- XMLNodeIteratorBase: errorHandler  warns when it gets "%s" as
   error message and tries to figure out what libxml2 really means
 - activated YUMParser tests
 

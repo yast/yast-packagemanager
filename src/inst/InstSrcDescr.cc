@@ -32,6 +32,7 @@
 #include <y2util/ExternalProgram.h>
 #include <y2util/TaggedFile.h>
 
+#include <y2pm/InstTarget.h>
 #include <y2pm/InstSrcDescr.h>
 
 #include <Y2PM.h>
@@ -82,6 +83,23 @@ InstSrcDescr::InstSrcDescr()
 //
 InstSrcDescr::~InstSrcDescr()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//	METHOD NAME : InstSrcDescr::content_relnotesurl
+//	METHOD TYPE : const std::string
+//
+const std::string InstSrcDescr::content_relnotesurl() const
+{
+  PkgArch tarch( InstTarget::baseArch() );
+  string  relnotes( _content_relnotesurl );
+
+  for ( string::size_type pos = relnotes.find( "%a" );
+	pos != string::npos; pos = relnotes.find( "%a", pos ) ) {
+    relnotes.replace( pos, 2, tarch.asString() );
+  }
+  return relnotes;
 }
 
 ///////////////////////////////////////////////////////////////////
