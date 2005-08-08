@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug  8 11:46:25 CEST 2005 - lnussel@suse.de
+
+- put forced refresh into InstSrcManager API
+
+-------------------------------------------------------------------
 Wed Aug  3 21:00:57 CEST 2005 - ma@suse.de
 
 - Added callbacks during InstSrc refresh.
