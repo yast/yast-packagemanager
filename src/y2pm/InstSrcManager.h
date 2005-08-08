@@ -239,7 +239,7 @@ class InstSrcManager {
      * Let the source refresh its meta data. If meta data have changed and the
      * source is enabled, it is disabled and reenabled using the new metadata.
      **/
-    PMError refreshSource( const ISrcId & isrc_r );
+    PMError refreshSource( const ISrcId & isrc_r, bool force = false );
 
   public:
 

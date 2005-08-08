@@ -566,7 +566,7 @@ PMError InstSrcManager::scanMedia( ISrcId & isrc_r, const Url & mediaurl_r, cons
 //	METHOD NAME : InstSrcManager::refreshSource
 //	METHOD TYPE : PMError
 //
-PMError InstSrcManager::refreshSource( const ISrcId & isrc_r )
+PMError InstSrcManager::refreshSource( const ISrcId & isrc_r, bool force )
 {
   InstSrcPtr it( lookupId( isrc_r ) );
   if ( ! it )
@@ -575,7 +575,7 @@ PMError InstSrcManager::refreshSource( const ISrcId & isrc_r )
       return Error::E_bad_id;
     }
 
-  PMError err = it->refreshSource();
+  PMError err = it->refreshSource(force);
   return err;
 }
 
