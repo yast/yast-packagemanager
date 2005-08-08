@@ -1,5 +1,7 @@
 #include <iomanip>
 #include <fstream>
+#include <iterator>
+#include <algorithm>
 #include <string>
 #include <list>
 #include <set>
@@ -149,12 +151,53 @@ void cedSrc( const string & url_r ) {
   SEC << "---CED Src '" << url_r << "'" << endl;
 }
 
+template<typename T>
+  struct _dump
+  {
+    explicit
+    _dump( const T & t )
+    : _t( t )
+    {}
+
+    friend ostream & operator<<( ostream & str, const _dump<T> & dt )
+    { return str << dt._t; }
+
+  private:
+    const T _t;
+  };
+
+template<typename T>
+  _dump<T>
+  dump( const T & t )
+  { return _dump<T>( t ); }
+
+ostream & operator<<( ostream & str, const _dump<PMSelectablePtr> & dt )
+{
+  PMSelectablePtr s = dt._t;
+  if ( s )
+    {
+      const char * btg = s->userCandidate() ? "U " : "* ";
+      for ( PMSelectable::PMObjectList::const_iterator it = s->av_begin();
+            it != s->av_end(); ++it )
+        {
+          const char * tg = ( s->candidateObj() == *it ) ? btg : "  ";
+          str << "    " << tg << (*it)->nameEdArch() << endl;
+        }
+    }
+  return str;
+
+
+  return str << "xxx" << endl;
+}
+
+
 ostream & dumpPkgWhatIf( ostream & str, bool all = false )
 {
   str << "+++[dumpPkgWhatIf]+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
     if ( all || (*it)->to_modify() || (*it)->is_taboo() ) {
-      (*it)->dumpStateOn( str ) << endl;
+      (*it)->dumpStateOn( str ) << endl << dump(*it);
+      str << endl;
     }
   }
   str << "---[dumpPkgWhatIf]---------------------------------------------------" << endl;
@@ -193,8 +236,8 @@ bool doSolve( PMManager & mgr_r ) {
     WAR << "SOLVE: failed packages: " << bad.size() << endl;
     WAR << bad << endl;
     //for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
-//	 p != bad.end(); ++p ) {
-  //    out << *p << endl;
+    //	 p != bad.end(); ++p ) {
+    //   out << *p << endl;
     //}
     return false;
   }
@@ -288,28 +331,32 @@ int main( int argc, char * argv[] )
   if ( 0 )
     {
       Y2PM::noAutoInstSrcManager();
-      InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/YUM-9.3" );
+      //InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/YUM-9.3" );
+      InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/TEST" );
       ISM.enableSource( nid );
       if ( nid )
         {
-          PMGR["at"]->user_set_install();
-          dumpPkgWhatIf( SEC );
-          doSolve( PMGR );
-          dumpPkgWhatIf( SEC );
-          dataDump( INT, PMGR["at"]->theObject() );
+          //dataDump( INT, PMGR["at"]->theObject() );
         }
 
       return 0;
     }
 
+  SEC << ISM.getSources( true ).front()->descr()->content_relnotesurl() << endl;
+
+  return 0;
+
   PMError err;
   Y2PM::instSrcManager();
-  InstSrcManager::ISrcId nid = ISM.getSources().front();
-  if ( nid )
-    {
-      err = ISM.refreshSource( nid );
-      SEC << err << endl;
-    }
+  dumpPkgWhatIf( SEC, true );
+
+  PMGR["glibc-devel"]->user_set_install();
+  doSolve( PMGR );
+  dumpPkgWhatIf( SEC, true );
+
+  PMGR["glibc"]->setUserCandidate( *++PMGR["glibc"]->av_rbegin() );
+  doSolve( PMGR );
+  dumpPkgWhatIf( SEC, true );
 
   SEC << "STOP" << endl;
   return 0;

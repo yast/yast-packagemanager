@@ -223,7 +223,7 @@ class InstSrcDescr : public CountedRep {
     const Pathname &     content_descrdir()    const { return _content_descrdir; }
     const Pathname &     content_datadir()     const { return _content_datadir; }
     const std::string &  content_flags()       const { return _content_flags; }
-    const std::string &  content_relnotesurl() const { return _content_relnotesurl; }
+    const std::string    content_relnotesurl() const;
     const std::string &  content_youurl()      const { return _content_youurl; }
     const std::string &  content_youtype()     const { return _content_youtype; }
     const std::string &  content_youpath()     const { return _content_youpath; }

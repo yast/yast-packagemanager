@@ -249,6 +249,9 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 
     ndescr->set_product_dir (product_dir_r);
 
+    ndescr->set_default_refresh( ndescr->hasFlag( "volatile_content" ) );
+
+
     // Finaly check whether there are gpg-pubkeys in the media rootdir
     // and let the ISM store them.
     list<string> files;
