@@ -181,7 +181,6 @@ void InstSrc::_mgr_attach()
 PMError InstSrc::enableSource( bool checkRefresh_r )
 {
   MIL << "Enable InstSrc " << *this << endl;
-
   ///////////////////////////////////////////////////////////////////
   // pre checks
   ///////////////////////////////////////////////////////////////////
@@ -198,11 +197,17 @@ PMError InstSrc::enableSource( bool checkRefresh_r )
     return Error::E_src_no_description;
   }
 
-  if ( checkRefresh_r && _descr->default_refresh() ) {
-    PMError err = refreshSource();
-    if ( err )
-      return err;
-  }
+  if ( ! Y2PM::runningFromSystem() )
+    {
+      // disable refresh at installation/update
+      checkRefresh_r = false;
+    }
+  else if ( checkRefresh_r && _descr->default_refresh() )
+    {
+      PMError err = refreshSource();
+      if ( err )
+        return err;
+    }
 
   //-----------------------------------------------------------------
   // Determine search path for providePackage
