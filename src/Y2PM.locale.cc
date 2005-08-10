@@ -67,14 +67,25 @@ class Y2PM::LocaleSettings {
     LocaleSettings()
       : _preferred_locale( _locale_fallback )
     {
-      char * envlang = getenv ( "LANG" );
-      if ( envlang ) {
-	MIL << "$LANG='" << envlang << "'" << endl;
-	LangCode lang( envlang );
-	if ( lang.isSet() ) {
-	  _preferred_locale = lang;
-	}
-      }
+      char * envlist[] = { "LC_ALL", "LC_CTYPE", "LANG", NULL };
+      for ( char ** envvar = envlist; *envvar; ++envvar )
+        {
+          char * envlang = getenv( *envvar );
+          if ( envlang )
+            {
+              string envstr( envlang );
+              MIL << "$" << *envvar << "='" << envstr << "'" << endl;
+              if ( envstr != "POSIX" && envstr != "C" )
+                {
+                  LangCode lang( envlang );
+                  if ( lang.isSet() )
+                    {
+                      _preferred_locale = lang;
+                      break;
+                    }
+                }
+            }
+        }
       MIL << "Preferred locale: '" << _preferred_locale << "'" << endl;
       MIL << "Fallback locale: '" << _locale_fallback << "'" << endl;
     }

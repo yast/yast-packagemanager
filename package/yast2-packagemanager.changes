@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug 10 13:24:57 CEST 2005 - ma@suse.de
+
+- Tying to guess the UI language, evaluate LC_ALL, LC_CTYPE and
+  LANG. Ignore 'POSIX' and 'C' as they are no languages. (#102615)
+- 2.12.13
+
+-------------------------------------------------------------------
 Tue Aug  9 18:20:03 CEST 2005 - ma@suse.de
 
 - Disable 'autorefresh' on installation/update. It's not necessary

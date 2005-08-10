@@ -342,8 +342,7 @@ int main( int argc, char * argv[] )
       return 0;
     }
 
-  SEC << ISM.getSources( true ).front()->descr()->content_relnotesurl() << endl;
-
+  SEC << Y2PM::getPreferredLocale() << endl;
   return 0;
 
   PMError err;
