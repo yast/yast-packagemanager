@@ -6,7 +6,6 @@
 <package pkgid="5f5547fe534991d161f5cbd9b823276a86eb55ea" name="packetfilter" arch="noarch">
   <version epoch="0" ver="0.9.1" rel="4"/>
 </package>
-<bla/>
 <package pkgid="f9d63f4369eda675a65522ab6c985a60e73a1ceb" name="bbconf" arch="i386">
   <version epoch="0" ver="1.2" rel="1"/>
 </package>

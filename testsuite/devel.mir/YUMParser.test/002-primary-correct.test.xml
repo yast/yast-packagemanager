@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm" packages="8">
+<metadata xmlns="http://linux.duke.edu/metadata/common" 
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm" 
+          xmlns:suse="http://novell.com/package/metadata/suse/common"
+          packages="8">
 <package type="rpm">
   <name>packetfilter</name>
   <arch>noarch</arch>
@@ -142,24 +145,24 @@ style files/themes.</description>
       <rpm:entry name="libm.so.6"/>
     </rpm:requires>
     <file>/usr/bin/bbconf</file>
-    <authors>
-      <author>First Author</author>
-      <author>Second Author</author>
-    </authors>
-    <keywords>
-      <keyword>One keyword</keyword>
-      <keyword>Another one</keyword>
-    </keywords>
-    <media mediaid='2'/>
-    <dirsizes>
-      <dirsize path="/usr/bin" size-kbyte="520" filecount="2"/>
-      <dirsize path="/usr/share/doc" size-kbyte="100" filecount="25"/>
-    </dirsizes>
-    <freshen>
-      <entry name="nothing" flags="EQ" epoch="0" ver="1.1" rel="521"/>
-      <entry name="anything" flags="LT" epoch="0" ver="1.2" rel="125"/>
-    </freshen>
-    <install_only/>
+    <suse:authors>
+      <suse:author>First Author</suse:author>
+      <suse:author>Second Author</suse:author>
+    </suse:authors>
+    <suse:keywords>
+      <suse:keyword>One keyword</suse:keyword>
+      <suse:keyword>Another one</suse:keyword>
+    </suse:keywords>
+    <suse:media mediaid='2'/>
+    <suse:dirsizes>
+      <suse:dirsize path="/usr/bin" size-kbyte="520" filecount="2"/>
+      <suse:dirsize path="/usr/share/doc" size-kbyte="100" filecount="25"/>
+    </suse:dirsizes>
+    <suse:freshen>
+      <suse:entry name="nothing" flags="EQ" epoch="0" ver="1.1" rel="521"/>
+      <suse:entry name="anything" flags="LT" epoch="0" ver="1.2" rel="125"/>
+    </suse:freshen>
+    <suse:install_only/>
   </format>
 </package>
 <package type="rpm">

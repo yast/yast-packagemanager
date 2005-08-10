@@ -274,6 +274,34 @@ namespace YUM {
 
   DEFINE_BASE_POINTER(YUMOtherData);
 
+/* ** YUMPatchData not yet finalized **
+
+  class YUMPatchData : public Rep {
+    REP_BODY(YUMPatchData);
+  public:
+    YUMPatchData();
+    std::patchId;
+    std::timestamp;
+    std::name;
+    std::summary;
+    MultiLang summary;
+    MultiLang description;
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::list<YUMDependency> provides;
+    std::list<YUMDependency> conflicts;
+    std::list<YUMDependency> obsoletes;
+    std::list<YUMDependency> freshen;
+    std::list<YUMDependency> requires;
+    std::string category;
+    bool rebootNeeded;
+    bool packageManager;
+  };
+
+  DEFINE_BASE_POINTER(YUMPatchData);
+*/
+
 } /* end of namespace YUM */
 
 
