@@ -2,6 +2,8 @@
 # Makefile.am for packagemanager/src/instsrc
 #
 
+SUBDIRS = schema
+
 AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
 AM_LDFLAGS = -L$(libdir)
 
@@ -28,6 +30,3 @@ liby2pmsrcYUM_la_SOURCES =		\
 
 liby2pmsrcYUM_la_LIBADD = -lxml2
 
-schemafilesdir =  $(schemadir)/packagemanager
-schemafiles_DATA = $(wildcard *.rng)
-EXTRA_DIST = $(schemafiles_DATA)

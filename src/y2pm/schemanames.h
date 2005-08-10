@@ -26,7 +26,7 @@ namespace YUM {
 /* FIXME: How do I do this properly? */
 #define SCHEMABASE "/usr/share/YaST2/schema/packagemanager/"
 #define REPOMDSCHEMA (SCHEMABASE "repomd.rng")
-#define PRIMARYSCHEMA (SCHEMABASE "primary.rng")
+#define PRIMARYSCHEMA (SCHEMABASE "suse-primary.rng")
 #define GROUPSCHEMA (SCHEMABASE "groups.rng")
 #define FILELISTSCHEMA (SCHEMABASE "filelists.rng")
 #define OTHERSCHEMA (SCHEMABASE "other.rng")
