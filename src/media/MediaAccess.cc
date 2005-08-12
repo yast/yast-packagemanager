@@ -90,8 +90,6 @@ MediaAccess::open (const Url& url, const Pathname & preferred_attach_point)
         _handler = new MediaDISK (url,preferred_attach_point);
         break;
       case Url::smb:
-        _handler = new MediaSMB (url,preferred_attach_point);
-        break;
       case Url::cifs:
         _handler = new MediaCIFS (url,preferred_attach_point);
         break;
