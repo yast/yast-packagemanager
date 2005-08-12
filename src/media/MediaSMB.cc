@@ -20,8 +20,10 @@
 /-*/
 
 #include <iostream>
+#include <fstream>
 
 #include <y2util/Y2SLog.h>
+#include <y2util/TmpPath.h>
 #include <y2pm/Mount.h>
 #include <y2pm/MediaSMB.h>
 
@@ -185,13 +187,20 @@ PMError MediaSMB::attachTo(bool next)
       environment["PASSWD"] = password;
 
     //////////////////////////////////////////////////////
-#warning waiting for mount to pass environment to smbmount
-    // unless plain mount supports this we add username
-    // and password again.
-    if ( username.size() )
-      options["username"] = username;
-    if ( password.size() )
-      options["password"] = password;
+    // In case we need a tmpfile, credentials will remove
+    // it in it's destructor after the mout call below.
+    TmpPath credentials;
+    if ( username.size() || password.size() )
+      {
+        TmpFile tmp;
+        ofstream outs( tmp.path().asString().c_str() );
+        outs << "username=" <<  username << endl;
+        outs << "password=" <<  password << endl;
+        outs.close();
+
+        credentials = tmp;
+        options["credentials"] = credentials.path().asString();
+      }
     //
     //////////////////////////////////////////////////////
 
