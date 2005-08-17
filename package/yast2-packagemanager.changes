@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Aug 17 13:04:51 CEST 2005 - lnussel@suse.de
+
+- fix handling of multiple provides of the same name by the same
+  package (#105127)
+
+-------------------------------------------------------------------
 Fri Aug 12 17:01:07 CEST 2005 - ma@suse.de
 
 - MediaHandler: Drop smbmount and map and smb:// to cifs:// (#104358)

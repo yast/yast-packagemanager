@@ -636,13 +636,15 @@ PkgDep::search_for_provider( const PkgRelation& req, PMSolvablePtr referer,
 	set<PMSolvablePtr > seen;
 
 	RevRel_for( PkgSet::getRevRelforPkg(available.provided(),req.name()), prov ) {
-		if (seen.find(prov->pkg()) != seen.end())
-			continue;
-		seen.insert(prov->pkg());
 		if (req.matches( prov->relation() )) {
 			D__ << "Available " << prov->pkg()->name() << " provides "
 				 << prov->relation() << " which is needed by "
 				 << referer->name() << " (Requires: " << req << ")" << endl;
+
+			if (seen.find(prov->pkg()) != seen.end())
+				continue;
+			seen.insert(prov->pkg());
+
 			// search_for_provider is called when no
 			// candidate or installed provides the
 			// relation, so when there is 
