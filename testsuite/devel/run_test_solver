@@ -4,9 +4,10 @@ TESTS="01simple 02conflict bug21829 inconsistent1 inconsistent2 inconsistent3 in
 make autosolvertest >/dev/null 2>&1
 
 Y2DEBUG=1
+Y2SLOG_DEBUG=1
 Y2SLOG_FILE=autosolvertest.y2log
 
-export Y2DEBUG Y2SLOG_FILE
+export Y2DEBUG Y2SLOG_FILE Y2SLOG_DEBUG
 
 
 while [ "$#" -gt 0 ]; do

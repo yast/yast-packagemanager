@@ -212,12 +212,14 @@ static void dumpPkgStates(std::ostream& os)
     if(!install.empty())
     {
 	os << "Install: ";
+	sort(install.begin(), install.end());
 	copy(install.begin(), install.end(), ostream_iterator<string>(os, ","));
 	os << endl;
     }
     if(!remove.empty())
     {
 	os << "Remove: ";
+	sort(remove.begin(), remove.end());
 	copy(remove.begin(), remove.end(), ostream_iterator<string>(os, ","));
 	os << endl;
     }

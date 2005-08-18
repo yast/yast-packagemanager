@@ -310,7 +310,8 @@ class PkgDep {
 						   const PkgDep& dep,
 						   PMSolvablePtr to_remove,
 						   PMSolvablePtr assume_instd,
-						   RelInfo::Kind kind = RelInfo::CONFLICT );
+						   RelInfo::Kind kind = RelInfo::CONFLICT,
+						   const PkgSet* candidates = NULL);
 		/**
 		 * This Result has a problem with s and its relation
 		 * rel. To solve the conflict, to_remove must be
@@ -320,7 +321,8 @@ class PkgDep {
 						   const PkgDep& dep,
 						   PMSolvablePtr to_remove,
 						   PMSolvablePtr assume_instd,
-						   RelInfo::Kind kind = RelInfo::CONFLICT );
+						   RelInfo::Kind kind = RelInfo::CONFLICT,
+						   const PkgSet* candidates = NULL);
 		void add_alternative( PMSolvablePtr p, alternative_kind k );
 		void add_notes( const Notes& notes );
 
@@ -446,7 +448,7 @@ class PkgDep {
 							   PMSolvablePtr newpkg );
 	// remove.cc
 	void virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
-								 PMSolvablePtr assume_instd = NULL ) const;
+								 PMSolvablePtr assume_instd = NULL, const PkgSet* candidates = NULL) const;
 	// utils.cc
 	bool also_provided_by_installed( const PkgRelation& rel );
 	PMSolvablePtr upgrade_solves_conflict( PMSolvablePtr pkg,
@@ -570,9 +572,13 @@ public:
     public: // static members
 
 	/** recoursive remove package pkg from PkgSet set and extend
-	 * to_remove with all removed packages */
+	 * to_remove with all removed packages
+	 *
+	 * @param candidates optionally check this additional set for providers
+	 * to not remove packages that are instaled and candidate (#104601).
+	 * */
 	static void remove_package( PkgSet *set, PMSolvablePtr pkg,
-						 SolvableList& to_remove);
+						 SolvableList& to_remove, const PkgSet* candidates = NULL);
 
 	/**
 	 * count number of packages providing req in set
