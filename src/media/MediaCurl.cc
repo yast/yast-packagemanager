@@ -42,6 +42,8 @@ Pathname MediaCurl::_cookieFile = "/var/lib/YaST2/cookies";
 
 MediaCurl::Callbacks *MediaCurl::_callbacks = 0;
 
+bool MediaCurl::_globalInit = false;
+
 ///////////////////////////////////////////////////////////////////
 
 static inline void escape( string & str_r,
@@ -70,6 +72,13 @@ MediaCurl::MediaCurl( const Url &      url_r,
 		    true ), // does_download
       _curl( 0 ), _connected( false )
 {
+  if ( ! _globalInit )
+    {
+      _globalInit = true;
+      CURLcode ret = curl_global_init( CURL_GLOBAL_ALL );
+      if ( ret != 0 )
+        WAR << "curl global init failed" << endl;
+    }
 }
 
 void MediaCurl::setCookieFile( const Pathname &fileName )
@@ -91,22 +100,15 @@ PMError MediaCurl::attachTo (bool next)
 
   if ( !_url.isValid() ) return Error::E_bad_url;
 
-  CURLcode ret = curl_global_init( CURL_GLOBAL_ALL );
-  if ( ret != 0 ) {
-    ERR << "curl global init failed" << endl;
-    return Error::E_error;
-  }
-
   _curl = curl_easy_init();
   if ( !_curl ) {
-    curl_global_cleanup();
     ERR << "curl easy init failed" << endl;
     return Error::E_error;
   }
 
   _connected = true;
 
-  ret = curl_easy_setopt( _curl, CURLOPT_ERRORBUFFER, _curlError );
+  CURLcode ret = curl_easy_setopt( _curl, CURLOPT_ERRORBUFFER, _curlError );
   if ( ret != 0 ) {
     return PMError( Error::E_curl_setopt_failed, "Error setting error buffer" );
   }
@@ -302,9 +304,6 @@ PMError MediaCurl::disconnectFrom()
 PMError MediaCurl::releaseFrom( bool eject )
 {
   disconnect();
-
-  curl_global_cleanup();
-
   return Error::E_ok;
 }
 
