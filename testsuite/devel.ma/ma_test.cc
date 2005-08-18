@@ -342,7 +342,7 @@ int main( int argc, char * argv[] )
       return 0;
     }
 
-  SEC << Y2PM::getPreferredLocale() << endl;
+  Y2PM::instSrcManager();
   return 0;
 
   PMError err;

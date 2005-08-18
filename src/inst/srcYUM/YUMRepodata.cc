@@ -47,12 +47,13 @@ namespace YUM
   Repodata::Repodata( const Pathname & repodataDir_r )
   : _repodataDir( repodataDir_r )
   {
-    // repomd
+    MIL << "Loading repodata from '" << repodataDir_r << "'" << endl;
+    // If repomd.xml was found and successfully loaded, use
+    // is sha1sum as ID.
     PathInfo repomd( _repodataDir + defaultRepomd_Xml() );
     if ( ! repomd.isFile() )
       {
         WAR << repomd << endl;
-        return;
       }
     else
       {
@@ -62,15 +63,13 @@ namespace YUM
           {
             DBG << **iter;
           }
-        if ( iter.errorStatus() )
-          {
-            ERR << iter.errorStatus()->msg() << " parsing " << repomd << endl;
-            return ;
-          }
-      }
 
-    //
-    _repodataId = PathInfo::sha1sum( repomd.path() );
+        if ( iter.errorStatus() )
+          ERR << iter.errorStatus()->msg() << " parsing " << repomd << endl;
+        else
+          _repodataId = PathInfo::sha1sum( repomd.path() );
+      }
+    MIL << repomd.path() << " has data ID '" << _repodataId << "'" << endl;
   }
 
   ///////////////////////////////////////////////////////////////////

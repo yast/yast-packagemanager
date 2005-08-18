@@ -188,6 +188,7 @@ InstSrcDataYUM::tryGetData( InstSrcDataPtr & ndata_r, const InstSrcPtr source_r 
 
   if ( ! ndata->_impl->repodata().hasData() )
     {
+      ERR << Error::E_isrc_cache_invalid << endl;
       return Error::E_isrc_cache_invalid;
     }
 

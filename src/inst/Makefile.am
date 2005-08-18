@@ -37,8 +37,7 @@ liby2pminstsrc_la_SOURCES = \
 	InstTargetError.cc		\
 	InstTargetCallbacks.cc		\
 	InstTargetSelDB.cc		\
-	InstTargetProdDB.cc		\
-	UpdateInfParser.cc
+	InstTargetProdDB.cc
 
 liby2pminstsrc_la_LIBADD = \
 	srcYUM/liby2pmsrcYUM.la	\
