@@ -79,6 +79,8 @@ class MediaCurl : public MediaHandler {
     static Callbacks *_callbacks;
 
     bool _connected;
+
+    static bool _globalInit;
 };
 
 ///////////////////////////////////////////////////////////////////
