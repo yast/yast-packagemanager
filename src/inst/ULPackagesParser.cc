@@ -170,15 +170,15 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     pkgmaptype::iterator pkgpos = _pkgmap.find (single);
     if (pkgpos != _pkgmap.end())
     {
-	ERR << "Duplicate '" << single << "'" << endl;
+	ERR << "Duplicate '=Pkg' value '" << single << "'" << endl;
 	return InstSrcError::E_data_bad_packages;
     }
 
     std::vector<std::string> splitted;
-
-    stringutil::split (single, splitted);
-//MIL << "-----------------------------" << endl;
-//MIL << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
+    if ( stringutil::split (single, splitted) != 4 ) {
+      ERR << "Invalid '=Pkg: N V R A' value '" << single << "'" << endl;
+      return InstSrcError::E_data_bad_packages;
+    }
 
     PkgArch arch (splitted[3]);
 
@@ -228,6 +228,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
 
     } // not allowed arch
 
+
     //---------------------------------------------------------------
     // Pkg -> PMPackage
     PkgName name (splitted[0].c_str());
@@ -250,6 +251,7 @@ ULPackagesParser::fromCache (TagCacheRetrievalPtr pkgcache, TagCacheRetrievalPtr
     _tagset.getTagByIndex (tagname)
 #define SET_CACHE(tagname) \
     do { tagptr = GET_TAG (tagname); dataprovider->_attr_##tagname = tagptr->Pos(); } while (0)
+
 
     //---------------------------------------------------------------
     // pass PMSolvable data directly to instance
@@ -431,10 +433,6 @@ ULPackagesParser::fromLocale ()
 	return InstSrcError::E_data_bad_packages_lang;
     }
 
-    std::vector<std::string> splitted;
-    stringutil::split (single, splitted, " ", false);
-//MIL << "Lang for " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
-
     //---------------------------------------------------------------
     // find corresponding package
 
@@ -495,10 +493,6 @@ ULPackagesParser::fromDU ()
 	ERR << "No '=Pkg' value found" << endl;
 	return InstSrcError::E_data_bad_packages_lang;
     }
-
-    std::vector<std::string> splitted;
-    stringutil::split (single, splitted, " ", false);
-//MIL << "Lang for " << splitted[0] << "-" << splitted[1] << "-" << splitted[2] << "." << splitted[3] << endl;
 
     //---------------------------------------------------------------
     // find corresponding package
