@@ -8,7 +8,7 @@ From-Input-List: yes
 
 --- Test 2
 
-Install: libc6,amd,libgdbm,
+Install: amd,libc6,libgdbm,
 
 Name: amd
 Edition: upl102-11
@@ -25,7 +25,7 @@ Referers: amd-upl102-11 requires libgdbm
 
 --- Test 3
 
-Install: libc6,foo1,
+Install: foo1,libc6,
 
 Name: libc6
 Edition: 2.0.7-1

@@ -28,18 +28,33 @@ void PkgDep::remove( SolvableList& pkgs )
 }
 
 void PkgDep::virtual_remove_package( PMSolvablePtr pkg, SolvableList& to_remove,
-				 PMSolvablePtr assume_instd ) const
+				 PMSolvablePtr assume_instd, const PkgSet* candidates ) const
 {
     PkgSet set = vinstalled;
     if (assume_instd)
 	set.add( assume_instd );
-    remove_package( &set, pkg, to_remove );
+    remove_package( &set, pkg, to_remove, candidates );
+}
+
+static unsigned count_providers_for_other_than( const PkgSet* set, const PkgRelation& req, PMSolvablePtr pkg)
+{
+	unsigned providers = 0;
+
+	RevRel_for( PkgSet::getRevRelforPkg(set->provided(),req.name()), prov ) {
+		if (prov->pkg() != pkg && prov->relation().matches( req )) {
+			D__ << req.name() << " satisfied by " << prov->pkg()->name() << " " << (const void*)(prov->pkg())
+				 << " with Provides: " << prov->relation() << std::endl;
+			++providers;
+		}
+	}
+	D__ << req.name() << ": total " << providers << " providers" << endl;
+	return providers;
 }
 
 //recoursive remove package pkg from PkgSet set and extend to_remove
 //with all removed packages
 // FIXME: to_remove should be by name as it could affect toinstall and installed packages?
-void PkgDep::remove_package( PkgSet *set, PMSolvablePtr startpkg, SolvableList& to_remove )
+void PkgDep::remove_package( PkgSet *set, PMSolvablePtr startpkg, SolvableList& to_remove, const PkgSet* candidates )
 {
     std::deque<PMSolvablePtr> tocheck;
     std::set<PMSolvablePtr> removeset;
@@ -83,17 +98,28 @@ void PkgDep::remove_package( PkgSet *set, PMSolvablePtr startpkg, SolvableList& 
 		RevRel_for( PkgSet::getRevRelforPkg(set->required(),(*prov).name()), req1 ) {
 			D__ << "    requirement: " << req1->relation()
 				 << " by " << req1->pkg()->name() << endl;
-			if (count_providers_for( set, req1->relation() ) < 1) {
-				D__ << "    no providers anymore, schedule remove of "
-					 << req1->pkg()->name() << endl;
-				++numremove;
-				if(removeset.find(req1->pkg()) == removeset.end())
+			if(candidates && candidates->lookup(req1->pkg()->name()) && candidates->lookup(req1->pkg()->name()) != req1->pkg())
+			{
+				D__ << "    different version of " << req1->pkg()->name() << " in candidates, skipping removal check" << endl;
+			}
+			else if (count_providers_for( set, req1->relation() ) < 1) {
+				if(candidates && count_providers_for_other_than( candidates, req1->relation(), pkg) > 0)
 				{
-				    tocheck.push_back(req1->pkg());
+					D__ << "  => not removing " << req1->pkg()->name() << endl;
 				}
 				else
 				{
-				    D__ << "    not really, already in toremove :-)" << endl;
+					D__ << "    no providers anymore, schedule remove of "
+						<< req1->pkg()->name() << endl;
+					++numremove;
+					if(removeset.find(req1->pkg()) == removeset.end())
+					{
+						tocheck.push_back(req1->pkg());
+					}
+					else
+					{
+						D__ << "    not really, already in toremove :-)" << endl;
+					}
 				}
 			}
 		}

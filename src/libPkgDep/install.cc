@@ -25,7 +25,7 @@ bool PkgDep::P::is_obsoleted_by_candidate(PkgSet& candidates, PMSolvablePtr pkg,
 		<< "because of provides " << *prov << endl;
 	    if(res)
 	    {
-		res->add_conflict(repl,*prov,_dep, repl, pkg, RelInfo::OBSOLETION);
+		res->add_conflict(repl,*prov,_dep, repl, pkg, RelInfo::OBSOLETION, _dep.candidates);
 	    }
 	    ret = true;
 	}
@@ -41,7 +41,7 @@ bool PkgDep::P::is_obsoleted_by_candidate(PkgSet& candidates, PMSolvablePtr pkg,
 		D__ << pkg->nameEd() << " obsoleted by candidate " << obs->pkg()->name() << endl;
 		if(res)
 		{
-		    res->add_conflict(*obs, _dep, obs->pkg(), pkg, RelInfo::OBSOLETION);
+		    res->add_conflict(*obs, _dep, obs->pkg(), pkg, RelInfo::OBSOLETION, _dep.candidates);
 		}
 		ret = true;
 	    }
@@ -456,7 +456,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 					do_upgrade_for_conflict( upgrade );
 				}
 				else {
-					res.add_conflict( *confl, *this, confl->pkg(), cand );
+					res.add_conflict( *confl, *this, confl->pkg(), cand, RelInfo::CONFLICT, candidates );
 					res._error = true;
 				}
 			}
@@ -487,7 +487,7 @@ void PkgDep::add_package( PMSolvablePtr cand )
 				}
 				else {
 					res.add_conflict( cand, *confl,
-									  *this, prov->pkg(), cand );
+									  *this, prov->pkg(), cand, RelInfo::CONFLICT, candidates );
 					res._error = true;
 				}
 			}
@@ -793,7 +793,7 @@ bool PkgDep::check_for_broken_reqs( PMSolvablePtr oldpkg, PMSolvablePtr newpkg, 
 						 << oldpkg->edition() << " by " << newpkg->name()
 						 << "-" << newpkg->edition()
 						 << " (old provided " << *prov << ")\n";
-					res.add_conflict( *req, *this, req->pkg(), newpkg, RelInfo::REQUIREMENT );
+					res.add_conflict( *req, *this, req->pkg(), newpkg, RelInfo::REQUIREMENT, candidates );
 					res._error = true;
 				}
 			}

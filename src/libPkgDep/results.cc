@@ -68,11 +68,12 @@ void PkgDep::ErrorResult::add_conflict(
 	const PkgDep& dep,
 	PMSolvablePtr to_remove,
 	PMSolvablePtr assume_instd,
-	RelInfo::Kind kind )
+	RelInfo::Kind kind,
+	const PkgSet* candidates)
 {
     conflicts_with.push_back( RelInfo( rrel, kind ));
     if (to_remove)
-	dep.virtual_remove_package( to_remove, remove_to_solve_conflict, assume_instd );
+	dep.virtual_remove_package( to_remove, remove_to_solve_conflict, assume_instd, candidates );
 }
 
 /** this ErrorResult has a problem because <s> <kind> <rel> */
@@ -82,11 +83,12 @@ void PkgDep::ErrorResult::add_conflict(
     const PkgDep& dep,
     PMSolvablePtr to_remove,
     PMSolvablePtr assume_instd,
-    RelInfo::Kind kind )
+    RelInfo::Kind kind,
+    const PkgSet* candidates)
 {
     conflicts_with.push_back( RelInfo( s, rel, kind ));
     if (to_remove)
-	dep.virtual_remove_package( to_remove, remove_to_solve_conflict, assume_instd );
+	dep.virtual_remove_package( to_remove, remove_to_solve_conflict, assume_instd, candidates );
 }
 
 void PkgDep::ErrorResult::add_unresolvable( PMSolvablePtr s, const PkgRelation& rel )
