@@ -52,10 +52,8 @@ pkginclude_HEADERS = PMLangCode.h PMTypes.h Y2PMCallbacks.h \
 	InstSrcDataPLAIN.h InstSrcDataPLAINPtr.h			\
 	PMPLAINPackageDataProvider.h PMPLAINPackageDataProviderPtr.h	\
 	InstSrcDataYUM.h InstSrcDataYUMPtr.h				\
-	UpdateInfParser.h			\
 	InstData.h				\
 	FileDeps.h				\
-	UpdateInfParser.h			\
 	\
 	InstTargetError.h			\
 	InstTargetCallbacks.h			\

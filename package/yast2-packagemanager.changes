@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug 18 17:29:58 CEST 2005 - ma@suse.de
+
+- Make shure curl_global_init/curl_global_cleanup are called only
+  once. (#103005)
+- Prevent SEGV in packages file is corrupted. (#105006)
+
+-------------------------------------------------------------------
 Thu Aug 18 15:11:58 CEST 2005 - lnussel@suse.de
 
 - check candidate set when calculating packages to remove (#104601)

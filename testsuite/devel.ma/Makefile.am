@@ -36,3 +36,6 @@ VComp_SOURCES = VComp.cc
 VComp_LDADD = $(LDADD)
 
 ALL: $(EXTRA_PROGRAMS)
+
+PM:
+	$(MAKE) -C $(top_builddir)/src
