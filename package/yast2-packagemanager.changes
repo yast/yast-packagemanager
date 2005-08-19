@@ -4,6 +4,7 @@ Fri Aug 19 12:44:06 CEST 2005 - ma@suse.de
 - Unescape usernames and passwords passed to libcurl. Curl unescapes
   them if they are included in the URL, but passed as separate option
   we have to unescape them. (#96960)
+- 2.12.15
 
 -------------------------------------------------------------------
 Thu Aug 18 17:29:58 CEST 2005 - ma@suse.de
@@ -16,7 +17,6 @@ Thu Aug 18 17:29:58 CEST 2005 - ma@suse.de
 Thu Aug 18 15:11:58 CEST 2005 - lnussel@suse.de
 
 - check candidate set when calculating packages to remove (#104601)
-- 2.12.15
 
 -------------------------------------------------------------------
 Wed Aug 17 13:04:51 CEST 2005 - lnussel@suse.de
