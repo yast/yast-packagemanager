@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Aug 19 12:44:06 CEST 2005 - ma@suse.de
+
+- Unescape usernames and passwords passed to libcurl. Curl unescapes
+  them if they are included in the URL, but passed as separate option
+  we have to unescape them. (#96960)
+
+-------------------------------------------------------------------
 Thu Aug 18 17:29:58 CEST 2005 - ma@suse.de
 
 - Make shure curl_global_init/curl_global_cleanup are called only

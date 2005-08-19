@@ -59,6 +59,13 @@ static inline string escapedPath( string path_r ) {
   return path_r;
 }
 
+static inline string unEscape( string text_r ) {
+  char * tmp = curl_unescape( text_r.c_str(), 0 );
+  string ret( tmp );
+  curl_free( tmp );
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////
 //
 //	CLASS NAME : MediaCurl
@@ -154,6 +161,7 @@ PMError MediaCurl::attachTo (bool next)
   }
 
   if ( _userpwd.size() ) {
+    _userpwd = unEscape( _userpwd );
     ret = curl_easy_setopt( _curl, CURLOPT_USERPWD, _userpwd.c_str() );
     if ( ret != 0 ) {
       return PMError( Error::E_curl_setopt_failed, _curlError );
@@ -241,6 +249,7 @@ PMError MediaCurl::attachTo (bool next)
 
     }
 
+    _proxyuserpwd = unEscape( _proxyuserpwd );
     ret = curl_easy_setopt( _curl, CURLOPT_PROXYUSERPWD, _proxyuserpwd.c_str() );
     if ( ret != 0 ) {
       return PMError( Error::E_curl_setopt_failed, _curlError );
