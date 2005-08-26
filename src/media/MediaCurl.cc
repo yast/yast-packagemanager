@@ -125,7 +125,21 @@ PMError MediaCurl::attachTo (bool next)
     return PMError( Error::E_curl_setopt_failed, _curlError );
   }
 
+  if ( _url.protocol() == Url::http ) {
+    // follow any Location: header that the server sends as part of
+    // an HTTP header (#113275)
+    ret = curl_easy_setopt ( _curl, CURLOPT_FOLLOWLOCATION, true );
+    if ( ret != 0) {
+      return PMError( Error::E_curl_setopt_failed, _curlError );
+    }
+    ret = curl_easy_setopt ( _curl, CURLOPT_MAXREDIRS, 3L );
+    if ( ret != 0) {
+      return PMError( Error::E_curl_setopt_failed, _curlError );
+    }
+  }
 
+  // XXX: wasn't that the wrong fix for some problem? this should be
+  // removed
   if ( _url.protocol() == Url::https ) {
       WAR << "Disable certificate verification for https." << endl;
       ret = curl_easy_setopt( _curl, CURLOPT_SSL_VERIFYPEER, 0 );
