@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Tue Aug 30 09:47:03 CEST 2005 - ma@suse.de
+
+- Put kernel-update-script.diff into SVN.
+- 2.12.17
+
+-------------------------------------------------------------------
+Mon Aug 29 14:44:42 CEST 2005 - agruen@suse.de
+
+- kernel-update-script.diff: add REUSE_DRIVER_PACKAGES and
+  DOWNLOAD_DRIVER_PACKAGES to the template for /etc/sysconfig/
+  onlineupdate.
+
+-------------------------------------------------------------------
 Fri Aug 26 16:41:42 CEST 2005 - lnussel@suse.de
 
 - follow http redirects (#113275)
