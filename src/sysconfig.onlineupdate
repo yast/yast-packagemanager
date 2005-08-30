@@ -60,3 +60,33 @@ YOU_REMOVE_SOURCE_PACKAGES="yes"
 # Note: you need to have the deltarpm tools installed to actually
 # make this work. Delta packages are only used via ftp and http.
 YOU_USE_DELTAS=""
+
+## Type: list(yes,ask,no)
+## Default: yes
+#
+# Determines if the kernel update tool will attempt to download kernel
+# driver packages from the locations defined in /var/lib/YaST2/download/*
+# and /var/lib/YaST2/download.conf when doing a kernel upgrade.
+#
+# With "yes", the kernel update tool will try to download the required
+# kernel driver packages automatically. With "ask", the kernel update
+# tool will ask the user.  With "no", or if no kernel driver packages
+# are installed, the kernel update tool will not download any driver
+# packages.
+DOWNLOAD_DRIVER_PACKAGES="yes"
+
+## Type: list(yes,ask,no)
+## Default: yes
+#
+# Determines if during kernel upgrades, the kernel update tool will attempt
+# to reuse kernel driver packages from the kernel it is upgrading from.
+#
+# With "yes", the kernel update tool will try to reuse old driver
+# packages automatically. With "ask", the kernel update tool will ask
+# the user. With "no", the kernel update tool will not reuse old driver
+# packages.
+#
+# If both DOWNLOAD_DRIVER_PACKAGES and REUSE_DRIVER_PACKAGES are set to
+# "yes", the kernel update tool will first try to download a suitable
+# driver package.
+REUSE_DRIVER_PACKAGES="yes"
