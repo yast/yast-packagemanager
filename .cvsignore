@@ -21,5 +21,5 @@ ltmain.sh
 install-sh
 Makefile.am.common
 packagemanager.pot
-autodocs-ycp.ami
+*.ami
 OUTPUT*
