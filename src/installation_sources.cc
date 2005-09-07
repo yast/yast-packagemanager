@@ -20,8 +20,9 @@ using namespace std;
 void usage()
 {
   cout << "Usage:" << endl
-       << "  installation_sources [-e] -a url   Add source at given URL." << endl
-       << "    -e  Enable source." << endl
+       << "  installation_sources [-e|-d] -a url   Add source at given URL." << endl
+       << "    -e  Enable source. This is the default." << endl
+       << "    -d  Disable source." << endl
        << "  installation_sources -s       Show all available sources." << endl;
   exit( 1 );
 }
@@ -40,13 +41,13 @@ int main( int argc, char **argv )
 
   const char *urlStr = 0;
 
-  bool showSources = false;
-  bool addSource = false;
-  bool enableSource = false;
+  bool showSources  = false;
+  bool addSource    = false;
+  bool enableSource = true; // -e per default
 
   int c;
   while( 1 ) {
-    c = getopt( argc, argv, "esa:" );
+    c = getopt( argc, argv, "desa:" );
     if ( c < 0 ) break;
 
     switch ( c ) {
@@ -56,6 +57,9 @@ int main( int argc, char **argv )
       case 'a':
         addSource = true;
         urlStr = optarg;
+        break;
+      case 'd':
+        enableSource = false;
         break;
       case 'e':
         enableSource = true;
@@ -86,25 +90,31 @@ int main( int argc, char **argv )
     PMError error = instSrcMgr.scanMedia( sourceIds, url );
     if ( error ) {
       cerr << error << endl;
+      exit( 1 );
     }
-    
+
     InstSrcManager::ISrcIdList::const_iterator it;
     for( it = sourceIds.begin(); it != sourceIds.end(); ++it ) {
       error = instSrcMgr.enableSource( *it );
       if ( error ) {
         cerr << error << endl;
+        exit( 1 );
       }
+      instSrcMgr.setAutoenable( *it, enableSource );
     }
+    cout << "Added Installation Sources:" << endl;
   }
 
   if ( showSources ) {
     instSrcMgr.getSources( sourceIds );
+    cout << "Installation Sources:" << endl;
   }
 
-  cout << "Installation Sources:" << endl;
   InstSrcManager::ISrcIdList::const_iterator it;
   for( it = sourceIds.begin(); it != sourceIds.end(); ++it ) {
     constInstSrcDescrPtr descr = (*it)->descr();
+    cout << ( descr->default_activate() ? "[x]" : "[ ]" );
+    cout << ( descr->default_refresh() ? "* " : "  " );
     cout << descr->content_label() << " (" << descr->url() << ")" << endl;
   }
 

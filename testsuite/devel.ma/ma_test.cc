@@ -343,6 +343,10 @@ int main( int argc, char * argv[] )
     }
 
   Y2PM::instSrcManager();
+  InstSrcManager::ISrcId nid = ISM.getSources().front();
+  INT << nid->descr()->content_relnotesurl() << endl;
+  DBG << *nid << endl;
+
   return 0;
 
   PMError err;
