@@ -28,8 +28,9 @@ make -C ../../src || exit 1
 make $PRG || exit 1
 
 export Y2SLOG_FILE=-
-export Y2SLOG_DEBUG=
-export Y2DEBUG=1
+#export Y2SLOG_DEBUG=
+#export Y2DEBUG=1
 # exec gdb ./$PRG
 #./$PRG "$@" 2> log
-./$PRG "$@" 2> $LPIPE
+#./$PRG "$@" 2> $LPIPE
+sudo ./$PRG "$@" 2>&1 | tee log
