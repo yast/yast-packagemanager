@@ -52,6 +52,7 @@ extern "C" {
 #include <y2pm/PMYouSettings.h>
 #include <y2pm/PMYouPatchInfo.h>
 #include <y2pm/PMYouProduct.h>
+#include <y2pm/librpmDb.h>
 
 #include <Y2PM.h>
 
@@ -376,6 +377,10 @@ PMError InstTarget::executeScript( const Pathname & scriptname )
     WAR << "Script " << scriptname << " aborted by user request" << endl;
     err = Error::E_user_abort;
   } else {
+
+    // Invalidate all outstanding database handles in case
+    // the database gets modified.
+    librpmDb::dbRelease( true );
 
     ExternalProgram prg( ( "/bin/bash >/dev/null 2>/dev/null " + scriptname.asString() ).c_str() );
 

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep  9 17:55:38 CEST 2005 - ma@suse.de
+
+- Allow kernel update tool to install packages while YOU is
+  running. (#116087)
+- 2.12.19
+
+-------------------------------------------------------------------
 Wed Sep  7 18:48:32 CEST 2005 - ma@suse.de
 
 - installation_sources: New option '-d' to allow adding installation
