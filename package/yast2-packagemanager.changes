@@ -3,6 +3,7 @@ Wed Sep  7 18:48:32 CEST 2005 - ma@suse.de
 
 - installation_sources: New option '-d' to allow adding installation
   sources, which are disabled per default. (#115315)
+- 2.12.18
 
 -------------------------------------------------------------------
 Tue Aug 30 09:47:03 CEST 2005 - ma@suse.de
