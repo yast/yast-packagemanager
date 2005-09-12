@@ -305,11 +305,24 @@ void go( std::list<PMPackagePtr> dellist_r ) {
 int main( int argc, char * argv[] )
 {
   set_log_filename( "-" );
-
-  if ( 1 ) {
-    //Y2PM::setNotRunningFromSystem();
+  Y2PM::packageManager();
+  Y2PM::selectionManager();
+  Y2PM::languageManager();
+  Y2PM::instSrcManager();
+  
+  string baseSelection( "Minimal+X11" );
+  
+  PMSelectablePtr bsel = SMGR[baseSelection];
+  if ( ! minx11 ) 
+    {
+      ERR << "NO Selection
+    }
+  
+  
+  if ( 0 ) {
+    Y2PM::setNotRunningFromSystem();
     Y2PM::setCacheToRamdisk( false );
-    //Y2PM::noAutoInstSrcManager();
+    Y2PM::noAutoInstSrcManager();
     Timecount _t("",false);
     _t.start( "Launch InstTarget" );
     Y2PM::instTargetInit("/Local/ma/FOO");

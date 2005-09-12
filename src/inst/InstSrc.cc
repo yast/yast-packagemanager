@@ -571,11 +571,18 @@ PMError InstSrc::_init_openCache( const Pathname & cachedir_r )
     return Error::E_bad_cache_descr;
   }
 
-  // cache_data_dir might exist. if, it must be a directory
+  // cache_data_dir might exist. if, it must be a directory.
+  // If running from system, a missing one is created.
   cpath( cache_data_dir() );
   if ( cpath.isExist() ) {
     if ( !cpath.isDir() ) {
       ERR << "data_dir is not a directory " << cpath << endl;
+      return Error::E_cache_dir_create;
+    }
+  } else if ( Y2PM::runningFromSystem() ) {
+    int res = PathInfo::assert_dir( cpath.path() );
+    if ( res ) {
+      ERR << "Unable to create data_dir " << cpath << " (errno " << res << ")" << endl;
       return Error::E_cache_dir_create;
     }
   }
