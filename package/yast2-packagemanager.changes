@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Sep 12 15:36:06 CEST 2005 - ma@suse.de
+
+- InstSrc: Recreate a missing cache dir when refreshing a source.
+  (#115531)
+- 2.12.20
+
+
+-------------------------------------------------------------------
 Fri Sep  9 17:55:38 CEST 2005 - ma@suse.de
 
 - Allow kernel update tool to install packages while YOU is
