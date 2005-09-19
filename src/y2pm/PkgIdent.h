@@ -88,20 +88,21 @@ class PkgIdent {
 //      Order to be used by associative std::container (set/map):
 //      Lexicographic by _name, _edition then _arch.
 //
-template<>
-inline bool std::less<PkgIdent>::operator()( const PkgIdent & lhs, const PkgIdent & rhs ) const
-{
-  int r = lhs.name()->compare( rhs.name() );
-  if ( r != 0 )
-    return( r < 0 );
-  r = lhs.version().compare( rhs.version() );
-  if ( r != 0 )
-    return( r < 0 );
-  r = lhs.release().compare( rhs.release() );
-  if ( r != 0 )
-    return( r < 0 );
-  return( lhs.arch()->compare( rhs.arch() ) < 0 );
-
+namespace std {
+  template<>
+    inline bool less<PkgIdent>::operator()( const PkgIdent & lhs, const PkgIdent & rhs ) const
+    {
+      int r = lhs.name()->compare( rhs.name() );
+      if ( r != 0 )
+        return( r < 0 );
+      r = lhs.version().compare( rhs.version() );
+      if ( r != 0 )
+        return( r < 0 );
+      r = lhs.release().compare( rhs.release() );
+      if ( r != 0 )
+        return( r < 0 );
+      return( lhs.arch()->compare( rhs.arch() ) < 0 );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////

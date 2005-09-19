@@ -328,25 +328,8 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  if ( 0 )
-    {
-      Y2PM::noAutoInstSrcManager();
-      //InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/YUM-9.3" );
-      InstSrcManager::ISrcId nid = newSrc( "dir:///Local/EXPORT/TEST" );
-      ISM.enableSource( nid );
-      if ( nid )
-        {
-          //dataDump( INT, PMGR["at"]->theObject() );
-        }
-
-      return 0;
-    }
-
+  Y2PM::instTargetInit("/");
   Y2PM::instSrcManager();
-  InstSrcManager::ISrcId nid = ISM.getSources().front();
-  INT << nid->descr()->content_relnotesurl() << endl;
-  DBG << *nid << endl;
-
   return 0;
 
   PMError err;

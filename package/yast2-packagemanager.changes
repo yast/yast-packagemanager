@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 19 14:21:02 CEST 2005 - ma@suse.de
+
+- Adjust template specializations to correct namespace.
+- 2.13.0
+
+-------------------------------------------------------------------
 Mon Sep 12 15:36:06 CEST 2005 - ma@suse.de
 
 - InstSrc: Recreate a missing cache dir when refreshing a source.

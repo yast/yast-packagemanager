@@ -118,12 +118,14 @@ class PkgSplit {
  * A matter of taste, as 'operator<' would do the same job. But I don't like it
  * in classes where it's meaning isn't obvious.
  **/
-template<>
-inline bool std::less<PkgSplit>::operator()(const PkgSplit & lhs, const PkgSplit & rhs ) const {
-  int d = lhs.ipkg().asString().compare( rhs.ipkg().asString() );
-  if ( d )
-    return( d < 0 );
-  return( lhs.file().asString() < rhs.file().asString() );
+namespace std {
+  template<>
+    inline bool less<PkgSplit>::operator()(const PkgSplit & lhs, const PkgSplit & rhs ) const {
+    int d = lhs.ipkg().asString().compare( rhs.ipkg().asString() );
+    if ( d )
+      return( d < 0 );
+    return( lhs.file().asString() < rhs.file().asString() );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////
