@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep 21 14:20:35 CEST 2005 - mir@suse.de
+
+- PMYouSettings::primaryProduct now skips products with noyou
+  attribute (bug #65573)
+- 2.13.1
+
+-------------------------------------------------------------------
 Mon Sep 19 14:21:02 CEST 2005 - ma@suse.de
 
 - Adjust template specializations to correct namespace.
