@@ -354,12 +354,16 @@ list<PMYouProductPtr> PMYouSettings::products() const
 
 PMYouProductPtr PMYouSettings::primaryProduct() const
 {
-  if ( _products.empty() ) {
+  std::list<PMYouProductPtr>::const_iterator iter=_products.begin();
+  while (iter != _products.end() && (*iter)->noYou())
+    ++iter;
+
+  if ( iter == _products.end() ) {
     ERR << "No known products." << endl;
     return 0;
   }
-
-  return *_products.begin();
+  else
+    return *iter;
 }
 
 void PMYouSettings::setCheckSignatures( bool check )
