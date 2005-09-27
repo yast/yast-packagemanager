@@ -190,6 +190,10 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	{
 	    ndescr->set_content_language (LangCode (value));
 	}
+	else if (tag == "SHORTLABEL")
+	{
+	    ndescr->set_content_shortlabel (value);
+	}
 	else if (tag == "LABEL")
 	{
 	    ndescr->set_content_label (value);
