@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Sep 27 14:54:41 CEST 2005 - ma@suse.de
+
+- Allow to specify an abbreviated short label in the content
+  file. The UI may use this to display installation sources in
+  lists of limited with. If short label is omitted the label
+  will be used.
+
+-------------------------------------------------------------------
 Wed Sep 21 14:20:35 CEST 2005 - mir@suse.de
 
 - PMYouSettings::primaryProduct now skips products with noyou

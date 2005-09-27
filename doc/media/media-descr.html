@@ -309,6 +309,13 @@ Default <tt>&lt;base&gt;</tt> architecture if no matching <tt>ARCH.&lt;base&gt;<
 </td></tr>
 <tr><td>M</td><td><tt>REQUIRES</tt></td><td>package name or tag which must be provided by the installed product.</td></tr>
 <tr><td>O</td><td><tt>LINGUAS</tt></td><td>ISO <i><tt>&lt;language&gt;</tt></i> or <i><tt>&lt;language&gt;_&lt;country&gt;</tt></i> code</td></tr>
+<tr><td>O</td><td><tt>SHORTLABEL</tt></td><td>UTF-8 encoded short label.<br>
+Default: Same as LABEL.<br>
+For the UI it's desirable to have an abbreviated label name which can be used
+in lists of limited with. Especially because the most interesting part of the
+labe might be the version number. But it's usg. at the end amd might get clipped.
+E.g. <tt>SLES-9</tt> instead of <tt>SUSE LINUX Enterprise Server version 9</tt>.
+</td></tr>
 <tr><td>O</td><td><tt>LABEL</tt></td><td>UTF-8 encoded label.<br>
 Default label if <tt>LINGUAS</tt> is omitted or no default language can
 be determined.</td></tr>

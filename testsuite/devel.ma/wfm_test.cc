@@ -305,59 +305,21 @@ void go( std::list<PMPackagePtr> dellist_r ) {
 int main( int argc, char * argv[] )
 {
   set_log_filename( "-" );
-  Y2PM::packageManager();
-  Y2PM::selectionManager();
-  Y2PM::languageManager();
-  Y2PM::instSrcManager();
-  
-  string baseSelection( "Minimal+X11" );
-  
-  PMSelectablePtr bsel = SMGR[baseSelection];
-  if ( ! minx11 ) 
-    {
-      ERR << "NO Selection
-    }
-  
-  
-  if ( 0 ) {
-    Y2PM::setNotRunningFromSystem();
-    Y2PM::setCacheToRamdisk( false );
-    Y2PM::noAutoInstSrcManager();
-    Timecount _t("",false);
-    _t.start( "Launch InstTarget" );
-    Y2PM::instTargetInit("/Local/ma/FOO");
-    _t.start( "Launch PMPackageManager" );
-    Y2PM::packageManager();
-    _t.start( "Launch PMSelectionManager" );
-    Y2PM::selectionManager();
-    _t.start( "Launch PMLanguageManager" );
-    Y2PM::languageManager();
-    _t.start( "Launch InstSrcManager" );
-    Y2PM::instSrcManager();
-    _t.stop();
-    INT << "Total Packages   " << PMGR.size() << endl;
-    INT << "Total Selections " << SMGR.size() << endl;
-    INT << "Total Languages  " << LMGR.size() << endl;
-  }
+  INT << "START" << endl;
 
-  TMGR.setBackupPath( "/Local/ma/FOO/BAK" );
-  TMGR.createPackageBackups( true );
+#define XX(s) DBG << '"' << #s << "\"\t-> " << CBSuggest( #s ) << endl;
 
-  ISM.enableDefaultSources();
+  XX(r);
+  XX(re);
+  XX(ret);
+  XX(retr);
+  XX(retry);
+  XX(R);
+  XX(RE);
+  XX(RET);
+  XX(RETR);
+  XX(RETRY);
 
-  SEC << SMGR["Kde"]->user_set_install() << endl;
-  SEC << SMGR["Kde-Desktop"]->user_set_install() << endl;
-  SEC << SMGR["Kde-Devel"]->user_set_install() << endl;
-  SEC << SMGR.activate() << endl;
-  for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin();
-        it != PMGR.end(); ++it )
-    {
-      (*it)->user_set_install();
-    }
-  SEC << doSolve( PMGR ) << endl;
-  doCommit();
-
-  SEC << "STOP" << endl;
   return 0;
 }
 
