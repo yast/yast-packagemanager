@@ -305,7 +305,7 @@ void go( std::list<PMPackagePtr> dellist_r ) {
 int main( int argc, char * argv[] )
 {
   y2error( "xxx" );
-  set_log_filename( "-" );
+  //set_log_filename( "-" );
 
   if ( 0 ) {
     //Y2PM::setNotRunningFromSystem();
@@ -328,7 +328,6 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  Y2PM::instTargetInit("/");
   Y2PM::instSrcManager();
   return 0;
 

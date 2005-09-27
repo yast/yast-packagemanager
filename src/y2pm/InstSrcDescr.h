@@ -162,6 +162,7 @@ class InstSrcDescr : public CountedRep {
 
     LangCode    _content_language;
     LinguasList _content_linguas;
+    std::string _content_shortlabel;
     std::string _content_label;
     LabelMap    _content_labelmap;
 
@@ -217,6 +218,7 @@ class InstSrcDescr : public CountedRep {
     const PkgRelation &  content_requires()    const { return _content_requires; }
     const LangCode &     content_language()    const { return _content_language; }
     const LinguasList &  content_linguas()     const { return _content_linguas; }
+    const std::string &  content_shortlabel()  const { return _content_shortlabel; }
     const std::string &  content_label()       const { return _content_label; }
     const LabelMap &     content_labelmap()    const { return _content_labelmap; }
     const std::string &  content_timezone()    const { return _content_timezone; }
@@ -241,6 +243,11 @@ class InstSrcDescr : public CountedRep {
      * Package data directory below _url
      **/
     Pathname datadir() const { return _product_dir + _content_datadir; }
+
+    /**
+     * Content shortlabel according to Y2PM::getPreferredLocale
+     **/
+    std::string shortlabel() const;
 
     /**
      * Content label according to Y2PM::getPreferredLocale
@@ -282,6 +289,7 @@ class InstSrcDescr : public CountedRep {
     void set_content_requires( const PkgRelation & val_r )    { _content_requires = val_r; }
     void set_content_language(const LangCode & val_r )        { _content_language = val_r; }
     void set_content_linguas( const LinguasList & val_r )     { _content_linguas = val_r; }
+    void set_content_shortlabel( const std::string & val_r )  { _content_shortlabel = val_r; }
     void set_content_label( const std::string & val_r )       { _content_label = val_r; }
     void set_content_labelmap( const LabelMap & val_r )       { _content_labelmap = val_r; }
     void set_content_timezone( const std::string & val_r )    { _content_timezone = val_r; }

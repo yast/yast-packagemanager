@@ -105,6 +105,19 @@ const std::string InstSrcDescr::content_relnotesurl() const
 ///////////////////////////////////////////////////////////////////
 //
 //
+//	METHOD NAME : InstSrcDescr::shortlabel
+//	METHOD TYPE : std::string
+//
+//	DESCRIPTION :
+//
+std::string InstSrcDescr::shortlabel() const
+{
+  return content_shortlabel().empty() ? label() : content_shortlabel();
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
 //	METHOD NAME : InstSrcDescr::label
 //	METHOD TYPE : std::string
 //
@@ -194,6 +207,7 @@ static const std::string RequiresTag	= "Requires";
 static const std::string DefBaseTag	= "DefaultBase";
 static const std::string LabelMapTag	= "LabelMap";
 static const std::string LinguasTag	= "Linguas";
+static const std::string ShortLabelTag	= "ShortLabel";
 static const std::string LabelTag	= "Label";
 static const std::string LangTag	= "Language";
 static const std::string TimeTag	= "Timezone";
@@ -288,6 +302,9 @@ PMError InstSrcDescr::writeStream( std::ostream & str ) const
     str << (*ling_pos) << endl;
   }
   str << "-" << LinguasTag << ":" << endl;
+
+  // content shortlabel
+  str << "=" << ShortLabelTag << ":" << _content_shortlabel << endl;
 
   // content label
   str << "=" << LabelTag << ":" << _content_label << endl;
@@ -400,7 +417,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
 	        ACTIVATE, REFRESH, RANK,
 		FORDELTAS,
 	        MEDIA, PRODUCT, DEFBASE, ARCH,
-		REQUIRES, LANGUAGE, LABEL, LABELMAP, LINGUAS, TIMEZONE, DESCRDIR, DATADIR,
+		REQUIRES, LANGUAGE, SHORTLABEL, LABEL, LABELMAP, LINGUAS, TIMEZONE, DESCRDIR, DATADIR,
 		FLAGS, RELNOTESURL,
 		YOUURL, YOUTYPE, YOUPATH };
 
@@ -419,6 +436,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     tagset.addTag (ArchTag,		ARCH,	    TaggedFile::MULTI);		// _content_archmap
     tagset.addTag (RequiresTag, 	REQUIRES,   TaggedFile::SINGLE);	// _content_requires
     tagset.addTag (LangTag,		LANGUAGE,   TaggedFile::SINGLE);	// _content_language
+    tagset.addTag (ShortLabelTag,	SHORTLABEL, TaggedFile::SINGLE);	// _content_shortlabel
     tagset.addTag (LabelTag,		LABEL,	    TaggedFile::SINGLE);	// _content_label
     tagset.addTag (LabelMapTag,		LABELMAP,   TaggedFile::MULTI);	        // _content_labelmap
     tagset.addTag (LinguasTag,		LINGUAS,    TaggedFile::MULTI);		// _content_linguas
@@ -549,6 +567,7 @@ PMError InstSrcDescr::readStream( InstSrcDescrPtr & ndescr_r, std::istream & des
     ndescr->set_content_archmap( arch );
 
     ndescr->set_content_requires( PkgRelation::fromString( GET_STRING(REQUIRES) ) );
+    ndescr->set_content_shortlabel(GET_STRING(SHORTLABEL));
     ndescr->set_content_label(GET_STRING(LABEL));
 
     GET_POS(LABELMAP).retrieveData (descrstream, multi);
