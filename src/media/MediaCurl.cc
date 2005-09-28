@@ -225,6 +225,8 @@ PMError MediaCurl::attachTo (bool next)
 	  _proxy = cfg.readEntry( "FTP_PROXY" );
 	} else if ( _url.protocol() == Url::http ) {
 	  _proxy = cfg.readEntry( "HTTP_PROXY" );
+	} else if ( _url.protocol() == Url::https ) {
+	  _proxy = cfg.readEntry( "HTTPS_PROXY" );
 	}
       }
     }

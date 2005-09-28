@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 28 14:55:21 CEST 2005 - mir@suse.de
+
+- bugfix: use HTTPS_PROXY setting for https media (in MediaCurl.cc)
+  (Bug #95647)
+
+-------------------------------------------------------------------
 Tue Sep 27 14:54:41 CEST 2005 - ma@suse.de
 
 - Allow to specify an abbreviated 'ShortLabel' in the content
