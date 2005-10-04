@@ -328,20 +328,17 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
-  Y2PM::instSrcManager();
-  return 0;
-
   PMError err;
+  Y2PM::instTargetInit("/");
   Y2PM::instSrcManager();
-  dumpPkgWhatIf( SEC, true );
 
-  PMGR["glibc-devel"]->user_set_install();
-  doSolve( PMGR );
-  dumpPkgWhatIf( SEC, true );
-
-  PMGR["glibc"]->setUserCandidate( *++PMGR["glibc"]->av_rbegin() );
-  doSolve( PMGR );
-  dumpPkgWhatIf( SEC, true );
+  INT << PMGR["OpenOffice_org-zh-TW"] << endl;
+  if ( PMGR["OpenOffice_org-zh-TW"] )
+    {
+      PMGR["OpenOffice_org-zh-TW"]->user_set_install();
+      dumpPkgWhatIf( SEC );
+      doCommit();
+    }
 
   SEC << "STOP" << endl;
   return 0;

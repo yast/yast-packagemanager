@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Oct  4 15:16:26 CEST 2005 - ma@suse.de
+
+- Immediately abort download, if progress callback returns
+  FALSE. (#115534)
+- 2.13.2
+
+-------------------------------------------------------------------
 Wed Sep 28 14:55:21 CEST 2005 - mir@suse.de
 
 - bugfix: use HTTPS_PROXY setting for https media (in MediaCurl.cc)

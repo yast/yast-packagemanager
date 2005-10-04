@@ -597,7 +597,8 @@ int MediaCurl::progressCallback( void *clientp, double dltotal, double dlnow,
   DownloadProgressReport::Send * reportP = reinterpret_cast<DownloadProgressReport::Send*>( clientp );
   if ( reportP ) {
     ProgressData pd( 0, int(dltotal), int(dlnow) );
-    (*reportP)->progress( pd );
+    if ( (*reportP)->progress( pd ) == false )
+      return 1; // abort requested by user
   }
 
 #warning YOU callbacks still active
