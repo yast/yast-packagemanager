@@ -36,7 +36,8 @@ namespace MediaCallbacks {
 
   void DownloadProgressCallback::start( const Url & url_r, const Pathname & localpath_r ) {
   }
-  void DownloadProgressCallback::progress( const ProgressData & prg ) {
+  bool DownloadProgressCallback::progress( const ProgressData & prg ) {
+    return true; // continue download
   }
   void DownloadProgressCallback::stop( PMError error ) {
   }

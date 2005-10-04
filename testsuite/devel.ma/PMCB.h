@@ -201,8 +201,9 @@ struct DownloadProgressCallback : public MediaCallbacks::DownloadProgressCallbac
   virtual void start( const Url & url_r, const Pathname & localpath_r ) {
     MIL << XXX << __PRETTY_FUNCTION__ << YYY << url_r << YYY << localpath_r << YYY << endl;
   }
-  virtual void progress( const ProgressData & prg ) {
+  virtual bool progress( const ProgressData & prg ) {
     MIL << XXX << __PRETTY_FUNCTION__ << YYY << prg << YYY << endl;
+    return true;
   }
   virtual void stop( PMError error ) {
     MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << endl;

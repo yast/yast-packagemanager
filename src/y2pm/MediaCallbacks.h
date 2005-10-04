@@ -36,7 +36,7 @@ namespace MediaCallbacks {
   ///////////////////////////////////////////////////////////////////
   struct DownloadProgressCallback : public RedirectCallback<DownloadProgressCallback> {
     virtual void start( const Url & url_r, const Pathname & localpath_r ) = 0;
-    virtual void progress( const ProgressData & prg ) = 0;
+    virtual bool progress( const ProgressData & prg ) = 0;
     virtual void stop( PMError error ) = 0;
   };
 
@@ -44,8 +44,8 @@ namespace MediaCallbacks {
     virtual void start( const Url & url_r, const Pathname & localpath_r ) {
       DownloadProgressCallback::start( url_r, localpath_r );
     }
-    virtual void progress( const ProgressData & prg ) {
-      DownloadProgressCallback::progress( prg );
+    virtual bool progress( const ProgressData & prg ) {
+      return DownloadProgressCallback::progress( prg );
     }
     virtual void stop( PMError error ) {
       DownloadProgressCallback::stop( error );
