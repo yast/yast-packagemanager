@@ -429,6 +429,9 @@ class PkgDuMaster {
     friend std::ostream & operator<<( std::ostream & str, const std::set<MountPoint> & obj );
 };
 
+extern std::ostream & operator<<( std::ostream & str, const PkgDuMaster & obj );
+extern std::ostream & operator<<( std::ostream & str, const std::set<PkgDuMaster::MountPoint> & obj );
+
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////

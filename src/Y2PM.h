@@ -199,12 +199,12 @@ class Y2PM {
     /**
      * Triggered if preferred locale value actually changed.
      **/
-    static PMError Y2PM::preferredLocaleChanged();
+    static PMError preferredLocaleChanged();
     /**
      * Triggered if requested locale value actually changed.
      **/
-    static PMError Y2PM::requestedLocalesChanged( const LocaleSet & addLocales_r,
-						  const LocaleSet & delLocales_r );
+    static PMError requestedLocalesChanged( const LocaleSet & addLocales_r,
+                                            const LocaleSet & delLocales_r );
 
   public:
 
