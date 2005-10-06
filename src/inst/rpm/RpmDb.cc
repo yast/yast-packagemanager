@@ -805,6 +805,7 @@ PMError RpmDb::importPubkey( const Pathname & pubkey_r )
 
   RpmArgVec opts;
   opts.push_back ( "--import" );
+  opts.push_back ( "--" );
   opts.push_back ( pubkey_r.asString().c_str() );
 
   // don't call modifyDatabase because it would remove the old
@@ -1205,7 +1206,7 @@ RpmDb::checkPackage (const Pathname & packagePath, string version, string md5 )
     std::string path = packagePath.asString();
     // checking --checksig
     const char *const argv[] = {
-	"rpm", "--checksig", path.c_str(), 0
+	"rpm", "--checksig", "--", path.c_str(), 0
     };
 
     exit_code = -1;
@@ -1321,6 +1322,7 @@ RpmDb::queryChangedFiles(FileList & fileList, const string& packageName)
     opts.push_back ("--nodeps");
     opts.push_back ("--noscripts");
     opts.push_back ("--nomd5");
+    opts.push_back ("--");
     opts.push_back (packageName.c_str());
 
     run_rpm (opts, ExternalProgram::Discard_Stderr);
@@ -1609,6 +1611,7 @@ PMError RpmDb::installPackage( const Pathname & filename, unsigned flags )
     if(flags & RPMINST_JUSTDB)
 	opts.push_back ("--justdb");
 
+    opts.push_back("--");
     opts.push_back (filename.asString().c_str());
 
     modifyDatabase(); // BEFORE run_rpm
@@ -1729,6 +1732,7 @@ PMError RpmDb::removePackage( const string & name_r, unsigned flags )
       WAR << "IGNORE OPTION: 'rpm -e' does not support '--force'" << endl;
     }
 
+    opts.push_back("--");
     opts.push_back(name_r.c_str());
 
     modifyDatabase(); // BEFORE run_rpm

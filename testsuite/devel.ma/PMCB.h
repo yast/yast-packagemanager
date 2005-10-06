@@ -54,7 +54,7 @@ struct ConvertDbReceive : public RpmDbCallbacks::ConvertDbCallback {
   virtual void progress( const ProgressData & prg,
 			 unsigned failed, unsigned ignored, unsigned alreadyInV4 ) {
     _pc = prg;
-    if ( _pc.updateIfNewPercent( 5 )
+    if ( _pc.updateIfNewPercent( 20 )
 	 || failed != _lastFailed
 	 || ignored != _lastIgnored
 	 || alreadyInV4 != _lastAlreadyInV4 ) {
@@ -102,7 +102,7 @@ struct RebuildDbCallback : public RpmDbCallbacks::RebuildDbCallback {
   }
   virtual void progress( const ProgressData & prg ) {
     _pc = prg;
-    if ( _pc.updateIfNewPercent() ) {
+    if ( _pc.updateIfNewPercent(20) ) {
       MIL << XXX << __PRETTY_FUNCTION__ << YYY << _pc << YYY << endl;
     }
   }
@@ -134,7 +134,7 @@ struct ScanDbCallback : public RpmDbCallbacks::ScanDbCallback {
   }
   virtual void progress( const ProgressData & prg ) {
     _pc = prg;
-    if ( 1||_pc.updateIfNewPercent() ) {
+    if ( _pc.updateIfNewPercent(20) ) {
       MIL << XXX << __PRETTY_FUNCTION__ << YYY << _pc << YYY << endl;
     }
   }
@@ -196,14 +196,16 @@ RemovePkgCallback removePkgCallback;
 // Reporting progress of download
 ///////////////////////////////////////////////////////////////////
 struct DownloadProgressCallback : public MediaCallbacks::DownloadProgressCallback {
+  bool _continue;
   virtual void reportbegin() { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
   virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
   virtual void start( const Url & url_r, const Pathname & localpath_r ) {
     MIL << XXX << __PRETTY_FUNCTION__ << YYY << url_r << YYY << localpath_r << YYY << endl;
+    _continue = (localpath_r.basename() != "OpenOffice_org-zh-TW.rpm");
   }
   virtual bool progress( const ProgressData & prg ) {
     MIL << XXX << __PRETTY_FUNCTION__ << YYY << prg << YYY << endl;
-    return true;
+    return _continue;
   }
   virtual void stop( PMError error ) {
     MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << endl;
@@ -290,6 +292,69 @@ struct SourceRefreshCallback  : public InstSrcManagerCallbacks::SourceRefreshCal
 };
 
 SourceRefreshCallback sourceRefreshCallback;
+
+///////////////////////////////////////////////////////////////////
+// Reporting commitProvide
+///////////////////////////////////////////////////////////////////
+#undef Y2LOG
+#define Y2LOG "CommitProvide"
+struct CommitProvideCallback  : public Y2PMCallbacks::CommitProvideCallback  {
+  virtual void reportbegin() { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+
+  virtual void start( constPMPackagePtr pkg, bool sourcepkg ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << pkg << YYY << sourcepkg << YYY << endl;
+  }
+  virtual CBSuggest attempt( unsigned cnt ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << cnt << YYY << endl;
+    return CBSuggest::PROCEED;
+  }
+  virtual CBSuggest result( PMError error, const Pathname & localpath ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << localpath << YYY << endl;
+    return CBSuggest::PROCEED;
+  }
+  virtual void stop( PMError error, const Pathname & localpath ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << localpath << YYY << endl;
+  }
+
+  CommitProvideCallback() {
+    Y2PMCallbacks::commitProvideReport.redirectTo( this );
+  }
+};
+
+CommitProvideCallback commitProvideCallback;
+
+
+///////////////////////////////////////////////////////////////////
+// Reporting commitInstall
+///////////////////////////////////////////////////////////////////
+#undef Y2LOG
+#define Y2LOG "CommitInstall"
+struct CommitInstallCallback  : public Y2PMCallbacks::CommitInstallCallback  {
+  virtual void reportbegin() { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+  virtual void reportend()   { SEC << XXX << __PRETTY_FUNCTION__ << YYY << endl; }
+
+  virtual void start( constPMPackagePtr pkg, bool sourcepkg, const Pathname & path ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << pkg << YYY << sourcepkg << YYY << path << YYY << endl;
+  }
+  virtual CBSuggest attempt( unsigned cnt ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << cnt << YYY << endl;
+    return CBSuggest::PROCEED;
+  }
+  virtual CBSuggest result( PMError error ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << endl;
+    return CBSuggest::PROCEED;
+  }
+  virtual void stop( PMError error ) {
+    MIL << XXX << __PRETTY_FUNCTION__ << YYY << error << YYY << endl;
+  }
+
+  CommitInstallCallback() {
+    Y2PMCallbacks::commitInstallReport.redirectTo( this );
+  }
+};
+
+CommitInstallCallback commitInstallCallback;
 
 #undef Y2LOG
 #define Y2LOG "DEFINE_Y2LOG"

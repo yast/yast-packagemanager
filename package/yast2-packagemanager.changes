@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct  6 12:51:32 CEST 2005 - ma@suse.de
+
+- Protect calls to rpm against malformed pathname arguments. (#116764)
+- 2.13.3
+
+-------------------------------------------------------------------
 Tue Oct  4 15:16:26 CEST 2005 - ma@suse.de
 
 - Immediately abort download, if progress callback returns
