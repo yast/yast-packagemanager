@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct  6 17:51:23 CEST 2005 - ma@suse.de
+
+- Build with GCC 4.1
+- 2.13.4
+
+-------------------------------------------------------------------
 Thu Oct  6 12:51:32 CEST 2005 - ma@suse.de
 
 - Protect calls to rpm against malformed pathname arguments. (#116764)

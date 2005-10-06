@@ -187,7 +187,7 @@ bad, PkgDep::ErrorResultList& obsolete)
 {
     bool deletedone = false;
     for(PkgDep::ResultList::iterator it = good.begin();
-	    it != good.end(); (deletedone?0:++it))
+	    it != good.end(); (deletedone?it:++it))
     {
 	deletedone = false;
 	if(it->solvable == NULL)

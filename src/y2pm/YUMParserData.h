@@ -30,6 +30,14 @@ Purpose: Declares the various YUMData classes, which are rather dumb
 #include <list>
 #include <iostream>
 
+/** Forward declaration of pointer classes in namespace YUM. */
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMRepomdData );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPrimaryData );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMGroupData );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMFileListData );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMOtherData );
+//DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPatchData );
+
 namespace YUM {
 
   /**
@@ -145,7 +153,7 @@ namespace YUM {
    **/
   class YUMRepomdData : public Rep {
     REP_BODY(YUMRepomdData);
-    
+
   public:
     YUMRepomdData();
     std::string type;
@@ -157,19 +165,16 @@ namespace YUM {
     std::string openChecksum;
   };
 
-  DEFINE_BASE_POINTER(YUMRepomdData);
-
-
   /**
    * @short Describes a package in a YUM repository
    **/
   class YUMPrimaryData : public Rep {
     REP_BODY(YUMPrimaryData);
-    
+
   public:
-    
+
     YUMPrimaryData();
-    
+
     std::string type;
     std::string name;
     std::string arch;
@@ -201,7 +206,7 @@ namespace YUM {
     std::list<YUMDependency> obsoletes;
     std::list<YUMDependency> requires;
     std::list<FileData> files;
-    
+
     // SuSE specific data
     std::list<std::string> authors;
     std::list<std::string> keywords;
@@ -211,18 +216,15 @@ namespace YUM {
     bool installOnly;
   };
 
-  DEFINE_BASE_POINTER(YUMPrimaryData);
-
-
   /**
   * @short Describes the groups in a YUM repository
   **/
   class YUMGroupData : public Rep
   {
     REP_BODY(YUMGroupData);
-    
+
   public:
-    
+
     YUMGroupData();
     std::string groupId;
     std::list<MultiLang> name;
@@ -232,8 +234,6 @@ namespace YUM {
     std::list<MetaPkg> grouplist;
     std::list<PackageReq> packageList;
   };
-
-  DEFINE_BASE_POINTER(YUMGroupData);
 
   /**
    * @short Contains the file list for a YUM package.
@@ -254,8 +254,6 @@ namespace YUM {
     std::list<FileData> files;
   };
 
-  DEFINE_BASE_POINTER(YUMFileListData);
-
   /**
   * @short Data from other.mxl, i.e., changelogs
   **/
@@ -271,8 +269,6 @@ namespace YUM {
     std::string rel;
     std::list<ChangelogEntry> changelog;
   };
-
-  DEFINE_BASE_POINTER(YUMOtherData);
 
 /* ** YUMPatchData not yet finalized **
 
@@ -299,7 +295,6 @@ namespace YUM {
     bool packageManager;
   };
 
-  DEFINE_BASE_POINTER(YUMPatchData);
 */
 
 } /* end of namespace YUM */

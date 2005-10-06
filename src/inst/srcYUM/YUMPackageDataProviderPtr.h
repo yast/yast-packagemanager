@@ -23,21 +23,15 @@
 #include <y2pm/PMPackageDataProviderPtr.h>
 
 ///////////////////////////////////////////////////////////////////
-namespace YUM
-{ /////////////////////////////////////////////////////////////////
-
-  ///////////////////////////////////////////////////////////////////
-  //
-  //	CLASS NAME : PackageDataProviderPtr
-  //	CLASS NAME : constPackageDataProviderPtr
-  /**
-   *
-   **/
-  DEFINE_DERIVED_POINTER(PackageDataProvider, PMPackageDataProvider );
-
-  /////////////////////////////////////////////////////////////////
-} // namespace YUM
+//
+//	CLASS NAME : YUM::PackageDataProviderPtr
+//	CLASS NAME : YUM::constPackageDataProviderPtr
+/**
+ *
+ **/
+DEFINE_DERIVED_POINTER_IN_NAMESPACE( YUM, PackageDataProvider, PMPackageDataProvider );
 ///////////////////////////////////////////////////////////////////
+
 
 #endif // YUMPackageDataProviderPtr_h
 
