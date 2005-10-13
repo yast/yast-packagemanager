@@ -498,6 +498,17 @@ PMError InstSrc::refreshSource( bool force_r )
     {
       disableSource();
     }
+  else if ( isRemote() )
+    {
+      // cleanup below media_dir to get rid of previously
+      // downloaded stuff.
+      MIL << "CLEAN old cache_media_dir" << endl;
+      PathInfo mediadir( cache_media_dir(), PathInfo::LSTAT );
+      if ( mediadir.isDir() ) {
+        PathInfo::clean_dir( mediadir.path() );
+      }
+    }
+
 
   PathInfo::erase( cache_data_dir() );
   PathInfo::rename( nsrc->cache_data_dir(), cache_data_dir() );

@@ -22,11 +22,18 @@ if ! fuser $LPIPE >/dev/null; then
         ~ma/bin/sy2l.tcl $LPIPE &
 fi
 
-make -C ../../src || exit 1
+if ps axl | grep -q '[/]usr/sbin/iceczc'; then
+	MAKE=make
+else
+	MAKE="make -j 15"
+fi
+
+
+$MAKE -C ../../src || exit 1
 #if [ $PRG == wfm_test.bin ]; then
 #	make -C /Local/ma/yast2/current/source/core/wfm/src || exit 1
 #fi
-make $PRG || exit 1
+$MAKE $PRG || exit 1
 
 export Y2SLOG_FILE=-
 export Y2SLOG_DEBUG=
