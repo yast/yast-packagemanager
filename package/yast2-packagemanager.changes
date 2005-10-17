@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 14 11:58:44 CEST 2005 - ma@suse.de
+
+- Fixed sometimes incomplete refresh installation sources via ftp/http
+  (#121925)
+- 2.12.21
+
+-------------------------------------------------------------------
 Mon Sep 12 15:36:06 CEST 2005 - ma@suse.de
 
 - InstSrc: Recreate a missing cache dir when refreshing a source.
