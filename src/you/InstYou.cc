@@ -58,6 +58,7 @@
 
 #include <y2pm/InstYou.h>
 
+// #define Y2_UPDATE_SCRIPT_ARGUMENTS_FILE "/var/adm/YaST/you_update_arguments"
 using namespace std;
 
 InstYou::Callbacks *InstYou::_callbacks = 0;
@@ -1058,6 +1059,7 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
   if ( error ) return error;
 
   list<PMPackagePtr> packages = patch->packages();
+  list<string> updateScriptArguments;
 
   int progressTotal = packages.size() + 2; // number of packages plus pre and post script
   int progressCurrent = 0;
@@ -1101,6 +1103,8 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
     D__ << "INSTALL PKG " << fileName << endl;
     if ( _settings->dryRun() ) {
       cout << "INSTALL: " << fileName << endl;
+    } else if (! patch->updateScript().empty()) {
+      updateScriptArguments.push_back(fileName.asString());
     } else {
 #if 0 // for keepOriginal
       if ( (*itPkg)->keepOriginal() ) {
@@ -1120,6 +1124,12 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
         return error;
       }
     }
+  }
+
+  if ( (! patch->updateScript().empty()) 
+       && ! _settings->dryRun() ) {
+    error = executeScript( patch->updateScript(), patch->product(), updateScriptArguments );
+    if (error) return error;
   }
 
   error = patchProgress( 99 );
@@ -1150,6 +1160,12 @@ PMError InstYou::installPatch( const PMYouPatchPtr &patch )
 PMError InstYou::executeScript( const string &script,
                                 const PMYouProductPtr &product )
 {
+  return executeScript(script, product, std::list<std::string>());
+}
+
+PMError InstYou::executeScript( const std::string & script, const PMYouProductPtr & product, 
+                       const std::list<std::string> & arguments )
+{
   if ( script.empty() ) return PMError();
 
   Pathname scriptPath = product->localScriptPath( script );
@@ -1163,9 +1179,26 @@ PMError InstYou::executeScript( const string &script,
     }
 
     D__ << "Script extension: " << extension << endl;
+    for (list<string>::const_iterator it = arguments.begin();
+         it != arguments.end();
+         ++ it) {
+      D__ << "Script argument: " << *it << endl;
+    }
 
     PMError error;
     if ( extension == "ycp" ) {
+      ofstream argFile(Y2_UPDATE_SCRIPT_ARGUMENTS_FILE);
+      if ( argFile.fail() ) {
+        ERR << "Unable to save '" << Y2_UPDATE_SCRIPT_ARGUMENTS_FILE << "'" << endl;
+      }
+
+      for (list<string>::const_iterator it = arguments.begin();
+           it != arguments.end();
+           ++ it) {
+        argFile << *it << endl;
+      }
+      argFile.close();
+        
       if ( !_callbacks ) return PMError( YouError::E_callback_missing );
 
       if ( !_callbacks->executeYcpScript( scriptPath.asString() ) ) {
@@ -1182,7 +1215,6 @@ PMError InstYou::executeScript( const string &script,
       }
     }
   }
-
   return PMError();
 }
 

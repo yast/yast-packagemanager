@@ -35,6 +35,7 @@ YOUPatchTagSet::YOUPatchTagSet()
   addTag( "UpdateOnlyInstalled", UPDATEONLYINSTALLED, TaggedFile::SINGLE );
   addTag( "Packages",            PACKAGES,            TaggedFile::MULTIOLD );
   addTag( "Prescript",           PRESCRIPT,           TaggedFile::SINGLE );
+  addTag( "UpdateScript",        UPDATESCRIPT,        TaggedFile::SINGLE );
   addTag( "Postscript",          POSTSCRIPT,          TaggedFile::SINGLE );
   addTag( "Files",               FILES,               TaggedFile::MULTIOLD );
   addTag( "UpdateOnlyNew",       UPDATEONLYNEW,       TaggedFile::SINGLE );

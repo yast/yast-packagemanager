@@ -40,6 +40,7 @@ extern "C" {
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 #include <y2util/Y2SLog.h>
 
@@ -367,6 +368,11 @@ PMError InstTarget::installPatch( const Pathname &filename )
 
 PMError InstTarget::executeScript( const Pathname & scriptname )
 {
+  return executeScript(scriptname, std::list<std::string>());
+}
+
+PMError InstTarget::executeScript( const Pathname &scriptname, const std::list<std::string> arguments )
+{
   ScriptExecReport::Send report( scriptExecReport );
   report->start( scriptname );
 
@@ -382,7 +388,16 @@ PMError InstTarget::executeScript( const Pathname & scriptname )
     // the database gets modified.
     librpmDb::dbRelease( true );
 
-    ExternalProgram prg( ( "/bin/bash >/dev/null 2>/dev/null " + scriptname.asString() ).c_str() );
+    ostringstream cmdStream;
+    cmdStream << "/bin/bash >/dev/null 2>/dev/null " 
+              << scriptname.asString();
+    for (list<string>::const_iterator it = arguments.begin();
+         it != arguments.end();
+         ++ it) {
+      cmdStream << " '" << *it << "'";
+    }
+
+    ExternalProgram prg( cmdStream.str().c_str() );
 
     while( prg.running() ) {
       usleep( 500000 );

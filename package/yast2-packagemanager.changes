@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct 20 18:57:37 CEST 2005 - mir@suse.de
+
+- Added capability for additional update scripts in patches
+  (#116935)
+- 2.13.6
+
+-------------------------------------------------------------------
 Thu Oct 13 17:39:32 CEST 2005 - ma@suse.de
 
 - Fixed sometimes incomplete refresh installation sources via ftp/http
