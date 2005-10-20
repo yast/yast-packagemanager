@@ -304,6 +304,8 @@ class InstYou {
     PMError retrieveDelta( const std::string& name, const PMYouProductPtr& prod, const std::string& md5sum);
 
     PMError executeScript( const std::string &, const PMYouProductPtr & );
+    PMError executeScript( const std::string & script, const PMYouProductPtr & product, 
+                           const std::list<std::string> & arguments );
 
     /**
       Check, if patch has only packages which are at least as new as the

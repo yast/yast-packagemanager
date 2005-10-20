@@ -41,6 +41,27 @@ using namespace std;
 
 IMPL_DERIVED_POINTER( PMYouPatch, PMSolvable );
 
+/* this is for Bugzilla #116935, introduction of patch scripts
+   updateScriptMap will later be replaced by an additional attribute
+   for PMYouPatch. */
+namespace {
+  map<const PMYouPatch *,string> updateScriptMap;
+}
+
+void PMYouPatch::setUpdateScript( const std::string &updateScript ) 
+{ 
+  updateScriptMap[this] = updateScript;
+}
+
+std::string PMYouPatch::updateScript() const 
+{ 
+  if (updateScriptMap.count(this)!=0)
+    return updateScriptMap[this];
+  else
+    return string();
+}
+
+
 ///////////////////////////////////////////////////////////////////
 //
 //
@@ -69,6 +90,7 @@ PMYouPatch::PMYouPatch( const PkgName &    name_r,
 //
 PMYouPatch::~PMYouPatch()
 {
+  updateScriptMap.erase(this);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -90,6 +112,7 @@ ostream & PMYouPatch::dumpOn( ostream & str ) const
   str << "PostInformation:" << endl << _postInformation << endl;
   str << "UpdateOnlyInstalled:" << ( _updateOnlyInstalled ? "true" : "false" ) << endl;
   str << "Prescript: " << _preScript << endl;
+  str << "UpdateScript: " << updateScript() << endl;
   str << "Postscript: " << _postScript << endl;
 
   return str;
@@ -227,3 +250,5 @@ bool PMYouPatch::isSelected() const
     return false;
   }
 }
+
+  

@@ -2,7 +2,7 @@
 # Makefile.am for packagemanager/src/pkg
 #
 
-AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -Wall
+AM_CPPFLAGS = -DY2LOG=\"packagemanager\" -DY2_UPDATE_SCRIPT_ARGUMENTS_FILE=\"/var/adm/YaST/you_update_arguments\" -Wall
 
 # first look into source tree, then into $(includedir)
 INCLUDES = -I$(top_srcdir)/src -I$(includedir)

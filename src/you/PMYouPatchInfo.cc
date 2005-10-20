@@ -432,6 +432,7 @@ PMError PMYouPatchInfo::readFile( const Pathname &path, const string &fileName,
     p->setPreInformation( tagValueLocale( YOUPatchTagSet::PREINFORMATION, patchstream ) );
     p->setPostInformation( tagValueLocale( YOUPatchTagSet::POSTINFORMATION, patchstream ) );
     p->setPreScript( tagValue( YOUPatchTagSet::PRESCRIPT, patchstream ) );
+    p->setUpdateScript( tagValue( YOUPatchTagSet::UPDATESCRIPT, patchstream ) );
     p->setPostScript( tagValue( YOUPatchTagSet::POSTSCRIPT, patchstream ) );
 
     value = tagValue( YOUPatchTagSet::UPDATEONLYINSTALLED, patchstream );

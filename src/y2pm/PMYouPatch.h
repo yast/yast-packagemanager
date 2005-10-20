@@ -156,6 +156,15 @@ class PMYouPatch : public PMObject
     std::string preScript() const { return _preScript; }
 
     /**
+     * Set name of script which is executed instead of installation of patch.
+     */
+    void setUpdateScript( const std::string &updateScript );
+    /**
+     * Return name of script which is executed instead of installation of patch.
+     */
+      std::string updateScript() const;
+
+    /**
      * Set name of script which is executed after installation of patch.
      */
     void setPostScript( const std::string &postScript ) { _postScript = postScript; }
