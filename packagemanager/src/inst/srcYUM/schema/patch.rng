@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar ns="http://novell.com/package/metadata/suse/patch"
+         xmlns="http://relaxng.org/ns/structure/1.0"
+         datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <include href="primary.rng">
+    <start>
+      <ref name="element-patch"/>
+    </start>
+    <!-- patches use localized summary and description fields -->
+    <define name="element-summary">
+      <oneOrMore>
+        <element name="summary">
+          <ref name="localized-string"/>
+        </element>
+      </oneOrMore>
+    </define>
+    <define name="element-description">
+      <oneOrMore>
+        <element name="description">
+          <ref name="localized-string"/>
+        </element>
+      </oneOrMore>
+    </define>
+  </include>
+  <define name="element-patch">
+    <element name="patch">
+      <ref name="patch"/>
+    </element>
+  </define>
+  <define name="localized-string">
+    <attribute name="lang"/>
+    <text/>
+  </define>
+  <define name="patch">
+    <attribute name="patchid">
+      <text/>
+    </attribute>
+    <attribute name="timestamp">
+      <data type="nonNegativeInteger"/>
+    </attribute>
+    <ref name="element-name"/>
+    <ref name="element-summary"/>
+    <ref name="element-description"/>
+    <ref name="element-version"/>
+    <ref name="dependency-block"/>
+    <ref name="element-category"/>
+    <optional>
+      <element name="reboot_needed">
+        <empty/>
+      </element>
+    </optional>
+    <optional>
+      <element name="package_manager">
+        <empty/>
+      </element>
+    </optional>
+    <element name="atoms">
+      <oneOrMore>
+        <ref name="element-package"/>
+      </oneOrMore>
+      <oneOrMore>
+        <ref name="element-script"/>
+      </oneOrMore>
+      <oneOrMore>
+        <ref name="element-message"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="dependency-block">
+    <!-- shortcut since all atoms have the same dependency section -->
+    <ref name="element-provides"/>
+    <optional>
+      <ref name="element-conflicts"/>
+    </optional>
+    <optional>
+      <ref name="element-obsoletes"/>
+    </optional>
+    <optional>
+      <ref name="element-freshen"/>
+    </optional>
+    <ref name="element-requires"/>
+  </define>
+  <define name="element-freshen">
+    <element name="freshen" ns="http://novell.com/package/metadata/suse/common">
+      <ref name="freshen"/>
+    </element>
+  </define>
+  <define name="freshen">
+    <oneOrMore>
+      <element name="entry">
+        <ref name="attribute-name"/>
+        <optional>
+          <attribute name="flags">
+            <choice>
+              <value>EQ</value>
+              <value>LE</value>
+              <value>GE</value>
+              <value>LT</value>
+              <value>GT</value>
+            </choice>
+          </attribute>
+          <ref name="shared-entry-attributes"/>
+        </optional>
+        <empty/>
+      </element>
+    </oneOrMore>
+  </define>
+  <define name="element-category">
+    <element name="category">
+      <choice>
+        <value>security</value>
+        <value>recommended</value>
+        <value>bonus</value>
+        <value>beta</value>
+      </choice>
+    </element>
+  </define>
+  <define name="element-script">
+    <element name="script">
+      <element name="do">
+        <data type="string"/>
+      </element>
+      <element name="undo">
+        <data type="string"/>
+      </element>
+      <ref name="dependency-block"/>
+    </element>
+  </define>
+  <define name="element-message">
+    <element name="message">
+      <attribute name="type">
+        <choice>
+          <value>OK</value>
+          <value>YesNo</value>
+        </choice>
+      </attribute>
+      <element name="text">
+        <data type="string"/>
+      </element>
+      <ref name="dependency-block"/>
+    </element>
+  </define>
+</grammar>

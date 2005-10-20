@@ -1,0 +1,9 @@
+--- Test 1
+
+Install: shadow,
+
+Name: shadow
+Edition: 1.1-1
+Is-Upgrade-From: 1.0-1
+Inconsistent: shadow-1.0-1 requires libsomething.so.0
+

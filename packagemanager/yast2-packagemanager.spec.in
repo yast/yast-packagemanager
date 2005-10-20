@@ -1,0 +1,97 @@
+@HEADER-COMMENT@
+
+# neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools doxygen libpng readline readline-devel acl attr curl curl-devel openssl openssl-devel rpm rpm-devel popt popt-devel openslp openslp-devel pkgconfig libxml2 libxml2-devel dejagnu
+
+Provides:	libpkg
+Obsoletes:	libpkg
+Provides:	yast2-agent-package
+Obsoletes:	yast2-agent-package
+Provides:	yast2-agent-you
+Obsoletes:	yast2-agent-you
+Provides:	yast2-agent-targetpkg
+Obsoletes:	yast2-agent-targetpkg
+Provides:	yast2-core-clients y2client
+Obsoletes:	yast2-core-clients y2client
+Provides:	yast2-core-pkginfo
+Obsoletes:	yast2-core-pkginfo
+Provides:	yast2-agent-ftp
+Obsoletes:	yast2-agent-ftp
+Provides:	yast2-agent-http
+Obsoletes:	yast2-agent-http
+
+Provides:	yast2-db-groups
+Obsoletes:	yast2-db-groups
+
+PreReq:    	%fillup_prereq
+Requires:	rpm >= 4.1.1
+
+@HEADER@
+Summary:	-
+
+%description
+-
+
+@HEADER-DEVEL@
+Summary:	-
+
+Provides:	libpkg-devel
+Obsoletes:	libpkg-devel
+Provides:	yast2-agent-package-devel
+Obsoletes:	yast2-agent-package-devel
+Provides:	yast2-agent-you-devel
+Obsoletes:	yast2-agent-you-devel
+Provides:	yast2-agent-targetpkg-devel
+Obsoletes:	yast2-agent-targetpkg-devel
+Provides:	yast2-core-clients-devel
+Obsoletes:	yast2-core-clients-devel
+Provides:	yast2-core-pkginfo-devel
+Obsoletes:	yast2-core-pkginfo-devel
+Provides:	yast2-agent-ftp-devel
+Obsoletes:	yast2-agent-ftp-devel
+Provides:	yast2-agent-http-devel
+Obsoletes:	yast2-agent-http-devel
+
+Requires:	rpm-devel >= 4.1.1 liby2util-devel curl-devel openslp-devel openssl-devel libxml2-devel
+Requires:	doxygen
+
+%description devel
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
+ln -s /usr/lib/YaST2/bin/create_you_patch %{buildroot}%{_bindir}
+mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2
+mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2/you
+
+@CLEAN@
+
+%files
+%defattr(-,root,root)
+%{_libdir}/liby2pm.so.*
+/usr/bin/online_update
+/usr/bin/machid_hash
+/usr/bin/installation_sources
+/usr/bin/genIS_PLAINcache
+%config(noreplace) /etc/youservers
+/var/adm/fillup-templates/sysconfig.onlineupdate
+/var/lib/YaST2
+/var/lib/YaST2/you
+/usr/share/update-messages/en/*
+/usr/share/YaST2/schema
+
+%files devel
+%defattr(-,root,root)
+%{_libdir}/liby2pm.so
+%{_libdir}/liby2pm.la
+@includedir@
+%doc @docdir@
+%dir /usr/lib/YaST2
+/usr/lib/YaST2/bin/
+%{_bindir}/create_you_patch
+
+%post
+%{fillup_only -n onlineupdate}

@@ -1,0 +1,72 @@
+Name: p1
+Edition: 1.0-1
+Conflicts: p2
+
+Name: smail
+Edition: 1.0-1
+Requires: libc6 < 2.1
+Provides: MTA
+Conflicts: MTA, libident >= 2.0
+
+Name: foo
+Edition: 1.0-1
+
+Name: libident
+Edition: 1.9-1
+
+Name: libc6
+Edition: 2.0.7-2
+
+Name: test1
+Edition: 1.0-1
+Requires: test2
+
+Name: test2
+Edition: 1.0-1
+
+Name: foo2
+Edition: 1.0-1
+Conflicts: baz21, baz22
+
+Name: foo3
+Edition: 1.0-1
+Conflicts: baz31, baz32
+
+Name: requirerer
+Edition: 1.0-1
+Requires: required < 2.0
+
+Name: required
+Edition: 1.0-1
+
+Name: requirerer2
+Edition: 1.0-1
+Requires: required2 < 2.0
+
+Name: required2
+Edition: 1.0-1
+
+Name: requirerer2
+Edition: 1.0-1
+Requires: required2 < 2.0
+
+Name: required2
+Edition: 1.0-1
+
+Name: requirerer3
+Edition: 2.0-1
+Requires: required3 < 2.0
+
+Name: required3
+Edition: 1.0-1
+
+Name: libfoo
+Edition: 1.0-1
+
+Name: libfoo-dev
+Edition: 1.0-1
+Requires: libfoo = 1.0-1
+
+Name: foouser
+Edition: 1.0-1
+Requires: libfoo

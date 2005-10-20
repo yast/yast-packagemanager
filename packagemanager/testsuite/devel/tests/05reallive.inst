@@ -1,0 +1,339 @@
+Name: ncurses
+Edition: 4.2-1
+Provides: curses, libform.so.4, libmenu.so.4, libncurses.so.4, libpanel.so.4
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libncurses.so.4
+
+Name: ld.so
+Edition: 1.9.9-2
+Requires: /bin/sh, ld-linux.so.2, libc.so.6
+Files: /sbin/ldconfig
+
+Name: lisa
+Edition: 3.1-0
+Requires: ld-linux.so.2, libc.so.6, libncurses.so.4, /bin/sh
+
+Name: procmail
+Edition: 3.10-8
+Requires: ld-linux.so.2, libc.so.6, libm.so.6, libnsl.so.1, /bin/sh
+
+Name: DEV
+Edition: 3.3-0
+Requires: /usr/bin/perl
+
+Name: tcsh
+Edition: 6.08.00-1
+Requires: /usr/bin/perl, ld-linux.so.2, libc.so.6, libcrypt.so.1, libncurses.so.4
+
+Name: patch
+Edition: 2.5-1
+Requires: ld-linux.so.2, libc.so.6
+
+Name: libz
+Edition: 1.0.2-1
+Provides: libz.so.1
+Requires: ld-linux.so.2, libc.so.6
+
+Name: SysVinit-scripts
+Edition: 1.04-0
+Requires: SysVinit >= 2.76, lisa >= 3.1, /bin/sh, ld-linux.so.2, libc.so.6, /bin/bash, /bin/sh
+
+Name: sh-utils
+Edition: 1.16-3
+Requires: libpam >= 0.58, /bin/sh, ld-linux.so.2, libc.so.6, libcrypt.so.1, libdl.so.2, libm.so.6, libpam.so.0, /bin/sh
+Provides: /usr/bin/env
+
+Name: kbd
+Edition: 0.96-1
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, /bin/sh
+
+Name: util-linux
+Edition: 2.7.1-5
+Requires: lisa >= 3.0, /bin/sh, ld-linux.so.2, libc.so.6, libcrypt.so.1, libdl.so.2, libm.so.6, libncurses.so.4, libpam.so.0, libpam_misc.so.0, /usr/bin/perl
+
+Name: bool
+Edition: 2.0-1
+
+Name: autoconf
+Edition: 2.13-0
+Requires: awk, m4, mktemp, /bin/sh, /bin/sh, /usr/bin/perl
+
+Name: ed
+Edition: 0.2-5
+Requires: /bin/sh, ld-linux.so.2, libc.so.6
+
+Name: bash
+Edition: 1.14.7-9
+Files: /bin/bash, /bin/sh
+Requires: mktemp, /usr/bin/perl, ld-linux.so.2, libc.so.6, libncurses.so.4, /bin/sh
+
+Name: findutils
+Edition: 4.1-9
+Requires: /bin/sh
+
+Name: perl
+Edition: 5.005_02-0
+Files: /usr/bin/perl
+Requires: tcsh, ld-linux.so.2, libc.so.6, libcrypt.so.1, libdb.so.3, libdl.so.2, libm.so.6, libnsl.so.1, libpthread.so.0
+
+Name: gawk
+Edition: 3.0.3-3
+Provides: awk
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libm.so.6, /bin/sh
+
+Name: libpwdb
+Edition: 0.54-7
+Provides: libpwdb.so.0
+Requires: /bin/sh
+
+Name: rpm
+Edition: 2.5.5-2
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libdb.so.2, libz.so.1, /bin/bash, /bin/sh, /usr/bin/perl
+Conflicts: patch < 2.5 
+
+Name: ncurses-termcap-devel
+Edition: 4.2-1
+Requires: ncurses-devel = 4.2
+Conflicts: libtermcap-devel
+
+Name: strace
+Edition: 3.1-3
+Requires: ld-linux.so.2, libc.so.6, libnsl.so.1
+
+Name: vixie-cron
+Edition: 3.0.1-18
+Provides: cron
+Requires: syslog, /bin/sh, ld-linux.so.2, libc.so.6, /bin/sh
+
+Name: pciutils
+Edition: 1.99.4-1
+Requires: ld-linux.so.2, libc.so.6
+
+Name: crontabs
+Edition: 1.10-2
+Requires: cron, /bin/bash
+
+Name: info
+Edition: 3.12-3
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libncurses.so.4, libz.so.1
+
+Name: egcs-c++
+Edition: 2.91.60-3
+Provides: libstdc++.so.2.9
+Requires: gcc, ld-linux.so.2, libc.so.6, libm.so.6
+
+Name: egcs
+Edition: 2.91.60-3
+Provides: gcc
+Requires: binutils, ld-linux.so.2, libc.so.6
+
+Name: SysVinit
+Edition: 2.76-0
+Requires: SysVinit-scripts >= 1.04, ld-linux.so.2, libc.so.6, libcrypt.so.1
+
+Name: python-eclass
+Edition: 1.2-0
+Provides: Acquisition.so, ExtensionClass.so, MethodObject.so, Missing.so, MultiMapping.so, Sync.so, ThreadLock.so
+Requires: python >= 1.5, ld-linux.so.2, libc.so.6
+
+Name: binutils
+Edition: 2.9.1.0.19a-0
+Provides: libbfd-2.9.1.0.19.so.0, libopcodes-2.9.1.0.19.so.0
+Requires: /bin/sh, ld-linux.so.2, libbfd-2.9.1.0.19.so.0, libc.so.6, libopcodes-2.9.1.0.19.so.0
+
+Name: linux-kernel-binary
+Edition: 2.2.1-0a
+Requires: /bin/sh
+
+Name: shadow-misc
+Edition: 1.1-3
+Provides: libshadow.so.0, pam_dialup.so
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libcrypt.so.1, libshadow.so.0, /bin/bash
+
+Name: libgr
+Edition: 2.0.13-1
+Provides: libfbm.so.1, libjpeg.so.6, libpbm.so.1, libpgm.so.1, libpng.so.1, libpnm.so.1, libppm.so.1, libtiff.so.3
+Requires: /bin/sh, ld-linux.so.2, libc.so.6
+
+Name: copyrights
+Edition: 1.2-1
+
+Name: man
+Edition: 1.5f-1
+Requires: groff, /bin/sh, ld-linux.so.2, libc.so.6, /bin/sh
+Conflicts: man_db
+
+Name: perl-add
+Edition: 5.005_02-0
+Provides: B.so, DB_File.so, Dumper.so, Fcntl.so, IO.so, Opcode.so, POSIX.so, SDBM_File.so, Socket.so, SysV.so, Thread.so, attrs.so, re.so
+Requires: perl = 5.005_02, ld-linux.so.2, libc.so.6, libcrypt.so.1, libdb.so.3, libdl.so.2, libm.so.6, libnsl.so.1, libpthread.so.0, /usr/bin/perl
+
+Name: cracklib
+Edition: 2.7-1
+Requires: ld-linux.so.2, libc.so.6, /bin/sh
+
+Name: ncurses-devel
+Edition: 4.2-1
+Requires: ncurses = 4.2
+Obsoletes: ncurses-devel-compat
+
+Name: ncurses-devel-static
+Edition: 4.2-1
+Requires: ncurses-devel = 4.2
+Obsoletes: ncurses-devel-compat-static
+
+Name: ncurses-termcap-devel-static
+Edition: 4.2-1
+Requires: ncurses-devel-static = 4.2
+Conflicts: libtermcap-devel-static
+
+Name: procps
+Edition: 1.2.9-2
+Provides: libproc.so.1.2.6
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libncurses.so.4, libproc.so.1.2.6
+
+Name: automake
+Edition: 1.4-0
+Requires: autoconf >= 2.13, /bin/sh, /bin/sh, /usr/bin/perl
+
+Name: isapnptools
+Edition: 1.16-1
+Requires: ld-linux.so.2, libc.so.6
+
+Name: qt
+Edition: 1.4.2-1
+Provides: libqt.so.1
+Requires: /bin/sh
+
+Name: qt-devel
+Edition: 1.4.2-1
+Requires: qt = 1.4.2, ld-linux.so.2, libc.so.6, libm.so.6, libstdc++.so.2.9
+
+Name: pam-apps
+Edition: 0.55-6
+Requires: ld-linux.so.2, libc.so.6, libdl.so.2, libnsl.so.1, libpam.so.0, libpam_misc.so.0, libpwdb.so.0
+
+Name: LPRng
+Edition: 3.5.3-1
+Provides: lpr
+Requires: ld-linux.so.2, libc.so.6, libncurses.so.4, libnsl.so.1
+
+Name: rcs
+Edition: 5.7-5
+Requires: diffutils, ed, mktemp, ld-linux.so.2, libc.so.6, /bin/sh
+
+Name: nis-client
+Edition: 2.0-0
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libcrypt.so.1, libnsl.so.1, libresolv.so.2, /bin/bash
+
+Name: tcl
+Edition: 8.0.4-1
+Provides: libtcl8.0.so
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libdl.so.2, libm.so.6, libtcl8.0.so
+
+Name: LPRng-lpd
+Edition: 3.5.3-1
+Provides: lpd
+Requires: SysVinit-scripts >= 1.03-2, /bin/sh, ld-linux.so.2, libc.so.6, libnsl.so.1, /bin/sh
+
+Name: readline
+Edition: 2.2.1-0
+Provides: libhistory.so.3, libreadline.so.3
+Requires: /bin/sh
+
+Name: slang
+Edition: 1.2.2-0
+Provides: libslang.so.1
+Requires: ncurses, /bin/sh, ld-linux.so.2, libc.so.6, libm.so.6
+
+Name: sysklogd
+Edition: 1.3.26-3
+Provides: syslog
+Requires: SysVinit-scripts >= 1.03, /bin/sh, ld-linux.so.2, libc.so.6, /bin/sh
+
+Name: groff
+Edition: 1.11a-3
+Provides: libdriver.so.1.11, libgroff.so.1.11
+Requires: ld-linux.so.2, libc.so.6, libdriver.so.1.11, libgroff.so.1.11, libm.so.6, /bin/sh
+
+Name: groff-ps
+Edition: 1.11a-3
+Requires: ld-linux.so.2, libc.so.6, libdriver.so.1.11, libgroff.so.1.11, libm.so.6
+
+Name: less
+Edition: 332-3
+Requires: ld-linux.so.2, libc.so.6, libncurses.so.4
+
+Name: gdb
+Edition: 4.17-2
+Provides: debugger
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libm.so.6, libncurses.so.4
+
+Name: linux-kernel-include
+Edition: 2.2.1-0a
+
+Name: libpam
+Edition: 0.66-1
+Provides: libpam.so.0, libpam_misc.so.0, pam_access.so, pam_cracklib.so, pam_deny.so, pam_env.so, pam_ftp.so, pam_group.so, pam_lastlog.so, pam_limits.so, pam_listfile.so, pam_mail.so, pam_nologin.so, pam_permit.so, pam_pwdb.so, pam_radius.so, pam_rhosts_auth.so, pam_rootok.so, pam_securetty.so, pam_shells.so, pam_stress.so, pam_tally.so, pam_time.so, pam_unix_acct.so, pam_unix_auth.so, pam_unix_passwd.so, pam_unix_session.so, pam_warn.so, pam_wheel.so
+Requires: libpwdb >= 0.54, /bin/sh, ld-linux.so.2, libc.so.6, libcrypt.so.1, libnsl.so.1, libpwdb.so.0
+
+Name: diffutils
+Edition: 2.7b-0
+Requires: /bin/sh, ld-linux.so.2, libc.so.6
+
+Name: setup
+Edition: 2.0-0a
+Requires: /bin/sh
+
+Name: m4
+Edition: 1.4-6
+Requires: /bin/sh, ld-linux.so.2, libc.so.6
+
+Name: e2fsprogs
+Edition: 1.14-0
+Provides: libcom_err.so.2, libe2p.so.2, libext2fs.so.2, libss.so.2, libuuid.so.1
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libcom_err.so.2, libe2p.so.2, libext2fs.so.2, libss.so.2, libuuid.so.1
+
+Name: glibc
+Edition: 2.1-1
+Provides: ld-linux.so.2, libBrokenLocale.so.1, libSegFault.so, libc.so.6, libcrypt.so.1, libdb.so.2, libdb.so.3, libdl.so.2, libm.so.6, libnsl.so.1, libnss_compat.so.2, libnss_db.so.2, libnss_dns.so.2, libnss_files.so.2, libnss_hesiod.so.2, libnss_nis.so.2, libnss_nisplus.so.2, libpthread.so.0, libresolv.so.2, librt.so.1, libutil.so.1
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libdb.so.3, libnsl.so.1, libnss_files.so.2, libpthread.so.0, libresolv.so.2
+
+Name: tcl-devel
+Edition: 8.0.4-1
+Requires: tcl = 8.0.4
+
+Name: svgalib
+Edition: 1.3.1-1
+Provides: libvga.so.1, libvgagl.so.1
+Requires: /bin/sh, ld-linux.so.2, libc.so.6, libm.so.6, libvga.so.1, /bin/sh, /usr/bin/perl
+
+Name: python
+Edition: 1.5.1-0a
+Provides: arraymodule.so, audioop.so, binascii.so, bsddbmodule.so, cPickle.so, cStringIO.so, cmathmodule.so, cryptmodule.so, cursesmodule.so, errnomodule.so, fcntlmodule.so, grpmodule.so, imageop.so, mathmodule.so, md5module.so, newmodule.so, nismodule.so, operator.so, parsermodule.so, pwdmodule.so, readline.so, resource.so, rgbimgmodule.so, rotormodule.so, selectmodule.so, socketmodule.so, stropmodule.so, structmodule.so, syslogmodule.so, termios.so, timemodule.so, timingmodule.so, zlibmodule.so
+Requires: ld-linux.so.2, libc.so.6, libdl.so.2, libm.so.6, libpthread.so.0, libcrypt.so.1, libdb.so.2, libncurses.so.4, libreadline.so.3, libz.so.1, /bin/sh
+Files: /usr/bin/python
+
+Name: python-devel
+Edition: 1.5.1-0a
+Requires: python = 1.5.1, /bin/sh, /usr/bin/env, /usr/bin/python
+
+Name: dialog
+Edition: 0.6-6
+Requires: ld-linux.so.2, libc.so.6, libncurses.so.4, /bin/sh
+
+Name: mtabase
+Edition: 1.0-5
+Requires: SysVinit-scripts >= 1.02-4, /bin/sh, /bin/bash
+
+Name: sendmail
+Edition: 8.8.7-7
+Provides: MTA
+Requires: mtabase, procmail, /bin/sh, ld-linux.so.2, libc.so.6, libdb.so.3, libnsl.so.1, libresolv.so.2, /bin/bash
+
+Name: mktemp
+Version: 1.4
+Release: 2
+Requires: ld-linux.so.2, libc.so.6
+Files:
+ /bin/mktemp
+

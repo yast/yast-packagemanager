@@ -1,0 +1,390 @@
+		    Ideas for the YaST2 Software Selection
+		   ========================================
+
+Author:  Stefan Hundhammer <sh@suse.de>
+Updated: 2002-05-15
+
+
+				  Motivation
+				 ============
+
+- YaST1 is gone with SuSE 8.0 - no more fallback for those who don't like
+  YaST2.
+
+- YaST2's current single package selection has quite some flaws (see below).
+
+- The number of packages is increasing, thus a good user interface to the
+  single package selection becomes more and more important.
+
+- It's questionable if the current way of presenting the data is really a good
+  approach - the user easily suffers from information overflow.
+
+
+
+	    Problems of the Current YaST2 Single Package Selection
+	   ========================================================
+
+- Double-click to select one item or to cycle to the next package state
+  (don't install / install / update / remove)
+
+- Need to click to view the package long description
+
+- No way to select more than one package at once
+
+- Poor performance
+
+A generic (YCP) table widget is misused to serve this function as well, but it
+had never been intended to do that. A custom widget for single package
+selection could offer much more functionality along with much improved
+ergonomics.
+
+
+			       New Requirements
+			      ==================
+
+- Several installation sources must be supported - all of which can possibly
+  contain different versions of the same packages.
+
+  There must be some kind of priority or ranking between them: The base CD is
+  superseded by a product CD which is superseded by a patch CD etc.
+
+- The base software selections as well as the add-on selections must be
+  viewable / accessible in the single package selection.
+
+- Support RPM "Suggests:" tag in addition to hard "Requires:"
+
+
+
+				   New Ideas
+				  ==========
+
+Multimedia support
+------------------
+
+Package description not just as plain ASCII text, but as Multimedia show.
+
+  Minimum:
+  - HTML for package description
+  - Screen shot(s) for interactive / X programs
+
+  Optional:
+  - Sound
+  - Video
+
+  Future options:
+  - Click on a link in the HTML text navigates to
+    - some other related package
+    - the application's home page
+    - the SuSE FTP server to check for updated versions
+    - other FTP servers to check for updated versions
+
+
+Package Keywords
+----------------
+
+Packages should get keywords to characterize them so advanced queries could be
+possible.
+
+Examples:
+
+KMail:
+- KDE app
+- X app
+- mail client
+- network
+
+Emacs:
+- X app
+- console app
+- editor
+
+File utilities (ls, cp, ...):
+- base system
+- system utilities
+- shell program
+
+
+Sample queries:
+- Search ("KDE app" or "X app") and "mail client"
+
+
+Package Ratings
+---------------
+
+(Nice to have)
+
+We have dozens of mail clients, dozens of editors etc. to choose from.
+
+Packages should get a rating by other users (how?) or by the SuSE team to
+support selecting one out of many similar packages (which mailer? which
+editor?).
+
+This might become a very political issue and it involves continued work to keep
+it up-to-date, but the suggestion itself is now 2.5 years old and nothing has
+happened since. YaST2 should at least provide the basic infrastructure to
+support something like that.
+
+Ratings could include:
+- Feature set
+- Stability
+- Completeness
+- Actively maintained
+- Performance
+- Resource consumption
+- Suitability for console environment
+- Suitability for X desktop environment
+- Suitability for newbies
+- Suitability for experts
+
+
+Ratings should age to reflect the fact that they are gradually becoming
+obsolete unless updated.
+
+
+User-Defined selections
+-----------------------
+
+The user should be able to define his own package selecions based on keywords,
+ratings etc., name those selections and save them to disk (to floppy?).
+
+
+Exclude Lists
+-------------
+
+(Nice to have)
+
+Users should be able to specify packages they don't want installed. Adding X
+libs or KDE libs to an exclude list could make life easier for server admins
+who want to avoid by all means having anything X or KDE related installed, even
+if they select additional single packages.
+
+Selecting a package that requires something in an exclude list would trigger an
+error. Sometimes this is very hard to catch manually - dependency graphs can
+get very complicated, and one single wrong click could trigger automatically
+selecting a lot of unwanted packages indirectly.
+
+Alternative: New package state "exclude" in addition to install / update / ...
+
+
+
+User Package Preferences by Category
+------------------------------------
+
+(Nice to have)
+
+The user should be able to adjust package selections to personal preferences,
+e.g.:
+
+GNOME -> Xlib -> KDE -> console
+
+"I want a GNOME mailer. If there is none, give me an Xlib based mailer. If
+there is none, a KDE based mailer. ..."
+
+
+
+User Selections on Floppy
+-------------------------
+
+(Nice to have)
+
+Users who usually add a few packages to one of the ready-made selections should
+be able to save those add-on selections to floppy so they don't forget them for
+future installations ("I always add 'xv' and 'selfhtml' to the 'default +
+office' selection).
+
+
+Misc
+----
+
+- New check box to turn off automatic dependency checking to avoid lots of
+  dependency complaints for large changes
+
+- Support for run time dependencies: Some YaST2 modules require installation of
+  additional packages only on invocation. This is typical for YaST2 config
+  modules for special hardware (scanner, TV card etc.) - only when that
+  hardware is being configured it makes sense to actually have the related
+  software. RPM supports only hard requirements, thus YaST2 needs to do that.
+
+
+
+			       Data Presentation
+			      ===================
+
+Currently, there are the old SuSE package series and the RPM group tags, and
+the old SuSE package series will be dropped (?).
+
+The RPM group tags are only one view on the overal set of packages.
+
+Average users see many more packages than they are really interested in: They
+frequently neither care for base packages that they need to install anywhere
+nor are they interested in subpackages. YaST2 for example has 180+ subpackages,
+yet it is one single logical package to most users.
+
+Experienced users, however, may really want to see all packages.
+
+Conclusion: We should offer multiple views on the overal set of packages. The
+user should be able to switch views easily (e.g. click on another tab in the
+GUI).
+
+
+
+				 Old Behaviour
+				===============
+
+Display (single package selection)
+----------------------------------
+
+- RPM group tags - not really as tree, only as list
+
+- SuSE package series
+
+- Available disk space per partition
+
+- Per package:
+  - pkg selection status: [x] [a] [i] [u] [d]
+  - pkg name
+  - pkg size
+  - pkg short description
+  - pkg version
+
+
+Actions
+-------
+
+- Select pkg (switch selection state) - multiple clicks required
+
+- Show pkg long description
+
+- Pkg search:
+  - search for pkg name
+  - full-text search in pkg description
+  - toggle case sensitive search
+
+- Save / load settings
+- Select all
+- Deselect all
+- Delete all
+- Delete nothing
+- Replace all
+- Replace nothing
+- Don't replace anything, delete instead
+- Replace, don't delete
+- Check dependencies
+
+
+Display (other SW selection dialogs)
+------------------------------------
+
+- Choose one of n base selections
+- Add n out of m add-on selections
+
+
+
+
+				 New Behaviour
+				==============
+
+Display
+-------
+
+- Multiple views (tabs) to select a set of packages to display:
+  - RPM group tags as tree
+  - Key words from PDB as list (tree?) of clickable items
+  - Search
+  - User-defined package selection(s)
+
+- List of packages with
+  - Selection state
+  - pkg name
+  - pkg size
+  - pkg short description
+  - pkg version
+  - installation source
+
+- Per-package info for the currently selected pkg:
+  - Pkg long description - HTML if available, including screen shot or other
+    images; ASCII otherwise
+  - Technical / additional info:
+    - License
+    - Requires
+    - Provides
+    - All other stuff provided by "rpm -qi" (?)
+
+  - Localization info: UI translated, help translated, doc translated?
+  - File list  (CD with RPM required?)
+  - Change log (CD with RPM required?)
+
+  - Dependencies (preferably as tree / graph)
+    - (User) packages this pkg depends on
+    - (User) packages depending on this pkg
+
+- Simple view / hide system related packages (libs, system services,
+  base packages)
+
+
+Ideas
+-----
+
+* Display pkg list as tree, divided by user-visible categories, e.g.:
+
+Mail Clients
+[ ] KMail
+[ ] Pine
+[ ] Mutt
+...
+Editors
+[ ] KWrite
+[ ] Emacs
+[ ] Vim
+...
+
+
+
+* Select packages by MIME types supported by this package (.mp3, .png, ...)
+
+* Select by hardware supported
+
+* Tool bar buttons - in addition (!) to toggling package state.
+  This will change the mouse cursor to a different shape (very much like in
+  Gimp etc.) and perform the respective action directly on any package clicked
+  with this cursor:
+
+  - install pkg
+  - remove pkg
+  - update pkg
+
+  The normal mouse cursor will retain its current behaviour: Cycle through all
+  pkg states.
+
+* Icons in the pkg list to indicate the type of pkg (system, X, KDE, ...)
+
+
+
+Summary: Views
+--------------
+
+- RPM group tags as full tree
+- RPM group tags as flat list (keywords) with check boxes (?)
+- Keywords
+  - as flat list with check boxes
+  - as tree (?)
+- Hardware supported as list with check boxes
+- MIME types as tree - leaf nodes with check boxes
+
+
+
+DRAFT
+=====
+
+- Don't notify upon dependency conflicts, just display the pkgs affected in
+  another color / RPM group as well
+
+- Pkg status "don't touch"
+
+- Pkg status "never install"
+
+- Filter "status changed": Display pkgs that will be installed / deleted /
+  updated + their installation source
+  (similar to "what if" function of YaST1)
+
+- View: pkgs installed since date xy

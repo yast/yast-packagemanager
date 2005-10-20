@@ -1,0 +1,268 @@
+#! /bin/bash
+PROG=$(basename $0)
+
+function Warn() {
+	echo "$PROG: $@" >&2
+}
+function Err() {
+	Warn "$@"
+	echo "Usage: $PROG CLASSNAME [ FROMNAME BASENAME ]" >&2
+	echo "" >&2
+	echo "Create counted pointer class CLASSNAME as either base class," >&2
+	echo "or derived class, if FROMNAME BASENAME are supplied. " >&2
+	echo "" >&2
+	echo "FROMNAME: The class CLASSNAME is derived from." >&2
+	echo "BASENAME: The bottommost(!) class of the derivation tree." >&2
+	echo "" >&2
+	echo "Example:" >&2
+	echo "  $PROG PMSolvable" >&2
+	echo "  $PROG PMObject  PMSolvable PMSolvable" >&2
+	echo "  $PROG PMPackage PMObject   PMSolvable" >&2
+	echo "" >&2
+	echo "See CountedPointer documentation." >&2
+	echo "" >&2
+	echo "Created files: {CLASSNAME}.h {CLASSNAME}.cc {CLASSNAME}Ptr.h" >&2
+	echo "" >&2
+	exit 1
+}
+function ChkExists() {
+	DOEXIT=
+	for f in "$@" ; do
+		test -e $f && {
+			Warn "File already exists: $f"
+			DOEXIT=1
+		}
+	done
+
+	test -n "$DOEXIT" && Err "Aborting"
+}
+
+CLASS=$1
+FROM=$2
+BASE=$3
+CH="${CLASS}.h"
+CC="${CLASS}.cc"
+PH="${CLASS}Ptr.h"
+
+if [ $# == 1 ]; then
+	DERIVED=
+elif [ $# == 3 ]; then
+	DERIVED=1
+else
+	Err "Incorrect number of arguments $#:'$@'"
+fi
+
+ChkExists "$CH" "$CC" "$PH"
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+function catLogo() {
+cat <<'EOF'
+/*---------------------------------------------------------------------\
+|                                                                      |
+|                      __   __    ____ _____ ____                      |
+|                      \ \ / /_ _/ ___|_   _|___ \                     |
+|                       \ V / _` \___ \ | |   __) |                    |
+|                        | | (_| |___) || |  / __/                     |
+|                        |_|\__,_|____/ |_| |_____|                    |
+|                                                                      |
+|                               core system                            |
+|                                                        (C) SuSE GmbH |
+\----------------------------------------------------------------------/
+EOF
+}
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+function H_include () {
+	if [ -n "$DERIVED" ]; then
+		echo -ne "\n#include <y2pm/${FROM}.h>"
+	fi
+}
+
+function H_derived () {
+	if [ -z "$DERIVED" ]; then
+		echo -ne "public CountedRep"
+	else
+		echo -ne "public ${FROM}"
+	fi
+}
+
+function PTR_include () {
+	if [ -z "$DERIVED" ]; then
+		echo -ne "#include <y2util/RepDef.h>"
+	else
+		echo -ne "#include <y2pm/${FROM}Ptr.h>"
+	fi
+}
+
+function PTR_def () {
+	if [ -z "$DERIVED" ]; then
+		echo -ne "DEFINE_BASE_POINTER(${CLASS});"
+	else
+		echo -ne "DEFINE_DERIVED_POINTER(${CLASS},${BASE});"
+	fi
+}
+
+function PTR_impl () {
+	if [ -z "$DERIVED" ]; then
+		echo -ne "IMPL_BASE_POINTER(${CLASS});"
+	else
+		echo -ne "IMPL_DERIVED_POINTER(${CLASS},${BASE});"
+	fi
+}
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CH"
+$(catLogo)
+
+  File:       ${CLASS}.h
+
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose:
+
+/-*/
+#ifndef ${CLASS}_h
+#define ${CLASS}_h
+
+#include <iosfwd>
+
+#include <y2pm/${CLASS}Ptr.h>$(H_include)
+
+///////////////////////////////////////////////////////////////////
+//
+//	CLASS NAME : ${CLASS}
+/**
+ *
+ **/
+class ${CLASS} : $(H_derived) {
+  REP_BODY(${CLASS});
+
+  public:
+
+    ${CLASS}();
+
+    virtual ~${CLASS}();
+
+  public:
+
+    virtual std::ostream & dumpOn( std::ostream & str ) const;
+};
+
+///////////////////////////////////////////////////////////////////
+
+#endif // ${CLASS}_h
+
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$CC"
+$(catLogo)
+
+  File:       ${CLASS}.cc
+
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose:
+
+/-*/
+
+#include <iostream>
+
+#include <y2pm/${CLASS}.h>
+
+using namespace std;
+
+///////////////////////////////////////////////////////////////////
+//	CLASS NAME : ${CLASS}Ptr
+//	CLASS NAME : const${CLASS}Ptr
+///////////////////////////////////////////////////////////////////
+$(PTR_impl)
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : ${CLASS}::${CLASS}
+//	METHOD TYPE : Constructor
+//
+//	DESCRIPTION :
+//
+${CLASS}::${CLASS}()
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : ${CLASS}::~${CLASS}
+//	METHOD TYPE : Destructor
+//
+//	DESCRIPTION :
+//
+${CLASS}::~${CLASS}()
+{
+}
+
+///////////////////////////////////////////////////////////////////
+//
+//
+//	METHOD NAME : ${CLASS}::dumpOn
+//	METHOD TYPE : ostream &
+//
+//	DESCRIPTION :
+//
+ostream & ${CLASS}::dumpOn( ostream & str ) const
+{
+  Rep::dumpOn( str );
+  return str;
+}
+
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+
+cat <<EOF >"$PH"
+$(catLogo)
+
+  File:       ${CLASS}Ptr.h
+
+  Author:     Michael Andres <ma@suse.de>
+  Maintainer: Michael Andres <ma@suse.de>
+
+  Purpose: Declaration of pointer classes const${CLASS}Ptr and ${CLASS}Ptr.
+
+/-*/
+#ifndef ${CLASS}Ptr_h
+#define ${CLASS}Ptr_h
+
+$(PTR_include)
+
+///////////////////////////////////////////////////////////////////
+//	CLASS NAME : ${CLASS}Ptr
+//	CLASS NAME : const${CLASS}Ptr
+///////////////////////////////////////////////////////////////////
+$(PTR_def)
+
+#endif // ${CLASS}Ptr_h
+
+EOF
+
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+## ---------------------------------------------------------------------
+

@@ -1,0 +1,175 @@
+--- Test 1
+
+Install: foo2,
+Remove: foo,foo-devel,
+
+Name: foo2
+Edition: 2.0-1
+From-Input-List: yes
+
+--- Test 2
+
+Install: foo2,
+
+Name: foo2
+Edition: 2.0-1
+From-Input-List: yes
+
+Name: foo
+Edition: 1.0-1
+Conflicts-With: foo2-2.0-1 obsoletes foo
+State-Change-Not-Possible: yes
+
+Name: foo-devel
+Edition: 1.1-1
+Conflicts-With: foo2-2.0-1 obsoletes foo-devel
+State-Change-Not-Possible: yes
+
+--- Test 3
+
+Install: foo2old,
+
+Name: foo2old
+Edition: 2.0-1
+From-Input-List: yes
+
+Name: foo
+Edition: 1.0-1
+Conflicts-With: foo2old-2.0-1 obsoletes fooold
+State-Change-Not-Possible: yes
+
+Name: foo-devel
+Edition: 1.1-1
+Conflicts-With: foo2old-2.0-1 obsoletes fooold
+State-Change-Not-Possible: yes
+
+--- Test 4
+
+Install: barold,
+
+Name: barold
+Edition: 4.0-1
+From-Input-List: yes
+Conflicts-With: bar-devel-1.1-1 requires bar = 1.0-1
+Remove-To-Solve-Conflict: bar-devel
+
+--- Test 5
+
+Install: barold2,
+Remove: bar2,bar2-devel,
+
+Name: barold2
+Edition: 4.0-1
+From-Input-List: yes
+
+--- Test 6
+
+Install: barold2,
+
+Name: barold2
+Edition: 4.0-1
+From-Input-List: yes
+
+Name: bar2
+Edition: 1.0-1
+Conflicts-With: barold2-4.0-1 obsoletes bar2
+State-Change-Not-Possible: yes
+
+Name: bar2-devel
+Edition: 1.1-1
+Conflicts-With: barold2-4.0-1 obsoletes barold2 = 4.0-1
+State-Change-Not-Possible: yes
+
+--- Test 7
+
+Install: aaa,bbb,
+
+Name: aaa
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: bbb
+Edition: 2.0-1
+From-Input-List: yes
+Conflicts-With: aaa-1.0-1 obsoletes bbb
+Remove-To-Solve-Conflict: aaa
+
+--- Test 8
+
+Install: aaa,ccc,
+
+Name: aaa
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: ccc
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: bbb
+Edition: 2.0-1
+Referers: ccc-1.0-1 requires bbb
+Conflicts-With: aaa-1.0-1 obsoletes bbb
+Remove-To-Solve-Conflict: aaa
+Remove-Referers: ccc
+
+--- Test 9
+
+Install: aaa,ccc,ddd,
+
+Name: aaa
+Edition: 1.0-1
+Referers: ddd-1.0-1 requires aaa
+
+Name: ccc
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: ddd
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: bbb
+Edition: 2.0-1
+Referers: ccc-1.0-1 requires bbb
+Conflicts-With: aaa-1.0-1 obsoletes bbb
+Remove-To-Solve-Conflict: aaa, ddd
+Remove-Referers: ccc
+
+--- Test 10
+
+Install: eee,fff,
+
+Name: fff
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: eee
+Edition: 1.0-1
+From-Input-List: yes
+Conflicts-With: fff-1.0-1 obsoletes eee
+Remove-To-Solve-Conflict: fff
+
+--- Test 11
+
+Install: fff,ggg,hhh,
+
+Name: fff
+Edition: 1.0-1
+Referers: ggg-1.0-1 requires fff
+
+Name: ggg
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: hhh
+Edition: 1.0-1
+From-Input-List: yes
+
+Name: eee
+Edition: 1.0-1
+Referers: hhh-1.0-1 requires eee
+Conflicts-With: fff-1.0-1 obsoletes eee
+Remove-To-Solve-Conflict: fff, ggg
+Remove-Referers: hhh
+

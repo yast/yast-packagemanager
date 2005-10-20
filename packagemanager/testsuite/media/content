@@ -1,0 +1,18 @@
+PRODUCT	SuSE Linux Professional
+VERSION	8.1
+BASEPRODUCT
+BASEVERSION
+VENDOR SuSE Linux AG
+ARCH.i686 i686 i586 i486 i386 noarch
+ARCH.i586 i586 i486 i386 noarch
+ARCH.i486 i486 i386 noarch
+ARCH.i386 i386 noarch
+DEFAULTBASE i386
+REQUIRES suse-release
+LINGUAS	de en
+LABEL SuSE Linux Professional Version 8.1
+LABEL.de SuSE Linux Professional in der Version 8.1
+DESCRDIR descr
+DATADIR data
+LANGUAGE de
+TIMEZONE Europe/Berlin

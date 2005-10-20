@@ -1,0 +1,155 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:36 UTC 2002
+
+=Ver: 3.0
+
+=Sel:  Office
+
+=Sum: Office Applications
+=Sum.cs: Office Applications
+=Sum.de: Office Applications
+=Sum.en: Office Applications
+=Sum.es: Office Applications
+=Sum.fr: Office Applications
+=Sum.gl: Office Applications
+=Sum.hu: Office Applications
+=Sum.it: Office Applications
+=Sum.ja: Office Applications
+=Sum.nl: Office Applications
+=Sum.pt: Office Applications
+=Sum.sv: Office Applications
+=Sum.tr: Office Applications
+
++Con:
+Minimal
+-Con:
+
+=Cat: addon
+
+=Vis: true
+
+=Ord: 15
+
++Ins:
+OpenOffice_org
+itcl
+java2-jre
+taskjuggler
+wine
+-Ins:
+
++Ins.bs:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.bs:
+
++Ins.cs:
+OpenOffice_org-cs (OpenOffice_org-en)
+myspell-czech
+-Ins.cs:
+
++Ins.da:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.da:
+
++Ins.de:
+OpenOffice_org-de (OpenOffice_org-en)
+myspell-german
+-Ins.de:
+
++Ins.default:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.default:
+
++Ins.el:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.el:
+
++Ins.es:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.es:
+
++Ins.fr:
+OpenOffice_org-fr (OpenOffice_org-en)
+myspell-french
+-Ins.fr:
+
++Ins.hu:
+OpenOffice_org-hu (OpenOffice_org-en)
+myspell-hungarian
+-Ins.hu:
+
++Ins.it:
+OpenOffice_org-it (OpenOffice_org-en)
+myspell-italian
+-Ins.it:
+
++Ins.ja:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.ja:
+
++Ins.lt:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.lt:
+
++Ins.nl:
+OpenOffice_org-nl (OpenOffice_org-en)
+myspell-dutch
+-Ins.nl:
+
++Ins.pl:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.pl:
+
++Ins.pt:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.pt:
+
++Ins.ru:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.ru:
+
++Ins.sk:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.sk:
+
++Ins.sl:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.sl:
+
++Ins.sl_SI:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.sl_SI:
+
++Ins.sv:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.sv:
+
++Ins.tr:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.tr:
+
++Ins.tu:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.tu:
+
++Ins.zh_CN:
+OpenOffice_org-en
+OpenOffice_org-en-help
+-Ins.zh_CN:
+

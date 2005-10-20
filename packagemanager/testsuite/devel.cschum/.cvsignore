@@ -1,0 +1,13 @@
+Makefile
+Makefile.in
+.deps
+.libs
+
+cschum_test
+test_libcurl
+err_test
+test_patchinfo
+callback_test
+test_media
+test_filterarchs
+test_proddb

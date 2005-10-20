@@ -1,0 +1,194 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:32 UTC 2002
+
+=Ver: 3.0
+
+=Sel:  Kde-Desktop
+
+=Sum: KDE Desktop Environment
+=Sum.cs: Prostředí KDE
+=Sum.de: KDE Desktop-Umgebung
+=Sum.en: KDE Desktop Environment
+=Sum.es: Entorno Gráfico KDE
+=Sum.fr: Environnement de bureau KDE
+=Sum.gl: KDE Desktop Environment
+=Sum.hu: KDE grafikus munkakörnyezet
+=Sum.it: Ambiente Desktop KDE
+=Sum.ja: KDE デスクトップ環境
+=Sum.nl: KDE Desktop omgeving
+=Sum.pt: KDE Desktop Environment
+=Sum.sv: KDE Desktop Environment
+=Sum.tr: KDE Desktop Environment
+
++Req:
+X11
+Basis-Sound
+-Req:
+
++Con:
+Minimal
+-Con:
+
+=Cat: addon
+
+=Vis: true
+
+=Ord: 11
+
++Ins:
+SDL
+aalib
+alsa
+arts
+audiofile
+cdk
+cdparanoia
+cdrecord
+compat
+cups-libs
+dialog
+dosbootdisk
+enscript
+esound
+fam
+ghostscript-fonts-std
+gphoto
+heimdal-lib
+icons
+java2-jre
+k3b
+kdeaddons3-internet
+kdeaddons3-kate
+kdeaddons3-kicker
+kdeaddons3-sound
+kdeartwork3
+kdeartwork3-sound
+kdebase3
+kdebase3-SuSE
+kdebase3-kdm
+kdebase3-konqueror
+kdebase3-ksysguardd
+kdebase3-nsplugin
+kdegames3
+kdegames3-arcade
+kdegames3-board
+kdegames3-card
+kdegames3-tactic
+kdegraphics3
+kdegraphics3-fax
+kdegraphics3-kamera
+kdegraphics3-postscript
+kdelibs3
+kdelibs3-32bit
+kdelibs3-cups
+kdemultimedia3-midi
+kdemultimedia3-sound
+kdemultimedia3-video
+kdenetwork3
+kdenetwork3-mail
+kdenetwork3-news
+kdepim3
+kdepim3-organizer
+kdetoys3
+kdeutils3
+kdeutils3-laptop
+kdeutils3-printing
+keramik
+kinternet
+libexif
+libgphoto2
+libogg
+libpcap
+libtool
+libvorbis
+libxml2
+libxslt
+linux-atm
+mkisofs
+netscape-plugins
+openmotif
+pcre
+pcsc-lite
+pixieplus-kde
+ppp
+release-notes
+sensors
+slang
+smpppd
+susewm-kcmyast
+unixODBC
+wvdial
+-Ins:
+
++Ins.cs:
+kde3-i18n-cs
+-Ins.cs:
+
++Ins.da:
+kde3-i18n-da
+-Ins.da:
+
++Ins.de:
+kde3-i18n-de
+-Ins.de:
+
++Ins.el:
+kde3-i18n-el
+-Ins.el:
+
++Ins.es:
+kde3-i18n-es
+-Ins.es:
+
++Ins.fr:
+kde3-i18n-fr
+-Ins.fr:
+
++Ins.hu:
+kde3-i18n-hu
+-Ins.hu:
+
++Ins.it:
+kde3-i18n-it
+-Ins.it:
+
++Ins.ja:
+kde3-i18n-ja
+-Ins.ja:
+
++Ins.lt:
+kde3-i18n-lt
+-Ins.lt:
+
++Ins.nl:
+kde3-i18n-nl
+-Ins.nl:
+
++Ins.pl:
+kde3-i18n-pl
+-Ins.pl:
+
++Ins.pt:
+kde3-i18n-pt
+-Ins.pt:
+
++Ins.ru:
+kde3-i18n-ru
+-Ins.ru:
+
++Ins.sk:
+kde3-i18n-sk
+-Ins.sk:
+
++Ins.sl:
+kde3-i18n-sl
+-Ins.sl:
+
++Ins.sv:
+kde3-i18n-sv
+-Ins.sv:
+
++Ins.tr:
+kde3-i18n-tr
+-Ins.tr:
+

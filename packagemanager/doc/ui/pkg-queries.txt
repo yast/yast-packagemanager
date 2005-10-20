@@ -1,0 +1,45 @@
+				Package Queries
+                               =================
+
+Author:  Stefan Hundhammer <sh@suse.de>
+Updated: 2002-07-04
+
+
+- Return all packages with RPM group tag XY
+- Return all packages whose RPM group tag begins with (!) XY
+- Return all packages that belong to SW selection XY
+- Return all packages that belong to YOU patch XY
+- Return all packages that match keyword X (and/or Y)
+- Return all packages that can handle MIME type X (and/or Y)
+- Return all packages that support hardware X (and/or Y)
+- Return all packages that require hardware X (and/or Y)
+- Return all packages whose name matches/begins with X
+- Return all packages whose summary contains X
+- Return all packages whose description contains X
+- Return all installed packages 
+- Return all packages 
+- Return all packages required (directly/indirectly) by package X
+- Return all packages that require package X (directly/indirectly)
+- Return all available instances (version) of packages X
+- Return all packages installed since date XY
+- Return all packages (automatically/explicitly) marked for installation
+- Return all packages marked for update
+- Return all packages marked for removal
+- Return all packages marked as "taboo"
+- Return all packages with file/directory XY in the file list (exact match)
+- Return all packages with file/directory XY in the file list (wildcard match)
+
+- ?? Return all packages with unresolved dependency conflicts
+- ?? Return all packages on installation source XY
+- ?? Return all packages with change log entry since date XY
+
+
+
+- Return all RPM group tags used in any available package
+- ?? Return all RPM group tags used in any installed package
+- Return all available SW selections
+- Return all available YOU patches
+- Return all available keywords
+- Return all available MIME types
+
+

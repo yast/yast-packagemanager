@@ -1,0 +1,147 @@
+--- Test 1
+
+Install: bash,
+
+Name: bash
+Edition: 2.0.2-1
+From-Input-List: yes
+
+--- Test 2
+
+Install: amd,libc6,libgdbm,
+
+Name: amd
+Edition: upl102-11
+From-Input-List: yes
+
+Name: libc6
+Edition: 2.0.7-1
+Referers: libgdbm-1.17-1 requires libc6 >= 2.0.7-
+Is-Upgrade-From: 2.0.5-1
+
+Name: libgdbm
+Edition: 1.17-1
+Referers: amd-upl102-11 requires libgdbm
+
+--- Test 3
+
+Install: foo1,libc6,
+
+Name: libc6
+Edition: 2.0.7-1
+Referers: foo1-1.0-1 requires libc6 >= 2.0.6-
+Is-Upgrade-From: 2.0.5-1
+
+Name: bar1(*)
+Edition: EDITION-UNSPEC
+Referers: foo1-1.0-1 requires bar1
+Not-Available: any
+Remove-Referers: foo1
+
+Name: foo1
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo1-1.0-1 requires bar1
+
+--- Test 4
+
+Install: foo2,
+
+Name: bar2(*)
+Edition: EDITION-UNSPEC
+Referers: foo2-1.0-1 requires bar2 >= 1.0-
+Not-Available: >= 1.0-
+Remove-Referers: foo2
+
+Name: foo2
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2-1.0-1 requires bar2 >= 1.0-
+
+--- Test 5
+
+Install: foo2a,foo2b,foo2c,
+
+Name: bar2(*)
+Edition: EDITION-UNSPEC
+Referers: foo2a-1.0-1 requires bar2 >= 1.0-, foo2b-1.0-1 requires bar2 <= 1.1-, foo2c-1.0-1 requires bar2 > 1.0-
+Not-Available: (1.0-,1.1-]
+Remove-Referers: foo2a, foo2b, foo2c
+
+Name: bar3(*)
+Edition: EDITION-UNSPEC
+Referers: foo2a-1.0-1 requires bar3 = 2.0-
+Not-Available: [2.0-,2.0-]
+Remove-Referers: foo2a
+
+Name: foo2a
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2a-1.0-1 requires bar2 >= 1.0-, foo2a-1.0-1 requires bar3 = 2.0-
+
+Name: foo2b
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2b-1.0-1 requires bar2 <= 1.1-
+
+Name: foo2c
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2c-1.0-1 requires bar2 > 1.0-
+
+--- Test 6
+
+Install: foo2d,foo2e,
+
+Name: bar2(*)
+Edition: EDITION-UNSPEC
+Referers: foo2d-1.0-1 requires bar2 > 2.0-, foo2e-1.0-1 requires bar2 <= 1.0-
+Not-Available: (2.0-,1.0-] (impossible)
+Remove-Referers: foo2d, foo2e
+
+Name: foo2d
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2d-1.0-1 requires bar2 > 2.0-
+
+Name: foo2e
+Edition: 1.0-1
+From-Input-List: yes
+Unresolvable: foo2e-1.0-1 requires bar2 <= 1.0-
+
+--- Test 7
+
+Install: bash,foo3,
+
+Name: bash
+Edition: 2.0.2-1
+Referers: foo3-1.0-1 requires /bin/sh
+
+Name: foo3
+Edition: 1.0-1
+From-Input-List: yes
+
+--- Test 8
+
+Install: bash,foo3,foo4,
+
+Name: bash
+Edition: 2.0.2-1
+Referers: foo3-1.0-1 requires /bin/sh
+
+Name: foo3
+Edition: 1.0-1
+Referers: foo4-1.0-1 requires /usr/bin/bar
+
+Name: foo4
+Edition: 1.0-1
+From-Input-List: yes
+
+--- Test 9
+
+Install: foo5,
+
+Name: foo5
+Edition: 1.0-1
+From-Input-List: yes
+

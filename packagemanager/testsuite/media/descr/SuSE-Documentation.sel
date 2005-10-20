@@ -1,0 +1,240 @@
+# SuSE-Linux-Package-Selection 3.0 -- (c) 2002 SuSE Linux AG
+# generated on Thu Aug 22 08:22:37 UTC 2002
+
+=Ver: 3.0
+
+=Sel:  SuSE-Documentation
+
+=Sum: Help & Support Documentation
+=Sum.cs: Nápověda a dokumentace
+=Sum.de: Dokumentation zu Hilfe & Support
+=Sum.en: Help & Support Documentation
+=Sum.es: Ayuda y documentación de Soporte
+=Sum.fr: Documentation Aide & Support
+=Sum.gl: Help & Support Documentation
+=Sum.hu: Segítség és terméktámogatás
+=Sum.it: Documentazione di supporto
+=Sum.ja: ヘルプ、説明書、マニュアル
+=Sum.nl: Help & ondersteunings-documentatie
+=Sum.pt: Help & Support Documentation
+=Sum.sv: Help & Support Documentation
+=Sum.tr: Help & Support Documentation
+
+=Cat: addon
+
+=Vis: true
+
+=Ord: 14
+
++Ins:
+howtoenh
+htdig
+l2h-pngicons
+sdb
+susehelp
+susetour
+-Ins:
+
++Ins.bs:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.bs:
+
++Ins.cs:
+man-pages-cs
+sdb_cz
+sdb_en
+susehelp_cz (susehelp_en)
+susetour_en
+-Ins.cs:
+
++Ins.da:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.da:
+
++Ins.de:
+howtodeh
+sdb_de (sdb_en)
+susehelp_de (susehelp_en)
+suselinux-adminguide_de (suselinux-adminguide_en)
+suselinux-reference_de (suselinux-reference_en)
+suselinux-userguide_de (suselinux-userguide_en)
+susetour_de (susetour_en)
+-Ins.de:
+
++Ins.default:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.default:
+
++Ins.el:
+howtoel
+sdb_en
+susehelp_en
+susetour_en
+-Ins.el:
+
++Ins.es:
+howtoes
+man-pages-es
+sdb_es (sdb_en)
+susehelp_es (susehelp_en)
+suselinux-adminguide_es (suselinux-adminguide_en)
+suselinux-reference_es (suselinux-reference_en)
+suselinux-userguide_es (suselinux-userguide_en)
+susetour_es (susetour_en)
+-Ins.es:
+
++Ins.fr:
+howtofr
+man-pages-fr
+sdb_fr (sdb_en)
+susehelp_fr (susehelp_en)
+susetour_en
+-Ins.fr:
+
++Ins.hu:
+qappl_hu (qappl_en)
+qconfig_hu (qconfig_en)
+sdb_en
+sdb_hu
+susehelp_hu (susehelp_en)
+suselinux-reference_hu (suselinux-reference_en)
+susetour_hu (susehelp_en)
+-Ins.hu:
+
++Ins.it:
+howtoit
+man-pages-it
+sdb_it (sdb_en)
+susehelp_it (susehelp_en)
+suselinux-reference_it (suselinux-reference_en)
+suselinux-userguide_it (suselinux-userguide_en)
+susetour_it (susetour_en)
+-Ins.it:
+
++Ins.ja:
+man-pages-ja
+sdb_en
+susehelp_en
+susetour_en
+xmanja
+-Ins.ja:
+
++Ins.lt:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.lt:
+
++Ins.nl:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.nl:
+
++Ins.pl:
+howtopl
+sdb_en
+susehelp_en
+susetour_en
+-Ins.pl:
+
++Ins.pt:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.pt:
+
++Ins.ru:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.ru:
+
++Ins.sk:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.sk:
+
++Ins.sl:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.sl:
+
++Ins.sl_SI:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.sl_SI:
+
++Ins.sv:
+howtosv
+sdb_en
+susehelp_en
+susetour_en
+-Ins.sv:
+
++Ins.tr:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.tr:
+
++Ins.tu:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.tu:
+
++Ins.zh_CN:
+sdb_en
+susehelp_en
+suselinux-adminguide_en
+suselinux-reference_en
+suselinux-userguide_en
+susetour_en
+-Ins.zh_CN:
+
