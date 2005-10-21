@@ -1556,8 +1556,20 @@ PMError InstYou::retrievePatch( const PMYouPatchPtr &patch )
     }
   }
 
+  error = patchProgress( 98 );
+  if ( error ) return error;
+
+  if (!patch->updateScript().empty() ) {
+       PMError error = retrieveScript( patch->updateScript(), patch->product() );
+    if ( error ) {
+      ERR << "Error retrieving updateScript." << endl;
+      return error;
+    }
+  }
+
   error = patchProgress( 99 );
   if ( error ) return error;
+
 
   if ( !patch->postScript().empty() ) {
     PMError error = retrieveScript( patch->postScript(), patch->product() );

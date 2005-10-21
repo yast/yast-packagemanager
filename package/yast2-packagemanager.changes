@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 21 23:51:47 CEST 2005 - mir@suse.de
+
+- Added documentantion for update scripts and fixed a bug
+  in last change: I forgot to retrieve the update script
+- 2.13.7
+
+-------------------------------------------------------------------
 Thu Oct 20 18:57:37 CEST 2005 - mir@suse.de
 
 - Added capability for additional update scripts in patches
