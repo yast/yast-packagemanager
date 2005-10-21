@@ -150,7 +150,7 @@
     <itemizedlist>
       <listitem><para>Show pre/post information (special case of script)</para></listitem>
       <listitem><para>Execute pre/postinstall script</para></listitem>
-      <listitem><para>Install packages
+      <listitem><para>Install packages (or call update script instead if present)
 	<itemizedlist>
 	  <listitem><para>Skip non-installed packages, if specified in patch description.</para></listitem>
 	</itemizedlist>

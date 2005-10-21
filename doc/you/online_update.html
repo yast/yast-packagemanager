@@ -214,6 +214,7 @@ Reggirtllatsni:
 -->
 
 Prescript: &lt;name of script executed before installing the patch&gt;
+UpdateScript: &lt;name of script executed instead of installing the rpms&gt; (since 10.0)
 Postscript: &lt;name of script executed after installing the patch&gt;
 
 Packages:
@@ -318,6 +319,14 @@ Segakcap:
   <td>Prescript</td>
   <td>file name</td>
   <td>Name of script to be executed before installing the RPMs of the patch.</td>
+</tr>
+<tr>
+  <td>UpdateScript</td>
+  <td>file name</td>
+  <td>Name of script to be executed instead of installing the RPMs of the patch.
+      It is called with a list of rpm filenames as arguments. If it is a ycp file,
+      the list of rpm filenames is not in the arguments but written into a special file, 
+      /var/adm/YaST/you_update_arguments. Since 10.0.</td>
 </tr>
 <tr>
   <td>Postscript</td>
@@ -519,9 +528,11 @@ package isn't listed as compatible architecture the package won't be installed.
 <h3>Executing scripts within a patch</h3>
 
 <p>There is the possibility to run scripts while installing packages. The script from the
-<tt>Prescript:</tt> tag is executed before the packages are installed. The script from the
-<tt>Postscript:</tt> tag is executed after the packages have been installed. The scripts are
-downloaded from the <tt>scripts</tt> subdirectory and stored localy before execution.</p>
+<tt>Prescript:</tt> tag is executed before the packages are installed. The
+script from the <tt>UpdateScript:</tt> tag is executed instead of installing
+the packages. The script from the <tt>Postscript:</tt> tag is executed after 
+the packages have been installed. The scripts are downloaded from the <tt>scripts</tt> 
+subdirectory and stored localy before execution. (Since 10.0)</p>
 
 
 <h2>Usage</h2>
