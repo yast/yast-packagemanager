@@ -372,6 +372,7 @@ class InstTarget: public CountedRep, public InstData {
      * Execute script.
      **/
     PMError executeScript( const Pathname &scriptname );
+    PMError executeScript( const Pathname &scriptname, const std::list<std::string> arguments );
 
     ///////////////////////////////////////////////////////////////////
     // Product related interface

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sat Oct 22 00:16:33 CEST 2005 - mir@suse.de
+
+- Added capability for additional update scripts in patches and
+  updated documentation about this. (#116935) 
+  (backport from 2.13.6 and 2.13.7)
+- 2.12.22
+
+-------------------------------------------------------------------
 Fri Oct 14 11:58:44 CEST 2005 - ma@suse.de
 
 - Fixed sometimes incomplete refresh installation sources via ftp/http
