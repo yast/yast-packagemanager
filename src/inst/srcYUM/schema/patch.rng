@@ -13,9 +13,11 @@
       </oneOrMore>
     </define>
     <define name="element-description">
-      <element name="description">
-        <ref name="localized-string"/>
-      </element>
+      <oneOrMore>
+        <element name="description">
+          <ref name="localized-string"/>
+        </element>
+      </oneOrMore>
     </define>
     <!-- packages in patches have an additional rpmfiles element -->
     <define name="element-package">
