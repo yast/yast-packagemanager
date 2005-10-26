@@ -2,8 +2,6 @@ default namespace = "http://novell.com/package/metadata/suse/common"
 namespace ns1 = "http://linux.duke.edu/metadata/common"
 
 
-grammar {
-
 include "primary.rnc" {
   element-format = 
     element ns1:format { suse-format }
@@ -62,7 +60,7 @@ element-freshen =
 
 freshen =
     element entry {
-      attribute name { text },
+      attribute-name,
       (
         shared-entry-attributes,
         attribute flags { "EQ" | "LE" | "GE" | "LT" | "GT" }
@@ -72,5 +70,3 @@ freshen =
 
 element-install_only =
     element install_only { empty }
-
-}
