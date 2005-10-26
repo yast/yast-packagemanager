@@ -97,7 +97,7 @@
   <define name="freshen">
     <oneOrMore>
       <element name="entry">
-        <attribute name="name"/>
+        <ref name="attribute-name"/>
         <optional>
           <ref name="shared-entry-attributes"/>
           <attribute name="flags">
