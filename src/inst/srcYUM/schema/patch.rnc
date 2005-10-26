@@ -6,7 +6,7 @@ include "suse-primary.rnc" {
   start = element-patch
   # patches use localized summary and description fields
   element-summary = element summary { localized-string }+
-  element-description = element description { localized-string }
+  element-description = element description { localized-string }+
   # packages in patches have an additional rpmfiles element
   element-package = element yum:package { package, element-pkgfiles }
   # names in dependencies can include a "kind". Should not be used for packages.
