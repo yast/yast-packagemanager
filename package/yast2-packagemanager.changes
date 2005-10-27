@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 27 17:42:59 CEST 2005 - mir@suse.de
+
+- Fix for last fix, forgot to pass script parameters in executeScript()
+- 2.12.23
+
+-------------------------------------------------------------------
 Sat Oct 22 00:16:33 CEST 2005 - mir@suse.de
 
 - Added capability for additional update scripts in patches and
