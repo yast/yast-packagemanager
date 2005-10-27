@@ -1205,7 +1205,7 @@ PMError InstYou::executeScript( const std::string & script, const PMYouProductPt
         return PMError( YouError::E_script_failed, scriptPath.asString() );
       }
     } else {
-      PMError error = Y2PM::instTarget().executeScript( scriptPath );
+      PMError error = Y2PM::instTarget().executeScript( scriptPath, arguments );
       if ( error ) {
         if ( error == InstTargetError::E_user_abort ) {
           return PMError( YouError::E_user_abort );
