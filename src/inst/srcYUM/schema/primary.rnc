@@ -2,11 +2,10 @@ default namespace = "http://linux.duke.edu/metadata/common"
 
 grammar {
 
-include "rpm-ns.rnc" {
-        # defines element-format and format
-        start = element-metadata
-}
+# defines element-format and format
+include "rpm-ns.rnc"
 
+start = element-metadata
 element-metadata = 
   element metadata { metadata }
 

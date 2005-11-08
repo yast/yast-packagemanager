@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <grammar ns="http://linux.duke.edu/metadata/common" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
-  <include href="rpm-ns.rng">
-    <!-- defines element-format and format -->
-    <start>
-      <ref name="element-metadata"/>
-    </start>
-  </include>
+  <!-- defines element-format and format -->
+  <include href="rpm-ns.rng"/>
+  <start>
+    <ref name="element-metadata"/>
+  </start>
   <define name="element-metadata">
     <element name="metadata">
       <ref name="metadata"/>
