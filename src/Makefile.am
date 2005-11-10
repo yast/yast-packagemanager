@@ -65,9 +65,6 @@ genIS_PLAINcache_SOURCES =	genIS_PLAINcache.cc
 genIS_PLAINcache_LDADD =	liby2pm.la
 #genIS_PLAINcache_LDFLAGS =	-static
 
+fillup_DATA = sysconfig.onlineupdate
 
-admdir = /var/adm/fillup-templates
-
-adm_DATA = sysconfig.onlineupdate
-
-EXTRA_DIST = $(adm_DATA)
+EXTRA_DIST = $(fillup_DATA)
