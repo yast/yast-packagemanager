@@ -61,6 +61,9 @@ YUMPrimaryData::YUMPrimaryData()
 FileData::FileData()
 { }
 
+YUMPatchData::YUMPatchData()
+{ }
+
 FileData::FileData(const std::string &name,
                    const std::string &type)
 : name(name), type(type)
@@ -122,6 +125,7 @@ IMPL_BASE_POINTER(YUMPrimaryData);
 IMPL_BASE_POINTER(YUMGroupData);
 IMPL_BASE_POINTER(YUMFileListData);
 IMPL_BASE_POINTER(YUMOtherData);
+IMPL_BASE_POINTER(YUMPatchData);
 
 /* output operators */
 
@@ -333,5 +337,163 @@ ostream& operator<<(ostream& out, const YUMOtherData& data)
     << data.epoch << "-" << data.ver << "-" << data.rel << endl
     << "Changelog:" << endl
     << data.changelog << endl;
+  return out;
+}
+
+ostream& operator<<(ostream &out, const YUMPatchData& data)
+{
+  out << "-------------------------------------------------" << endl
+    << "Patch Data: " << endl
+    << "  patch ID: " << data.patchId << endl
+    << "  timestamp: '" << data.timestamp << "'" << endl
+    << "  engine: '" << data.engine << "'" << endl
+    << "  name: " << data.name << endl
+    << "  summary: " << data.summary << endl
+    << "  description: " << data.description << endl
+    << "  epoch: " << data.epoch << endl
+    << "  version: " << data.ver << endl
+    << "  release: " << data.rel << endl
+    << "  provides: " << data.provides << endl
+    << "  conflicts: " << data.conflicts << endl
+    << "  obsoletes: " << data.obsoletes << endl
+    << "  freshen: " << data.freshen << endl
+    << "  requires: " << data.requires << endl
+    << "  category: " << data.category << endl
+    << "  reboot needed: " << data.rebootNeeded << endl
+    << "  affects package manager: " << data.packageManager << endl
+    << "  update script: " << data.updateScript << endl
+    << "  atoms:" << endl
+    << data.atoms;
+  return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchAtom& data)
+{
+  out << "Atom data" << endl
+    << "  atom type: " << data.type << endl;
+  if (data.type == "message")
+    out << data.message;
+  else if (data.type == "script")
+    out << data.script;
+  else if (data.type == "package")
+    out << data.package;
+  return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchMessage& data)
+{
+  out << "Message Data: " << endl
+    << "  name: " << data.name << endl
+    << "  type: " << data.type << endl
+    << "  epoch: " << data.epoch << endl
+    << "  version: " << data.ver << endl
+    << "  release: " << data.rel << endl
+    << "  provides: " << data.provides << endl
+    << "  conflicts: " << data.conflicts << endl
+    << "  obsoletes: " << data.obsoletes << endl
+    << "  freshen: " << data.freshen << endl
+    << "  requires: " << data.requires << endl
+    << "  text: " << data.text << endl;
+  return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchScript& data)
+{
+  out << "Script Data: " << endl
+    << "  name: " << data.name << endl
+    << "  epoch: " << data.epoch << endl
+    << "  version: " << data.ver << endl
+    << "  release: " << data.rel << endl
+    << "  provides: " << data.provides << endl
+    << "  conflicts: " << data.conflicts << endl
+    << "  obsoletes: " << data.obsoletes << endl
+    << "  freshen: " << data.freshen << endl
+    << "  requires: " << data.requires << endl
+    << "  do script: " << data.do_script << endl
+    << "  undo script: " << data.undo_script << endl;
+  return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchPackage& data)
+{
+  out << "Package Data: " << endl
+    << "  name: '" << data.name << "'" << endl
+    << "  type: '" << data.type << "'" << endl
+    << "   arch: '" << data.arch << "'" << endl
+    << "   ver: '" << data.ver << "'" << endl
+    << "  checksumType: '" << data.checksumType << "'" << endl
+    << "  checksumPkgid: '" << data.checksumPkgid << "'" << endl
+    << "  checksum: '" << data.checksum << "'" << endl
+    << "  summary: '" << data.summary << "'" << endl
+    << "  description: '" << data.description << "'" << endl
+    << "  packager: '" << data.packager << "'" << endl
+    << "  url: '" << data.url << "'" << endl
+    << "  timeFile: '" << data.timeFile << "'" << endl
+    << "  timeBuild: '" << data.timeBuild << "'" << endl
+    << "  sizePackage: '" << data.sizePackage << "'" << endl
+    << "  sizeInstalled: '" << data.sizeInstalled << "'" << endl
+    << "  sizeArchive: '" << data.sizeArchive << "'" << endl
+    << "  location: '" << data.location << "'" << endl
+    << "  license: '" << data.license << "'" << endl
+    << "  vendor: '" << data.vendor << "'" << endl
+    << "  group: '" << data.group << "'" << endl
+    << "  buildhost: '" << data.buildhost << "'" << endl
+    << "  sourcerpm: '" << data.sourcerpm << "'" << endl
+    << "  headerStart: '" << data.headerStart << "'" << endl
+    << "  headerEnd: '" << data.headerEnd << "'" << endl
+    << "  provides:" << endl
+    << data.provides << endl
+    << "  conflicts:" << endl
+    << data.conflicts << endl
+    << "  obsoletes:" << endl
+    << data.obsoletes << endl
+    << "  requires:" << endl
+    << data.requires << endl
+    << "  files:" << endl
+    << data.files << endl
+    << "  authors: " << join(data.authors,", ") << endl
+    << "  keywords: " << join(data.keywords,", ") << endl
+    << "  media: " << data.media << endl
+    << "  dirsizes: " << endl
+    << data.dirSizes << endl
+    << "  freshen: " << endl
+    << data.freshen << endl
+    << "  install-only: '" << data.installOnly << "'" << endl
+    << "  files:" << endl
+    << data.files << endl
+    << "  Changelog:" << endl
+    << data.changelog << endl
+    << "  Plain RPM:" << endl
+    << "    arch: " << data.plainRpm.arch << endl
+    << "    filename: " << data.plainRpm.filename << endl
+    << "    download size: " << data.plainRpm.downloadsize << endl
+    << "    MD5: " << data.plainRpm.md5sum << endl
+    << "    build time: " << data.plainRpm.buildtime << endl
+    << "  Patch RPM:" << endl
+    << "    arch: " << data.patchRpm.arch << endl
+    << "    filename: " << data.patchRpm.filename << endl
+    << "    download size: " << data.patchRpm.downloadsize << endl
+    << "    MD5: " << data.patchRpm.md5sum << endl
+    << "    build time: " << data.patchRpm.buildtime << endl
+    << data.patchRpm.baseVersions
+    << "  Delta RPM:" << endl
+    << "    arch: " << data.deltaRpm.arch << endl
+    << "    filename: " << data.deltaRpm.filename << endl
+    << "    download size: " << data.deltaRpm.downloadsize << endl
+    << "    MD5: " << data.deltaRpm.md5sum << endl
+    << "    build time: " << data.deltaRpm.buildtime << endl
+    << data.deltaRpm.baseVersion;
+  return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const YUM::YUMBaseVersion& data)
+{
+  out << "    Base version:" << endl
+    << "      epoch: " << data.epoch << endl
+    << "      version: " << data.ver << endl
+    << "      release: " << data.rel << endl
+    << "      MD5: " << data.md5sum << endl
+    << "      build time: " << data.buildtime << endl
+    << "      source info: " << data.source_info << endl;
   return out;
 }

@@ -30,6 +30,7 @@ namespace YUM {
 #define GROUPSCHEMA (SCHEMABASE "groups.rng")
 #define FILELISTSCHEMA (SCHEMABASE "filelists.rng")
 #define OTHERSCHEMA (SCHEMABASE "other.rng")
+#define PATCHSCHEMA (SCHEMABASE "patch.rng")
 }
 
 

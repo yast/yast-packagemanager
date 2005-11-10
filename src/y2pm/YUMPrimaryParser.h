@@ -39,6 +39,8 @@ namespace YUM {
     virtual ~YUMPrimaryParser();
 
   private:
+    // FIXME move needed method to a common class, inherit it
+    friend class YUMPatchParser;
     virtual bool isInterested(const xmlNodePtr nodePtr);
     virtual YUMPrimaryDataPtr process(const xmlTextReaderPtr reader);
     void parseFormatNode(YUMPrimaryDataPtr dataPtr,
