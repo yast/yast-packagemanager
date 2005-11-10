@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov 10 15:54:33 CET 2005 - jsrain@suse.cz
+
+- Added parser for YUM patch files
+
+-------------------------------------------------------------------
 Fri Oct 21 23:51:47 CEST 2005 - mir@suse.de
 
 - Added documentantion for update scripts and fixed a bug

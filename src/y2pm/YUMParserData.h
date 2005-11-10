@@ -36,7 +36,7 @@ DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPrimaryData );
 DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMGroupData );
 DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMFileListData );
 DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMOtherData );
-//DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPatchData );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPatchData );
 
 namespace YUM {
 
@@ -147,6 +147,123 @@ namespace YUM {
     std::string entry;
   };
 
+  class YUMBaseVersion {
+  public:
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::string md5sum;
+    std::string buildtime;
+    std::string source_info;
+  };
+
+  class YUMPatchPackage {
+  public:
+    // data for primary
+    std::string type;
+    std::string name;
+    std::string arch;
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::string checksumType;
+    std::string checksumPkgid;
+    std::string checksum;
+    std::string summary;
+    std::string description;
+    std::string packager;
+    std::string url;
+    std::string timeFile;
+    std::string timeBuild;
+    std::string sizePackage;
+    std::string sizeInstalled;
+    std::string sizeArchive;
+    std::string location;
+    std::string license;
+    std::string vendor;
+    std::string group;
+    std::string buildhost;
+    std::string sourcerpm;
+    std::string headerStart;
+    std::string headerEnd;
+    std::list<YUMDependency> provides;
+    std::list<YUMDependency> conflicts;
+    std::list<YUMDependency> obsoletes;
+    std::list<YUMDependency> requires;
+    std::list<FileData> files;
+    // SuSE specific data
+    std::list<std::string> authors;
+    std::list<std::string> keywords;
+    std::string  media;
+    std::list<YUMDirSize> dirSizes;
+    std::list<YUMDependency> freshen;
+    bool installOnly;
+    // Change Log
+    std::list<ChangelogEntry> changelog;
+    // Package Files
+    struct {
+      std::string arch;
+      std::string filename;
+      std::string downloadsize;
+      std::string md5sum;
+      std::string buildtime;
+    } plainRpm;
+    struct {
+      std::string arch;
+      std::string filename;
+      std::string downloadsize;
+      std::string md5sum;
+      std::string buildtime;
+      std::list<YUMBaseVersion> baseVersions;
+    } patchRpm;
+    struct {
+      std::string arch;
+      std::string filename;
+      std::string downloadsize;
+      std::string md5sum;
+      std::string buildtime;
+      YUMBaseVersion baseVersion;
+    } deltaRpm;
+  };
+
+  class YUMPatchScript {
+  public:
+    std::string name;
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::string do_script;
+    std::string undo_script;
+    std::list<YUMDependency> provides;
+    std::list<YUMDependency> conflicts;
+    std::list<YUMDependency> obsoletes;
+    std::list<YUMDependency> freshen;
+    std::list<YUMDependency> requires;
+  };
+
+  class YUMPatchMessage {
+  public:
+    std::string name;
+    std::string type;
+    std::string epoch;
+    std::string ver;
+    std::string rel;
+    std::list<YUMDependency> provides;
+    std::list<YUMDependency> conflicts;
+    std::list<YUMDependency> obsoletes;
+    std::list<YUMDependency> freshen;
+    std::list<YUMDependency> requires;
+    std::string text;
+  };
+
+  class YUMPatchAtom {
+  public:
+    std::string type;
+    // FIXME memory efectivity
+    YUMPatchPackage package;
+    YUMPatchScript script;
+    YUMPatchMessage message;
+  };
 
   /**
    * @short Holds the metadata about a YUM repository
@@ -270,16 +387,20 @@ namespace YUM {
     std::list<ChangelogEntry> changelog;
   };
 
-/* ** YUMPatchData not yet finalized **
+/* ** YUMPatchData not yet finalized **/
 
   class YUMPatchData : public Rep {
     REP_BODY(YUMPatchData);
   public:
     YUMPatchData();
-    std::patchId;
-    std::timestamp;
-    std::name;
-    std::summary;
+    ~YUMPatchData() {
+
+    }
+
+    std::string patchId;
+    std::string timestamp;
+    std::string engine;
+    std::string name;
     MultiLang summary;
     MultiLang description;
     std::string epoch;
@@ -293,9 +414,11 @@ namespace YUM {
     std::string category;
     bool rebootNeeded;
     bool packageManager;
+    std::string updateScript;
+    // FIXME this copying of structures is inefective
+    std::list<YUMPatchAtom> atoms;
   };
 
-*/
 
 } /* end of namespace YUM */
 
@@ -315,6 +438,12 @@ std::ostream& operator<<(std::ostream &out, const YUM::YUMPrimaryData& data);
 std::ostream& operator<<(std::ostream &out, const YUM::YUMGroupData& data);
 std::ostream& operator<<(std::ostream &out, const YUM::YUMFileListData& data);
 std::ostream& operator<<(std::ostream& out, const YUM::YUMOtherData& data);
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchData& data);
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchAtom& data);
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchMessage& data);
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchScript& data);
+std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchPackage& data);
+std::ostream& operator<<(std::ostream& out, const YUM::YUMBaseVersion& data);
 
 
 

@@ -27,5 +27,6 @@ Purpose: Declare everything you need to use YUM parsers.
 #include <y2pm/YUMGroupParser.h>
 #include <y2pm/YUMFileListParser.h>
 #include <y2pm/YUMOtherParser.h>
+#include <y2pm/YUMPatchParser.h>
 
 #endif
