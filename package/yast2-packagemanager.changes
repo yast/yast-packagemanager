@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 10 18:24:01 CET 2005 - mvidner@suse.cz
+
+- Prefix friendliness: use fillupdir instead of
+  /var/adm/fillup-templates and datadir instead of /usr/share.
+
+-------------------------------------------------------------------
 Thu Nov 10 15:54:33 CET 2005 - jsrain@suse.cz
 
 - Added parser for YUM patch files

@@ -77,7 +77,7 @@ mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2/you
 /usr/bin/installation_sources
 /usr/bin/genIS_PLAINcache
 %config(noreplace) /etc/youservers
-/var/adm/fillup-templates/sysconfig.onlineupdate
+@fillupdir@/sysconfig.onlineupdate
 /var/lib/YaST2
 /var/lib/YaST2/you
 /usr/share/update-messages/en/*
