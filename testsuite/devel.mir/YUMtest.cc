@@ -96,7 +96,6 @@ int main(int argc, char **argv)
         throw *iter.errorStatus();
     }
     else if (!strcmp(argv[1],"patch")) {
-cerr << "Processing patch" << endl;
       YUMPatchParser iter(cin,"");
       for (;
            !iter.atEnd();
