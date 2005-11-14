@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 14 17:14:40 CET 2005 - jsrain@suse.cz
+
+- optimalizations of YUM patch parser
+
+-------------------------------------------------------------------
 Thu Nov 10 18:24:01 CET 2005 - mvidner@suse.cz
 
 - Prefix friendliness: use fillupdir instead of
