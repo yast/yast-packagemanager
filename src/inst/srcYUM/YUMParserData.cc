@@ -126,6 +126,9 @@ IMPL_BASE_POINTER(YUMGroupData);
 IMPL_BASE_POINTER(YUMFileListData);
 IMPL_BASE_POINTER(YUMOtherData);
 IMPL_BASE_POINTER(YUMPatchData);
+IMPL_BASE_POINTER(YUMPatchPackage);
+IMPL_BASE_POINTER(YUMPatchScript);
+IMPL_BASE_POINTER(YUMPatchMessage);
 
 /* output operators */
 
@@ -372,11 +375,13 @@ std::ostream& operator<<(std::ostream& out, const YUM::YUMPatchAtom& data)
   out << "Atom data" << endl
     << "  atom type: " << data.type << endl;
   if (data.type == "message")
-    out << data.message;
+    out << *data.message;
   else if (data.type == "script")
-    out << data.script;
+    out << *data.script;
   else if (data.type == "package")
-    out << data.package;
+    out << *data.package;
+  else
+    out << "Unknown atom type" << endl;
   return out;
 }
 

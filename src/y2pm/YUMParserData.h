@@ -37,6 +37,9 @@ DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMGroupData );
 DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMFileListData );
 DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMOtherData );
 DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPatchData );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPatchPackage );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPatchScript );
+DEFINE_BASE_POINTER_IN_NAMESPACE( YUM, YUMPatchMessage );
 
 namespace YUM {
 
@@ -157,8 +160,10 @@ namespace YUM {
     std::string source_info;
   };
 
-  class YUMPatchPackage {
+  class YUMPatchPackage : public Rep {
+    REP_BODY(YUMPatchPackage);
   public:
+    YUMPatchPackage() {};
     // data for primary
     std::string type;
     std::string name;
@@ -226,8 +231,10 @@ namespace YUM {
     } deltaRpm;
   };
 
-  class YUMPatchScript {
+  class YUMPatchScript : public Rep {
+    REP_BODY(YUMPatchScript);
   public:
+    YUMPatchScript() {};
     std::string name;
     std::string epoch;
     std::string ver;
@@ -241,8 +248,10 @@ namespace YUM {
     std::list<YUMDependency> requires;
   };
 
-  class YUMPatchMessage {
+  class YUMPatchMessage : public Rep {
+    REP_BODY(YUMPatchMessage);
   public:
+    YUMPatchMessage() {};
     std::string name;
     std::string type;
     std::string epoch;
@@ -259,10 +268,11 @@ namespace YUM {
   class YUMPatchAtom {
   public:
     std::string type;
-    // FIXME memory efectivity
-    YUMPatchPackage package;
-    YUMPatchScript script;
-    YUMPatchMessage message;
+    // union not possibel due to constructors
+    // there is no common parent
+    YUMPatchPackagePtr package;
+    YUMPatchScriptPtr script;
+    YUMPatchMessagePtr message;
   };
 
   /**
