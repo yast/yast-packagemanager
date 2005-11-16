@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 16 17:47:43 CET 2005 - kkaempf@suse.de
+
+- pass arguments to update script (#116935)
+- 2.13.8
+
+-------------------------------------------------------------------
 Mon Nov 14 17:14:40 CET 2005 - jsrain@suse.cz
 
 - optimalizations of YUM patch parser
