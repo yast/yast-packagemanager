@@ -1,5 +1,5 @@
-xsl_html := /usr/share/xml/docbook/custom/susedtd/0.2.3/stylesheet/suse-html.xsl
-xsl_html_chunk := /usr/share/xml/docbook/custom/susedtd/0.2.3/stylesheet/suse-html-chunk.xsl
+xsl_html := /usr/share/xml/docbook/custom/susedtd/1.0.2/stylesheet/suse-html.xsl
+xsl_html_chunk := /usr/share/xml/docbook/custom/susedtd/1.0.2/stylesheet/suse-html-chunk.xsl
 allhtml := $(patsubst %.xml,%.html,$(wildcard *.xml))
 
 main := PackageManagement.xml
@@ -8,7 +8,7 @@ DESTDIR := ./
 
 admongfx := /usr/share/doc/manual/suselinux-adminguide_de/html/admon/
 naviggfx := /usr/share/doc/manual/suselinux-adminguide_de/html/navig/
-stylesheet := /usr/share/xml/docbook/custom/susedtd/0.2.3/stylesheet/susebooks.css
+stylesheet := /usr/share/xml/docbook/custom/susedtd/1.0.2/stylesheet/susebooks.css
 stylesheet_out := susebooks.css
 
 all:
