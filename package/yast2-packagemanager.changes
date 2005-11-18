@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Nov 18 18:00:52 CET 2005 - kkaempf@suse.de
+
+- encodeURL more characters
+
+-------------------------------------------------------------------
+Thu Nov 17 15:21:53 CET 2005 - kkaempf@suse.de
+
+- add first line of /etc/SuSE-release to URL for suseservers.cgi
+- 2.13.9
+
+-------------------------------------------------------------------
 Wed Nov 16 17:47:43 CET 2005 - kkaempf@suse.de
 
 - pass arguments to update script (#116935)
