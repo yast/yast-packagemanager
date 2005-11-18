@@ -28,6 +28,7 @@
 
 #include <y2util/Y2SLog.h>
 #include <y2util/SysConfig.h>
+#include <y2util/stringutil.h>
 
 #include <Y2PM.h>
 #include <y2pm/InstSrcError.h>
@@ -370,6 +371,20 @@ PMError PMYouServers::requestServers( bool check )
 
 	url += "&distproduct=" + product->distProduct();
     }
+
+    {
+    ifstream suse_release ("/etc/SuSE-release");
+    // read /etc/SuSE-release and add first line to URL
+    //  this is an additional safety measure if only packages were updated
+    //  but the product info is still old
+    if (suse_release) {
+	string release_line = stringutil::getline (suse_release, true);
+	if (release_line.size() > 0) {
+	    url += "&suse-release=" + release_line;
+	}
+    }
+    }	// end of scope for suse_release, close stream
+
     addPackageVersion( "yast2-online-update", url );
     addPackageVersion( "yast2-packagemanager", url );
     addPackageVersion( "liby2util", url );
@@ -581,6 +596,21 @@ string PMYouServers::encodeUrl( const string &url )
     switch ( *it ) {
       case ' ':
         result += "%20";
+        break;
+      case '?'
+        result += "%3F";
+        break;
+      case '&'
+        result += "%3F";
+        break;
+      case ';'
+        result += "%3B";
+        break;
+      case '/'
+        result += "%2F";
+        break;
+      case '+'
+        result += "%2B";
         break;
       default:
         result += *it;
