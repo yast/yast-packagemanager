@@ -21,6 +21,8 @@
 #ifndef PMLocale_h
 #define PMLocale_h
 
+#include <libintl.h>
+
 #define _(MSG)  dgettext( "packagemanager", (MSG) )
 
 class PMLocale
