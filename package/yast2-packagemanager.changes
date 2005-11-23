@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 23 15:03:24 CET 2005 - kkaempf@suse.de
+
+- fix 'type-punned pointer' in RPMv3->v4 conversion
+- 2.13.10
+
+-------------------------------------------------------------------
 Fri Nov 18 18:00:52 CET 2005 - kkaempf@suse.de
 
 - encodeURL more characters

@@ -161,8 +161,10 @@ static void compressFilelist(Header h)
 	return;		/* Already converted. */
     }
 
-    if (!hge(h, RPMTAG_OLDFILENAMES, &fnt, (void **) &fileNames, &count))
+    void *hgePtr = NULL;
+    if (!hge(h, RPMTAG_OLDFILENAMES, &fnt, &hgePtr, &count))
 	return;		/* no file list */
+    fileNames = (char **)hgePtr;
     if (fileNames == NULL || count <= 0)
 	return;
 
@@ -236,6 +238,7 @@ void providePackageNVR(Header h)
     HGE_t hge = (HGE_t)headerGetEntryMinMemory;
     HFD_t hfd = headerFreeData;
     const char *name, *version, *release;
+    void *hgePtr = NULL;
     int_32 * epoch;
     const char *pEVR;
     char *p;
@@ -254,7 +257,8 @@ void providePackageNVR(Header h)
         return;
     pEVR = p = (char *)alloca(21 + strlen(version) + 1 + strlen(release) + 1);
     *p = '\0';
-    if (hge(h, RPMTAG_EPOCH, NULL, (void **) &epoch, NULL)) {
+    if (hge(h, RPMTAG_EPOCH, NULL, &hgePtr, NULL)) {
+	epoch = (int_32 *)hgePtr;
         sprintf(p, "%d:", *epoch);
         while (*p != '\0')
             p++;
@@ -265,13 +269,15 @@ void providePackageNVR(Header h)
      * Rpm prior to 3.0.3 does not have versioned provides.
      * If no provides at all are available, we can just add.
      */
-    if (!hge(h, RPMTAG_PROVIDENAME, &pnt, (void **) &provides, &providesCount))
+    if (!hge(h, RPMTAG_PROVIDENAME, &pnt, &hgePtr, &providesCount))
         goto exit;
+    provides = (const char **)hgePtr;
 
     /*
      * Otherwise, fill in entries on legacy packages.
      */
-    if (!hge(h, RPMTAG_PROVIDEVERSION, &pvt, (void **) &providesEVR, NULL)) {
+    if (!hge(h, RPMTAG_PROVIDEVERSION, &pvt, &hgePtr, NULL)) {
+	providesEVR = (const char **)hgePtr;
         for (i = 0; i < providesCount; i++) {
             char * vdummy = "";
             int_32 fdummy = RPMSENSE_ANY;
@@ -283,7 +289,8 @@ void providePackageNVR(Header h)
         goto exit;
     }
 
-    xx = hge(h, RPMTAG_PROVIDEFLAGS, NULL, (void **) &provideFlags, NULL);
+    xx = hge(h, RPMTAG_PROVIDEFLAGS, NULL, &hgePtr, NULL);
+    provideFlags = (int_32 *)hgePtr;
 
     /*@-nullderef@*/    /* LCL: providesEVR is not NULL */
     if (provides && providesEVR && provideFlags)
