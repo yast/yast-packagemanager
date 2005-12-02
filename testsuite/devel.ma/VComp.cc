@@ -22,6 +22,7 @@ inline int RpmVerCmp( const string & lhs, const string & rhs ) {
     << lhs << ", " << rhs << ") == "
       << setw( 2 ) << ret << " " << CmpOp( ret )
 	<< endl;
+  return ret;
 }
 
 

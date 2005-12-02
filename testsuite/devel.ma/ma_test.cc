@@ -235,10 +235,6 @@ bool doSolve( PMManager & mgr_r ) {
   if ( ! mgr_r.solveInstall( good, bad ) ) {
     WAR << "SOLVE: failed packages: " << bad.size() << endl;
     WAR << bad << endl;
-    //for( PkgDep::ErrorResultList::const_iterator p = bad.begin();
-    //	 p != bad.end(); ++p ) {
-    //   out << *p << endl;
-    //}
     return false;
   }
   return true;
@@ -329,16 +325,19 @@ int main( int argc, char * argv[] )
   }
 
   PMError err;
-  Y2PM::instTargetInit("/");
+  //Y2PM::instTargetInit("/");
   Y2PM::instSrcManager();
 
-  INT << PMGR["OpenOffice_org-zh-TW"] << endl;
-  if ( PMGR["OpenOffice_org-zh-TW"] )
-    {
-      PMGR["OpenOffice_org-zh-TW"]->user_set_install();
-      dumpPkgWhatIf( SEC );
-      doCommit();
-    }
+  MIL << PMGR["coreutils"]->user_set_install() << endl;
+  MIL << PMGR["pango"]->user_set_install() << endl;
+  doSolve( PMGR );
+
+  std::list<PMPackagePtr> dellist;
+  std::list<PMPackagePtr> inslist;
+  std::list<PMPackagePtr> srclist;
+  Y2PM::packageManager().getPackagesToInsDel( dellist, inslist, srclist );
+
+  MIL << inslist << endl;
 
   SEC << "STOP" << endl;
   return 0;

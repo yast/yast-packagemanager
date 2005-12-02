@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Dec  2 14:04:56 CET 2005 - ma@suse.de
+
+- Removed 'require doxygen' from -devel package.
+- 2.13.11
+
+-------------------------------------------------------------------
 Wed Nov 23 15:03:24 CET 2005 - kkaempf@suse.de
 
 - fix 'type-punned pointer' in RPMv3->v4 conversion
