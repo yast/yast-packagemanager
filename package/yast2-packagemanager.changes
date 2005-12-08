@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Dec  8 14:49:30 CET 2005 - kkaempf@suse.de
+
+- Fix automatic media change in YOU (#120107)
+  (if URL ends with digit, i.e. ".../CD1")
+- Honor new URL entered in 'change media' popup (#120107)
+
+-------------------------------------------------------------------
 Fri Dec  2 14:04:56 CET 2005 - ma@suse.de
 
 - Removed 'require doxygen' from -devel package.

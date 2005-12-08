@@ -13,7 +13,7 @@
   File:       InstYou.cc
 
   Author:     Cornelius Schumacher <cschum@suse.de>
-  Maintainer: Michael Radziej <mir@suse.de>
+  Maintainer: Klaus Kaempf <kkaempf@suse.de>
 
   Purpose: YaST Online Update.
 
@@ -24,6 +24,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include <iostream>
 #include <fstream>
@@ -504,6 +505,7 @@ PMError InstYou::attachSource()
   }
 
   PMError error = _media.open( _settings->patchUrl(), _settings->attachPoint() );
+  DBG << "_media.open() Url: " << _settings->patchUrl() << endl;
   if ( error ) {
     ERR << "Error opening URL '" << _settings->patchUrl() << "'" << endl;
     return error;
@@ -2242,6 +2244,39 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
 
   if ( !masterMedia ) return PMError::E_ok;
 
+  // try to auto-increment digit at end of URL (i.e. .../CD1 -> .../CD2)
+
+  // find digits at end of URL
+  const char *currentUrl = _settings->patchUrl().asString().c_str();
+  if (currentUrl != NULL
+      && *currentUrl != 0) {
+
+    const char *cptr = currentUrl + strlen (currentUrl);
+    while (cptr > currentUrl
+	   && isdigit (*(cptr-1))) {
+      cptr--;
+    }
+    int currentNumber = atoi (cptr);
+    if (currentNumber > 0
+	&& currentNumber != number) {				// we have new number, re-create URL
+
+      releaseSource();				// trigger re-attachment later
+      _media.release( true );
+
+      string newUrl (currentUrl, 0, (cptr-currentUrl));
+      char *newNum = NULL;
+      asprintf (&newNum, "%d", number);
+      if (newNum != NULL) {
+	newUrl += newNum;
+	free (newNum);
+      }
+      DBG << "Auto-incremented URL: " << newUrl << endl;
+      PMYouServer server = _settings->patchServer();
+      server.setUrl (newUrl);
+      _settings->setPatchServer (server);
+    }
+  }
+
   PMError error = attachSource();
   if ( error ) return error;
 
@@ -2289,6 +2324,14 @@ PMError InstYou::verifyMediaNumber( int number, int lastNumber )
         log( _("Eject media.\n") );
         _media.release( true );
         continue;
+      }
+      else {					// new URL
+	log( _("New URL:\n") );
+	log( result.c_str() );
+        _media.release( true );
+	PMYouServer server = _settings->patchServer();
+	server.setUrl (result);
+	_settings->setPatchServer (server);
       }
     } else {
       log( _("Failed.\n") );
