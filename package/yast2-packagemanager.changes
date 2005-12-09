@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Dec  9 17:09:17 CET 2005 - kkaempf@suse.de
+
+- Fix automatic media change in YOU (#120107)
+  (if URL ends with digit, i.e. ".../CD1")
+- Honor new URL entered in 'change media' popup (#120107)
+- 2.12.24
+
+-------------------------------------------------------------------
 Thu Oct 27 17:42:59 CEST 2005 - mir@suse.de
 
 - Fix for last fix, forgot to pass script parameters in executeScript()
