@@ -1,3 +1,9 @@
+extern "C"
+{
+#include <rpm/rpmdb.h>
+}
+
+
 #include <iomanip>
 #include <fstream>
 #include <iterator>
@@ -197,6 +203,7 @@ ostream & dumpPkgWhatIf( ostream & str, bool all = false )
   for ( PMManager::PMSelectableVec::const_iterator it = PMGR.begin(); it != PMGR.end(); ++it ) {
     if ( all || (*it)->to_modify() || (*it)->is_taboo() ) {
       (*it)->dumpStateOn( str ) << endl << dump(*it);
+      dataDump(str,(*it)->installedObj());
       str << endl;
     }
   }
@@ -300,8 +307,7 @@ void go( std::list<PMPackagePtr> dellist_r ) {
 */
 int main( int argc, char * argv[] )
 {
-  y2error( "xxx" );
-  //set_log_filename( "-" );
+  set_log_filename( "-" );
 
   if ( 0 ) {
     //Y2PM::setNotRunningFromSystem();
@@ -324,8 +330,11 @@ int main( int argc, char * argv[] )
     INT << "Total Languages  " << LMGR.size() << endl;
   }
 
+
   PMError err;
-  //Y2PM::instTargetInit("/");
+  Y2PM::instTargetInit("/");
+  dumpPkgWhatIf( DBG, true );
+  return 0;
   Y2PM::instSrcManager();
 
   MIL << PMGR["coreutils"]->user_set_install() << endl;

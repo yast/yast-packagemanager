@@ -23,6 +23,7 @@
 
 extern "C" {
 #include <stdint.h>
+#include <rpm/rpmdb.h>
 }
 
 #include <iosfwd>
@@ -44,7 +45,7 @@ class binHeader : public CountedRep {
 
     typedef int32_t tag;
 
-    typedef struct headerToken * Header;
+    typedef ::Header Header;
 
     class intList;
 
