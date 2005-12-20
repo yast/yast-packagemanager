@@ -598,7 +598,7 @@ string PMYouServers::encodeUrl( const string &url )
         result += "%20";
         break;
       case '?':
-        result += "%3F";
+        result += "%26";
         break;
       case '&':
         result += "%3F";
