@@ -354,12 +354,12 @@ PMError PMYouServers::requestServers( bool check )
     if ( product )
     {
 	url = product->youUrl();
-	url += "?product=" + product->product();
-	url += "&version=" + product->version();
-	url += "&basearch=" + string( product->baseArch() );
-	url += "&arch=" + string( product->arch() );
+	url += "?product=" + encodeUrl( product->product() );
+	url += "&version=" + encodeUrl( product->version() );
+	url += "&basearch=" + encodeUrl(string( product->baseArch() ) );
+	url += "&arch=" + encodeUrl( string( product->arch() ) ) ;
 
-	url += "&lang=" + string( _settings->langCode().code() );
+	url += "&lang=" + encodeUrl( string( _settings->langCode().code() ) );
 
 	url += "&business=";
 	if ( product->businessProduct() ) url += "1";
@@ -369,7 +369,7 @@ PMError PMYouServers::requestServers( bool check )
 	if ( check ) url += "1";
 	else url += "0";
 
-	url += "&distproduct=" + product->distProduct();
+	url += "&distproduct=" + encodeUrl( product->distProduct() );
     }
 
     {
@@ -380,7 +380,7 @@ PMError PMYouServers::requestServers( bool check )
     if (suse_release) {
 	string release_line = stringutil::getline (suse_release, true);
 	if (release_line.size() > 0) {
-	    url += "&suse-release=" + release_line;
+	    url += "&suse-release=" + encodeUrl(release_line);
 	}
     }
     }	// end of scope for suse_release, close stream
@@ -391,15 +391,13 @@ PMError PMYouServers::requestServers( bool check )
 
     SysConfig clock( "clock" );
     string timezone = clock.readEntry( "TIMEZONE" );
-    url += "&timezone=" + timezone;
+    url += "&timezone=" + encodeUrl( timezone );
 
     SysConfig youcfg( "onlineupdate" );
     if (youcfg.readBoolEntry("YOU_USE_MACHID", true))
       {
-        url += "&machid=" + fetchMachID();
+        url += "&machid=" + encodeUrl( fetchMachID() );
       }
-
-    url = encodeUrl( url );
 
     DBG << "url: '" << url << "'" << endl;
 
@@ -549,7 +547,7 @@ void PMYouServers::addPackageVersion( const string &pkgName, string &url )
     if ( !pkg ) {
       WAR << "No installed object for " << pkgName << endl;
     } else {
-      url += "&" + pkgName + "=" + pkg->edition().asString();
+      url += "&" + pkgName + "=" + encodeUrl( pkg->edition().asString() );
     }
   }
 }
