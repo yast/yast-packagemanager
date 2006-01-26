@@ -1,6 +1,5 @@
 @HEADER-COMMENT@
 
-# neededforbuild  gpp libgpp liby2util liby2util-devel yast2-devtools doxygen libpng readline readline-devel acl attr curl curl-devel openssl openssl-devel rpm rpm-devel popt popt-devel openslp openslp-devel pkgconfig libxml2 libxml2-devel dejagnu
 
 Provides:	libpkg
 Obsoletes:	libpkg
@@ -26,6 +25,7 @@ PreReq:    	%fillup_prereq
 Requires:	rpm >= 4.1.1
 
 @HEADER@
+BuildRequires:	curl-devel dejagnu doxygen gcc-c++ liby2util-devel openslp-devel readline-devel rpm-devel yast2-devtools
 Summary:	-
 
 %description
