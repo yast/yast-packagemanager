@@ -1,26 +1,5 @@
 @HEADER-COMMENT@
 
-
-Provides:	libpkg
-Obsoletes:	libpkg
-Provides:	yast2-agent-package
-Obsoletes:	yast2-agent-package
-Provides:	yast2-agent-you
-Obsoletes:	yast2-agent-you
-Provides:	yast2-agent-targetpkg
-Obsoletes:	yast2-agent-targetpkg
-Provides:	yast2-core-clients y2client
-Obsoletes:	yast2-core-clients y2client
-Provides:	yast2-core-pkginfo
-Obsoletes:	yast2-core-pkginfo
-Provides:	yast2-agent-ftp
-Obsoletes:	yast2-agent-ftp
-Provides:	yast2-agent-http
-Obsoletes:	yast2-agent-http
-
-Provides:	yast2-db-groups
-Obsoletes:	yast2-db-groups
-
 PreReq:    	%fillup_prereq
 Requires:	rpm >= 4.1.1
 
@@ -31,25 +10,9 @@ Summary:	-
 %description
 -
 
-@HEADER-DEVEL@
+%package devel
+Group:          Development/Libraries
 Summary:	-
-
-Provides:	libpkg-devel
-Obsoletes:	libpkg-devel
-Provides:	yast2-agent-package-devel
-Obsoletes:	yast2-agent-package-devel
-Provides:	yast2-agent-you-devel
-Obsoletes:	yast2-agent-you-devel
-Provides:	yast2-agent-targetpkg-devel
-Obsoletes:	yast2-agent-targetpkg-devel
-Provides:	yast2-core-clients-devel
-Obsoletes:	yast2-core-clients-devel
-Provides:	yast2-core-pkginfo-devel
-Obsoletes:	yast2-core-pkginfo-devel
-Provides:	yast2-agent-ftp-devel
-Obsoletes:	yast2-agent-ftp-devel
-Provides:	yast2-agent-http-devel
-Obsoletes:	yast2-agent-http-devel
 
 Requires:	rpm-devel >= 4.1.1 liby2util-devel curl-devel openslp-devel openssl-devel libxml2-devel
 
@@ -58,39 +21,32 @@ Requires:	rpm-devel >= 4.1.1 liby2util-devel curl-devel openslp-devel openssl-de
 
 @PREP@
 
-@BUILD@
+%build
+%{prefix}/bin/y2tool y2autoconf
+%{prefix}/bin/y2tool y2automake
+autoreconf --force --install
 
-@INSTALL@
-install -m 644 -D src/you/youservers $RPM_BUILD_ROOT/etc/youservers
-ln -s /usr/lib/YaST2/bin/create_you_patch %{buildroot}%{_bindir}
-mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2
-mkdir -p $RPM_BUILD_ROOT/var/lib/YaST2/you
+export CFLAGS="$RPM_OPT_FLAGS -DNDEBUG"
+export CXXFLAGS="$RPM_OPT_FLAGS -DNDEBUG"
+
+%{?suse_update_config:%{suse_update_config -f}}
+./configure --libdir=%{_libdir} --prefix=%{prefix} --mandir=%{_mandir} \
+	--enable-static --disable-shared
+make %{?jobs:-j%jobs}
+
+%install
+make install DESTDIR="$RPM_BUILD_ROOT"
+rm -rf %{buildroot}%{_libdir}/*.la
+rm -rf %{buildroot}/usr/bin
+rm -rf %{buildroot}/usr/share
+rm -rf %{buildroot}/var
+rm -rf %{buildroot}/etc
+rm -rf %{buildroot}/usr/lib/YaST2
+rm -rf %{buildroot}@docdir|
 
 @CLEAN@
 
-%files
-%defattr(-,root,root)
-%{_libdir}/liby2pm.so.*
-/usr/bin/online_update
-/usr/bin/machid_hash
-/usr/bin/installation_sources
-/usr/bin/genIS_PLAINcache
-%config(noreplace) /etc/youservers
-@fillupdir@/sysconfig.onlineupdate
-/var/lib/YaST2
-/var/lib/YaST2/you
-/usr/share/update-messages/en/*
-/usr/share/YaST2/schema
-
 %files devel
 %defattr(-,root,root)
-%{_libdir}/liby2pm.so
-%{_libdir}/liby2pm.la
+%{_libdir}/liby2pm.a
 @includedir@
-%doc @docdir@
-%dir /usr/lib/YaST2
-/usr/lib/YaST2/bin/
-%{_bindir}/create_you_patch
-
-%post
-%{fillup_only -n onlineupdate}
