@@ -5,6 +5,16 @@ Thu Feb  9 14:03:40 CET 2006 - lnussel@suse.de
 - 2.13.15
 
 -------------------------------------------------------------------
+Wed Jan 25 21:43:37 CET 2006 - mls@suse.de
+
+- converted neededforbuild to BuildRequires
+
+-------------------------------------------------------------------
+Mon Jan 16 09:48:45 CET 2006 - kkaempf@suse.de
+
+- temporarely disable testsuite
+
+-------------------------------------------------------------------
 Thu Dec 22 09:29:13 CET 2005 - kkaempf@suse.de
 
 - improved fix for url encoding (#140317)
