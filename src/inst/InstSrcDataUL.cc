@@ -256,6 +256,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
     ndescr->set_default_refresh( ndescr->hasFlag( "volatile_content" ) );
 
 
+#if 0 // would compromise zypp and we don't need them anyways.
     // Finaly check whether there are gpg-pubkeys in the media rootdir
     // and let the ISM store them.
     list<string> files;
@@ -279,6 +280,7 @@ PMError InstSrcDataUL::tryGetDescr( InstSrcDescrPtr & ndescr_r,
 	}
       }
     }
+#endif
 
     ///////////////////////////////////////////////////////////////////
     // done
