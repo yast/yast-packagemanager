@@ -24,7 +24,7 @@ Purpose:    Pathnames of schemas for validation
 
 namespace YUM {
 /* FIXME: How do I do this properly? */
-#define SCHEMABASE "/usr/share/YaST2/schema/packagemanager/"
+#define SCHEMABASE "/usr/share/zypp/schema/yum/"
 #define REPOMDSCHEMA (SCHEMABASE "repomd.rng")
 #define PRIMARYSCHEMA (SCHEMABASE "suse-primary.rng")
 #define GROUPSCHEMA (SCHEMABASE "groups.rng")

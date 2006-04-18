@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Apr 18 15:36:28 CEST 2006 - lnussel@suse.de
+
+- use ZYPP XML schemas for YUM sources (patch by Marcus Huewe,
+  #163840)
+- 2.13.17
+
+-------------------------------------------------------------------
 Mon Mar 27 11:38:46 CEST 2006 - lnussel@suse.de
 
 - don't import gpg keys found on installation sources
