@@ -159,9 +159,16 @@ YUMPrimaryParser::parseFormatNode(YUMPrimaryDataPtr dataPtr,
         parseDependencyEntries(& dataPtr->requires, child);
       }
       else if (name == "file") {
+#if 0
         dataPtr->files.push_back
           (FileData(_helper.content(child),
                     _helper.attribute(child,"type")));
+#else
+	// add files from primary.xml as file provides
+	string empty;
+	dataPtr->provides.push_back(YUMDependency(_helper.content(child),
+				empty, empty, empty, empty, empty));
+#endif
       }
       /* SUSE specific elements */
       else if (name == "authors") {
