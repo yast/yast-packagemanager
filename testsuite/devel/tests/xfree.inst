@@ -1,7 +1,0 @@
-Name: xf86
-Edition: 4.2.0-176
-Requires: libXrandr.so.1
-
-Name: xshared
-Edition: 4.2.0-176
-Provides: libXrandr.so.1

@@ -1,3 +1,0 @@
-rm -rf ~/.y2log
-rm -rf /tmp/tcache
-testsuite/test_packages --url dir:/// --dir `pwd`/testsuite/media query 3ddiag

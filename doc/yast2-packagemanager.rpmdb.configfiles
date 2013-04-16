@@ -1,4 +1,0 @@
-During the last package installation, some changed configuration
-files were detected.  Find the log files for the install process in
-/var/log/YaST2/.  Check whether your configuration files are still
-up to date.
