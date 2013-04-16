@@ -1,5 +1,0 @@
-Checking: rpms/broken2-1-1.i386.rpm
-Package is not OK for the following reasons:
- - Package is not signed
- - Package has no MD5 sum
-

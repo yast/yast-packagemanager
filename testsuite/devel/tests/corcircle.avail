@@ -1,8 +1,0 @@
-Name: B
-Edition: 1.0-1
-Conflicts: A
-
-Name: C
-Edition: 1.0-1
-Obsoletes: A
-Requires: B
