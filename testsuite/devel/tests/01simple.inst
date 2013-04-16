@@ -1,4 +1,0 @@
-Name: libc6
-Edition: 2.0.5-1
-Provides: libc.so.6, libm.so.6
-Files: /sbin/unusual

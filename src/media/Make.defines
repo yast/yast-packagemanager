@@ -1,2 +1,0 @@
-#undef Y2LOG
-#define Y2LOG "mediaaccess"

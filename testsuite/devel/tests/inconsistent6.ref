@@ -1,9 +1,0 @@
---- Test 1
-
-
-Name: kaffeine
-Edition: 1-1
-Is-Downgrade-From: 2-1
-Inconsistent: kaffeine-2-1 requires libkdesomething.so
-State-Change-Not-Possible: yes
-
